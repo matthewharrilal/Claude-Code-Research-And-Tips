@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orchestration Approaches Compared | Claude Code Knowledge Base</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="wide-container">
+    <nav class="nav-breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <a href="index.html">Comparisons</a>
+      <span>/</span>
+      Orchestration
+    </nav>
+
+    <h1><span class="bionic">Orc</span>hestration <span class="bionic">App</span>roaches <span class="bionic">Com</span>pared</h1>
+
+    <!-- You Are Here Context Box -->
+    <div class="you-are-here" style="background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%); border-left: 4px solid #2a7d7d; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+      <strong style="color: #2a7d7d;">You Are Here:</strong> This compares four major strategies for <strong>autonomous AI-assisted development</strong>: Basic Ralph, PRD-Driven Ralph, CC Mirror, and Gas Town. Each represents a different philosophy for shipping features with minimal human intervention. <em>Pick the simplest approach that meets your needs.</em>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+      <div class="toc-title">On This Page</div>
+      <ul>
+        <li><a href="#goal">The Same Goal</a></li>
+        <li><a href="#basic-ralph">Approach 1: Basic Ralph</a></li>
+        <li><a href="#prd-ralph">Approach 2: PRD-Driven Ralph</a></li>
+        <li><a href="#cc-mirror">Approach 3: CC Mirror Hub-and-Spoke</a></li>
+        <li><a href="#gas-town">Approach 4: Gas Town Factory</a></li>
+        <li><a href="#decision-matrix">Decision Matrix</a></li>
+        <li><a href="#feature-comparison">Feature Comparison</a></li>
+        <li><a href="#scaling">Scaling Path</a></li>
+        <li><a href="#selection">Selection Guide</a></li>
+        <li><a href="#hybrid">Hybrid Strategies</a></li>
+      </ul>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="goal">The <span class="bionic">Sa</span>me <span class="bionic">Go</span>al</h2>
+
+    <p><strong>Ship a complete feature autonomously</strong> - from specification to working, tested code - with minimal human intervention.</p>
+
+    <p>Each approach below represents a different philosophy for achieving this goal, with distinct tradeoffs in setup complexity, parallelism, and appropriate scale.</p>
+
+    <hr class="section-divider">
+
+    <!-- Basic Ralph -->
+    <h2 id="basic-ralph"><span class="bionic">App</span>roach 1: <span class="bionic">Bas</span>ic <span class="bionic">Ral</span>ph</h2>
+
+    <h3>How it works</h3>
+    <p>A simple bash loop that runs Claude Code repeatedly with fresh context until a completion condition is met. Each iteration:</p>
+    <ol>
+      <li>Reads the current state (prd.json, progress.txt)</li>
+      <li>Works on the next task in the list</li>
+      <li>Commits changes</li>
+      <li>Checks for completion signal</li>
+      <li>Loops or exits</li>
+    </ol>
+
+    <pre><code>for (( i=1; i<=$MAX_ITERATIONS; i++ )); do
+  claude "Review prd.json... If complete, output PROMISE COMPLETE HERE"
+  if grep -q "PROMISE COMPLETE HERE" output.txt; then break; fi
+done</code></pre>
+
+    <h4>Key Files</h4>
+    <div class="file-listing">
+      <div class="file-item">
+        <span class="file-name">ralph.sh</span>
+        <span class="file-desc">The loop script</span>
+      </div>
+      <div class="file-item">
+        <span class="file-name">prompt.md</span>
+        <span class="file-desc">Instructions for each iteration</span>
+      </div>
+      <div class="file-item">
+        <span class="file-name">prd.json</span>
+        <span class="file-desc">Task list with user stories</span>
+      </div>
+      <div class="file-item">
+        <span class="file-name">progress.txt</span>
+        <span class="file-desc">Accumulated learnings</span>
+      </div>
+    </div>
+
+    <div class="pattern-box" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <div>
+        <h4 style="color: var(--success); margin-top: 0;">Pros</h4>
+        <ul>
+          <li><strong>Simple to set up</strong> - Just a bash script and a few files</li>
+          <li><strong>Low overhead</strong> - No complex infrastructure</li>
+          <li><strong>Easy to understand</strong> - Anyone can read the code</li>
+          <li><strong>Fresh context per iteration</strong> - Avoids "context rot"</li>
+          <li><strong>Git history as memory</strong> - Each iteration commits</li>
+          <li><strong>Verifiable</strong> - Tests must pass each iteration</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color: var(--error); margin-top: 0;">Cons</h4>
+        <ul>
+          <li><strong>Sequential only</strong> - One task at a time, no parallelism</li>
+          <li><strong>Single agent</strong> - No specialization or role separation</li>
+          <li><strong>Context amnesia</strong> - Each iteration starts fresh</li>
+          <li><strong>No dependency management</strong> - Tasks must be linearly ordered</li>
+          <li><strong>Human-designed task breakdown</strong> - Quality depends on PRD</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="decision-point">
+      <strong>Best For:</strong> Solo developers, overnight shipping, well-scoped features, Stage 1-3 users.
+      <br><strong>Setup Time:</strong> 15-30 minutes
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- PRD-Driven Ralph -->
+    <h2 id="prd-ralph"><span class="bionic">App</span>roach 2: <span class="bionic">PRD</span>-Driven <span class="bionic">Ral</span>ph</h2>
+
+    <h3>How it works</h3>
+    <p>Extension of basic Ralph that adds structured task management via a JSON-based Product Requirements Document:</p>
+
+    <pre><code>{
+  "name": "Authentication System",
+  "stories": [
+    {
+      "id": "story-1",
+      "title": "User can register",
+      "acceptanceCriteria": [
+        "Email validation works",
+        "Password hashed with bcrypt",
+        "Confirmation email sent"
+      ],
+      "passes": false,
+      "priority": 1
+    }
+  ]
+}</code></pre>
+
+    <p>Each iteration parses prd.json for the next incomplete story (by priority), implements to meet acceptance criteria, marks complete when verified, and continues until all stories pass.</p>
+
+    <div class="callout callout-insight">
+      <div class="callout-title">Dr. Ralph Variant</div>
+      <p>Enhanced with quality gates: 80%+ confidence threshold before advancing, multi-phase verification between stages.</p>
+    </div>
+
+    <div class="pattern-box" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <div>
+        <h4 style="color: var(--success); margin-top: 0;">Pros</h4>
+        <ul>
+          <li><strong>Structured tasks</strong> - Clear boundaries between work items</li>
+          <li><strong>Acceptance criteria</strong> - Explicit success conditions</li>
+          <li><strong>Priority ordering</strong> - Most important work first</li>
+          <li><strong>Measurable progress</strong> - Track story completion</li>
+          <li><strong>Self-documenting</strong> - PRD becomes project history</li>
+          <li><strong>Quality gates</strong> - Optional confidence thresholds</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color: var(--error); margin-top: 0;">Cons</h4>
+        <ul>
+          <li><strong>Upfront planning required</strong> - Someone must write the PRD</li>
+          <li><strong>PRD quality is critical</strong> - Garbage in, garbage out</li>
+          <li><strong>Still sequential</strong> - No parallelism improvement</li>
+          <li><strong>Single agent</strong> - No role specialization</li>
+          <li><strong>Rigid structure</strong> - Hard to adapt to emergent needs</li>
+          <li><strong>Manual task sizing</strong> - Each story must fit in context</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="decision-point">
+      <strong>Best For:</strong> Well-defined features, teams with good specs, regulated environments, Stage 3-5 users.
+      <br><strong>Setup Time:</strong> 1-2 hours (including PRD creation)
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- CC Mirror -->
+    <h2 id="cc-mirror"><span class="bionic">App</span>roach 3: CC <span class="bionic">Mir</span>ror <span class="bionic">Hub</span>-and-Spoke</h2>
+
+    <h3>How it works</h3>
+    <p>Central orchestrator that delegates to specialized worker agents through Claude Code's native Task API. The orchestrator <strong>never writes code</strong> - it coordinates.</p>
+
+    <div class="ascii-diagram">                +-----------------+
+                |  Orchestrator   |
+                |  (Conductor)    |
+                +--------+--------+
+                         |
+         +---------------+--------------+
+         |               |              |
+         v               v              v
+   +-----------+   +-----------+   +-----------+
+   |  Coder    |   |  Tester   |   |  Reviewer |
+   |  (Opus)   |   |  (Sonnet) |   |  (Haiku)  |
+   +-----------+   +-----------+   +-----------+</div>
+
+    <div class="callout callout-danger">
+      <div class="callout-title">Orchestrator Philosophy</div>
+      <p style="margin: 0; font-family: monospace; font-size: 0.95em;">
+        YOU DO NOT WRITE CODE. YOU DO NOT RUN COMMANDS.<br>
+        YOU DO NOT EXPLORE CODEBASES.<br>
+        You are the CONDUCTOR. Your agents play the instruments.
+      </p>
+    </div>
+
+    <h4>Tool Ownership</h4>
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Allowed Tools</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Orchestrator</strong></td>
+            <td>Read (1-2 files), Task*, AskUserQuestion</td>
+          </tr>
+          <tr>
+            <td><strong>Workers</strong></td>
+            <td>Read, Write, Edit, Bash, Glob, Grep, WebFetch, LSP</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pattern-box" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <div>
+        <h4 style="color: var(--success); margin-top: 0;">Pros</h4>
+        <ul>
+          <li><strong>True parallelism</strong> - Workers execute simultaneously</li>
+          <li><strong>Specialization</strong> - Right model for each task type</li>
+          <li><strong>Cost optimization</strong> - Expensive models only where needed</li>
+          <li><strong>Dependency tracking</strong> - Built-in blocked/blocking</li>
+          <li><strong>Native integration</strong> - Uses Claude Code's Task API</li>
+          <li><strong>Clear separation</strong> - Orchestrator thinks, workers do</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color: var(--error); margin-top: 0;">Cons</h4>
+        <ul>
+          <li><strong>More complex setup</strong> - Requires understanding task decomposition</li>
+          <li><strong>Coordination overhead</strong> - Orchestrator context grows</li>
+          <li><strong>Needs good decomposition</strong> - Poorly split tasks cause confusion</li>
+          <li><strong>Learning curve</strong> - Different mental model</li>
+          <li><strong>Worker isolation</strong> - Workers don't see each other</li>
+          <li><strong>Merge complexity</strong> - Parallel work may conflict</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="decision-point">
+      <strong>Best For:</strong> Multi-domain features, cost-optimized usage, interactive development, Stage 4-6 users.
+      <br><strong>Setup Time:</strong> 1-2 hours
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Gas Town -->
+    <h2 id="gas-town"><span class="bionic">App</span>roach 4: Gas <span class="bionic">Tow</span>n <span class="bionic">Fac</span>tory</h2>
+
+    <h3>How it works</h3>
+    <p>Not just agents, but an <strong>agent factory</strong> - a self-managing town of specialized workers that coordinate through inboxes and handoffs.</p>
+
+    <div class="ascii-diagram">Gas Town (~/.gt)
++-- HQ (town-level management)
++-- Rigs (project repos)
+|   +-- Witness (per-rig observer)
++-- Workers
+|   +-- Mayor (town coordination)
+|   +-- Deacon (monitoring/handshakes)
+|   +-- Dogs (quality gates)
+|   +-- Refinery (task decomposition)
+|   +-- Polecat (named persistent workers)
+|   +-- Crew (ephemeral workers)
++-- Overseer (YOU - human with inbox)</div>
+
+    <h4>Role Definitions</h4>
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Mayor</strong></td><td>Town-wide coordination, resource allocation</td></tr>
+          <tr><td><strong>Deacon</strong></td><td>Monitoring agent health, handshakes between agents</td></tr>
+          <tr><td><strong>Dogs</strong></td><td>Quality gates, watchdogs for bad behavior</td></tr>
+          <tr><td><strong>Refinery</strong></td><td>Task decomposition into worker-sized chunks</td></tr>
+          <tr><td><strong>Polecat</strong></td><td>Named persistent workers with specialization</td></tr>
+          <tr><td><strong>Crew</strong></td><td>Ephemeral workers for one-off tasks</td></tr>
+          <tr><td><strong>Witness</strong></td><td>Per-project observer, watches for problems</td></tr>
+          <tr><td><strong>Overseer</strong></td><td>Human with inbox (you)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <blockquote>
+      <p>"You just make up features, design them, file the implementation plans, and sling work around to your polecats and crew."</p>
+      <footer>-- Steve Yegge</footer>
+    </blockquote>
+
+    <div class="pattern-box" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <div>
+        <h4 style="color: var(--success); margin-top: 0;">Pros</h4>
+        <ul>
+          <li><strong>Maximum parallelism</strong> - 10+ agents simultaneously</li>
+          <li><strong>Deep specialization</strong> - Each role optimized</li>
+          <li><strong>Self-improving</strong> - Factory learns over time</li>
+          <li><strong>Full team simulation</strong> - Human dev team dynamics</li>
+          <li><strong>Automatic decomposition</strong> - Refinery breaks down work</li>
+          <li><strong>Quality built-in</strong> - Dogs enforce standards</li>
+          <li><strong>Resilient</strong> - System continues if agents fail</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color: var(--error); margin-top: 0;">Cons</h4>
+        <ul>
+          <li><strong>Complex setup</strong> - Significant infrastructure</li>
+          <li><strong>High overhead</strong> - $50-200/day</li>
+          <li><strong>Needs scale to justify</strong> - Overkill for small features</li>
+          <li><strong>Requires experience</strong> - Comfort with chaos</li>
+          <li><strong>Tmux proficiency required</strong> - Primary UI</li>
+          <li><strong>Debugging difficulty</strong> - Hard to trace problems</li>
+          <li><strong>Budget implications</strong> - Not for hobby projects</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="decision-point">
+      <strong>Prerequisites:</strong>
+      <ul style="margin-bottom: 0;">
+        <li>Extensive multi-agent experience (Stage 7+)</li>
+        <li>Comfort with chaos and emergent behavior</li>
+        <li>$50-200/day budget tolerance</li>
+        <li>tmux as primary development interface</li>
+        <li>Willingness to debug complex agent interactions</li>
+      </ul>
+      <strong>Setup Time:</strong> 4-8 hours (plus learning curve)
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Decision Matrix -->
+    <h2 id="decision-matrix"><span class="bionic">Dec</span>ision <span class="bionic">Mat</span>rix</h2>
+
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Factor</th>
+            <th>Basic Ralph</th>
+            <th>PRD-Ralph</th>
+            <th>CC Mirror</th>
+            <th>Gas Town</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Setup Complexity</strong></td>
+            <td style="color: var(--success);">Easy</td>
+            <td>Medium</td>
+            <td>Medium</td>
+            <td style="color: var(--error);">Hard</td>
+          </tr>
+          <tr>
+            <td><strong>Parallelism</strong></td>
+            <td style="color: var(--error);">None</td>
+            <td style="color: var(--error);">None</td>
+            <td style="color: var(--success);">High</td>
+            <td style="color: var(--success);">Maximum</td>
+          </tr>
+          <tr>
+            <td><strong>Agent Count</strong></td>
+            <td>1</td>
+            <td>1</td>
+            <td>3-8</td>
+            <td>10-50+</td>
+          </tr>
+          <tr>
+            <td><strong>Infrastructure</strong></td>
+            <td>Low</td>
+            <td>Low</td>
+            <td>Medium</td>
+            <td>High</td>
+          </tr>
+          <tr>
+            <td><strong>Upfront Planning</strong></td>
+            <td style="color: var(--success);">Low</td>
+            <td style="color: var(--error);">High</td>
+            <td>Medium</td>
+            <td>Medium</td>
+          </tr>
+          <tr>
+            <td><strong>Cost per Day</strong></td>
+            <td>$5-20</td>
+            <td>$5-20</td>
+            <td>$20-80</td>
+            <td>$50-200</td>
+          </tr>
+          <tr>
+            <td><strong>Learning Curve</strong></td>
+            <td style="color: var(--success);">Low</td>
+            <td style="color: var(--success);">Low</td>
+            <td>Medium</td>
+            <td style="color: var(--error);">High</td>
+          </tr>
+          <tr>
+            <td><strong>Debugging Ease</strong></td>
+            <td style="color: var(--success);">Easy</td>
+            <td style="color: var(--success);">Easy</td>
+            <td>Medium</td>
+            <td style="color: var(--error);">Hard</td>
+          </tr>
+          <tr>
+            <td><strong>Best Project Scale</strong></td>
+            <td>Small</td>
+            <td>Medium</td>
+            <td>Medium</td>
+            <td>Large</td>
+          </tr>
+          <tr>
+            <td><strong>Quality Gates</strong></td>
+            <td>Manual</td>
+            <td>Criteria</td>
+            <td>Workers</td>
+            <td>Dogs</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Feature Comparison -->
+    <h2 id="feature-comparison"><span class="bionic">Fea</span>ture <span class="bionic">Com</span>parison</h2>
+
+    <h3>Context Management</h3>
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Approach</th>
+            <th>Strategy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Basic Ralph</strong></td><td>Fresh context each iteration, git history as memory</td></tr>
+          <tr><td><strong>PRD-Ralph</strong></td><td>Fresh context + structured prd.json + progress.txt</td></tr>
+          <tr><td><strong>CC Mirror</strong></td><td>Orchestrator accumulates context, workers get task-specific</td></tr>
+          <tr><td><strong>Gas Town</strong></td><td>Persistent workers (Polecats) maintain context, Crew ephemeral</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Error Handling</h3>
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Approach</th>
+            <th>Strategy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Basic Ralph</strong></td><td>Tests must pass, loop continues until success or max iterations</td></tr>
+          <tr><td><strong>PRD-Ralph</strong></td><td>Same + acceptance criteria validation</td></tr>
+          <tr><td><strong>CC Mirror</strong></td><td>Task dependencies, requeue on failure</td></tr>
+          <tr><td><strong>Gas Town</strong></td><td>Dogs catch quality issues, Witness monitors, Deacon coordinates recovery</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Task Decomposition</h3>
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Approach</th>
+            <th>Responsibility</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Basic Ralph</strong></td><td>Human creates small tasks</td></tr>
+          <tr><td><strong>PRD-Ralph</strong></td><td>Human writes detailed PRD with stories</td></tr>
+          <tr><td><strong>CC Mirror</strong></td><td>Orchestrator decomposes, routes to workers</td></tr>
+          <tr><td><strong>Gas Town</strong></td><td>Refinery automatically decomposes</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Communication</h3>
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Approach</th>
+            <th>Mechanism</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Basic Ralph</strong></td><td>File-based (progress.txt, git commits)</td></tr>
+          <tr><td><strong>PRD-Ralph</strong></td><td>Same + structured prd.json</td></tr>
+          <tr><td><strong>CC Mirror</strong></td><td>Task API (TaskCreate, TaskUpdate, dependencies)</td></tr>
+          <tr><td><strong>Gas Town</strong></td><td>MCP Agent Mail (inbox-based), file handoffs</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Scaling Path -->
+    <h2 id="scaling"><span class="bionic">Sca</span>ling <span class="bionic">Pat</span>h</h2>
+
+    <div class="ascii-diagram">+---------------------------------------------------------------------+
+|                       SCALING PROGRESSION                           |
++---------------------------------------------------------------------+
+|                                                                     |
+|   SIMPLE ------------------------------------------------> COMPLEX  |
+|                                                                     |
+|   Stage 1-3          Stage 4-5          Stage 6          Stage 7+  |
+|   +---------+       +---------+       +---------+       +--------+ |
+|   | Ralph   |------>|  PRD    |------>|CC Mirror|------>|  Gas   | |
+|   | (Basic) |       | Ralph   |       |Hub-Spoke|       | Town   | |
+|   +---------+       +---------+       +---------+       +--------+ |
+|                                                                     |
+|   1 agent           1 agent           3-8 agents        10+ agents |
+|   $5/day            $10/day           $50/day           $150/day   |
+|                                                                     |
++---------------------------------------------------------------------+</div>
+
+    <hr class="section-divider">
+
+    <!-- Selection Guide -->
+    <h2 id="selection"><span class="bionic">Sel</span>ection <span class="bionic">Gui</span>de</h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+
+      <div class="pattern-box" style="border-left: 4px solid var(--success);">
+        <h4 style="margin-top: 0; color: var(--success);">Start with Basic Ralph when:</h4>
+        <ul style="margin-bottom: 0;">
+          <li>You're new to autonomous development</li>
+          <li>Feature is well-scoped and fits in a day</li>
+          <li>You want "set it and forget it" overnight shipping</li>
+          <li>Budget is a concern</li>
+          <li>You value simplicity over parallelism</li>
+        </ul>
+      </div>
+
+      <div class="pattern-box" style="border-left: 4px solid var(--accent);">
+        <h4 style="margin-top: 0; color: var(--accent);">Upgrade to PRD-Ralph when:</h4>
+        <ul style="margin-bottom: 0;">
+          <li>You have clear, detailed requirements</li>
+          <li>Quality gates matter (regulated environment)</li>
+          <li>You want measurable progress tracking</li>
+          <li>Tasks have natural linear dependencies</li>
+          <li>You're comfortable writing structured specs</li>
+        </ul>
+      </div>
+
+      <div class="pattern-box" style="border-left: 4px solid var(--warning);">
+        <h4 style="margin-top: 0; color: var(--warning);">Move to CC Mirror when:</h4>
+        <ul style="margin-bottom: 0;">
+          <li>You need parallelism across domains</li>
+          <li>Cost optimization matters (right model for each task)</li>
+          <li>Features span frontend + backend + tests</li>
+          <li>You want native Claude Code orchestration</li>
+          <li>Interactive development with oversight</li>
+        </ul>
+      </div>
+
+      <div class="pattern-box" style="border-left: 4px solid var(--heading);">
+        <h4 style="margin-top: 0; color: var(--heading);">Go Gas Town when:</h4>
+        <ul style="margin-bottom: 0;">
+          <li>You're at Stage 7+ (10+ agent experience)</li>
+          <li>Project scale justifies the overhead</li>
+          <li>Speed-to-market is critical</li>
+          <li>Budget is not a constraint</li>
+          <li>You're comfortable with emergence and chaos</li>
+          <li>You need a self-improving agent factory</li>
+        </ul>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Hybrid Strategies -->
+    <h2 id="hybrid"><span class="bionic">Hyb</span>rid <span class="bionic">Str</span>ategies</h2>
+
+    <p>These approaches aren't mutually exclusive. Common combinations:</p>
+
+    <div class="pattern-box">
+      <h4 style="margin-top: 0;">1. Ralph + Git Worktrees</h4>
+      <p>Run multiple Ralph loops in parallel via worktrees:</p>
+      <pre><code>for feature in auth payments notifications; do
+  git worktree add ../wt-$feature $feature-branch
+  (cd ../wt-$feature && ./ralph.sh 20) &
+done
+wait</code></pre>
+      <p><strong>Result:</strong> Parallel Ralph without CC Mirror complexity</p>
+    </div>
+
+    <div class="pattern-box">
+      <h4 style="margin-top: 0;">2. CC Mirror by Day, Ralph by Night</h4>
+      <ul>
+        <li><strong>Daytime:</strong> Interactive CC Mirror with human oversight</li>
+        <li><strong>Overnight:</strong> Ralph loops for verified, autonomous work</li>
+      </ul>
+      <p><strong>Result:</strong> Best of both interaction models</p>
+    </div>
+
+    <div class="pattern-box">
+      <h4 style="margin-top: 0;">3. Gas Town with PRD Discipline</h4>
+      <p>Use Gas Town's Refinery but feed it well-structured PRDs:</p>
+      <ul>
+        <li>Human writes PRD</li>
+        <li>Refinery decomposes into worker tasks</li>
+        <li>Polecats execute with acceptance criteria</li>
+      </ul>
+      <p><strong>Result:</strong> Factory-scale with structured requirements</p>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Cost-Benefit Summary -->
+    <h2><span class="bionic">Cos</span>t-Benefit <span class="bionic">Sum</span>mary</h2>
+
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Investment</th>
+            <th>Basic Ralph</th>
+            <th>PRD-Ralph</th>
+            <th>CC Mirror</th>
+            <th>Gas Town</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Setup Time</strong></td>
+            <td>30 min</td>
+            <td>2 hrs</td>
+            <td>2 hrs</td>
+            <td>8 hrs</td>
+          </tr>
+          <tr>
+            <td><strong>Learning</strong></td>
+            <td>1 day</td>
+            <td>1 day</td>
+            <td>3 days</td>
+            <td>1-2 weeks</td>
+          </tr>
+          <tr>
+            <td><strong>Daily Cost</strong></td>
+            <td>$5-20</td>
+            <td>$10-30</td>
+            <td>$30-80</td>
+            <td>$50-200</td>
+          </tr>
+          <tr>
+            <td><strong>ROI Scale</strong></td>
+            <td>Small</td>
+            <td>Medium</td>
+            <td>Medium</td>
+            <td>Large</td>
+          </tr>
+          <tr>
+            <td><strong>Break-even</strong></td>
+            <td>Immediate</td>
+            <td>Week 1</td>
+            <td>Week 2</td>
+            <td>Month 1</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="recommendation">
+      <ol style="margin: 0;">
+        <li><strong>Start simple (Basic Ralph)</strong> - Prove autonomous development works for your workflow</li>
+        <li><strong>Add structure when needed (PRD-Ralph)</strong> - When you want quality gates and tracking</li>
+        <li><strong>Scale with parallelism (CC Mirror)</strong> - When single-agent becomes a bottleneck</li>
+        <li><strong>Go full factory (Gas Town)</strong> - Only when scale demands it and budget permits</li>
+      </ol>
+      <p style="margin-top: 1em; margin-bottom: 0;"><em>The best orchestration approach is the simplest one that meets your needs. Complexity has costs - in setup, debugging, and cognitive overhead. Scale up only when the simpler approach demonstrably fails.</em></p>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Quick Reference Commands -->
+    <h2><span class="bionic">Qui</span>ck <span class="bionic">Ref</span>erence <span class="bionic">Com</span>mands</h2>
+
+    <pre><code># Basic Ralph
+./ralph.sh 25
+
+# PRD-Ralph (same command, different prd.json structure)
+./ralph.sh 25  # With structured prd.json
+
+# CC Mirror
+npx cc-mirror quick --provider mirror --name mclaude
+
+# Gas Town
+go install github.com/steveyegge/gastown/cmd/gt@latest
+gt init  # Initialize town</code></pre>
+
+    <!-- Related Pages -->
+    <div class="related-pages">
+      <h3>Related Comparisons</h3>
+      <ul>
+        <li><a href="architecture.html">Agent Architecture Compared</a> - Single, Subagents, Swarm, Hierarchical</li>
+        <li><a href="memory.html">Memory Approaches Compared</a> - progress.txt, Git, AGENTS.md, Claude-Mem</li>
+        <li><a href="cost.html">Cost Optimization Guide</a> - Model selection, caching, budget engineering</li>
+        <li><a href="observability.html">Observability Patterns</a> - Monitoring, debugging, alerts</li>
+      </ul>
+    </div>
+
+    <!-- Footer Navigation -->
+    <nav class="footer-nav">
+      <a href="architecture.html">Previous: Architecture Comparison</a>
+      <a href="memory.html">Next: Memory Comparison</a>
+    </nav>
+
+  </div>
+
+  
+  <script src="../js/copy-code.js"></script>
+</body>
+</html>

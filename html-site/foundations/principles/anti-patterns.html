@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anti-Patterns - Claude Code Knowledge Base</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="nav-breadcrumb">
+      <a href="../../index.html">Home</a><span>→</span>
+      <a href="../index.html">Foundations</a><span>→</span>
+      <a href="index.html">Principles</a><span>→</span>
+      Anti-Patterns
+    </nav>
+
+    <div class="you-are-here">
+      <h3>You Are Here</h3>
+      <p><strong>Context:</strong> A <span class="bionic">com</span>prehensive catalog of what does NOT work and why. Learning these failures helps you <span class="bionic">rec</span>ognize problems before they cause damage.</p>
+      <p><strong>Prerequisites:</strong> <a href="core.html">Core Principles</a> - understand what's right before learning what's wrong.</p>
+      <p><strong>After this:</strong> <a href="learning-loops.html">Learning Loops</a> to build systems that improve over time.</p>
+    </div>
+
+    <h1><span class="bionic">An</span>ti-<span class="bionic">Pat</span>tern <span class="bionic">Ana</span>lysis for <span class="bionic">Cla</span>ude <span class="bionic">Co</span>de</h1>
+
+    <p class="lead">This guide identifies what <strong>does not work</strong> and why, enabling practitioners to avoid common pitfalls. Each anti-pattern includes warning signs, root causes, and fixes.</p>
+
+    <!-- Table of Contents -->
+    <nav class="toc">
+      <h3>Quick Navigation</h3>
+      <ul>
+        <li><a href="#context-anti-patterns">Context Anti-Patterns</a></li>
+        <li><a href="#orchestration-anti-patterns">Orchestration Anti-Patterns</a></li>
+        <li><a href="#task-design-anti-patterns">Task Design Anti-Patterns</a></li>
+        <li><a href="#configuration-anti-patterns">Configuration Anti-Patterns</a></li>
+        <li><a href="#multi-agent-anti-patterns">Multi-Agent Anti-Patterns</a></li>
+        <li><a href="#verification-anti-patterns">Verification Anti-Patterns</a></li>
+        <li><a href="#security-anti-patterns">Security Anti-Patterns</a></li>
+        <li><a href="#misconceptions">Misconceptions & Debunked Claims</a></li>
+        <li><a href="#detection-checklist">Detection Checklist</a></li>
+        <li><a href="#recovery-strategies">Recovery Strategies</a></li>
+      </ul>
+    </nav>
+
+    <hr class="divider-warning">
+
+    <!-- Context Anti-Patterns -->
+    <section id="context-anti-patterns">
+      <h2><span class="bionic">Con</span>text <span class="bionic">An</span>ti-<span class="bionic">Pat</span>terns</h2>
+
+      <div class="anti-pattern-card">
+        <h3>Long Single-Thread Conversations</h3>
+
+        <div class="warning-signs">
+          <h4>Warning Signs</h4>
+          <ul>
+            <li>Repetitive or contradictory responses</li>
+            <li>CLAUDE.md directives being ignored</li>
+            <li>Claude referencing files that don't exist</li>
+            <li>Truncated code outputs (functions cut off mid-definition)</li>
+            <li>Claude "forgets" work done 30 minutes ago</li>
+          </ul>
+        </div>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p><strong>Context rot accumulates.</strong> As conversations grow, earlier instructions and context get compressed or lost. The model struggles to maintain coherence across hundreds of turns.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <ul>
+            <li>Use Ralph pattern: fresh context per iteration</li>
+            <li>Persist state externally (files, git history, progress.txt)</li>
+            <li>Start new sessions for unrelated tasks</li>
+            <li>Use <code>/compact</code> proactively at 60-70% context usage</li>
+          </ul>
+        </div>
+        <p class="source">Source: @ryancarson, @mattpocockuk</p>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>Trusting Compaction Blindly</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p><strong>Compaction is lossy.</strong> The model must decide what's "important" without knowing your actual priorities. Subtle but critical details often get compressed away.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <ul>
+            <li>Maintain external state manually (reflection files, progress logs)</li>
+            <li>Use explicit instruction files (CLAUDE.md) that survive compaction</li>
+            <li>Compact proactively at 60-70% rather than waiting for auto-compact at 95%</li>
+            <li>Review behavior after compaction</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>Reading Entire Codebase</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Context window (~200K tokens) cannot hold a full codebase. Filling it with code leaves no room for reasoning or output.</p>
+        </div>
+
+        <div class="comparison-box">
+          <div class="bad-example">
+            <h5>Bad Prompt</h5>
+            <p>"Read all the files in src/ to understand the architecture"</p>
+          </div>
+          <div class="good-example">
+            <h5>Good Prompt</h5>
+            <p>"Read src/index.ts and src/config.ts to understand the entry point"</p>
+          </div>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <ul>
+            <li>Use .claudeignore aggressively</li>
+            <li>Request targeted reads (specific files for specific tasks)</li>
+            <li>Use subagents for exploration (isolated context)</li>
+            <li>Let Claude search with Glob/Grep rather than loading everything upfront</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>Including Build Outputs in Context</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>node_modules/, dist/, .next/, coverage/ consume massive context budget uselessly. Generated files provide no value for reasoning but consume precious tokens.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <p>Create a proper .claudeignore:</p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre># .claudeignore
+node_modules/
+dist/
+build/
+.next/
+.cache/
+*.log
+coverage/</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="checkpoint">
+      <h4 class="checkpoint-header">Checkpoint: Context Anti-Patterns</h4>
+      <p>You should now recognize:</p>
+      <ul>
+        <li>Long conversations cause context rot with predictable symptoms</li>
+        <li>Compaction is lossy - don't trust it blindly</li>
+        <li>Never try to load an entire codebase</li>
+        <li>.claudeignore is essential, not optional</li>
+      </ul>
+    </div>
+
+    <hr class="divider-warning">
+
+    <!-- Orchestration Anti-Patterns -->
+    <section id="orchestration-anti-patterns">
+      <h2><span class="bionic">Orch</span>estration <span class="bionic">An</span>ti-<span class="bionic">Pat</span>terns</h2>
+
+      <div class="anti-pattern-card">
+        <h3>Workers Spawning Workers (Recursive Explosion)</h3>
+
+        <div class="warning-signs">
+          <h4>Warning Signs</h4>
+          <ul>
+            <li>Subagent depth >2 levels</li>
+            <li>Context usage spiking unexpectedly</li>
+            <li>Tasks taking 10x longer than expected</li>
+            <li>Runaway API costs</li>
+          </ul>
+        </div>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>No coordination between nested subagents. Context explodes geometrically. Workers lose sight of the original task.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix: Worker Preamble Pattern</h4>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>CONTEXT: You are a WORKER agent, not an orchestrator.
+
+RULES:
+- Complete ONLY the task described below
+- Use tools directly (Read, Write, Edit, Bash, etc.)
+- Do NOT spawn sub-agents
+- Do NOT call TaskCreate or TaskUpdate
+- Report your results with absolute file paths</pre>
+          </div>
+        </div>
+        <p class="source">Source: @nummanali (CC Mirror skill)</p>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>Orchestrator Using Tools Directly</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Mixing concerns leads to scope creep. Orchestrator should think at the coordination level, not get lost in file edits.</p>
+        </div>
+
+        <blockquote class="callout-principle">
+          YOU DO NOT WRITE CODE. YOU DO NOT RUN COMMANDS. YOU DO NOT EXPLORE CODEBASES. You are the CONDUCTOR. Your agents play the instruments.
+          <cite>-- CC Mirror principle</cite>
+        </blockquote>
+
+        <div class="two-column">
+          <div class="column">
+            <h5>Orchestrator Uses</h5>
+            <ul>
+              <li>TaskCreate, TaskList, TaskGet, TaskUpdate</li>
+              <li>AskUserQuestion</li>
+              <li>Task (to spawn workers)</li>
+              <li>Read (reference files only, 1-2 max)</li>
+            </ul>
+          </div>
+          <div class="column">
+            <h5>Workers Use</h5>
+            <ul>
+              <li>Read, Write, Edit, Bash</li>
+              <li>Glob, Grep, WebFetch, WebSearch</li>
+              <li>LSP</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>No Completion Detection</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Agents run indefinitely without knowing when to stop. Infinite loops consuming API budget.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix: Completion Promise Pattern</h4>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>if grep -q "PROMISE COMPLETE HERE" output.txt; then
+  break
+fi</pre>
+          </div>
+          <p>Or use testable completion criteria:</p>
+          <ul>
+            <li>All PRD items have <code>passes: true</code></li>
+            <li>Tests pass: <code>npm test</code> exits 0</li>
+            <li>Build succeeds: <code>npm run build</code> exits 0</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>Sequential When Parallel Is Possible</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Tasks that could run in parallel are executed sequentially, wasting time. Underutilizing available parallelism.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <ul>
+            <li>Spawn multiple background subagents for independent tasks</li>
+            <li>Use git worktrees for parallel feature branches</li>
+            <li>Identify task dependencies; parallelize where no dependencies exist</li>
+          </ul>
+        </div>
+        <p class="source">Source: @mollycantillon (Panopticon), @0xSero (Orchestra)</p>
+      </div>
+    </section>
+
+    <hr class="divider-warning">
+
+    <!-- Task Design Anti-Patterns -->
+    <section id="task-design-anti-patterns">
+      <h2><span class="bionic">Ta</span>sk <span class="bionic">Des</span>ign <span class="bionic">An</span>ti-<span class="bionic">Pat</span>terns</h2>
+
+      <div class="anti-pattern-card">
+        <h3>Tasks Too Large (Context Collapse)</h3>
+
+        <div class="warning-signs">
+          <h4>What Happens</h4>
+          <p>Scope creep, context exhaustion, incomplete work, degraded quality mid-task.</p>
+        </div>
+
+        <div class="comparison-box">
+          <div class="bad-example">
+            <h5>Bad Task</h5>
+            <p>"Build the entire authentication system"</p>
+          </div>
+          <div class="good-example">
+            <h5>Good Task</h5>
+            <p>"Implement the login endpoint with:<br>
+            1. Email/password validation<br>
+            2. JWT token generation<br>
+            3. Rate limiting (5 attempts/minute)"</p>
+          </div>
+        </div>
+
+        <div class="the-fix">
+          <h4>Sizing Heuristics</h4>
+          <ul>
+            <li>~100-500 lines of code change</li>
+            <li>~1-3 files modified</li>
+            <li>~30-60 minutes equivalent human time</li>
+            <li>Clear, testable success criteria</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>Vague Acceptance Criteria</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Ambiguity invites interpretation. Claude's interpretation may not match yours.</p>
+        </div>
+
+        <div class="comparison-box">
+          <div class="bad-example">
+            <h5>Bad Criteria</h5>
+            <p>"Make it work"<br>"Fix the bug"<br>"Clean up the code"</p>
+          </div>
+          <div class="good-example">
+            <h5>Good Criteria</h5>
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>{
+  "delete_video_shows_confirmation": {
+    "description": "Delete video shows confirmation dialog",
+    "acceptance": "User clicks delete, modal appears
+                   with 'Confirm' and 'Cancel',
+                   clicking 'Cancel' preserves video"
+  }
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>Tasks Too Small (Overhead Exceeds Value)</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Agent startup, context loading, and coordination overhead outweighs trivial task value.</p>
+        </div>
+
+        <div class="comparison-box">
+          <div class="bad-example">
+            <h5>Too Small</h5>
+            <p>"Add a comment to line 42"<br>"Rename variable x to count"</p>
+          </div>
+          <div class="good-example">
+            <h5>Just Right</h5>
+            <p>"Implement the User model with email, password hash, and created_at fields"</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>Dependent Tasks Without Explicit Ordering</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Agent B starts before Agent A finishes, causing conflicts or failures. No dependency graph means race conditions.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <ul>
+            <li>Use <code>addBlocks</code> / <code>addBlockedBy</code> in task management</li>
+            <li>Or enforce serial execution for dependent tasks</li>
+            <li>Or use handoff files between sequential tasks</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="checkpoint">
+      <h4 class="checkpoint-header">Checkpoint: Task Design</h4>
+      <p>You should now recognize:</p>
+      <ul>
+        <li>Tasks too large cause context collapse</li>
+        <li>Vague criteria lead to wrong outputs</li>
+        <li>Tasks too small waste more time than they save</li>
+        <li>Dependent tasks need explicit ordering</li>
+      </ul>
+    </div>
+
+    <hr class="divider-warning">
+
+    <!-- Configuration Anti-Patterns -->
+    <section id="configuration-anti-patterns">
+      <h2><span class="bionic">Conf</span>iguration <span class="bionic">An</span>ti-<span class="bionic">Pat</span>terns</h2>
+
+      <div class="anti-pattern-card">
+        <h3>--dangerously-skip-permissions Everywhere</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>No safety net. Claude can execute ANY command, including destructive ones. One wrong <code>rm -rf</code> and your work is gone.</p>
+        </div>
+
+        <div class="comparison-box">
+          <div class="bad-example">
+            <h5>Dangerous</h5>
+            <div class="code-block">
+<pre>alias claude='claude --dangerously-skip-permissions'</pre>
+            </div>
+          </div>
+          <div class="good-example">
+            <h5>Safe</h5>
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre>{
+  "permissions": {
+    "commands": {
+      "git status": "allow-always",
+      "npm test": "allow-always",
+      "npm run build": "allow-always"
+    },
+    "blockedPatterns": [
+      "rm -rf",
+      "sudo",
+      "git push --force",
+      "git reset --hard"
+    ]
+  }
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>CLAUDE.md Too Long</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Every token in CLAUDE.md is loaded every conversation turn. Instructions consume context budget, leaving less for actual work.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <ul>
+            <li>Keep under 500 tokens</li>
+            <li>Essential information only</li>
+            <li>Use file imports (@docs/architecture.md) for detailed references</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>CLAUDE.md Too Generic</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Generic boilerplate provides no project-specific guidance. Claude makes wrong assumptions every session. Same mistakes repeated.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>Include in CLAUDE.md</h4>
+          <ul>
+            <li>Actual development commands</li>
+            <li>Your specific patterns and conventions</li>
+            <li>Known issues and workarounds</li>
+            <li>Architecture decisions</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider-warning">
+
+    <!-- Multi-Agent Anti-Patterns -->
+    <section id="multi-agent-anti-patterns">
+      <h2><span class="bionic">Mul</span>ti-<span class="bionic">Ag</span>ent <span class="bionic">An</span>ti-<span class="bionic">Pat</span>terns</h2>
+
+      <div class="anti-pattern-card">
+        <h3>Parallel Agents Without Isolation</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Merge conflicts, file corruption, race conditions. Multiple agents editing same files simultaneously creates chaos.</p>
+        </div>
+
+        <blockquote>
+          "Parallel agents cause merge conflicts - use serial"
+          <cite>-- @mattpocockuk</cite>
+        </blockquote>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <ul>
+            <li>Branch isolation: each agent works on its own git branch</li>
+            <li>Directory ownership: each agent owns specific directories</li>
+            <li>Git worktrees for full isolation</li>
+            <li>File locking for shared resources</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>Agent Communication Via Context Pollution</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Subagent contexts are isolated. Information must be explicitly passed through files or return values, not shared conversation.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <ul>
+            <li>File-based handoffs: write to handoff-agent1-to-agent2.json</li>
+            <li>Git-based handoffs: commit history visible to future agents</li>
+            <li>Explicit return values from subagents</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>No Agent Health Monitoring</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Stuck agents, infinite loops, runaway costs go unnoticed. No visibility into agent state or progress.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <ul>
+            <li>Use Claude HUD plugin for context monitoring</li>
+            <li>Use rpai for tmux multi-agent management</li>
+            <li>Implement heartbeat logging</li>
+            <li>Set maximum iteration limits</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider-warning">
+
+    <!-- Verification Anti-Patterns -->
+    <section id="verification-anti-patterns">
+      <h2><span class="bionic">Ver</span>ification <span class="bionic">An</span>ti-<span class="bionic">Pat</span>terns</h2>
+
+      <div class="anti-pattern-card">
+        <h3>No Verification At All</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>LLMs make plausible-looking mistakes. Without verification, these become production bugs.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <ul>
+            <li>Type checking: <code>npm run typecheck</code></li>
+            <li>Unit tests: <code>npm test</code></li>
+            <li>Lint: <code>npm run lint</code></li>
+            <li>Manual review of diffs before commit</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>Marking Complete Without Testing</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Claude's tendency to optimistically mark features complete.</p>
+        </div>
+
+        <blockquote class="callout-warning-quote">
+          "Claude's tendency to mark features complete without proper testing... did much better at verifying end-to-end once explicitly prompted to use browser automation tools"
+          <cite>-- Anthropic Best Practices</cite>
+        </blockquote>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <ul>
+            <li>Require explicit test results in completion report</li>
+            <li>Use Playwright MCP for UI verification</li>
+            <li>Include verification steps in every task definition</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>Single-Point Verification</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Only unit tests run. Integration and E2E issues missed. Unit tests pass in isolation but integrations fail.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>Layered Verification</h4>
+          <ol>
+            <li><strong>Type check</strong> - catches interface mismatches</li>
+            <li><strong>Unit tests</strong> - catches logic errors</li>
+            <li><strong>Integration tests</strong> - catches component interaction bugs</li>
+            <li><strong>E2E tests</strong> - catches user journey issues</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <div class="checkpoint">
+      <h4 class="checkpoint-header">Checkpoint: Verification</h4>
+      <p>You should now recognize:</p>
+      <ul>
+        <li>Never trust Claude's output without verification</li>
+        <li>Claude tends to mark things complete prematurely</li>
+        <li>Layered verification catches different types of bugs</li>
+        <li>Browser automation is needed for UI verification</li>
+      </ul>
+    </div>
+
+    <hr class="divider-warning">
+
+    <!-- Security Anti-Patterns -->
+    <section id="security-anti-patterns">
+      <h2><span class="bionic">Sec</span>urity <span class="bionic">An</span>ti-<span class="bionic">Pat</span>terns</h2>
+
+      <div class="anti-pattern-card">
+        <h3>.env Files in Context</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>API keys, passwords, tokens leak into conversation history. Credentials become part of context, potentially logged or exposed.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <ul>
+            <li>Never <code>cat .env</code> in Claude Code</li>
+            <li>Add to .claudeignore</li>
+            <li>Use environment variables, not file reads</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>Whitelisting Dangerous Commands</h3>
+
+        <div class="the-fix">
+          <h4>Commands to NEVER Whitelist</h4>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre># Destructive file operations
+rm -rf
+find . -delete
+
+# Git destruction
+git push --force
+git reset --hard
+git clean -fd
+
+# System modification
+sudo *
+chmod -R 777
+
+# Remote code execution
+curl | bash
+wget -O- | sh</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="anti-pattern-card">
+        <h3>Claude Modifying Its Own Instructions</h3>
+
+        <div class="why-fails">
+          <h4>Why It Fails</h4>
+          <p>Prompt injection or accidental CLAUDE.md modification changes behavior. Self-referential attacks can alter agent behavior.</p>
+        </div>
+
+        <div class="the-fix">
+          <h4>The Fix</h4>
+          <ul>
+            <li>Make CLAUDE.md read-only: <code>chmod 444 CLAUDE.md</code></li>
+            <li>Version control all configuration files</li>
+            <li>Review diffs before committing</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider-context">
+
+    <!-- Misconceptions -->
+    <section id="misconceptions">
+      <h2><span class="bionic">Mis</span>conceptions & <span class="bionic">Deb</span>unked <span class="bionic">Cla</span>ims</h2>
+
+      <div class="misconception-card">
+        <h3>"Just Let It Run Overnight"</h3>
+        <p><strong>Reality:</strong> Without proper Ralph loop setup, Claude will: stop at first uncertainty, consume massive tokens on infinite loops, produce inconsistent results without context management.</p>
+        <p><strong>Correct approach:</strong> Use file-based state (Ralph pattern) with explicit completion promises.</p>
+      </div>
+
+      <div class="misconception-card">
+        <h3>"Claude Understands Your Whole Codebase"</h3>
+        <p><strong>Reality:</strong> Claude only sees what's in context window (~200K tokens, ~100-150K of code). Large codebases need selective context loading.</p>
+        <p><strong>Correct approach:</strong> Use .claudeignore, targeted reads, summarization.</p>
+      </div>
+
+      <div class="misconception-card">
+        <h3>"Opus Is Always Better"</h3>
+        <p><strong>Reality:</strong> Opus costs 60x more than Haiku. For simple tasks, Haiku/Sonnet are faster AND sufficient. Opus shines only for complex reasoning.</p>
+        <p><strong>Correct approach:</strong> Match model to task complexity.</p>
+      </div>
+
+      <div class="misconception-card">
+        <h3>"MCP Servers Are Plug and Play"</h3>
+        <p><strong>Reality:</strong> Many have version compatibility issues. Configuration often requires debugging. Some don't work with latest Claude Code versions.</p>
+        <p><strong>Correct approach:</strong> Test MCP servers in isolation before integration.</p>
+      </div>
+
+      <div class="misconception-card">
+        <h3>"/init Auto-Generates Good CLAUDE.md"</h3>
+        <p><strong>Reality:</strong> Often produces generic content. Better to write manually with specific project knowledge.</p>
+      </div>
+    </section>
+
+    <hr class="divider-checkpoint">
+
+    <!-- Detection Checklist -->
+    <section id="detection-checklist">
+      <h2><span class="bionic">An</span>ti-<span class="bionic">Pat</span>tern <span class="bionic">Det</span>ection <span class="bionic">Check</span>list</h2>
+
+      <h3>Pre-Session Checklist</h3>
+      <ul class="checklist">
+        <li>Git working directory clean or stashed?</li>
+        <li>On dedicated branch (not main/master)?</li>
+        <li>.claudeignore excludes sensitive files and build outputs?</li>
+        <li>CLAUDE.md updated with current project context?</li>
+        <li>Safe commands whitelisted?</li>
+        <li>Correct model selected for task complexity?</li>
+        <li>Context monitoring active (Claude HUD)?</li>
+      </ul>
+
+      <h3>During Session</h3>
+      <ul class="checklist">
+        <li>Context usage under 70%?</li>
+        <li>Claude following CLAUDE.md conventions?</li>
+        <li>Outputs verified with tests/typechecks?</li>
+        <li>No infinite loop patterns detected?</li>
+        <li>Changes reviewable via <code>git diff</code>?</li>
+        <li>Subagent depth < 3 levels?</li>
+        <li>Task completion achievable in current context?</li>
+      </ul>
+
+      <h3>Post-Session Checklist</h3>
+      <ul class="checklist">
+        <li>All changes reviewed before commit?</li>
+        <li>Tests passing?</li>
+        <li>Type checking passing?</li>
+        <li>No security issues introduced?</li>
+        <li>No credentials in code/context?</li>
+        <li>Session costs within budget?</li>
+        <li>Learnings captured for future sessions?</li>
+      </ul>
+
+      <h3>Red Flag Detection</h3>
+      <ul class="checklist red-flags">
+        <li>Same file edited 5+ times without progress? (Verification loop)</li>
+        <li>Multiple grep/glob calls with no results? (Exploration loop)</li>
+        <li>Context >90% without task completion? (Context collapse imminent)</li>
+        <li>Token consumption rate 3x normal? (Runaway agent)</li>
+        <li>Circular edit patterns? (Logic error)</li>
+      </ul>
+    </section>
+
+    <hr class="divider-procedure">
+
+    <!-- Recovery Strategies -->
+    <section id="recovery-strategies">
+      <h2><span class="bionic">Rec</span>overy <span class="bionic">Strat</span>egies</h2>
+
+      <div class="troubleshoot">
+        <details>
+          <summary>From Context Overflow</summary>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre># Compact immediately
+/compact
+
+# If severely degraded
+/reset
+
+# Start focused session
+claude "Focus only on src/auth/ - implement OAuth flow"</pre>
+          </div>
+        </details>
+      </div>
+
+      <div class="troubleshoot">
+        <details>
+          <summary>From File Corruption</summary>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre># Discard changes to specific file
+git checkout -- path/to/file.ts
+
+# Recovery from stash
+git stash pop
+
+# Hard reset (CAREFUL)
+git reset --hard HEAD</pre>
+          </div>
+        </details>
+      </div>
+
+      <div class="troubleshoot">
+        <details>
+          <summary>From Infinite Loops</summary>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre># Graceful interrupt
+Ctrl+C
+
+# Harder interrupt
+Ctrl+\
+
+# Force kill
+pkill -9 -f claude
+
+# Break Ralph loop
+echo "PROMISE COMPLETE HERE" >> progress.txt</pre>
+          </div>
+        </details>
+      </div>
+
+      <div class="troubleshoot">
+        <details>
+          <summary>From Cost Runaway</summary>
+          <ol>
+            <li>Kill all Claude processes: <code>pkill -f claude</code></li>
+            <li>Check Anthropic dashboard for usage</li>
+            <li>Set hard budget limits in console</li>
+            <li>Review what caused high usage</li>
+          </ol>
+        </details>
+      </div>
+
+      <div class="troubleshoot">
+        <details>
+          <summary>From Authentication Issues</summary>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<pre># Re-authenticate
+claude auth logout
+claude auth login
+
+# Clear credentials
+rm -rf ~/.claude/credentials
+
+# Use API key instead
+export ANTHROPIC_API_KEY="sk-ant-..."</pre>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <div class="milestone">
+      Anti-Patterns Complete! You now know what to avoid and how to recover when things go wrong.
+    </div>
+
+    <!-- Summary Table -->
+    <section id="summary">
+      <h2><span class="bionic">Sum</span>mary: Core <span class="bionic">An</span>ti-<span class="bionic">Pat</span>tern <span class="bionic">Cat</span>egories</h2>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Root Cause</th>
+            <th>Prevention</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Context</td><td>Growing conversations</td><td>Fresh context per iteration (Ralph)</td></tr>
+          <tr><td>Orchestration</td><td>Role confusion</td><td>Strict orchestrator/worker separation</td></tr>
+          <tr><td>Task Design</td><td>Wrong sizing</td><td>30-60 min atomic tasks</td></tr>
+          <tr><td>Prompting</td><td>Ambiguity</td><td>Explicit, testable criteria</td></tr>
+          <tr><td>Configuration</td><td>Missing safeguards</td><td>Proper .claudeignore, permissions</td></tr>
+          <tr><td>Multi-Agent</td><td>No isolation</td><td>Branch/directory ownership</td></tr>
+          <tr><td>Verification</td><td>Blind trust</td><td>Layered testing requirements</td></tr>
+          <tr><td>Memory</td><td>In-context only</td><td>External file-based state</td></tr>
+          <tr><td>Cost</td><td>No limits</td><td>Iteration caps, model matching</td></tr>
+          <tr><td>Security</td><td>Weak permissions</td><td>Blocklists, read-only configs</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="footer-nav">
+      <a href="core.html">← Core Principles</a>
+      <a href="learning-loops.html">Next: Learning Loops →</a>
+    </div>
+  </div>
+
+  
+  <script src="../../js/copy-code.js"></script>
+</body>
+</html>

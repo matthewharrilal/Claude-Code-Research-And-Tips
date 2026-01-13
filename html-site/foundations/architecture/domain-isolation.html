@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domain Isolation Patterns - Claude Code Architecture</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .bionic { font-weight: 700; }
+
+    .you-are-here {
+      background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .you-are-here h2 {
+      margin: 0 0 12px 0;
+      padding: 0;
+      border: none;
+      font-size: 1.1em;
+      color: var(--accent);
+    }
+
+    .checkpoint {
+      background: #f0ebe3;
+      border-left: 4px solid var(--success);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+
+    .checkpoint-header {
+      color: var(--success);
+      font-weight: 600;
+      font-size: 0.9em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .domain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .domain-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .domain-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    .domain-icon {
+      font-size: 2em;
+      margin-bottom: 8px;
+    }
+
+    .domain-name {
+      font-weight: 600;
+      color: var(--heading);
+      font-family: 'SF Mono', monospace;
+    }
+
+    .domain-desc {
+      font-size: 0.85em;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .principle-box {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+
+    .principle-box h4 {
+      margin: 0 0 16px 0;
+      color: var(--heading);
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 0.75em;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .code-block-wrapper {
+      position: relative;
+    }
+
+    .code-block-wrapper:hover .copy-btn {
+      opacity: 1;
+    }
+
+    .tmux-visual {
+      background: #1e1e1e;
+      color: #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+      font-family: 'SF Mono', monospace;
+      font-size: 0.85em;
+      margin: 24px 0;
+      overflow-x: auto;
+    }
+
+    .tmux-visual .header {
+      color: #6b9b7a;
+      border-bottom: 1px solid #444;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    .tmux-session {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px dashed #333;
+    }
+
+    .tmux-session:last-child {
+      border-bottom: none;
+    }
+
+    .tmux-name {
+      color: #2a7d7d;
+    }
+
+    .tmux-status {
+      color: #888;
+    }
+
+    .anti-pattern-box {
+      background: #fdf0ef;
+      border: 1px solid var(--error);
+      border-left: 4px solid var(--error);
+      border-radius: 0 12px 12px 0;
+      padding: 20px 24px;
+      margin: 20px 0;
+    }
+
+    .anti-pattern-box h4 {
+      color: var(--error);
+      margin: 0 0 12px 0;
+    }
+
+    .checklist {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+
+    .checklist h4 {
+      margin: 0 0 16px 0;
+      color: var(--heading);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .checklist ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .checklist li {
+      padding: 8px 0;
+      padding-left: 28px;
+      position: relative;
+    }
+
+    .checklist li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12px;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+    }
+
+    .milestone {
+      background: linear-gradient(90deg, #6b9b7a 0%, #2a7d7d 100%);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      text-align: center;
+      margin: 32px 0;
+      font-weight: 600;
+    }
+
+    .philosophy-quote {
+      background: linear-gradient(135deg, #f5f0e8 0%, #fefcf3 100%);
+      border-left: 4px solid var(--heading);
+      border-radius: 0 12px 12px 0;
+      padding: 24px;
+      margin: 24px 0;
+      font-style: italic;
+    }
+
+    .philosophy-quote cite {
+      display: block;
+      margin-top: 12px;
+      font-style: normal;
+      color: var(--text-muted);
+      font-size: 0.9em;
+    }
+
+    .handoff-diagram {
+      background: var(--code-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      font-family: 'SF Mono', monospace;
+      font-size: 0.85em;
+      overflow-x: auto;
+      white-space: pre;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Breadcrumb Navigation -->
+    <nav class="nav-breadcrumb">
+      <a href="../../index.html">Home</a>
+      <span>/</span>
+      <a href="../index.html">Foundations</a>
+      <span>/</span>
+      <a href="index.html">Architecture</a>
+      <span>/</span>
+      <strong>Domain Isolation</strong>
+    </nav>
+
+    <!-- You Are Here Box -->
+    <div class="you-are-here">
+      <h2>You Are Here</h2>
+      <p><strong><span class="bionic">Dom</span>ain <span class="bionic">Iso</span>lation</strong> is the architectural pattern for running multiple Claude Code instances across different life/work domains. This is Molly Cantillon's "Personal Panopticon" - 8 parallel agents managing different aspects of your life without context pollution.</p>
+      <p><strong>Pre-requisite:</strong> <a href="composition-rules.html">Composition Rules</a> (understand how patterns combine). <strong>Use case:</strong> Anyone wanting Claude to manage multiple distinct areas (work, finance, health, email, etc.) simultaneously.</p>
+    </div>
+
+    <h1><span class="bionic">Dom</span>ain <span class="bionic">Iso</span>lation <span class="bionic">Pat</span>terns</h1>
+
+    <p class="conversational-lead">A comprehensive guide to isolating Claude Code instances across life and work domains, derived from the Personal Panopticon architecture and community best practices.</p>
+
+    <!-- Table of Contents -->
+    <nav class="toc">
+      <h3 class="toc-title">On This Page</h3>
+      <ul>
+        <li><a href="#panopticon-model">The Panopticon Model</a></li>
+        <li><a href="#why-isolation">Why Domain Isolation Matters</a></li>
+        <li><a href="#implementation">Implementation Patterns</a></li>
+        <li><a href="#cross-domain">Cross-Domain Coordination</a></li>
+        <li><a href="#customization">Domain-Specific Customization</a></li>
+        <li><a href="#anti-patterns">Anti-Patterns</a></li>
+        <li><a href="#implementation-checklist">Implementation Checklist</a></li>
+      </ul>
+    </nav>
+
+    <hr class="section-divider">
+
+    <!-- The Panopticon Model -->
+    <section id="panopticon-model">
+      <h2>The <span class="bionic">Pan</span>opticon <span class="bionic">Mod</span>el</h2>
+
+      <h3>The Core Concept</h3>
+      <p>Molly Cantillon's "Personal Panopticon" introduces a paradigm shift: running Claude Code as a <strong>swarm of 8 parallel isolated instances</strong>, each owning a distinct life domain to achieve "self-legibility" and reverse the data asymmetry institutions have over you.</p>
+
+      <div class="philosophy-quote">
+        "The feeling is hard to name. It is the violent gap between how blind you were and how obvious everything feels now with an observer that reads all the feeds, catches what you've unconsciously dropped, notices patterns across domains you'd kept stubbornly separate, and---crucially---tells you what to do about it."
+        <cite>- Molly Cantillon</cite>
+      </div>
+
+      <h3>The 8 Parallel Isolated Domains</h3>
+      <div class="domain-grid">
+        <div class="domain-card">
+          <div class="domain-name">~/nox</div>
+          <div class="domain-desc">Company/product - business operations</div>
+        </div>
+        <div class="domain-card">
+          <div class="domain-name">~/metrics</div>
+          <div class="domain-desc">Analytics/data - quantitative insights</div>
+        </div>
+        <div class="domain-card">
+          <div class="domain-name">~/email</div>
+          <div class="domain-desc">Communications - inbox management</div>
+        </div>
+        <div class="domain-card">
+          <div class="domain-name">~/growth</div>
+          <div class="domain-desc">Marketing/acquisition - audience building</div>
+        </div>
+        <div class="domain-card">
+          <div class="domain-name">~/trades</div>
+          <div class="domain-desc">Personal finance - market intelligence</div>
+        </div>
+        <div class="domain-card">
+          <div class="domain-name">~/health</div>
+          <div class="domain-desc">Fitness/sleep/wellness - body optimization</div>
+        </div>
+        <div class="domain-card">
+          <div class="domain-name">~/writing</div>
+          <div class="domain-desc">Content creation - creative output</div>
+        </div>
+        <div class="domain-card">
+          <div class="domain-name">~/personal</div>
+          <div class="domain-desc">Life admin - everything else</div>
+        </div>
+      </div>
+
+      <h3>How Isolation Works</h3>
+      <div class="principle-box">
+        <h4>Isolation Principles</h4>
+        <table>
+          <thead>
+            <tr><th>Principle</th><th>Implementation</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Directory isolation</strong></td><td>Each instance runs in its own <code>~/&lt;domain&gt;</code> directory</td></tr>
+            <tr><td><strong>No cross-contamination</strong></td><td>Agents cannot read/write outside their directory</td></tr>
+            <tr><td><strong>Independent context</strong></td><td>Each instance has fresh context, no shared conversation history</td></tr>
+            <tr><td><strong>Domain-specific memory</strong></td><td>Each directory contains its own notes, data, and history</td></tr>
+            <tr><td><strong>Explicit handoffs</strong></td><td>Information crosses domains only through deliberate file-based handoffs</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Why Domain Isolation Matters -->
+    <section id="why-isolation">
+      <h2><span class="bionic">Why</span> Domain <span class="bionic">Iso</span>lation <span class="bionic">Mat</span>ters</h2>
+
+      <h3>1. Context Pollution Prevention</h3>
+      <p>Claude Code's context window is finite. When a single instance handles everything---finances, health, code, personal admin---the context becomes diluted:</p>
+      <ul>
+        <li><strong>Context rot:</strong> Older, irrelevant information crowds out recent, relevant context</li>
+        <li><strong>Confusion:</strong> Agent may apply patterns from one domain inappropriately to another</li>
+        <li><strong>Diluted expertise:</strong> A generalist context produces generalist outputs</li>
+      </ul>
+      <div class="callout callout-success">
+        <div class="callout-title">Isolation Solution</div>
+        <p>Each domain agent maintains a focused, specialized context that deepens over time rather than broadening into noise.</p>
+      </div>
+
+      <h3>2. Specialized Optimization Per Domain</h3>
+      <p>Different domains require different:</p>
+      <table>
+        <thead>
+          <tr><th>Aspect</th><th>Example Variation</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Tools</strong></td><td><code>~/trades</code> needs brokerage APIs; <code>~/health</code> needs WHOOP integration</td></tr>
+          <tr><td><strong>Schedules</strong></td><td><code>~/trades</code> runs overnight for market data; <code>~/health</code> runs post-workout</td></tr>
+          <tr><td><strong>Models</strong></td><td><code>~/writing</code> may benefit from Opus creativity; <code>~/metrics</code> works fine with Sonnet</td></tr>
+          <tr><td><strong>Verification</strong></td><td><code>~/nox</code> (company) needs rigorous testing; <code>~/personal</code> can be looser</td></tr>
+          <tr><td><strong>CLAUDE.md rules</strong></td><td>Each domain has domain-specific guardrails and conventions</td></tr>
+        </tbody>
+      </table>
+
+      <h3>3. Security and Privacy Boundaries</h3>
+      <p>Domain isolation creates natural security perimeters:</p>
+      <ul>
+        <li><strong>Credential separation:</strong> API keys for trading don't leak to other domains</li>
+        <li><strong>Blast radius containment:</strong> A compromised or misbehaving agent affects only one domain</li>
+        <li><strong>Privacy zones:</strong> Personal health data never mingles with company code</li>
+        <li><strong>Audit trails:</strong> Per-domain logs make it clear what accessed what</li>
+      </ul>
+
+      <h3>4. Parallel Execution</h3>
+      <p>With isolation, you can run all domains simultaneously:</p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Terminal 1          # Terminal 2          # Terminal 3
+cd ~/nox && claude    cd ~/trades && claude cd ~/health && claude</code></pre>
+      </div>
+      <p>No conflicts. No waiting. Each agent works on its domain while others work in parallel.</p>
+    </section>
+
+    <div class="checkpoint">
+      <div class="checkpoint-header">Checkpoint: Understanding the Why</div>
+      <p>Before implementing, ensure you understand why isolation matters:</p>
+      <ul>
+        <li>Context pollution degrades quality</li>
+        <li>Different domains need different configurations</li>
+        <li>Security boundaries protect sensitive data</li>
+        <li>Parallel execution multiplies throughput</li>
+      </ul>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Implementation Patterns -->
+    <section id="implementation">
+      <h2><span class="bionic">Imp</span>lementation <span class="bionic">Pat</span>terns</h2>
+
+      <h3>Filesystem Isolation</h3>
+
+      <h4>Basic Directory Structure</h4>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>~/
++-- nox/
+|   +-- CLAUDE.md           # Company-specific rules
+|   +-- .claude/
+|   |   +-- settings.json   # Domain permissions
+|   |   +-- commands/       # Domain slash commands
+|   +-- [project files]
+|
++-- trades/
+|   +-- CLAUDE.md           # Finance rules, risk limits
+|   +-- briefs/             # Daily morning briefs
+|   +-- data/               # Market data pulls
+|   +-- .secrets/           # Brokerage credentials
+|
++-- health/
+|   +-- CLAUDE.md           # Health tracking rules
+|   +-- workouts/           # Generated workout plans
+|   +-- integrations/       # WHOOP, Apple Health exports
+|
++-- [other domains...]</code></pre>
+      </div>
+
+      <h4>Domain-Specific CLAUDE.md</h4>
+      <p>Each domain gets its own <code>CLAUDE.md</code> tailored to that context:</p>
+
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># ~/trades/CLAUDE.md
+
+## Domain: Personal Finance & Trading
+
+### Data Sources
+- Brokerage exports in ./data/
+- Congressional disclosures from House API
+- Polymarket odds via MCP
+- X sentiment from firehose
+
+### Morning Brief Protocol
+1. Pull overnight data
+2. Cross-reference against positions
+3. Flag material changes
+4. Output to ./briefs/YYYY-MM-DD.md
+
+### Risk Rules
+- NEVER execute actual trades
+- Flag any position >5% of portfolio
+- Always note data freshness</code></pre>
+      </div>
+
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># ~/health/CLAUDE.md
+
+## Domain: Fitness & Wellness
+
+### Integrations
+- WHOOP exports in ./data/whoop/
+- Apple Health exports in ./data/apple-health/
+
+### Workout Generation
+- Account for travel schedule in ./calendar/
+- Adapt to recovery scores
+- Prefer bodyweight when traveling
+
+### Sleep Protocol
+- If recovery <66%, suggest lighter day
+- Track sleep debt across week</code></pre>
+      </div>
+
+      <h3>Process Isolation</h3>
+
+      <h4>Separate Claude Code Instances</h4>
+      <p>Each domain runs its own Claude Code process:</p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>#!/bin/bash
+# start-domains.sh - Launch all domain instances
+
+DOMAINS="nox metrics email growth trades health writing personal"
+
+for domain in $DOMAINS; do
+    cd ~/$domain
+    tmux new-session -d -s $domain "claude"
+done
+
+echo "All domains launched. Use 'tmux attach -t <domain>' to connect."</code></pre>
+      </div>
+
+      <h4>tmux/screen Management</h4>
+      <p>tmux provides the ideal interface for managing parallel instances:</p>
+
+      <div class="tmux-visual">
+        <div class="header">tmux sessions</div>
+        <div class="tmux-session">
+          <span class="tmux-name">nox</span>
+          <span class="tmux-status">Claude running on company product</span>
+        </div>
+        <div class="tmux-session">
+          <span class="tmux-name">metrics</span>
+          <span class="tmux-status">Pulling analytics data</span>
+        </div>
+        <div class="tmux-session">
+          <span class="tmux-name">email</span>
+          <span class="tmux-status">Processing inbox, drafting replies</span>
+        </div>
+        <div class="tmux-session">
+          <span class="tmux-name">growth</span>
+          <span class="tmux-status">Running A/B copy generation</span>
+        </div>
+        <div class="tmux-session">
+          <span class="tmux-name">trades</span>
+          <span class="tmux-status">[Overnight] Scraping brokerage data</span>
+        </div>
+        <div class="tmux-session">
+          <span class="tmux-name">health</span>
+          <span class="tmux-status">Generating workout for tomorrow</span>
+        </div>
+        <div class="tmux-session">
+          <span class="tmux-name">writing</span>
+          <span class="tmux-status">[Idle] Waiting for creative task</span>
+        </div>
+        <div class="tmux-session">
+          <span class="tmux-name">personal</span>
+          <span class="tmux-status">Finding forgotten subscriptions</span>
+        </div>
+      </div>
+
+      <p><strong>Key tmux commands:</strong></p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># List all domain sessions
+tmux ls
+
+# Attach to specific domain
+tmux attach -t trades
+
+# Detach (keeps running)
+Ctrl-b d
+
+# Kill a domain session
+tmux kill-session -t health</code></pre>
+      </div>
+
+      <h3>Git Isolation</h3>
+
+      <h4>Separate Repositories</h4>
+      <p>The cleanest isolation: each domain is its own git repository.</p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>~/nox/.git         # Company code history
+~/trades/.git      # Trading analysis history
+~/health/.git      # Health tracking history</code></pre>
+      </div>
+      <p><strong>Benefits:</strong></p>
+      <ul>
+        <li>Complete commit history isolation</li>
+        <li>Independent branching strategies</li>
+        <li>No risk of cross-domain commits</li>
+        <li>Domain-specific <code>.gitignore</code></li>
+      </ul>
+
+      <h4>Git Worktrees for Parallel Development</h4>
+      <p>When a single domain needs parallel work streams, use git worktrees:</p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Within ~/nox, create parallel feature branches
+cd ~/nox
+git worktree add ../nox-feature-auth feature-auth
+git worktree add ../nox-feature-payments feature-payments
+
+# Now you have:
+~/nox/                   # Main development
+~/nox-feature-auth/      # Auth feature (isolated)
+~/nox-feature-payments/  # Payments feature (isolated)</code></pre>
+      </div>
+      <p>Each worktree can run its own Claude Code instance without conflicts.</p>
+    </section>
+
+    <div class="milestone">Milestone: Basic Implementation Complete</div>
+
+    <hr class="section-divider">
+
+    <!-- Cross-Domain Coordination -->
+    <section id="cross-domain">
+      <h2><span class="bionic">Cro</span>ss-Domain <span class="bionic">Coo</span>rdination</h2>
+
+      <h3>When Bridging Is Needed</h3>
+      <p>Despite strict isolation, some scenarios require cross-domain awareness:</p>
+      <ul>
+        <li><strong>Morning brief synthesis:</strong> Combine insights from <code>~/trades</code>, <code>~/health</code>, <code>~/nox</code></li>
+        <li><strong>Schedule conflicts:</strong> <code>~/writing</code> deadline vs <code>~/nox</code> meeting</li>
+        <li><strong>Resource allocation:</strong> Time/money tradeoffs across domains</li>
+        <li><strong>Pattern recognition:</strong> Sleep quality (<code>~/health</code>) affecting productivity (<code>~/nox</code>)</li>
+      </ul>
+
+      <h3>The Handoff Pattern</h3>
+      <p>Agents communicate through explicit file-based handoffs:</p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>~/shared/                 # Cross-domain directory
++-- handoff-trades-to-personal.json
++-- handoff-health-to-nox.json
++-- daily-synthesis.md</code></pre>
+      </div>
+
+      <p><strong>Handoff file structure:</strong></p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>{
+  "from": "trades",
+  "to": "personal",
+  "timestamp": "2026-01-09T06:30:00Z",
+  "summary": "Portfolio up 2.3% overnight. No action required.",
+  "flags": [],
+  "data_freshness": "2026-01-09T06:00:00Z"
+}</code></pre>
+      </div>
+
+      <p><strong>Reading handoffs:</strong></p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># In ~/personal/CLAUDE.md
+
+## Cross-Domain Integration
+Check ~/shared/ for handoffs from other domains before generating daily brief.
+Incorporate flags from trades, health status, and calendar conflicts.</code></pre>
+      </div>
+
+      <h3>The Correlation Engine Pattern</h3>
+      <p>For domains that need persistent cross-referencing, create a dedicated correlation layer:</p>
+
+      <div class="handoff-diagram">~/correlation/
++-- CLAUDE.md              # Rules for cross-domain analysis
++-- feeds/                 # Symlinks to domain outputs
+|   +-- trades-brief -> ~/trades/briefs/latest.md
+|   +-- health-status -> ~/health/status/current.json
+|   +-- nox-blockers -> ~/nox/blockers.md
++-- output/
+    +-- daily-synthesis.md</div>
+
+      <p><strong>The correlation agent:</strong></p>
+      <ul>
+        <li>Has read-only access to all domain outputs</li>
+        <li>Cannot write to any domain directory</li>
+        <li>Synthesizes patterns across domains</li>
+        <li>Outputs to <code>~/correlation/output/</code></li>
+      </ul>
+      <p>This creates a "meta-observer" that sees across domains without violating isolation.</p>
+
+      <h3>Scheduled Cross-Domain Runs</h3>
+      <p>Use cron for orchestrated multi-domain workflows:</p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Morning synthesis (6 AM)
+0 6 * * * cd ~/trades && claude "Generate morning brief" > briefs/$(date +%Y-%m-%d).md
+5 6 * * * cd ~/health && claude "Analyze overnight recovery" > status/current.json
+10 6 * * * cd ~/correlation && claude "Synthesize daily brief from all domains"</code></pre>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Domain-Specific Customization -->
+    <section id="customization">
+      <h2><span class="bionic">Dom</span>ain-Specific <span class="bionic">Cus</span>tomization</h2>
+
+      <h3>Different Rules Per Domain</h3>
+      <p>Each domain's <code>CLAUDE.md</code> enforces domain-appropriate behavior:</p>
+      <table>
+        <thead>
+          <tr><th>Domain</th><th>Key Rules</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>nox</strong></td><td>Strict testing, PR workflow, code review requirements</td></tr>
+          <tr><td><strong>trades</strong></td><td>Read-only market access, risk limits, no actual execution</td></tr>
+          <tr><td><strong>health</strong></td><td>Privacy-first, local data only, no cloud uploads</td></tr>
+          <tr><td><strong>email</strong></td><td>Drafts require approval, never auto-send, BCC logging</td></tr>
+          <tr><td><strong>writing</strong></td><td>Creative license, experimental, less verification</td></tr>
+          <tr><td><strong>personal</strong></td><td>Maximum automation, minimal oversight</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Specialized Subagents Per Domain</h3>
+      <p>Define domain-specific subagents in each <code>.claude/agents/</code> directory:</p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>~/nox/.claude/agents/
++-- code-reviewer.md      # PR analysis
++-- test-generator.md     # Test coverage
++-- security-scanner.md   # Vulnerability check
+
+~/trades/.claude/agents/
++-- sentiment-analyzer.md # Social sentiment
++-- disclosure-parser.md  # Congressional filings
++-- position-checker.md   # Portfolio analysis
+
+~/health/.claude/agents/
++-- workout-generator.md  # Custom workout plans
++-- sleep-analyzer.md     # Sleep pattern insights
++-- recovery-advisor.md   # Training load recommendations</code></pre>
+      </div>
+
+      <h3>Model Selection by Domain</h3>
+      <p>Different domains may benefit from different models:</p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># ~/nox/CLAUDE.md
+## Model: Opus 4.5
+Complex reasoning for architecture decisions, security reviews.
+
+# ~/email/CLAUDE.md
+## Model: Sonnet
+Fast drafting, pattern-based responses.
+
+# ~/metrics/CLAUDE.md
+## Model: Haiku
+Simple data lookups, aggregations.</code></pre>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Anti-Patterns -->
+    <section id="anti-patterns">
+      <h2><span class="bionic">Ant</span>i-<span class="bionic">Pat</span>terns</h2>
+
+      <div class="anti-pattern-box">
+        <h4>Over-Isolation (Can't Coordinate)</h4>
+        <p><strong>Symptoms:</strong></p>
+        <ul>
+          <li>Domains become silos with no awareness of each other</li>
+          <li>Duplicate work across domains</li>
+          <li>Conflicting decisions (trading decision ignores health crash)</li>
+          <li>No synthesized view of life/work</li>
+        </ul>
+        <p><strong>Solutions:</strong></p>
+        <ul>
+          <li>Implement the correlation engine pattern</li>
+          <li>Schedule cross-domain synthesis</li>
+          <li>Create explicit handoff protocols</li>
+          <li>Allow read-only access to critical domain outputs</li>
+        </ul>
+      </div>
+
+      <div class="anti-pattern-box">
+        <h4>Under-Isolation (Context Bleed)</h4>
+        <p><strong>Symptoms:</strong></p>
+        <ul>
+          <li>Single Claude instance handling "everything"</li>
+          <li>Long context with mixed domain information</li>
+          <li>Agent confuses domain contexts</li>
+          <li>Privacy breaches (health data in work context)</li>
+          <li>Generic, unfocused outputs</li>
+        </ul>
+        <p><strong>Solutions:</strong></p>
+        <ul>
+          <li>Strict directory separation</li>
+          <li>Separate tmux sessions per domain</li>
+          <li>Domain-specific CLAUDE.md files</li>
+          <li>Never run a single "master" instance</li>
+        </ul>
+      </div>
+
+      <div class="anti-pattern-box">
+        <h4>Domain Sprawl</h4>
+        <p><strong>Symptoms:</strong></p>
+        <ul>
+          <li>Creating too many micro-domains</li>
+          <li>Overhead of managing 15+ instances</li>
+          <li>Unclear domain boundaries</li>
+          <li>Constant handoffs for simple tasks</li>
+        </ul>
+        <p><strong>Solutions:</strong></p>
+        <ul>
+          <li>Start with 3-5 core domains</li>
+          <li>Expand only when clear need emerges</li>
+          <li>Consolidate related concerns</li>
+          <li>Use subagents within domains instead of new domains</li>
+        </ul>
+      </div>
+
+      <div class="anti-pattern-box">
+        <h4>Ignoring the Meta-Level</h4>
+        <p>From Molly Cantillon's warning:</p>
+        <blockquote>"Goodhart says optimize for a metric and you game your way to hollow victory."</blockquote>
+        <p><strong>Symptoms:</strong></p>
+        <ul>
+          <li>Over-optimizing domain metrics</li>
+          <li>Losing sight of actual goals</li>
+          <li>WHOOP says recovered but you feel like death</li>
+          <li>Trusting the brief over lived experience</li>
+        </ul>
+        <p><strong>Solutions:</strong></p>
+        <ul>
+          <li>Maintain a "meta-level outside the system"</li>
+          <li>Periodic human review of domain outputs</li>
+          <li>Be ready to delete a domain if it stops serving</li>
+          <li>"We must continue to live outside it"</li>
+        </ul>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- The Anthropic Trade-off -->
+    <section>
+      <h2>The <span class="bionic">Ant</span>hropic <span class="bionic">Tra</span>de-off</h2>
+
+      <div class="philosophy-quote">
+        "Sometimes the tower has a landlord. Anthropic sees every query you make. The value exchange is explicit: their visibility into your thinking for access to a thousand-clone attention span. In this case, chosen beats imposed."
+        <cite>- Molly Cantillon</cite>
+      </div>
+
+      <p>Domain isolation provides local privacy (domains don't see each other), but Anthropic's API sees all domains. This is an accepted trade-off for the capability.</p>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Implementation Checklist -->
+    <section id="implementation-checklist">
+      <h2><span class="bionic">Imp</span>lementation <span class="bionic">Che</span>cklist</h2>
+
+      <div class="checklist">
+        <h4>Phase 1: Core Setup (Day 1)</h4>
+        <ul>
+          <li>Choose 3-5 initial domains</li>
+          <li>Create directory structure: <code>mkdir -p ~/{domain1,domain2,domain3}</code></li>
+          <li>Write basic CLAUDE.md for each domain</li>
+          <li>Set up tmux sessions for each domain</li>
+          <li>Test running parallel instances</li>
+        </ul>
+      </div>
+
+      <div class="checklist">
+        <h4>Phase 2: Automation (Week 1)</h4>
+        <ul>
+          <li>Create domain startup script</li>
+          <li>Set up cron jobs for scheduled runs (e.g., overnight <code>~/trades</code>)</li>
+          <li>Implement basic handoff protocol in <code>~/shared/</code></li>
+          <li>Add domain-specific slash commands</li>
+        </ul>
+      </div>
+
+      <div class="checklist">
+        <h4>Phase 3: Correlation (Week 2)</h4>
+        <ul>
+          <li>Set up <code>~/correlation/</code> meta-observer</li>
+          <li>Create morning synthesis workflow</li>
+          <li>Implement cross-domain flagging</li>
+          <li>Add notification system for completions</li>
+        </ul>
+      </div>
+
+      <div class="checklist">
+        <h4>Phase 4: Refinement (Ongoing)</h4>
+        <ul>
+          <li>Tune CLAUDE.md rules based on experience</li>
+          <li>Prune domains that don't add value</li>
+          <li>Add/remove subagents as needed</li>
+          <li>Maintain meta-level perspective</li>
+        </ul>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Quick Reference -->
+    <div class="quick-ref">
+      <h3 class="quick-ref-title">Quick Reference</h3>
+
+      <h4>Domain Startup</h4>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Start all domains
+for d in nox trades health email; do
+  tmux new-session -d -s $d "cd ~/$d && claude"
+done
+
+# Attach to domain
+tmux attach -t trades
+
+# List all domains
+tmux ls</code></pre>
+      </div>
+
+      <h4>Handoff Protocol</h4>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Write handoff from trades domain
+echo '{"from":"trades","summary":"...","ts":"'$(date -Iseconds)'"}' > ~/shared/handoff-trades.json
+
+# Read handoffs in correlation
+cat ~/shared/handoff-*.json | jq -s '.'</code></pre>
+      </div>
+    </div>
+
+    <!-- Related Pages -->
+    <div class="related-pages">
+      <h3>Continue Learning</h3>
+      <ul>
+        <li><a href="complexity-ladder.html">Complexity Ladder</a> - See where Panopticon fits (Level 5+)</li>
+        <li><a href="primitives.html">Primitives</a> - The building blocks used in domain isolation</li>
+        <li><a href="composition-rules.html">Composition Rules</a> - How to combine patterns correctly</li>
+      </ul>
+    </div>
+
+    <!-- Sources -->
+    <div class="callout callout-insight">
+      <div class="callout-title">Sources</div>
+      <ul>
+        <li><strong>Primary:</strong> <a href="https://x.com/mollycantillon">@mollycantillon</a> - The Personal Panopticon thread</li>
+        <li><strong>Supporting:</strong> <a href="https://x.com/bcherny">@bcherny</a> - Boris Cherny's parallel sessions workflow</li>
+        <li><strong>Technical:</strong> CC Mirror, Git Worktrees, rpai monitoring patterns</li>
+        <li><strong>Philosophy:</strong> Planning/Execution separation, filesystem as state</li>
+      </ul>
+    </div>
+
+    <!-- Footer Navigation -->
+    <nav class="footer-nav">
+      <a href="composition-rules.html">Previous: Composition Rules</a>
+      <a href="../../index.html">Back to Home</a>
+    </nav>
+  </div>
+
+  
+  <script src="../../js/copy-code.js"></script>
+</body>
+</html>

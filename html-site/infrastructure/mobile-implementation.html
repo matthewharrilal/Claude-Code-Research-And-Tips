@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Claude Code - Implementation Details</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .bionic { font-weight: 700; }
+
+        .you-are-here {
+            background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%);
+            border-left: 4px solid #2a7d7d;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .you-are-here h2 {
+            margin-top: 0;
+            color: #2a7d7d;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .checkpoint {
+            background: #f0ebe3;
+            border-left: 4px solid #6b9b7a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .checkpoint-header {
+            color: #6b9b7a;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .troubleshoot {
+            border: 1px solid #c97065;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .troubleshoot summary {
+            background: #fef6f5;
+            padding: 1rem;
+            cursor: pointer;
+            color: #c97065;
+            font-weight: 600;
+        }
+
+        .troubleshoot > div {
+            padding: 1rem;
+            background: white;
+        }
+
+        .milestone {
+            background: linear-gradient(90deg, #6b9b7a 0%, #2a7d7d 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            margin: 2rem 0;
+            font-weight: 600;
+        }
+
+        .divider-procedure { border-top: 3px solid #2a7d7d; margin: 2.5rem 0; }
+        .divider-checkpoint { border-top: 3px solid #6b9b7a; margin: 2.5rem 0; }
+        .divider-warning { border-top: 3px solid #c49052; margin: 2.5rem 0; }
+        .divider-context { border-top: 3px solid #5c4b3a; margin: 2.5rem 0; }
+
+        .file-tree {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .timing-box {
+            background: #e8f4f4;
+            border: 1px solid #2a7d7d;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .timing-box h4 {
+            color: #2a7d7d;
+            margin-top: 0;
+        }
+
+        .warning-box {
+            background: #fdf6e9;
+            border-left: 4px solid #c49052;
+            border-radius: 0 8px 8px 0;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .warning-box strong {
+            color: #c49052;
+        }
+
+        .nav-breadcrumb {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            margin-bottom: 1.5em;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .terminal-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.85em;
+            line-height: 1.5;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .terminal-output .prompt { color: #6b9b7a; }
+        .terminal-output .comment { color: #6a9955; }
+        .terminal-output .output { color: #9cdcfe; }
+
+        .deps-checklist {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .deps-checklist h4 {
+            margin-top: 0;
+            color: var(--heading);
+        }
+
+        .deps-checklist ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .deps-checklist li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .deps-checklist li::before {
+            content: "[ ]";
+            position: absolute;
+            left: 0;
+            font-family: monospace;
+            color: var(--text-muted);
+        }
+
+        .related-pages {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2.5rem 0;
+        }
+
+        .related-pages h3 {
+            margin-top: 0;
+        }
+
+        .footer-nav {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-nav a {
+            background: var(--bg-secondary);
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .footer-nav a:hover {
+            background: var(--code-bg);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-breadcrumb">
+            <a href="../index.html">Home</a> <span>&rarr;</span>
+            <a href="index.html">Infrastructure</a> <span>&rarr;</span>
+            Mobile Implementation
+        </nav>
+
+        <h1><span class="bionic">Mob</span>ile Claude Code - <span class="bionic">Imp</span>lementation <span class="bionic">Det</span>ails</h1>
+
+        <div class="you-are-here">
+            <h2>You Are Here</h2>
+            <p><strong><span class="bionic">Con</span>text:</strong> This is the <span class="bionic">han</span>ds-on implementation guide. You already <span class="bionic">und</span>erstand WHY mobile Claude Code <span class="bionic">mat</span>ters (cloud VM + persistent <span class="bionic">ses</span>sions + push notifications). <strong>Now you need the <span class="bionic">exa</span>ct commands.</strong></p>
+            <p><strong><span class="bionic">Whe</span>re this fits:</strong> This is the <span class="bionic">com</span>panion to the conceptual <a href="mobile-cloud-vm.html">Mobile Cloud VM</a> page. That page explains architecture; <strong>this page gives you <span class="bionic">cop</span>y-paste code.</strong></p>
+            <p><strong><span class="bionic">Wha</span>t you'll configure:</strong></p>
+            <ul>
+                <li><span class="bionic">tmu</span>x auto-attach on SSH login</li>
+                <li>Claude <span class="bionic">hoo</span>ks for push notifications</li>
+                <li>Git <span class="bionic">wor</span>ktrees for parallel agents</li>
+                <li><span class="bionic">Por</span>t allocation to avoid conflicts</li>
+                <li><span class="bionic">mos</span>h for network resilience</li>
+            </ul>
+        </div>
+
+        <hr class="divider-context">
+
+        <!-- Source Attribution -->
+        <section id="source">
+            <h2><span class="bionic">Sou</span>rce</h2>
+            <div class="tool-meta">
+                <span class="tag">@omarsar0 (Elvis)</span>
+                <span class="tag">AI educator at dair_ai</span>
+                <span class="tag">ex-Meta AI, PhD</span>
+            </div>
+            <div class="tool-meta" style="margin-top: 0.5rem;">
+                <span class="tag">625 likes</span>
+                <span class="tag">86K views</span>
+                <span class="tag">704 bookmarks</span>
+            </div>
+            <p style="margin-top: 1rem;"><strong>Original blog:</strong> <code>granda.org/en/2026/01/02/claude-code-on-the-go/</code> by mgranda</p>
+        </section>
+
+        <hr class="divider-procedure">
+
+        <!-- Dependencies Checklist -->
+        <section id="dependencies">
+            <h2><span class="bionic">Dep</span>endencies <span class="bionic">Che</span>cklist</h2>
+            <p>Gather these <span class="bionic">bef</span>ore you begin. <span class="bionic">Mis</span>sing one will cause frustration.</p>
+
+            <div class="deps-checklist">
+                <h4>Required Accounts & Tools</h4>
+                <ul>
+                    <li><span class="bionic">Vul</span>tr account + API key (or any VPS provider)</li>
+                    <li><span class="bionic">Tai</span>lscale account (for secure networking)</li>
+                    <li><span class="bionic">Ter</span>mius or Blink app (iOS SSH/mosh client)</li>
+                    <li><span class="bionic">Pok</span>e account (or ntfy/Pushover/Telegram for notifications)</li>
+                </ul>
+            </div>
+
+            <div class="deps-checklist">
+                <h4>Install on VM</h4>
+                <ul>
+                    <li><code>mosh</code> - Mobile shell for resilient connections</li>
+                    <li><code>tmux</code> - Terminal multiplexer for persistent sessions</li>
+                    <li><code>jq</code> - JSON parsing (for hook scripts)</li>
+                    <li><code>git</code> - With worktree support</li>
+                </ul>
+            </div>
+        </section>
+
+        <hr class="divider-procedure">
+
+        <!-- Step 1: tmux Auto-Attach -->
+        <section id="tmux-setup">
+            <h2><span class="bionic">Ste</span>p 1: <span class="bionic">tmu</span>x Auto-<span class="bionic">Att</span>ach</h2>
+            <p>When you SSH into your VM, you want to <span class="bionic">imm</span>ediately be inside tmux. No extra commands. This snippet in <code>~/.zshrc</code> handles it.</p>
+
+            <h3><span class="bionic">Add</span> to ~/.zshrc</h3>
+            <pre><code>if [[ -z "$TMUX" ]]; then
+  tmux attach -t main 2>/dev/null || tmux new -s main
+fi</code></pre>
+
+            <p><strong><span class="bionic">Wha</span>t it does:</strong></p>
+            <ul>
+                <li>If not already in tmux, try to attach to session named "main"</li>
+                <li>If "main" doesn't exist, create it</li>
+                <li>Result: every SSH login drops you into tmux automatically</li>
+            </ul>
+
+            <div class="terminal-output">
+<span class="prompt">$</span> ssh user@100.x.x.x                   <span class="comment"># Connect to VM</span>
+
+<span class="output">[Auto-attaching to tmux...]</span>            <span class="comment"># The magic!</span>
+
+<span class="output">Either:</span>
+  <span class="output">- Attaching to existing 'main' session (if exists)</span>
+  <span class="output">- Creating new 'main' session (if doesn't exist)</span>
+
+<span class="output">+-----------------------------------------------+</span>
+<span class="output">|  tmux: session 'main'                          |</span>
+<span class="output">+-----------------------------------------------+</span>
+
+<span class="prompt">user@vm:~$</span> _                           <span class="comment"># Already in tmux!</span>
+            </div>
+
+            <div class="checkpoint">
+                <h4 class="checkpoint-header">Checkpoint: tmux Auto-Attach Working</h4>
+                <p>After adding to <code>~/.zshrc</code> and reconnecting:</p>
+                <ul>
+                    <li>You should see tmux status bar at bottom of terminal</li>
+                    <li>Running <code>tmux ls</code> should show "main" session</li>
+                    <li>Disconnecting and reconnecting resumes same session</li>
+                </ul>
+            </div>
+        </section>
+
+        <hr class="divider-procedure">
+
+        <!-- Step 2: Notification Hook -->
+        <section id="notification-hook">
+            <h2><span class="bionic">Ste</span>p 2: <span class="bionic">Not</span>ification <span class="bionic">Hoo</span>k</h2>
+            <p>When Claude needs <span class="bionic">inp</span>ut (asks you a question), you want a push notification on your <span class="bionic">pho</span>ne. This uses Claude's hook system.</p>
+
+            <h3>2a. Create hook directory</h3>
+            <pre><code>mkdir -p ~/.claude/hooks</code></pre>
+
+            <h3>2b. Create notification script</h3>
+            <p>Save this as <code>~/.claude/hooks/poke-notify.sh</code>:</p>
+            <pre><code>#!/bin/bash
+# Extract question from Claude's event data
+QUESTION=$(echo "$EVENT_DATA" | jq -r '.tool_input.questions[0].question')
+
+# Your project name for context
+PROJECT_NAME="my-feature-branch"
+
+# Build message
+MESSAGE="$PROJECT_NAME: Claude needs input - $QUESTION"
+
+# Send to Poke (or your notification service)
+curl -X POST "https://api.pokepush.com/notify" \
+  -H "Authorization: Bearer $POKE_TOKEN" \
+  -d "{\"message\": \"$MESSAGE\"}"</code></pre>
+
+            <h3>2c. Make it executable</h3>
+            <pre><code>chmod +x ~/.claude/hooks/poke-notify.sh</code></pre>
+
+            <h3>2d. Configure Claude settings</h3>
+            <p>Save this as <code>~/.claude/settings.json</code>:</p>
+            <pre><code>{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "AskUserQuestion",
+      "hooks": [{
+        "type": "command",
+        "command": "~/.claude/hooks/poke-notify.sh question"
+      }]
+    }]
+  }
+}</code></pre>
+
+            <div class="checkpoint">
+                <h4 class="checkpoint-header">Checkpoint: Notification Hook Working</h4>
+                <p>Test by starting Claude and giving it a task that requires a question:</p>
+                <pre><code>claude
+> Build a login form and ask me about the design</code></pre>
+                <p>You should see:</p>
+                <ul>
+                    <li>Claude creates the form and asks a styling question</li>
+                    <li>Within 2-3 seconds, your phone gets a push notification</li>
+                    <li>Notification contains project name + question text</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <strong>Important:</strong> Set your <code>POKE_TOKEN</code> environment variable before testing. Add to <code>~/.zshrc</code>: <code>export POKE_TOKEN="your-token-here"</code>
+            </div>
+        </section>
+
+        <hr class="divider-procedure">
+
+        <!-- Step 3: Git Worktrees -->
+        <section id="git-worktrees">
+            <h2><span class="bionic">Ste</span>p 3: Git <span class="bionic">Wor</span>ktrees for <span class="bionic">Par</span>allel Agents</h2>
+            <p>Each feature branch gets its own <span class="bionic">dir</span>ectory, its own <span class="bionic">tmu</span>x window, and its own <span class="bionic">Cla</span>ude instance. They don't interfere with each other.</p>
+
+            <h3>Create worktrees for each feature branch</h3>
+            <pre><code>cd ~/Code/myproject
+
+# Create worktrees for parallel development
+git worktree add ../myproject-sidebar feature/sidebar
+git worktree add ../myproject-dark-mode feature/dark-mode</code></pre>
+
+            <h3>Result: Three independent working directories</h3>
+            <div class="file-tree">
+~/Code/
+├── myproject/              # main branch (original repo)
+├── myproject-sidebar/      # feature/sidebar (worktree)
+└── myproject-dark-mode/    # feature/dark-mode (worktree)
+            </div>
+
+            <h3>Each gets its own tmux window</h3>
+            <div class="terminal-output">
+<span class="output">+-----------------------------------------------+</span>
+<span class="output">|  tmux windows:                                 |</span>
+<span class="output">|------------------------------------------------|</span>
+<span class="output">|  0: main        ~/Code/myproject/              |</span>
+<span class="output">|  1: sidebar     ~/Code/myproject-sidebar/     claude running</span>
+<span class="output">|  2: dark-mode   ~/Code/myproject-dark-mode/   claude running</span>
+<span class="output">+-----------------------------------------------+</span>
+            </div>
+
+            <p><strong><span class="bionic">Cre</span>ate tmux windows:</strong></p>
+            <pre><code># Create named windows for each worktree
+tmux new-window -n sidebar -c ~/Code/myproject-sidebar
+tmux new-window -n dark-mode -c ~/Code/myproject-dark-mode
+
+# Switch between them
+tmux select-window -t sidebar    # Ctrl+b, then window number also works</code></pre>
+
+            <div class="checkpoint">
+                <h4 class="checkpoint-header">Checkpoint: Worktrees Set Up</h4>
+                <ul>
+                    <li><code>git worktree list</code> shows all three worktrees</li>
+                    <li>Each directory has its own branch checked out</li>
+                    <li>Changes in one worktree don't affect others</li>
+                    <li>You can run <code>claude</code> in each window independently</li>
+                </ul>
+            </div>
+        </section>
+
+        <hr class="divider-procedure">
+
+        <!-- Step 4: Port Allocation -->
+        <section id="port-allocation">
+            <h2><span class="bionic">Ste</span>p 4: <span class="bionic">Por</span>t Allocation</h2>
+            <p>When <span class="bionic">run</span>ning dev servers in multiple worktrees, they fight over ports. This <span class="bionic">det</span>erministic allocation gives each branch a unique port.</p>
+
+            <h3>Save as port_for_branch.py</h3>
+            <pre><code>#!/usr/bin/env python3
+import sys
+
+branch_name = sys.argv[1]
+hash_val = sum(ord(c) for c in branch_name)
+django_port = 8001 + (hash_val % 99)
+print(django_port)</code></pre>
+
+            <h3>Usage</h3>
+            <pre><code>$ python3 port_for_branch.py sidebar
+8047                                   # sidebar gets port 8047
+
+$ python3 port_for_branch.py dark-mode
+8023                                   # dark-mode gets port 8023</code></pre>
+
+            <p><strong><span class="bionic">Key</span> insight:</strong> Same branch <span class="bionic">alw</span>ays gets the same port. Deterministic = no conflicts, no remembering.</p>
+
+            <div class="warning-box">
+                <strong>If you skip this:</strong> Multiple dev servers will fight for the same port, causing confusing "Address already in use" errors.
+            </div>
+        </section>
+
+        <hr class="divider-procedure">
+
+        <!-- Step 5: mosh Connection -->
+        <section id="mosh-setup">
+            <h2><span class="bionic">Ste</span>p 5: <span class="bionic">mos</span>h Connection</h2>
+            <p><span class="bionic">mos</span>h (mobile shell) handles network transitions <span class="bionic">sea</span>mlessly. WiFi to cellular? Phone sleeps? Connection resumes instantly.</p>
+
+            <h3>Connect using mosh</h3>
+            <pre><code>mosh --ssh="ssh -p 47892" user@100.x.x.x</code></pre>
+
+            <h3>What mosh provides vs regular SSH</h3>
+            <table>
+                <tr><th>Scenario</th><th>Regular SSH</th><th>mosh</th></tr>
+                <tr><td>WiFi to Cellular</td><td>CONNECTION LOST</td><td>Seamless</td></tr>
+                <tr><td>Phone sleeps</td><td>RECONNECT NEEDED</td><td>Seamless</td></tr>
+                <tr><td>Spotty connection</td><td>FROZEN / TIMEOUT</td><td>Survives</td></tr>
+            </table>
+
+            <div class="checkpoint">
+                <h4 class="checkpoint-header">Checkpoint: mosh Working</h4>
+                <ul>
+                    <li>Connection shows "mosh" in your terminal client</li>
+                    <li>Turning WiFi off then back on doesn't disconnect</li>
+                    <li>Switching from WiFi to cellular maintains session</li>
+                </ul>
+            </div>
+        </section>
+
+        <hr class="divider-warning">
+
+        <!-- Troubleshooting Section -->
+        <section id="troubleshooting">
+            <h2><span class="bionic">Tro</span>ubleshooting</h2>
+            <p>Common issues and their fixes. Click to expand each problem.</p>
+
+            <details class="troubleshoot">
+                <summary>mosh doesn't forward SSH agent - Git push fails</summary>
+                <div>
+                    <p><strong>Problem:</strong> When you try to <code>git push</code> through mosh, GitHub authentication fails because mosh doesn't forward your SSH agent.</p>
+                    <p><strong>Solution:</strong> Manually add your key inside the tmux session:</p>
+                    <pre><code># Inside tmux, when you need to push:
+ssh-add ~/.ssh/id_ed25519           # Add key manually
+Identity added: /home/user/.ssh/id_ed25519
+
+git push                            # Now works!</code></pre>
+                    <p><strong>Permanent fix:</strong> Add <code>ssh-add ~/.ssh/id_ed25519 2>/dev/null</code> to your <code>~/.zshrc</code> after the tmux block.</p>
+                </div>
+            </details>
+
+            <details class="troubleshoot">
+                <summary>Notification hook doesn't fire</summary>
+                <div>
+                    <p><strong>Check these in order:</strong></p>
+                    <ol>
+                        <li><strong>Script executable?</strong> Run <code>ls -la ~/.claude/hooks/poke-notify.sh</code> - should show <code>-rwx</code></li>
+                        <li><strong>jq installed?</strong> Run <code>which jq</code> - should return a path</li>
+                        <li><strong>POKE_TOKEN set?</strong> Run <code>echo $POKE_TOKEN</code> - should show your token</li>
+                        <li><strong>settings.json valid?</strong> Run <code>cat ~/.claude/settings.json | jq .</code> - should parse without error</li>
+                        <li><strong>Hook matcher correct?</strong> Must be exactly <code>"AskUserQuestion"</code> (case-sensitive)</li>
+                    </ol>
+                    <p><strong>Test manually:</strong></p>
+                    <pre><code>export EVENT_DATA='{"tool_input":{"questions":[{"question":"Test?"}]}}'
+~/.claude/hooks/poke-notify.sh question</code></pre>
+                </div>
+            </details>
+
+            <details class="troubleshoot">
+                <summary>mosh connection fails to establish</summary>
+                <div>
+                    <p><strong>Problem:</strong> mosh hangs or times out when connecting.</p>
+                    <p><strong>Common causes:</strong></p>
+                    <ol>
+                        <li><strong>mosh-server not installed on VM:</strong>
+                            <pre><code>sudo apt install mosh</code></pre>
+                        </li>
+                        <li><strong>UDP ports blocked:</strong> mosh uses UDP 60000-61000. Open these in your firewall:
+                            <pre><code># UFW (Ubuntu)
+sudo ufw allow 60000:61000/udp
+
+# Or check if it's a Vultr/cloud firewall issue</code></pre>
+                        </li>
+                        <li><strong>Wrong SSH port specified:</strong> Make sure <code>-p</code> matches your actual SSH port</li>
+                    </ol>
+                </div>
+            </details>
+
+            <details class="troubleshoot">
+                <summary>tmux session doesn't persist after disconnect</summary>
+                <div>
+                    <p><strong>Problem:</strong> When you reconnect, your tmux session is gone.</p>
+                    <p><strong>Check:</strong></p>
+                    <ol>
+                        <li>Did the VM reboot? Check <code>uptime</code></li>
+                        <li>Did you exit tmux cleanly vs just disconnecting?</li>
+                        <li>Is tmux running? <code>pgrep tmux</code></li>
+                    </ol>
+                    <p><strong>Prevention:</strong> The auto-attach snippet in <code>~/.zshrc</code> handles this, but make sure you disconnect by closing the app, not by typing <code>exit</code> in tmux.</p>
+                </div>
+            </details>
+
+            <details class="troubleshoot">
+                <summary>Port collision between worktrees</summary>
+                <div>
+                    <p><strong>Problem:</strong> "Address already in use" when starting dev server.</p>
+                    <p><strong>Solutions:</strong></p>
+                    <ol>
+                        <li><strong>Use the port allocation script:</strong> See Step 4 above</li>
+                        <li><strong>Find what's using the port:</strong>
+                            <pre><code>lsof -i :8000</code></pre>
+                        </li>
+                        <li><strong>Kill the process:</strong>
+                            <pre><code>kill $(lsof -t -i :8000)</code></pre>
+                        </li>
+                    </ol>
+                </div>
+            </details>
+
+            <details class="troubleshoot">
+                <summary>Git worktree shows "already checked out"</summary>
+                <div>
+                    <p><strong>Problem:</strong> Can't create worktree because branch is checked out elsewhere.</p>
+                    <p><strong>Solution:</strong></p>
+                    <pre><code># Find where branch is checked out
+git worktree list
+
+# Remove old worktree (if directory deleted but not unregistered)
+git worktree prune
+
+# Force create if you really want it
+git worktree add --force ../myproject-sidebar feature/sidebar</code></pre>
+                </div>
+            </details>
+        </section>
+
+        <hr class="divider-checkpoint">
+
+        <!-- File Locations Summary -->
+        <section id="file-locations">
+            <h2><span class="bionic">Fil</span>e Locations <span class="bionic">Sum</span>mary</h2>
+            <p>Quick reference for where everything lives:</p>
+
+            <div class="file-tree">
+~/.claude/settings.json          # Hook configuration
+~/.claude/hooks/poke-notify.sh   # Notification script
+~/.zshrc                         # tmux auto-attach + env vars
+~/Code/myproject/                # Main repo
+~/Code/myproject-*/              # Worktree directories
+            </div>
+        </section>
+
+        <hr class="divider-checkpoint">
+
+        <!-- Timing Expectations -->
+        <section id="timing">
+            <h2><span class="bionic">Tim</span>ing <span class="bionic">Exp</span>ectations</h2>
+
+            <div class="timing-box">
+                <h4>What to Expect</h4>
+                <ul>
+                    <li><strong>Hook trigger to notification:</strong> 1-3 seconds</li>
+                    <li><strong>tmux auto-attach:</strong> Instant</li>
+                    <li><strong>Git worktree creation:</strong> 2-5 seconds</li>
+                    <li><strong>mosh reconnection after sleep:</strong> &lt;1 second</li>
+                </ul>
+            </div>
+        </section>
+
+        <hr class="divider-checkpoint">
+
+        <!-- Alternative Notification Services -->
+        <section id="alternatives">
+            <h2><span class="bionic">Alt</span>ernative <span class="bionic">Not</span>ification Services</h2>
+            <p>The Poke webhook pattern can be <span class="bionic">ada</span>pted for other services. Just change the curl endpoint and payload:</p>
+
+            <table>
+                <tr><th>Service</th><th>Notes</th></tr>
+                <tr><td><strong>ntfy</strong></td><td>Open source, self-hostable, free</td></tr>
+                <tr><td><strong>Pushover</strong></td><td>One-time $5 purchase, reliable</td></tr>
+                <tr><td><strong>Telegram Bot</strong></td><td>Free, requires bot setup</td></tr>
+                <tr><td><strong>Discord Webhook</strong></td><td>Free if you live in Discord</td></tr>
+            </table>
+
+            <h3>Example: ntfy adaptation</h3>
+            <pre><code>#!/bin/bash
+QUESTION=$(echo "$EVENT_DATA" | jq -r '.tool_input.questions[0].question')
+MESSAGE="$PROJECT_NAME: Claude needs input - $QUESTION"
+
+# ntfy instead of Poke
+curl -d "$MESSAGE" ntfy.sh/your-private-topic</code></pre>
+        </section>
+
+        <hr class="divider-checkpoint">
+
+        <!-- Alternative Mobile Clients -->
+        <section id="mobile-clients">
+            <h2><span class="bionic">Mob</span>ile SSH <span class="bionic">Cli</span>ents</h2>
+
+            <table>
+                <tr><th>App</th><th>Platform</th><th>mosh Support</th><th>Notes</th></tr>
+                <tr><td><strong>Termius</strong></td><td>iOS/Android</td><td>Yes</td><td>Most polished, agents can help set it up</td></tr>
+                <tr><td><strong>Blink</strong></td><td>iOS</td><td>Yes</td><td>Open source, power-user favorite</td></tr>
+            </table>
+        </section>
+
+        <div class="milestone">
+            Mobile Implementation Complete! You can now code from anywhere.
+        </div>
+
+        <!-- Related Pages -->
+        <div class="related-pages">
+            <h3>Related Pages</h3>
+            <ul>
+                <li><a href="mobile-cloud-vm.html">Mobile Cloud VM</a> - The conceptual architecture this implements</li>
+                <li><a href="remote.html">Remote Mac Control</a> - System.surf for Mac-as-API approach</li>
+                <li><a href="../techniques/hooks.html">Claude Hooks</a> - Deep dive on hook configuration</li>
+            </ul>
+        </div>
+
+        <!-- Footer Navigation -->
+        <nav class="footer-nav">
+            <a href="index.html">&larr; Infrastructure Index</a>
+            <a href="../index.html">Home</a>
+            <a href="remote.html">Remote Mac Control &rarr;</a>
+        </nav>
+
+        <footer style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9em;">
+            <p>Source: @omarsar0, mgranda | Research compiled January 2026</p>
+        </footer>
+    </div>
+
+    <script src="../js/copy-code.js"></script>
+</body>
+</html>

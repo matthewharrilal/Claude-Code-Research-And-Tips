@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>rpai - tmux Multi-Agent Manager | Claude Code Tooling</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .you-are-here {
+      background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .checkpoint {
+      background: #f0ebe3;
+      border-left: 4px solid var(--success);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .checkpoint-header {
+      color: var(--success);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .troubleshoot {
+      border: 1px solid var(--error);
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+    .troubleshoot summary {
+      background: #fef6f5;
+      padding: 1rem;
+      cursor: pointer;
+      color: var(--error);
+      font-weight: 500;
+    }
+    .troubleshoot > div {
+      padding: 1rem;
+      background: white;
+    }
+    .milestone {
+      background: linear-gradient(90deg, var(--success) 0%, var(--accent) 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      margin: 2rem 0;
+    }
+    .terminal-output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85em;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    .terminal-output .comment {
+      color: #6a9955;
+    }
+    .terminal-output .prompt {
+      color: #569cd6;
+    }
+    .bionic { font-weight: 700; }
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      font-size: 0.75em;
+    }
+    .copy-btn:hover {
+      background: var(--accent-light);
+    }
+    .code-wrapper {
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="nav-breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <a href="index.html">Tooling</a>
+      <span>/</span>
+      rpai - tmux Manager
+    </nav>
+
+    <div class="you-are-here">
+      <strong><span class="bionic">You</span> Are <span class="bionic">Her</span>e:</strong> You're learning about <strong>rpai</strong>, a TUI tool that lets you monitor and switch between multiple AI agents running in tmux panes. This is part of the <strong>multi-agent workflow</strong> pattern where you run Claude, Cursor, and Codex in parallel.
+      <br><br>
+      <strong><span class="bionic">Wha</span>t you <span class="bionic">nee</span>d first:</span></strong> tmux installed and running, Rust/Cargo installed, at least one AI agent running in a tmux pane.
+    </div>
+
+    <h1><span class="bionic">rpa</span>i - tmux <span class="bionic">Mul</span>ti-Agent <span class="bionic">Man</span>ager</h1>
+
+    <div class="problem-statement">
+      <strong>The UX around parallel agents sucks right now.</strong> When running 3+ agents in tmux panes, you're constantly:
+      <ul>
+        <li>Tabbing between panes trying to find the right agent</li>
+        <li>Losing track of which agent is doing what</li>
+        <li>Missing outputs from background agents</li>
+      </ul>
+      <em>"Parallel agents feel like herding caffeinated cats."</em>
+    </div>
+
+    <div class="toc">
+      <div class="toc-title">On This Page</div>
+      <ul>
+        <li><a href="#what-it-does">What rpai Does</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#usage">Usage & Demo</a></li>
+        <li><a href="#workflow">Multi-Agent Workflow Example</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#limitations">Limitations</a></li>
+      </ul>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="what-it-does"><span class="bionic">Wha</span>t rpai <span class="bionic">Doe</span>s</h2>
+
+    <p>rpai is a <strong>TUI dashboard</strong> for tmux that makes monitoring parallel AI agents actually usable:</p>
+
+    <ol>
+      <li><strong><span class="bionic">Sca</span>ns</strong> tmux panes for running AI agents</li>
+      <li><strong><span class="bionic">Dis</span>plays</strong> TUI with agent list, status, output previews</li>
+      <li><strong><span class="bionic">Jum</span>p</strong> to any agent with selection (mouse supported)</li>
+      <li><strong><span class="bionic">Mon</span>itor</strong> all agents from one view</li>
+    </ol>
+
+    <h3><span class="bionic">Det</span>ected <span class="bionic">Age</span>nts</h3>
+    <ul>
+      <li>Claude</li>
+      <li>Cursor</li>
+      <li>Codex</li>
+      <li>Opencode</li>
+    </ul>
+
+    <div class="callout callout-insight">
+      <div class="callout-title">Mental Model</div>
+      <p>View multi-agent setups like a <strong>control center</strong>: agents run autonomously in panes, rpai is your dashboard for oversight and navigation. Your terminal becomes a unified workspace for AI collaboration.</p>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="installation"><span class="bionic">Ins</span>tallation</h2>
+
+    <div class="tutorial-block">
+      <div class="tutorial-header">Installing rpai</div>
+      <div class="tutorial-content">
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">1</div>
+          <div class="tutorial-step-content">
+            <h4>Install via Cargo</h4>
+            <div class="code-wrapper">
+              <pre><code>cargo install rpai</code></pre>
+            </div>
+            <p>That's it. One command.</p>
+          </div>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">2</div>
+          <div class="tutorial-step-content">
+            <h4>Run inside tmux</h4>
+            <div class="code-wrapper">
+              <pre><code>rpai</code></pre>
+            </div>
+            <p>Must be run inside a tmux session with agents running in other panes.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="checkpoint-header">Checkpoint: Installation Complete</div>
+      <p><strong>You should see:</strong></p>
+      <div class="terminal-output">
+<span class="comment"># Expected cargo output:</span>
+    Updating crates.io index
+  Downloaded rpai v0.3.2
+  Downloaded 1 crate (42.3 KB)
+   Compiling libc v0.2.147
+   Compiling rpai v0.3.2
+    Finished release [optimized]
+  Installing /home/user/.cargo/bin/rpai
+
+Installed: rpai v0.3.2
+      </div>
+      <p><strong>Time expected:</strong> 1-3 minutes (depends on cargo cache)</p>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="usage"><span class="bionic">Usa</span>ge & <span class="bionic">Dem</span>o</h2>
+
+    <h3><span class="bionic">Lau</span>nching rpai</h3>
+
+    <p>With agents running in tmux panes, run <code>rpai</code>:</p>
+
+    <div class="terminal-output">
+<pre>
++---------------------------------------------------------------+
+|                  RPAI - Agent Monitor                          |
++---------------------------------------------------------------+
+|                                                                |
+|  Detected Agents:                                              |
+|                                                                |
+|  [1] CLAUDE AGENT    ======== running                          |
+|      Pane: 0:1.0                                               |
+|                                                                |
+|  [2] CURSOR AGENT    ====     running                          |
+|      Pane: 0:1.1                                               |
+|                                                                |
+|  [3] CODEX AGENT              idle                             |
+|      Pane: 0:2.0                                               |
+|                                                                |
+|  [4] OPENCODE        ======== running                          |
+|      Pane: 0:2.1                                               |
+|                                                                |
++---------------------------------------------------------------+
+|                                                                |
+|  Preview (Agent #1: CLAUDE):                                   |
+|  -----------------------------                                 |
+|  > import pandas as pd                                         |
+|  > df = pd.read_csv('data.csv')                                |
+|  > # Processing 1.2M rows...                                   |
+|                                                                |
+|  [Preview updates as agent outputs]                            |
+|                                                                |
++---------------------------------------------------------------+
+|  Controls: Up/Down navigate | Enter jump | q quit | r refresh  |
++---------------------------------------------------------------+
+</pre>
+    </div>
+
+    <h3><span class="bionic">Jum</span>ping to an <span class="bionic">Age</span>nt</h3>
+
+    <p>Select Agent #2 (Cursor) and press Enter:</p>
+
+    <div class="terminal-output">
+<pre>
+Jumping to pane 0:1.1...
+
+[Screen switches to Cursor pane]
+
+Cursor Agent running in this pane:
+> Analyzing repository structure...
+> Found 47 TypeScript files
+> Implementing requested changes...
+
+[You're now in the Cursor pane - type normally]
+
+Press Ctrl+B, then : to return to rpai
+(or press Prefix + q to see pane numbers)
+</pre>
+    </div>
+
+    <h3><span class="bionic">Whe</span>n No <span class="bionic">Age</span>nts Running</h3>
+
+    <div class="terminal-output">
+<pre>
++---------------------------------------------------------------+
+|                  RPAI - Agent Monitor                          |
++---------------------------------------------------------------+
+|                                                                |
+|  [!] No agents detected                                        |
+|                                                                |
+|  Expected processes not found in any tmux pane:                |
+|    - claude                                                    |
+|    - cursor                                                    |
+|    - codex                                                     |
+|    - opencode                                                  |
+|                                                                |
+|  To use rpai:                                                  |
+|    1. Open a new tmux pane: Ctrl+B, %                          |
+|    2. Start an agent: claude                                   |
+|    3. Run rpai again                                           |
+|                                                                |
++---------------------------------------------------------------+
+</pre>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="workflow"><span class="bionic">Mul</span>ti-Agent <span class="bionic">Wor</span>kflow <span class="bionic">Exa</span>mple</h2>
+
+    <div class="ascii-diagram">
+Terminal layout with rpai:
+
++------------------+------------------+---------------------------+
+| Claude (pane 0)  | Cursor (pane 1)  | rpai dashboard (pane 2)   |
+|                  |                  |                           |
+| Working on:      | Implementing:    | [1] CLAUDE === running    |
+| auth module      | UI components    | [2] CURSOR === running    |
+|                  |                  | [3] CODEX      idle       |
+|                  |                  |                           |
+| [agent output]   | [agent output]   | Preview: Cursor is...     |
++------------------+------------------+---------------------------+
+    </div>
+
+    <p><strong><span class="bionic">Wor</span>kflow:</strong></p>
+    <ol>
+      <li>Watch rpai dashboard to see which agents need attention</li>
+      <li>Select agent and press Enter to jump to its pane</li>
+      <li>Interact with agent</li>
+      <li>Return to rpai to monitor overall progress</li>
+    </ol>
+
+    <div class="callout callout-success">
+      <div class="callout-title">Timing Expectations</div>
+      <ul>
+        <li><strong>Installation:</strong> 1-3 minutes</li>
+        <li><strong>Agent detection:</strong> Instant</li>
+        <li><strong>Refresh interval:</strong> ~1 second</li>
+        <li><strong>Pane jumping:</strong> Instant</li>
+      </ul>
+    </div>
+
+    <div class="milestone">
+      Checkpoint: You now have a control center for all your AI agents!
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="troubleshooting"><span class="bionic">Tro</span>ubleshooting</h2>
+
+    <details class="troubleshoot">
+      <summary>Error: "cargo: command not found"</summary>
+      <div>
+        <p><strong>Cause:</strong> Rust/Cargo not installed on system</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Install Rust and Cargo via rustup (official installer)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Follow prompts, then reload shell
+source ~/.cargo/env
+
+# Verify installation
+cargo --version
+rustc --version
+
+# Now install rpai
+cargo install rpai</code></pre>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>Error: "error: could not compile rpai"</summary>
+      <div>
+        <p><strong>Cause:</strong> Missing system dependencies, outdated Rust, or incompatible platform</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Update Rust to latest stable
+rustup update stable
+
+# On macOS, ensure Xcode command line tools installed
+xcode-select --install
+
+# On Ubuntu/Debian, install build essentials
+sudo apt install build-essential pkg-config libssl-dev
+
+# On Fedora/RHEL
+sudo dnf install gcc openssl-devel
+
+# Retry installation
+cargo install rpai</code></pre>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>Error: "rpai: not attached to a tmux session"</summary>
+      <div>
+        <p><strong>Cause:</strong> Not running inside a tmux session</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Start a tmux session first
+tmux new -s agents
+
+# Or attach to existing session
+tmux attach -t agents
+
+# Now run rpai inside tmux
+rpai</code></pre>
+        <p><strong>Prevention:</strong> rpai requires tmux - always start tmux first</p>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>Error: "No agents detected" despite agents running</summary>
+      <div>
+        <p><strong>Cause:</strong> Agents not in tmux panes, or detection pattern not matching</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Verify agents are running IN tmux panes
+tmux list-panes -a  # Shows all panes
+
+# Check what processes are in each pane
+tmux list-panes -a -F "#{pane_id}: #{pane_current_command}"
+
+# Agent must be running one of: claude, cursor, codex, opencode
+# If using custom agent name, may need configuration
+
+# Ensure agent is actually running (not just terminal open)
+# In agent pane, you should see active claude/cursor/codex process</code></pre>
+        <p><strong>Detection patterns (likely):</strong> <code>claude</code>, <code>cursor</code>, <code>codex</code>, <code>opencode</code></p>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>Problem: "Jump to agent not working"</summary>
+      <div>
+        <p><strong>Cause:</strong> Pane was closed, tmux layout changed, or selection issue</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Manually switch to pane
+tmux select-pane -t &lt;pane-id&gt;
+
+# List all panes to find correct ID
+tmux list-panes -a
+
+# If pane was closed, agent is gone - need to restart it
+tmux split-window
+claude  # Or your agent</code></pre>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>Problem: rpai crashed or frozen</summary>
+      <div>
+        <p><strong>Emergency Recovery:</strong></p>
+        <pre><code># Kill rpai process
+pkill rpai
+# Or Ctrl+C if focused
+
+# Resume normal tmux navigation
+tmux select-pane -t {pane-id}
+# Or press Ctrl+B then arrow keys</code></pre>
+      </div>
+    </details>
+
+    <hr class="section-divider">
+
+    <h2 id="limitations"><span class="bionic">Lim</span>itations & <span class="bionic">Whe</span>n NOT to Use</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Problem</th>
+          <th>Use Instead</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GUI-based workflows</td>
+          <td>rpai is tmux-only</td>
+          <td>Cursor/VS Code multi-tab view</td>
+        </tr>
+        <tr>
+          <td>Single agent</td>
+          <td>No monitoring needed</td>
+          <td>Direct terminal</td>
+        </tr>
+        <tr>
+          <td>Non-tmux terminal</td>
+          <td>Won't work</td>
+          <td>iTerm2 tabs, screen, or tmux</td>
+        </tr>
+        <tr>
+          <td>Custom agent names</td>
+          <td>May not detect</td>
+          <td>Configure detection or use standard names</td>
+        </tr>
+        <tr>
+          <td>Need token/cost tracking</td>
+          <td>rpai shows output, not metrics</td>
+          <td>Claude HUD for metrics</td>
+        </tr>
+        <tr>
+          <td>Windows native terminal</td>
+          <td>tmux not native</td>
+          <td>WSL2 with tmux</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3><span class="bionic">Kno</span>wn <span class="bionic">Lim</span>itations</h3>
+    <ul>
+      <li><strong>tmux-only</strong> - Doesn't work with other terminal multiplexers (screen) or GUI terminals</li>
+      <li><strong>Early-stage project</strong> - "Weekend project" maturity level</li>
+      <li><strong>Agent detection by process name</strong> - Custom agents may not be recognized</li>
+      <li><strong>Augments, doesn't replace tmux knowledge</strong> - Need to know basic tmux commands</li>
+      <li><strong>No context/token usage display</strong> - Shows output, not Claude-specific metrics</li>
+    </ul>
+
+    <hr class="section-divider">
+
+    <div class="related-pages">
+      <h3>Related Pages</h3>
+      <ul>
+        <li><a href="claude-hud.html">Claude HUD</a> - For context window and token tracking</li>
+        <li><a href="claude-mem.html">Claude-Mem</a> - For persistent memory across sessions</li>
+        <li><a href="../patterns/orchestration/index.html">Orchestration Patterns</a> - Multi-agent architectures</li>
+      </ul>
+    </div>
+
+    <div class="footer-nav">
+      <a href="index.html">Back to Tooling Index</a>
+      <a href="claude-hud.html">Next: Claude HUD</a>
+    </div>
+
+  </div>
+
+  
+  <script src="../js/copy-code.js"></script>
+</body>
+</html>

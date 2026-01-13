@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude-Mem - Persistent Memory Plugin | Claude Code Tooling</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .you-are-here {
+      background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .checkpoint {
+      background: #f0ebe3;
+      border-left: 4px solid var(--success);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .checkpoint-header {
+      color: var(--success);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .troubleshoot {
+      border: 1px solid var(--error);
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+    .troubleshoot summary {
+      background: #fef6f5;
+      padding: 1rem;
+      cursor: pointer;
+      color: var(--error);
+      font-weight: 500;
+    }
+    .troubleshoot > div {
+      padding: 1rem;
+      background: white;
+    }
+    .milestone {
+      background: linear-gradient(90deg, var(--success) 0%, var(--accent) 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      margin: 2rem 0;
+    }
+    .terminal-output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85em;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    .terminal-output .comment {
+      color: #6a9955;
+    }
+    .terminal-output .success {
+      color: #4ec9b0;
+    }
+    .terminal-output .arrow {
+      color: #569cd6;
+    }
+    .bionic { font-weight: 700; }
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      font-size: 0.75em;
+    }
+    .copy-btn:hover {
+      background: var(--accent-light);
+    }
+    .code-wrapper {
+      position: relative;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .stat-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2em;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.9em;
+    }
+    .architecture-diagram {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85em;
+      overflow-x: auto;
+      white-space: pre;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="nav-breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <a href="index.html">Tooling</a>
+      <span>/</span>
+      Claude-Mem
+    </nav>
+
+    <div class="you-are-here">
+      <strong><span class="bionic">You</span> Are <span class="bionic">Her</span>e:</strong> You're learning about <strong>claude-mem</strong>, a plugin that gives Claude Code "infinite memory" by automatically capturing sessions, compressing them to semantic summaries, and injecting relevant context into future sessions.
+      <br><br>
+      <strong><span class="bionic">Wha</span>t you <span class="bionic">nee</span>d first:</strong> Claude Code installed and working. That's it - the plugin handles the rest.
+    </div>
+
+    <h1><span class="bionic">Cla</span>ude-Mem - <span class="bionic">Per</span>sistent <span class="bionic">Mem</span>ory Plugin</h1>
+
+    <div class="problem-statement">
+      <strong>Every Claude Code session starts from scratch.</strong>
+      <ul>
+        <li>Context resets on restart</li>
+        <li>Must re-explain project history every session</li>
+        <li>Token waste from repetition</li>
+        <li>Can't maintain long-term project continuity</li>
+      </ul>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">95%</div>
+        <div class="stat-label">Fewer tokens per session</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">~20x</div>
+        <div class="stat-label">More tool calls before limit</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">Local</div>
+        <div class="stat-label">SQLite only - your data stays local</div>
+      </div>
+    </div>
+
+    <div class="toc">
+      <div class="toc-title">On This Page</div>
+      <ul>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#usage">Usage & Workflow</a></li>
+        <li><a href="#configuration">Configuration</a></li>
+        <li><a href="#privacy">Privacy Controls</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ul>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="how-it-works"><span class="bionic">How</span> It <span class="bionic">Wor</span>ks</h2>
+
+    <div class="callout callout-insight">
+      <div class="callout-title">Mental Model</div>
+      <p>Think of Claude Code as a <strong>stateful agent with biomimetic memory</strong> - capture everything automatically, compress semantically like human recall, and retrieve progressively to avoid overload. Like how developers recall project history without re-reading entire logs.</p>
+    </div>
+
+    <h3><span class="bionic">Fou</span>r-Phase <span class="bionic">Sys</span>tem</h3>
+
+    <div class="pattern-box">
+      <div class="pattern-title">1. Capture Phase</div>
+      <p>Lifecycle hooks monitor events:</p>
+      <ul>
+        <li>SessionStart</li>
+        <li>PostToolUse</li>
+        <li>User prompts</li>
+        <li>Observations</li>
+      </ul>
+      <p>All logged to local SQLite.</p>
+    </div>
+
+    <div class="pattern-box">
+      <div class="pattern-title">2. Compression Phase</div>
+      <p>Claude's agent-sdk generates <strong>semantic summaries</strong> (~50-100 tokens) instead of raw transcripts. This is the magic - your 10,000 token session becomes a 100 token memory.</p>
+    </div>
+
+    <div class="pattern-box">
+      <div class="pattern-title">3. Retrieval Phase (3-Layer System)</div>
+      <pre><code>Layer 1: search()           --> Compact index, returns IDs
+Layer 2: timeline()         --> Chronological snippets
+Layer 3: get_observations() --> Full details for specific IDs</code></pre>
+      <p>Hybrid semantic + keyword search via Chroma vector DB.</p>
+    </div>
+
+    <div class="pattern-box">
+      <div class="pattern-title">4. Injection Phase</div>
+      <p>Relevant context auto-injected into new sessions. Query manually with <code>mem-search</code> skill.</p>
+    </div>
+
+    <h3><span class="bionic">Arc</span>hitecture</h3>
+
+    <div class="architecture-diagram">
++---------------------------------------------+
+|  Claude Code Session                        |
+|  +-- Lifecycle Hooks                        |
+|       +-- Capture events                    |
++---------------------------------------------+
+              |
+              v
++---------------------------------------------+
+|  Worker Service (port 37777)                |
+|  +-- SQLite DB (raw data)                   |
+|  +-- Chroma Vector DB (embeddings)          |
+|  +-- Claude Agent SDK (compression)         |
++---------------------------------------------+
+              |
+              v
++---------------------------------------------+
+|  Future Session                             |
+|  +-- Auto-inject relevant context           |
++---------------------------------------------+
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="installation"><span class="bionic">Ins</span>tallation</h2>
+
+    <div class="tutorial-block">
+      <div class="tutorial-header">Installing claude-mem</div>
+      <div class="tutorial-content">
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">1</div>
+          <div class="tutorial-step-content">
+            <h4>Add the Marketplace</h4>
+            <div class="code-wrapper">
+              <pre><code>/plugin marketplace add thedotmack/claude-mem</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">2</div>
+          <div class="tutorial-step-content">
+            <h4>Install the Plugin</h4>
+            <div class="code-wrapper">
+              <pre><code>/plugin install claude-mem</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">3</div>
+          <div class="tutorial-step-content">
+            <h4>Restart Claude Code</h4>
+            <p>Exit and relaunch Claude Code to activate the hooks.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="checkpoint-header">Checkpoint: Installation Complete</div>
+      <p><strong>You should see:</strong></p>
+      <div class="terminal-output">
+claude> /plugin install claude-mem
+
+<span class="comment"># Installing claude-mem...</span>
+
+Downloading plugin files...
+  <span class="success">+</span> src/capture/hooks.js
+  <span class="success">+</span> src/compress/agent-sdk.js
+  <span class="success">+</span> src/retrieve/search.js
+  <span class="success">+</span> src/worker/server.js
+  <span class="success">+</span> package.json
+
+Installing dependencies...
+  <span class="success">+</span> better-sqlite3
+  <span class="success">+</span> chroma-db                          <span class="comment"><-- Vector database for search</span>
+  <span class="success">+</span> @anthropic/agent-sdk               <span class="comment"><-- For compression</span>
+
+Initializing worker service...
+  <span class="success">+</span> SQLite database created
+  <span class="success">+</span> Chroma embeddings initialized
+  <span class="success">+</span> Worker listening on port 37777     <span class="comment"><-- Web UI port</span>
+
+Configuring lifecycle hooks...
+  <span class="success">+</span> SessionStart hook registered
+  <span class="success">+</span> PostToolUse hook registered
+  <span class="success">+</span> Capture pipeline active
+
+<span class="success">claude-mem installed!</span>
+
+IMPORTANT: Restart Claude Code to activate hooks
+
+Web UI available at: http://localhost:37777
+Config file: ~/.claude-mem/settings.json
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="usage"><span class="bionic">Usa</span>ge & <span class="bionic">Wor</span>kflow</h2>
+
+    <h3><span class="bionic">Aut</span>omatic <span class="bionic">Cap</span>ture in <span class="bionic">Act</span>ion</h3>
+
+    <p>After restart, memory captures automatically. Here's what happens behind the scenes:</p>
+
+    <div class="terminal-output">
+claude> Help me debug the authentication issue we discussed yesterday
+
+<span class="comment">========================================
+CLAUDE-MEM CAPTURE
+========================================</span>
+
+[SessionStart captured]                 <span class="arrow"><-- New session logged</span>
+  <span class="arrow">-></span> Project: /Users/dev/myapp
+  <span class="arrow">-></span> Branch: main
+  <span class="arrow">-></span> Timestamp: 2026-01-10 10:30:45
+
+[Context Injection]                     <span class="arrow"><-- Auto-injecting relevant history!</span>
+  Searching: "authentication issue"
+  Found 3 relevant observations:
+    - Session 2026-01-09: "JWT token expiration bug"
+    - Session 2026-01-08: "Added auth middleware"
+    - Session 2026-01-07: "User model changes"
+
+  Injecting 847 tokens of context...    <span class="arrow"><-- Efficient! Not full transcripts</span>
+
+<span class="comment">========================================</span>
+    </div>
+
+    <p><strong>Claude's response (with injected context):</strong></p>
+
+    <div class="terminal-output">
+Based on our previous session, I see we identified the JWT token
+expiration bug yesterday. The issue was in src/auth/middleware.ts
+where the token wasn't being refreshed properly.
+
+Let me check if that fix is still in place...
+
+[Claude continues with full context of previous work]
+    </div>
+
+    <h3><span class="bionic">Man</span>ual <span class="bionic">Mem</span>ory <span class="bionic">Sea</span>rch</h3>
+
+    <div class="code-wrapper">
+      <pre><code>claude> mem-search "database migrations"</code></pre>
+    </div>
+
+    <div class="terminal-output">
+<span class="comment">========================================
+MEMORY SEARCH: "database migrations"
+========================================</span>
+
+Layer 1: search() - Index scan
+  Query: "database migrations"
+  Type: all
+  Results: 5 observations
+
++-----+------------+--------------------------------------------+
+| ID  | Date       | Summary                                    |
++-----+------------+--------------------------------------------+
+| 142 | 2026-01-09 | Created users table migration              |
+| 138 | 2026-01-08 | Added index on email column                |
+| 127 | 2026-01-07 | Drizzle ORM migration setup                |
+| 089 | 2026-01-05 | Fixed migration rollback issue             |
+| 045 | 2025-12-20 | Initial schema design discussion           |
++-----+------------+--------------------------------------------+
+
+To get full details: get_observations([142, 138, 127])
+    </div>
+
+    <h3><span class="bionic">Fet</span>ching <span class="bionic">Ful</span>l <span class="bionic">Det</span>ails</h3>
+
+    <div class="code-wrapper">
+      <pre><code>get_observations([142, 138])</code></pre>
+    </div>
+
+    <div class="terminal-output">
+<span class="comment">========================================
+OBSERVATION DETAILS
+========================================</span>
+
+#142: Created users table migration (2026-01-09)
+---------------------------------------------
+Type: feature
+Files touched:
+  - db/migrations/0001_users.ts
+  - db/schema.ts
+
+Summary:
+  Created migration for users table with email, password_hash,
+  created_at columns. Used drizzle-kit generate. Added unique
+  constraint on email. Ran successfully against dev database.
+
+Patterns learned:
+  - Use `npm run db:generate` then `npm run db:push`
+  - Always add IF NOT EXISTS for idempotency
+
+---------------------------------------------
+
+#138: Added index on email column (2026-01-08)
+---------------------------------------------
+Type: optimization
+Files touched:
+  - db/migrations/0002_email_index.ts
+
+Summary:
+  Added index for faster email lookups during auth. Query time
+  improved from 45ms to 3ms on 100K row test set.
+
+Patterns learned:
+  - Index frequently queried columns
+  - Measure before/after with EXPLAIN ANALYZE
+    </div>
+
+    <div class="callout callout-warning">
+      <div class="callout-title">Important Rule</div>
+      <p>Always batch IDs in <code>get_observations</code> - never fetch single observations. This keeps context efficient.</p>
+    </div>
+
+    <h3><span class="bionic">Web</span> UI <span class="bionic">Vie</span>w</h3>
+
+    <p>Open browser to <code>http://localhost:37777</code>:</p>
+
+    <div class="terminal-output">
++---------------------------------------------------------------+
+|             CLAUDE-MEM WEB VIEWER                              |
++---------------------------------------------------------------+
+|                                                                |
+|  Statistics                                                    |
+|  ------------------                                            |
+|  Total observations: 847                                       |
+|  Sessions captured: 42                                         |
+|  Token savings: 94.2%                                          |
+|  Database size: 12.3 MB                                        |
+|                                                                |
+|  Search                                                        |
+|  +---------------------------------------------------+        |
+|  | [Search observations...]                           |        |
+|  +---------------------------------------------------+        |
+|                                                                |
+|  Recent Sessions                                               |
+|  ------------------                                            |
+|  2026-01-10 10:30 - Authentication debugging (current)         |
+|  2026-01-09 14:22 - Database migrations                        |
+|  2026-01-09 09:15 - API endpoint fixes                         |
+|  2026-01-08 16:45 - User model updates                         |
+|                                                                |
+|  Settings                                                      |
+|  ------------------                                            |
+|  Mode: [Stable v] [Switch to Endless Beta]                     |
+|  Auto-inject: [ON]                                             |
+|  Max inject tokens: [5000]                                     |
+|                                                                |
++---------------------------------------------------------------+
+    </div>
+
+    <div class="milestone">
+      Checkpoint: Claude now remembers your project history across sessions!
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="configuration"><span class="bionic">Con</span>figuration</h2>
+
+    <p><strong>Location:</strong> <code>~/.claude-mem/settings.json</code> (auto-created)</p>
+
+    <div class="code-wrapper">
+      <pre><code>{
+  "ai_model": "claude-3-opus-20240229",
+  "worker_port": 37777,
+  "data_directory": "~/.claude-mem/data",
+  "log_level": "info",
+  "context_injection_rules": {
+    "auto_inject": true,
+    "max_tokens": 5000
+  }
+}</code></pre>
+    </div>
+
+    <h3><span class="bionic">Fil</span>e <span class="bionic">Loc</span>ations</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Path</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>~/.claude-mem/settings.json</code></td>
+          <td>Configuration</td>
+        </tr>
+        <tr>
+          <td><code>~/.claude-mem/data/</code></td>
+          <td>SQLite database</td>
+        </tr>
+        <tr>
+          <td><code>~/.claude/plugins/marketplaces/thedotmack</code></td>
+          <td>Plugin files</td>
+        </tr>
+        <tr>
+          <td><code>http://localhost:37777</code></td>
+          <td>Web viewer</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3><span class="bionic">End</span>less <span class="bionic">Mod</span>e (Beta)</h3>
+
+    <p>Experimental feature via beta channel:</p>
+    <ul>
+      <li>Even more aggressive compression</li>
+      <li>Handles very long sessions (100+ tool calls)</li>
+      <li>Enable via web UI version switch</li>
+    </ul>
+
+    <hr class="section-divider">
+
+    <h2 id="privacy"><span class="bionic">Pri</span>vacy <span class="bionic">Con</span>trols</h2>
+
+    <p>Use <code>&lt;private&gt;</code> tags to exclude sensitive data:</p>
+
+    <div class="code-wrapper">
+      <pre><code>&lt;private&gt;
+API_KEY=sk-xxx
+DATABASE_PASSWORD=secret
+&lt;/private&gt;</code></pre>
+    </div>
+
+    <p>Everything else gets stored locally in SQLite. <strong>Your data never leaves your machine.</strong></p>
+
+    <hr class="section-divider">
+
+    <h2 id="troubleshooting"><span class="bionic">Tro</span>ubleshooting</h2>
+
+    <details class="troubleshoot">
+      <summary>Memory not being captured</summary>
+      <div>
+        <p><strong>Cause:</strong> Hooks not activated after install</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Ensure you restarted Claude Code after installation
+exit
+claude
+
+# Check if worker is running
+curl http://localhost:37777/health
+
+# If not responding, restart worker manually
+cd ~/.claude/plugins/marketplaces/thedotmack
+npm run start</code></pre>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>Port 37777 already in use</summary>
+      <div>
+        <p><strong>Cause:</strong> Another service using the port</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Find what's using the port
+lsof -i :37777
+
+# Kill the process if it's a stale worker
+kill -9 &lt;PID&gt;
+
+# Or change port in settings
+# Edit ~/.claude-mem/settings.json
+{
+  "worker_port": 37778
+}</code></pre>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>Context injection not working</summary>
+      <div>
+        <p><strong>Cause:</strong> Auto-inject disabled or no relevant memories</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Check settings
+cat ~/.claude-mem/settings.json | grep auto_inject
+
+# Should show: "auto_inject": true
+
+# If false, edit the file and restart Claude Code
+
+# Also check if there are any observations
+# Visit http://localhost:37777 to see if data exists</code></pre>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>Database growing too large</summary>
+      <div>
+        <p><strong>Cause:</strong> Long-term use accumulates data</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Check database size
+ls -lh ~/.claude-mem/data/
+
+# If too large, consider:
+# 1. Archiving old observations via web UI
+# 2. Deleting observations older than X days
+# 3. Reducing log_level to "warn"
+
+# Future versions may add auto-cleanup</code></pre>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>Bug report generation</summary>
+      <div>
+        <p><strong>For complex issues, generate a bug report:</strong></p>
+        <pre><code>cd ~/.claude/plugins/marketplaces/thedotmack
+npm run bug-report</code></pre>
+      </div>
+    </details>
+
+    <hr class="section-divider">
+
+    <h2><span class="bionic">Cav</span>eats</h2>
+
+    <ul>
+      <li><strong>Claude-specific:</strong> Relies on hooks, won't work with Codex/other tools</li>
+      <li><strong>Beta features experimental:</strong> Endless Mode may have issues</li>
+      <li><strong>Database growth:</strong> Long-term use could impact performance</li>
+      <li><strong>Port 37777:</strong> May conflict with other services</li>
+      <li><strong>License:</strong> AGPL-3.0 (ragtime/ dir has restrictive noncommercial license)</li>
+    </ul>
+
+    <hr class="section-divider">
+
+    <div class="why-matters">
+      <strong>If you skip this plugin:</strong> Every session starts from scratch. You waste tokens re-explaining project context. After 20+ sessions on a project, the accumulated knowledge is gone.
+      <br><br>
+      <strong>This connects to:</strong> The "external memory" principle - Claude is forgetful, but files (and now databases) persist. This extends that principle to semantic memory.
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="related-pages">
+      <h3>Related Pages</h3>
+      <ul>
+        <li><a href="claude-hud.html">Claude HUD</a> - For real-time session visibility</li>
+        <li><a href="tmux-manager.html">rpai</a> - For multi-agent monitoring</li>
+        <li><a href="../patterns/mastery/context-management.html">Context Management</a> - Core principles</li>
+      </ul>
+    </div>
+
+    <div class="footer-nav">
+      <a href="tmux-manager.html">Previous: rpai</a>
+      <a href="claude-hud.html">Next: Claude HUD</a>
+    </div>
+
+  </div>
+
+  
+  <script src="../js/copy-code.js"></script>
+</body>
+</html>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual to Filesystem State | Transformations | Claude Code Knowledge Base</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .you-are-here {
+      background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%);
+      border-left: 4px solid #2a7d7d;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .bionic { font-weight: 700; }
+    .checkpoint {
+      background: #f0ebe3;
+      border-left: 4px solid #6b9b7a;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .checkpoint-header { color: #6b9b7a; font-weight: 600; margin-bottom: 0.5rem; }
+    .milestone {
+      background: linear-gradient(90deg, #6b9b7a 0%, #2a7d7d 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      margin: 2rem 0;
+    }
+    .before-after-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin: 24px 0;
+    }
+    @media (max-width: 900px) {
+      .before-after-container { grid-template-columns: 1fr; }
+    }
+    .before-box, .after-box {
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .before-box {
+      background: #fdf0ef;
+      border: 2px solid var(--error);
+    }
+    .before-box h3 { color: var(--error); margin-top: 0; }
+    .after-box {
+      background: #eef6f0;
+      border: 2px solid var(--success);
+    }
+    .after-box h3 { color: var(--success); margin-top: 0; }
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: #2a7d7d;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      font-size: 0.8em;
+    }
+    .copy-btn:hover { background: #3a9d9d; }
+    .code-block-wrapper {
+      position: relative;
+    }
+    .architecture-diagram {
+      background: var(--code-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      font-family: 'SF Mono', monospace;
+      font-size: 0.9em;
+      line-height: 1.5;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="nav-breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <a href="index.html">Transformations</a>
+      <span>/</span>
+      Manual to Filesystem
+    </nav>
+
+    <div class="you-are-here">
+      <h3 style="margin-top: 0; color: var(--accent);"><span class="bionic">You</span> Are <span class="bionic">Her</span>e</h3>
+      <p><strong><span class="bionic">Con</span>text:</strong> You're keeping project state in your head, re-explaining context every session, and losing patterns when context clears.</p>
+      <p><strong><span class="bionic">Whe</span>re this fits:</strong> This transformation enables the Ralph pattern and multi-agent workflows by externalizing memory to the filesystem.</p>
+      <p><strong><span class="bionic">Wha</span>t you'll learn:</strong> How to structure state files so Claude remembers across sessions and learnings compound over time.</p>
+    </div>
+
+    <h1><span class="bionic">Man</span>ual Context to <span class="bionic">Fil</span>esystem State</h1>
+
+    <p class="conversational-lead">
+      <strong>The <span class="bionic">Pro</span>blem:</strong> Where does knowledge live between sessions?
+    </p>
+
+    <div class="toc">
+      <div class="toc-title">Contents</div>
+      <ul>
+        <li><a href="#before">BEFORE: Manual Context Management</a></li>
+        <li><a href="#after">AFTER: Filesystem State</a></li>
+        <li><a href="#architecture">State File Architecture</a></li>
+        <li><a href="#migration">Migration Checklist</a></li>
+        <li><a href="#templates">Quick Reference Templates</a></li>
+      </ul>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="before"><span class="bionic">BEF</span>ORE: Manual <span class="bionic">Con</span>text Management</h2>
+
+    <div class="architecture-diagram">
+[Your Brain] -----> [Claude Session] -----> [Code Changes]
+     |                    |
+     |                    v
+     |              Session ends
+     |                    |
+     v                    v
+  Remembers?         [Knowledge Lost]
+    </div>
+
+    <div class="before-box" style="margin: 24px 0;">
+      <h3>What This Looks Like</h3>
+      <p><strong>Starting every new session:</strong></p>
+      <div class="code-block-wrapper">
+        <pre><code>Human: I'm continuing work on the user dashboard.
+Yesterday we finished the login form (US-001).
+We learned that server actions are required for forms.
+The migration pattern uses IF NOT EXISTS.
+Today we need to do US-002 (profile page).
+Also remember that types go in actions.ts...</code></pre>
+      </div>
+      <p><strong>Every. Single. Session.</strong></p>
+    </div>
+
+    <h3>The <span class="bionic">Pro</span>blems</h3>
+
+    <table>
+      <thead>
+        <tr><th>Problem</th><th>Impact</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Context lost on clear/compact</strong></td><td>Start over explaining everything</td></tr>
+        <tr><td><strong>Human memory limits</strong></td><td>Forget discoveries, repeat mistakes</td></tr>
+        <tr><td><strong>No compounding learning</strong></td><td>Each session starts from zero</td></tr>
+        <tr><td><strong>Tribal knowledge</strong></td><td>Only you know the patterns</td></tr>
+        <tr><td><strong>Session-dependent</strong></td><td>Can't hand off to another agent</td></tr>
+      </tbody>
+    </table>
+
+    <div class="gotcha-block">
+      <p><strong>The Failure Mode:</strong></p>
+      <pre style="background: transparent; margin: 0;">Session 1: Discover bcrypt needs 12 rounds (the hard way)
+Session 2: Forget, use default 10 rounds
+Session 3: Debug production auth issues
+Session 4: Rediscover bcrypt needs 12 rounds</pre>
+      <p style="margin-top: 12px;">Knowledge doesn't compound. You're running in circles.</p>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="after"><span class="bionic">AFT</span>ER: Filesystem <span class="bionic">Sta</span>te</h2>
+
+    <div class="architecture-diagram">
+[Filesystem State] <---> [Claude Session] -----> [Code Changes]
+       |                        |                      |
+       v                        v                      v
+  [Persists]              [Reads State]          [Updates State]
+       |                        |                      |
+       +------------------------+----------------------+
+                    |
+              [Compounds Over Time]
+    </div>
+
+    <div class="after-box" style="margin: 24px 0;">
+      <h3>State Lives in Files</h3>
+      <p>Sessions read and write. Knowledge persists. Learning compounds.</p>
+    </div>
+
+    <h3><span class="bionic">Sta</span>te File 1: progress.txt</h3>
+
+    <p>Session memory and pattern discoveries:</p>
+
+    <div class="code-block-wrapper">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code># Progress Log
+Project: User Dashboard
+Started: 2026-01-09
+
+## Codebase Patterns Discovered
+- Migrations: Always use IF NOT EXISTS (learned from failed deploy)
+- Types: Export from actions.ts, import in components
+- React: useRef&lt;Timeout | null&gt;(null) for timer refs
+- Forms: Server actions required, not API routes
+- Auth: bcrypt rounds = 12 (security requirement)
+
+## Session Log
+
+### 2026-01-09 - US-001: Login Form
+- Status: COMPLETE
+- Files modified:
+  - app/login/page.tsx
+  - lib/actions/auth.ts
+  - lib/schemas/auth.ts
+- Learnings:
+  - Server actions handle form submission
+  - Zod validation happens server-side
+  - Toast notifications via sonner
+- Time: ~2 hours
+---
+
+### 2026-01-09 - US-002: Profile Page
+- Status: IN PROGRESS
+- Files modified:
+  - app/profile/page.tsx (started)
+- Blocked by: Need to understand image upload pattern
+- Next: Check how settings page handles uploads
+---</code></pre>
+    </div>
+
+    <h3><span class="bionic">Sta</span>te File 2: prd.json</h3>
+
+    <p>Machine-readable task state:</p>
+
+    <div class="code-block-wrapper">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>{
+  "project": "User Dashboard",
+  "lastUpdated": "2026-01-09T14:30:00Z",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Login Form",
+      "status": "complete",
+      "passes": true,
+      "completedAt": "2026-01-09T10:00:00Z"
+    },
+    {
+      "id": "US-002",
+      "title": "Profile Page",
+      "status": "in_progress",
+      "passes": false,
+      "blockers": ["image-upload-pattern"]
+    },
+    {
+      "id": "US-003",
+      "title": "Settings Page",
+      "status": "pending",
+      "passes": false,
+      "dependencies": ["US-002"]
+    }
+  ],
+  "discoveries": {
+    "patterns": ["server-actions-for-forms", "bcrypt-12-rounds"],
+    "antipatterns": ["api-routes-for-forms", "inline-validation"]
+  }
+}</code></pre>
+    </div>
+
+    <h3><span class="bionic">Sta</span>te File 3: AGENTS.md</h3>
+
+    <p>Permanent learnings for all future agents:</p>
+
+    <div class="code-block-wrapper">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code># Agent Learnings
+
+This file contains patterns and knowledge discovered through development.
+Read before starting work. Update when you learn something new.
+
+## Authentication Module
+
+### Security Requirements
+- Password hashing: bcrypt with minimum 12 rounds
+- Session tokens: 7-day expiry, refresh on activity
+- Rate limiting: 5 attempts per 15 minutes
+
+### Patterns
+- All auth actions in `lib/actions/auth.ts`
+- Schemas in `lib/schemas/auth.ts`
+- Use `getServerSession()` not `useSession()` in server components
+
+## Database
+
+### Migration Patterns
+- Always use `IF NOT EXISTS` for table creation
+- Always use `IF EXISTS` for drops
+- Name format: `YYYYMMDD_description.sql`
+- Test migrations against production clone before deploy
+
+## Frontend
+
+### Form Handling
+- Server actions, not API routes
+- Zod validation server-side
+- `useFormState` + `useFormStatus` for state
+- Toast feedback via sonner
+
+### Component Patterns
+- Ref typing: `useRef&lt;HTMLElement | null&gt;(null)`
+- Timer refs: `useRef&lt;Timeout | null&gt;(null)`
+- Cleanup in useEffect return</code></pre>
+    </div>
+
+    <h3><span class="bionic">Sta</span>rting a New <span class="bionic">Ses</span>sion Now</h3>
+
+    <div class="after-box" style="margin: 24px 0;">
+      <pre style="background: transparent; border: none; padding: 0; margin: 0;">Human: Continue work on user dashboard
+
+[Claude reads progress.txt, prd.json, AGENTS.md]
+
+Claude: I see we completed US-001 (login form) and US-002 (profile page)
+is in progress, blocked on the image upload pattern. Let me check the
+settings page to understand how uploads work here, then continue with
+the profile page.</pre>
+      <p style="margin-top: 16px;"><strong>Zero context re-explanation. Knowledge compounds.</strong></p>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="architecture"><span class="bionic">Fil</span>esystem State <span class="bionic">Arc</span>hitecture</h2>
+
+    <div class="file-listing">
+      <div class="file-listing-header">Recommended Directory Structure</div>
+      <div class="file-item">
+        <span class="file-name">scripts/ralph/progress.txt</span>
+        <span class="file-desc">Session log, discoveries</span>
+      </div>
+      <div class="file-item">
+        <span class="file-name">scripts/ralph/prd.json</span>
+        <span class="file-desc">Task tracking, dependencies</span>
+      </div>
+      <div class="file-item">
+        <span class="file-name">scripts/ralph/scratch/</span>
+        <span class="file-desc">Temporary analysis files</span>
+      </div>
+      <div class="file-item">
+        <span class="file-name">AGENTS.md</span>
+        <span class="file-desc">Permanent learnings (or .claude/AGENTS.md)</span>
+      </div>
+      <div class="file-item">
+        <span class="file-name">.git/</span>
+        <span class="file-desc">History as memory</span>
+      </div>
+    </div>
+
+    <h3>What Each <span class="bionic">Lay</span>er Does</h3>
+
+    <table>
+      <thead>
+        <tr><th>Layer</th><th>Purpose</th><th>Lifespan</th><th>Who Reads</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>progress.txt</code></td><td>Session continuity</td><td>This project</td><td>Same agent, next session</td></tr>
+        <tr><td><code>prd.json</code></td><td>Task state machine</td><td>This project</td><td>Agent, potentially CI</td></tr>
+        <tr><td><code>AGENTS.md</code></td><td>Pattern library</td><td>Permanent</td><td>All future agents</td></tr>
+        <tr><td><code>.git</code></td><td>Change history</td><td>Permanent</td><td>Anyone</td></tr>
+      </tbody>
+    </table>
+
+    <hr class="section-divider">
+
+    <h2 id="migration"><span class="bionic">Mig</span>ration Checklist</h2>
+
+    <div class="tutorial-block">
+      <div class="tutorial-header">Getting Started (Do Once)</div>
+      <div class="tutorial-content">
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">1</div>
+          <div class="tutorial-step-content">
+            <h4>Create scripts/ralph/ directory</h4>
+            <pre><code>mkdir -p scripts/ralph</code></pre>
+          </div>
+        </div>
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">2</div>
+          <div class="tutorial-step-content">
+            <h4>Initialize progress.txt with project header</h4>
+          </div>
+        </div>
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">3</div>
+          <div class="tutorial-step-content">
+            <h4>Initialize prd.json with user stories structure</h4>
+          </div>
+        </div>
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">4</div>
+          <div class="tutorial-step-content">
+            <h4>Create AGENTS.md at project root</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="checkpoint-header">Checkpoint: After Getting Started</div>
+      <p><strong>Verify your state:</strong></p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Check directory structure
+ls -la scripts/ralph/
+
+# Check all files exist
+ls scripts/ralph/progress.txt scripts/ralph/prd.json AGENTS.md
+
+# Verify prd.json has valid structure
+jq 'keys' scripts/ralph/prd.json</code></pre>
+      </div>
+      <div class="expected-output">
+        <pre>scripts/ralph/:
+-rw-r--r--  progress.txt    &larr; Session log ready
+-rw-r--r--  prd.json        &larr; Task state ready
+
+AGENTS.md exists             &larr; Pattern library ready
+
+["project", "userStories"]   &larr; Required keys present</pre>
+      </div>
+    </div>
+
+    <div class="tutorial-block">
+      <div class="tutorial-header">Every Session Start</div>
+      <div class="tutorial-content">
+        <ul>
+          <li>Read <code>progress.txt</code> to understand where you left off</li>
+          <li>Read <code>prd.json</code> to see task states and blockers</li>
+          <li>Read <code>AGENTS.md</code> to load project patterns</li>
+          <li>Identify the next task to work on</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tutorial-block">
+      <div class="tutorial-header">During Session</div>
+      <div class="tutorial-content">
+        <ul>
+          <li>Update <code>progress.txt</code> when you learn something</li>
+          <li>Update <code>prd.json</code> when task status changes</li>
+          <li>Note blockers and dependencies as you discover them</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tutorial-block">
+      <div class="tutorial-header">Every Session End</div>
+      <div class="tutorial-content">
+        <ul>
+          <li>Update <code>progress.txt</code> with session summary</li>
+          <li>Update <code>prd.json</code> with final task states</li>
+          <li>Add any permanent learnings to <code>AGENTS.md</code></li>
+          <li>Commit state files with meaningful message</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="checkpoint-header">Checkpoint: After First Complete Session Cycle</div>
+      <p><strong>Verify your state:</strong></p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Check progress.txt has at least one session entry
+grep -c "## Session" scripts/ralph/progress.txt
+
+# Check prd.json has updated task states
+jq '.userStories | map(select(.status != "pending")) | length' scripts/ralph/prd.json
+
+# Check AGENTS.md has patterns
+grep -c "^- " AGENTS.md
+
+# Check git has state files committed
+git log --oneline --name-only -1 | grep -E "progress|prd|AGENTS"</code></pre>
+      </div>
+      <div class="expected-output">
+        <pre>1                    &larr; At least 1 session logged
+1                    &larr; At least 1 task started/completed
+5                    &larr; Multiple patterns documented
+progress.txt         &larr; State files in commit
+prd.json</pre>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="templates"><span class="bionic">Qui</span>ck Reference <span class="bionic">Tem</span>plates</h2>
+
+    <h3>Minimal progress.txt</h3>
+
+    <div class="code-block-wrapper">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code># Progress Log
+Project: [Name]
+Started: [Date]
+
+## Patterns
+- [Pattern 1]
+
+## Sessions
+### [Date] - [Task]
+- Status: [complete|in_progress|blocked]
+- Files: [list]
+- Learnings: [what you discovered]
+---</code></pre>
+    </div>
+
+    <h3>Minimal prd.json</h3>
+
+    <div class="code-block-wrapper">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>{
+  "project": "Name",
+  "userStories": [
+    {"id": "US-001", "title": "Task", "status": "pending", "passes": false}
+  ]
+}</code></pre>
+    </div>
+
+    <h3>Minimal AGENTS.md</h3>
+
+    <div class="code-block-wrapper">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code># Agent Learnings
+
+## [Module Name]
+- [Pattern or requirement]</code></pre>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2>The <span class="bionic">Men</span>tal Model</h2>
+
+    <div class="before-after-container">
+      <div class="before-box">
+        <h4>Manual Context</h4>
+        <p>Knowledge lives in wetware, dies with the session.</p>
+      </div>
+      <div class="after-box">
+        <h4>Filesystem State</h4>
+        <p>Knowledge lives in files, compounds forever.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-insight">
+      <div class="callout-title">The Insight</div>
+      <p>Your brain is RAM. The filesystem is disk. <strong>Persist what matters.</strong></p>
+    </div>
+
+    <div class="milestone">
+      Memory externalized. Knowledge compounds across sessions.
+    </div>
+
+    <hr class="section-divider">
+
+    <h2><span class="bionic">Com</span>pounding Returns</h2>
+
+    <div class="ascii-diagram">
+Session 1:  Learn pattern A, write to AGENTS.md
+Session 2:  Read AGENTS.md, learn pattern B, write it
+Session 3:  Read AGENTS.md, know A+B already, learn C
+...
+Session N:  Read AGENTS.md, know A through N-1, highly effective
+    </div>
+
+    <p><strong>Each session is more productive than the last.</strong></p>
+
+    <hr class="section-divider">
+
+    <div class="related-pages">
+      <h3>Related Pages</h3>
+      <ul>
+        <li><a href="single-to-autonomous.html">Transform: Single to Autonomous</a></li>
+        <li><a href="../patterns/mastery/ralph-complete.html">Ralph Pattern Complete Guide</a></li>
+        <li><a href="../patterns/mastery/context-management.html">Context Management Strategies</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-nav">
+      <a href="single-to-autonomous.html">&larr; Single to Autonomous</a>
+      <a href="prompt-to-agent.html">Next: Prompt to Agent &rarr;</a>
+    </div>
+
+  </div>
+
+  <script>
+    function copyCode(btn) {
+      const pre = btn.parentElement.querySelector('pre');
+      const code = pre.querySelector('code') || pre;
+      navigator.clipboard.writeText(code.textContent);
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    }
+  </script>
+  <script src="../js/copy-code.js"></script>
+</body>
+</html>

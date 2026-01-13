@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complexity Ladder - Claude Code Architecture</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    /* Complexity Ladder Specific Styles */
+    .level-indicator {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 1.1em;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .level-0 .level-indicator { background: #e8f4f4; color: #2a7d7d; }
+    .level-1 .level-indicator { background: #e8f0e8; color: #4a8b5a; }
+    .level-2 .level-indicator { background: #f0f0e8; color: #6a8b3a; }
+    .level-3 .level-indicator { background: #f5f0e0; color: #8a7b2a; }
+    .level-4 .level-indicator { background: #f8ebe0; color: #a06a20; }
+    .level-5 .level-indicator { background: #f8e5d8; color: #b85a18; }
+    .level-6 .level-indicator { background: #f5dcd0; color: #c44a10; }
+    .level-7 .level-indicator { background: #f0d0c8; color: #d03a08; }
+
+    .level-section {
+      margin: 32px 0;
+      padding: 28px;
+      background: white;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .level-section::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-radius: 12px 0 0 12px;
+    }
+
+    .level-0::before { background: linear-gradient(180deg, #2a7d7d, #3a9d9d); }
+    .level-1::before { background: linear-gradient(180deg, #4a8b5a, #5aab6a); }
+    .level-2::before { background: linear-gradient(180deg, #6a8b3a, #7aab4a); }
+    .level-3::before { background: linear-gradient(180deg, #8a7b2a, #aa9b3a); }
+    .level-4::before { background: linear-gradient(180deg, #a06a20, #c08a30); }
+    .level-5::before { background: linear-gradient(180deg, #b85a18, #d87a28); }
+    .level-6::before { background: linear-gradient(180deg, #c44a10, #e46a20); }
+    .level-7::before { background: linear-gradient(180deg, #d03a08, #f05a18); }
+
+    .level-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .level-title {
+      font-size: 1.3em;
+      font-weight: 600;
+      color: var(--heading);
+      margin: 0;
+    }
+
+    .level-subtitle {
+      color: var(--text-muted);
+      font-size: 0.95em;
+      margin-left: auto;
+      padding: 4px 12px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+    }
+
+    .unlock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #e8f4f4 0%, #eef6f0 100%);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin: 12px 0;
+    }
+
+    .advancement-trigger {
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .advancement-trigger h4 {
+      color: var(--heading);
+      margin: 0 0 8px 0;
+      font-size: 0.95em;
+    }
+
+    .bionic { font-weight: 700; }
+
+    .progression-visual {
+      background: var(--code-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      font-family: 'SF Mono', monospace;
+      font-size: 0.9em;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .you-are-here {
+      background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .you-are-here h2 {
+      margin: 0 0 12px 0;
+      padding: 0;
+      border: none;
+      font-size: 1.1em;
+      color: var(--accent);
+    }
+
+    .checkpoint {
+      background: #f0ebe3;
+      border-left: 4px solid var(--success);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+
+    .checkpoint-header {
+      color: var(--success);
+      font-weight: 600;
+      font-size: 0.9em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .milestone {
+      background: linear-gradient(90deg, #6b9b7a 0%, #2a7d7d 100%);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      text-align: center;
+      margin: 32px 0;
+      font-weight: 600;
+    }
+
+    .cost-table {
+      margin: 24px 0;
+    }
+
+    .cost-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      margin: 4px 0;
+      border-radius: 6px;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 0.75em;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .code-block-wrapper {
+      position: relative;
+    }
+
+    .code-block-wrapper:hover .copy-btn {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Breadcrumb Navigation -->
+    <nav class="nav-breadcrumb">
+      <a href="../../index.html">Home</a>
+      <span>/</span>
+      <a href="../index.html">Foundations</a>
+      <span>/</span>
+      <a href="index.html">Architecture</a>
+      <span>/</span>
+      <strong>Complexity Ladder</strong>
+    </nav>
+
+    <!-- You Are Here Box -->
+    <div class="you-are-here">
+      <h2>You Are Here</h2>
+      <p><strong>The <span class="bionic">Com</span>plexity <span class="bionic">Lad</span>der</strong> is the master framework for understanding Claude Code capability levels. Before diving into specific patterns (Ralph, Gas Town, CC Mirror), you need to understand <em>where</em> they fit in the progression. This page answers: "What level am I at? What should I learn next?"</p>
+      <p><strong>Pre-requisite:</strong> Basic familiarity with Claude Code. <strong>Next:</strong> <a href="primitives.html">Primitives</a> (the building blocks) or jump to your current level's pattern documentation.</p>
+    </div>
+
+    <h1>The <span class="bionic">Com</span>plexity <span class="bionic">Lad</span>der</h1>
+
+    <p class="conversational-lead">A <span class="bionic">pro</span>gression from beginner to expert Claude Code usage patterns, synthesized from community implementations, power user workflows, and production configurations.</p>
+
+    <!-- Visual Progression -->
+    <div class="progression-visual">Level 7: Full Agent Factory (Gas Town)          [Team-scale solo]
+       |
+Level 6: Parallel Swarms + Worktrees            [Massive parallelization]
+       |
+Level 5: Multi-Agent Orchestration              [Parallel specialized work]
+       |
+Level 4: PRD-Driven Loops (Full Ralph)          [Structured autonomous dev]
+       |
+Level 3: Simple Loops (Basic Ralph)             [Autonomous execution]
+       |
+Level 2: Subagents + Hooks                      [Task delegation, automation]
+       |
+Level 1: CLAUDE.md + Slash Commands             [Consistent behavior, shortcuts]
+       |
+Level 0: Single Interactive Session             [Basic AI coding assistance]</div>
+
+    <div class="checkpoint">
+      <div class="checkpoint-header">Checkpoint: Understanding the Map</div>
+      <p>Before continuing, make sure you understand: <strong>each level builds on the previous</strong>. Skipping levels leads to frustration. The ladder is designed to be climbed one rung at a time.</p>
+    </div>
+
+    <!-- Table of Contents -->
+    <nav class="toc">
+      <h3 class="toc-title">On This Page</h3>
+      <ul>
+        <li><a href="#level-0">Level 0: Single Interactive Session</a></li>
+        <li><a href="#level-1">Level 1: CLAUDE.md + Slash Commands</a></li>
+        <li><a href="#level-2">Level 2: Subagents + Hooks</a></li>
+        <li><a href="#level-3">Level 3: Simple Loops (Basic Ralph)</a></li>
+        <li><a href="#level-4">Level 4: PRD-Driven Loops (Full Ralph)</a></li>
+        <li><a href="#level-5">Level 5: Multi-Agent Orchestration</a></li>
+        <li><a href="#level-6">Level 6: Parallel Swarms + Worktrees</a></li>
+        <li><a href="#level-7">Level 7: Full Agent Factory (Gas Town)</a></li>
+        <li><a href="#progression-guide">Progression Guide</a></li>
+        <li><a href="#anti-patterns">Anti-Patterns by Level</a></li>
+        <li><a href="#quick-reference">Quick Reference</a></li>
+      </ul>
+    </nav>
+
+    <hr class="section-divider">
+
+    <!-- Level 0 -->
+    <section id="level-0" class="level-section level-0">
+      <div class="level-header">
+        <span class="level-indicator">0</span>
+        <h2 class="level-title"><span class="bionic">Sin</span>gle <span class="bionic">Int</span>eractive <span class="bionic">Ses</span>sion</h2>
+        <span class="level-subtitle">Basic AI Coding Assistance</span>
+      </div>
+
+      <p><span class="bionic">Bas</span>ic Claude Code usage in a single terminal. No persistence between sessions. Manual approval for all operations. You're the driver, Claude is the copilot.</p>
+
+      <h4>What You Do</h4>
+      <ul>
+        <li>Run <code>claude</code> in a project directory</li>
+        <li>Ask questions, request code changes</li>
+        <li>Approve each operation manually</li>
+        <li>Session ends, context is lost</li>
+      </ul>
+
+      <h4>Key Characteristics</h4>
+      <ul>
+        <li>No memory between sessions</li>
+        <li>No custom instructions</li>
+        <li>Manual everything</li>
+        <li>Single task focus</li>
+      </ul>
+
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>cd ~/my-project
+claude
+> "Add a login form to the homepage"
+# Claude edits files, you approve each one
+# Session ends, you start fresh next time</code></pre>
+      </div>
+
+      <div class="unlock-badge">Unlock: Basic AI Coding Assistance</div>
+      <p>You can now get AI help for coding tasks, but every session starts from scratch.</p>
+
+      <div class="advancement-trigger">
+        <h4>When to Advance to Level 1</h4>
+        <ul>
+          <li>You find yourself repeating the same instructions</li>
+          <li>You want Claude to "just know" your project's patterns</li>
+          <li>You're tired of re-establishing context every session</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Level 1 -->
+    <section id="level-1" class="level-section level-1">
+      <div class="level-header">
+        <span class="level-indicator">1</span>
+        <h2 class="level-title">CLAUDE.md + <span class="bionic">Sla</span>sh <span class="bionic">Com</span>mands</h2>
+        <span class="level-subtitle">Consistent Behavior, Shortcuts</span>
+      </div>
+
+      <p><span class="bionic">Pro</span>ject context via CLAUDE.md files. Reusable workflows via slash commands. Claude "remembers" your project's architecture, coding standards, and preferences.</p>
+
+      <h4>What You Add</h4>
+
+      <p><strong>CLAUDE.md in project root:</strong></p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Project Context
+
+## Tech Stack
+- TypeScript + React
+- PostgreSQL with Drizzle ORM
+- Tailwind CSS
+
+## Coding Standards
+- Use functional components only
+- All API calls through server actions
+- Never use `any` type
+
+## Common Commands
+npm run dev       # Start dev server
+npm run typecheck # TypeScript check
+npm run test      # Run tests</code></pre>
+      </div>
+
+      <p><strong>Slash commands in <code>.claude/commands/</code>:</strong></p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># .claude/commands/review.md
+Review the current git diff for:
+1. Logic errors
+2. Missing error handling
+3. TypeScript issues
+
+Output format: [file:line] - [severity] - [issue]</code></pre>
+      </div>
+
+      <h4>Key Characteristics</h4>
+      <ul>
+        <li><span class="bionic">Per</span>sistent project context</li>
+        <li><span class="bionic">Con</span>sistent Claude behavior across sessions</li>
+        <li>Quick invocation of common workflows</li>
+        <li>Still single-session, still manual</li>
+      </ul>
+
+      <div class="unlock-badge">Unlock: Consistent Behavior, Workflow Shortcuts</div>
+      <p>Claude now understands your project. Commands take seconds instead of paragraphs.</p>
+
+      <div class="advancement-trigger">
+        <h4>When to Advance to Level 2</h4>
+        <ul>
+          <li>You need tasks done in parallel</li>
+          <li>You want automated responses to events (file saves, commits)</li>
+          <li>You want specialized agents for different task types</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="checkpoint">
+      <div class="checkpoint-header">Checkpoint: Levels 0-1 Mastered</div>
+      <p>At this point, you should have:</p>
+      <ul>
+        <li>A CLAUDE.md file documenting your project</li>
+        <li>At least 2-3 slash commands for common tasks</li>
+        <li>Consistent Claude responses across sessions</li>
+      </ul>
+      <p>If not, spend more time at Level 1 before proceeding.</p>
+    </div>
+
+    <!-- Level 2 -->
+    <section id="level-2" class="level-section level-2">
+      <div class="level-header">
+        <span class="level-indicator">2</span>
+        <h2 class="level-title"><span class="bionic">Sub</span>agents + <span class="bionic">Hoo</span>ks</h2>
+        <span class="level-subtitle">Task Delegation, Automation</span>
+      </div>
+
+      <p><span class="bionic">Del</span>egate to specialized agents with isolated contexts. Automate responses to lifecycle events. Claude becomes a small team rather than a single assistant.</p>
+
+      <h4>What You Add</h4>
+
+      <p><strong>Subagents in <code>.claude/agents/</code>:</strong></p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># .claude/agents/security-reviewer.yaml
+name: Security Reviewer
+description: Reviews code for security vulnerabilities
+tools:
+  - Read
+  - Grep
+  - Glob
+prompt: |
+  You are a security expert. Analyze code for:
+  - Hardcoded secrets
+  - SQL injection
+  - XSS vulnerabilities
+  - Authentication bypasses</code></pre>
+      </div>
+
+      <p><strong>Hooks in <code>~/.claude/settings.json</code>:</strong></p>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Edit",
+      "hooks": [{
+        "type": "command",
+        "command": "prettier --write $FILE"
+      }]
+    }],
+    "PreToolUse": [{
+      "matcher": "AskUserQuestion",
+      "hooks": [{
+        "type": "command",
+        "command": "~/.claude/hooks/notify.sh"
+      }]
+    }]
+  }
+}</code></pre>
+      </div>
+
+      <h4>Subagent vs Hook Decision</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>Tool</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Complex multi-step reasoning</td><td>Subagent</td></tr>
+          <tr><td>Simple automatic task</td><td>Hook</td></tr>
+          <tr><td>Adversarial review</td><td>Subagent</td></tr>
+          <tr><td>Format on save</td><td>Hook</td></tr>
+          <tr><td>Quick notification</td><td>Hook</td></tr>
+        </tbody>
+      </table>
+
+      <div class="unlock-badge">Unlock: Task Delegation, Automated Workflows</div>
+      <p>You now have a small AI team. Subagents handle specialized work. Hooks handle automation.</p>
+
+      <div class="advancement-trigger">
+        <h4>When to Advance to Level 3</h4>
+        <ul>
+          <li>You want overnight feature development</li>
+          <li>You want Claude to work without your presence</li>
+          <li>You need iterative self-improvement on tasks</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Level 3 -->
+    <section id="level-3" class="level-section level-3">
+      <div class="level-header">
+        <span class="level-indicator">3</span>
+        <h2 class="level-title"><span class="bionic">Sim</span>ple <span class="bionic">Loo</span>ps (Basic Ralph)</h2>
+        <span class="level-subtitle">Autonomous Execution</span>
+      </div>
+
+      <p>Claude Code runs in a loop until a task is complete. Each iteration gets fresh context. External memory via git and files. Named after Geoffrey Huntley's "Ralph Wiggum" pattern.</p>
+
+      <h4>The Core Loop</h4>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>#!/bin/bash
+# ralph-simple.sh
+while :; do
+  claude "Check progress.txt, complete next task, update progress" | tee output.txt
+
+  if grep -q "ALL TASKS COMPLETE" output.txt; then
+    break
+  fi
+
+  sleep 5
+done</code></pre>
+      </div>
+
+      <h4>External Memory Files</h4>
+      <div class="file-listing">
+        <div class="file-listing-header">Required Files</div>
+        <div class="file-item">
+          <span class="file-name">progress.txt</span>
+          <span class="file-desc">What's done, what's next</span>
+        </div>
+        <div class="file-item">
+          <span class="file-name">AGENTS.md</span>
+          <span class="file-desc">Learnings for future iterations</span>
+        </div>
+      </div>
+
+      <h4>Key Characteristics</h4>
+      <ul>
+        <li><span class="bionic">Fre</span>sh context each iteration</li>
+        <li><span class="bionic">Mem</span>ory persists in files and git</li>
+        <li>Simple completion condition</li>
+        <li>Single task list</li>
+      </ul>
+
+      <div class="unlock-badge">Unlock: Autonomous Execution</div>
+      <p>Claude can now work without you watching. Come back to find tasks completed.</p>
+
+      <div class="advancement-trigger">
+        <h4>When to Advance to Level 4</h4>
+        <ul>
+          <li>You need structured acceptance criteria</li>
+          <li>You want automatic quality gates</li>
+          <li>You need to track complex multi-story features</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Level 4 -->
+    <section id="level-4" class="level-section level-4">
+      <div class="level-header">
+        <span class="level-indicator">4</span>
+        <h2 class="level-title">PRD-<span class="bionic">Dri</span>ven <span class="bionic">Loo</span>ps (Full Ralph)</h2>
+        <span class="level-subtitle">Structured Autonomous Dev</span>
+      </div>
+
+      <p><span class="bionic">JSO</span>N-based task tracking with acceptance criteria, priority ordering, and quality gates. Full product requirement documents drive autonomous development.</p>
+
+      <h4>prd.json Structure</h4>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>{
+  "branchName": "ralph/auth-feature",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create login form component",
+      "acceptanceCriteria": [
+        "Email/password fields render",
+        "Validates email format",
+        "npm run typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Add form submission handler",
+      "acceptanceCriteria": [
+        "Calls auth API on submit",
+        "Shows error on failure",
+        "Redirects on success",
+        "npm run typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}</code></pre>
+      </div>
+
+      <h4>Story Sizing Rules</h4>
+      <div class="gotcha-block">
+        <ul>
+          <li><strong>Too big:</strong> "Build the entire auth system"</li>
+          <li><strong>Just right:</strong> "Add login form component"</li>
+          <li><strong>Rule:</strong> If you can't describe it in 2-3 sentences, split it</li>
+        </ul>
+      </div>
+
+      <div class="unlock-badge">Unlock: Structured Autonomous Development</div>
+      <p>Real features shipped overnight. Learnings compound across iterations.</p>
+
+      <div class="advancement-trigger">
+        <h4>When to Advance to Level 5</h4>
+        <ul>
+          <li>You want multiple agents working simultaneously</li>
+          <li>You want agents coordinating on complex tasks</li>
+          <li>You're hitting limits of sequential processing</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="milestone">Milestone: Autonomous Developer Achieved (Levels 0-4)</div>
+
+    <div class="checkpoint">
+      <div class="checkpoint-header">Checkpoint: Ready for Multi-Agent?</div>
+      <p>Before proceeding to Levels 5-7, verify:</p>
+      <ul>
+        <li>You've successfully run a Ralph loop overnight</li>
+        <li>Your prd.json stories are well-sized (completable in one context)</li>
+        <li>Quality gates (typecheck, tests) are enforced</li>
+        <li>You're comfortable with Claude working unattended</li>
+      </ul>
+      <p>Levels 5-7 are significantly more complex and costly. Ensure you've mastered Level 4 first.</p>
+    </div>
+
+    <!-- Level 5 -->
+    <section id="level-5" class="level-section level-5">
+      <div class="level-header">
+        <span class="level-indicator">5</span>
+        <h2 class="level-title"><span class="bionic">Mul</span>ti-Agent <span class="bionic">Orc</span>hestration</h2>
+        <span class="level-subtitle">Parallel Specialized Work</span>
+      </div>
+
+      <p><span class="bionic">Cen</span>tral orchestrator delegates to specialized workers. Hub-and-spoke architecture. Agents coordinate via task management and file-based handoffs. Powered by CC Mirror or similar tools.</p>
+
+      <h4>Architecture</h4>
+      <div class="ascii-diagram">         Orchestrator
+              |
+    +---------+---------+
+    |         |         |
+ Coder     Tester    Docs
+ Agent     Agent     Agent</div>
+
+      <h4>Model Selection for Workers</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Use Case</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Haiku</strong></td><td>File lookups, simple transforms. Spawn 5-10 parallel.</td></tr>
+          <tr><td><strong>Sonnet</strong></td><td>Implementation, test generation. Main workhorse.</td></tr>
+          <tr><td><strong>Opus</strong></td><td>Architecture decisions, ambiguous tasks. Reserve for complex.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="unlock-badge">Unlock: Parallel Specialized Work</div>
+      <p>Multiple agents working simultaneously on coordinated tasks.</p>
+
+      <div class="advancement-trigger">
+        <h4>When to Advance to Level 6</h4>
+        <ul>
+          <li>You need truly parallel work on the same codebase</li>
+          <li>You want git worktree isolation</li>
+          <li>You're managing 5+ simultaneous agents</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Level 6 -->
+    <section id="level-6" class="level-section level-6">
+      <div class="level-header">
+        <span class="level-indicator">6</span>
+        <h2 class="level-title"><span class="bionic">Par</span>allel <span class="bionic">Swa</span>rms + <span class="bionic">Wor</span>ktrees</h2>
+        <span class="level-subtitle">Massive Parallelization</span>
+      </div>
+
+      <p><span class="bionic">Git</span> worktrees provide complete isolation for parallel agents. Multiple Ralph loops running simultaneously. Merge orchestration handles conflicts.</p>
+
+      <h4>Git Worktree Setup</h4>
+      <div class="code-block-wrapper">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Create isolated worktrees for parallel agents
+git worktree add ../wt-auth feature-auth
+git worktree add ../wt-payments feature-payments
+git worktree add ../wt-notifications feature-notifications</code></pre>
+      </div>
+
+      <h4>Architecture</h4>
+      <div class="ascii-diagram">Main Repo
+    |
+    +---> Worktree: auth (Agent 1)
+    |         |
+    |         +-> Ralph loop running
+    |
+    +---> Worktree: payments (Agent 2)
+    |         |
+    |         +-> Ralph loop running
+    |
+    +---> Worktree: notifications (Agent 3)
+              |
+              +-> Ralph loop running</div>
+
+      <div class="unlock-badge">Unlock: Massive Parallelization</div>
+      <p>10x productivity through true parallel development.</p>
+
+      <div class="advancement-trigger">
+        <h4>When to Advance to Level 7</h4>
+        <ul>
+          <li>You want a persistent team of specialized agents</li>
+          <li>You want self-improving systems</li>
+          <li>You're ready for team-scale operations solo</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Level 7 -->
+    <section id="level-7" class="level-section level-7">
+      <div class="level-header">
+        <span class="level-indicator">7</span>
+        <h2 class="level-title">Full <span class="bionic">Age</span>nt <span class="bionic">Fac</span>tory (Gas Town)</h2>
+        <span class="level-subtitle">Team-Scale Solo</span>
+      </div>
+
+      <p><span class="bionic">Fac</span>tory architecture for agent production. 7+ specialized roles working continuously. Self-improving systems that add capabilities. Human becomes Product Manager, agents become the engineering team.</p>
+
+      <h4>The 7 Roles</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Function</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Mayor</strong></td><td>Town-level coordination across all projects</td></tr>
+          <tr><td><strong>Deacon</strong></td><td>Monitoring, health checks, handshakes</td></tr>
+          <tr><td><strong>Dogs</strong></td><td>Quality gates, watchdogs, linting</td></tr>
+          <tr><td><strong>Refinery</strong></td><td>Task decomposition from high-level specs</td></tr>
+          <tr><td><strong>Polecat</strong></td><td>Named persistent workers (specialized)</td></tr>
+          <tr><td><strong>Witness</strong></td><td>Per-project observer</td></tr>
+          <tr><td><strong>Crew</strong></td><td>Ephemeral workers for burst tasks</td></tr>
+          <tr><td><strong>Overseer (YOU)</strong></td><td>Human boss with inbox</td></tr>
+        </tbody>
+      </table>
+
+      <blockquote>
+        <p>"You're a Product Manager. Gas Town is an Idea Compiler. You file features, agents build them."</p>
+      </blockquote>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">Warnings (from Steve Yegge)</div>
+        <ul>
+          <li>"Code is 3 weeks old, smuggled 400 miles upriver"</li>
+          <li>"100% vibe-coded - never looked at the code myself"</li>
+          <li>"If you have any doubt whatsoever, you can't use it"</li>
+          <li>"Expensive as hell"</li>
+          <li>"Requires tmux"</li>
+        </ul>
+      </div>
+
+      <div class="unlock-badge">Unlock: Team-Scale Productivity Solo</div>
+      <p>One person with Gas Town = small engineering team output.</p>
+    </section>
+
+    <div class="milestone">Milestone: Agent Factory Architect (Levels 5-7)</div>
+
+    <hr class="section-divider">
+
+    <!-- Progression Guide -->
+    <section id="progression-guide">
+      <h2><span class="bionic">Pro</span>gression <span class="bionic">Gui</span>de</h2>
+
+      <h3>Moving Up Each Level</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>From</th>
+            <th>To</th>
+            <th>Key Steps</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td>1</td><td>Create CLAUDE.md, make 3 slash commands for common tasks</td></tr>
+          <tr><td>1</td><td>2</td><td>Add one subagent for security/review, add format-on-save hook</td></tr>
+          <tr><td>2</td><td>3</td><td>Write a simple bash loop, let it run unattended for one task</td></tr>
+          <tr><td>3</td><td>4</td><td>Create your first prd.json, run Ralph on a real feature</td></tr>
+          <tr><td>4</td><td>5</td><td>Set up CC Mirror, orchestrate 3 agents on one task</td></tr>
+          <tr><td>5</td><td>6</td><td>Use worktrees, run 3 parallel Ralph loops on related features</td></tr>
+          <tr><td>6</td><td>7</td><td>Install Gas Town, create your first rig, name your first polecat</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Time Investment by Level</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Level</th>
+            <th>Setup Time</th>
+            <th>Mastery Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td>1 day</td></tr>
+          <tr><td>1</td><td>30 min</td><td>1 week</td></tr>
+          <tr><td>2</td><td>2 hours</td><td>2 weeks</td></tr>
+          <tr><td>3</td><td>1 hour</td><td>1 week</td></tr>
+          <tr><td>4</td><td>4 hours</td><td>2 weeks</td></tr>
+          <tr><td>5</td><td>4 hours</td><td>2 weeks</td></tr>
+          <tr><td>6</td><td>2 hours</td><td>1 week</td></tr>
+          <tr><td>7</td><td>1 day</td><td>1+ month</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Cost Implications</h3>
+      <div class="cost-table">
+        <div class="cost-row"><span>Level 0-1</span><span>$20-50/month</span></div>
+        <div class="cost-row"><span>Level 2-3</span><span>$50-100/month</span></div>
+        <div class="cost-row"><span>Level 4</span><span>$100-200/month</span></div>
+        <div class="cost-row"><span>Level 5</span><span>$200-400/month</span></div>
+        <div class="cost-row"><span>Level 6</span><span>$400-800/month</span></div>
+        <div class="cost-row"><span>Level 7</span><span>$800+ (multiple accounts)</span></div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Anti-Patterns -->
+    <section id="anti-patterns">
+      <h2><span class="bionic">Ant</span>i-Patterns at Each Level</h2>
+
+      <details>
+        <summary>Level 0 Anti-Patterns</summary>
+        <div>
+          <ul>
+            <li>Asking Claude to "just build everything"</li>
+            <li>Not learning from Claude's explanations</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>Level 1 Anti-Patterns</summary>
+        <div>
+          <ul>
+            <li>Overloading CLAUDE.md with everything (keep it focused)</li>
+            <li>Creating too many slash commands (quality over quantity)</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>Level 2 Anti-Patterns</summary>
+        <div>
+          <ul>
+            <li>Spawning subagents for simple lookups (use tools directly)</li>
+            <li>Complex logic in hooks (keep them simple)</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>Level 3 Anti-Patterns</summary>
+        <div>
+          <ul>
+            <li>Stories too large for one context window</li>
+            <li>No external memory (loops forget everything)</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>Level 4 Anti-Patterns</summary>
+        <div>
+          <ul>
+            <li>Vague acceptance criteria ("works correctly")</li>
+            <li>Skipping the typecheck quality gate</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>Level 5 Anti-Patterns</summary>
+        <div>
+          <ul>
+            <li>Workers spawning sub-agents (recursion chaos)</li>
+            <li>Orchestrator doing implementation work</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>Level 6 Anti-Patterns</summary>
+        <div>
+          <ul>
+            <li>Not isolating worktrees properly</li>
+            <li>Ignoring merge conflicts</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>Level 7 Anti-Patterns</summary>
+        <div>
+          <ul>
+            <li>Trying Gas Town without Level 6 mastery</li>
+            <li>Expecting polish and stability</li>
+            <li>Underbudgeting for API costs</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Quick Reference -->
+    <section id="quick-reference">
+      <h2><span class="bionic">Qui</span>ck <span class="bionic">Ref</span>erence: Key Tools by Level</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Level</th>
+            <th>Primary Tools</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td><code>claude</code></td></tr>
+          <tr><td>1</td><td>CLAUDE.md, <code>.claude/commands/</code></td></tr>
+          <tr><td>2</td><td><code>.claude/agents/</code>, <code>~/.claude/settings.json</code> hooks</td></tr>
+          <tr><td>3</td><td>bash loop, progress.txt</td></tr>
+          <tr><td>4</td><td>prd.json, prompt.md, ralph.sh</td></tr>
+          <tr><td>5</td><td>CC Mirror, orchestration skill, Task tool</td></tr>
+          <tr><td>6</td><td><code>git worktree</code>, parallel bash, merge scripts</td></tr>
+          <tr><td>7</td><td>Gas Town (<code>gt</code>), tmux, MCP Agent Mail</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Bottom Line -->
+    <section class="recommendation">
+      <blockquote style="border: none; background: none; padding: 0; margin: 0 0 16px 0; font-style: normal;">
+        "Given excellent upfront specification, we can already achieve meaningful unattended software production in 2026." - Ryan Carson
+      </blockquote>
+      <p>Start at Level 0. Master each level before advancing. By Level 4, you're shipping features overnight. By Level 7, you're running a solo engineering department.</p>
+      <p><strong>The ladder is real. Climb it.</strong></p>
+    </section>
+
+    <!-- Related Pages -->
+    <div class="related-pages">
+      <h3>Continue Learning</h3>
+      <ul>
+        <li><a href="primitives.html">Primitives</a> - The atomic building blocks that compose each level</li>
+        <li><a href="composition-rules.html">Composition Rules</a> - How primitives combine into patterns</li>
+        <li><a href="domain-isolation.html">Domain Isolation</a> - The Panopticon pattern for multi-domain work</li>
+      </ul>
+    </div>
+
+    <!-- Footer Navigation -->
+    <nav class="footer-nav">
+      <a href="../../index.html">Home</a>
+      <a href="primitives.html">Next: Primitives</a>
+    </nav>
+  </div>
+
+  
+  <script src="../../js/copy-code.js"></script>
+</body>
+</html>

@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude HUD - Real-Time Session Visibility | Claude Code Tooling</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .you-are-here {
+      background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .checkpoint {
+      background: #f0ebe3;
+      border-left: 4px solid var(--success);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .checkpoint-header {
+      color: var(--success);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .troubleshoot {
+      border: 1px solid var(--error);
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+    .troubleshoot summary {
+      background: #fef6f5;
+      padding: 1rem;
+      cursor: pointer;
+      color: var(--error);
+      font-weight: 500;
+    }
+    .troubleshoot > div {
+      padding: 1rem;
+      background: white;
+    }
+    .milestone {
+      background: linear-gradient(90deg, var(--success) 0%, var(--accent) 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      margin: 2rem 0;
+    }
+    .terminal-output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85em;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    .terminal-output .comment {
+      color: #6a9955;
+    }
+    .terminal-output .success {
+      color: #4ec9b0;
+    }
+    .terminal-output .warning {
+      color: #dcdcaa;
+    }
+    .terminal-output .error {
+      color: #f14c4c;
+    }
+    .terminal-output .arrow {
+      color: #569cd6;
+    }
+    .bionic { font-weight: 700; }
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      font-size: 0.75em;
+    }
+    .copy-btn:hover {
+      background: var(--accent-light);
+    }
+    .code-wrapper {
+      position: relative;
+    }
+    .context-bar {
+      font-family: 'SF Mono', Monaco, monospace;
+      margin: 1rem 0;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .context-bar.green {
+      background: #d4edda;
+      color: #155724;
+    }
+    .context-bar.yellow {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .context-bar.red {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .hud-preview {
+      background: #2d2d2d;
+      border: 2px solid #444;
+      border-radius: 8px;
+      padding: 0;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.8em;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+    }
+    .hud-preview .hud-header {
+      background: #3d3d3d;
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid #444;
+      color: #e0e0e0;
+    }
+    .hud-preview .hud-body {
+      padding: 1rem;
+      color: #d4d4d4;
+    }
+    .hud-preview .hud-section {
+      border-bottom: 1px solid #444;
+      padding: 0.5rem 0;
+    }
+    .hud-preview .hud-section:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="nav-breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <a href="index.html">Tooling</a>
+      <span>/</span>
+      Claude HUD
+    </nav>
+
+    <div class="you-are-here">
+      <strong><span class="bionic">You</span> Are <span class="bionic">Her</span>e:</strong> You're learning about <strong>Claude HUD</strong>, a plugin that shows you real-time context usage, tool activity, and subagent status. This makes the hidden control plane of Claude Code visible.
+      <br><br>
+      <strong><span class="bionic">Wha</span>t you <span class="bionic">nee</span>d first:</strong> Claude Code v1.0.80+, Pro/Max/Team subscription (for usage limits), terminal with ANSI color support.
+    </div>
+
+    <h1><span class="bionic">Cla</span>ude HUD - <span class="bionic">Rea</span>l-Time <span class="bionic">Ses</span>sion <span class="bionic">Vis</span>ibility</h1>
+
+    <div class="problem-statement">
+      <em>"Finally a HUD to tell if Claude's actually working... or just staring into the void"</em>
+      <br><br>
+      Without visibility, you don't know:
+      <ul>
+        <li>How much context you've used</li>
+        <li>What tools are currently executing</li>
+        <li>Which subagents are running</li>
+        <li>When you're about to hit limits</li>
+      </ul>
+    </div>
+
+    <div class="toc">
+      <div class="toc-title">On This Page</div>
+      <ul>
+        <li><a href="#what-it-shows">What It Shows</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#hud-in-action">The HUD in Action</a></li>
+        <li><a href="#configuration">Configuration</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#limitations">Limitations</a></li>
+      </ul>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="what-it-shows"><span class="bionic">Wha</span>t It <span class="bionic">Sho</span>ws</h2>
+
+    <div class="callout callout-insight">
+      <div class="callout-title">Mental Model</div>
+      <p>Think of Claude Code sessions as a <strong>dynamic system needing instrumentation</strong> - like a dashboard in a car to avoid breakdowns. Visibility into resource usage prevents context overflow. Real-time feedback beats blind trust.</p>
+    </div>
+
+    <h3><span class="bionic">Ses</span>sion <span class="bionic">Met</span>adata</h3>
+    <ul>
+      <li>Model in use (e.g., Opus 4.5)</li>
+      <li>Plan tier</li>
+      <li><strong>Context percentage with color-coded bar</strong></li>
+      <li>Project path</li>
+      <li>Git branch</li>
+      <li>Config counts (CLAUDE.md files, rules, MCPs, hooks)</li>
+      <li>Usage limits</li>
+      <li>Session duration</li>
+    </ul>
+
+    <h3><span class="bionic">Con</span>text Bar <span class="bionic">Col</span>or Guide</h3>
+
+    <div class="context-bar green">======== 35%</div> <span>GREEN: Low usage, plenty of room</span>
+    <br><br>
+    <div class="context-bar yellow">========= 65%</div> <span>YELLOW: Medium usage, be aware</span>
+    <br><br>
+    <div class="context-bar red">========== 85%</div> <span>RED: High usage, consider fresh session</span>
+
+    <h3><span class="bionic">Too</span>l <span class="bionic">Act</span>ivity</h3>
+    <ul>
+      <li>Spinners for running tools (Read, Edit, Glob, etc.)</li>
+      <li>File targets being operated on</li>
+      <li>Checkmarks and counts for completed tools</li>
+    </ul>
+
+    <h3><span class="bionic">Age</span>nt <span class="bionic">Sta</span>tus</h3>
+    <ul>
+      <li>Subagent names (Explore, Librarian, etc.)</li>
+      <li>Descriptions of what they're doing</li>
+      <li>Elapsed time</li>
+      <li>Completion indicators</li>
+    </ul>
+
+    <h3><span class="bionic">Tod</span>o <span class="bionic">Pro</span>gress</h3>
+    <ul>
+      <li>Current task status</li>
+      <li>Completion counter (e.g., 5/5)</li>
+    </ul>
+
+    <hr class="section-divider">
+
+    <h2 id="installation"><span class="bionic">Ins</span>tallation</h2>
+
+    <div class="tutorial-block">
+      <div class="tutorial-header">Installing Claude HUD</div>
+      <div class="tutorial-content">
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">1</div>
+          <div class="tutorial-step-content">
+            <h4>Add the Marketplace</h4>
+            <div class="code-wrapper">
+              <pre><code>/plugin marketplace add jarrodwatts/claude-hud</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">2</div>
+          <div class="tutorial-step-content">
+            <h4>Install the Plugin</h4>
+            <div class="code-wrapper">
+              <pre><code>/plugin install claude-hud</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">3</div>
+          <div class="tutorial-step-content">
+            <h4>Run Setup</h4>
+            <div class="code-wrapper">
+              <pre><code>/claude-hud:setup</code></pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="checkpoint">
+      <div class="checkpoint-header">Checkpoint: Installation Complete</div>
+      <p><strong>You should see:</strong></p>
+      <div class="terminal-output">
+claude> /claude-hud:setup
+
+Claude HUD Setup
+
+Select a preset:
+
+  [1] Full         - All displays enabled (recommended)
+  [2] Essential    - Core info only
+  [3] Minimal      - Bare minimum
+  [4] Custom       - Configure manually
+
+Selection: 1
+
+Applying Full preset...
+  <span class="success">+</span> Model display: ON
+  <span class="success">+</span> Context bar: ON
+  <span class="success">+</span> Config counts: ON
+  <span class="success">+</span> Duration: ON
+  <span class="success">+</span> Usage limits: ON
+  <span class="success">+</span> Token breakdown: ON (at 85%+)
+  <span class="success">+</span> Tool activity: ON
+  <span class="success">+</span> Agent status: ON
+  <span class="success">+</span> Todo progress: ON
+  <span class="success">+</span> Git status: ON
+
+<span class="success">Setup complete!</span>
+
+HUD will appear on your next prompt.
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="hud-in-action"><span class="bionic">The</span> HUD in <span class="bionic">Act</span>ion</h2>
+
+    <h3><span class="bionic">Nor</span>mal <span class="bionic">Ope</span>ration</h3>
+
+    <div class="hud-preview">
+      <div class="hud-header">
+        [Opus 4.5] <span style="color: #4ec9b0;">========</span><span style="color: #666;">==</span> 35% | myapp | main | 1 MCP | 1m
+      </div>
+      <div class="hud-body">
+        <div class="hud-section">
+          <span style="color: #4ec9b0;">+</span> Read x2 | <span style="color: #4ec9b0;">+</span> WebFetch x1 | <span style="color: #dcdcaa;">~</span> Edit (saving...)
+        </div>
+        <div class="hud-section">
+          Todos: 3/5 complete
+        </div>
+      </div>
+    </div>
+
+    <h3><span class="bionic">Dur</span>ing <span class="bionic">Act</span>ive <span class="bionic">Too</span>l Use</h3>
+
+    <div class="hud-preview">
+      <div class="hud-header">
+        [Opus 4.5] <span style="color: #dcdcaa;">==========</span> 72% | myapp | feature/auth | 2 MCP
+      </div>
+      <div class="hud-body">
+        <div class="hud-section">
+          <span style="color: #dcdcaa;">~</span> Read: src/auth/middleware.ts <span style="color: #666;"><-- Currently reading</span><br>
+          <span style="color: #dcdcaa;">~</span> Bash: npm run typecheck <span style="color: #666;"><-- Running in parallel</span><br>
+          <span style="color: #4ec9b0;">+</span> Edit x3 | <span style="color: #4ec9b0;">+</span> Glob x1 <span style="color: #666;"><-- Completed</span>
+        </div>
+        <div class="hud-section">
+          Agents:<br>
+          &nbsp;&nbsp;<span style="color: #dcdcaa;">~</span> Explore: Finding auth patterns (15s) <span style="color: #666;"><-- Subagent active</span><br>
+          &nbsp;&nbsp;<span style="color: #4ec9b0;">+</span> Librarian: Checked dependencies (done)
+        </div>
+        <div class="hud-section">
+          Todos: [in_progress] Fix auth bug | 2/4 complete
+        </div>
+      </div>
+    </div>
+
+    <h3><span class="bionic">At</span> High <span class="bionic">Con</span>text <span class="bionic">Usa</span>ge (85%+)</h3>
+
+    <div class="hud-preview">
+      <div class="hud-header">
+        [Opus 4.5] <span style="color: #f14c4c;">==========</span> 89% | myapp | main | <span style="color: #f14c4c;">HIGH</span>
+      </div>
+      <div class="hud-body">
+        <div class="hud-section" style="color: #f14c4c;">
+          Token Breakdown: <span style="color: #666;"><-- Appears at 85%+</span><br>
+          &nbsp;&nbsp;Input:  145,234 / 200,000 (73%)<br>
+          &nbsp;&nbsp;Output:  32,451 /  50,000 (65%)<br>
+          &nbsp;&nbsp;Cache:   21,000 tokens cached <span style="color: #666;"><-- Context savings</span><br>
+          <br>
+          Consider: /compact or starting fresh session
+        </div>
+        <div class="hud-section">
+          <span style="color: #4ec9b0;">+</span> Read x12 | <span style="color: #4ec9b0;">+</span> Edit x8 | <span style="color: #4ec9b0;">+</span> Bash x5
+        </div>
+      </div>
+    </div>
+
+    <h3><span class="bionic">Dur</span>ing <span class="bionic">Sub</span>agent <span class="bionic">Wor</span>k</h3>
+
+    <div class="hud-preview">
+      <div class="hud-header">
+        [Opus 4.5] <span style="color: #4ec9b0;">========</span><span style="color: #666;">==</span> 45% | myapp | main
+      </div>
+      <div class="hud-body">
+        <div class="hud-section">
+          Background Agents:<br><br>
+          &nbsp;&nbsp;<span style="color: #dcdcaa;">~</span> research-auth<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"Analyzing authentication patterns in codebase"<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;Running: 23s <span style="color: #666;"><-- Live timer</span><br><br>
+          &nbsp;&nbsp;<span style="color: #dcdcaa;">~</span> write-tests<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"Generating unit tests for UserService"<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;Running: 8s<br><br>
+          &nbsp;&nbsp;<span style="color: #4ec9b0;">+</span> explore-db (completed in 12s)<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;"Found: Drizzle ORM with SQLite"
+        </div>
+        <div class="hud-section">
+          <span style="color: #4ec9b0;">+</span> Task x2 | <span style="color: #dcdcaa;">~</span> Task (research-auth running)
+        </div>
+      </div>
+    </div>
+
+    <div class="milestone">
+      Checkpoint: You can now see everything Claude is doing!
+    </div>
+
+    <hr class="section-divider">
+
+    <h2 id="configuration"><span class="bionic">Con</span>figuration</h2>
+
+    <h3><span class="bionic">Int</span>eractive <span class="bionic">Set</span>up</h3>
+
+    <div class="code-wrapper">
+      <pre><code>/claude-hud:configure</code></pre>
+    </div>
+
+    <p><strong>Presets:</strong></p>
+    <ul>
+      <li><strong>Full</strong> - All displays enabled (recommended)</li>
+      <li><strong>Essential</strong> - Core info only</li>
+      <li><strong>Minimal</strong> - Bare minimum</li>
+    </ul>
+
+    <h3><span class="bionic">Man</span>ual <span class="bionic">Con</span>fig</h3>
+
+    <p><strong>Location:</strong> <code>~/.claude/plugins/claude-hud/config.json</code></p>
+
+    <div class="code-wrapper">
+      <pre><code>{
+  "layout": "default",
+  "pathLevels": 2,
+  "gitStatus": {
+    "enabled": true,
+    "showDirty": true,
+    "showAheadBehind": true
+  },
+  "display": {
+    "showModel": true,
+    "showContextBar": true,
+    "showConfigCounts": true,
+    "showDuration": true,
+    "showUsage": true,
+    "showTokenBreakdown": true,
+    "showTools": true,
+    "showAgents": true,
+    "showTodos": true
+  }
+}</code></pre>
+    </div>
+
+    <h3><span class="bionic">Tec</span>hnical <span class="bionic">Det</span>ails</h3>
+    <ul>
+      <li>Updates every ~300ms</li>
+      <li>Parses Claude Code's stdin JSON and transcript JSONL</li>
+      <li>Extracts native token data, tools, agents, todos</li>
+      <li>Renders to stdout in terminal statusline</li>
+      <li>Uses native APIs - no tmux or separate windows needed</li>
+      <li>Token breakdown appears at 85%+ usage</li>
+    </ul>
+
+    <hr class="section-divider">
+
+    <h2 id="troubleshooting"><span class="bionic">Tro</span>ubleshooting</h2>
+
+    <details class="troubleshoot">
+      <summary>Error: "Plugin marketplace not available"</summary>
+      <div>
+        <p><strong>Cause:</strong> Claude Code version too old, or marketplace not enabled</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Update Claude Code to latest
+npm update -g @anthropic-ai/claude-code
+
+# Verify version (1.0.80+ required)
+claude --version
+
+# If marketplace still not available, try direct install
+cd ~/.claude/plugins
+git clone https://github.com/jarrodwatts/claude-hud.git</code></pre>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>HUD not appearing after setup</summary>
+      <div>
+        <p><strong>Cause:</strong> Setup not completed, plugin not activated, or display disabled</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Run setup again
+/claude-hud:setup
+
+# Check if display options enabled
+/claude-hud:configure
+# Select "Full" preset to enable everything
+
+# Manually check config:
+cat ~/.claude/plugins/claude-hud/config.json | jq '.display'
+# All values should be true
+
+# Restart session to apply
+exit
+claude</code></pre>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>Context bar not showing colors correctly</summary>
+      <div>
+        <p><strong>Cause:</strong> Terminal doesn't support ANSI colors, or terminal theme interference</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Verify terminal supports colors
+echo -e "\e[32mGreen\e[0m \e[33mYellow\e[0m \e[31mRed\e[0m"
+# Should show colored text
+
+# If using tmux, enable 256 colors
+echo 'set -g default-terminal "xterm-256color"' >> ~/.tmux.conf
+tmux source-file ~/.tmux.conf
+
+# For iTerm2: Preferences > Profiles > Terminal >
+# Report Terminal Type: xterm-256color
+
+# Check TERM variable
+echo $TERM
+# Should be xterm-256color or similar</code></pre>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>Usage limits not showing</summary>
+      <div>
+        <p><strong>Cause:</strong> Not on Pro/Max/Team plan, or using API directly</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Usage display requires:
+# - Claude Pro, Max, or Team subscription
+# - NOT available for API-only users
+
+# Verify your plan:
+# Check claude.ai account settings
+
+# If on correct plan but still not showing:
+# Restart Claude Code session
+exit
+claude</code></pre>
+        <p><strong>Known limitation:</strong> API users cannot see usage limits - this is expected behavior</p>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>Activity lines not appearing</summary>
+      <div>
+        <p><strong>Cause:</strong> Activity lines only show when relevant operations happening</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Activity lines appear ONLY during:
+# - Tool execution (Read, Edit, Bash, etc.)
+# - Subagent runs
+# - Active task processing
+
+# If session is idle, no activity will show - this is expected
+
+# To test, trigger an action:
+"Read the file package.json"
+# You should see: + Read x1
+
+# Activity disappears after operations complete
+# This is normal behavior</code></pre>
+        <p><strong>Note:</strong> Empty activity section when idle is expected, not an error</p>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>Config not loading / defaults being used</summary>
+      <div>
+        <p><strong>Cause:</strong> Invalid JSON in config, wrong file location, or syntax errors</p>
+        <p><strong>Solution:</strong></p>
+        <pre><code># Check config location
+ls -la ~/.claude/plugins/claude-hud/config.json
+
+# Validate JSON syntax
+cat ~/.claude/plugins/claude-hud/config.json | jq .
+
+# If jq shows errors, fix the JSON:
+# Common issues:
+# - Trailing commas
+# - Missing quotes
+# - Unclosed braces
+
+# Reset to defaults if corrupted
+rm ~/.claude/plugins/claude-hud/config.json
+/claude-hud:configure
+# Select "Full" preset</code></pre>
+        <p><strong>Note:</strong> Config errors silently revert to defaults - always validate JSON</p>
+      </div>
+    </details>
+
+    <details class="troubleshoot">
+      <summary>HUD completely broken - Emergency Recovery</summary>
+      <div>
+        <p><strong>Remove and reinstall:</strong></p>
+        <pre><code># Remove and reinstall
+rm -rf ~/.claude/plugins/claude-hud
+/plugin install claude-hud
+/claude-hud:setup</code></pre>
+        <p><strong>Plugin causing crashes:</strong></p>
+        <pre><code># Remove plugin temporarily
+mv ~/.claude/plugins/claude-hud ~/.claude/plugins/claude-hud.bak
+
+# Start Claude Code without HUD
+claude
+
+# If stable, reinstall fresh
+rm -rf ~/.claude/plugins/claude-hud.bak
+/plugin install claude-hud</code></pre>
+      </div>
+    </details>
+
+    <hr class="section-divider">
+
+    <h2 id="limitations"><span class="bionic">Lim</span>itations & <span class="bionic">Whe</span>n NOT to Use</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Problem</th>
+          <th>Use Instead</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>API-only usage</td>
+          <td>Usage limits won't show</td>
+          <td>Track via API dashboard</td>
+        </tr>
+        <tr>
+          <td>Minimal terminal setup</td>
+          <td>Plugin overhead</td>
+          <td>Basic Claude Code</td>
+        </tr>
+        <tr>
+          <td>Remote/SSH sessions</td>
+          <td>Rendering issues possible</td>
+          <td>Check context manually</td>
+        </tr>
+        <tr>
+          <td>Very slow machine</td>
+          <td>300ms polling adds load</td>
+          <td>Monitor less frequently</td>
+        </tr>
+        <tr>
+          <td>Short quick tasks</td>
+          <td>Overhead not worth setup</td>
+          <td>Skip monitoring</td>
+        </tr>
+        <tr>
+          <td>Automated/headless runs</td>
+          <td>No visual output</td>
+          <td>Log-based monitoring</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3><span class="bionic">Kno</span>wn <span class="bionic">Lim</span>itations</h3>
+    <ul>
+      <li><strong>Usage display Pro/Max/Team only</strong> - API users see nothing</li>
+      <li><strong>Git status requires being in repo</strong> - No display outside repos</li>
+      <li><strong>Activity lines transient</strong> - Disappear after operations complete</li>
+      <li><strong>~300ms polling delay</strong> - Not instantaneous</li>
+      <li><strong>Config errors silent</strong> - Bad JSON reverts to defaults without warning</li>
+      <li><strong>Terminal must support ANSI</strong> - Basic terminals may have issues</li>
+      <li><strong>Token breakdown at 85%+ only</strong> - Not visible at lower usage levels</li>
+    </ul>
+
+    <hr class="section-divider">
+
+    <div class="why-matters">
+      <strong>If you skip this plugin:</strong> Claude Code is a black box. You don't know if it's thinking, running tools, or "staring into the void." You'll hit context limits without warning.
+      <br><br>
+      <strong>This connects to:</strong> The visibility principle - you can't optimize what you can't see. HUD makes the hidden control plane visible.
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="related-pages">
+      <h3>Related Pages</h3>
+      <ul>
+        <li><a href="claude-mem.html">Claude-Mem</a> - For persistent memory across sessions</li>
+        <li><a href="tmux-manager.html">rpai</a> - For multi-agent monitoring</li>
+        <li><a href="../patterns/mastery/context-management.html">Context Management</a> - Core principles</li>
+      </ul>
+    </div>
+
+    <div class="footer-nav">
+      <a href="claude-mem.html">Previous: Claude-Mem</a>
+      <a href="agent-sdk.html">Next: Agent SDK</a>
+    </div>
+
+  </div>
+
+  
+  <script src="../js/copy-code.js"></script>
+</body>
+</html>

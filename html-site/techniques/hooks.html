@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hooks - Claude Code Techniques</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="nav-breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <a href="index.html">Techniques</a>
+      <span>/</span>
+      Hooks
+    </nav>
+
+    <h1><span class="bionic">Hoo</span>ks: <span class="bionic">Eve</span>nt-Driven <span class="bionic">Aut</span>omation</h1>
+
+    <!-- You Are Here Context Box -->
+    <div class="you-are-here" style="background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%); border-left: 4px solid #2a7d7d; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+      <strong style="color: #2a7d7d;">You Are Here</strong>
+      <p style="margin: 0.5rem 0 0 0;"><strong>Hooks</strong> are shell commands that trigger automatically during Claude Code's lifecycle. They let you run formatters after file edits, send notifications when tasks complete, block unsafe operations, and create guardrails. Hooks are NOT AI prompts - they're deterministic shell scripts. This guide covers hook types, configuration, security patterns, and real-world examples.</p>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+      <div class="toc-title">Contents</div>
+      <ul>
+        <li><a href="#what-are-hooks">What Are Hooks?</a></li>
+        <li><a href="#hook-events">Hook Event Types</a></li>
+        <li><a href="#configuration">Configuring Hooks</a></li>
+        <li><a href="#common-patterns">Common Hook Patterns</a></li>
+        <li><a href="#advanced-patterns">Advanced Hook Patterns</a></li>
+        <li><a href="#hook-data">Hook Input/Output Data</a></li>
+        <li><a href="#security">Security and Best Practices</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+      </ul>
+    </div>
+
+    <!-- Section 1: What Are Hooks -->
+    <h2 id="what-are-hooks"><span class="bionic">Wha</span>t Are <span class="bionic">Hoo</span>ks?</h2>
+
+    <div class="problem-statement">
+      You want Claude to run your formatter after every file edit, notify you on mobile when long tasks complete, or prevent accidental writes to production files. Doing this manually every time is tedious and error-prone.
+    </div>
+
+    <p>Hooks are <strong>shell commands (not AI prompts)</strong> triggered by Claude Code lifecycle events. They run synchronously as <em>fire-and-wait</em> operations - Claude waits for hook completion before proceeding.</p>
+
+    <div class="callout callout-insight">
+      <div class="callout-title">Key Properties</div>
+      <ul>
+        <li><strong>Not AI:</strong> Hooks are shell scripts, not prompts</li>
+        <li><strong>Synchronous:</strong> Claude waits for hook completion</li>
+        <li><strong>Input via stdin:</strong> JSON payload with context</li>
+        <li><strong>Output controls behavior:</strong> <code>decision</code> can block operations</li>
+        <li><strong>Locations:</strong> <code>~/.claude/settings.json</code> (user) or <code>.claude/settings.json</code> (project)</li>
+      </ul>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Section 2: Hook Events -->
+    <h2 id="hook-events"><span class="bionic">Hoo</span>k <span class="bionic">Eve</span>nt <span class="bionic">Typ</span>es</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Hook</th>
+          <th>When</th>
+          <th>Common Uses</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>PreToolUse</strong></td>
+          <td>Before a tool executes</td>
+          <td>Block unsafe operations, validate inputs, require confirmation</td>
+        </tr>
+        <tr>
+          <td><strong>PostToolUse</strong></td>
+          <td>After a tool completes</td>
+          <td>Auto-format code, send notifications, run linters</td>
+        </tr>
+        <tr>
+          <td><strong>SessionStart</strong></td>
+          <td>Session begins</td>
+          <td>Setup environment, print welcome messages</td>
+        </tr>
+        <tr>
+          <td><strong>SessionEnd</strong></td>
+          <td>Session ends</td>
+          <td>Cleanup, summarize work, push changes</td>
+        </tr>
+        <tr>
+          <td><strong>Stop</strong></td>
+          <td>Claude stops responding</td>
+          <td>Trigger continuation in loops (Ralph pattern)</td>
+        </tr>
+        <tr>
+          <td><strong>Notification</strong></td>
+          <td>Notification events</td>
+          <td>Send to external systems</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Tool Matcher Options</h3>
+
+    <p>Target specific tools within PreToolUse/PostToolUse hooks:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Tool Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>Write</code></td><td>File write operations</td></tr>
+        <tr><td><code>Edit</code></td><td>File edit operations</td></tr>
+        <tr><td><code>Bash</code></td><td>Shell command execution</td></tr>
+        <tr><td><code>Read</code></td><td>File read operations</td></tr>
+        <tr><td><code>Task</code></td><td>Subagent spawning</td></tr>
+        <tr><td><code>AskUserQuestion</code></td><td>User input prompts</td></tr>
+        <tr><td><code>WebSearch</code></td><td>Web search operations</td></tr>
+        <tr><td><code>WebFetch</code></td><td>URL fetching</td></tr>
+      </tbody>
+    </table>
+
+    <hr class="section-divider">
+
+    <!-- Section 3: Configuration -->
+    <h2 id="configuration"><span class="bionic">Con</span>figuring <span class="bionic">Hoo</span>ks</h2>
+
+    <div class="tutorial-block">
+      <div class="tutorial-header">Basic Hook Configuration</div>
+      <div class="tutorial-content">
+        <p>Add hooks to <code>~/.claude/settings.json</code> (global) or <code>.claude/settings.json</code> (project):</p>
+        <pre><code>{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/validate-write.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/format-file.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/on-stop.sh"
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+      </div>
+    </div>
+
+    <h3>Configuration Locations</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Scope</th>
+          <th>Path</th>
+          <th>Use Case</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>User</strong></td>
+          <td><code>~/.claude/settings.json</code></td>
+          <td>Global hooks for all projects</td>
+        </tr>
+        <tr>
+          <td><strong>Project</strong></td>
+          <td><code>.claude/settings.json</code></td>
+          <td>Project-specific hooks (checked into git)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr class="section-divider">
+
+    <!-- Section 4: Common Patterns -->
+    <h2 id="common-patterns"><span class="bionic">Com</span>mon <span class="bionic">Hoo</span>k <span class="bionic">Pat</span>terns</h2>
+
+    <h3>1. Auto-Format on Write</h3>
+
+    <div class="pattern-box">
+      <div class="pattern-title">Prettier/ESLint After Every Write</div>
+      <pre><code>#!/bin/bash
+# ~/.claude/hooks/format-file.sh
+
+# Read hook data from stdin
+HOOK_DATA=$(cat)
+
+# Extract file path from JSON
+FILE_PATH=$(echo "$HOOK_DATA" | jq -r '.tool_input.file_path // empty')
+
+if [ -n "$FILE_PATH" ]; then
+  # Determine formatter by extension
+  case "$FILE_PATH" in
+    *.ts|*.tsx|*.js|*.jsx)
+      npx prettier --write "$FILE_PATH" 2>/dev/null
+      npx eslint --fix "$FILE_PATH" 2>/dev/null
+      ;;
+    *.py)
+      black "$FILE_PATH" 2>/dev/null
+      ruff --fix "$FILE_PATH" 2>/dev/null
+      ;;
+    *.go)
+      gofmt -w "$FILE_PATH" 2>/dev/null
+      ;;
+  esac
+fi</code></pre>
+    </div>
+
+    <h3>2. Mobile Push Notifications</h3>
+
+    <div class="pattern-box">
+      <div class="pattern-title">Notify When Claude Needs Input</div>
+      <pre><code>#!/bin/bash
+# ~/.claude/hooks/notify-mobile.sh
+
+HOOK_DATA=$(cat)
+
+# Extract question text
+QUESTION=$(echo "$HOOK_DATA" | jq -r '.tool_input.questions[0].question // .tool_input.question // "Input needed"')
+PROJECT=$(basename "$PWD")
+
+# Send via Pushover
+curl -s \
+  --form-string "token=$PUSHOVER_APP_TOKEN" \
+  --form-string "user=$PUSHOVER_USER_KEY" \
+  --form-string "title=Claude: $PROJECT" \
+  --form-string "message=$QUESTION" \
+  --form-string "priority=1" \
+  https://api.pushover.net/1/messages.json
+
+# Or use ntfy (free, self-hostable)
+# curl -d "$PROJECT: $QUESTION" ntfy.sh/your-topic
+
+# Or use Telegram
+# curl -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
+#   -d chat_id="$CHAT_ID" -d text="$PROJECT: $QUESTION"</code></pre>
+
+      <p><strong>Hook configuration for AskUserQuestion:</strong></p>
+      <pre><code>{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/notify-mobile.sh"
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+    </div>
+
+    <h3>3. Block Writes to Protected Files</h3>
+
+    <div class="pattern-box">
+      <div class="pattern-title">PreToolUse Validation</div>
+      <pre><code>#!/bin/bash
+# ~/.claude/hooks/validate-write.sh
+
+HOOK_DATA=$(cat)
+FILE_PATH=$(echo "$HOOK_DATA" | jq -r '.tool_input.file_path // empty')
+
+# Define protected patterns
+PROTECTED_PATTERNS=(
+  ".env"
+  "secrets"
+  "credentials"
+  "config/production"
+  "node_modules"
+)
+
+# Check if file matches any protected pattern
+for pattern in "${PROTECTED_PATTERNS[@]}"; do
+  if [[ "$FILE_PATH" == *"$pattern"* ]]; then
+    # Block the write by returning decision: reject
+    echo '{"decision": "block", "reason": "Cannot write to protected file: '"$FILE_PATH"'"}'
+    exit 0
+  fi
+done
+
+# Allow the write
+echo '{"decision": "allow"}'</code></pre>
+    </div>
+
+    <h3>4. Task Completion Notification</h3>
+
+    <div class="pattern-box">
+      <div class="pattern-title">PostToolUse for Task Tool</div>
+      <pre><code>#!/bin/bash
+# ~/.claude/hooks/task-complete.sh
+
+HOOK_DATA=$(cat)
+TASK_RESULT=$(echo "$HOOK_DATA" | jq -r '.result // "Task completed"')
+PROJECT=$(basename "$PWD")
+
+curl -s \
+  --form-string "token=$PUSHOVER_APP_TOKEN" \
+  --form-string "user=$PUSHOVER_USER_KEY" \
+  --form-string "title=Task Done: $PROJECT" \
+  --form-string "message=$TASK_RESULT" \
+  --form-string "priority=0" \
+  https://api.pushover.net/1/messages.json</code></pre>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Section 5: Advanced Patterns -->
+    <h2 id="advanced-patterns"><span class="bionic">Adv</span>anced <span class="bionic">Hoo</span>k <span class="bionic">Pat</span>terns</h2>
+
+    <h3>Ralph Wiggum Loop Hook</h3>
+
+    <p>Use the Stop hook to enable continuous loops without user intervention:</p>
+
+    <pre><code>#!/bin/bash
+# ~/.claude/hooks/ralph-continue.sh
+
+# Check if we're in a Ralph loop (look for marker file)
+if [ -f ".ralph-active" ]; then
+  # Signal continuation by returning to the loop controller
+  # The actual continuation is handled by the outer bash loop:
+  # while :; do cat PROMPT.md | claude-code; done
+  echo "Ralph loop iteration complete"
+fi</code></pre>
+
+    <h3>Smart Notification Filtering</h3>
+
+    <pre><code>#!/bin/bash
+# ~/.claude/hooks/smart-notify.sh
+
+HOOK_DATA=$(cat)
+QUESTION=$(echo "$HOOK_DATA" | jq -r '.tool_input.questions[0].question // ""')
+
+# Skip low-priority questions (auto-approve)
+if [[ "$QUESTION" == *"confirm"* ]] || [[ "$QUESTION" == *"proceed"* ]]; then
+  exit 0  # Don't notify
+fi
+
+# High priority for errors
+PRIORITY=0
+if [[ "$QUESTION" == *"error"* ]] || [[ "$QUESTION" == *"fail"* ]]; then
+  PRIORITY=1
+fi
+if [[ "$QUESTION" == *"critical"* ]] || [[ "$QUESTION" == *"security"* ]]; then
+  PRIORITY=2
+fi
+
+# Send with priority
+curl -s \
+  --form-string "token=$PUSHOVER_APP_TOKEN" \
+  --form-string "user=$PUSHOVER_USER_KEY" \
+  --form-string "message=$QUESTION" \
+  --form-string "priority=$PRIORITY" \
+  https://api.pushover.net/1/messages.json</code></pre>
+
+    <h3>Security Pattern Detection</h3>
+
+    <pre><code>#!/bin/bash
+# ~/.claude/hooks/security-check.sh
+
+HOOK_DATA=$(cat)
+COMMAND=$(echo "$HOOK_DATA" | jq -r '.tool_input.command // empty')
+
+# Block dangerous patterns
+DANGEROUS_PATTERNS=(
+  "rm -rf /"
+  "sudo rm"
+  "> /dev/sd"
+  "mkfs"
+  "dd if="
+  "chmod 777"
+  ":(){:|:&};:"  # Fork bomb
+)
+
+for pattern in "${DANGEROUS_PATTERNS[@]}"; do
+  if [[ "$COMMAND" == *"$pattern"* ]]; then
+    echo '{"decision": "block", "reason": "Blocked dangerous command pattern"}'
+    exit 0
+  fi
+done
+
+echo '{"decision": "allow"}'</code></pre>
+
+    <hr class="section-divider">
+
+    <!-- Section 6: Hook Data -->
+    <h2 id="hook-data"><span class="bionic">Hoo</span>k <span class="bionic">Inp</span>ut/Output <span class="bionic">Dat</span>a</h2>
+
+    <h3>Input (stdin JSON)</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>session_id</code></td>
+          <td>Current session identifier</td>
+        </tr>
+        <tr>
+          <td><code>tool_name</code></td>
+          <td>Name of the tool being executed</td>
+        </tr>
+        <tr>
+          <td><code>tool_input</code></td>
+          <td>Input parameters passed to the tool</td>
+        </tr>
+        <tr>
+          <td><code>result</code></td>
+          <td>(PostToolUse only) Tool execution result</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Output (stdout JSON)</h3>
+
+    <p>For PreToolUse hooks, output can control behavior:</p>
+
+    <pre><code>// Allow the operation
+{"decision": "allow"}
+
+// Block the operation
+{"decision": "block", "reason": "Explanation shown to Claude"}
+
+// Modify inputs (advanced)
+{"decision": "allow", "modified_input": {...}}</code></pre>
+
+    <h3>Example Input Payload</h3>
+
+    <pre><code>{
+  "session_id": "abc123",
+  "tool_name": "Write",
+  "tool_input": {
+    "file_path": "/Users/me/project/src/app.ts",
+    "content": "console.log('hello');"
+  }
+}</code></pre>
+
+    <hr class="section-divider">
+
+    <!-- Section 7: Security -->
+    <h2 id="security"><span class="bionic">Sec</span>urity and <span class="bionic">Bes</span>t <span class="bionic">Pra</span>ctices</h2>
+
+    <div class="callout callout-warning">
+      <div class="callout-title">Important Security Notes</div>
+      <ul>
+        <li>Hooks run with <strong>your user permissions</strong> - they can do anything you can</li>
+        <li>Malicious CLAUDE.md files could configure harmful hooks</li>
+        <li>Review hook configurations in repositories before running</li>
+        <li>Keep hook scripts simple and auditable</li>
+      </ul>
+    </div>
+
+    <h3>Best Practices</h3>
+
+    <div class="recommendation">
+      <ol>
+        <li><strong>Use absolute paths:</strong> Avoid relative paths in hook commands</li>
+        <li><strong>Fail gracefully:</strong> Hooks should exit 0 on error to avoid blocking Claude</li>
+        <li><strong>Keep hooks fast:</strong> Slow hooks delay Claude responses</li>
+        <li><strong>Log hook executions:</strong> Debug issues with verbose logging</li>
+        <li><strong>Test manually first:</strong> Run hook scripts directly before configuration</li>
+      </ol>
+    </div>
+
+    <h3>Security Audit Checklist</h3>
+
+    <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+      <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Before Running a New Project</div>
+      <ol>
+        <li>Check <code>.claude/settings.json</code> for hook configurations</li>
+        <li>Review all referenced hook scripts</li>
+        <li>Verify hook scripts don't contain malicious commands</li>
+        <li>Check for suspicious environment variable usage</li>
+        <li>Ensure hooks don't exfiltrate data</li>
+      </ol>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Section 8: Troubleshooting -->
+    <h2 id="troubleshooting"><span class="bionic">Tro</span>ubleshooting</h2>
+
+    <details>
+      <summary>Hook not executing</summary>
+      <div>
+        <ol>
+          <li>Verify hook script is executable: <code>chmod +x script.sh</code></li>
+          <li>Check JSON syntax in settings.json</li>
+          <li>Ensure matcher matches the tool name exactly</li>
+          <li>Test script manually: <code>echo '{}' | ./script.sh</code></li>
+        </ol>
+      </div>
+    </details>
+
+    <details>
+      <summary>Hook blocking unexpectedly</summary>
+      <div>
+        <ol>
+          <li>Add logging to see what's being matched</li>
+          <li>Check the decision output format</li>
+          <li>Verify pattern matching logic</li>
+        </ol>
+        <pre><code># Debug logging
+echo "DEBUG: FILE_PATH=$FILE_PATH" >> /tmp/hook-debug.log</code></pre>
+      </div>
+    </details>
+
+    <details>
+      <summary>Hook errors or crashes</summary>
+      <div>
+        <ul>
+          <li>Check script shebang: <code>#!/bin/bash</code></li>
+          <li>Verify dependencies (jq, curl, etc.) are installed</li>
+          <li>Check file permissions</li>
+          <li>Ensure environment variables are set</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>Slow Claude responses</summary>
+      <div>
+        <p>Hooks run synchronously. Slow hooks delay Claude.</p>
+        <ul>
+          <li>Move slow operations to background: <code>cmd &</code></li>
+          <li>Add timeouts to network calls</li>
+          <li>Cache results where possible</li>
+        </ul>
+      </div>
+    </details>
+
+    <h3>Debug Mode</h3>
+
+    <pre><code>#!/bin/bash
+# Add to top of hook script for debugging
+
+exec 2>>/tmp/hook-errors.log
+set -x  # Log all commands
+
+HOOK_DATA=$(cat)
+echo "$(date): Received: $HOOK_DATA" >> /tmp/hook-debug.log</code></pre>
+
+    <!-- Related Pages -->
+    <div class="related-pages">
+      <h3>Related Pages</h3>
+      <ul>
+        <li><a href="skills.html">Skills - Markdown instruction sets</a></li>
+        <li><a href="security.html">Security - Permissions and sandboxing</a></li>
+        <li><a href="mobile-async.html">Mobile and Async - Push notifications</a></li>
+      </ul>
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="footer-nav">
+      <a href="mcp.html">Previous: MCP Servers</a>
+      <a href="security.html">Next: Security</a>
+    </div>
+  </div>
+  <script src="../js/copy-code.js"></script>
+</body>
+</html>

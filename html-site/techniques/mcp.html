@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP Servers - Claude Code Techniques</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="nav-breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <a href="index.html">Techniques</a>
+      <span>/</span>
+      MCP Servers
+    </nav>
+
+    <h1><span class="bionic">MCP</span> <span class="bionic">Ser</span>vers</h1>
+
+    <!-- You Are Here Context Box -->
+    <div class="you-are-here" style="background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%); border-left: 4px solid #2a7d7d; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+      <strong style="color: #2a7d7d;">You Are Here</strong>
+      <p style="margin: 0.5rem 0 0 0;"><strong>Model Context Protocol (MCP)</strong> is an open-source standard for connecting AI applications to external systems. Think of it as "USB-C for AI" - a universal connector that allows Claude to seamlessly integrate with databases, APIs, files, and workflows. This guide covers configuration, popular servers, and building your own.</p>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+      <div class="toc-title">Contents</div>
+      <ul>
+        <li><a href="#what-is-mcp">What is MCP?</a></li>
+        <li><a href="#architecture">Architecture Deep Dive</a></li>
+        <li><a href="#core-concepts">Core Concepts: Tools, Resources, Prompts</a></li>
+        <li><a href="#official-servers">Official Reference Servers</a></li>
+        <li><a href="#popular-servers">Popular MCP Servers by Category</a></li>
+        <li><a href="#configuration">Configuring MCP in Claude Code</a></li>
+        <li><a href="#building-custom">Building Custom MCP Servers</a></li>
+        <li><a href="#security">Security Considerations</a></li>
+        <li><a href="#troubleshooting">Debugging and Troubleshooting</a></li>
+      </ul>
+    </div>
+
+    <!-- Section 1: What is MCP -->
+    <h2 id="what-is-mcp"><span class="bionic">Wha</span>t is <span class="bionic">MCP</span>?</h2>
+
+    <div class="problem-statement">
+      Every AI integration requires custom code. You want Claude to access your database, Git repos, Slack, and calendar - but each requires a different approach.
+    </div>
+
+    <p><strong>Model Context Protocol (MCP)</strong> is an open protocol enabling seamless integration between LLM applications and external data sources. It standardizes how to connect LLMs with the context they need through a JSON-RPC 2.0 message format.</p>
+
+    <div class="callout callout-insight">
+      <div class="callout-title">The USB-C Analogy</div>
+      <p>Just as USB-C provides a standardized way to connect electronic devices, MCP provides a standardized way to connect AI applications to external systems. Before MCP, every AI integration required custom code. With MCP, a single protocol handles all integrations.</p>
+    </div>
+
+    <h3>What MCP Enables</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Use Case</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Personalized Agents</strong></td>
+          <td>Access Google Calendar and Notion for context-aware assistance</td>
+        </tr>
+        <tr>
+          <td><strong>Design-to-Code</strong></td>
+          <td>Claude Code can generate entire web apps using Figma designs</td>
+        </tr>
+        <tr>
+          <td><strong>Enterprise Integration</strong></td>
+          <td>Connect to multiple organizational databases for data analysis via chat</td>
+        </tr>
+        <tr>
+          <td><strong>Hardware Integration</strong></td>
+          <td>AI models can create 3D designs on Blender and send to 3D printers</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr class="section-divider">
+
+    <!-- Section 2: Architecture -->
+    <h2 id="architecture"><span class="bionic">Arc</span>hitecture <span class="bionic">Dee</span>p <span class="bionic">Div</span>e</h2>
+
+    <div class="ascii-diagram">
++--------------------------------------------------+
+|            MCP Host (AI Application)              |
+|  (Claude Desktop, VS Code, Claude Code)           |
++-------------------+------------------------------+
+                    |
+         +----------+----------+
+         |          |          |
+     +---v--+   +---v--+  +---v--+
+     |Client|   |Client|  |Client|
+     |  1   |   |  2   |  |  3   |
+     +---+--+   +---+--+  +---+--+
+         |          |          |
+    +----v---+ +----v---+ +----v---+
+    |Server A| |Server B| |Server C|
+    |(Local) | |(Local) | |(Remote)|
+    |STDIO   | |STDIO   | |HTTP    |
+    +--------+ +--------+ +--------+
+    </div>
+
+    <h3>Key Participants</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Participant</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>MCP Host</strong></td>
+          <td>AI application (Claude Desktop, Claude Code, VS Code) that coordinates multiple MCP clients</td>
+        </tr>
+        <tr>
+          <td><strong>MCP Client</strong></td>
+          <td>Component maintaining connection to an MCP server, obtaining context for the host</td>
+        </tr>
+        <tr>
+          <td><strong>MCP Server</strong></td>
+          <td>Program providing context to clients (runs locally or remotely)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Transport Layers</h3>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Stdio Transport</div>
+        <div class="card-description">Standard input/output for local process communication. Optimal performance for local servers.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Streamable HTTP Transport</div>
+        <div class="card-description">HTTP POST with optional Server-Sent Events for remote servers. Supports OAuth, bearer tokens, API keys.</div>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Section 3: Core Concepts -->
+    <h2 id="core-concepts"><span class="bionic">Cor</span>e <span class="bionic">Con</span>cepts</h2>
+
+    <p>MCP servers provide three types of capabilities:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>What</th>
+          <th>Examples</th>
+          <th>Control</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Tools</strong></td>
+          <td>Functions LLMs can actively call</td>
+          <td>Search flights, send messages, create events</td>
+          <td>Model-controlled</td>
+        </tr>
+        <tr>
+          <td><strong>Resources</strong></td>
+          <td>Passive read-only data sources</td>
+          <td>Retrieve documents, access knowledge bases</td>
+          <td>Application-controlled</td>
+        </tr>
+        <tr>
+          <td><strong>Prompts</strong></td>
+          <td>Pre-built instruction templates</td>
+          <td>Plan vacation, summarize meetings</td>
+          <td>User-controlled</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Tool Definition Example</h3>
+
+    <pre><code>{
+  name: "searchFlights",
+  description: "Search for available flights",
+  inputSchema: {
+    type: "object",
+    properties: {
+      origin: { type: "string", description: "Departure city" },
+      destination: { type: "string", description: "Arrival city" },
+      date: { type: "string", format: "date", description: "Travel date" }
+    },
+    required: ["origin", "destination", "date"]
+  }
+}</code></pre>
+
+    <h3>Resource Discovery Patterns</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Pattern</th>
+          <th>Description</th>
+          <th>Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Direct Resources</strong></td>
+          <td>Fixed URIs pointing to specific data</td>
+          <td><code>calendar://events/2024</code></td>
+        </tr>
+        <tr>
+          <td><strong>Resource Templates</strong></td>
+          <td>Dynamic URIs with parameters</td>
+          <td><code>weather://forecast/{city}/{date}</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr class="section-divider">
+
+    <!-- Section 4: Official Servers -->
+    <h2 id="official-servers"><span class="bionic">Off</span>icial <span class="bionic">Ref</span>erence <span class="bionic">Ser</span>vers</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Server</th>
+          <th>Description</th>
+          <th>Package</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Everything</strong></td>
+          <td>Reference/test server with prompts, resources, and tools</td>
+          <td><code>@modelcontextprotocol/server-everything</code></td>
+        </tr>
+        <tr>
+          <td><strong>Fetch</strong></td>
+          <td>Web content fetching and conversion</td>
+          <td><code>@modelcontextprotocol/server-fetch</code></td>
+        </tr>
+        <tr>
+          <td><strong>Filesystem</strong></td>
+          <td>Secure file operations with access controls</td>
+          <td><code>@modelcontextprotocol/server-filesystem</code></td>
+        </tr>
+        <tr>
+          <td><strong>Git</strong></td>
+          <td>Read, search, manipulate Git repositories</td>
+          <td><code>mcp-server-git</code> (Python)</td>
+        </tr>
+        <tr>
+          <td><strong>Memory</strong></td>
+          <td>Knowledge graph-based persistent memory</td>
+          <td><code>@modelcontextprotocol/server-memory</code></td>
+        </tr>
+        <tr>
+          <td><strong>Sequential Thinking</strong></td>
+          <td>Dynamic problem-solving through thought sequences</td>
+          <td><code>@modelcontextprotocol/server-sequential-thinking</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tutorial-block">
+      <div class="tutorial-header">Quick Start Commands</div>
+      <div class="tutorial-content">
+        <p><strong>TypeScript Servers:</strong></p>
+        <pre><code>npx -y @modelcontextprotocol/server-memory
+npx -y @modelcontextprotocol/server-filesystem /path/to/allowed/files</code></pre>
+
+        <p><strong>Python Servers:</strong></p>
+        <pre><code># Using uvx (recommended)
+uvx mcp-server-git
+
+# Using pip
+pip install mcp-server-git
+python -m mcp_server_git</code></pre>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Section 5: Popular Servers -->
+    <h2 id="popular-servers"><span class="bionic">Pop</span>ular MCP <span class="bionic">Ser</span>vers</h2>
+
+    <h3>File System & Version Control</h3>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Filesystem Server</div>
+        <div class="card-description">Secure file operations with configurable access controls</div>
+        <div class="card-meta"><code>@modelcontextprotocol/server-filesystem</code></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Git Server</div>
+        <div class="card-description">Git status, diff, log, commit operations</div>
+        <div class="card-meta"><code>mcp-server-git</code> (Python)</div>
+      </div>
+      <div class="card">
+        <div class="card-title">GitHub Server</div>
+        <div class="card-description">Issues, PRs, repositories, organizations</div>
+        <div class="card-meta"><code>@modelcontextprotocol/server-github</code></div>
+      </div>
+    </div>
+
+    <h3>Databases</h3>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">SQLite Server</div>
+        <div class="card-description">Query execution, schema inspection, data manipulation</div>
+        <div class="card-meta"><code>mcp-server-sqlite</code> (Python)</div>
+      </div>
+      <div class="card">
+        <div class="card-title">PostgreSQL Server</div>
+        <div class="card-description">SQL queries, schema introspection, connection pooling</div>
+        <div class="card-meta"><code>mcp-server-postgres</code> (Python)</div>
+      </div>
+    </div>
+
+    <h3>Communication & Productivity</h3>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Slack Server</div>
+        <div class="card-description">Send messages, read channels, manage threads</div>
+        <div class="card-meta"><code>@modelcontextprotocol/server-slack</code></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Puppeteer Server</div>
+        <div class="card-description">Browser automation, screenshots, element interaction</div>
+        <div class="card-meta"><code>@modelcontextprotocol/server-puppeteer</code></div>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Section 6: Configuration -->
+    <h2 id="configuration"><span class="bionic">Con</span>figuring <span class="bionic">MCP</span></h2>
+
+    <h3>Configuration File Locations</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Platform</th>
+          <th>Claude Code Path</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>macOS</strong></td>
+          <td><code>~/.claude/settings.json</code> or project <code>.claude/settings.json</code></td>
+        </tr>
+        <tr>
+          <td><strong>Windows</strong></td>
+          <td><code>%USERPROFILE%\.claude\settings.json</code></td>
+        </tr>
+        <tr>
+          <td><strong>Linux</strong></td>
+          <td><code>~/.claude/settings.json</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tutorial-block">
+      <div class="tutorial-header">Complete Example Configuration</div>
+      <div class="tutorial-content">
+        <pre><code>{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/username/Desktop",
+        "/Users/username/Documents"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_xxxxxxxxxxxx"
+      }
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git", "--repository", "/Users/username/projects"]
+    }
+  }
+}</code></pre>
+      </div>
+    </div>
+
+    <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+      <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Verification Steps</div>
+      <ol>
+        <li>Edit the configuration file</li>
+        <li>Add server configurations</li>
+        <li>Restart Claude Code / Claude Desktop</li>
+        <li>Verify servers are connected: <code>/mcp</code> command or check MCP indicator</li>
+      </ol>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Section 7: Building Custom -->
+    <h2 id="building-custom"><span class="bionic">Bui</span>lding <span class="bionic">Cus</span>tom MCP <span class="bionic">Ser</span>vers</h2>
+
+    <h3>TypeScript Server Example</h3>
+
+    <pre><code>import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
+
+// Create server instance
+const server = new Server(
+  { name: "my-custom-server", version: "1.0.0" },
+  { capabilities: { tools: {} } }
+);
+
+// Define tools
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tools: [
+    {
+      name: "hello_world",
+      description: "Says hello to someone",
+      inputSchema: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "Name to greet" }
+        },
+        required: ["name"]
+      }
+    }
+  ]
+}));
+
+// Handle tool calls
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  if (request.params.name === "hello_world") {
+    const name = request.params.arguments?.name || "World";
+    return {
+      content: [{ type: "text", text: `Hello, ${name}!` }]
+    };
+  }
+  throw new Error(`Unknown tool: ${request.params.name}`);
+});
+
+// Start server
+const transport = new StdioServerTransport();
+await server.connect(transport);</code></pre>
+
+    <h3>Python Server Example</h3>
+
+    <pre><code>import asyncio
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+from mcp.types import Tool, TextContent
+
+# Create server instance
+server = Server("my-custom-server")
+
+@server.list_tools()
+async def list_tools() -> list[Tool]:
+    return [
+        Tool(
+            name="hello_world",
+            description="Says hello to someone",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "description": "Name to greet"}
+                },
+                "required": ["name"]
+            }
+        )
+    ]
+
+@server.call_tool()
+async def call_tool(name: str, arguments: dict) -> list[TextContent]:
+    if name == "hello_world":
+        greeting_name = arguments.get("name", "World")
+        return [TextContent(type="text", text=f"Hello, {greeting_name}!")]
+    raise ValueError(f"Unknown tool: {name}")
+
+async def main():
+    async with stdio_server() as (read_stream, write_stream):
+        await server.run(read_stream, write_stream)
+
+if __name__ == "__main__":
+    asyncio.run(main())</code></pre>
+
+    <h3>Available SDKs</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Language</th>
+          <th>Installation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>TypeScript</td><td><code>npm install @modelcontextprotocol/sdk</code></td></tr>
+        <tr><td>Python</td><td><code>pip install mcp</code></td></tr>
+        <tr><td>Go</td><td><code>go get github.com/modelcontextprotocol/go-sdk</code></td></tr>
+        <tr><td>Rust</td><td>Cargo</td></tr>
+        <tr><td>Java/Kotlin</td><td>Maven/Gradle</td></tr>
+        <tr><td>C#</td><td>NuGet</td></tr>
+        <tr><td>Ruby</td><td><code>gem install mcp</code></td></tr>
+        <tr><td>Swift</td><td>Swift Package Manager</td></tr>
+      </tbody>
+    </table>
+
+    <hr class="section-divider">
+
+    <!-- Section 8: Security -->
+    <h2 id="security"><span class="bionic">Sec</span>urity <span class="bionic">Con</span>siderations</h2>
+
+    <div class="callout callout-danger">
+      <div class="callout-title">Core Security Principles</div>
+      <ul>
+        <li><strong>User Consent:</strong> Explicit consent required for data access and operations</li>
+        <li><strong>Data Privacy:</strong> No transmission of resource data without user consent</li>
+        <li><strong>Tool Safety:</strong> Treat tools as arbitrary code execution with appropriate caution</li>
+        <li><strong>LLM Sampling Controls:</strong> User approval for any LLM sampling requests</li>
+      </ul>
+    </div>
+
+    <h3>Best Practices</h3>
+
+    <div class="recommendation">
+      <ol>
+        <li><strong>Limit directory access:</strong> Only expose necessary directories</li>
+        <li><strong>Use environment variables:</strong> Never hardcode secrets in config files</li>
+        <li><strong>Validate server sources:</strong> Only use servers from trusted sources</li>
+        <li><strong>Review permissions:</strong> Regularly audit which tools are enabled</li>
+      </ol>
+    </div>
+
+    <h3>Filesystem Security Example</h3>
+
+    <pre><code>{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/username/safe-directory"  // Only grant access to safe directories
+      ]
+    }
+  }
+}</code></pre>
+
+    <hr class="section-divider">
+
+    <!-- Section 9: Troubleshooting -->
+    <h2 id="troubleshooting"><span class="bionic">Deb</span>ugging and <span class="bionic">Tro</span>ubleshooting</h2>
+
+    <h3>MCP Inspector</h3>
+
+    <p>The <strong>MCP Inspector</strong> is the official interactive developer tool for testing and debugging MCP servers.</p>
+
+    <pre><code># Inspect npm packages
+npx @modelcontextprotocol/inspector npx @modelcontextprotocol/server-filesystem /path
+
+# Inspect PyPI packages
+npx @modelcontextprotocol/inspector uvx mcp-server-git --repository ~/code/repo.git
+
+# Inspect local servers
+npx @modelcontextprotocol/inspector node path/to/server/index.js</code></pre>
+
+    <details>
+      <summary>Server Not Appearing</summary>
+      <div>
+        <ol>
+          <li>Check configuration JSON syntax</li>
+          <li>Verify file paths are absolute (not relative)</li>
+          <li>Restart Claude Code / Claude Desktop</li>
+          <li>Check logs for error messages</li>
+        </ol>
+      </div>
+    </details>
+
+    <details>
+      <summary>Server Fails to Start</summary>
+      <div>
+        <pre><code># Test server manually
+npx -y @modelcontextprotocol/server-filesystem /path/to/directory
+
+# Check Node.js version
+node --version
+
+# Check Python/uv for Python servers
+python --version
+uvx --version</code></pre>
+      </div>
+    </details>
+
+    <details>
+      <summary>Permission Errors</summary>
+      <div>
+        <ul>
+          <li>Verify the server has access to required directories</li>
+          <li>Check environment variables are set correctly</li>
+          <li>Ensure API tokens have required scopes</li>
+        </ul>
+      </div>
+    </details>
+
+    <h3>Log Locations</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Platform</th>
+          <th>Log Path</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>macOS</strong></td>
+          <td><code>~/Library/Logs/Claude/mcp*.log</code></td>
+        </tr>
+        <tr>
+          <td><strong>Windows</strong></td>
+          <td><code>%APPDATA%\Claude\logs</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Related Pages -->
+    <div class="related-pages">
+      <h3>Related Pages</h3>
+      <ul>
+        <li><a href="skills.html">Skills - Markdown instruction sets</a></li>
+        <li><a href="hooks.html">Hooks - Event-driven automations</a></li>
+        <li><a href="security.html">Security - Permissions and sandboxing</a></li>
+      </ul>
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="footer-nav">
+      <a href="skills.html">Previous: Skills</a>
+      <a href="hooks.html">Next: Hooks</a>
+    </div>
+  </div>
+  <script src="../js/copy-code.js"></script>
+</body>
+</html>

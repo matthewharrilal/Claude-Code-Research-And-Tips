@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome MCP Reverse Engineering - Remote Browser Architecture</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="breadcrumb">
+        <a href="../index.html">Home</a> &raquo; <a href="index.html">Infrastructure</a> &raquo; Chrome MCP
+    </nav>
+
+    <header>
+        <h1><span class="bionic">Chr</span>ome MCP <span class="bionic">Rev</span>erse <span class="bionic">Eng</span>ineering</h1>
+        <p class="subtitle">How <span class="bionic">Ant</span>hropic taught Claude to <span class="bionic">bro</span>wse the web - and how to make it <span class="bionic">clo</span>ud-native</p>
+    </header>
+
+    <main>
+        <div class="you-are-here">
+            <h2>You Are Here</h2>
+            <p><strong><span class="bionic">Con</span>text:</strong> This documents a <span class="bionic">Chr</span>istmas reverse-engineering <span class="bionic">pro</span>ject that reveals Claude Code's <span class="bionic">bro</span>wser automation <span class="bionic">int</span>ernals and provides a <span class="bionic">sol</span>ution for cloud/remote <span class="bionic">exe</span>cution.</p>
+            <p><strong><span class="bionic">Whe</span>re this fits:</strong> For building <span class="bionic">pro</span>duction-grade AI <span class="bionic">bro</span>wser agents - monitoring, <span class="bionic">scr</span>aping, form-filling, QA - <span class="bionic">wit</span>hout local machine <span class="bionic">ris</span>ks.</p>
+        </div>
+
+        <hr class="divider-context">
+
+        <section id="source">
+            <h2><span class="bionic">Sou</span>rce</h2>
+            <div class="tool-meta">
+                <span class="tag">@pk_iv (Paul Klein IV)</span>
+                <span class="tag">Founder of Browserbase</span>
+                <span class="tag">Dec 2025</span>
+                <span class="tag tag-yellow">Medium Lift</span>
+            </div>
+
+            <blockquote>"I spent all of Christmas reverse engineering Claude Chrome so it would work with remote browsers. Here's how Anthropic taught Claude how to browse the web."</blockquote>
+        </section>
+
+        <hr class="divider-procedure">
+
+        <section id="breakdown">
+            <h2>How Claude Code <span class="bionic">Bro</span>wser Works (7-<span class="bionic">Par</span>t Breakdown)</h2>
+
+            <div class="step-card">
+                <h3>1. <span class="bionic">Ins</span>tallation</h3>
+                <ul>
+                    <li>Native messaging host created on machine</li>
+                    <li>Claude for Chrome extension installed</li>
+                </ul>
+            </div>
+
+            <div class="step-card">
+                <h3>2. <span class="bionic">Lau</span>nch</h3>
+                <ul>
+                    <li>Claude Code launches with <code>--chrome-native-host</code> flag</li>
+                    <li>Communicates via stdin/stdout using binary protocol</li>
+                </ul>
+            </div>
+
+            <div class="step-card">
+                <h3>3. <span class="bionic">Pro</span>tocol</h3>
+                <ul>
+                    <li><strong>4-byte little-endian length prefix + JSON payload</strong></li>
+                    <li>Uses MCP (Message Control Protocol) tool calls</li>
+                    <li>Tools: navigate, screenshot, click, etc.</li>
+                </ul>
+            </div>
+
+            <div class="step-card">
+                <h3>4. <span class="bionic">Arc</span>hitecture (Local)</h3>
+                <div class="code-block">
+                    <pre><code>Claude Code (MCP Client)
+        |
+    Binary Protocol
+    (4-byte LE + JSON)
+        |
+Chrome Extension (MCP Server)
+        |
+    Local Browser</code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h3>5. <span class="bionic">Ava</span>ilable <span class="bionic">Too</span>ls</h3>
+                <p>19 tools named <code>mcp__claude-in-chrome__*</code>:</p>
+                <ul>
+                    <li>navigate</li>
+                    <li>get_text</li>
+                    <li>click</li>
+                    <li>screenshot</li>
+                    <li>...and more</li>
+                </ul>
+            </div>
+
+            <div class="step-card">
+                <h3>6. <span class="bionic">Sec</span>urity <span class="bionic">Lim</span>itation</h3>
+                <div class="warning-box">
+                    <p><strong>Local Chrome only - dangerous due to prompt injection potential:</strong></p>
+                    <ul>
+                        <li>Cookies/sessions exposed</li>
+                        <li>Prompt injection could exfiltrate data</li>
+                        <li>Personal browser state vulnerable</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <h3>7. The <span class="bionic">Sol</span>ution</h3>
+                <p>Intercepting server translates:</p>
+                <div class="code-block">
+                    <pre><code>MCP --> CDP (Chrome DevTools Protocol) --> Browserbase Cloud</code></pre>
+                </div>
+                <p>Claude believes it's using local Chrome - same 19 tools work seamlessly - actual execution in isolated cloud browsers.</p>
+            </div>
+        </section>
+
+        <hr class="divider-procedure">
+
+        <section id="remote-architecture">
+            <h2>The <span class="bionic">Arc</span>hitecture (<span class="bionic">Rem</span>ote)</h2>
+
+            <div class="code-block">
+                <pre><code>Claude Code (MCP Client)
+        |
+    Binary Protocol
+        |
+Intercepting Server (MCP --> CDP Translation)
+        |
+Browserbase Cloud Browsers</code></pre>
+            </div>
+
+            <h3><span class="bionic">Ben</span>efits</h3>
+            <table>
+                <tr><th>Benefit</th><th>Description</th></tr>
+                <tr><td>Security</td><td>Isolated cloud execution</td></tr>
+                <tr><td>Scale</td><td>Parallel browser sessions</td></tr>
+                <tr><td>Production-grade</td><td>Headless, reliable</td></tr>
+                <tr><td>Stealth</td><td>Claude doesn't know the difference</td></tr>
+            </table>
+        </section>
+
+        <hr class="divider-procedure">
+
+        <section id="installation">
+            <h2><span class="bionic">Ins</span>tallation</h2>
+
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                <pre><code># In Claude Code
+/plugin marketplace add browserbase/claude-code-plugin
+/plugin install browserbase@browserbase-cloud
+
+# Then run the setup script (configures intercepting proxy)</code></pre>
+            </div>
+
+            <div class="checkpoint">
+                <h4 class="checkpoint-header">Checkpoint: Plugin Working</h4>
+                <ul>
+                    <li>Plugin shows as installed in <code>/plugin list</code></li>
+                    <li>Browser commands execute without errors</li>
+                    <li>Screenshots return from cloud browsers</li>
+                </ul>
+            </div>
+        </section>
+
+        <hr class="divider-procedure">
+
+        <section id="protocol">
+            <h2><span class="bionic">Tec</span>hnical <span class="bionic">Det</span>ails</h2>
+
+            <h3>MCP <span class="bionic">Pro</span>tocol <span class="bionic">For</span>mat</h3>
+            <div class="code-block">
+                <pre><code>[4 bytes: message length (little-endian)]
+[JSON payload with tool call]</code></pre>
+            </div>
+
+            <h3>Tool Call <span class="bionic">Exa</span>mple</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                <pre><code>{
+  "tool": "mcp__claude-in-chrome__navigate",
+  "params": {
+    "url": "https://status.github.com"
+  }
+}</code></pre>
+            </div>
+
+            <h3>CDP <span class="bionic">Tra</span>nslation</h3>
+            <p>The intercepting server translates MCP tool calls to Chrome DevTools Protocol commands for remote execution.</p>
+        </section>
+
+        <hr class="divider-procedure">
+
+        <section id="demo">
+            <h2><span class="bionic">Dem</span>o: <span class="bionic">Par</span>allel <span class="bionic">Sta</span>tus <span class="bionic">Che</span>cking</h2>
+
+            <p>The original thread includes a demo video showing:</p>
+            <ul>
+                <li>Claude compiling real-time outage status table</li>
+                <li>Checking GitHub, Cloudflare, AWS, etc.</li>
+                <li><strong>Parallel remote browser sessions</strong></li>
+                <li>All via the same MCP protocol</li>
+            </ul>
+        </section>
+
+        <hr class="divider-procedure">
+
+        <section id="caveats">
+            <h2><span class="bionic">Cav</span>eats & <span class="bionic">Got</span>chas</h2>
+
+            <table>
+                <tr><th>Issue</th><th>Notes</th></tr>
+                <tr><td>Extension required</td><td>Claude Code checks for Chrome extension to enable browser mode</td></tr>
+                <tr><td>Anti-bot measures</td><td>Some sites block cloud/headless browsers (captchas, etc.)</td></tr>
+                <tr><td>Local proxy still needed</td><td>Setup involves running a local proxy script</td></tr>
+                <tr><td>Verbose screenshots</td><td>Claude favors screenshots over clean markdown extraction</td></tr>
+                <tr><td>Unofficial</td><td>Not officially supported by Anthropic - could break with updates</td></tr>
+            </table>
+        </section>
+
+        <hr class="divider-procedure">
+
+        <section id="related">
+            <h2><span class="bionic">Rel</span>ated <span class="bionic">Con</span>cepts</h2>
+
+            <h3><span class="bionic">Bui</span>lds On</h3>
+            <ul>
+                <li>Anthropic's undocumented Claude for Chrome (Dec 2025)</li>
+                <li>Chrome DevTools Protocol (CDP)</li>
+                <li>Playwright/Puppeteer-style automation</li>
+            </ul>
+
+            <h3><span class="bionic">Ena</span>bles</h3>
+            <ul>
+                <li>Production-grade AI browser agents</li>
+                <li>Monitoring, scraping, form-filling, QA</li>
+                <li>No local machine risks</li>
+            </ul>
+
+            <h3><span class="bionic">Sim</span>ilar To</h3>
+            <ul>
+                <li>Anthropic's "Computer Use" tool (Claude 3.5+)</li>
+                <li>OpenAI's computer-use in o1</li>
+                <li>Adept/MultiOn agents</li>
+            </ul>
+        </section>
+
+        <hr class="divider-checkpoint">
+
+        <section id="mental-model">
+            <h2><span class="bionic">Men</span>tal <span class="bionic">Mod</span>el</h2>
+
+            <blockquote>Think of Claude Code's browser capability as a client speaking a custom language (MCP) to a local server (Chrome extension/native host). By building a compatible remote server that speaks the same language but executes elsewhere, you decouple the AI from local hardware.</blockquote>
+
+            <h3>Key <span class="bionic">Pri</span>nciples</h3>
+            <ol>
+                <li><strong>Protocol compatibility &gt; reimplementation</strong> - Match the interface, change the implementation</li>
+                <li><strong>Local = fast but risky & resource-heavy</strong> - Personal browser state exposed</li>
+                <li><strong>Cloud = isolated, parallelizable, production-grade</strong> - Safer at scale</li>
+            </ol>
+        </section>
+
+        <hr class="divider-checkpoint">
+
+        <section id="synthesis">
+            <h2><span class="bionic">Syn</span>thesis <span class="bionic">Hoo</span>ks</h2>
+
+            <h3><span class="bionic">Com</span>bines Well <span class="bionic">Wit</span>h</h3>
+            <ul>
+                <li>Stagehand (Browserbase's open-source agent framework)</li>
+                <li>Playwright MCP</li>
+                <li>Anthropic's tool-use API</li>
+            </ul>
+
+            <h3>Part of <span class="bionic">Lar</span>ger <span class="bionic">Pat</span>tern</h3>
+            <p>The emerging "browser-as-infrastructure" stack for AI agents - MCP as de-facto standard for AI &lt;-&gt; browser communication.</p>
+        </section>
+
+        <hr class="divider-checkpoint">
+
+        <section id="why-matters">
+            <h2>Why This <span class="bionic">Mat</span>ters</h2>
+
+            <div class="insight-box">
+                <p>"This thread is one of the cleanest public breakdowns of how early 2026 Claude browser integration actually worked under the hood - and a practical blueprint for making any local-only AI browser tool cloud-native."</p>
+            </div>
+
+            <h3>If you're <span class="bionic">bui</span>lding agents or <span class="bionic">aut</span>omations, this reveals:</h3>
+            <ul>
+                <li>How Claude Code browser automation actually works</li>
+                <li>The security risks of local execution</li>
+                <li>A production-ready cloud alternative</li>
+            </ul>
+        </section>
+
+        <hr class="divider-checkpoint">
+
+        <section id="questions">
+            <h2><span class="bionic">Fol</span>low-Up <span class="bionic">Que</span>stions</h2>
+
+            <ol>
+                <li>Has Anthropic acknowledged this MCP reverse-engineering?</li>
+                <li>Current state of the plugin (Jan 2026) - updates, bugs?</li>
+                <li>Performance/latency comparison: local vs Browserbase?</li>
+                <li>Open-source alternatives for MCP &rarr; CDP translation?</li>
+            </ol>
+        </section>
+
+        <div class="milestone">
+            Chrome MCP Reverse Engineering Guide Complete!
+        </div>
+    </main>
+
+    <footer>
+        <p>Research compiled January 2026 | <a href="../index.html">Back to Index</a></p>
+    </footer>
+
+    <script>
+    function copyCode(button) {
+        const codeBlock = button.parentElement.querySelector('pre code, pre');
+        navigator.clipboard.writeText(codeBlock.textContent);
+        button.textContent = 'Copied!';
+        setTimeout(() => button.textContent = 'Copy', 2000);
+    }
+    </script>
+</body>
+</html>

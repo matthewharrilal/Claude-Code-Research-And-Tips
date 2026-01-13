@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security - Claude Code Techniques</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="nav-breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <a href="index.html">Techniques</a>
+      <span>/</span>
+      Security
+    </nav>
+
+    <h1><span class="bionic">Sec</span>urity and <span class="bionic">Per</span>missions</h1>
+
+    <!-- You Are Here Context Box -->
+    <div class="you-are-here" style="background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%); border-left: 4px solid #2a7d7d; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+      <strong style="color: #2a7d7d;">You Are Here</strong>
+      <p style="margin: 0.5rem 0 0 0;">Claude Code runs commands on your machine with <strong>your permissions</strong>. This is powerful but requires understanding the trust model, permission levels, sandboxing options, and security best practices. This guide covers how to configure Claude Code safely for different risk tolerances.</p>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+      <div class="toc-title">Contents</div>
+      <ul>
+        <li><a href="#trust-model">The Trust Model</a></li>
+        <li><a href="#permission-levels">Permission Levels</a></li>
+        <li><a href="#dangerous-operations">Built-in Dangerous Operation Blocking</a></li>
+        <li><a href="#sandboxing">Sandboxing and Isolation</a></li>
+        <li><a href="#hook-security">Hook Security</a></li>
+        <li><a href="#mcp-security">MCP Server Security</a></li>
+        <li><a href="#prompt-injection">Prompt Injection Defense</a></li>
+        <li><a href="#best-practices">Security Best Practices</a></li>
+        <li><a href="#troubleshooting">Troubleshooting and Recovery</a></li>
+      </ul>
+    </div>
+
+    <!-- Section 1: Trust Model -->
+    <h2 id="trust-model"><span class="bionic">The</span> <span class="bionic">Tru</span>st <span class="bionic">Mod</span>el</h2>
+
+    <div class="problem-statement">
+      Claude Code can execute arbitrary shell commands, edit files, and access your filesystem. How much should you trust it, and how do you control what it can do?
+    </div>
+
+    <h3>Core Principle</h3>
+
+    <div class="callout callout-warning">
+      <div class="callout-title">Claude Code runs as YOU</div>
+      <p>When Claude executes a command, it runs with your user permissions. If you can delete system files, so can Claude. If you can access AWS credentials, so can Claude. The permission model mirrors your own access.</p>
+    </div>
+
+    <h3>Trust Boundaries</h3>
+
+    <div class="ascii-diagram">
++------------------------------------------------------------------+
+|                        YOUR MACHINE                               |
+|  +------------------------------------------------------------+  |
+|  |                    Claude Code Process                      |  |
+|  |                                                             |  |
+|  |  +------------------+    +------------------+               |  |
+|  |  | Shell Commands   |    | File Operations  |               |  |
+|  |  | (your perms)     |    | (your perms)     |               |  |
+|  |  +------------------+    +------------------+               |  |
+|  |                                                             |  |
+|  |  +------------------+    +------------------+               |  |
+|  |  | MCP Servers      |    | Hooks            |               |  |
+|  |  | (configurable)   |    | (your scripts)   |               |  |
+|  |  +------------------+    +------------------+               |  |
+|  +------------------------------------------------------------+  |
+|                                                                   |
+|  Environment Variables, SSH Keys, API Tokens - ALL ACCESSIBLE    |
++------------------------------------------------------------------+
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Section 2: Permission Levels -->
+    <h2 id="permission-levels"><span class="bionic">Per</span>mission <span class="bionic">Lev</span>els</h2>
+
+    <p>Claude Code has configurable permission levels that determine how much autonomy Claude has:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Mode</th>
+          <th>Behavior</th>
+          <th>Use Case</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Default</strong></td>
+          <td>Prompts for confirmation on write operations and shell commands</td>
+          <td>Learning, high-risk work</td>
+        </tr>
+        <tr>
+          <td><strong>Auto-accept edits</strong></td>
+          <td>Auto-approves file writes, still prompts for bash</td>
+          <td>Trusted file operations</td>
+        </tr>
+        <tr>
+          <td><strong>YOLO mode</strong></td>
+          <td>Auto-approves everything including shell commands</td>
+          <td>Sandboxed environments, experienced users</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tutorial-block">
+      <div class="tutorial-header">Enabling Permission Modes</div>
+      <div class="tutorial-content">
+        <p><strong>Auto-accept edits:</strong></p>
+        <pre><code># Via command line flag
+claude --auto-accept-edits
+
+# Or via slash command
+/auto-accept-edits</code></pre>
+
+        <p><strong>YOLO mode (use with caution):</strong></p>
+        <pre><code># Full autonomy - only use in sandboxed environments
+claude --dangerously-skip-permissions</code></pre>
+      </div>
+    </div>
+
+    <div class="gotcha-block">
+      <p><strong>YOLO Mode Warning:</strong> Only use <code>--dangerously-skip-permissions</code> in disposable environments like Docker containers, VMs, or CI pipelines. Never on your primary development machine.</p>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Section 3: Dangerous Operations -->
+    <h2 id="dangerous-operations"><span class="bionic">Bui</span>lt-in <span class="bionic">Dan</span>gerous <span class="bionic">Ope</span>ration <span class="bionic">Blo</span>cking</h2>
+
+    <p>Claude Code has built-in safeguards against common dangerous operations:</p>
+
+    <h3>Blocked by Default</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Examples</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Destructive file ops</strong></td>
+          <td><code>rm -rf /</code>, <code>rm -rf ~</code>, recursive deletes of system dirs</td>
+        </tr>
+        <tr>
+          <td><strong>Disk operations</strong></td>
+          <td><code>dd if=</code> to devices, <code>mkfs</code></td>
+        </tr>
+        <tr>
+          <td><strong>Permission changes</strong></td>
+          <td><code>chmod 777</code> on sensitive paths</td>
+        </tr>
+        <tr>
+          <td><strong>Network exfiltration</strong></td>
+          <td>Suspicious curl/wget patterns to untrusted hosts</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Git Safety Protocol</h3>
+
+    <p>Claude Code follows strict git safety rules:</p>
+
+    <div class="callout callout-insight">
+      <div class="callout-title">Git Command Restrictions</div>
+      <ul>
+        <li><strong>Never</strong> updates git config</li>
+        <li><strong>Never</strong> runs destructive commands (<code>push --force</code>, <code>reset --hard</code>) unless explicitly requested</li>
+        <li><strong>Never</strong> skips hooks (<code>--no-verify</code>) unless requested</li>
+        <li><strong>Avoids</strong> <code>git commit --amend</code> unless specific conditions are met</li>
+        <li><strong>Never</strong> commits unless explicitly asked</li>
+      </ul>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Section 4: Sandboxing -->
+    <h2 id="sandboxing"><span class="bionic">San</span>dboxing and <span class="bionic">Iso</span>lation</h2>
+
+    <h3>Docker Container Approach</h3>
+
+    <p>The safest way to run Claude Code is in an isolated container:</p>
+
+    <pre><code># Dockerfile for Claude Code sandbox
+FROM node:20-slim
+
+# Install Claude Code
+RUN npm install -g @anthropic-ai/claude-code
+
+# Create non-root user
+RUN useradd -m -s /bin/bash devuser
+USER devuser
+WORKDIR /home/devuser/project
+
+# Mount project as volume
+VOLUME /home/devuser/project
+
+# Run with API key
+ENV ANTHROPIC_API_KEY=""
+CMD ["claude"]</code></pre>
+
+    <pre><code># Run Claude Code in container
+docker run -it \
+  -v $(pwd):/home/devuser/project \
+  -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
+  claude-sandbox \
+  claude --dangerously-skip-permissions  # Safe inside container!</code></pre>
+
+    <h3>VM/Cloud VM Approach</h3>
+
+    <p>For maximum isolation, run on a separate machine:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Provider</th>
+          <th>Recommendation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Hetzner</strong></td><td>CX31 (~$13/month) - best price/performance</td></tr>
+        <tr><td><strong>DigitalOcean</strong></td><td>Droplet ($48/month) - easy setup</td></tr>
+        <tr><td><strong>AWS EC2</strong></td><td>Spot instances (70% cheaper)</td></tr>
+        <tr><td><strong>Home Mac</strong></td><td>Free - use Tailscale for access</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Filesystem Restrictions</h3>
+
+    <p>Limit Claude's access to specific directories via MCP:</p>
+
+    <pre><code>{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/me/projects/safe-project"  // Only this directory
+      ]
+    }
+  }
+}</code></pre>
+
+    <hr class="section-divider">
+
+    <!-- Section 5: Hook Security -->
+    <h2 id="hook-security"><span class="bionic">Hoo</span>k <span class="bionic">Sec</span>urity</h2>
+
+    <div class="callout callout-danger">
+      <div class="callout-title">Hooks Run With Your Permissions</div>
+      <p>Hook scripts execute as your user. A malicious <code>.claude/settings.json</code> in a cloned repository could configure hooks that exfiltrate data, install malware, or destroy files.</p>
+    </div>
+
+    <h3>Security Audit Before Running</h3>
+
+    <div class="tutorial-block">
+      <div class="tutorial-header">Audit Checklist for New Projects</div>
+      <div class="tutorial-content">
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">1</div>
+          <div class="tutorial-step-content">
+            <h4>Check for hook configurations</h4>
+            <pre><code>cat .claude/settings.json 2>/dev/null | jq '.hooks'</code></pre>
+          </div>
+        </div>
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">2</div>
+          <div class="tutorial-step-content">
+            <h4>Review referenced hook scripts</h4>
+            <pre><code># Look for any shell scripts in .claude/
+find .claude -name "*.sh" -exec cat {} \;</code></pre>
+          </div>
+        </div>
+        <div class="tutorial-step">
+          <div class="tutorial-step-number">3</div>
+          <div class="tutorial-step-content">
+            <h4>Check for suspicious patterns</h4>
+            <ul>
+              <li>Network calls to unknown hosts</li>
+              <li>Access to <code>~/.ssh</code>, <code>~/.aws</code>, <code>~/.config</code></li>
+              <li>Environment variable exfiltration</li>
+              <li>Background processes (<code>&</code>)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Using Hooks for Security</h3>
+
+    <p>Hooks can also <em>improve</em> security by blocking dangerous operations:</p>
+
+    <pre><code>#!/bin/bash
+# ~/.claude/hooks/security-guard.sh
+
+HOOK_DATA=$(cat)
+COMMAND=$(echo "$HOOK_DATA" | jq -r '.tool_input.command // empty')
+
+# Block patterns
+BLOCKED=(
+  "rm -rf /"
+  "sudo rm"
+  "chmod 777"
+  "> /dev/sd"
+  "curl.*|.*bash"  # Piped install scripts
+  "wget.*|.*sh"
+)
+
+for pattern in "${BLOCKED[@]}"; do
+  if [[ "$COMMAND" =~ $pattern ]]; then
+    echo '{"decision": "block", "reason": "Security: Blocked dangerous pattern"}'
+    exit 0
+  fi
+done
+
+echo '{"decision": "allow"}'</code></pre>
+
+    <hr class="section-divider">
+
+    <!-- Section 6: MCP Security -->
+    <h2 id="mcp-security"><span class="bionic">MCP</span> <span class="bionic">Ser</span>ver <span class="bionic">Sec</span>urity</h2>
+
+    <h3>MCP Security Principles</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Principle</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>User Consent</strong></td>
+          <td>Explicit consent required for data access</td>
+        </tr>
+        <tr>
+          <td><strong>Data Privacy</strong></td>
+          <td>No resource data transmission without user consent</td>
+        </tr>
+        <tr>
+          <td><strong>Tool Safety</strong></td>
+          <td>Treat tools as arbitrary code execution</td>
+        </tr>
+        <tr>
+          <td><strong>LLM Controls</strong></td>
+          <td>User approval for LLM sampling requests</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>MCP Server Vetting</h3>
+
+    <div class="recommendation">
+      <ol>
+        <li><strong>Use official servers:</strong> Prefer <code>@modelcontextprotocol/server-*</code> packages</li>
+        <li><strong>Audit third-party:</strong> Review code before installing community servers</li>
+        <li><strong>Limit permissions:</strong> Configure minimum required access</li>
+        <li><strong>Use environment variables:</strong> Never hardcode secrets in config</li>
+      </ol>
+    </div>
+
+    <h3>Secure Configuration Example</h3>
+
+    <pre><code>{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/me/allowed-directory"  // Explicit path restriction
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"  // From environment
+      }
+    }
+  }
+}</code></pre>
+
+    <hr class="section-divider">
+
+    <!-- Section 7: Prompt Injection -->
+    <h2 id="prompt-injection"><span class="bionic">Pro</span>mpt <span class="bionic">Inj</span>ection <span class="bionic">Def</span>ense</h2>
+
+    <div class="problem-statement">
+      Malicious content in files, URLs, or tool outputs could manipulate Claude's behavior through prompt injection attacks.
+    </div>
+
+    <h3>Attack Vectors</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Vector</th>
+          <th>Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Malicious files</strong></td>
+          <td>Code comments with "ignore previous instructions..."</td>
+        </tr>
+        <tr>
+          <td><strong>Web content</strong></td>
+          <td>Fetched URLs containing hidden instructions</td>
+        </tr>
+        <tr>
+          <td><strong>Tool outputs</strong></td>
+          <td>API responses designed to manipulate Claude</td>
+        </tr>
+        <tr>
+          <td><strong>CLAUDE.md</strong></td>
+          <td>Project instructions with malicious overrides</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Defense Strategies</h3>
+
+    <div class="callout callout-insight">
+      <div class="callout-title">Claude's Built-in Defenses</div>
+      <ul>
+        <li>Claude is trained to resist prompt injection</li>
+        <li>System prompts take precedence over user content</li>
+        <li>Suspicious instructions trigger warnings</li>
+      </ul>
+    </div>
+
+    <h3>User Defenses</h3>
+
+    <div class="recommendation">
+      <ol>
+        <li><strong>Review CLAUDE.md:</strong> Check project instructions before running</li>
+        <li><strong>Audit fetched URLs:</strong> Be cautious with <code>/fetch</code> on untrusted URLs</li>
+        <li><strong>Monitor outputs:</strong> Watch for unexpected commands or behaviors</li>
+        <li><strong>Use confirmation prompts:</strong> Don't enable YOLO mode on untrusted projects</li>
+      </ol>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Section 8: Best Practices -->
+    <h2 id="best-practices"><span class="bionic">Sec</span>urity <span class="bionic">Bes</span>t <span class="bionic">Pra</span>ctices</h2>
+
+    <h3>By Environment</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Environment</th>
+          <th>Recommendations</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Personal projects</strong></td>
+          <td>Auto-accept edits OK, review bash commands</td>
+        </tr>
+        <tr>
+          <td><strong>Work projects</strong></td>
+          <td>Keep confirmation prompts, audit hooks</td>
+        </tr>
+        <tr>
+          <td><strong>Untrusted repos</strong></td>
+          <td>Full confirmation mode, audit .claude/ directory</td>
+        </tr>
+        <tr>
+          <td><strong>CI/CD pipelines</strong></td>
+          <td>Docker sandbox, YOLO mode OK inside container</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>General Guidelines</h3>
+
+    <div class="recommendation">
+      <ol>
+        <li><strong>Principle of least privilege:</strong> Don't grant more access than needed</li>
+        <li><strong>Separate environments:</strong> Use VMs/containers for risky operations</li>
+        <li><strong>Audit regularly:</strong> Review what Claude has access to</li>
+        <li><strong>Keep secrets separate:</strong> Use environment variables, not config files</li>
+        <li><strong>Monitor activity:</strong> Check git history, file changes after sessions</li>
+        <li><strong>Use version control:</strong> Easy rollback if something goes wrong</li>
+      </ol>
+    </div>
+
+    <h3>Secrets Management</h3>
+
+    <pre><code># Good: Environment variables
+export ANTHROPIC_API_KEY="sk-..."
+export GITHUB_TOKEN="ghp_..."
+
+# Bad: Hardcoded in config
+{
+  "env": {
+    "API_KEY": "sk-abc123"  // Don't do this!
+  }
+}</code></pre>
+
+    <hr class="section-divider">
+
+    <!-- Section 9: Troubleshooting -->
+    <h2 id="troubleshooting"><span class="bionic">Tro</span>ubleshooting and <span class="bionic">Rec</span>overy</h2>
+
+    <details>
+      <summary>Claude modified files I didn't want changed</summary>
+      <div>
+        <pre><code># Check git status
+git status
+
+# Review changes
+git diff
+
+# Revert all changes
+git checkout -- .
+
+# Or revert specific file
+git checkout -- path/to/file</code></pre>
+      </div>
+    </details>
+
+    <details>
+      <summary>Suspicious network activity</summary>
+      <div>
+        <ol>
+          <li>Stop Claude immediately</li>
+          <li>Check running processes: <code>ps aux | grep claude</code></li>
+          <li>Review recent commands: <code>history</code></li>
+          <li>Check for background processes</li>
+          <li>Rotate any potentially compromised credentials</li>
+        </ol>
+      </div>
+    </details>
+
+    <details>
+      <summary>Accidentally ran dangerous command</summary>
+      <div>
+        <ol>
+          <li>Assess damage: what was affected?</li>
+          <li>Restore from backup if available</li>
+          <li>Check Time Machine (macOS) or similar</li>
+          <li>For git repos: <code>git reflog</code> can help recovery</li>
+        </ol>
+      </div>
+    </details>
+
+    <details>
+      <summary>Hook executed malicious code</summary>
+      <div>
+        <ol>
+          <li>Stop Claude and disconnect network</li>
+          <li>Review <code>~/.claude/settings.json</code> and project <code>.claude/</code></li>
+          <li>Check for persistence mechanisms (cron, launch agents)</li>
+          <li>Rotate credentials</li>
+          <li>Consider system restore</li>
+        </ol>
+      </div>
+    </details>
+
+    <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+      <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Emergency Contacts</div>
+      <ul>
+        <li><strong>Anthropic Security:</strong> security@anthropic.com</li>
+        <li><strong>Claude Code Issues:</strong> GitHub issues page</li>
+        <li><strong>Compromised credentials:</strong> Rotate immediately with respective providers</li>
+      </ul>
+    </div>
+
+    <!-- Related Pages -->
+    <div class="related-pages">
+      <h3>Related Pages</h3>
+      <ul>
+        <li><a href="hooks.html">Hooks - Event-driven automations</a></li>
+        <li><a href="mcp.html">MCP Servers - External tool integration</a></li>
+        <li><a href="mobile-async.html">Mobile - Remote access security</a></li>
+      </ul>
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="footer-nav">
+      <a href="hooks.html">Previous: Hooks</a>
+      <a href="mobile-async.html">Next: Mobile and Async</a>
+    </div>
+  </div>
+  <script src="../js/copy-code.js"></script>
+</body>
+</html>
