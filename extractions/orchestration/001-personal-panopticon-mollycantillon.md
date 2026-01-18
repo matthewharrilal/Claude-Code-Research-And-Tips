@@ -1,5 +1,22 @@
 # The Personal Panopticon
 
+---
+## D-FINAL Connection
+
+**This source contributed to:**
+- D-FINAL-architecture.md: Section 2.3 (brief mention of parallel domain isolation)
+
+**Coverage in D-FINAL:** 25%
+**High-value unique content:** Full 8-domain life architecture, GUI automation patterns, cron scheduling examples, "self-legibility" philosophy, WHOOP/Goodhart integration
+
+**Journey references:**
+- synthesis/mastery-multi-agent.md#domain-isolation
+- synthesis/architecture-complexity-ladder.md#level-6
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Source
 - **Author:** @mollycantillon (Molly Cantillon) - Founder at NOX, ex-Stanford
 - **Date:** 2026-01-07

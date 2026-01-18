@@ -1,3 +1,36 @@
+---
+## D-FINAL Connection
+
+**This foundational content contributed to:**
+- D-FINAL-mental-models.md: All Anti-Patterns (12 documented), Decision Heuristics (Part 6)
+- D-FINAL-architecture.md: Production requirements - sandboxing, observability, circuit breakers
+
+**Cross-cutting patterns identified:**
+- 80%+ AI project failure rate (2x typical IT projects) validates cautious approach
+- Multi-agent failure rate 41-86.7% validates Model 13 (Validator Consensus) need
+- Error amplification 17.2x (independent) vs 4.4x (centralized) validates coordination architecture
+- "Beyond three turns, AI becomes unreliable" validates fresh context principle
+
+**Universal Truth contribution:**
+- "The wisdom from failures is clear: Sandbox everything, commit constantly, cap costs aggressively, plan before implementing, and treat agents as junior developers who need supervision"
+- This directly informed all 9 Invariants in Part 3 of D-FINAL-mental-models.md
+
+**Evidence categories:**
+- Infinite Loop Disasters -> Model 11 (Ralph Mindset) iteration limits
+- Catastrophic File Deletion -> Sandboxing architecture requirements
+- Cost Horror Stories -> Model 8 (Cost Optimization) budget controls
+- Multi-Agent Coordination Failures -> Model 14 (Claims-Based Coordination)
+- Context Window Disasters -> Model 1 (Context-First), Model 3 (Fresh Context)
+- Security Incidents -> Enterprise architecture requirements
+
+**Journey references:**
+- journey-mental-models.md#anti-patterns (primary source)
+- journey-architecture.md#production-requirements (primary source)
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 # Production War Stories: What Actually Happens When AI Agents Run in the Real World
 
 ## Source

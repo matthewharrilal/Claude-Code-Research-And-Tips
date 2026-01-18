@@ -4,6 +4,13 @@ A comprehensive catalog of blog posts, articles, tutorials, and deep dives about
 
 ---
 
+## D-FINAL Connection
+
+**Sources contributed to:** All D-FINAL files
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Table of Contents
 
 1. [Steve Yegge's Articles](#steve-yegges-articles)

@@ -1,3 +1,14 @@
+---
+**DEPRECATED** (2026-01-18)
+
+This content has been superseded by D-FINAL synthesis.
+
+**Replacement:** See D-FINAL-mental-models Part 7 for current content.
+**Reason:** Content fully covered in D-FINAL with production validation.
+**Original preserved below for reference.**
+
+---
+
 # Deriving Patterns from First Principles
 
 **Purpose:** Teach the derivation process so you can invent new patterns, not just copy existing ones.

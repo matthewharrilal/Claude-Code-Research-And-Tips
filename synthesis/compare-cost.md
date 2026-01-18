@@ -1,3 +1,14 @@
+---
+**DEPRECATED** (2026-01-18)
+
+This content has been superseded by D-FINAL synthesis.
+
+**Replacement:** See D-FINAL-operations Section 2 for current content.
+**Reason:** Content fully covered in D-FINAL with production validation.
+**Original preserved below for reference.**
+
+---
+
 # Cost-Optimized Architecture Design
 
 A comprehensive guide to balancing cost versus capability when building AI agent systems with Claude Code.

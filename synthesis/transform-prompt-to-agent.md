@@ -1,5 +1,20 @@
 # Transformation: Prompt Engineering to Agent Engineering
 
+---
+
+## D-FINAL Integration
+
+**Validates invariants:** INV-1 (Context is constraint), INV-4 (Verification as trust boundary), INV-5 (Parallelization over single-agent), INV-6 (Human as orchestrator), INV-7 (Atomic tasks), INV-10 (Simplicity compensates)
+**Maps to complexity ladder:** Level 1 (Single Session) → Level 2-5 (Ralph → CC Mirror)
+**Cross-references:**
+- D-FINAL-architecture.md Section 1.2 (Complexity Ladder)
+- D-FINAL-mental-models.md Part 4 (Practitioner Evolution)
+- D-FINAL-mental-models.md Model 6 (Human as Orchestrator)
+**Journey link:** journey-mental-models.md (mindset transformation)
+**Last updated:** 2026-01-18 (Phase 2B)
+
+---
+
 ## The Paradigm Shift
 
 ### Prompt Engineering Era (2023-2024)

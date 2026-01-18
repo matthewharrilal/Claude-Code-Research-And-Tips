@@ -1,3 +1,14 @@
+---
+**DEPRECATED** (2026-01-18)
+
+This content has been superseded by D-FINAL synthesis.
+
+**Replacement:** See D-FINAL-architecture Section 2 for current content.
+**Reason:** Content fully covered in D-FINAL with production validation.
+**Original preserved below for reference.**
+
+---
+
 # Orchestration Pattern Taxonomy
 
 A comprehensive taxonomy of AI agent orchestration patterns, extracted from community innovations, production implementations, and research documentation.

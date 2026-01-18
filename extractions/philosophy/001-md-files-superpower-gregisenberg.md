@@ -1,3 +1,24 @@
+---
+## D-FINAL Connection
+
+**This foundational content contributed to:**
+- D-FINAL-mental-models.md: Model 2 (External State Over Internal Memory), Model 9 (Learning Must Compound)
+- D-FINAL-architecture.md: CLAUDE.md as persistence foundation
+
+**Core principles derived:**
+- External state persistence via .md files
+- Context injection through markdown
+- Compounding learning through documentation
+- "Structured context is the highest leverage asset you can own"
+
+**Journey references:**
+- journey-mental-models.md#external-state
+- journey-architecture.md#foundations
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 # .md Files = Superpower
 
 ## Source

@@ -1,5 +1,22 @@
 # Infinite Orchestra - Self-Improving Orchestrator
 
+---
+## D-FINAL Connection
+
+**This source contributed to:**
+- None (novel pattern not yet integrated)
+
+**Coverage in D-FINAL:** 10%
+**High-value unique content:** Self-improving orchestrator pattern, Docker containerization for safety, Neo4j memory integration, idle-state trigger mechanism, worker profile specialization (vision, docs, research, coder, memory, architect)
+
+**Journey references:**
+- synthesis/frontier-predictions.md#self-improvement
+- synthesis/combinations-pattern-extensions.md#experimental
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Source
 - **Author:** @0xSero - AI developer at Thrive Protocol
 - **Date:** 2026-01-04

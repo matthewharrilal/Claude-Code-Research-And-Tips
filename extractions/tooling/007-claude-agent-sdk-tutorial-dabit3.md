@@ -8,6 +8,11 @@
 - **Engagement:** 5.2K likes, 11K+ bookmarks, ~900K views
 
 ---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-implementation.md [Agent SDK, Programmatic Agents, Computer Use, Embedded Products sections]
+**Journey references:** journey-implementation.md [Agent SDK as Level 5-7 programmatic orchestration foundation]
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
 
 ## Core Insight
 

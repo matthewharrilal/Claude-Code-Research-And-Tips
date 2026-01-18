@@ -1,5 +1,12 @@
 # Unexplored Territory Map
 
+---
+## D-FINAL Integration
+**Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
+**Journey link:** journey-architecture.md, journey-implementation.md
+**Last updated:** 2026-01-18 (Phase 2B)
+---
+
 **Purpose:** Mapping combinations and innovations that COULD exist but aren't documented. This is theoretical frontier exploration based on synthesis of all extraction files.
 
 **Generated:** 2026-01-09

@@ -1,5 +1,22 @@
 # Ralph Compounding Runs - Learning Across Sessions
 
+---
+## D-FINAL Connection
+
+**This source contributed to:**
+- D-FINAL-implementation.md: Section 2.3 (compounding learning pattern)
+
+**Coverage in D-FINAL:** 65%
+**High-value unique content:** Archive structure for cross-run learning, 25-30 min planning workflow, reference-prior-runs technique
+
+**Journey references:**
+- synthesis/mastery-ralph-complete.md#compounding
+- synthesis/architecture-complexity-ladder.md#level-5
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Source
 - **Author:** @ryancarson (Ryan Carson) - Builder in Residence @Ampcode
 - **Date:** 2026-01-08

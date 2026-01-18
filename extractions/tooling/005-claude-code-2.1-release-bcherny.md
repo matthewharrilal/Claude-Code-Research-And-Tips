@@ -8,6 +8,11 @@
 - **Setup Docs:** https://code.claude.com/docs/en/setup
 
 ---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-implementation.md [Release Features, Hooks in Frontmatter, Wildcard Permissions, /teleport sections]
+**Journey references:** journey-implementation.md [2.1.0 features as platform capability baseline]
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
 
 ## Core Insight
 

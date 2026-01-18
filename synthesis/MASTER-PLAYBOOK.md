@@ -6,6 +6,37 @@
 
 ---
 
+## D-FINAL Integration
+
+**Relationship:** This playbook serves as the **user journey entry point** - a guided progression through Claude Code mastery. D-FINAL serves as the **production reference manual** - comprehensive technical documentation for implementation and operations.
+
+**How to use together:**
+- **Start here** for learning progression, capability milestones, and understanding "why"
+- **Reference D-FINAL** for production-ready code, checklists, and operational procedures
+
+**Validates invariants:**
+- INV-001: Context-First Paradigm (Part 1, Principle 1)
+- INV-002: External State Over Internal Memory (Part 1, Principle 2)
+- INV-003: Fresh Context Beats Extended Sessions (Part 1, Principle 3)
+- INV-004: Verification as Trust Boundary (Part 1, Principles 5-6)
+- INV-005: Orchestrator/Worker Separation (Part 1, Principle 4)
+
+**Cross-references:**
+- [D-FINAL-architecture.md](~/.claude/plans/WAVE-2.9/outputs/D-FINAL-architecture.md) - Pattern decision trees, architecture diagrams
+- [D-FINAL-implementation.md](~/.claude/plans/WAVE-2.9/outputs/D-FINAL-implementation.md) - Production code, hook templates
+- [D-FINAL-operations.md](~/.claude/plans/WAVE-2.9/outputs/D-FINAL-operations.md) - Checklists, incident response, monitoring
+- [D-FINAL-mental-models.md](~/.claude/plans/WAVE-2.9/outputs/D-FINAL-mental-models.md) - 16 mental models with practitioner evidence
+
+**Journey links:**
+- [journey-architecture.md](~/.claude/plans/PHASE-2B-REFINED/outputs/journey-architecture.md)
+- [journey-implementation.md](~/.claude/plans/PHASE-2B-REFINED/outputs/journey-implementation.md)
+- [journey-operations.md](~/.claude/plans/PHASE-2B-REFINED/outputs/journey-operations.md)
+- [journey-mental-models.md](~/.claude/plans/PHASE-2B-REFINED/outputs/journey-mental-models.md)
+
+**Last updated:** 2026-01-18 (Phase 2B D-FINAL Integration)
+
+---
+
 ## Navigation
 
 - [Part 1: Foundations](#part-1-foundations)

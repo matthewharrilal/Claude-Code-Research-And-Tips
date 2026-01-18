@@ -1,5 +1,22 @@
 # Gas Town - Factory for Coding Agents
 
+---
+## D-FINAL Connection
+
+**This source contributed to:**
+- D-FINAL-architecture.md: Section 2.4 (Gas Town core concepts, 8 stages, philosophy)
+
+**Coverage in D-FINAL:** 95%
+**High-value unique content:** Core concepts fully incorporated; this is the canonical Gas Town source
+
+**Journey references:**
+- synthesis/mastery-ralph-complete.md#scaling-to-gas-town
+- html-site/patterns/orchestration/gas-town.html
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Source
 - **Author:** @steve_yegge (Steve Yegge) - 40-year veteran, ex-Google/Amazon/Sourcegraph
 - **Date:** 2026-01-05

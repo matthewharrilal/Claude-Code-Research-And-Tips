@@ -1,5 +1,22 @@
 # Ralph Wiggum - 11 Tips Guide (3,000 Words)
 
+---
+## D-FINAL Connection
+
+**This source contributed to:**
+- D-FINAL-implementation.md: Section 3.3 (11 tips integrated into best practices)
+
+**Coverage in D-FINAL:** 70%
+**High-value unique content:** Full 11-tip structure with detailed rationale, "eager but dim junior developer" mental model, finite iterations principle articulation
+
+**Journey references:**
+- synthesis/mastery-ralph-complete.md#tips
+- html-site/patterns/mastery/ralph-complete.html#tips
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Source
 - **Author:** @mattpocockuk (Matt Pocock) - TypeScript expert, Total TypeScript, AI Hero
 - **Date:** 2026-01-08

@@ -1,5 +1,23 @@
 # Ralph Wiggum - Full Video Breakdown (Matt Pocock)
 
+---
+## D-FINAL Connection
+
+**This source contributed to:**
+- D-FINAL-architecture.md: Section 2.1 (Ralph pattern mental model)
+- D-FINAL-implementation.md: Section 1.2 (context rot, task sizing principles)
+
+**Coverage in D-FINAL:** 85%
+**High-value unique content:** Kanban vs multi-phase mental model diagram, "ship while you sleep" vision, file structure templates
+
+**Journey references:**
+- synthesis/mastery-ralph-complete.md#mental-model
+- html-site/patterns/mastery/ralph-complete.html
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Source
 - **Author:** @mattpocockuk (Matt Pocock) - Total TypeScript author, AI Hero, ex-Vercel
 - **Date:** 2026-01-05

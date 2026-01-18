@@ -1,5 +1,11 @@
 # EXECUTIVE INDEX: Deep Extractions Knowledge Base
 
+---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-mental-models.md
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
+
 > **Master Index for AI Agent Development Knowledge**
 >
 > 11 documents | 10,000+ lines | 12 frontier practitioners synthesized

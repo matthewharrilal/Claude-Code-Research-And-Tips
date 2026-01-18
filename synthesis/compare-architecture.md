@@ -1,3 +1,14 @@
+---
+**DEPRECATED** (2026-01-18)
+
+This content has been superseded by D-FINAL synthesis.
+
+**Replacement:** See D-FINAL-architecture Section 8 for current content.
+**Reason:** Content fully covered in D-FINAL with production validation.
+**Original preserved below for reference.**
+
+---
+
 # Agent Architecture Compared
 
 **A Decision Framework for Choosing the Right Multi-Agent Pattern**

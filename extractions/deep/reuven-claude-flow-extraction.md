@@ -1,5 +1,11 @@
 # Reuven Cohen and Claude-Flow: Complete Extraction
 
+---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-mental-models.md
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
+
 > **The enterprise swarm architect building infrastructure for multi-agent systems at scale.**
 
 ---

@@ -1,3 +1,28 @@
+---
+## D-FINAL Connection
+
+**This foundational content contributed to:**
+- D-FINAL-mental-models.md: Model 4 (Verification as Trust Boundary), Model 10 (Simplicity Compensates), Model 9 (Learning Must Compound)
+- D-FINAL-architecture.md: Complexity Ladder Level 1 (Vanilla baseline), Verification Infrastructure
+
+**Core principles derived:**
+- "My setup might be surprisingly vanilla" - simplicity as design philosophy
+- Verification feedback loop = 2-3x quality improvement
+- CLAUDE.md as institutional memory, git-checked, compounds over time
+- "Plan deeply -> execute shallowly"
+- PostToolUse hooks for verification (npm run typecheck && npm test)
+
+**Universal Truth contribution:**
+- Verification Non-Negotiable (Invariant #4) directly sourced from Boris
+
+**Journey references:**
+- journey-mental-models.md#verification-trust
+- journey-architecture.md#vanilla-baseline
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 # The Creator's Workflow - Boris Cherny's Claude Code Setup
 
 ## Source

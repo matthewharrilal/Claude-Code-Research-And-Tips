@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Molly Cantillon - Personal Panopticon | Practitioner Wisdom</title>
+  <meta data-pagefind-meta="chapter" content="Practitioners">
+  <meta data-pagefind-meta="section" content="Practitioner Profiles">
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/search.css">
   <style>
     .bionic { font-weight: 700; }
 
@@ -208,6 +211,34 @@
   </style>
 </head>
 <body>
+<!-- Search Modal -->
+<div class="search-modal" id="searchModal" aria-hidden="true">
+  <div class="search-overlay" onclick="closeSearch()"></div>
+  <div class="search-content">
+    <div class="search-header">
+      <div class="search-input-wrapper">
+        <span class="search-icon-input">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search documentation..." autocomplete="off" />
+        <kbd class="search-kbd">ESC</kbd>
+      </div>
+    </div>
+    <div class="search-filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="ch1">Chapter 1</button>
+      <button class="filter-btn" data-filter="ch2">Chapter 2</button>
+      <button class="filter-btn" data-filter="ch3">Chapter 3</button>
+      <button class="filter-btn" data-filter="ch4">Chapter 4</button>
+      <button class="filter-btn" data-filter="ref">Reference</button>
+    </div>
+    <div class="search-results" id="searchResults">
+      <div class="search-empty"><p>Start typing to search... (Press ⌘K anytime)</p></div>
+    </div>
+    <div class="search-footer">
+      <span>↑↓ Navigate</span><span>↵ Select</span><span>ESC Close</span>
+    </div>
+  </div>
+</div>
+
   <div class="container">
 
     <!-- Breadcrumb Navigation -->
@@ -217,6 +248,10 @@
       <a href="index.html">Practitioners</a>
       <span>/</span>
       Molly Cantillon
+      <button class="search-trigger" onclick="openSearch()" aria-label="Search" style="float: right; margin-bottom: 1rem;">
+        <span class="search-icon">⌘K</span>
+        <span class="search-text">Search</span>
+      </button>
     </nav>
 
     <!-- You Are Here Context Box -->
@@ -245,6 +280,7 @@
         <li><a href="#automations">Production Automations</a></li>
         <li><a href="#warnings">Philosophical Warnings</a></li>
         <li><a href="#troubleshooting">Troubleshooting &amp; Anti-Patterns</a></li>
+        <li><a href="#whats-next">What's Next</a></li>
       </ul>
     </div>
 
@@ -702,6 +738,181 @@ alias c='claude'
 5 6 * * * cd ~/health && claude "Analyze overnight recovery" > status/current.json
 10 6 * * * cd ~/correlation && claude "Synthesize daily brief from all domains"
       </div>
+
+      <h3><span class="bionic">Ope</span>rational Troubleshooting</h3>
+
+      <details class="troubleshoot">
+        <summary>Problem: "Domain Claude instance crashed or stuck"</summary>
+        <div>
+          <p><strong>Symptoms:</strong> tmux session unresponsive. Claude process consuming CPU but not responding. Briefs not generating.</p>
+          <p><strong>Causes:</strong></p>
+          <ul>
+            <li>Context overflow in long-running session</li>
+            <li>Network timeout to Anthropic API</li>
+            <li>Corrupted session state</li>
+          </ul>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Check if session is alive
+tmux ls
+tmux attach -t trades  # Try to attach
+
+# If unresponsive, kill and restart
+tmux kill-session -t trades
+tmux new-session -d -s trades "cd ~/trades && claude"
+
+# Check if Claude process is stuck
+ps aux | grep claude
+pkill -f "claude"  # Kill stuck processes
+
+# Restart all domains fresh
+for d in trades health email nox metrics growth writing personal; do
+  tmux kill-session -t $d 2>/dev/null
+  tmux new-session -d -s $d "cd ~/$d && claude"
+done
+          </div>
+          <p><strong>Prevention:</strong> Set up cron to restart sessions daily. Long-running sessions accumulate state.</p>
+        </div>
+      </details>
+
+      <details class="troubleshoot">
+        <summary>Problem: "Data sources not syncing"</summary>
+        <div>
+          <p><strong>Symptoms:</strong> Morning briefs using stale data. WHOOP data missing. Brokerage exports empty.</p>
+          <p><strong>Causes:</strong></p>
+          <ul>
+            <li>API credentials expired</li>
+            <li>Rate limiting from data sources</li>
+            <li>MCP server connection failed</li>
+          </ul>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Check data freshness
+ls -la ~/trades/data/  # When was last update?
+ls -la ~/health/data/
+
+# Test API connections manually
+curl -H "Authorization: Bearer $WHOOP_TOKEN" \
+  https://api.whoop.com/developer/v1/user/profile/basic
+
+# Check MCP server status
+ps aux | grep mcp
+
+# Restart MCP servers
+pkill -f "mcp-server"
+# Then restart your MCP servers
+          </div>
+          <p><strong>Prevention:</strong> Set up alerting for stale data. If ~/trades/data/* is older than 24h, send notification.</p>
+        </div>
+      </details>
+
+      <details class="troubleshoot">
+        <summary>Problem: "Cross-domain handoffs failing"</summary>
+        <div>
+          <p><strong>Symptoms:</strong> ~/correlation can't read domain outputs. Symlinks broken. Synthesis incomplete.</p>
+          <p><strong>Causes:</strong></p>
+          <ul>
+            <li>Domain outputs in unexpected locations</li>
+            <li>File permissions preventing read access</li>
+            <li>Symlinks pointing to moved/deleted files</li>
+          </ul>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Check symlinks in correlation
+ls -la ~/correlation/feeds/
+
+# Fix broken symlinks
+rm ~/correlation/feeds/trades-brief
+ln -s ~/trades/briefs/latest.md ~/correlation/feeds/trades-brief
+
+# Test read access
+cat ~/correlation/feeds/trades-brief
+
+# Recreate all symlinks
+rm -rf ~/correlation/feeds/*
+ln -s ~/trades/briefs/latest.md ~/correlation/feeds/trades-brief
+ln -s ~/health/status/current.json ~/correlation/feeds/health-status
+ln -s ~/nox/blockers.md ~/correlation/feeds/nox-blockers
+          </div>
+          <p><strong>Prevention:</strong> Use standardized output paths. Each domain writes to predictable locations.</p>
+        </div>
+      </details>
+
+      <h3><span class="bionic">Eme</span>rgency Recovery</h3>
+
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Single domain corrupted - isolate and rebuild
+mv ~/trades ~/trades.backup
+mkdir -p ~/trades
+cp ~/trades.backup/CLAUDE.md ~/trades/
+# Restart with fresh state, migrate data gradually
+
+# All sessions crashed - full restart
+pkill -f "claude"
+tmux kill-server
+for d in trades health email nox metrics growth writing personal; do
+  mkdir -p ~/$d
+  tmux new-session -d -s $d "cd ~/$d && claude"
+done
+tmux ls  # Verify all running
+
+# Cron jobs not executing - diagnose
+crontab -l                    # View current crons
+grep CRON /var/log/syslog     # Check execution logs
+# Ensure Claude path is absolute in cron:
+# 0 6 * * * /usr/local/bin/claude "..."
+
+# Lost track of domain boundaries
+# Create inventory of what each domain should own:
+for d in ~/trades ~/health ~/email ~/nox ~/metrics ~/growth ~/writing ~/personal; do
+  echo "=== $d ==="
+  head -20 $d/CLAUDE.md 2>/dev/null || echo "No CLAUDE.md"
+done > ~/domain-inventory.txt
+
+# Need to see everything Claude has done across domains
+for d in ~/trades ~/health ~/email ~/nox; do
+  echo "=== $d recent files ==="
+  ls -lt $d | head -10
+done
+
+# Panopticon feeling oppressive - take a break
+# Stop all automation, keep only essential:
+tmux kill-session -t health
+tmux kill-session -t metrics
+tmux kill-session -t growth
+# Keep only: trades (money), email (communications), nox (work)
+# Re-add domains only when you miss them
+      </div>
+    </section>
+
+    <div class="divider-context"></div>
+
+    <!-- What's Next Section -->
+    <section id="whats-next">
+      <h2><span class="bionic">Wha</span>t's <span class="bionic">Nex</span>t?</h2>
+
+      <p>You now understand the Personal Panopticon architecture. Here's where to go from here:</p>
+
+      <div class="philosophy-card">
+        <h4>If You Want to Start Building</h4>
+        <p>Begin with <strong>3 domains</strong>, not 8. Pick where you feel most blind: finances, health, or communications. Follow the Phase 1 setup above and run for 2 weeks before adding more.</p>
+      </div>
+
+      <div class="philosophy-card">
+        <h4>If You Want More Technical Multi-Agent Patterns</h4>
+        <p>Study <a href="steve-yegge.html"><strong>Steve Yegge's Gas Town</strong></a> - where Panopticon is life-focused, Gas Town is code-factory focused. Different use case, similar multi-agent philosophy.</p>
+      </div>
+
+      <div class="philosophy-card">
+        <h4>If You Want Simpler Automation First</h4>
+        <p>Start with <a href="ashley-ha.html"><strong>Ashley Ha's 4-phase workflow</strong></a> in a single domain before scaling to multiple. Master one Claude instance before multiplying.</p>
+      </div>
+
+      <div class="philosophy-card">
+        <h4>If You're Concerned About Self-Surveillance Risks</h4>
+        <p>Re-read the Philosophical Warnings section above. Maintain your "meta-level outside the system." The Panopticon is a tool, not a master. Be ready to delete domains that stop serving.</p>
+      </div>
     </section>
 
     <div class="milestone">Personal Panopticon Mental Model Complete</div>
@@ -719,10 +930,16 @@ alias c='claude'
     </div>
 
     <!-- Footer Navigation -->
-    <div class="footer-nav">
-      <a href="reuven-cohen.html">Previous: Reuven Cohen</a>
-      <a href="index.html">Back to Practitioners</a>
-    </div>
+    <nav class="footer-nav">
+      <a href="reuven-cohen.html" class="nav-prev">
+        <span class="nav-direction">Previous</span>
+        <span class="nav-title">Reuven Cohen</span>
+      </a>
+      <a href="nader-dabit.html" class="nav-next">
+        <span class="nav-direction">Next</span>
+        <span class="nav-title">Nader Dabit</span>
+      </a>
+    </nav>
 
     <!-- Related Pages -->
     <div class="related-pages">
@@ -738,5 +955,6 @@ alias c='claude'
 
   
   <script src="../js/copy-code.js"></script>
+  <script src="../js/search.js"></script>
 </body>
 </html>

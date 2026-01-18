@@ -8,6 +8,11 @@
 - **Repo:** github.com/jarrodwatts/claude-hud (1.8K stars)
 
 ---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-implementation.md [Session Monitoring, Context Visibility, Debugging Tools sections]
+**Journey references:** journey-implementation.md [Claude HUD as Level 2-3 observability tool]
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
 
 ## Core Insight
 

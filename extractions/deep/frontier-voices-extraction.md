@@ -1,5 +1,11 @@
 # Frontier Voices: Tier 3 Specialized Innovators - Complete Extraction
 
+---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-mental-models.md
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
+
 > **The advanced practitioners pushing specific frontiers in AI agent engineering beyond the main voices.**
 >
 > Synthesized from web research, GitHub analysis, community discovery, and source documents.

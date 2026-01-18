@@ -1,3 +1,33 @@
+---
+## D-FINAL Connection
+
+**This foundational content contributed to:**
+- D-FINAL-mental-models.md: Model 4 (Verification as Trust), Model 10 (Simplicity Compensates), Model 8 (Model Tiering - "Opus higher generation, MUCH lower correction")
+- D-FINAL-architecture.md: Vanilla baseline philosophy, Verification Infrastructure, Level 1 Complexity Ladder
+
+**Core principles derived:**
+- "Do the Simple Thing First" - foundational simplicity principle
+- "Build for the Model Six Months From Now" - anti-workaround philosophy
+- "Raw Model Access as Design Goal" - Unix-style composability
+- Verification feedback loop = 2-3x quality improvement
+- "My setup might be surprisingly vanilla" - simplicity as competitive advantage
+
+**Universal Truth contribution:**
+- Invariant #7 (Simplicity Bias) - "Every practitioner warns against over-engineering"
+- Invariant #4 (Verification Non-Negotiable) - Boris's PostToolUse hook pattern
+
+**Evidence impact:**
+- Boris's workflow is cited as primary evidence for Model 10 (Simplicity)
+- His Opus-First approach informs Model 8 cost divergence discussion
+
+**Journey references:**
+- journey-mental-models.md#simplicity
+- journey-architecture.md#vanilla-baseline
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 # Boris Cherny's Official Design Philosophy for Claude Code
 
 ## Source

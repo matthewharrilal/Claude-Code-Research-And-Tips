@@ -1,5 +1,11 @@
 # SYNTHESIS: Frontier Predictions for AI Agent Development
 
+---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-mental-models.md
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
+
 > **A comprehensive forecast synthesizing insights from Steve Yegge, Boris Cherny, Reuven Cohen, Numman Ali, Molly Cantillon, Nader Dabit, Eric Buess, Gene Kim, Kieran Klaassen, and the broader practitioner community.**
 >
 > **Synthesis Date:** 2026-01-10

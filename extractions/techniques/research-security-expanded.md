@@ -7,6 +7,11 @@ A comprehensive reference for Claude Code security, permissions, sandboxing, and
 **Status:** Complete
 
 ---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-implementation.md [Security & Permissions, YOLO Mode Safety, Enterprise Configuration sections]
+**Journey references:** journey-implementation.md [Security as cross-cutting concern at all complexity levels]
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
 
 ## Table of Contents
 

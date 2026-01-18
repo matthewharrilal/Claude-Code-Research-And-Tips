@@ -6,6 +6,38 @@
 
 ---
 
+## D-FINAL Integration
+
+**Relationship:** This staff engineer guide serves as the **strategic thinking companion** - focused on frontier mental models, practitioner wisdom, and paradigm-level thinking about agent systems. D-FINAL serves as the **production reference manual** - comprehensive technical documentation with 16 validated mental models, implementation patterns, and operational procedures.
+
+**How to use together:**
+- **Use this guide** for strategic positioning, understanding industry direction, and frontier thinking
+- **Reference D-FINAL** for detailed mental model frameworks, production code, and operational checklists
+- **This guide asks "where is this going?"** while D-FINAL answers "how do I build it today?"
+
+**Validates invariants:**
+- INV-005: Parallelization Over Single-Agent Optimization (The Staff Engineer Mental Model, Principles)
+- INV-006: Simplicity Compensates for Non-Determinism (Principle 2: Infrastructure Over Wrappers)
+- INV-007: Human Judgment Irreplaceable (Principle 4: The Trust Gradient)
+- INV-008: Orchestrator/Worker Separation (Principle 8: The Iron Law)
+- INV-009: Learning Must Compound (Beads section, external state themes)
+
+**Cross-references:**
+- [D-FINAL-architecture.md](~/.claude/plans/WAVE-2.9/outputs/D-FINAL-architecture.md) - Complexity Ladder (Levels 0-9), Gas Town architecture
+- [D-FINAL-implementation.md](~/.claude/plans/WAVE-2.9/outputs/D-FINAL-implementation.md) - Production implementation patterns
+- [D-FINAL-operations.md](~/.claude/plans/WAVE-2.9/outputs/D-FINAL-operations.md) - Cost economics, monitoring, war stories
+- [D-FINAL-mental-models.md](~/.claude/plans/WAVE-2.9/outputs/D-FINAL-mental-models.md) - 16 mental models with full practitioner evidence
+
+**Journey links:**
+- [journey-architecture.md](~/.claude/plans/PHASE-2B-REFINED/outputs/journey-architecture.md)
+- [journey-implementation.md](~/.claude/plans/PHASE-2B-REFINED/outputs/journey-implementation.md)
+- [journey-operations.md](~/.claude/plans/PHASE-2B-REFINED/outputs/journey-operations.md)
+- [journey-mental-models.md](~/.claude/plans/PHASE-2B-REFINED/outputs/journey-mental-models.md)
+
+**Last updated:** 2026-01-18 (Phase 2B D-FINAL Integration)
+
+---
+
 ## The Six Waves Framework (Steve Yegge)
 
 The most important mental model for understanding where AI-assisted development is heading.

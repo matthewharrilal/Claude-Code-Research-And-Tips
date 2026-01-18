@@ -1,3 +1,14 @@
+---
+**DEPRECATED** (2026-01-18)
+
+This content has been superseded by D-FINAL synthesis.
+
+**Replacement:** See D-FINAL-architecture Section 1.2 for current content.
+**Reason:** Content fully covered in D-FINAL with production validation.
+**Original preserved below for reference.**
+
+---
+
 # Claude Code Complexity Ladder
 
 A progression from beginner to expert Claude Code usage patterns, synthesized from community implementations, power user workflows, and production configurations.

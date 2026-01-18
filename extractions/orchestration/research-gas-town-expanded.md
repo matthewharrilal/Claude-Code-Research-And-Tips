@@ -1,5 +1,22 @@
 # Gas Town - Exhaustive Research Compilation
 
+---
+## D-FINAL Connection
+
+**This source contributed to:**
+- D-FINAL-architecture.md: Sections 2.4, 2.5, 3 (Gas Town architecture, Beads integration, emerging patterns)
+
+**Coverage in D-FINAL:** 75%
+**High-value unique content:** MCP Agent Mail integration details, Beads data plane specifics, gt CLI command reference, tmux configuration, cost management at scale less detailed
+
+**Journey references:**
+- synthesis/mastery-ralph-complete.md#gas-town-deep-dive
+- html-site/patterns/orchestration/gas-town.html
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 > **Research Status:** This document synthesizes all locally available information about Steve Yegge's Gas Town orchestration framework. Web research tools were unavailable during compilation. Sections marked [RESEARCH NEEDED] indicate areas where live web access would provide additional detail.
 
 ---

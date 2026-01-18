@@ -1,5 +1,34 @@
 # Mobile Claude Code - Implementation Details
 
+---
+## D-FINAL Connection
+
+**This content contributed to:**
+- D-FINAL-implementation.md: Section 4 (Hook Templates - specific PreToolUse patterns), Section 1 (Context Management - external state patterns)
+- D-FINAL-operations.md: Section 4 (Operational Checklists - mobile setup verification)
+
+**GAP STATUS:** **This content fills a D-FINAL gap - mobile coverage not in D-FINAL**
+
+This extraction provides copy-paste ready implementation code for mobile workflows:
+- Exact hook configuration JSON
+- Notification script shell code
+- tmux auto-attach patterns
+- Port allocation algorithms for parallel agents
+
+**Platform-specific considerations:**
+- Shell: bash/zsh configuration differences
+- Git worktrees: Branch isolation for parallel mobile agents
+- mosh: SSH agent forwarding limitations
+- Notification services: Poke, Pushover, ntfy alternatives
+
+**Journey references:**
+- [journey-implementation.md - Hook configuration patterns]
+- [journey-operations.md - Mobile checklist templates]
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Source
 - **Author:** @omarsar0 (Elvis) - AI educator at dair_ai, ex-Meta AI, PhD
 - **Date:** 2026-01-05

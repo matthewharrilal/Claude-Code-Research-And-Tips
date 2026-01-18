@@ -4,6 +4,20 @@
 
 ---
 
+## D-FINAL Integration
+
+**Validates invariants:** INV-1 (Context is constraint), INV-3 (Fresh context beats extended), INV-5 (Parallelization over single-agent), INV-8 (Model tiering), INV-14 (Claims-based coordination)
+**Maps to complexity ladder:** Level 1-2 (Single/Ralph) → Level 5-6 (CC Mirror Hub-and-Spoke)
+**Cross-references:**
+- D-FINAL-architecture.md Section 2.2 (CC Mirror Hub-and-Spoke)
+- D-FINAL-architecture.md Section 7 (Architecture Invariants - The Iron Law)
+- D-FINAL-mental-models.md Model 5 (Parallelization Over Single-Agent)
+- D-FINAL-mental-models.md Model 8 (Model Tiering)
+**Journey link:** journey-architecture.md (pattern selection and scaling)
+**Last updated:** 2026-01-18 (Phase 2B)
+
+---
+
 ## The Workload
 
 Build a full-stack feature: User Authentication System

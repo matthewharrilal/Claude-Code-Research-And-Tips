@@ -7,6 +7,11 @@
 - **Repo:** https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md
 
 ---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-implementation.md [Official Plugins, Code Quality, Two-Phase Workflow sections]
+**Journey references:** journey-implementation.md [code-simplifier as Level 2-3 polish/refinement pattern]
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
 
 ## Core Insight
 

@@ -1,5 +1,22 @@
 # Ralph Wiggum Marketer - Self-Critiquing Content Loop
 
+---
+## D-FINAL Connection
+
+**This source contributed to:**
+- D-FINAL-architecture.md: Section 1.4 (brief mention of domain generalization)
+
+**Coverage in D-FINAL:** 15%
+**High-value unique content:** Non-code domain Ralph (marketing), SQLite-backed discovery/synthesis separation, self-critique loop, domain-specific prompt templates for content workflows
+
+**Journey references:**
+- synthesis/combinations-pattern-extensions.md#non-code-domains
+- synthesis/taxonomy-workflows.md#content-creation
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Source
 - **Author:** @koylanai (Muratcan Koylan) - AI Agent Systems Manager, building agents since GPT-2
 - **Date:** 2026-01-07

@@ -1,5 +1,12 @@
 # Agent Pattern Vocabulary
 
+---
+## D-FINAL Integration
+**Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
+**Journey link:** journey-architecture.md, journey-implementation.md
+**Last updated:** 2026-01-18 (Phase 2B)
+---
+
 **The Complete Lexicon of Agentic Development Patterns**
 
 This document defines precise meanings for every term used in the agent pattern language. Each entry provides a definition, syntax where applicable, usage context, and canonical examples from the research corpus.

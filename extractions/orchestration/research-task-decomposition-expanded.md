@@ -1,5 +1,23 @@
 # Task Decomposition for AI Agents: Comprehensive Research
 
+---
+## D-FINAL Connection
+
+**This source contributed to:**
+- D-FINAL-architecture.md: Section 5.1 (task sizing principles)
+- D-FINAL-implementation.md: Section 1.3 (atomic work units, verification patterns)
+
+**Coverage in D-FINAL:** 60%
+**High-value unique content:** Token budgeting formulas (Section 11), TodoWrite vs external task management comparison (Section 13), context window estimation heuristics, good vs bad decomposition examples
+
+**Journey references:**
+- synthesis/architecture-complexity-ladder.md#task-sizing
+- synthesis/taxonomy-workflows.md#decomposition
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 **Purpose:** Exhaustive guide to breaking work into agent-sized chunks for Claude Code and similar AI coding agents.
 
 **Last Updated:** 2026-01-09

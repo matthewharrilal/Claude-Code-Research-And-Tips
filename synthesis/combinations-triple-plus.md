@@ -1,5 +1,12 @@
 # Higher-Order Combinations: Triple+ Pattern Stacks
 
+---
+## D-FINAL Integration
+**Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
+**Journey link:** journey-architecture.md, journey-implementation.md
+**Last updated:** 2026-01-18 (Phase 2B)
+---
+
 This synthesis identifies the most powerful multi-pattern combinations from the Claude Code power user community. These are not individual techniques but **integrated stacks** where each component amplifies the others.
 
 ---

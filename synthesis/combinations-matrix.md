@@ -1,5 +1,12 @@
 # Pattern Combination Matrix
 
+---
+## D-FINAL Integration
+**Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
+**Journey link:** journey-architecture.md, journey-implementation.md
+**Last updated:** 2026-01-18 (Phase 2B)
+---
+
 A comprehensive guide to combining Claude Code power-user patterns for maximum effectiveness.
 
 ---

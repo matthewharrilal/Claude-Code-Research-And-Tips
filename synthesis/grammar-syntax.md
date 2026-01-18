@@ -1,5 +1,12 @@
 # Agent Pattern Syntax Rules
 
+---
+## D-FINAL Integration
+**Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
+**Journey link:** journey-architecture.md, journey-implementation.md
+**Last updated:** 2026-01-18 (Phase 2B)
+---
+
 A formal grammar for composing agentic patterns. These rules define how primitives combine, what compositions are valid, and how to recognize syntax errors before they manifest as runtime failures.
 
 ---

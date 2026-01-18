@@ -1,5 +1,12 @@
 # Community Extensions as Composition Layer
 
+---
+## D-FINAL Integration
+**Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
+**Journey link:** journey-architecture.md, journey-implementation.md
+**Last updated:** 2026-01-18 (Phase 2B)
+---
+
 Extensions transform Claude Code from a single-agent tool into a composable platform. This document maps the extension ecosystem and establishes patterns for combining extensions as building blocks.
 
 ---

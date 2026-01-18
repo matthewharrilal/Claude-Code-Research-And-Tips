@@ -1,6 +1,12 @@
 # Boris Cherny: The Complete Mental Model
 ## Creator of Claude Code, Staff Engineer at Anthropic
 
+---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-mental-models.md
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
+
 > "I'm Boris and I created Claude Code. [...] My setup might be surprisingly vanilla!"
 
 ---

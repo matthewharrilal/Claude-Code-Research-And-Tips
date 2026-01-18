@@ -1,3 +1,29 @@
+---
+## D-FINAL Connection
+
+**This foundational content contributed to:**
+- D-FINAL-mental-models.md: Part 5 (Anti-Patterns), Part 6 (Decision Heuristics - When to Stop a Run)
+- D-FINAL-architecture.md: Architecture Invariants, Recovery Strategies
+
+**Cross-cutting patterns identified:**
+- 4,677 open issues = comprehensive failure mode catalog
+- Path-based permission bypass validates security architecture requirements
+- Context window overflow patterns inform Model 1 (Context-First Paradigm)
+- Infinite loop patterns inform stuck detection heuristics
+
+**Evidence impact:**
+- GitHub issue tracker analysis provides empirical anti-pattern validation
+- Platform-specific issues inform cross-platform architecture decisions
+- Version-specific bugs inform upgrade strategy recommendations
+
+**Journey references:**
+- journey-mental-models.md#failure-modes
+- journey-architecture.md#recovery-strategies
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 # Claude Code Edge Cases, Failure Modes, and Anti-Patterns
 
 **Research Date:** 2026-01-09

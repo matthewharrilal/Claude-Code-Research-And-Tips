@@ -1,5 +1,11 @@
 # Eric Buess Deep Extraction: The Unhobbled Claude Code Stack
 
+---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-mental-models.md
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
+
 ## Meta
 
 - **Source Author:** Eric Buess (@EricBuess)

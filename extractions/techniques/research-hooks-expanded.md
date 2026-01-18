@@ -3,6 +3,11 @@
 A comprehensive reference for Claude Code hooks: event-driven shell automations that extend Claude Code's capabilities. This document synthesizes official documentation, community patterns, and real production configurations.
 
 ---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-implementation.md [Hooks System, Lifecycle Events, Automation Patterns sections]
+**Journey references:** journey-implementation.md [Hooks as Level 2-4 automation enabler]
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
 
 ## Table of Contents
 

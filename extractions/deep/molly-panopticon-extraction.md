@@ -1,5 +1,11 @@
 # Deep Extraction: Molly Cantillon's Personal Panopticon
 
+---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-mental-models.md
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
+
 **Source:** @mollycantillon (Molly Cantillon) - Founder at NOX, ex-Stanford
 **Original Post:** https://x.com/mollycantillon/status/2008918474006122936 (2026-01-07)
 **Engagement:** 2.4K likes, 418K views, 3.8K bookmarks (heavily validated)

@@ -1,5 +1,23 @@
 # Opus 4.5 + Ralph + Playwright: Complete Implementation Guide
 
+---
+## D-FINAL Connection
+
+**This source contributed to:**
+- D-FINAL-architecture.md: Section 6.2 (browser verification patterns)
+- D-FINAL-implementation.md: Section 4 (frontend testing integration)
+
+**Coverage in D-FINAL:** 45%
+**High-value unique content:** Visual verification workflow with Playwright MCP, screenshot-driven debugging loop, browser-as-validator pattern, full frontend testing integration guide
+
+**Journey references:**
+- synthesis/taxonomy-tools.md#playwright-mcp
+- synthesis/combinations-tool-stacks.md#visual-verification
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 **Source:** @weswinder (Wes Winder) - 12+ year developer, founder of #1 vibe coding community
 **Date:** 2026-01-05
 **URL:** https://x.com/weswinder/status/2008051871743918410

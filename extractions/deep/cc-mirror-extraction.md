@@ -1,5 +1,11 @@
 # CC Mirror: Maximum Effort Extraction
 
+---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-mental-models.md
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
+
 **The Hidden Multi-Agent API That Anthropic Built But Disabled**
 
 > "Claude Code - Official Multi Agent Orchestration. This is a disabled feature, but through CC Mirror, I have been able to enable it. It is so simple, yet powerful and IMO beats every orchestration I've seen. There's no point building your own."

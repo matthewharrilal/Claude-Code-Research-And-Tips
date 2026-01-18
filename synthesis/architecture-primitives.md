@@ -1,3 +1,14 @@
+---
+**DEPRECATED** (2026-01-18)
+
+This content has been superseded by D-FINAL synthesis.
+
+**Replacement:** See D-FINAL-architecture Sections 2.1-2.8 for current content.
+**Reason:** Content fully covered in D-FINAL with production validation.
+**Original preserved below for reference.**
+
+---
+
 # Agent Pattern Primitives
 
 A comprehensive catalog of the atomic building blocks that compose complex AI agent orchestration patterns. These primitives are the smallest reusable units extracted from Ralph, Gas Town, CC Mirror, Panopticon, and other production agent architectures.

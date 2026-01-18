@@ -1,5 +1,21 @@
 # Transformation: Manual Context -> Filesystem State
 
+---
+
+## D-FINAL Integration
+
+**Validates invariants:** INV-2 (External state over internal memory), INV-9 (Learning must compound), INV-11 (Ralph Mindset - files carry state)
+**Maps to complexity ladder:** Level 0-1 (Manual/Single Session) → Level 2+ (Ralph and beyond)
+**Cross-references:**
+- D-FINAL-implementation.md Section 2 (State Management Implementation)
+- D-FINAL-implementation.md Section 2.2 (PRD Schema Templates)
+- D-FINAL-mental-models.md Model 2 (External State Over Internal Memory)
+- D-FINAL-mental-models.md Model 9 (Learning Must Compound)
+**Journey link:** journey-implementation.md (state file setup)
+**Last updated:** 2026-01-18 (Phase 2B)
+
+---
+
 ## The Problem
 
 You're building a complex feature across multiple sessions and need to track:

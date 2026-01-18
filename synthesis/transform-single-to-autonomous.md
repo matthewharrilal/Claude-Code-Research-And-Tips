@@ -4,6 +4,19 @@
 
 ---
 
+## D-FINAL Integration
+
+**Validates invariants:** INV-1 (Context is constraint), INV-2 (External state over internal memory), INV-3 (Fresh context beats extended), INV-4 (Verification as trust boundary), INV-9 (Learning must compound)
+**Maps to complexity ladder:** Level 1 (Single Session) → Level 2 (Ralph Wiggum Loop)
+**Cross-references:**
+- D-FINAL-architecture.md Section 2.1 (Ralph Wiggum Loop Pattern)
+- D-FINAL-implementation.md Section 3 (Complete Ralph Implementation)
+- D-FINAL-mental-models.md Model 11 (The Ralph Mindset)
+**Journey link:** journey-implementation.md (Ralph setup walkthrough)
+**Last updated:** 2026-01-18 (Phase 2B)
+
+---
+
 ## The Task
 
 Build a user authentication feature with:

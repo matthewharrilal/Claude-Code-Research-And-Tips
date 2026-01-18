@@ -1,3 +1,14 @@
+---
+**DEPRECATED** (2026-01-18)
+
+This content has been superseded by D-FINAL synthesis.
+
+**Replacement:** See D-FINAL-mental-models Part 1 for current content.
+**Reason:** Content fully covered in D-FINAL with production validation.
+**Original preserved below for reference.**
+
+---
+
 # Core Principles of Agent Engineering
 
 **Purpose:** The fundamental WHYs behind every pattern in Claude Code agent engineering. These principles are the bedrock from which all patterns derive. Understanding them enables you to create new patterns, adapt existing ones, and diagnose failures.

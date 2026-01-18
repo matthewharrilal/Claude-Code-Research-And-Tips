@@ -1,5 +1,22 @@
 # New Frontier Voices: Advanced Practitioners Beyond the Usual Names
 
+---
+## D-FINAL Connection
+
+**This source contributed to:**
+- D-FINAL-architecture.md: Section 3 (brief mentions of emerging patterns)
+
+**Coverage in D-FINAL:** 30%
+**High-value unique content:** Top 10 frontier practitioners (Reuven Cohen, Numman Ali, Kieran Klaassen, etc.), enterprise-scale innovations, swarm architectures, production-hardened tools discovery
+
+**Journey references:**
+- synthesis/frontier-predictions.md#emerging-voices
+- html-site/practitioners/frontier-voices.html
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Source
 - **Type:** Research Discovery
 - **Date:** January 10, 2026

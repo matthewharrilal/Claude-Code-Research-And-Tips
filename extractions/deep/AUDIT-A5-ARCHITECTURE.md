@@ -1,3 +1,9 @@
+---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-mental-models.md
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
+
 ## A5: Synthesis - Architecture Documents
 
 ### Files Reviewed:

@@ -1,5 +1,28 @@
 # System - Remote Mac Control via Claude AI
 
+---
+## D-FINAL Connection
+
+**This content contributed to:**
+- D-FINAL-implementation.md: Section 3 (Complete Ralph Implementation - remote execution contexts), Section 4 (Hook Templates - infrastructure patterns)
+- D-FINAL-operations.md: Section 1.3 (Enterprise Monitoring Architecture - remote agent patterns), Section 3 (Security Operations - tunnel security)
+
+**GAP STATUS:** Unique infrastructure pattern - Mac-as-API via Cloudflare tunnels not explicitly covered in D-FINAL
+
+**Platform-specific considerations:**
+- macOS-only (AppleScript, Raycast integration)
+- Requires Cloudflare Workers infrastructure
+- Zero-trust security model via tunnels
+- Brain/Body split architecture for security isolation
+
+**Journey references:**
+- [journey-implementation.md - Infrastructure deployment contexts]
+- [journey-operations.md - Remote agent security patterns]
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Source
 - **Author:** @burcs (Brandon) - PM at Cloudflare, founder of Outerbase (YC W23, acquired)
 - **Date:** 2026-01-05

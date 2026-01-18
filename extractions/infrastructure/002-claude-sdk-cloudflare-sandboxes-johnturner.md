@@ -1,5 +1,28 @@
 # Claude Agent SDK in Cloudflare Sandboxes - Production Agent Architecture
 
+---
+## D-FINAL Connection
+
+**This content contributed to:**
+- D-FINAL-implementation.md: Section 5 (Enterprise Implementation Patterns - sandbox deployment), Section 3 (Complete Ralph Implementation - production deployment variants)
+- D-FINAL-operations.md: Section 1.3 (Enterprise Monitoring Architecture - Cloudflare patterns), Section 5 (Incident Response - sandbox recovery)
+
+**GAP STATUS:** Extends D-FINAL with specific Cloudflare sandbox patterns (Durable Objects, WebSockets, session persistence)
+
+**Platform-specific considerations:**
+- Cloudflare Workers ecosystem required
+- Durable Objects for state persistence
+- Sandbox tier considerations (standard-2+ for long responses)
+- Local → Cloud deployment symmetry pattern
+
+**Journey references:**
+- [journey-implementation.md - Production deployment patterns]
+- [journey-operations.md - Enterprise monitoring architecture]
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Source
 - **Author:** @johnturner (John Turner) - WordPress plugin creator (1M+ users), AI enthusiast
 - **Date:** 2026-01-02

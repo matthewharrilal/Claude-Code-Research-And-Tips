@@ -1,5 +1,34 @@
 # Replit + Claude Code - Mobile Vibe Coding Guide
 
+---
+## D-FINAL Connection
+
+**This content contributed to:**
+- D-FINAL-implementation.md: Informed cloud IDE deployment patterns (Section 5 - Enterprise Implementation)
+- D-FINAL-operations.md: Informed Section 2 (Cost Management - Replit vs API cost tradeoffs)
+
+**GAP STATUS:** **This content fills a D-FINAL gap - mobile coverage not in D-FINAL**
+
+This extraction covers the "vibe coding" paradigm - loose, iterative, voice/prompt-driven development from mobile devices. Unique contributions:
+- Zero-setup full-stack development from phone
+- Replit Agent (structure) + Claude Code (details) combo workflow
+- Voice dictation integration for mobile input
+- Instant preview feedback loops on mobile
+
+**Platform-specific considerations:**
+- Replit mobile app (iOS/Android)
+- Cloud IDE vs SSH: Different mental model
+- API costs: Claude Code doesn't consume Replit credits
+- Preview limitations: Mobile view vs full desktop
+
+**Journey references:**
+- [journey-implementation.md - Cloud IDE deployment alternatives]
+- [journey-operations.md - Cost optimization strategies]
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Source
 - **Author:** @itsPaulAi (Paul Couvert)
 - **Date:** 2026-01-08/09

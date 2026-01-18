@@ -1,5 +1,23 @@
 # The Ralph Loop - Autonomous Feature Development
 
+---
+## D-FINAL Connection
+
+**This source contributed to:**
+- D-FINAL-architecture.md: Section 2.1 (Ralph pattern core architecture)
+- D-FINAL-implementation.md: Sections 3.2-3.4 (production loop implementation, prd.json schema)
+
+**Coverage in D-FINAL:** 90%
+**High-value unique content:** Core loop fully incorporated; original bash script and flow diagram serve as canonical reference
+
+**Journey references:**
+- synthesis/mastery-ralph-complete.md#core-implementation
+- html-site/patterns/orchestration/ralph-research.html
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Source
 - **Author:** @ryancarson (Ryan Carson) - 3x founder, Builder in Residence at Amp Code
 - **Date:** 2026-01-07

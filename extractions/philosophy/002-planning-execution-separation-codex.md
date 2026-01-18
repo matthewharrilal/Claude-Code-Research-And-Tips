@@ -1,3 +1,24 @@
+---
+## D-FINAL Connection
+
+**This foundational content contributed to:**
+- D-FINAL-mental-models.md: Model 12 (Phase Isolation Mindset), Model 6 (Human as Orchestrator), Model 7 (Atomic Tasks)
+- D-FINAL-architecture.md: Two-Phase Orchestration Pattern, FIC Methodology, Codebase Size Routing
+
+**Core principles derived:**
+- Planning before implementation as non-negotiable
+- Phase isolation preserves context quality (Research -> Plan -> Implement)
+- Filesystem as state queue for resilience
+- Atomic tasks (15-60 minutes) minimize drift
+
+**Journey references:**
+- journey-mental-models.md#phase-isolation
+- journey-architecture.md#two-phase-orchestration
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 # Planning vs Execution Separation - Long-Running Agent Architecture
 
 ## Source

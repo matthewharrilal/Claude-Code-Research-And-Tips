@@ -1,3 +1,25 @@
+---
+## D-FINAL Connection
+
+**This foundational content contributed to:**
+- D-FINAL-mental-models.md: Model 6 (Human as Orchestrator), Model 5 (Parallelization), Model 11 (Ralph Mindset)
+- D-FINAL-architecture.md: Complexity Ladder Level 2-3 (Subagents + Hooks, Ralph Loop)
+
+**Core principles derived:**
+- Hook-based automation removes friction (PreToolUse, PostToolUse, Stop hooks)
+- Subagent spawning enables capability amplification
+- Ralph Wiggum loops for persistent autonomous work
+- Validators keep agents honest across context clears
+- "Frictionless context management" = state via files, not memory
+
+**Journey references:**
+- journey-mental-models.md#human-orchestration
+- journey-architecture.md#complexity-ladder
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 # Unhobbled Claude Code - The 10x Stack
 
 ## Source

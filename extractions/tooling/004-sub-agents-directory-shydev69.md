@@ -8,6 +8,11 @@
 - **Site:** https://sub-agents.directory
 
 ---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-implementation.md [Sub-Agent Ecosystem, Ready-to-Use Prompts, Agent Orchestration sections]
+**Journey references:** journey-implementation.md [Sub-agents directory as Level 3-4 specialist delegation resource]
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
 
 ## Core Insight
 

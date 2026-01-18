@@ -4,6 +4,13 @@ A comprehensive collection of foundational, influential, and historically signif
 
 ---
 
+## D-FINAL Connection
+
+**Sources contributed to:** All D-FINAL files
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 ## Table of Contents
 
 1. [Origin & Announcement Threads](#1-origin--announcement-threads)

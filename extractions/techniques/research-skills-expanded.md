@@ -3,6 +3,11 @@
 A comprehensive corpus on Claude Code's skill system: creation, structure, triggers, community skills, plugins, and best practices. Compiled from official documentation, community implementations, and power user discoveries.
 
 ---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-implementation.md [Skills & Slash Commands, Plugin Architecture, Best Practices sections]
+**Journey references:** journey-implementation.md [Skills as Complexity Level 2-3 pattern]
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
 
 ## Part 1: Foundational Concepts
 

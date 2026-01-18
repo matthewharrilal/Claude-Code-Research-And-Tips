@@ -1,3 +1,33 @@
+---
+## D-FINAL Connection
+
+**This foundational content contributed to:**
+- D-FINAL-mental-models.md: Anti-Patterns (Part 5), Warning Signs of Wrong-Stage Thinking
+- D-FINAL-architecture.md: Architecture Invariants - Why sandboxing, commit discipline, iteration limits are mandatory
+
+**Cross-cutting patterns identified:**
+- 80%+ AI project failure rate validates cautious architecture approach
+- Multi-agent systems fail 41-86.7% in production - coordination is hard
+- "The gap between demos and production is enormous"
+- Context degradation as universal failure mode (Invariant #1)
+
+**Universal Truth contribution:**
+- Invariant #6 (Git As Recovery) - "All practitioners use git commits as checkpoints for recovery"
+- Invariant #7 (Simplicity Bias) - "Every war story involves complexity failing"
+
+**Evidence impact:**
+- $47,000 recursive loop validates iteration limits (Model 7)
+- Catastrophic file deletion validates sandboxing (Architecture Section 3)
+- 3.2M token circular revisions validates fresh context principle (Model 3)
+
+**Journey references:**
+- journey-mental-models.md#anti-patterns
+- journey-architecture.md#failure-modes
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 # Production War Stories: What Actually Happens When AI Agents Run
 
 ## Source

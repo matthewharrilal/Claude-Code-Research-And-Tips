@@ -1,3 +1,14 @@
+---
+**DEPRECATED** (2026-01-18)
+
+This content has been superseded by D-FINAL synthesis.
+
+**Replacement:** See D-FINAL-operations Section 4 for current content.
+**Reason:** Content fully covered in D-FINAL with production validation.
+**Original preserved below for reference.**
+
+---
+
 # Deployment Architecture Taxonomy for Claude Code
 
 **Comprehensive Classification of Infrastructure Patterns, Sandboxing Strategies, and Execution Environments**

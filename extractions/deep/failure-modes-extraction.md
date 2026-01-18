@@ -1,5 +1,11 @@
 # Claude Code Failure Modes: Complete Catalog
 
+---
+## D-FINAL Connection
+**Contributed to:** D-FINAL-mental-models.md
+**Last enhanced:** 2026-01-18 (Phase 2B)
+---
+
 > **Everything that can go wrong, why it happens, and how to recover.**
 
 ---

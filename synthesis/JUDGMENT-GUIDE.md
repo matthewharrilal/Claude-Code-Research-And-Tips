@@ -5,6 +5,37 @@
 
 ---
 
+## D-FINAL Integration
+
+**Relationship:** This judgment guide serves as the **decision-making companion** - focused on real-time tradeoff analysis and contextual wisdom. D-FINAL serves as the **production reference manual** - comprehensive technical documentation with decision trees, checklists, and implementation patterns.
+
+**How to use together:**
+- **Use this guide** when facing a decision that feels ambiguous or context-dependent
+- **Reference D-FINAL** for systematic decision trees and production implementation details
+- **Combine both** for informed decisions: this guide provides the "why", D-FINAL provides the "how"
+
+**Validates invariants:**
+- INV-001: Context-First Paradigm (Judgment Domain: Context Management)
+- INV-002: External State Over Internal Memory (Judgment Domain: State Management)
+- INV-006: Simplicity Compensates for Non-Determinism (Judgment Domain: Architecture Selection)
+- INV-007: Human Judgment Irreplaceable (Core premise of this entire guide)
+
+**Cross-references:**
+- [D-FINAL-architecture.md](~/.claude/plans/WAVE-2.9/outputs/D-FINAL-architecture.md) - Decision trees, pattern selection criteria
+- [D-FINAL-implementation.md](~/.claude/plans/WAVE-2.9/outputs/D-FINAL-implementation.md) - Implementation patterns, anti-patterns
+- [D-FINAL-operations.md](~/.claude/plans/WAVE-2.9/outputs/D-FINAL-operations.md) - Operational judgment, incident response
+- [D-FINAL-mental-models.md](~/.claude/plans/WAVE-2.9/outputs/D-FINAL-mental-models.md) - Mental Model 6: Human as Orchestrator, Decision Heuristics
+
+**Journey links:**
+- [journey-architecture.md](~/.claude/plans/PHASE-2B-REFINED/outputs/journey-architecture.md)
+- [journey-implementation.md](~/.claude/plans/PHASE-2B-REFINED/outputs/journey-implementation.md)
+- [journey-operations.md](~/.claude/plans/PHASE-2B-REFINED/outputs/journey-operations.md)
+- [journey-mental-models.md](~/.claude/plans/PHASE-2B-REFINED/outputs/journey-mental-models.md)
+
+**Last updated:** 2026-01-18 (Phase 2B D-FINAL Integration)
+
+---
+
 ## Quick Decision Trees
 
 ### "Which Orchestration Pattern Should I Use?"

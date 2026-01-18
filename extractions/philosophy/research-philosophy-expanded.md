@@ -1,3 +1,32 @@
+---
+## D-FINAL Connection
+
+**This foundational content contributed to:**
+- D-FINAL-mental-models.md: All 16 Mental Models - Primary synthesis source
+- D-FINAL-architecture.md: Architecture patterns, complexity ladder, coordination patterns
+
+**Core principles derived:**
+- Model 1 (Context-First Paradigm) from Section 12 - Context Rot Awareness
+- Model 2 (External State) from Section 13 - External Memory Architecture
+- Model 3 (Fresh Context) from Section 7 - Fresh Context Per Iteration
+- Model 4 (Verification as Trust) from Section 9 - Verification Loops
+- Model 5 (Parallelization) from Section 10 - Agent Colonies Over Single Agents
+- Model 6 (Human as Orchestrator) from Section 2 - Human as PM, AI as Coder
+- Model 9 (Learning Must Compound) from Section 20 - Compounding Knowledge Systems
+- Model 10 (Simplicity) from Section 22 - Simplicity as Strategy
+
+**Cross-cutting patterns identified:**
+- 25 distinct philosophies synthesized into unified mental model framework
+- Practitioner divergences documented (Opus-First vs Haiku-Swarm, etc.)
+
+**Journey references:**
+- journey-mental-models.md#all-models (comprehensive source)
+- journey-architecture.md#foundations
+
+**Last enhanced:** 2026-01-18 (Phase 2B)
+
+---
+
 # Philosophy & Mental Models for AI-Assisted Development
 
 A comprehensive research document on paradigms, philosophies, and mental models for effective AI coding collaboration. This represents the evolved thinking of practitioners who have shipped meaningful work with AI assistance.
