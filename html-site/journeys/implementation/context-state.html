@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Context & State Management - Claude Code Knowledge Base</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+</head>
+<body>
+  <div class="page-with-sidebar">
+    <!-- Sidebar navigation -->
+    <nav class="sidebar">
+      <button class="sidebar-close" aria-label="Close menu">&times;</button>
+      <div class="sidebar-header">
+        <h1 class="sidebar-title"><a href="../../index.html">Claude Code KB</a></h1>
+      </div>
+      <ul class="sidebar-nav">
+        <!-- Architecture section -->
+        <li class="nav-section">
+          <div class="nav-section-title">Architecture</div>
+          <ul class="nav-subsections">
+            <li class="nav-page"><a href="../architecture/decision-framework.html">Decision Framework</a></li>
+            <li class="nav-page"><a href="../architecture/core-patterns.html">Core Patterns</a></li>
+            <li class="nav-page"><a href="../architecture/enterprise-swarm.html">Enterprise & Swarm</a></li>
+            <li class="nav-page"><a href="../architecture/context-composition.html">Context & Composition</a></li>
+          </ul>
+        </li>
+        <!-- Implementation section (open when on implementation pages) -->
+        <li class="nav-section open">
+          <div class="nav-section-title">Implementation</div>
+          <ul class="nav-subsections">
+            <li class="nav-page current"><a href="context-state.html">Context & State</a></li>
+            <li class="nav-page"><a href="ralph-production.html">Ralph Production</a></li>
+            <li class="nav-page"><a href="hooks-enterprise.html">Hooks & Enterprise</a></li>
+          </ul>
+        </li>
+        <!-- Operations section -->
+        <li class="nav-section">
+          <div class="nav-section-title">Operations</div>
+          <ul class="nav-subsections">
+            <li class="nav-page"><a href="../operations/monitoring-cost.html">Monitoring & Cost</a></li>
+            <li class="nav-page"><a href="../operations/security-checklists.html">Security & Checklists</a></li>
+            <li class="nav-page"><a href="../operations/incident-response.html">Incident Response</a></li>
+          </ul>
+        </li>
+        <!-- Mental Models section -->
+        <li class="nav-section">
+          <div class="nav-section-title">Mental Models</div>
+          <ul class="nav-subsections">
+            <li class="nav-page"><a href="../mental-models/core-models.html">Core Models</a></li>
+            <li class="nav-page"><a href="../mental-models/advanced-models.html">Advanced Models</a></li>
+            <li class="nav-page"><a href="../mental-models/practice-heuristics.html">Practice & Heuristics</a></li>
+          </ul>
+        </li>
+        <!-- Foundations section -->
+        <li class="nav-section">
+          <div class="nav-section-title">Foundations</div>
+          <ul class="nav-subsections">
+            <li class="nav-page"><a href="../foundations/invariants-reference.html">Invariants Reference</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay"></div>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb">
+        <a href="../../index.html">Home</a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="context-state.html">Implementation</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">Context & State</span>
+      </nav>
+
+      <!-- Page meta -->
+      <div class="page-meta">
+        <span class="page-meta-item">~50 min read</span>
+      </div>
+
+      <h1>Context & State Management</h1>
+
+      <div class="context-box you-are-here">
+        <h3>You Are Here</h3>
+        <p><strong>What this covers:</strong> Complete implementation guide for Claude Code production systems - context management and state persistence across fresh sessions.</p>
+        <p><strong>Time estimate:</strong> ~50 minutes for full read, 15 minutes for targeted sections</p>
+        <p><strong>Where this fits:</strong></p>
+        <div class="ascii-diagram">Foundations (Principles/Architecture)
+           |
+    =====================================
+    |  >>> YOU ARE HERE <<<             |
+    |  Building Production Systems      |
+    |  (Context & State)                |
+    =====================================
+           |
+    Operations (Monitoring/Recovery)
+           |
+    Mental Models (Decision Heuristics)</div>
+        <p><strong>Related pages:</strong></p>
+        <ul>
+          <li><a href="ralph-production.html">Ralph Production</a> - Production loop implementation</li>
+          <li><a href="hooks-enterprise.html">Hooks & Enterprise</a> - Safety hooks and enterprise patterns</li>
+          <li><a href="../operations/monitoring-cost.html">Monitoring & Cost</a> - Operational monitoring</li>
+        </ul>
+      </div>
+
+      <p>This guide covers the two most critical factors in Claude Code production quality: managing the context window effectively and persisting state across fresh sessions. These are not optional optimizations - they are fundamental requirements for reliable autonomous work.</p>
+
+      <h2 id="prerequisites">Prerequisites</h2>
+
+      <p>Before beginning implementation, verify your environment:</p>
+
+      <ul>
+        <li>Claude Code installed and responding</li>
+        <li>You're in a git repository</li>
+        <li>jq is available for JSON processing</li>
+        <li>Node.js/npm available (for hooks examples)</li>
+        <li>You're NOT on main/master branch</li>
+      </ul>
+
+      <div class="checkpoint">
+        <div class="checkpoint-header">Checkpoint: Environment</div>
+        <div class="checkpoint-content">
+          <p>Run these commands to verify your setup:</p>
+          <div class="code-block">
+            <button class="copy-btn">Copy</button>
+            <pre><code>claude --version
+# Should output version number (e.g., 0.2.x)
+
+git status
+# Should NOT say "fatal: not a git repository"
+
+jq --version
+# Should output "jq-1.x"
+
+git branch --show-current
+# Should NOT be "main" or "master"</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <details class="troubleshoot">
+        <summary>Environment setup failing</summary>
+        <div class="troubleshoot-content">
+          <div class="troubleshoot-cause">Common setup issues:</div>
+          <table>
+            <tr><th>Symptom</th><th>Cause</th><th>Recovery</th></tr>
+            <tr><td><code>claude: command not found</code></td><td>Claude Code not installed</td><td>Run <code>npm install -g @anthropic-ai/claude-code</code></td></tr>
+            <tr><td><code>fatal: not a git repository</code></td><td>Not in git repo</td><td>Run <code>git init</code> or navigate to correct directory</td></tr>
+            <tr><td><code>jq: command not found</code></td><td>jq not installed</td><td>macOS: <code>brew install jq</code>, Ubuntu: <code>apt install jq</code></td></tr>
+            <tr><td><code>ANTHROPIC_API_KEY not set</code></td><td>Missing API key</td><td>Add <code>export ANTHROPIC_API_KEY="sk-ant-..."</code> to ~/.bashrc</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <hr class="section-divider">
+
+      <h2 id="context-management">Part 1: Context Management</h2>
+
+      <p>The most important constraint in Claude Code agent systems: never fill context beyond 60% for quality work.</p>
+
+      <h3 id="sixty-percent-rule">The 60% Threshold Rule</h3>
+
+      <p>Context quality degrades progressively. At 60%, you're in the optimal zone. Beyond 70%, you'll see noticeable quality loss in reasoning and code generation.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Fill Level</th>
+            <th>Quality</th>
+            <th>Action Required</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0-50%</td><td>Full capability</td><td>Continue working</td></tr>
+          <tr><td>50-60%</td><td>Optimal zone</td><td>Monitor, prepare to compact</td></tr>
+          <tr><td>60-70%</td><td>Slight degradation</td><td>Consider <code>/compact</code> or fresh session</td></tr>
+          <tr><td>70-85%</td><td>Noticeable quality loss</td><td><code>/compact</code> required</td></tr>
+          <tr><td>85-95%</td><td>Significant degradation</td><td>Fresh session required</td></tr>
+          <tr><td>95%+</td><td>Failure mode</td><td>Emergency reset</td></tr>
+        </tbody>
+      </table>
+
+      <h4>Context Budget Calculator Script</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/bin/bash
+# context-budget.sh - Calculate and monitor context usage
+# Location: ~/.claude/scripts/context-budget.sh
+
+MAX_TOKENS=200000
+BUDGET_PERCENT=60
+BUDGET=$((MAX_TOKENS * BUDGET_PERCENT / 100))
+
+# Estimate tokens from character count (~4 chars = 1 token)
+estimate_tokens() {
+    local file="$1"
+    local chars=$(wc -c < "$file" 2>/dev/null || echo 0)
+    echo $((chars / 4))
+}
+
+# Sum all markdown files in current project
+total_chars=$(find . -name "*.md" -exec cat {} + 2>/dev/null | wc -c)
+estimated_tokens=$((total_chars / 4))
+
+used_percent=$((estimated_tokens * 100 / MAX_TOKENS))
+
+echo "=== Context Budget Report ==="
+echo "Max tokens: $MAX_TOKENS"
+echo "Budget (60%): $BUDGET tokens"
+echo "Estimated static context: $estimated_tokens tokens ($used_percent%)"
+
+if [ $estimated_tokens -gt $BUDGET ]; then
+    echo "WARNING: Over budget! Reduce by $((estimated_tokens - BUDGET)) tokens"
+    exit 1
+else
+    echo "OK: $((BUDGET - estimated_tokens)) tokens remaining for work"
+    exit 0
+fi</code></pre>
+      </div>
+
+      <h4 id="opencode-profiles">Alternative Tools: OpenCode Context Profiles</h4>
+
+      <p>Source: <a href="https://github.com/0xSero/orchestra">0xSero/orchestra</a> (OpenCode integration)</p>
+
+      <p>OpenCode (from SST) provides profile-based context management that complements Claude Code:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/bin/bash
+# opencode-context-profiles.sh - Profile-based context management
+# Use with Orchestra pattern for specialized context windows
+
+# Define worker profiles with different context allocations
+cat > orchestrator.json << 'EOF'
+{
+  "profiles": [
+    { "id": "vision", "purpose": "Visual analysis", "context_budget": 40 },
+    { "id": "docs", "purpose": "Documentation research", "context_budget": 30 },
+    { "id": "research", "purpose": "Deep investigation", "context_budget": 50 },
+    { "id": "coder", "purpose": "Implementation", "context_budget": 60 },
+    { "id": "memory", "purpose": "Context persistence", "context_budget": 25 },
+    { "id": "architect", "purpose": "System design", "context_budget": 55 }
+  ]
+}
+EOF
+
+# Launch OpenCode with specific profile
+opencode --profile coder "$(cat prompt.md)"</code></pre>
+      </div>
+
+      <p><strong>Integration with Claude Code:</strong></p>
+      <ul>
+        <li>Use OpenCode profiles for specialized sub-tasks</li>
+        <li>Claude Code for primary orchestration</li>
+        <li>rpai (<code>cargo install rpai</code>) to monitor both simultaneously</li>
+      </ul>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code># Monitor multiple AI agents (Claude, OpenCode, Cursor) in tmux
+rpai
+# TUI shows: agent list, status, output previews
+# Jump to any agent with selection (mouse supported)</code></pre>
+      </div>
+
+      <h3 id="fresh-context">Fresh Context Initialization</h3>
+
+      <p>Every agent iteration must start with fresh context. Never use <code>--continue</code> for autonomous work.</p>
+
+      <p>Extended sessions accumulate context pollution. Fresh context per iteration maintains constant quality:</p>
+
+      <div class="ascii-diagram">Extended Session:           Fresh Context Per Iteration:
++---------------------+    +---------------------+
+| Iteration 1: Good   |    | Iteration 1: Fresh  |
+| Iteration 2: OK     |    | Iteration 2: Fresh  |
+| Iteration 3: Decay  |    | Iteration 3: Fresh  |
+| Iteration 4: Rot    |    | Iteration 4: Fresh  |
+| Iteration 5: Fail   |    | Iteration 5: Fresh  |
++---------------------+    +---------------------+
+      Quality down             Quality = Constant</div>
+
+      <h4>Fresh Context Loop (Minimal)</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/bin/bash
+# fresh-context-loop.sh - The simplest Ralph implementation
+
+PROMPT="prompts/main.md"
+MAX_ITERATIONS=${1:-10}
+
+for i in $(seq 1 $MAX_ITERATIONS); do
+    echo "=== Iteration $i of $MAX_ITERATIONS ==="
+
+    # CRITICAL: Fresh context every iteration - NEVER use --continue
+    cat "$PROMPT" | claude-code
+
+    # Check for explicit completion signal
+    if [ -f "completion.flag" ]; then
+        echo "Task complete after $i iterations"
+        rm -f completion.flag
+        exit 0
+    fi
+
+    sleep 2  # Prevent rate limiting
+done
+
+echo "Max iterations reached without completion"
+exit 1</code></pre>
+      </div>
+
+      <details class="troubleshoot">
+        <summary>Fresh context loop issues</summary>
+        <div class="troubleshoot-content">
+          <table>
+            <tr><th>Symptom</th><th>Cause</th><th>Recovery</th></tr>
+            <tr><td>Loop runs forever</td><td>No completion signal</td><td>Add <code>completion.flag</code> creation to prompt</td></tr>
+            <tr><td>Quality degrades after 3-4 iterations</td><td>Using <code>--continue</code></td><td>Remove <code>--continue</code>, use fresh context</td></tr>
+            <tr><td>Rate limited errors</td><td>Too fast iteration</td><td>Increase sleep between iterations to 5+ seconds</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <h3 id="fic">Frequent Intentional Compaction (FIC)</h3>
+
+      <p>Source: <a href="https://github.com/HumanLayer">HumanLayer/advanced-context-engineering</a> (validated on 300K+ LOC Rust codebase)</p>
+
+      <p>For large codebases, design workflow phases that deliberately compact. Instead of one long session, break work into phases that each produce a compacted artifact for the next phase.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Codebase Size</th>
+            <th>Use FIC?</th>
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>&lt; 50K LOC</td><td>Optional</td><td>Single-session likely sufficient</td></tr>
+          <tr><td>50-150K LOC</td><td>Recommended</td><td>Prevents shallow implementation</td></tr>
+          <tr><td>150K+ LOC</td><td>Required</td><td>Only way to fit in context</td></tr>
+          <tr><td>300K+ LOC</td><td>Required + Strict</td><td>"Week shipped in a day" claim</td></tr>
+        </tbody>
+      </table>
+
+      <h4>FIC Workflow Script</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/bin/bash
+# fic-workflow.sh - Frequent Intentional Compaction Implementation
+
+PROJECT_DIR="$(pwd)"
+ARTIFACTS_DIR="$PROJECT_DIR/.fic"
+mkdir -p "$ARTIFACTS_DIR"
+
+# Phase 1: Research (30-40% context budget)
+run_research_phase() {
+    local task_description="$1"
+
+    echo "=== PHASE 1: RESEARCH (30-40% context) ==="
+
+    cat > /tmp/research-prompt.md << EOF
+# Research Phase
+
+## Task
+$task_description
+
+## Instructions
+1. Analyze the codebase to understand:
+   - Relevant files and their relationships
+   - Existing patterns that apply
+   - Potential challenges
+
+2. Output a COMPACTED research.md (100-200 lines max) containing:
+   - Key files to modify
+   - Existing patterns to follow
+   - Dependencies and constraints
+   - Risks identified
+
+## Critical
+- Use /context to monitor utilization
+- Stay under 40% context fill
+- Produce ONLY the research.md artifact
+- Do NOT begin implementation
+
+## Output Format
+Write to: $ARTIFACTS_DIR/research.md
+EOF
+
+    claude-code --print < /tmp/research-prompt.md
+
+    if [ ! -f "$ARTIFACTS_DIR/research.md" ]; then
+        echo "ERROR: Research phase failed to produce artifact"
+        exit 1
+    fi
+
+    echo "Research complete: $(wc -l < "$ARTIFACTS_DIR/research.md") lines"
+}
+
+# Phase 2: Planning (20-30% context budget)
+run_planning_phase() {
+    echo "=== PHASE 2: PLANNING (20-30% context) ==="
+
+    cat > /tmp/planning-prompt.md << EOF
+# Planning Phase
+
+## Input
+Read: $ARTIFACTS_DIR/research.md
+
+## Instructions
+1. Based on research findings, create implementation plan
+2. Break into atomic, testable steps
+3. Identify verification criteria for each step
+
+## Output
+Write to: $ARTIFACTS_DIR/plan.md (150-250 lines max)
+
+## Critical
+- Use /context to monitor utilization
+- Stay under 30% context fill
+- Produce ONLY the plan.md artifact
+- Do NOT begin implementation
+EOF
+
+    claude-code --print < /tmp/planning-prompt.md
+
+    if [ ! -f "$ARTIFACTS_DIR/plan.md" ]; then
+        echo "ERROR: Planning phase failed to produce artifact"
+        exit 1
+    fi
+
+    echo "Planning complete: $(wc -l < "$ARTIFACTS_DIR/plan.md") lines"
+}
+
+# Phase 3: Implementation (60-70% context budget)
+run_implementation_phase() {
+    echo "=== PHASE 3: IMPLEMENTATION (60-70% context) ==="
+
+    cat > /tmp/implement-prompt.md << EOF
+# Implementation Phase
+
+## Inputs
+- Read: $ARTIFACTS_DIR/research.md
+- Read: $ARTIFACTS_DIR/plan.md
+
+## Instructions
+1. Execute the plan step by step
+2. Verify each step before proceeding
+3. Commit after each verified step
+
+## Context Budget
+You have 60-70% context for implementation reasoning.
+The research and plan artifacts total ~400 lines - leaving you maximum
+room for code generation and verification.
+
+## Completion Signal
+When ALL plan steps are complete and verified:
+<promise>COMPLETE</promise>
+EOF
+
+    claude-code --print < /tmp/implement-prompt.md
+}
+
+# Main FIC workflow
+main() {
+    local task="$1"
+
+    if [ -z "$task" ]; then
+        echo "Usage: $0 \"task description\""
+        exit 1
+    fi
+
+    echo "=== FIC WORKFLOW ==="
+    echo "Task: $task"
+    echo ""
+
+    run_research_phase "$task"
+    echo ""
+
+    run_planning_phase
+    echo ""
+
+    run_implementation_phase
+}
+
+main "$@"</code></pre>
+      </div>
+
+      <h4>Context Utilization Targets by Phase</h4>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Phase</th>
+            <th>Target</th>
+            <th>Warning</th>
+            <th>Critical</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Research</td><td>30-40%</td><td>45%</td><td>50%</td></tr>
+          <tr><td>Planning</td><td>20-30%</td><td>35%</td><td>40%</td></tr>
+          <tr><td>Implementation</td><td>60-70%</td><td>75%</td><td>80%</td></tr>
+        </tbody>
+      </table>
+
+      <details class="troubleshoot">
+        <summary>FIC workflow issues</summary>
+        <div class="troubleshoot-content">
+          <table>
+            <tr><th>Symptom</th><th>Cause</th><th>Recovery</th></tr>
+            <tr><td>Research artifact missing</td><td>Phase 1 timeout or error</td><td>Increase timeout, check prompt clarity</td></tr>
+            <tr><td>Plan too long (&gt;250 lines)</td><td>Scope too large</td><td>Break task into smaller sub-tasks</td></tr>
+            <tr><td>Implementation phase exceeds budget</td><td>Research/plan too detailed</td><td>Compact artifacts more aggressively</td></tr>
+            <tr><td>"Context utilization unknown"</td><td>Claude can't track context</td><td>Use <code>/context</code> command manually</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <h4 id="aider-architect">Aider's Architect/Editor Pattern for Phase Separation</h4>
+
+      <p>Source: <a href="https://github.com/paul-gauthier/aider">paul-gauthier/aider</a></p>
+
+      <p>Aider pioneered the Architect/Editor pattern that maps directly to FIC phases:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/bin/bash
+#===============================================================================
+# aider-style-phases.sh - Architect mode for planning, Editor mode for implementation
+# Adapting Aider's proven pattern to Claude Code workflows
+#===============================================================================
+
+# PHASE 1: ARCHITECT MODE (Planning)
+# - High-level design decisions
+# - File structure planning
+# - Interface definitions
+# - NO code changes
+
+run_architect_phase() {
+    local task="$1"
+
+    cat > /tmp/architect-prompt.md << EOF
+# Architect Mode
+
+You are in ARCHITECT mode. Planning only, no implementation.
+
+## Task
+$task
+
+## Output Required
+1. Files that need to be created or modified
+2. Key interfaces and data structures
+3. Dependencies between components
+4. Order of implementation
+
+## Rules
+- DO NOT write implementation code
+- DO NOT create or modify files
+- Focus on design decisions only
+- Output to: .fic/architecture.md
+EOF
+
+    claude-code --print < /tmp/architect-prompt.md
+}
+
+# PHASE 2: EDITOR MODE (Implementation)
+# - Execute the architect's plan
+# - One file at a time
+# - Auto-commit each logical change (Aider pattern)
+
+run_editor_phase() {
+    local architecture=".fic/architecture.md"
+
+    cat > /tmp/editor-prompt.md << EOF
+# Editor Mode
+
+You are in EDITOR mode. Execute the plan, commit each change.
+
+## Architecture Plan
+$(cat "$architecture")
+
+## Rules
+- Implement ONE component at a time
+- Commit after each logical change (Aider pattern)
+- Use meaningful commit messages
+- Run tests after each change
+
+## Commit Pattern (from Aider)
+git add <file>
+git commit -m "feat: <component> - <what was done>"
+EOF
+
+    claude-code --print < /tmp/editor-prompt.md
+}
+
+# Usage: Architect first, then Editor
+# ./aider-style-phases.sh architect "Build user auth system"
+# ./aider-style-phases.sh editor</code></pre>
+      </div>
+
+      <p><strong>Key Aider Patterns Transferable to Claude Code:</strong></p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Aider Feature</th>
+            <th>Claude Code Implementation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Architect mode</td><td>Separate planning phase in FIC</td></tr>
+          <tr><td>Auto-commit</td><td>Git commit after each verification</td></tr>
+          <tr><td>Git-aware</td><td>Read git history as context</td></tr>
+          <tr><td>Multi-file editing</td><td>PRD with file dependencies</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="context-injection">Context Injection Architecture</h3>
+
+      <p>The three-layer system for context management:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>~/.claude/CLAUDE.md           # Layer 1: Global (always loaded)
+./CLAUDE.md                   # Layer 2: Project (always loaded)
+./.claude/CONTEXT.md          # Layer 3: Session (auto-generated)</code></pre>
+      </div>
+
+      <h4>Layer 1 - Global CLAUDE.md</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code># Global Rules - All Projects
+
+## My Preferences
+- Always use TypeScript strict mode
+- Prefer composition over inheritance
+- Use conventional commits format
+
+## Security
+- Never commit .env files
+- Use environment variables for secrets
+- Never cat .env or credential files in Claude Code
+
+## Verification
+- Always run typecheck before commits
+- Include tests for new functionality</code></pre>
+      </div>
+
+      <h4>Layer 2 - Project CLAUDE.md</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code># Project: [Project Name]
+
+## Tech Stack
+- Framework: [e.g., Next.js 14]
+- Language: [e.g., TypeScript 5.x]
+- Database: [e.g., PostgreSQL via Prisma]
+- Testing: [e.g., Vitest + Playwright]
+
+## Commands
+- `npm run dev` - Development server (port 3000)
+- `npm run test` - Run test suite
+- `npm run typecheck` - TypeScript checking
+- `npm run build` - Production build
+
+## Conventions
+- All API routes in src/api/
+- Use Zod for validation schemas
+- Repository pattern for data access
+- Components in src/components/[Feature]/
+
+## Key Files
+- `src/db/schema.ts` - Database schema
+- `src/lib/api.ts` - API client
+- `src/types/index.ts` - Shared types</code></pre>
+      </div>
+
+      <h4>Layer 3 - Dynamic Context Hook</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/bin/bash
+# ~/.claude/hooks/generate-context.sh
+# Generates fresh CONTEXT.md at session start
+
+CONTEXT_FILE=".claude/CONTEXT.md"
+mkdir -p .claude
+
+cat > "$CONTEXT_FILE" << EOF
+## Current Session Context (Auto-Generated)
+Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+### Git Status
+\`\`\`
+$(git status --short 2>/dev/null || echo "Not a git repository")
+\`\`\`
+
+### Recent Commits
+\`\`\`
+$(git log --oneline -5 2>/dev/null || echo "No git history")
+\`\`\`
+
+### Current Branch
+$(git branch --show-current 2>/dev/null || echo "unknown")
+
+### Failing Tests (if any)
+\`\`\`
+$(npm test 2>&1 | grep -E "(FAIL|Error|failed)" | head -10 || echo "No test failures detected")
+\`\`\`
+
+### Pending Tasks
+$(jq -r '.userStories[] | select(.passes == false) | "- [ ] \(.id): \(.title)"' plans/prd.json 2>/dev/null || echo "No PRD found")
+EOF
+
+echo "Context generated: $CONTEXT_FILE"</code></pre>
+      </div>
+
+      <h3 id="progressive-disclosure">Progressive Disclosure</h3>
+
+      <p>Load minimal context initially, expand on demand:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code># Project: MyApp
+
+## Core Rules (Always Active)
+- Run typecheck before commits
+- Follow existing code patterns
+- One component per file
+
+## On-Demand References
+Load these ONLY when working on related features:
+
+- Authentication: See `/docs/auth-patterns.md`
+- API Design: See `/docs/api-conventions.md`
+- Database: See `/docs/schema-guide.md`
+- Testing: See `/docs/testing-patterns.md`
+
+Do NOT read these files unless you need them for the current task.</code></pre>
+      </div>
+
+      <hr class="section-divider">
+
+      <h2 id="state-management">Part 2: State Management</h2>
+
+      <p>Each Claude session starts fresh. Memory persists only through files the agent can read/write.</p>
+
+      <h3 id="external-state-trilogy">The External State Trilogy</h3>
+
+      <p>Every agent system needs three types of external state:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>project/
+├── plans/
+│   ├── prd.json          # Machine-parseable task state (read/write)
+│   └── progress.txt      # Append-only learning log
+├── .git/                 # Version history + recovery
+└── CLAUDE.md             # Project context</code></pre>
+      </div>
+
+      <h3 id="prd-schema">PRD Schema Templates</h3>
+
+      <h4>Minimal PRD Schema (Single Agent)</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>{
+  "project": "feature-name",
+  "branchName": "feature/my-feature",
+  "created": "2026-01-18T10:00:00Z",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Add database table for users",
+      "description": "Create the users table with essential fields",
+      "acceptanceCriteria": [
+        "Column 'id' exists as primary key",
+        "Column 'email' exists with unique constraint",
+        "Column 'created_at' has default timestamp",
+        "npm run typecheck passes",
+        "npm run test passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}</code></pre>
+      </div>
+
+      <h4>Production PRD Schema (with RALPH_STATUS support)</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>{
+  "project": {
+    "id": "proj-20260118100000",
+    "name": "Feature Name",
+    "description": "Brief description of what we're building",
+    "created_at": "2026-01-18T10:00:00Z",
+    "updated_at": "2026-01-18T10:00:00Z"
+  },
+
+  "meta": {
+    "total_iterations": 0,
+    "estimated_cost_usd": 0,
+    "last_checkpoint": null,
+    "agent_version": "ralph-production-1.0"
+  },
+
+  "termination": {
+    "max_iterations": 50,
+    "max_cost_usd": 25.00,
+    "stuck_threshold": 3,
+    "completion_signals": {
+      "promise_marker": "&lt;promise&gt;COMPLETE&lt;/promise&gt;",
+      "ralph_status_required": true,
+      "min_completion_indicators": 2
+    }
+  },
+
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Story title (verb phrase)",
+      "description": "What needs to happen and why",
+      "priority": 1,
+      "status": "pending",
+      "passes": false,
+
+      "acceptanceCriteria": [
+        "Specific, verifiable criterion 1",
+        "Specific, verifiable criterion 2",
+        "npm run typecheck passes",
+        "npm run test passes"
+      ],
+
+      "files": [
+        "src/path/to/file.ts",
+        "src/path/to/other.ts"
+      ],
+
+      "dependencies": [],
+      "blocked_by": [],
+
+      "tracking": {
+        "started_at": null,
+        "completed_at": null,
+        "iteration_count": 0,
+        "commit_sha": null
+      },
+
+      "notes": ""
+    }
+  ],
+
+  "learnings": {
+    "codebase_patterns": [],
+    "gotchas": [],
+    "decisions": []
+  }
+}</code></pre>
+      </div>
+
+      <div class="checkpoint">
+        <div class="checkpoint-header">Checkpoint: PRD Setup</div>
+        <div class="checkpoint-content">
+          <p>Verify your PRD is valid:</p>
+          <div class="code-block">
+            <button class="copy-btn">Copy</button>
+            <pre><code>jq empty plans/prd.json
+# No output = valid JSON
+
+jq '.userStories | length' plans/prd.json
+# Should output a number > 0</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <details class="troubleshoot">
+        <summary>PRD issues</summary>
+        <div class="troubleshoot-content">
+          <table>
+            <tr><th>Symptom</th><th>Cause</th><th>Recovery</th></tr>
+            <tr><td><code>jq: parse error</code></td><td>Invalid JSON</td><td>Validate with <code>jq empty plans/prd.json</code></td></tr>
+            <tr><td>Agent ignores PRD</td><td>Not reading file</td><td>Add explicit "Read plans/prd.json" to prompt</td></tr>
+            <tr><td>Stories never complete</td><td>Criteria too vague</td><td>Make criteria testable: "X passes" not "X works"</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <h3 id="claude-flow-memory">Claude-Flow's Hybrid Memory Architecture</h3>
+
+      <p>Source: <a href="https://github.com/ruvnet/claude-flow">ruvnet/claude-flow</a> (11.3k stars)</p>
+
+      <p>Claude-Flow demonstrates a more sophisticated state model using a hybrid approach:</p>
+
+      <div class="ascii-diagram">Claude-Flow State Architecture
+==============================
+
++----------------------------------------------------------+
+|                      MEMORY LAYER                        |
++----------------------------------------------------------+
+|                                                          |
+|  Coordination Layer (AgentDB - SQLite)                   |
+|  +-- Who is doing what?                                  |
+|  +-- What's the status of task X?                        |
+|  +-- What messages need to be delivered?                 |
+|  +-- What resources are available?                       |
+|                                                          |
+|  Semantic Layer (ReasoningBank - Vectors)                |
+|  +-- How did we solve similar problems before?           |
+|  +-- What patterns apply to this situation?              |
+|  +-- What learnings are relevant?                        |
+|  +-- What context should be injected?                    |
+|                                                          |
++----------------------------------------------------------+</div>
+
+      <p><strong>Key insight from Reuven Cohen (@ruvnet):</strong></p>
+      <blockquote>"For swarm memory, you don't need complex vector similarity searches. What you really need is a common simple SQLite storage environment that allows all agents to save their current state and access previous states."</blockquote>
+
+      <h4>Implementing Claude-Flow's AgentDB in your Ralph loop</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/bin/bash
+#===============================================================================
+# agentdb-setup.sh - Claude-Flow style state management for Ralph
+#===============================================================================
+
+AGENT_DB=".agent-state/agent.db"
+mkdir -p "$(dirname "$AGENT_DB")"
+
+# Initialize AgentDB schema (Claude-Flow pattern)
+init_agentdb() {
+    sqlite3 "$AGENT_DB" << 'EOF'
+-- Agent State Table (from Claude-Flow)
+CREATE TABLE IF NOT EXISTS agent_state (
+    agent_id TEXT PRIMARY KEY,
+    agent_type TEXT NOT NULL,
+    current_task TEXT,
+    status TEXT DEFAULT 'idle',
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    context_snapshot TEXT
+);
+
+-- Task History Table
+CREATE TABLE IF NOT EXISTS task_history (
+    task_id TEXT PRIMARY KEY,
+    agent_id TEXT REFERENCES agent_state(agent_id),
+    task_description TEXT,
+    result TEXT,
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP
+);
+
+-- Inter-Agent Messages (for multi-agent coordination)
+CREATE TABLE IF NOT EXISTS agent_messages (
+    message_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    from_agent TEXT,
+    to_agent TEXT,
+    message_type TEXT,
+    content TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    acknowledged BOOLEAN DEFAULT FALSE
+);
+
+-- Learned Patterns (ReasoningBank simple version)
+CREATE TABLE IF NOT EXISTS learned_patterns (
+    pattern_id TEXT PRIMARY KEY,
+    problem_signature TEXT NOT NULL,
+    solution_steps TEXT NOT NULL,
+    reward_score REAL DEFAULT 0,
+    applications INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+EOF
+    echo "AgentDB initialized at $AGENT_DB"
+}
+
+# Register agent state (call at iteration start)
+register_agent() {
+    local agent_id="$1"
+    local agent_type="$2"
+
+    sqlite3 "$AGENT_DB" << EOF
+INSERT OR REPLACE INTO agent_state (agent_id, agent_type, status, last_updated)
+VALUES ('$agent_id', '$agent_type', 'active', datetime('now'));
+EOF
+}
+
+# Record task completion (call after story passes)
+record_task() {
+    local task_id="$1"
+    local agent_id="$2"
+    local description="$3"
+    local result="$4"
+
+    sqlite3 "$AGENT_DB" << EOF
+INSERT INTO task_history (task_id, agent_id, task_description, result, completed_at)
+VALUES ('$task_id', '$agent_id', '$description', '$result', datetime('now'));
+EOF
+}
+
+# Store learned pattern (call when discovering reusable solution)
+store_pattern() {
+    local pattern_id="$1"
+    local problem="$2"
+    local solution="$3"
+
+    sqlite3 "$AGENT_DB" << EOF
+INSERT OR REPLACE INTO learned_patterns (pattern_id, problem_signature, solution_steps, applications)
+VALUES ('$pattern_id', '$problem', '$solution',
+        COALESCE((SELECT applications FROM learned_patterns WHERE pattern_id='$pattern_id'), 0) + 1);
+EOF
+}
+
+# Query similar patterns (simple keyword search, not vector)
+find_patterns() {
+    local keyword="$1"
+    sqlite3 "$AGENT_DB" << EOF
+SELECT pattern_id, problem_signature, solution_steps
+FROM learned_patterns
+WHERE problem_signature LIKE '%$keyword%'
+ORDER BY applications DESC
+LIMIT 5;
+EOF
+}
+
+# Usage
+init_agentdb
+register_agent "ralph-main" "implementation"</code></pre>
+      </div>
+
+      <h4>When to use Claude-Flow's architecture</h4>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>Use Simple (prd.json)</th>
+            <th>Use AgentDB</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Single-agent Ralph</td><td>Yes</td><td>Overkill</td></tr>
+          <tr><td>Multi-agent coordination</td><td>No</td><td>Yes</td></tr>
+          <tr><td>Long-running (days)</td><td>Optional</td><td>Recommended</td></tr>
+          <tr><td>Learning across sessions</td><td>No</td><td>Yes</td></tr>
+          <tr><td>Enterprise compliance</td><td>No</td><td>Yes (audit trail)</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="progress-log">Progress Log Implementation</h3>
+
+      <h4>progress.txt Initial Template</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code># Progress Log - APPEND ONLY, NEVER EDIT ABOVE THIS LINE
+# Project: [Project Name]
+# Started: [Date]
+
+## Codebase Patterns Discovered
+&lt;!-- Add patterns as you learn them --&gt;
+- [Pattern]: [Description]
+
+## Key Files Reference
+&lt;!-- Track important files --&gt;
+- [file path]: [purpose]
+
+---
+
+&lt;!-- Individual iteration logs below --&gt;</code></pre>
+      </div>
+
+      <h4>Progress Entry Format (Agent Instructions)</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>APPEND to progress.txt (NEVER update or overwrite):
+
+---
+
+## [ISO Date] - [Story ID]
+- **Completed:** [What was done]
+- **Files Changed:** [List files]
+- **Verification:** [Test results]
+- **Learnings:**
+  - [Pattern discovered]
+  - [Gotcha encountered]
+- **Next:** [What's unblocked]</code></pre>
+      </div>
+
+      <p>History must never be rewritten. Each iteration adds context for future iterations without risking loss of learning.</p>
+
+      <h3 id="git-as-memory">Git History as Memory (Aider Pattern)</h3>
+
+      <p>Source: <a href="https://github.com/paul-gauthier/aider">paul-gauthier/aider</a></p>
+
+      <p>Aider treats git history as the primary memory system. Each commit is a checkpoint that can be queried, compared, and reverted to:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/bin/bash
+# git-as-memory.sh - Aider-style git history for context
+
+# Generate context from recent git history
+generate_git_context() {
+    local lines="${1:-50}"
+
+    cat << EOF
+## Git History Context (Last $lines commits)
+
+### Recent Changes
+\`\`\`
+$(git log --oneline -$lines 2>/dev/null || echo "No git history")
+\`\`\`
+
+### Files Changed Recently
+\`\`\`
+$(git diff --stat HEAD~10..HEAD 2>/dev/null || echo "No recent changes")
+\`\`\`
+
+### Uncommitted Changes
+\`\`\`
+$(git status --short 2>/dev/null || echo "Clean working directory")
+\`\`\`
+EOF
+}
+
+# Auto-commit with meaningful message (core Aider feature)
+aider_style_commit() {
+    local component="$1"
+    local action="$2"
+
+    git add -A
+    if ! git diff --cached --quiet; then
+        git commit -m "feat($component): $action"
+        echo "Committed: feat($component): $action"
+    fi
+}
+
+# Usage in Ralph loop:
+# After each story completion:
+#   aider_style_commit "auth" "implement JWT token validation"</code></pre>
+      </div>
+
+      <h3 id="atomic-writes">Atomic Write Implementation</h3>
+
+      <p>Partial writes corrupt state. Always use atomic writes:</p>
+
+      <h4>Bash - Atomic JSON Write</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/bin/bash
+# atomic-write.sh - Prevents partial writes
+
+atomic_write_json() {
+    local content="$1"
+    local target="$2"
+    local temp_file="${target}.tmp.$$"
+
+    # Write to temp file
+    echo "$content" > "$temp_file"
+
+    # Validate JSON before committing
+    if ! jq empty "$temp_file" 2>/dev/null; then
+        rm -f "$temp_file"
+        echo "ERROR: Invalid JSON, aborting write" >&2
+        return 1
+    fi
+
+    # Atomic rename (POSIX guarantees atomicity)
+    mv "$temp_file" "$target"
+    return 0
+}
+
+# Usage example:
+# new_prd=$(jq '.userStories[0].passes = true' prd.json)
+# atomic_write_json "$new_prd" "prd.json"</code></pre>
+      </div>
+
+      <h4>Python - Atomic JSON Write</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/usr/bin/env python3
+"""atomic_write.py - Atomic file writes for agent state"""
+
+import os
+import json
+import tempfile
+from pathlib import Path
+
+
+def atomic_write_json(filepath: str, data: dict) -> None:
+    """
+    Write JSON atomically using temp-file-then-rename.
+
+    Args:
+        filepath: Target file path
+        data: Dictionary to write as JSON
+
+    Raises:
+        Exception: If write fails (original file unchanged)
+    """
+    path = Path(filepath)
+    dir_path = path.parent
+
+    # Create temp file in same directory (required for atomic rename)
+    fd, temp_path = tempfile.mkstemp(dir=str(dir_path), suffix='.tmp')
+
+    try:
+        with os.fdopen(fd, 'w') as f:
+            json.dump(data, f, indent=2)
+            f.flush()
+            os.fsync(f.fileno())  # Ensure data hits disk
+
+        # Atomic rename
+        os.rename(temp_path, filepath)
+
+    except Exception:
+        # Clean up temp file on failure
+        if os.path.exists(temp_path):
+            os.unlink(temp_path)
+        raise
+
+
+# Usage:
+# prd = json.load(open('prd.json'))
+# prd['userStories'][0]['passes'] = True
+# atomic_write_json('prd.json', prd)</code></pre>
+      </div>
+
+      <h3 id="ralph-status">RALPH_STATUS Structured Signals</h3>
+
+      <p>Source: <a href="https://github.com/frankbria/ralph-claude-code">frankbria/ralph-claude-code</a></p>
+
+      <p>Beyond simple grep, structured JSON status enables dual-condition exit gates:</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/bin/bash
+# ralph-status.sh - RALPH_STATUS signal parsing and dual-condition exit
+
+# Extract RALPH_STATUS from Claude output
+parse_ralph_status() {
+    local output="$1"
+
+    # Extract JSON block between RALPH_STATUS markers
+    local status_json=$(echo "$output" | \
+        grep -oP '{"RALPH_STATUS":\s*{[^}]+}}' | \
+        head -1 || echo "")
+
+    if [ -z "$status_json" ]; then
+        echo '{"EXIT_SIGNAL": false, "completion_indicators": 0}'
+        return 1
+    fi
+
+    echo "$status_json" | jq -r '.RALPH_STATUS'
+}
+
+# Dual-condition exit gate
+should_exit() {
+    local status_json="$1"
+
+    local exit_signal=$(echo "$status_json" | jq -r '.EXIT_SIGNAL // false')
+    local completion_indicators=$(echo "$status_json" | jq -r '.completion_indicators // 0')
+
+    # BOTH conditions must be true:
+    # 1. Explicit EXIT_SIGNAL = true
+    # 2. At least 2 completion indicators
+
+    if [ "$exit_signal" = "true" ] && [ "$completion_indicators" -ge 2 ]; then
+        echo "EXIT: Both conditions met (signal: $exit_signal, indicators: $completion_indicators)"
+        return 0
+    else
+        echo "CONTINUE: Conditions not met (signal: $exit_signal, indicators: $completion_indicators)"
+        return 1
+    fi
+}</code></pre>
+      </div>
+
+      <p>Single exit signals are unreliable. Requiring both an explicit signal and multiple completion indicators prevents premature termination.</p>
+
+      <h3 id="checkpoints">Checkpoint and Recovery</h3>
+
+      <h4>Checkpoint Creation Script</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/bin/bash
+# create-checkpoint.sh - Save recovery point
+
+CHECKPOINT_DIR=".checkpoints"
+mkdir -p "$CHECKPOINT_DIR"
+
+create_checkpoint() {
+    local story_id="$1"
+    local progress="$2"
+    local next_steps="$3"  # JSON array
+
+    local checkpoint_id="chk-$(date +%Y%m%d-%H%M%S)"
+    local checkpoint_file="$CHECKPOINT_DIR/$checkpoint_id.json"
+
+    cat > "$checkpoint_file" << EOF
+{
+    "checkpoint_id": "$checkpoint_id",
+    "created_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+    "git_state": {
+        "branch": "$(git branch --show-current)",
+        "last_commit": "$(git rev-parse HEAD)",
+        "modified_files": $(git diff --name-only | jq -R -s -c 'split("\n") | map(select(length > 0))')
+    },
+    "task_state": {
+        "current_story": "$story_id"
+    },
+    "context_summary": "$progress",
+    "next_steps": $next_steps
+}
+EOF
+
+    git add "$checkpoint_file"
+    git commit -m "checkpoint: $story_id - $progress"
+
+    echo "Checkpoint created: $checkpoint_id"
+}
+
+# Usage:
+# create_checkpoint "US-003" "Completed auth endpoints" '["Add tests", "Update docs"]'</code></pre>
+      </div>
+
+      <h4>Checkpoint Recovery Script</h4>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/bin/bash
+# recover-checkpoint.sh - Resume from saved state
+
+recover_from_checkpoint() {
+    local checkpoint_id="$1"
+    local checkpoint_file=".checkpoints/$checkpoint_id.json"
+
+    if [ ! -f "$checkpoint_file" ]; then
+        echo "ERROR: Checkpoint not found: $checkpoint_id" >&2
+        ls -la .checkpoints/
+        return 1
+    fi
+
+    local branch=$(jq -r '.git_state.branch' "$checkpoint_file")
+    local commit=$(jq -r '.git_state.last_commit' "$checkpoint_file")
+    local summary=$(jq -r '.context_summary' "$checkpoint_file")
+    local next=$(jq -r '.next_steps | join(", ")' "$checkpoint_file")
+
+    echo "=== Recovering from checkpoint: $checkpoint_id ==="
+    echo "Branch: $branch"
+    echo "Commit: $commit"
+    echo "Summary: $summary"
+    echo "Next steps: $next"
+
+    git checkout "$branch"
+    git reset --hard "$commit"
+
+    cat > /tmp/recovery-prompt.md << EOF
+# Recovery Context
+
+## Previous Progress
+$summary
+
+## Next Steps
+$next
+
+## Instructions
+Continue from checkpoint. Read prd.json and progress.txt for full context.
+Focus on the next steps listed above.
+EOF
+
+    echo ""
+    echo "Recovery prompt saved to: /tmp/recovery-prompt.md"
+    echo "Start fresh session with: cat /tmp/recovery-prompt.md | claude-code"
+}
+
+list_checkpoints() {
+    echo "=== Available Checkpoints ==="
+    for file in .checkpoints/*.json; do
+        if [ -f "$file" ]; then
+            id=$(jq -r '.checkpoint_id' "$file")
+            date=$(jq -r '.created_at' "$file")
+            story=$(jq -r '.task_state.current_story' "$file")
+            echo "$id | $date | $story"
+        fi
+    done
+}</code></pre>
+      </div>
+
+      <h3 id="advisory-reservations">Advisory File Reservations (Multi-Agent)</h3>
+
+      <p>Source: <a href="https://github.com/Dicklesworthstone/mcp_agent_mail">Dicklesworthstone/mcp_agent_mail</a></p>
+
+      <p>For multi-agent coordination without hard locks. Agents declare intent to modify files, allowing other agents to voluntarily avoid conflicts.</p>
+
+      <div class="code-block">
+        <button class="copy-btn">Copy</button>
+        <pre><code>#!/usr/bin/env python3
+"""
+advisory_reservations.py - Async conflict prevention for multi-agent systems
+
+This implements the advisory reservation pattern where agents declare intent
+to modify files, allowing other agents to voluntarily avoid conflicts.
+"""
+
+import sqlite3
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Optional, List
+
+
+class FileReservationSystem:
+    """
+    Advisory file reservation system.
+
+    Key principle: Reservations are ADVISORY, not enforced.
+    Agents see reservations and voluntarily comply.
+    """
+
+    def __init__(self, db_path: str = ".agent-state/reservations.db"):
+        self.db_path = Path(db_path)
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self._init_db()
+
+    def _init_db(self):
+        """Initialize SQLite database for reservations."""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS reservations (
+                    id INTEGER PRIMARY KEY,
+                    path_pattern TEXT NOT NULL,
+                    agent_id TEXT NOT NULL,
+                    reason TEXT,
+                    exclusive BOOLEAN DEFAULT 1,
+                    created_at TEXT NOT NULL,
+                    expires_at TEXT NOT NULL
+                )
+            """)
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_path ON reservations(path_pattern)
+            """)
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_expires ON reservations(expires_at)
+            """)
+
+    def reserve(
+        self,
+        paths: List[str],
+        agent_id: str,
+        ttl_seconds: int = 3600,
+        exclusive: bool = True,
+        reason: str = ""
+    ) -> dict:
+        """
+        Create advisory reservations for paths.
+
+        Args:
+            paths: List of path patterns (supports glob-style **)
+            agent_id: Identifier for the reserving agent
+            ttl_seconds: Time-to-live in seconds
+            exclusive: If True, indicates exclusive intent
+            reason: Human-readable reason for reservation
+
+        Returns:
+            Reservation record
+        """
+        now = datetime.utcnow()
+        expires = now + timedelta(seconds=ttl_seconds)
+
+        reservations = []
+        with sqlite3.connect(self.db_path) as conn:
+            for path in paths:
+                cursor = conn.execute("""
+                    INSERT INTO reservations
+                    (path_pattern, agent_id, reason, exclusive, created_at, expires_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    path, agent_id, reason, exclusive,
+                    now.isoformat(), expires.isoformat()
+                ))
+
+                reservations.append({
+                    "id": cursor.lastrowid,
+                    "path": path,
+                    "agent_id": agent_id,
+                    "reason": reason,
+                    "exclusive": exclusive,
+                    "expires_at": expires.isoformat()
+                })
+
+        return {"status": "reserved", "reservations": reservations}
+
+    def check_conflicts(self, paths: List[str], agent_id: str) -> List[dict]:
+        """Check if paths conflict with existing reservations."""
+        self._cleanup_expired()
+
+        conflicts = []
+        with sqlite3.connect(self.db_path) as conn:
+            for path in paths:
+                cursor = conn.execute("""
+                    SELECT path_pattern, agent_id, reason, expires_at
+                    FROM reservations
+                    WHERE exclusive = 1
+                    AND agent_id != ?
+                    AND (
+                        path_pattern = ?
+                        OR path_pattern LIKE ? || '/%'
+                        OR ? LIKE path_pattern || '/%'
+                    )
+                """, (agent_id, path, path, path))
+
+                for row in cursor:
+                    conflicts.append({
+                        "path": path,
+                        "reserved_by": row[1],
+                        "pattern": row[0],
+                        "reason": row[2],
+                        "expires_at": row[3]
+                    })
+
+        return conflicts
+
+    def release(self, agent_id: str, paths: Optional[List[str]] = None):
+        """Release reservations for an agent."""
+        with sqlite3.connect(self.db_path) as conn:
+            if paths:
+                for path in paths:
+                    conn.execute("""
+                        DELETE FROM reservations
+                        WHERE agent_id = ? AND path_pattern = ?
+                    """, (agent_id, path))
+            else:
+                conn.execute("""
+                    DELETE FROM reservations WHERE agent_id = ?
+                """, (agent_id,))
+
+    def _cleanup_expired(self):
+        """Remove expired reservations."""
+        now = datetime.utcnow().isoformat()
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute("""
+                DELETE FROM reservations WHERE expires_at < ?
+            """, (now,))</code></pre>
+      </div>
+
+      <hr class="section-divider">
+
+      <h2 id="summary">Summary: Implementation Invariants</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Invariant</th>
+            <th>Implementation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Fresh context beats extended</td><td>Never use <code>--continue</code> in loops</td></tr>
+          <tr><td>60% context ceiling</td><td>Monitor and compact proactively</td></tr>
+          <tr><td>External state &gt; internal memory</td><td>prd.json + progress.txt + git</td></tr>
+          <tr><td>Atomic writes always</td><td>temp-file-then-rename pattern</td></tr>
+          <tr><td>Append-only learning</td><td>NEVER edit progress.txt</td></tr>
+          <tr><td>Dual-condition exit</td><td>EXIT_SIGNAL + completion_indicators &gt;= 2</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Footer navigation -->
+      <div class="footer-nav">
+        <a href="../architecture/context-composition.html" class="nav-prev">
+          <span class="nav-direction">Previous</span>
+          <span class="nav-title">Context & Composition</span>
+        </a>
+        <a href="ralph-production.html" class="nav-next">
+          <span class="nav-direction">Next</span>
+          <span class="nav-title">Ralph Production</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Mobile toggle button -->
+  <button class="sidebar-toggle" aria-label="Open navigation">&#9776;</button>
+
+  <script src="../../js/sidebar.js"></script>
+</body>
+</html>
