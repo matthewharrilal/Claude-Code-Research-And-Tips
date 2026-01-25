@@ -2,7 +2,7 @@
 
 > A curated knowledge base to help you master Claude Code—from your first prompt to autonomous overnight development.
 
-**97 interconnected guides** distilled from 150+ sources, 40+ practitioners, and countless hours of real-world usage.
+**300+ guides and resources** distilled from 150+ sources, 40+ practitioners, and countless hours of real-world usage.
 
 ---
 
@@ -14,13 +14,33 @@ This is a browsable documentation site that teaches you how to use [Claude Code]
 
 ---
 
-## Three Ways to Learn
+## Active Development
 
-The site offers three entry points based on where you are:
+This project is actively evolving. Current status:
+
+| Phase | Status |
+|-------|--------|
+| Phase 1: Source Extraction | ✅ Complete (120+ extractions) |
+| Phase 2: Synthesis & Audit | ✅ Complete (65 synthesis docs) |
+| Phase 3: HTML Generation | 🔄 In Progress |
+| Phase 4: Search & Navigation | 📋 Planned |
+
+**Recent additions:**
+- `gallery/` - Three-panel documentation POC (Mintlify-inspired)
+- `UI-Tips/` - AI design workflows and MCP configurations
+- `mvp/` - Pattern showcase website prototype
+- 12 new spotlight extractions for deep-dive topics
+
+---
+
+## Four Ways to Learn
+
+The site offers multiple entry points based on where you are:
 
 | Path | Best For | Start Here |
 |------|----------|------------|
 | **Beginner** | "I'm new to Claude Code" | `html-site/start-here/index.html` |
+| **Journey-Based** | "Guide me step by step" | `html-site/journeys/index.html` |
 | **Decision-Maker** | "I need to choose the right approach" | `html-site/start-here/judgment-guide.html` |
 | **Mastery-Seeker** | "I want deep expertise" | `html-site/start-here/master-playbook.html` |
 
@@ -88,42 +108,80 @@ Claude-Research-And-Tips/
 ├── README.md                   # You are here
 ├── CLAUDE.md                   # Project instructions for Claude Code
 ├── SOURCE-INDEX.md             # Master bibliography (150+ sources)
-├── claude-code-mastery.md      # Core techniques overview
-├── ideas-lab.md                # Experimental concepts
-├── productivity-workflows.md   # Daily routines & feedback loops
 │
-├── extractions/                # Raw research by category
-│   ├── orchestration/          # Ralph, Gas Town, multi-agent (21 files)
-│   ├── deep/                   # Key thinker deep dives (12 files)
-│   ├── techniques/             # Skills, MCP, hooks (8 files)
-│   ├── tooling/                # Plugins, CLI, SDKs (7 files)
+├── extractions/                # Raw research by category (120+ files)
+│   ├── orchestration/          # Ralph, Gas Town, multi-agent (39 files)
+│   ├── deep/                   # Key thinker deep dives (22 files)
+│   ├── techniques/             # Skills, MCP, hooks (9 files)
+│   ├── tooling/                # Plugins, CLI, SDKs (13 files)
 │   ├── philosophy/             # Foundational thinking (7 files)
-│   └── ...more categories
+│   ├── infrastructure/         # Remote, cloud, mobile (6 files)
+│   ├── mobility/               # Mobile-first workflows (5 files)
+│   ├── cross-cutting/          # Production patterns (7 files)
+│   └── sources/                # Platform compilations (12 files)
 │
-├── synthesis/                  # Processed insights & frameworks (42 files)
+├── synthesis/                  # Processed insights (65 files)
 │   ├── MASTER-PLAYBOOK.md      # Complete progression guide
 │   ├── JUDGMENT-GUIDE.md       # Architectural decisions
 │   ├── architecture-*.md       # Primitives, composition, complexity
 │   ├── mastery-*.md            # Ralph, context, multi-agent
-│   └── ...more synthesis docs
+│   ├── compare-*.md            # Side-by-side analyses
+│   ├── taxonomy-*.md           # Classification systems
+│   └── transform-*.md          # Evolution guides
 │
-└── html-site/                  # Browsable web version (open this!)
-    ├── index.html              # Main entry point
-    ├── start-here/             # Beginner guides & learning journey
-    ├── foundations/            # Core principles & architecture
-    ├── patterns/               # Ralph, Gas Town, orchestration
-    ├── practitioners/          # Boris Cherny, Steve Yegge, etc.
-    ├── techniques/             # Skills, MCP, hooks
-    ├── tooling/                # Claude-mem, HUD, SDK
-    ├── comparisons/            # Side-by-side analysis
-    ├── transformations/        # Before/after journeys
-    ├── combinations/           # Advanced pattern synthesis
-    ├── frontier/               # Cutting-edge innovations
-    ├── philosophy/             # Foundational thinking
-    ├── infrastructure/         # Remote, cloud, mobile
-    ├── reference/              # Quick lookups
-    └── sources/                # Bibliography
+├── html-site/                  # Browsable web version (237 HTML files)
+│   ├── index.html              # Main entry point
+│   ├── start-here/             # Beginner guides
+│   ├── journeys/               # Learning path pages (NEW)
+│   ├── foundations/            # Core principles
+│   ├── patterns/               # Ralph, Gas Town, orchestration
+│   ├── synthesis/              # HTML versions of synthesis docs
+│   └── extractions/spotlight/  # Deep-dive case studies (NEW)
+│
+├── gallery/                    # Design POC (NEW)
+│   ├── ralph-mintlify-poc.html # Three-panel layout prototype
+│   ├── poc-knowledge/          # Design research & decisions
+│   └── archive/                # Historical iterations
+│
+├── UI-Tips/                    # AI Design Workflows (NEW)
+│   └── CLAUDE.md               # PAGES framework, MCP stacks
+│
+└── mvp/                        # Pattern Website (NEW)
+    ├── index.html              # Pattern discovery hub
+    └── patterns/               # Individual pattern pages
 ```
+
+---
+
+## New: Design & Prototypes
+
+### Gallery POC (`gallery/`)
+
+A proof-of-concept for converting markdown documentation into rich, interactive HTML:
+
+- **Three-panel layout**: Left nav, main content, activity zone
+- **Resizable panels**: Drag to adjust activity zone width
+- **Scroll-sync**: Activity zone highlights relevant context as you read
+- **Design research**: Mintlify, Stripe, Linear inspiration documented
+
+This POC will become the template for 250+ HTML documentation pages.
+
+### AI Design Workflows (`UI-Tips/`)
+
+Comprehensive guide for AI-assisted UI design:
+
+- **PAGES Framework**: Purpose → Anchor → Guide → Elevate → Ship
+- **12 MCP Stacks**: Figma, shadcn, Storybook, Motion.dev configs
+- **Hero Animation Pipeline**: Google Whisk → Flow → WEBP
+- **Component Library Tiering**: When to use Magic UI vs shadcn vs Tailwind
+
+### Pattern Showcase (`mvp/`)
+
+Working prototype of a pattern knowledge website:
+
+- Tabbed navigation (Find by Pattern / Problem / Person)
+- Dark theme with accessible tab structure
+- Problem-to-solution mapping for each pattern
 
 ---
 
@@ -189,6 +247,9 @@ This site was built with **ADHD-friendly design**:
 | [Ralph Complete](html-site/patterns/mastery/ralph-complete.html) | Deep dive on the Ralph pattern |
 | [Core Principles](html-site/foundations/principles/core.html) | The 8 foundational principles |
 | [Complexity Ladder](html-site/foundations/architecture/complexity-ladder.html) | Level-by-level breakdown |
+| [Gallery POC](gallery/ralph-mintlify-poc.html) | Three-panel documentation prototype |
+| [AI Design Workflows](UI-Tips/CLAUDE.md) | PAGES framework & MCP stacks |
+| [Pattern Showcase](mvp/index.html) | Interactive pattern discovery |
 
 ---
 
