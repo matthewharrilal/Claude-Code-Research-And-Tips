@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Two-Layer Scoring System - Layout Comparison POC</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'gallery-base': '#0f1210',
+            'gallery-elevated': '#171c18',
+            'gallery-surface': '#1e241f',
+            'gallery-highlight': '#252b26',
+            'accent': {
+              DEFAULT: '#4ade80',
+              muted: '#22c55e',
+              glow: 'rgba(74, 222, 128, 0.15)'
+            },
+            'text-primary': '#e8e6e3',
+            'text-secondary': '#9d9b98',
+            'text-muted': '#6b6966',
+            'border-subtle': '#2a302b',
+            'border-active': '#3d4a3f',
+            // Direction-specific colors
+            'error-soft': '#3d2020',
+            'success-soft': '#1d2d1d',
+          },
+          fontFamily: {
+            sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
+            mono: ['Geist Mono', 'SF Mono', 'Monaco', 'monospace'],
+          },
+          boxShadow: {
+            'premium-sm': '0 1px 1px rgba(0,0,0,0.12)',
+            'premium-md': '0 1px 1px rgba(0,0,0,0.12), 0 2px 2px rgba(0,0,0,0.12), 0 4px 4px rgba(0,0,0,0.12)',
+            'glow': '0 0 0 1px rgba(74,222,128,0.1), 0 0 20px rgba(74,222,128,0.1)',
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+            'brush-pulse': 'brushPulse 0.4s ease forwards',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Spring Physics Timing */
+    :root {
+      --easing-spring-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --easing-spring-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(12px); }
+      70% { opacity: 1; transform: translateY(-3px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes brushPulse {
+      0% { background-color: rgba(74, 222, 128, 0.2); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.3); }
+      70% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+      100% { background-color: rgba(74, 222, 128, 0.1); }
+    }
+
+    /* Layout switcher indicator */
+    .layout-indicator {
+      transition: transform 0.3s var(--easing-spring-bouncy), width 0.3s var(--easing-spring-smooth);
+    }
+
+    /* Layout content transitions */
+    .layout-content {
+      display: none;
+      opacity: 0;
+      animation: fadeInUp 0.4s var(--easing-spring-bouncy) forwards;
+    }
+
+    .layout-content.active {
+      display: block;
+    }
+
+    /* Direction A: Drop cap */
+    .direction-a .drop-cap::first-letter {
+      font-size: 3.5rem;
+      float: left;
+      line-height: 1;
+      margin-right: 0.5rem;
+      color: #4ade80;
+      font-weight: 600;
+    }
+
+    /* Brushing highlights */
+    .brushable.highlighted {
+      animation: brushPulse 0.4s ease forwards;
+      border-radius: 6px;
+    }
+
+    /* Copy button states */
+    .copy-btn .copy-icon,
+    .copy-btn .check-icon {
+      transition: all 0.25s var(--easing-spring-bouncy);
+    }
+
+    .copy-btn .check-icon {
+      position: absolute;
+      opacity: 0;
+      transform: scale(0.5) rotate(-90deg);
+    }
+
+    .copy-btn.copied .copy-icon {
+      opacity: 0;
+      transform: scale(0.5) rotate(90deg);
+    }
+
+    .copy-btn.copied .check-icon {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0f1210; }
+    ::-webkit-scrollbar-thumb { background: #2a302b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3d4a3f; }
+  </style>
+</head>
+
+<body class="bg-gallery-base text-text-primary font-sans antialiased">
+
+  <!-- Version Indicator -->
+  <div class="fixed bottom-4 right-4 z-50 bg-gallery-elevated border border-border-subtle rounded-md px-3 py-1.5 text-xs text-text-muted">
+    POC: Three Layout Comparison
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-40 bg-gallery-elevated/95 backdrop-blur-sm border-b border-border-subtle">
+    <div class="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2 text-text-secondary hover:text-accent transition-colors duration-150 group">
+        <i data-lucide="arrow-left" class="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-0.5"></i>
+        <span class="text-sm font-medium">Gallery</span>
+      </a>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium bg-accent/10 text-accent border border-accent/20">
+        <span class="text-base">🧪</span>
+        <span>POC</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-6 pb-12">
+
+    <!-- Header -->
+    <section class="my-8 text-center">
+      <h1 class="text-3xl font-bold text-text-primary mb-2">Two-Layer Scoring System</h1>
+      <p class="text-text-secondary mb-6">Same content, three layout philosophies</p>
+    </section>
+
+    <!-- Layout Switcher Tabs -->
+    <div class="mb-6">
+      <div class="relative flex gap-1 p-1 bg-gallery-elevated rounded-lg" role="tablist">
+        <button
+          class="layout-tab flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 z-10"
+          data-layout="a"
+          role="tab"
+          aria-selected="false"
+        >
+          <span class="hidden sm:inline">Direction A:</span> Refactoring.guru
+        </button>
+        <button
+          class="layout-tab flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 z-10"
+          data-layout="b"
+          role="tab"
+          aria-selected="false"
+        >
+          <span class="hidden sm:inline">Direction B:</span> Game Patterns
+        </button>
+        <button
+          class="layout-tab flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 z-10"
+          data-layout="c"
+          role="tab"
+          aria-selected="true"
+        >
+          <span class="hidden sm:inline">Direction C:</span> shadcn
+        </button>
+        <!-- Sliding Indicator -->
+        <div class="layout-indicator absolute top-1 bottom-1 right-1 w-[calc(33.333%-4px)] bg-gallery-surface rounded-md shadow-premium-sm" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <!-- ================================================================
+         DIRECTION A: Refactoring.guru Style
+         Problem-first, educational, visual diagrams
+         ================================================================ -->
+    <div class="layout-content direction-a" id="layout-a">
+
+      <!-- Problem Section -->
+      <section class="mb-8 py-6 border-b border-border-subtle">
+        <h2 class="text-lg text-text-muted uppercase tracking-widest mb-4">The Problem</h2>
+        <div class="bg-gradient-to-br from-error-soft to-gallery-elevated border-l-4 border-red-400 rounded-lg p-6">
+          <p class="text-text-primary mb-3">Your documentation answers "What is X?" but users need "How do I become someone who uses X?"</p>
+          <p class="text-text-secondary mb-0">Content is technically complete. Mental models are solid. But readers can't execute.</p>
+        </div>
+        <p class="mt-4 text-text-secondary">This gap isn't a content quality problem. It's a <strong class="text-text-primary">journey architecture</strong> problem. Two different failure modes, two different fixes.</p>
+      </section>
+
+      <!-- Solution Section -->
+      <section class="mb-8 py-6 border-b border-border-subtle">
+        <h2 class="text-lg text-text-muted uppercase tracking-widest mb-4">The Solution</h2>
+        <div class="bg-gradient-to-br from-success-soft to-gallery-elevated border-l-4 border-accent rounded-lg p-6">
+          <p class="text-text-primary mb-3"><strong>Split your evaluation into two distinct layers:</strong></p>
+          <ul class="text-text-secondary space-y-2">
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-accent mt-1 flex-shrink-0"></i>
+              <span><strong class="text-text-primary">Layer 1 (40%):</strong> Content Quality — mental models, actionability, source fidelity</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="check" class="w-4 h-4 text-accent mt-1 flex-shrink-0"></i>
+              <span><strong class="text-text-primary">Layer 2 (60%):</strong> User Journey — orientation, checkpoints, failure handling</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Diagram Section -->
+      <section class="mb-8 py-6 border-b border-border-subtle">
+        <h2 class="text-lg text-text-muted uppercase tracking-widest mb-4">The Structure</h2>
+        <div class="bg-gallery-surface rounded-lg p-6">
+          <svg class="w-full h-auto" viewBox="0 0 500 140" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="layer1Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#22c55e;stop-opacity:0.3"/>
+                <stop offset="100%" style="stop-color:#22c55e;stop-opacity:0.1"/>
+              </linearGradient>
+              <linearGradient id="layer2Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#4ade80;stop-opacity:0.3"/>
+                <stop offset="100%" style="stop-color:#4ade80;stop-opacity:0.1"/>
+              </linearGradient>
+            </defs>
+            <!-- Layer 1 -->
+            <rect x="10" y="10" width="180" height="120" rx="8" fill="url(#layer1Grad)" stroke="#2a302b"/>
+            <text x="100" y="35" text-anchor="middle" fill="#9d9b98" font-size="11" font-family="Space Grotesk">LAYER 1: CONTENT</text>
+            <text x="100" y="55" text-anchor="middle" fill="#4ade80" font-size="14" font-family="Space Grotesk" font-weight="600">40%</text>
+            <text x="100" y="75" text-anchor="middle" fill="#6b6966" font-size="9" font-family="Space Grotesk">Mental Models</text>
+            <text x="100" y="90" text-anchor="middle" fill="#6b6966" font-size="9" font-family="Space Grotesk">Actionability</text>
+            <text x="100" y="105" text-anchor="middle" fill="#6b6966" font-size="9" font-family="Space Grotesk">Source Fidelity</text>
+            <text x="100" y="120" text-anchor="middle" fill="#6b6966" font-size="9" font-family="Space Grotesk">Coherence</text>
+
+            <!-- Plus sign -->
+            <text x="220" y="75" text-anchor="middle" fill="#4ade80" font-size="24" font-family="Space Grotesk">+</text>
+
+            <!-- Layer 2 -->
+            <rect x="250" y="10" width="240" height="120" rx="8" fill="url(#layer2Grad)" stroke="#2a302b"/>
+            <text x="370" y="35" text-anchor="middle" fill="#9d9b98" font-size="11" font-family="Space Grotesk">LAYER 2: JOURNEY</text>
+            <text x="370" y="55" text-anchor="middle" fill="#4ade80" font-size="14" font-family="Space Grotesk" font-weight="600">60%</text>
+            <text x="310" y="75" text-anchor="middle" fill="#6b6966" font-size="9" font-family="Space Grotesk">Orientation</text>
+            <text x="310" y="90" text-anchor="middle" fill="#6b6966" font-size="9" font-family="Space Grotesk">Motivation</text>
+            <text x="310" y="105" text-anchor="middle" fill="#6b6966" font-size="9" font-family="Space Grotesk">Procedures</text>
+            <text x="310" y="120" text-anchor="middle" fill="#6b6966" font-size="9" font-family="Space Grotesk">Checkpoints</text>
+            <text x="430" y="75" text-anchor="middle" fill="#6b6966" font-size="9" font-family="Space Grotesk">Execution</text>
+            <text x="430" y="90" text-anchor="middle" fill="#6b6966" font-size="9" font-family="Space Grotesk">Failure</text>
+            <text x="430" y="105" text-anchor="middle" fill="#6b6966" font-size="9" font-family="Space Grotesk">Transform</text>
+          </svg>
+        </div>
+      </section>
+
+      <!-- When to Use Grid -->
+      <section class="mb-8 py-6 border-b border-border-subtle">
+        <h2 class="text-lg text-text-muted uppercase tracking-widest mb-4">When to Use</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="text-accent font-medium mb-3 flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i> Good Candidates
+            </h4>
+            <ul class="space-y-2 text-text-secondary">
+              <li class="flex items-start gap-2"><span class="text-accent">✓</span> Technical documentation audits</li>
+              <li class="flex items-start gap-2"><span class="text-accent">✓</span> Tutorial quality assessment</li>
+              <li class="flex items-start gap-2"><span class="text-accent">✓</span> Content gap analysis</li>
+              <li class="flex items-start gap-2"><span class="text-accent">✓</span> Developer portal reviews</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-red-400 font-medium mb-3 flex items-center gap-2">
+              <i data-lucide="x-circle" class="w-4 h-4"></i> Poor Candidates
+            </h4>
+            <ul class="space-y-2 text-text-secondary">
+              <li class="flex items-start gap-2"><span class="text-red-400">✗</span> Marketing copy</li>
+              <li class="flex items-start gap-2"><span class="text-red-400">✗</span> API reference (dense by design)</li>
+              <li class="flex items-start gap-2"><span class="text-red-400">✗</span> Quick-start guides (journey-only)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Related Patterns Cards -->
+      <section class="mb-8">
+        <h2 class="text-lg text-text-muted uppercase tracking-widest mb-4">Related Patterns</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <a href="#" class="block p-4 bg-gallery-surface border border-border-subtle rounded-lg hover:border-accent hover:shadow-glow transition-all duration-200">
+            <h4 class="text-text-primary font-medium mb-1">Four-Context Evaluation</h4>
+            <p class="text-sm text-text-muted">2AM debugging, architecture decisions, quick lookup, mastery</p>
+          </a>
+          <a href="#" class="block p-4 bg-gallery-surface border border-border-subtle rounded-lg hover:border-accent hover:shadow-glow transition-all duration-200">
+            <h4 class="text-text-primary font-medium mb-1">Expertise Reversal Effect</h4>
+            <p class="text-sm text-text-muted">Why beginner-friendly hurts experts</p>
+          </a>
+          <a href="#" class="block p-4 bg-gallery-surface border border-border-subtle rounded-lg hover:border-accent hover:shadow-glow transition-all duration-200">
+            <h4 class="text-text-primary font-medium mb-1">Voice Consistency Audit</h4>
+            <p class="text-sm text-text-muted">The 60/40 practitioner voice test</p>
+          </a>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================================================================
+         DIRECTION B: Game Programming Patterns Style
+         Prose-first, narrative, conversational
+         ================================================================ -->
+    <div class="layout-content direction-b" id="layout-b">
+
+      <article class="max-w-3xl mx-auto">
+        <!-- Article Header -->
+        <header class="py-8 mb-6 border-b border-border-subtle">
+          <h1 class="text-4xl font-bold mb-2">Two-Layer Scoring</h1>
+          <p class="text-xl text-text-secondary italic">A framework for auditing practitioner documentation</p>
+        </header>
+
+        <!-- Prose Body -->
+        <div class="prose text-lg leading-relaxed">
+          <p class="drop-cap">You've been there. The documentation is comprehensive—every feature documented, every API explained, every edge case noted. Yet developers still struggle. They know <em>what</em> things are, but can't figure out <em>how to become someone who uses them</em>.</p>
+
+          <p>The problem isn't the content. The problem is the <strong class="text-accent">journey architecture</strong>.</p>
+
+          <p>Traditional documentation audits focus on a single dimension: Is the information accurate? Is it complete? These matter, but they're only part of the story. You can have perfect content and still fail your readers.</p>
+
+          <div class="text-center my-8 text-text-muted tracking-[0.5em]">* * *</div>
+
+          <p>The Two-Layer Scoring System splits evaluation into two weighted components:</p>
+
+          <div class="my-8 p-6 bg-gallery-surface border-l-4 border-accent rounded-r-lg">
+            <p class="mb-2"><strong class="text-accent">Layer 1 (40%):</strong> Content Quality</p>
+            <p class="text-text-secondary mb-0">Mental models, actionability, source fidelity, coherence, completeness. The "what is this?" dimension.</p>
+          </div>
+
+          <div class="my-8 p-6 bg-gallery-surface border-l-4 border-accent rounded-r-lg">
+            <p class="mb-2"><strong class="text-accent">Layer 2 (60%):</strong> User Journey</p>
+            <p class="text-text-secondary mb-0">Orientation, motivation, procedures, checkpoints, failure handling. The "how do I succeed?" dimension.</p>
+          </div>
+
+          <p>The 40/60 split isn't arbitrary. In auditing 100+ files of practitioner documentation, we found that content quality problems are easier to fix. Missing a section? Add it. Inaccurate quote? Verify it. But journey problems require structural rethinking. That's why journey gets more weight—it's where the hard work lives.</p>
+
+          <div class="text-center my-8 text-text-muted tracking-[0.5em]">* * *</div>
+
+          <blockquote class="my-8 p-6 bg-gallery-elevated rounded-lg border-l-4 border-text-muted">
+            <p class="text-xl italic text-text-primary mb-2">"Our content answers 'What is Ralph?' Users need 'How do I become someone who uses Ralph?'"</p>
+            <cite class="text-sm text-text-muted">— Phase 2A Audit Discovery</cite>
+          </blockquote>
+
+          <p>This insight reframes everything. Documentation isn't a knowledge repository—it's a transformation engine. Readers don't want to <em>know</em> things. They want to <em>become</em> people who can do things.</p>
+
+          <p>The scoring rubric captures this by asking journey questions that content audits miss:</p>
+
+          <ul class="my-6 space-y-2 text-text-secondary">
+            <li><strong class="text-text-primary">Orientation:</strong> Does the user know where they are and what they need?</li>
+            <li><strong class="text-text-primary">Checkpoints:</strong> Can users verify they're on track before continuing?</li>
+            <li><strong class="text-text-primary">Failure:</strong> When things go wrong, is recovery documented?</li>
+          </ul>
+
+          <p>Most documentation scores 80% on content quality but under 50% on journey readiness. That gap is why readers struggle despite comprehensive coverage.</p>
+
+          <div class="text-center my-8 text-text-muted tracking-[0.5em]">* * *</div>
+
+          <p>There's a counterintuitive finding buried in this framework: the <strong class="text-accent">Expertise Reversal Effect</strong>. Instructional techniques that work for beginners can actually <em>harm</em> expert learning.</p>
+
+          <p>Progressive disclosure slows experts down. Verbose explanations force artificial mental decomposition. "Beginner-friendly" structure creates friction for senior practitioners. For practitioner documentation, dense reference beats progressive disclosure. Copy-paste ready beats explained concepts.</p>
+
+          <p>This doesn't mean abandoning beginners. It means understanding your audience and optimizing for their actual usage patterns, not assumed ones.</p>
+
+          <!-- See Also -->
+          <section class="mt-12 pt-8 border-t border-border-subtle">
+            <h3 class="text-lg text-text-muted uppercase tracking-wide mb-4">See Also</h3>
+            <ul class="space-y-3">
+              <li class="flex items-start gap-2">
+                <span class="text-accent font-mono">›</span>
+                <span><a href="#" class="font-medium hover:text-accent">Four-Context Evaluation</a> <span class="text-text-muted text-sm">— How experts actually use documentation</span></span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-accent font-mono">›</span>
+                <span><a href="#" class="font-medium hover:text-accent">Audit Coordination Template</a> <span class="text-text-muted text-sm">— Running 6 parallel auditors</span></span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-accent font-mono">›</span>
+                <span><a href="#" class="font-medium hover:text-accent">Voice Consistency Rubric</a> <span class="text-text-muted text-sm">— The 60/40 practitioner voice test</span></span>
+              </li>
+            </ul>
+          </section>
+        </div>
+      </article>
+    </div>
+
+    <!-- ================================================================
+         DIRECTION C: shadcn Style
+         Preview-first, copy-ready, two-zone with brushing & linking
+         ================================================================ -->
+    <div class="layout-content active direction-c" id="layout-c">
+
+      <!-- Hero Essence Block -->
+      <section class="my-8">
+        <div class="relative bg-gradient-to-b from-gallery-elevated to-gallery-base border border-border-subtle rounded-xl p-10 text-center overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-radial from-accent/5 via-transparent to-transparent opacity-50"></div>
+          <div class="relative">
+            <h1 class="text-3xl font-bold text-text-primary mb-2">Two-Layer Scoring</h1>
+            <p class="text-text-secondary mb-6">Content Quality + User Journey = Total Score</p>
+
+            <div class="inline-flex items-center gap-4 bg-gallery-base border border-border-subtle rounded-lg px-6 py-4 mb-4 hover:shadow-glow transition-shadow duration-300">
+              <code class="font-mono text-lg md:text-xl text-accent">Score = (Content × 40%) + (Journey × 60%)</code>
+              <button
+                class="copy-btn relative flex items-center justify-center w-10 h-10 bg-gallery-surface border border-border-subtle rounded-md hover:border-accent hover:text-accent transition-all duration-150"
+                onclick="copyFormula(this)"
+                aria-label="Copy formula"
+              >
+                <i data-lucide="copy" class="copy-icon w-4 h-4"></i>
+                <i data-lucide="check" class="check-icon w-4 h-4 text-accent"></i>
+              </button>
+            </div>
+            <p class="text-text-muted italic">The formula. Evaluate both layers, weight appropriately.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Variant Tabs -->
+      <div class="mb-4">
+        <div class="relative flex gap-1 p-1 bg-gallery-elevated rounded-lg" role="tablist">
+          <button class="variant-tab flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 z-10 text-accent" data-variant="layer1" role="tab" aria-selected="true">
+            Layer 1: Content (40%)
+          </button>
+          <button class="variant-tab flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 z-10 text-text-secondary" data-variant="layer2" role="tab" aria-selected="false">
+            Layer 2: Journey (60%)
+          </button>
+          <button class="variant-tab flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 z-10 text-text-secondary" data-variant="thresholds" role="tab" aria-selected="false">
+            Thresholds
+          </button>
+          <div class="variant-indicator absolute top-1 bottom-1 left-1 w-[calc(33.333%-4px)] bg-gallery-surface rounded-md shadow-premium-sm transition-transform duration-300" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <!-- Variant Content Blocks -->
+      <div class="mb-8">
+        <!-- Layer 1 -->
+        <div class="variant-content active" id="variant-layer1">
+          <div class="relative bg-gallery-elevated border border-border-subtle rounded-lg overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-2 border-b border-border-subtle">
+              <span class="text-xs text-text-muted font-mono">scoring-criteria.md</span>
+              <button class="copy-btn relative flex items-center gap-2 px-3 py-1.5 bg-gallery-surface border border-border-subtle rounded-md text-xs text-text-secondary hover:border-accent hover:text-accent transition-all duration-150" onclick="copyVariant('layer1', this)">
+                <i data-lucide="copy" class="copy-icon w-3.5 h-3.5"></i>
+                <i data-lucide="check" class="check-icon w-3.5 h-3.5 text-accent"></i>
+                <span class="copy-text">Copy</span>
+              </button>
+            </div>
+            <pre class="p-4 font-mono text-sm overflow-x-auto text-text-primary"><span class="text-text-muted"># Layer 1: Content Quality (40% weight)</span>
+
+| Criterion           | 0 Points          | 1 Point              | 2 Points                    |
+|---------------------|-------------------|----------------------|-----------------------------|
+| Mental Model Depth  | No mental models  | Shallow models       | Deep, transferable models   |
+| Actionability       | No code examples  | Requires modification| Copy-paste ready            |
+| Navigation          | No cross-refs     | Links without context| Links with "why" context    |
+| Source Fidelity     | Unverified sources| Some unverifiable    | All sources verified        |
+| Coherence           | Contradictions    | Internally consistent| Coherent with full corpus   |
+| Completeness        | Major gaps        | All sections present | Comprehensive coverage      |
+
+<span class="text-accent">Max: 12 points → Scaled to 40% of total</span></pre>
+          </div>
+        </div>
+
+        <!-- Layer 2 -->
+        <div class="variant-content" id="variant-layer2">
+          <div class="relative bg-gallery-elevated border border-border-subtle rounded-lg overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-2 border-b border-border-subtle">
+              <span class="text-xs text-text-muted font-mono">journey-criteria.md</span>
+              <button class="copy-btn relative flex items-center gap-2 px-3 py-1.5 bg-gallery-surface border border-border-subtle rounded-md text-xs text-text-secondary hover:border-accent hover:text-accent transition-all duration-150" onclick="copyVariant('layer2', this)">
+                <i data-lucide="copy" class="copy-icon w-3.5 h-3.5"></i>
+                <i data-lucide="check" class="check-icon w-3.5 h-3.5 text-accent"></i>
+                <span class="copy-text">Copy</span>
+              </button>
+            </div>
+            <pre class="p-4 font-mono text-sm overflow-x-auto text-text-primary"><span class="text-text-muted"># Layer 2: User Journey (60% weight)</span>
+
+| Category      | Weight | What It Checks                                    |
+|---------------|--------|---------------------------------------------------|
+| ORIENTATION   | 15%    | Does user know where they are and what they need? |
+| MOTIVATION    | 15%    | Does user understand WHY they need this?          |
+| RELATIONSHIPS | 10%    | Does user understand how components connect?      |
+| PROCEDURES    | 20%    | Are steps complete, correct, executable?          |
+| CHECKPOINTS   | 15%    | Can users verify they're on track?                |
+| EXECUTION     | 10%    | Is runtime behavior documented?                   |
+| FAILURE       | 10%    | Are error states and recovery documented?         |
+| TRANSFORM     | 5%     | Is there a journey narrative?                     |
+
+<span class="text-accent">Max: 16 points → Scaled to 60% of total</span></pre>
+          </div>
+        </div>
+
+        <!-- Thresholds -->
+        <div class="variant-content" id="variant-thresholds">
+          <div class="relative bg-gallery-elevated border border-border-subtle rounded-lg overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-2 border-b border-border-subtle">
+              <span class="text-xs text-text-muted font-mono">thresholds.md</span>
+              <button class="copy-btn relative flex items-center gap-2 px-3 py-1.5 bg-gallery-surface border border-border-subtle rounded-md text-xs text-text-secondary hover:border-accent hover:text-accent transition-all duration-150" onclick="copyVariant('thresholds', this)">
+                <i data-lucide="copy" class="copy-icon w-3.5 h-3.5"></i>
+                <i data-lucide="check" class="check-icon w-3.5 h-3.5 text-accent"></i>
+                <span class="copy-text">Copy</span>
+              </button>
+            </div>
+            <pre class="p-4 font-mono text-sm overflow-x-auto text-text-primary"><span class="text-text-muted"># Rating Thresholds</span>
+
+| Score    | Rating    | Action Required              |
+|----------|-----------|------------------------------|
+| 90-100   | EXCELLENT | Ready for production         |
+| 75-89    | GOOD      | Minor enhancements needed    |
+| 60-74    | ADEQUATE  | Significant gaps to fill     |
+| 40-59    | POOR      | Major restructuring required |
+| 0-39     | FAILING   | Rewrite required             |
+
+<span class="text-text-muted"># Expected Scores by Content Type</span>
+| Content Type      | Expected | Notes                        |
+|-------------------|----------|------------------------------|
+| mastery-*.md      | 80%+     | Already tutorial-oriented    |
+| transform-*.md    | 70%+     | Have transformation narrative|
+| architecture-*.md | 65%+     | Good structure, need journey |
+| taxonomy-*.md     | 50%+     | Pure reference, major work   |</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-Zone Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+        <!-- Structured Zone -->
+        <div class="bg-gallery-elevated border border-border-subtle rounded-xl p-5 shadow-premium-md">
+          <div class="flex items-center gap-2 pb-3 mb-4 border-b-2 border-accent">
+            <span class="text-xs font-semibold uppercase tracking-wider text-text-muted">Structure</span>
+          </div>
+
+          <!-- Accordions -->
+          <div class="space-y-2">
+            <details class="brushable border border-border-subtle rounded-lg overflow-hidden" data-link="key-insight">
+              <summary class="flex items-center gap-2 p-3 bg-gallery-surface cursor-pointer hover:bg-gallery-highlight transition-colors">
+                <i data-lucide="lightbulb" class="w-4 h-4 text-accent"></i>
+                <span class="text-sm font-medium">Key Insight</span>
+              </summary>
+              <div class="p-3 border-t border-border-subtle text-sm text-text-secondary">
+                Content answers "What is X?" — Journey answers "How do I become someone who uses X?" Most documentation is 80%+ content quality but &lt;50% journey readiness.
+              </div>
+            </details>
+
+            <details class="brushable border border-border-subtle rounded-lg overflow-hidden" data-link="expertise-reversal">
+              <summary class="flex items-center gap-2 p-3 bg-gallery-surface cursor-pointer hover:bg-gallery-highlight transition-colors">
+                <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
+                <span class="text-sm font-medium">Expertise Reversal Effect</span>
+              </summary>
+              <div class="p-3 border-t border-border-subtle text-sm text-text-secondary">
+                Techniques effective for novices can HARM expert learning. Progressive disclosure slows experts. Dense reference beats explained concepts for practitioners.
+              </div>
+            </details>
+
+            <details class="brushable border border-border-subtle rounded-lg overflow-hidden" data-link="four-contexts">
+              <summary class="flex items-center gap-2 p-3 bg-gallery-surface cursor-pointer hover:bg-gallery-highlight transition-colors">
+                <i data-lucide="layout-grid" class="w-4 h-4 text-accent"></i>
+                <span class="text-sm font-medium">Four-Context Framework</span>
+              </summary>
+              <div class="p-3 border-t border-border-subtle text-sm text-text-secondary">
+                <ul class="space-y-1">
+                  <li><strong>2AM Debugging:</strong> Symptom → fix in &lt;30 seconds</li>
+                  <li><strong>Architecture Decisions:</strong> Decision trees with trade-offs</li>
+                  <li><strong>Quick Lookup:</strong> Dense reference, copy-paste ready</li>
+                  <li><strong>Mastery Journey:</strong> WHY before HOW, level progression</li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="brushable border border-border-subtle rounded-lg overflow-hidden" data-link="voice-audit">
+              <summary class="flex items-center gap-2 p-3 bg-gallery-surface cursor-pointer hover:bg-gallery-highlight transition-colors">
+                <i data-lucide="mic" class="w-4 h-4 text-accent"></i>
+                <span class="text-sm font-medium">Voice Consistency (60/40)</span>
+              </summary>
+              <div class="p-3 border-t border-border-subtle text-sm text-text-secondary">
+                <p class="mb-2">60% should read like someone doing the work, 40% as research synthesis.</p>
+                <div class="font-mono text-xs">
+                  <div class="text-red-400">"You may want to consider..."</div>
+                  <div class="text-accent">→ "Use this. Period."</div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <!-- Activity Zone -->
+        <div class="border border-dashed border-border-subtle rounded-xl p-5 bg-gallery-base">
+          <div class="flex items-center gap-2 pb-3 mb-4 border-b-2 border-dashed border-text-muted">
+            <span class="text-xs font-semibold uppercase tracking-wider text-text-muted">Activity</span>
+          </div>
+
+          <div class="space-y-3">
+            <!-- Quote -->
+            <div class="brushable activity-item p-3 rounded-lg transition-all duration-200 cursor-default hover:bg-gallery-elevated hover:shadow-premium-sm" data-links-to="key-insight">
+              <div class="flex items-center gap-2 mb-1.5">
+                <i data-lucide="message-square-quote" class="w-4 h-4 text-text-muted"></i>
+                <span class="text-xs font-semibold uppercase tracking-wide text-text-muted">Quote</span>
+              </div>
+              <p class="text-sm text-text-secondary leading-relaxed">
+                "Our content answers <em class="text-accent not-italic">'What is Ralph?'</em> Users need <em class="text-accent not-italic">'How do I become someone who uses Ralph?'</em>"
+              </p>
+              <p class="mt-2 text-xs text-text-muted">Phase 2A Audit Discovery</p>
+            </div>
+
+            <!-- Metric -->
+            <div class="brushable activity-item p-3 rounded-lg transition-all duration-200 cursor-default hover:bg-gallery-elevated hover:shadow-premium-sm" data-links-to="key-insight">
+              <div class="flex items-center gap-2 mb-1.5">
+                <i data-lucide="bar-chart-3" class="w-4 h-4 text-text-muted"></i>
+                <span class="text-xs font-semibold uppercase tracking-wide text-text-muted">Finding</span>
+              </div>
+              <p class="text-sm text-text-secondary leading-relaxed">
+                <strong class="text-text-primary">83.5% GOOD content</strong> but structured as REFERENCE, not USER JOURNEY. 70% lack checkpoints, 50% lack failure handling.
+              </p>
+              <p class="mt-2 text-xs text-text-muted">116-file audit results</p>
+            </div>
+
+            <!-- Voice Example -->
+            <div class="brushable activity-item p-3 rounded-lg transition-all duration-200 cursor-default hover:bg-gallery-elevated hover:shadow-premium-sm" data-links-to="voice-audit">
+              <div class="flex items-center gap-2 mb-1.5">
+                <i data-lucide="pen-tool" class="w-4 h-4 text-text-muted"></i>
+                <span class="text-xs font-semibold uppercase tracking-wide text-text-muted">Voice Fix</span>
+              </div>
+              <div class="text-sm text-text-secondary leading-relaxed">
+                <div class="text-red-400 line-through">"There are several approaches..."</div>
+                <div class="text-accent mt-1">"Here's what works."</div>
+              </div>
+              <p class="mt-2 text-xs text-text-muted">Practitioner voice standard</p>
+            </div>
+
+            <!-- Context Example -->
+            <div class="brushable activity-item p-3 rounded-lg transition-all duration-200 cursor-default hover:bg-gallery-elevated hover:shadow-premium-sm" data-links-to="four-contexts">
+              <div class="flex items-center gap-2 mb-1.5">
+                <i data-lucide="clock" class="w-4 h-4 text-text-muted"></i>
+                <span class="text-xs font-semibold uppercase tracking-wide text-text-muted">2AM Test</span>
+              </div>
+              <p class="text-sm text-text-secondary leading-relaxed">
+                Can the user find the exact error message and fix in <strong class="text-accent">&lt;30 seconds</strong>? If not, the documentation fails its most critical context.
+              </p>
+              <p class="mt-2 text-xs text-text-muted">Four-context evaluation</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connections Footer -->
+      <div class="flex flex-wrap items-center gap-4 p-5 bg-gallery-elevated rounded-xl">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-sm text-text-muted">Applies to:</span>
+          <span class="inline-flex items-center px-3 py-1.5 bg-gallery-surface border border-border-subtle rounded-md text-sm text-text-secondary">Documentation</span>
+          <span class="inline-flex items-center px-3 py-1.5 bg-gallery-surface border border-border-subtle rounded-md text-sm text-text-secondary">Tutorials</span>
+          <span class="inline-flex items-center px-3 py-1.5 bg-gallery-surface border border-border-subtle rounded-md text-sm text-text-secondary">Knowledge Bases</span>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap ml-auto">
+          <span class="text-sm text-text-muted">See also:</span>
+          <a href="#" class="inline-flex items-center px-3 py-1.5 bg-gallery-surface border border-accent/30 rounded-md text-sm text-text-secondary hover:border-accent hover:text-accent transition-all duration-200">Audit Coordination</a>
+          <a href="#" class="inline-flex items-center px-3 py-1.5 bg-gallery-surface border border-accent/30 rounded-md text-sm text-text-secondary hover:border-accent hover:text-accent transition-all duration-200">Restoration Methodology</a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initLayoutTabs();
+      initVariantTabs();
+      initBrushing();
+    });
+
+    // ========================================
+    // LAYOUT SWITCHER (A/B/C)
+    // ========================================
+    function initLayoutTabs() {
+      const tabs = document.querySelectorAll('.layout-tab');
+      const indicator = document.querySelector('.layout-indicator');
+      const contents = document.querySelectorAll('.layout-content');
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => {
+          // Update tab states
+          tabs.forEach(t => {
+            t.classList.remove('text-accent');
+            t.classList.add('text-text-secondary');
+            t.setAttribute('aria-selected', 'false');
+          });
+          tab.classList.add('text-accent');
+          tab.classList.remove('text-text-secondary');
+          tab.setAttribute('aria-selected', 'true');
+
+          // Move indicator
+          indicator.style.transform = `translateX(${index * 100}%)`;
+
+          // Switch content
+          const layoutId = tab.dataset.layout;
+          contents.forEach(c => c.classList.remove('active'));
+          const target = document.getElementById('layout-' + layoutId);
+          target.classList.add('active');
+
+          // Re-init icons for new content
+          lucide.createIcons();
+        });
+      });
+
+      // Set initial state (Direction C selected by default)
+      tabs[2].classList.add('text-accent');
+      tabs[2].classList.remove('text-text-secondary');
+      indicator.style.transform = 'translateX(200%)';
+    }
+
+    // ========================================
+    // VARIANT TABS (Direction C only)
+    // ========================================
+    function initVariantTabs() {
+      const tabs = document.querySelectorAll('.variant-tab');
+      const indicator = document.querySelector('.variant-indicator');
+      const contents = document.querySelectorAll('.variant-content');
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => {
+            t.classList.remove('text-accent');
+            t.classList.add('text-text-secondary');
+            t.setAttribute('aria-selected', 'false');
+          });
+          tab.classList.add('text-accent');
+          tab.classList.remove('text-text-secondary');
+          tab.setAttribute('aria-selected', 'true');
+
+          indicator.style.transform = `translateX(${index * 100}%)`;
+
+          const variant = tab.dataset.variant;
+          contents.forEach(c => c.classList.remove('active'));
+          document.getElementById('variant-' + variant).classList.add('active');
+        });
+      });
+    }
+
+    // ========================================
+    // BRUSHING & LINKING (Direction C)
+    // ========================================
+    function initBrushing() {
+      // Activity -> Structure
+      document.querySelectorAll('.activity-item[data-links-to]').forEach(item => {
+        const linkId = item.dataset.linksTo;
+
+        item.addEventListener('mouseenter', () => {
+          const target = document.querySelector(`details[data-link="${linkId}"]`);
+          if (target) target.classList.add('highlighted');
+        });
+
+        item.addEventListener('mouseleave', () => {
+          document.querySelectorAll('details.highlighted').forEach(el => {
+            el.classList.remove('highlighted');
+          });
+        });
+      });
+
+      // Structure -> Activity (reverse)
+      document.querySelectorAll('details[data-link]').forEach(detail => {
+        const linkId = detail.dataset.link;
+
+        detail.addEventListener('mouseenter', () => {
+          document.querySelectorAll(`.activity-item[data-links-to="${linkId}"]`).forEach(item => {
+            item.classList.add('highlighted');
+          });
+        });
+
+        detail.addEventListener('mouseleave', () => {
+          document.querySelectorAll('.activity-item.highlighted').forEach(el => {
+            el.classList.remove('highlighted');
+          });
+        });
+      });
+    }
+
+    // ========================================
+    // COPY FUNCTIONALITY
+    // ========================================
+    function copyFormula(btn) {
+      const text = 'Score = (Content × 40%) + (Journey × 60%)';
+      navigator.clipboard.writeText(text);
+      btn.classList.add('copied');
+      setTimeout(() => btn.classList.remove('copied'), 2000);
+    }
+
+    const variantCode = {
+      layer1: `# Layer 1: Content Quality (40% weight)
+
+| Criterion           | 0 Points          | 1 Point              | 2 Points                    |
+|---------------------|-------------------|----------------------|-----------------------------|
+| Mental Model Depth  | No mental models  | Shallow models       | Deep, transferable models   |
+| Actionability       | No code examples  | Requires modification| Copy-paste ready            |
+| Navigation          | No cross-refs     | Links without context| Links with "why" context    |
+| Source Fidelity     | Unverified sources| Some unverifiable    | All sources verified        |
+| Coherence           | Contradictions    | Internally consistent| Coherent with full corpus   |
+| Completeness        | Major gaps        | All sections present | Comprehensive coverage      |
+
+Max: 12 points → Scaled to 40% of total`,
+
+      layer2: `# Layer 2: User Journey (60% weight)
+
+| Category      | Weight | What It Checks                                    |
+|---------------|--------|---------------------------------------------------|
+| ORIENTATION   | 15%    | Does user know where they are and what they need? |
+| MOTIVATION    | 15%    | Does user understand WHY they need this?          |
+| RELATIONSHIPS | 10%    | Does user understand how components connect?      |
+| PROCEDURES    | 20%    | Are steps complete, correct, executable?          |
+| CHECKPOINTS   | 15%    | Can users verify they're on track?                |
+| EXECUTION     | 10%    | Is runtime behavior documented?                   |
+| FAILURE       | 10%    | Are error states and recovery documented?         |
+| TRANSFORM     | 5%     | Is there a journey narrative?                     |
+
+Max: 16 points → Scaled to 60% of total`,
+
+      thresholds: `# Rating Thresholds
+
+| Score    | Rating    | Action Required              |
+|----------|-----------|------------------------------|
+| 90-100   | EXCELLENT | Ready for production         |
+| 75-89    | GOOD      | Minor enhancements needed    |
+| 60-74    | ADEQUATE  | Significant gaps to fill     |
+| 40-59    | POOR      | Major restructuring required |
+| 0-39     | FAILING   | Rewrite required             |`
+    };
+
+    function copyVariant(variant, btn) {
+      navigator.clipboard.writeText(variantCode[variant]);
+      btn.classList.add('copied');
+      const textEl = btn.querySelector('.copy-text');
+      if (textEl) {
+        const original = textEl.textContent;
+        textEl.textContent = 'Copied!';
+        setTimeout(() => {
+          textEl.textContent = original;
+          btn.classList.remove('copied');
+        }, 2000);
+      } else {
+        setTimeout(() => btn.classList.remove('copied'), 2000);
+      }
+    }
+  </script>
+</body>
+</html>

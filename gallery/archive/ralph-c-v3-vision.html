@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ralph - Gallery V3 Vision</title>
+
+  <!--
+    V3 VISION PREVIEW - CDN-only aesthetic preview
+
+    LIMITATIONS vs PRODUCTION:
+    - Animations: CSS @keyframes (no true spring physics from Framer Motion)
+    - Components: Tailwind classes mimicking shadcn (not real Radix primitives)
+    - Icons: Full Lucide bundle loaded (no tree-shaking)
+    - Performance: No build optimization
+    - Accessibility: Manual ARIA (not automatic from Radix)
+
+    See GALLERY-ARCHITECTURE.md for full production spec.
+  -->
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'gallery-base': '#0f1210',
+            'gallery-elevated': '#171c18',
+            'gallery-surface': '#1e241f',
+            'gallery-highlight': '#252b26',
+            'accent': {
+              DEFAULT: '#4ade80',
+              muted: '#22c55e',
+              glow: 'rgba(74, 222, 128, 0.15)'
+            },
+            'text-primary': '#e8e6e3',
+            'text-secondary': '#9d9b98',
+            'text-muted': '#6b6966',
+            'border-subtle': '#2a302b',
+            'border-active': '#3d4a3f',
+          },
+          fontFamily: {
+            sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
+            mono: ['Geist Mono', 'SF Mono', 'Monaco', 'monospace'],
+          },
+          boxShadow: {
+            'premium-sm': '0 1px 1px rgba(0,0,0,0.12)',
+            'premium-md': '0 1px 1px rgba(0,0,0,0.12), 0 2px 2px rgba(0,0,0,0.12), 0 4px 4px rgba(0,0,0,0.12)',
+            'premium-lg': '0 1px 1px rgba(0,0,0,0.12), 0 2px 2px rgba(0,0,0,0.12), 0 4px 4px rgba(0,0,0,0.12), 0 8px 8px rgba(0,0,0,0.12), 0 16px 16px rgba(0,0,0,0.12)',
+            'glow': '0 0 0 1px rgba(74,222,128,0.1), 0 0 20px rgba(74,222,128,0.1)',
+            'glow-strong': '0 0 0 1px rgba(74,222,128,0.2), 0 0 30px rgba(74,222,128,0.15)',
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+            'fade-in': 'fadeIn 0.4s ease forwards',
+            'brush-pulse': 'brushPulse 0.4s ease forwards',
+          },
+        },
+      },
+    }
+  </script>
+
+  <!-- Custom CSS for Animations -->
+  <style>
+    /* Spring Physics Timing Functions */
+    :root {
+      --easing-spring-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --easing-spring-snappy: cubic-bezier(0.39, 0.575, 0.565, 1);
+      --easing-spring-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* Page Load Animations */
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      70% {
+        opacity: 1;
+        transform: translateY(-3px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Brush Pulse Animation */
+    @keyframes brushPulse {
+      0% {
+        background-color: rgba(74, 222, 128, 0.2);
+        box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.3);
+      }
+      70% {
+        box-shadow: 0 0 0 8px rgba(74, 222, 128, 0);
+      }
+      100% {
+        background-color: rgba(74, 222, 128, 0.1);
+      }
+    }
+
+    /* Hover Lift with Spring */
+    .hover-lift {
+      transition: transform 0.3s var(--easing-spring-bouncy),
+                  box-shadow 0.3s var(--easing-spring-smooth);
+    }
+
+    .hover-lift:hover {
+      transform: translateY(-4px) scale(1.01);
+    }
+
+    /* Copy Button Icon Morph */
+    .copy-button .copy-icon,
+    .copy-button .check-icon {
+      transition: all 0.25s var(--easing-spring-bouncy);
+    }
+
+    .copy-button .check-icon {
+      position: absolute;
+      opacity: 0;
+      transform: scale(0.5) rotate(-90deg);
+    }
+
+    .copy-button.copied .copy-icon {
+      opacity: 0;
+      transform: scale(0.5) rotate(90deg);
+    }
+
+    .copy-button.copied .check-icon {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+
+    /* Tab Slide Indicator */
+    .tab-indicator {
+      transition: transform 0.3s var(--easing-spring-bouncy),
+                  width 0.3s var(--easing-spring-smooth);
+    }
+
+    /* Variant Content Crossfade */
+    .variant-content {
+      opacity: 0;
+      display: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .variant-content.active {
+      display: block;
+      opacity: 1;
+    }
+
+    /* Stagger Animation Delays */
+    .stagger-1 { animation-delay: 100ms; }
+    .stagger-2 { animation-delay: 200ms; }
+    .stagger-3 { animation-delay: 300ms; }
+    .stagger-4 { animation-delay: 400ms; }
+    .stagger-5 { animation-delay: 500ms; }
+    .stagger-6 { animation-delay: 600ms; }
+    .stagger-7 { animation-delay: 700ms; }
+    .stagger-8 { animation-delay: 800ms; }
+
+    /* Initial state for animated elements */
+    .animate-on-load {
+      opacity: 0;
+    }
+
+    /* Zone highlight states */
+    .structure-section.highlighted {
+      animation: brushPulse 0.4s ease forwards;
+      border-radius: 8px;
+      padding-left: 12px;
+      padding-right: 12px;
+      margin-left: -12px;
+      margin-right: -12px;
+    }
+
+    .activity-item.highlighted {
+      animation: brushPulse 0.4s ease forwards;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0f1210;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #2a302b;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3d4a3f;
+    }
+  </style>
+</head>
+
+<body class="bg-gallery-base text-text-primary font-sans antialiased">
+
+  <!-- Version Indicator -->
+  <div class="fixed bottom-4 right-4 z-50 bg-gallery-elevated border border-border-subtle rounded-md px-3 py-1.5 text-xs text-text-muted animate-on-load stagger-8 animate-fade-in">
+    v3: Vision Preview (CDN)
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-40 bg-gallery-elevated/95 backdrop-blur-sm border-b border-border-subtle animate-on-load stagger-1 animate-fade-in">
+    <div class="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2 text-text-secondary hover:text-accent transition-colors duration-150 group">
+        <i data-lucide="arrow-left" class="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-0.5"></i>
+        <span class="text-sm font-medium">Patterns</span>
+      </a>
+
+      <!-- Maturity Badge -->
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium bg-accent/10 text-accent border border-accent/20">
+        <span class="text-base">🌳</span>
+        <span>Evergreen</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-6 pb-12">
+
+    <!-- Hero Essence -->
+    <section class="my-8 animate-on-load stagger-2 animate-fade-in-up">
+      <div class="relative bg-gradient-to-b from-gallery-elevated to-gallery-base border border-border-subtle rounded-xl p-10 text-center overflow-hidden">
+        <!-- Subtle glow effect -->
+        <div class="absolute inset-0 bg-gradient-radial from-accent/5 via-transparent to-transparent opacity-50"></div>
+
+        <div class="relative">
+          <!-- Pattern Name -->
+          <h1 class="text-3xl font-bold text-text-primary mb-2">Ralph</h1>
+          <p class="text-text-secondary mb-6">The Infinite Loop Pattern</p>
+
+          <!-- The One-Liner -->
+          <div class="inline-flex items-center gap-4 bg-gallery-base border border-border-subtle rounded-lg px-6 py-4 mb-4 hover:shadow-glow transition-shadow duration-300 group">
+            <code class="font-mono text-lg md:text-xl text-accent">while :; do cat PROMPT.md | claude ; done</code>
+
+            <!-- Copy Button with Icon Morph -->
+            <button
+              class="copy-button relative flex items-center justify-center w-10 h-10 bg-gallery-surface border border-border-subtle rounded-md hover:border-accent hover:text-accent transition-all duration-150"
+              onclick="copyEssence(this)"
+              aria-label="Copy command"
+            >
+              <i data-lucide="copy" class="copy-icon w-4 h-4"></i>
+              <i data-lucide="check" class="check-icon w-4 h-4 text-accent"></i>
+            </button>
+          </div>
+
+          <p class="text-text-muted italic">The one-liner. Everything else is scaffolding.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Variant Tabs -->
+    <div class="mb-4 animate-on-load stagger-3 animate-fade-in-up">
+      <div class="relative flex gap-1 p-1 bg-gallery-elevated rounded-lg" role="tablist">
+        <!-- Tab Buttons -->
+        <button
+          class="variant-tab flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 z-10"
+          data-variant="minimal"
+          role="tab"
+          aria-selected="true"
+        >
+          Minimal
+        </button>
+        <button
+          class="variant-tab flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 z-10"
+          data-variant="standard"
+          role="tab"
+          aria-selected="false"
+        >
+          Standard
+        </button>
+        <button
+          class="variant-tab flex-1 px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 z-10"
+          data-variant="production"
+          role="tab"
+          aria-selected="false"
+        >
+          Production
+        </button>
+
+        <!-- Sliding Indicator -->
+        <div class="tab-indicator absolute top-1 bottom-1 left-1 w-[calc(33.333%-4px)] bg-gallery-surface rounded-md shadow-premium-sm" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <!-- Variant Code Blocks -->
+    <div class="mb-8 animate-on-load stagger-4 animate-fade-in-up">
+      <!-- Minimal -->
+      <div class="variant-content active" id="variant-minimal">
+        <div class="relative bg-gallery-elevated border border-border-subtle rounded-lg overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-border-subtle">
+            <span class="text-xs text-text-muted font-mono">bash</span>
+            <button
+              class="copy-button relative flex items-center gap-2 px-3 py-1.5 bg-gallery-surface border border-border-subtle rounded-md text-xs text-text-secondary hover:border-accent hover:text-accent transition-all duration-150"
+              onclick="copyVariant('minimal', this)"
+            >
+              <i data-lucide="copy" class="copy-icon w-3.5 h-3.5"></i>
+              <i data-lucide="check" class="check-icon w-3.5 h-3.5 text-accent"></i>
+              <span class="copy-text">Copy</span>
+            </button>
+          </div>
+          <pre class="p-4 font-mono text-sm overflow-x-auto"><span class="text-text-muted"># Minimal: Just the loop</span>
+<span class="text-text-primary">while :; do cat PROMPT.md | claude ; done</span></pre>
+        </div>
+      </div>
+
+      <!-- Standard -->
+      <div class="variant-content" id="variant-standard">
+        <div class="relative bg-gallery-elevated border border-border-subtle rounded-lg overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-border-subtle">
+            <span class="text-xs text-text-muted font-mono">bash</span>
+            <button
+              class="copy-button relative flex items-center gap-2 px-3 py-1.5 bg-gallery-surface border border-border-subtle rounded-md text-xs text-text-secondary hover:border-accent hover:text-accent transition-all duration-150"
+              onclick="copyVariant('standard', this)"
+            >
+              <i data-lucide="copy" class="copy-icon w-3.5 h-3.5"></i>
+              <i data-lucide="check" class="check-icon w-3.5 h-3.5 text-accent"></i>
+              <span class="copy-text">Copy</span>
+            </button>
+          </div>
+          <pre class="p-4 font-mono text-sm overflow-x-auto"><span class="text-text-muted">#!/bin/bash
+# Standard: With iteration limit and completion detection</span>
+
+<span class="text-text-primary">MAX_ITERATIONS=${1:-10}
+
+for i in $(seq 1 $MAX_ITERATIONS); do
+  echo "=== Iteration $i ==="
+  OUTPUT=$(cat PROMPT.md | claude 2>&1 | tee /dev/stderr) || true
+
+  if echo "$OUTPUT" | grep -q "&lt;promise&gt;COMPLETE&lt;/promise&gt;"; then
+    echo "Done!"
+    exit 0
+  fi
+  sleep 2
+done
+
+echo "Max iterations reached"</span></pre>
+        </div>
+      </div>
+
+      <!-- Production -->
+      <div class="variant-content" id="variant-production">
+        <div class="relative bg-gallery-elevated border border-border-subtle rounded-lg overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2 border-b border-border-subtle">
+            <span class="text-xs text-text-muted font-mono">bash</span>
+            <button
+              class="copy-button relative flex items-center gap-2 px-3 py-1.5 bg-gallery-surface border border-border-subtle rounded-md text-xs text-text-secondary hover:border-accent hover:text-accent transition-all duration-150"
+              onclick="copyVariant('production', this)"
+            >
+              <i data-lucide="copy" class="copy-icon w-3.5 h-3.5"></i>
+              <i data-lucide="check" class="check-icon w-3.5 h-3.5 text-accent"></i>
+              <span class="copy-text">Copy</span>
+            </button>
+          </div>
+          <pre class="p-4 font-mono text-sm overflow-x-auto"><span class="text-text-muted">#!/bin/bash
+# Production: With stuck detection, rate limiting</span>
+
+<span class="text-text-primary">set -e
+MAX_ITERATIONS=${1:-25}
+STUCK_THRESHOLD=3
+LAST_COMMIT=""
+STUCK_COUNT=0
+
+for i in $(seq 1 $MAX_ITERATIONS); do
+  echo "=== Iteration $i ==="
+
+  <span class="text-text-muted"># Rate limit check</span>
+  if [ -f /tmp/ralph-rate-limited ]; then
+    echo "Rate limited, waiting 60s..."
+    sleep 60 && rm /tmp/ralph-rate-limited
+  fi
+
+  OUTPUT=$(cat prompt.md | claude --dangerously-skip-permissions 2>&1 | tee /dev/stderr) || true
+
+  <span class="text-text-muted"># Stuck detection</span>
+  CURRENT_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "none")
+  if [ "$CURRENT_COMMIT" = "$LAST_COMMIT" ]; then
+    STUCK_COUNT=$((STUCK_COUNT + 1))
+    [ $STUCK_COUNT -ge $STUCK_THRESHOLD ] && echo "Stuck!" && exit 1
+  else
+    STUCK_COUNT=0
+    LAST_COMMIT=$CURRENT_COMMIT
+  fi
+
+  sleep 5
+done</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two-Zone Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 animate-on-load stagger-5 animate-fade-in-up">
+
+      <!-- Structured Zone -->
+      <div class="bg-gallery-elevated border border-border-subtle rounded-xl p-5 shadow-premium-md">
+        <!-- Zone Header -->
+        <div class="flex items-center gap-2 pb-3 mb-4 border-b-2 border-accent">
+          <span class="text-xs font-semibold uppercase tracking-wider text-text-muted">Structure</span>
+        </div>
+
+        <!-- Diagram -->
+        <div class="bg-gallery-surface rounded-lg p-4 mb-4">
+          <svg class="w-full h-auto" viewBox="0 0 400 80" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                <polygon points="0 0, 8 3, 0 6" fill="#4ade80"/>
+              </marker>
+              <linearGradient id="boxGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#1e241f"/>
+                <stop offset="100%" style="stop-color:#171c18"/>
+              </linearGradient>
+            </defs>
+            <g transform="translate(5, 25)">
+              <rect x="0" y="0" width="55" height="30" rx="6" fill="url(#boxGrad)" stroke="#2a302b"/>
+              <text x="27.5" y="19" text-anchor="middle" fill="#e8e6e3" font-size="9" font-family="Space Grotesk">Fresh</text>
+              <line x1="60" y1="15" x2="75" y2="15" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arrow)"/>
+              <rect x="80" y="0" width="55" height="30" rx="6" fill="url(#boxGrad)" stroke="#2a302b"/>
+              <text x="107.5" y="19" text-anchor="middle" fill="#e8e6e3" font-size="9" font-family="Space Grotesk">Read</text>
+              <line x1="140" y1="15" x2="155" y2="15" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arrow)"/>
+              <rect x="160" y="0" width="55" height="30" rx="6" fill="url(#boxGrad)" stroke="#2a302b"/>
+              <text x="187.5" y="19" text-anchor="middle" fill="#e8e6e3" font-size="9" font-family="Space Grotesk">Task</text>
+              <line x1="220" y1="15" x2="235" y2="15" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arrow)"/>
+              <rect x="240" y="0" width="55" height="30" rx="6" fill="url(#boxGrad)" stroke="#2a302b"/>
+              <text x="267.5" y="19" text-anchor="middle" fill="#e8e6e3" font-size="9" font-family="Space Grotesk">Verify</text>
+              <line x1="300" y1="15" x2="315" y2="15" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arrow)"/>
+              <rect x="320" y="0" width="55" height="30" rx="6" fill="url(#boxGrad)" stroke="#2a302b"/>
+              <text x="347.5" y="19" text-anchor="middle" fill="#e8e6e3" font-size="9" font-family="Space Grotesk">Commit</text>
+            </g>
+            <path d="M 380 40 Q 395 40 395 55 Q 395 70 200 70 Q 5 70 5 55 Q 5 40 20 40" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow)"/>
+            <text x="200" y="65" text-anchor="middle" fill="#4ade80" font-size="8" font-family="Space Grotesk">loop</text>
+          </svg>
+        </div>
+
+        <!-- Structure Sections -->
+        <div class="space-y-1">
+
+          <!-- File Structure -->
+          <div class="structure-section py-3 border-b border-border-subtle transition-all duration-200" data-link="files">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="folder-tree" class="w-4 h-4 text-accent"></i>
+              <span class="text-sm font-semibold text-text-primary">File Structure</span>
+            </div>
+            <div class="bg-gallery-surface rounded-md p-3 font-mono text-xs leading-relaxed">
+              <span class="text-accent">scripts/ralph/</span><br>
+              ├── <span class="text-text-secondary">ralph.sh</span> <span class="text-text-muted italic"># The loop</span><br>
+              ├── <span class="text-text-secondary">prompt.md</span> <span class="text-text-muted italic"># Agent instructions</span><br>
+              ├── <span class="text-text-secondary">prd.json</span> <span class="text-text-muted italic"># Task board</span><br>
+              └── <span class="text-text-secondary">progress.txt</span> <span class="text-text-muted italic"># Learnings log</span>
+            </div>
+          </div>
+
+          <!-- When to Use -->
+          <div class="structure-section py-3 border-b border-border-subtle transition-all duration-200" data-link="when-yes">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-accent"></i>
+              <span class="text-sm font-semibold text-text-primary">When to Use</span>
+            </div>
+            <ul class="space-y-1.5 text-sm">
+              <li class="flex items-start gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-accent mt-0.5 flex-shrink-0"></i>
+                <span class="text-text-secondary">Feature development with clear specs</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-accent mt-0.5 flex-shrink-0"></i>
+                <span class="text-text-secondary">API endpoint implementation</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-accent mt-0.5 flex-shrink-0"></i>
+                <span class="text-text-secondary">Database migrations</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-accent mt-0.5 flex-shrink-0"></i>
+                <span class="text-text-secondary">Refactoring with test coverage</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-accent mt-0.5 flex-shrink-0"></i>
+                <span class="text-text-secondary">Overnight builds</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- When NOT to Use -->
+          <div class="structure-section py-3 border-b border-border-subtle transition-all duration-200" data-link="when-no">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="x-circle" class="w-4 h-4 text-red-400"></i>
+              <span class="text-sm font-semibold text-text-primary">When NOT to Use</span>
+            </div>
+            <ul class="space-y-1.5 text-sm">
+              <li class="flex items-start gap-2">
+                <i data-lucide="x" class="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0"></i>
+                <span class="text-text-secondary">Subjective tasks ("make it pretty")</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="x" class="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0"></i>
+                <span class="text-text-secondary">Security-critical code</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="x" class="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0"></i>
+                <span class="text-text-secondary">Exploratory work</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="x" class="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0"></i>
+                <span class="text-text-secondary">Legacy code without tests</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Variants -->
+          <div class="structure-section py-3 border-b border-border-subtle transition-all duration-200" data-link="variants">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="zap" class="w-4 h-4 text-accent"></i>
+              <span class="text-sm font-semibold text-text-primary">10 Variants</span>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <div class="px-2 py-1.5 bg-gallery-surface rounded text-xs hover:bg-gallery-highlight transition-colors cursor-default">
+                <span class="text-text-primary font-medium">Basic</span>
+                <span class="text-text-muted"> — Standard loop</span>
+              </div>
+              <div class="px-2 py-1.5 bg-gallery-surface rounded text-xs hover:bg-gallery-highlight transition-colors cursor-default">
+                <span class="text-text-primary font-medium">AFK</span>
+                <span class="text-text-muted"> — Overnight</span>
+              </div>
+              <div class="px-2 py-1.5 bg-gallery-surface rounded text-xs hover:bg-gallery-highlight transition-colors cursor-default">
+                <span class="text-text-primary font-medium">HOTL</span>
+                <span class="text-text-muted"> — Human review</span>
+              </div>
+              <div class="px-2 py-1.5 bg-gallery-surface rounded text-xs hover:bg-gallery-highlight transition-colors cursor-default">
+                <span class="text-text-primary font-medium">Marathon</span>
+                <span class="text-text-muted"> — Full SDLC</span>
+              </div>
+              <div class="px-2 py-1.5 bg-gallery-surface rounded text-xs hover:bg-gallery-highlight transition-colors cursor-default">
+                <span class="text-text-primary font-medium">Dr. Ralph</span>
+                <span class="text-text-muted"> — Confidence</span>
+              </div>
+              <div class="px-2 py-1.5 bg-gallery-surface rounded text-xs hover:bg-gallery-highlight transition-colors cursor-default">
+                <span class="text-text-primary font-medium">Compounding</span>
+                <span class="text-text-muted"> — Archives</span>
+              </div>
+              <div class="px-2 py-1.5 bg-gallery-surface rounded text-xs hover:bg-gallery-highlight transition-colors cursor-default">
+                <span class="text-text-primary font-medium">Parallel</span>
+                <span class="text-text-muted"> — Multi-branch</span>
+              </div>
+              <div class="px-2 py-1.5 bg-gallery-surface rounded text-xs hover:bg-gallery-highlight transition-colors cursor-default">
+                <span class="text-text-primary font-medium">Marketer</span>
+                <span class="text-text-muted"> — Content</span>
+              </div>
+              <div class="px-2 py-1.5 bg-gallery-surface rounded text-xs hover:bg-gallery-highlight transition-colors cursor-default">
+                <span class="text-text-primary font-medium">Lisa</span>
+                <span class="text-text-muted"> — Enhanced logs</span>
+              </div>
+              <div class="px-2 py-1.5 bg-gallery-surface rounded text-xs hover:bg-gallery-highlight transition-colors cursor-default">
+                <span class="text-text-primary font-medium">Rate-Ltd</span>
+                <span class="text-text-muted"> — Backoff</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Common Failures -->
+          <div class="structure-section py-3 transition-all duration-200" data-link="failures">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
+              <span class="text-sm font-semibold text-text-primary">Common Failures</span>
+            </div>
+            <ul class="space-y-1.5 text-sm">
+              <li class="flex items-start gap-2">
+                <span class="text-amber-400 flex-shrink-0">→</span>
+                <span class="text-text-secondary"><strong class="text-text-primary">Stories too large</strong> — Split into 2-3 sentence tasks</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-amber-400 flex-shrink-0">→</span>
+                <span class="text-text-secondary"><strong class="text-text-primary">Weak tests</strong> — Add typecheck to all criteria</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-amber-400 flex-shrink-0">→</span>
+                <span class="text-text-secondary"><strong class="text-text-primary">No browser verify</strong> — Add Playwright for UI</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-amber-400 flex-shrink-0">→</span>
+                <span class="text-text-secondary"><strong class="text-text-primary">Progress overwritten</strong> — Use "APPEND" explicitly</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-amber-400 flex-shrink-0">→</span>
+                <span class="text-text-secondary"><strong class="text-text-primary">Stuck loops</strong> — Add stuck detection script</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Zone -->
+      <div class="border border-dashed border-border-subtle rounded-xl p-5 bg-gallery-base">
+        <!-- Zone Header -->
+        <div class="flex items-center gap-2 pb-3 mb-4 border-b-2 border-dashed border-text-muted">
+          <span class="text-xs font-semibold uppercase tracking-wider text-text-muted">Activity</span>
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="space-y-3">
+
+          <!-- Quote -->
+          <div class="activity-item p-3 rounded-lg transition-all duration-200 cursor-default hover:bg-gallery-elevated hover:shadow-premium-sm" data-links-to="when-yes,failures">
+            <div class="flex items-center gap-2 mb-1.5">
+              <i data-lucide="message-square-quote" class="w-4 h-4 text-text-muted"></i>
+              <span class="text-xs font-semibold uppercase tracking-wide text-text-muted">Quote</span>
+            </div>
+            <p class="text-sm text-text-secondary leading-relaxed">
+              "The trick with hooks is you want to fire them <em class="text-accent not-italic">BEFORE</em> the loop restarts, not after."
+            </p>
+            <p class="mt-2 text-xs text-text-muted">@mpocock · 2h ago</p>
+          </div>
+
+          <!-- Connection -->
+          <div class="activity-item p-3 rounded-lg transition-all duration-200 cursor-default hover:bg-gallery-elevated hover:shadow-premium-sm" data-links-to="variants">
+            <div class="flex items-center gap-2 mb-1.5">
+              <i data-lucide="link-2" class="w-4 h-4 text-text-muted"></i>
+              <span class="text-xs font-semibold uppercase tracking-wide text-text-muted">Connection</span>
+            </div>
+            <p class="text-sm text-text-secondary leading-relaxed">
+              <strong class="text-text-primary">Ralph + Playwright</strong> for E2E testing. Wes Winder calls this combo "AGI" (tongue in cheek).
+            </p>
+            <p class="mt-2 text-xs text-text-muted">Discovered via @weswinder</p>
+          </div>
+
+          <!-- Case Study -->
+          <div class="activity-item p-3 rounded-lg transition-all duration-200 cursor-default hover:bg-gallery-elevated hover:shadow-premium-sm" data-links-to="when-yes">
+            <div class="flex items-center gap-2 mb-1.5">
+              <i data-lucide="bar-chart-3" class="w-4 h-4 text-text-muted"></i>
+              <span class="text-xs font-semibold uppercase tracking-wide text-text-muted">Case Study</span>
+            </div>
+            <p class="text-sm text-text-secondary leading-relaxed">
+              <strong class="text-text-primary">Real numbers:</strong> Ryan Carson ran <em class="text-accent not-italic">14 iterations</em> for a complete feature. Cost ~$10-15. Time: 2 hours autonomous.
+            </p>
+            <p class="mt-2 text-xs text-text-muted">Untangle Legal Agent</p>
+          </div>
+
+          <!-- Open Question -->
+          <div class="activity-item p-3 rounded-lg transition-all duration-200 cursor-default hover:bg-gallery-elevated hover:shadow-premium-sm" data-links-to="files">
+            <div class="flex items-center gap-2 mb-1.5">
+              <i data-lucide="help-circle" class="w-4 h-4 text-text-muted"></i>
+              <span class="text-xs font-semibold uppercase tracking-wide text-text-muted">Open Question</span>
+            </div>
+            <p class="text-sm text-text-secondary leading-relaxed">
+              How does Ralph interact with <strong class="text-text-primary">MCP notification servers</strong>? Can we get mobile pings when stuck?
+            </p>
+            <p class="mt-2 text-xs text-text-muted">Investigating</p>
+          </div>
+
+          <!-- Core Insight -->
+          <div class="activity-item p-3 rounded-lg transition-all duration-200 cursor-default hover:bg-gallery-elevated hover:shadow-premium-sm" data-links-to="when-no,failures">
+            <div class="flex items-center gap-2 mb-1.5">
+              <i data-lucide="lightbulb" class="w-4 h-4 text-text-muted"></i>
+              <span class="text-xs font-semibold uppercase tracking-wide text-text-muted">Core Insight</span>
+            </div>
+            <p class="text-sm text-text-secondary leading-relaxed">
+              "Given excellent upfront specification, we can already achieve meaningful <em class="text-accent not-italic">unattended software production</em> in 2026."
+            </p>
+            <p class="mt-2 text-xs text-text-muted">@anthropic</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connections Footer -->
+    <div class="flex flex-wrap items-center gap-4 p-5 bg-gallery-elevated rounded-xl animate-on-load stagger-6 animate-fade-in-up">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-sm text-text-muted">Combines with:</span>
+        <a href="#" class="inline-flex items-center px-3 py-1.5 bg-gallery-surface border border-border-subtle rounded-md text-sm text-text-secondary hover:border-accent hover:text-accent hover:shadow-glow transition-all duration-200">Hooks</a>
+        <a href="#" class="inline-flex items-center px-3 py-1.5 bg-gallery-surface border border-border-subtle rounded-md text-sm text-text-secondary hover:border-accent hover:text-accent hover:shadow-glow transition-all duration-200">Playwright</a>
+        <a href="#" class="inline-flex items-center px-3 py-1.5 bg-gallery-surface border border-border-subtle rounded-md text-sm text-text-secondary hover:border-accent hover:text-accent hover:shadow-glow transition-all duration-200">Git Worktrees</a>
+        <a href="#" class="inline-flex items-center px-3 py-1.5 bg-gallery-surface border border-border-subtle rounded-md text-sm text-text-secondary hover:border-accent hover:text-accent hover:shadow-glow transition-all duration-200">CC Mirror</a>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap ml-auto">
+        <span class="text-sm text-text-muted">Competes with:</span>
+        <a href="#" class="inline-flex items-center px-3 py-1.5 bg-gallery-surface border border-amber-500/30 rounded-md text-sm text-text-secondary hover:border-amber-500 hover:text-amber-400 transition-all duration-200">Gas Town</a>
+        <a href="#" class="inline-flex items-center px-3 py-1.5 bg-gallery-surface border border-amber-500/30 rounded-md text-sm text-text-secondary hover:border-amber-500 hover:text-amber-400 transition-all duration-200">Extended Sessions</a>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize Lucide icons
+      lucide.createIcons();
+
+      // Trigger animations
+      document.querySelectorAll('.animate-on-load').forEach(el => {
+        el.classList.remove('animate-on-load');
+      });
+
+      // Initialize tabs
+      initTabs();
+
+      // Initialize brushing & linking
+      initBrushing();
+    });
+
+    // ========================================
+    // COPY FUNCTIONALITY
+    // ========================================
+    function copyEssence(btn) {
+      const text = 'while :; do cat PROMPT.md | claude ; done';
+      navigator.clipboard.writeText(text);
+      btn.classList.add('copied');
+      setTimeout(() => btn.classList.remove('copied'), 2000);
+    }
+
+    const variantCode = {
+      minimal: 'while :; do cat PROMPT.md | claude ; done',
+      standard: `#!/bin/bash
+# Standard: With iteration limit and completion detection
+
+MAX_ITERATIONS=\${1:-10}
+
+for i in $(seq 1 $MAX_ITERATIONS); do
+  echo "=== Iteration $i ==="
+  OUTPUT=$(cat PROMPT.md | claude 2>&1 | tee /dev/stderr) || true
+
+  if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
+    echo "Done!"
+    exit 0
+  fi
+  sleep 2
+done
+
+echo "Max iterations reached"`,
+      production: `#!/bin/bash
+# Production: With stuck detection, rate limiting
+
+set -e
+MAX_ITERATIONS=\${1:-25}
+STUCK_THRESHOLD=3
+LAST_COMMIT=""
+STUCK_COUNT=0
+
+for i in $(seq 1 $MAX_ITERATIONS); do
+  echo "=== Iteration $i ==="
+
+  # Rate limit check
+  if [ -f /tmp/ralph-rate-limited ]; then
+    echo "Rate limited, waiting 60s..."
+    sleep 60 && rm /tmp/ralph-rate-limited
+  fi
+
+  OUTPUT=$(cat prompt.md | claude --dangerously-skip-permissions 2>&1 | tee /dev/stderr) || true
+
+  # Stuck detection
+  CURRENT_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "none")
+  if [ "$CURRENT_COMMIT" = "$LAST_COMMIT" ]; then
+    STUCK_COUNT=$((STUCK_COUNT + 1))
+    [ $STUCK_COUNT -ge $STUCK_THRESHOLD ] && echo "Stuck!" && exit 1
+  else
+    STUCK_COUNT=0
+    LAST_COMMIT=$CURRENT_COMMIT
+  fi
+
+  sleep 5
+done`
+    };
+
+    function copyVariant(variant, btn) {
+      navigator.clipboard.writeText(variantCode[variant]);
+      btn.classList.add('copied');
+      const textEl = btn.querySelector('.copy-text');
+      if (textEl) {
+        const original = textEl.textContent;
+        textEl.textContent = 'Copied!';
+        setTimeout(() => {
+          textEl.textContent = original;
+          btn.classList.remove('copied');
+        }, 2000);
+      } else {
+        setTimeout(() => btn.classList.remove('copied'), 2000);
+      }
+    }
+
+    // ========================================
+    // TAB FUNCTIONALITY
+    // ========================================
+    function initTabs() {
+      const tabs = document.querySelectorAll('.variant-tab');
+      const indicator = document.querySelector('.tab-indicator');
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => {
+          // Update active states
+          tabs.forEach(t => {
+            t.classList.remove('text-accent');
+            t.classList.add('text-text-secondary');
+            t.setAttribute('aria-selected', 'false');
+          });
+          tab.classList.add('text-accent');
+          tab.classList.remove('text-text-secondary');
+          tab.setAttribute('aria-selected', 'true');
+
+          // Move indicator
+          const tabWidth = 100 / tabs.length;
+          indicator.style.transform = `translateX(${index * 100}%)`;
+
+          // Switch content
+          const variant = tab.dataset.variant;
+          document.querySelectorAll('.variant-content').forEach(c => c.classList.remove('active'));
+          document.getElementById('variant-' + variant).classList.add('active');
+        });
+      });
+
+      // Set initial state
+      tabs[0].classList.add('text-accent');
+      tabs[0].classList.remove('text-text-secondary');
+    }
+
+    // ========================================
+    // BRUSHING & LINKING
+    // ========================================
+    function initBrushing() {
+      // Activity -> Structure
+      document.querySelectorAll('.activity-item[data-links-to]').forEach(item => {
+        const links = item.dataset.linksTo.split(',');
+
+        item.addEventListener('mouseenter', () => {
+          links.forEach(linkId => {
+            const target = document.querySelector(`.structure-section[data-link="${linkId}"]`);
+            if (target) target.classList.add('highlighted');
+          });
+        });
+
+        item.addEventListener('mouseleave', () => {
+          document.querySelectorAll('.structure-section.highlighted').forEach(el => {
+            el.classList.remove('highlighted');
+          });
+        });
+      });
+
+      // Structure -> Activity (reverse)
+      document.querySelectorAll('.structure-section[data-link]').forEach(section => {
+        const linkId = section.dataset.link;
+
+        section.addEventListener('mouseenter', () => {
+          document.querySelectorAll(`.activity-item[data-links-to*="${linkId}"]`).forEach(item => {
+            item.classList.add('highlighted');
+          });
+        });
+
+        section.addEventListener('mouseleave', () => {
+          document.querySelectorAll('.activity-item.highlighted').forEach(el => {
+            el.classList.remove('highlighted');
+          });
+        });
+      });
+    }
+  </script>
+</body>
+</html>
