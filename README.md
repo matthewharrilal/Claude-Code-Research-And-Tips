@@ -159,6 +159,10 @@ Claude-Research-And-Tips/
 
 A proof-of-concept for converting markdown documentation into rich, interactive HTML:
 
+![Ralph POC Screenshot](gallery/ralph-poc-screenshot.png)
+*Three-panel layout: collapsible nav (left), scrollable content (center), contextual activity zone (right)*
+
+**Key features:**
 - **Three-panel layout**: Left nav, main content, activity zone
 - **Resizable panels**: Drag to adjust activity zone width
 - **Scroll-sync**: Activity zone highlights relevant context as you read
