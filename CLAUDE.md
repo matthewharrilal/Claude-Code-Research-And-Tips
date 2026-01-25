@@ -25,18 +25,18 @@ Claude-Research-And-Tips/
 ├── ideas-lab.md             # Experimental concepts and compound intelligence
 ├── productivity-workflows.md # Daily routines and feedback loops
 │
-├── extractions/             # Research organized by category
-│   ├── orchestration/       # Ralph, Gas Town, CC Mirror, multi-agent (21 files)
-│   ├── deep/                # Deep dives on key thinkers (12 files)
-│   ├── techniques/          # Skills, MCP, hooks, security (8 files)
-│   ├── tooling/             # Plugins, CLI tools, SDKs (7 files)
+├── extractions/             # Research organized by category (120+ files)
+│   ├── orchestration/       # Ralph, Gas Town, CC Mirror, multi-agent (39 files)
+│   ├── deep/                # Deep dives on key thinkers (22 files)
+│   ├── techniques/          # Skills, MCP, hooks, security (9 files)
+│   ├── tooling/             # Plugins, CLI tools, SDKs (13 files)
 │   ├── philosophy/          # Foundational thinking, .md philosophy (7 files)
-│   ├── sources/             # Platform-specific research compilations (9 files)
+│   ├── sources/             # Platform-specific research compilations (12 files)
 │   ├── cross-cutting/       # Production patterns, edge cases (7 files)
-│   ├── infrastructure/      # Remote, cloud, Chrome MCP (3 files)
-│   └── mobility/            # Mobile-first workflows (4 files)
+│   ├── infrastructure/      # Remote, cloud, Chrome MCP (6 files)
+│   └── mobility/            # Mobile-first workflows (5 files)
 │
-├── synthesis/               # Processed insights and frameworks (42 files)
+├── synthesis/               # Processed insights and frameworks (65 files)
 │   ├── architecture-*.md    # Primitives, composition, complexity ladder
 │   ├── mastery-*.md         # Ralph complete, context management, multi-agent
 │   ├── compare-*.md         # Architecture, orchestration, memory comparisons
@@ -46,10 +46,21 @@ Claude-Research-And-Tips/
 │   ├── combinations-*.md    # Pattern combinations and extensions
 │   └── MASTER-PLAYBOOK.md   # Complete capability progression guide
 │
-└── html-site/               # Web-ready versions
-    ├── index.html
-    ├── synthesis/
-    └── extractions/
+├── html-site/               # Web-ready versions (237 HTML files)
+│   ├── index.html
+│   ├── journeys/            # Learning path pages (NEW)
+│   ├── synthesis/
+│   └── extractions/spotlight/ # Deep-dive case studies (NEW)
+│
+├── gallery/                 # Design POC (NEW)
+│   ├── ralph-mintlify-poc.html
+│   └── poc-knowledge/
+│
+├── UI-Tips/                 # AI Design Workflows (NEW)
+│   └── CLAUDE.md
+│
+└── mvp/                     # Pattern Website (NEW)
+    └── index.html
 ```
 
 ---
@@ -64,6 +75,9 @@ Claude-Research-And-Tips/
 | Understand the complexity ladder (Level 0-7) | `synthesis/architecture-complexity-ladder.md` |
 | Deep dive on Ralph pattern | `synthesis/mastery-ralph-complete.md` |
 | Make architectural decisions | `synthesis/JUDGMENT-GUIDE.md` |
+| See the design POC | `gallery/ralph-mintlify-poc.html` |
+| Learn AI design workflows | `UI-Tips/CLAUDE.md` |
+| Explore pattern showcase | `mvp/index.html` |
 
 ---
 
@@ -99,25 +113,48 @@ Claude-Research-And-Tips/
 
 ---
 
+## Methodology Reference
+
+Consolidated methodology files in `~/.claude/plans/`:
+
+| Task | Reference File |
+|------|----------------|
+| Ingest new sources | `METHODOLOGY-EXTRACTION.md` |
+| Audit content quality | `METHODOLOGY-QUALITY-AUDIT.md` |
+| Restore damaged content | `METHODOLOGY-RESTORATION.md` |
+| Copy HTML components | `TEMPLATES-HTML-COMPONENTS.md` |
+
+**Key Frameworks:**
+- Two-layer scoring (40% content + 60% journey)
+- Four-context evaluation (2AM debugging, decisions, quick lookup, mastery)
+- 6-phase restoration process
+- 10 transcendent patterns for multi-phase projects
+
+---
+
 ## Current Session Work
 
-**Session:** `shiny-finding-pnueli`
+**Latest Session:** `dreamy-tickling-pike` (2026-01-25)
 
-**Status:**
-```
-Phase 1: Extraction       ✅ COMPLETE (12 files, 10,000+ lines)
-Phase 2A: Audit           ✅ COMPLETE (25 agents, 116 files)
-Phase 2B: Content Create  🔲 PENDING (checkpoints, failure handling)
-Phase 3: HTML Overhaul    🔲 BLOCKED BY 2B
-```
+**Project Phase Status:**
+| Phase | Status |
+|-------|--------|
+| Phase 1: Extraction | ✅ COMPLETE (120+ files) |
+| Phase 2A: Quality Audit | ✅ COMPLETE (83.5% rated GOOD) |
+| Phase 2B: Content Enhancement | ✅ COMPLETE (checkpoints, failure handling) |
+| Phase 3: HTML Generation | 🔄 IN PROGRESS |
 
-**Key Finding:** Content is 83.5% GOOD but structured as REFERENCE, not USER JOURNEY. 70% lack checkpoints, 50% lack failure handling.
+**Recent Completions:**
+- Gallery POC with resizable panels (2026-01-25)
+- 4 granular commits pushed to GitHub
+- Unified sidebar navigation for journeys
+- README & CLAUDE.md maintenance update
 
 **Plan Files:** `~/.claude/plans/`
-- `START-HERE-AFTER-CONTEXT-LOSS.md` - Quick orientation
-- `CONTEXT-RECOVERY-2026-01-10.md` - Full reasoning chain
-- `PHASE-2B-CONTENT-CREATION.md` - Next steps with templates
-- `shiny-finding-pnueli.md` - Master session plan
+- `METHODOLOGY-*.md` - Reusable frameworks for future work
+- `TEMPLATES-HTML-COMPONENTS.md` - Copy-paste ready components
+- `PHASE-3-MASTER-PLAN.md` - HTML generation plan
+- `archive/` - Historical files (17 files)
 
 ---
 
