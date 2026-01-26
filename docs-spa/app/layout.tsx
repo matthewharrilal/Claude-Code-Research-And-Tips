@@ -1,16 +1,23 @@
 import type { Metadata } from 'next'
-import { Inter, Fira_Code } from 'next/font/google'
+import { Inter, JetBrains_Mono } from 'next/font/google'
 import { LazyMotion, domAnimation } from 'framer-motion'
 import './globals.css'
 
+// Inter - Industry standard for technical documentation
+// Excellent readability, substantial weight, used by GitHub/Vercel/Linear
+// Variable font with optical sizing for crisp rendering at all sizes
 const inter = Inter({
-  variable: '--font-inter',
+  variable: '--font-sans',
   subsets: ['latin'],
+  display: 'swap',
 })
 
-const firaCode = Fira_Code({
-  variable: '--font-fira-code',
+// JetBrains Mono - Designed specifically for developers
+// Excellent ligatures and character distinction
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-mono',
   subsets: ['latin'],
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -25,7 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${firaCode.variable} antialiased`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
         <LazyMotion features={domAnimation}>
           {children}
         </LazyMotion>

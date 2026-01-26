@@ -12,9 +12,9 @@ export function ActivityZone() {
   const items = useNavigationStore((s) => s.activityItems)
 
   return (
-    <div className="px-4 py-6">
-      {/* Enhanced header with visual indicator */}
-      <div className="flex items-center gap-2.5 mb-6 pb-4 border-b border-border/50">
+    <div className="px-5 py-8">
+      {/* Enhanced header with visual indicator - generous spacing */}
+      <div className="flex items-center gap-3 mb-8 pb-5 border-b border-border/40">
         <motion.div
           className="flex items-center justify-center w-7 h-7 rounded-lg bg-accent/10"
           animate={{
@@ -38,8 +38,8 @@ export function ActivityZone() {
         </div>
       </div>
 
-      {/* Activity items with staggered animation */}
-      <div className="space-y-4">
+      {/* Activity items - generous spacing for comfortable reading */}
+      <div className="space-y-5">
         <AnimatePresence mode="wait">
           {items.length === 0 ? (
             <motion.div

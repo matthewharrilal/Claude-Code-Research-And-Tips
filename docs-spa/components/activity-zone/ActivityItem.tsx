@@ -81,7 +81,7 @@ export function ActivityItem({
         {/* Inner card content */}
         <div
           className={`
-            relative rounded-[14px] p-4
+            relative rounded-[14px] p-5
             backdrop-blur-sm
             transition-all duration-300
             ${isActive
@@ -90,25 +90,9 @@ export function ActivityItem({
             }
           `}
         >
-          {/* Floating icon badge - the visual anchor */}
-          <motion.div
-            className="absolute -top-1 -right-1 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
-            style={{
-              backgroundColor: config.color,
-              boxShadow: isActive ? `0 4px 20px ${config.color}40` : `0 2px 8px ${config.color}30`,
-            }}
-            animate={{
-              scale: isActive ? 1.1 : 1,
-              rotate: isActive ? -3 : 0,
-            }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          >
-            <Icon className="w-5 h-5 text-white" />
-          </motion.div>
-
           {/* Type label - subtle chip */}
           <div
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3"
+            className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4"
             style={{
               backgroundColor: `${config.color}12`,
               color: config.color,
@@ -120,7 +104,7 @@ export function ActivityItem({
 
           {/* Title - prominent, bold */}
           <h4 className={`
-            font-bold text-[15px] leading-tight mb-2 pr-8
+            font-bold text-[15px] leading-snug mb-4
             ${isActive ? 'text-gray-900' : 'text-gray-700 group-hover:text-gray-900'}
           `}>
             {title}
@@ -130,14 +114,14 @@ export function ActivityItem({
           {htmlContent ? (
             <div
               className={`
-                text-[13px] leading-relaxed activity-item-content
+                text-[13px] leading-[1.85] activity-item-content
                 ${isActive ? 'text-gray-600' : 'text-gray-500'}
               `}
               dangerouslySetInnerHTML={{ __html: htmlContent }}
             />
           ) : children ? (
             <div className={`
-              text-[13px] leading-relaxed
+              text-[13px] leading-[1.85]
               ${isActive ? 'text-gray-600' : 'text-gray-500'}
             `}>
               {children}

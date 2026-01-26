@@ -92,19 +92,19 @@ export function PageSections({ slug }: PageSectionsProps) {
         animate="expanded"
         className="mt-1 mb-2 ml-2 overflow-hidden"
       >
-        {/* Minimal header */}
-        <div className="flex items-center gap-1.5 px-2 py-1.5 mb-1">
-          <div className="w-1 h-1 rounded-full bg-text-muted/40" />
-          <span className="text-[10px] font-medium uppercase tracking-wide text-text-muted/60">
+        {/* Header */}
+        <div className="flex items-center gap-2 px-3 py-2 mb-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-text-muted/50" />
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-text-muted/70">
             On this page
           </span>
-          <span className="text-[9px] text-text-muted/40 ml-auto tabular-nums">
+          <span className="text-[10px] text-text-muted/50 ml-auto tabular-nums">
             {sections.length}
           </span>
         </div>
 
-        {/* Section links - minimal styling */}
-        <div className="space-y-px">
+        {/* Section links */}
+        <div className="space-y-1">
           {sections.map((section, index) => {
             const isActive = activeSection === section.id
 
@@ -126,17 +126,17 @@ export function PageSections({ slug }: PageSectionsProps) {
                 >
                   <div
                     className={`
-                      relative flex items-center gap-2 py-1 px-2 rounded text-[11px] leading-tight
+                      relative flex items-center gap-2.5 py-1.5 px-3 rounded-md text-[12px] leading-snug
                       transition-colors duration-100
                       ${isActive
-                        ? 'text-accent font-medium bg-accent/5'
-                        : 'text-text-muted/70 hover:text-text-secondary'}
+                        ? 'text-accent font-medium bg-accent/8'
+                        : 'text-text-muted/80 hover:text-text-secondary hover:bg-bg-subtle'}
                     `}
                   >
-                    {/* Minimal dot indicator */}
-                    <div className={`w-1 h-1 rounded-full flex-shrink-0 ${isActive ? 'bg-accent' : 'bg-text-muted/30'}`} />
+                    {/* Dot indicator */}
+                    <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 transition-colors ${isActive ? 'bg-accent' : 'bg-text-muted/40 group-hover:bg-text-muted/60'}`} />
 
-                    {/* Section title - allow wrapping for readability */}
+                    {/* Section title */}
                     <span className="line-clamp-2">
                       {section.title}
                     </span>
