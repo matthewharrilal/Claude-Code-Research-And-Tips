@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orchestration Comparison | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Comparison Table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 32px;
+      font-size: 14px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .comparison-table th {
+      background: #f4f4f5;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .comparison-table tr:hover {
+      background: #fafafa;
+    }
+
+    .comparison-table .highlight {
+      background: #ecfdf5;
+      font-weight: 500;
+    }
+
+    /* Approach Card */
+    .approach-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .approach-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .approach-badge {
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    .approach-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .approach-subtitle {
+      font-size: 14px;
+      color: #71717a;
+      margin-bottom: 16px;
+    }
+
+    /* Scaling Path Diagram */
+    .scaling-diagram {
+      background: #18181b;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+      overflow-x: auto;
+    }
+
+    .scaling-diagram pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Pros/Cons Lists */
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    @media (max-width: 600px) {
+      .pros-cons {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pros-list, .cons-list {
+      padding: 16px;
+      border-radius: 8px;
+    }
+
+    .pros-list {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+    }
+
+    .cons-list {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+    }
+
+    .pros-list h4 {
+      color: #166534;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .cons-list h4 {
+      color: #991b1b;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .pros-list li, .cons-list li {
+      font-size: 14px;
+      margin-bottom: 8px;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .pros-list li::before {
+      content: "+";
+      position: absolute;
+      left: 0;
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    .cons-list li::before {
+      content: "-";
+      position: absolute;
+      left: 0;
+      color: #dc2626;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Orchestration Comparison</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">The Decision Framework</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-four-approaches" class="nav-item">Why Four Approaches?</a>
+          <a href="#why-parallelism-matters" class="nav-item">Why Parallelism Matters</a>
+          <a href="#why-cost-varies" class="nav-item">Why Cost Varies</a>
+        </div>
+      </div>
+
+      <!-- The Four Approaches -->
+      <div class="nav-section" data-section="approaches">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>The Four Approaches</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#basic-ralph" class="nav-item">Basic Ralph</a>
+          <a href="#prd-ralph" class="nav-item">PRD-Ralph</a>
+          <a href="#cc-mirror" class="nav-item">CC Mirror</a>
+          <a href="#gas-town" class="nav-item">Gas Town</a>
+        </div>
+      </div>
+
+      <!-- Path of Selection -->
+      <div class="nav-section" data-section="path">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Path of Selection</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#path" class="nav-item">Decision Flow</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Common Mistakes</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Selection Guide</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Four orchestration strategies exist: choose based on parallelism needs, budget, and your complexity tolerance.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Decision Framework
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"The best orchestration approach is the simplest one that meets your needs. Complexity has costs."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Parallelism? No -> Ralph. Yes -> Agents > 5? No -> CC Mirror. Yes -> Gas Town')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Parallelism? No -> Ralph. Yes -> Agents > 5? No -> CC Mirror. Yes -> Gas Town</code>
+          </div>
+
+          <div class="core-anchor">That's the core decision. Everything else is refinement.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          All four approaches share the SAME goal: <strong>ship a complete feature autonomously</strong> from specification to working, tested code with minimal human intervention. They differ in HOW they achieve this goal, with distinct tradeoffs in setup complexity, parallelism capability, and operational overhead.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Factor</th>
+              <th>Basic Ralph</th>
+              <th>PRD-Ralph</th>
+              <th>CC Mirror</th>
+              <th>Gas Town</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Parallelism</strong></td>
+              <td>None</td>
+              <td>None</td>
+              <td>High (3-8)</td>
+              <td>Maximum (10-50+)</td>
+            </tr>
+            <tr>
+              <td><strong>Setup Time</strong></td>
+              <td>30 min</td>
+              <td>2 hrs</td>
+              <td>2 hrs</td>
+              <td>8 hrs</td>
+            </tr>
+            <tr>
+              <td><strong>Daily Cost</strong></td>
+              <td>$5-20</td>
+              <td>$10-30</td>
+              <td>$30-80</td>
+              <td>$50-200</td>
+            </tr>
+            <tr>
+              <td><strong>Learning Curve</strong></td>
+              <td>Low</td>
+              <td>Low</td>
+              <td>Medium</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td><strong>Best For</strong></td>
+              <td>Solo dev, overnight</td>
+              <td>Structured specs</td>
+              <td>Multi-domain</td>
+              <td>Factory scale</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-four-approaches" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY FOUR APPROACHES?</div>
+          <div class="decision-reasoning">
+            Different projects have different constraints. A solo developer shipping overnight has different needs than a team running 10 parallel feature streams. One-size-fits-all orchestration doesn't exist because the tradeoffs are real: simplicity vs. parallelism, cost vs. speed, control vs. automation.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Don't start with Gas Town because it's "most powerful." Start with Basic Ralph, then upgrade only when you hit a specific limitation. Each upgrade brings complexity costs that only pay off at scale.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-parallelism-matters">
+          <div class="decision-why">WHY PARALLELISM MATTERS</div>
+          <div class="decision-reasoning">
+            A single Claude instance can only work on one task at a time. If your feature requires frontend + backend + tests + docs, sequential execution means 4x the calendar time. Parallelism lets multiple agents work different domains simultaneously, but adds coordination overhead.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Measure your bottleneck. If tasks complete faster than you can review, you don't need parallelism. If you're waiting on Claude, consider CC Mirror. If you're shipping multiple features simultaneously, consider Gas Town.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-cost-varies">
+          <div class="decision-why">WHY COST VARIES SO MUCH</div>
+          <div class="decision-reasoning">
+            More agents = more tokens = more cost. Gas Town running 10 agents simultaneously burns through API credits 10x faster than single-agent Ralph. But if Gas Town ships a feature in 1 day that would take Ralph 5 days, the total cost might be similar while calendar time is dramatically different.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Measure cost-per-feature, not cost-per-day. A $200/day Gas Town that ships 5 features beats a $20/day Ralph that ships 1, if you need the throughput. But if you're shipping 1 feature/week, Ralph is 10x more economical.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: THE FOUR APPROACHES -->
+      <section id="basic-ralph" data-activity="approaches">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The Four Approaches
+        </h2>
+
+        <!-- Basic Ralph -->
+        <div class="approach-card">
+          <div class="approach-header">
+            <span class="approach-badge">Level 1</span>
+            <span class="approach-title">Basic Ralph</span>
+          </div>
+          <div class="approach-subtitle">Simple bash loop with fresh context per iteration</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="keyword">for</span> (( i=1; i&lt;=$MAX_ITERATIONS; i++ )); <span class="keyword">do</span>
+  claude <span class="string">"Review prd.json... If complete, output PROMISE COMPLETE HERE"</span>
+  <span class="keyword">if</span> grep -q <span class="string">"PROMISE COMPLETE HERE"</span> output.txt; <span class="keyword">then</span> <span class="keyword">break</span>; <span class="keyword">fi</span>
+<span class="keyword">done</span></pre>
+          </div>
+
+          <div class="pros-cons">
+            <div class="pros-list">
+              <h4>Pros</h4>
+              <ul>
+                <li>Simple to set up (30 min)</li>
+                <li>Low overhead, no infrastructure</li>
+                <li>Easy to understand and debug</li>
+                <li>Fresh context avoids rot</li>
+                <li>Git history as implicit memory</li>
+              </ul>
+            </div>
+            <div class="cons-list">
+              <h4>Cons</h4>
+              <ul>
+                <li>Sequential only, no parallelism</li>
+                <li>Single agent, no specialization</li>
+                <li>Context amnesia between iterations</li>
+                <li>Human must decompose tasks</li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="text-sm text-text-muted mt-4">
+            <strong>Best for:</strong> Solo developers, overnight "ship it while I sleep" workflows, well-scoped features (Stage 1-3)
+          </p>
+        </div>
+
+        <!-- PRD-Ralph -->
+        <div class="approach-card" id="prd-ralph">
+          <div class="approach-header">
+            <span class="approach-badge">Level 2</span>
+            <span class="approach-title">PRD-Driven Ralph</span>
+          </div>
+          <div class="approach-subtitle">Structured task management via JSON-based Product Requirements Document</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre>{
+  <span class="string">"name"</span>: <span class="string">"Authentication System"</span>,
+  <span class="string">"stories"</span>: [
+    {
+      <span class="string">"id"</span>: <span class="string">"story-1"</span>,
+      <span class="string">"title"</span>: <span class="string">"User can register"</span>,
+      <span class="string">"acceptanceCriteria"</span>: [<span class="string">"Email validation"</span>, <span class="string">"Password hashed"</span>],
+      <span class="string">"passes"</span>: <span class="keyword">false</span>,
+      <span class="string">"priority"</span>: 1
+    }
+  ]
+}</pre>
+          </div>
+
+          <div class="pros-cons">
+            <div class="pros-list">
+              <h4>Pros</h4>
+              <ul>
+                <li>Structured tasks with boundaries</li>
+                <li>Acceptance criteria as gates</li>
+                <li>Priority ordering</li>
+                <li>Measurable progress tracking</li>
+                <li>Self-documenting PRD</li>
+              </ul>
+            </div>
+            <div class="cons-list">
+              <h4>Cons</h4>
+              <ul>
+                <li>Upfront PRD writing required</li>
+                <li>PRD quality determines output</li>
+                <li>Still sequential, no parallelism</li>
+                <li>Rigid to emergent requirements</li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="text-sm text-text-muted mt-4">
+            <strong>Best for:</strong> Well-defined features, teams that already write good specs, regulated environments (Stage 3-5)
+          </p>
+        </div>
+
+        <!-- CC Mirror -->
+        <div class="approach-card" id="cc-mirror">
+          <div class="approach-header">
+            <span class="approach-badge">Level 3</span>
+            <span class="approach-title">CC Mirror Hub-and-Spoke</span>
+          </div>
+          <div class="approach-subtitle">Central orchestrator delegates to specialized worker agents via Task API</div>
+
+          <div class="scaling-diagram">
+            <pre>                +-----------------+
+                |  Orchestrator   |
+                |  (Conductor)    |
+                +--------+--------+
+                         |
+         +---------------+---------------+
+         |               |               |
+         v               v               v
+   +-----------+   +-----------+   +-----------+
+   |  Coder    |   |  Tester   |   |  Reviewer |
+   |  (Opus)   |   |  (Sonnet) |   |  (Haiku)  |
+   +-----------+   +-----------+   +-----------+</pre>
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            <strong>Key principle:</strong> The orchestrator NEVER writes code. It only coordinates.
+          </p>
+
+          <div class="pros-cons">
+            <div class="pros-list">
+              <h4>Pros</h4>
+              <ul>
+                <li>True parallelism (3-8 workers)</li>
+                <li>Right model for each task type</li>
+                <li>Cost optimization via model routing</li>
+                <li>Built-in dependency tracking</li>
+                <li>Native Claude Code integration</li>
+              </ul>
+            </div>
+            <div class="cons-list">
+              <h4>Cons</h4>
+              <ul>
+                <li>More complex setup</li>
+                <li>Coordination overhead</li>
+                <li>Needs good task decomposition</li>
+                <li>Workers isolated from each other</li>
+                <li>Merge conflicts possible</li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="text-sm text-text-muted mt-4">
+            <strong>Best for:</strong> Multi-domain features (frontend + backend + tests), cost-optimized model usage, interactive development (Stage 4-6)
+          </p>
+        </div>
+
+        <!-- Gas Town -->
+        <div class="approach-card" id="gas-town">
+          <div class="approach-header">
+            <span class="approach-badge">Level 4</span>
+            <span class="approach-title">Gas Town Factory</span>
+          </div>
+          <div class="approach-subtitle">Self-managing agent factory with specialized workers and inbox coordination</div>
+
+          <div class="scaling-diagram">
+            <pre>Gas Town (~/.gt)
++-- HQ (town-level management)
++-- Rigs (project repos)
+|   +-- Witness (per-rig observer)
++-- Workers
+|   +-- Mayor (town coordination)
+|   +-- Deacon (monitoring/handshakes)
+|   +-- Dogs (quality gates)
+|   +-- Refinery (task decomposition)
+|   +-- Polecat (named persistent workers)
+|   +-- Crew (ephemeral workers)
++-- Overseer (YOU - human with inbox)</pre>
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            <strong>Philosophy:</strong> "You just make up features, design them, file the implementation plans, and sling work around to your polecats and crew."
+          </p>
+
+          <div class="pros-cons">
+            <div class="pros-list">
+              <h4>Pros</h4>
+              <ul>
+                <li>Maximum parallelism (10-50+ agents)</li>
+                <li>Deep specialization per role</li>
+                <li>Self-improving factory</li>
+                <li>Automatic task decomposition</li>
+                <li>Built-in quality gates (Dogs)</li>
+                <li>Persistent workers (Polecats)</li>
+              </ul>
+            </div>
+            <div class="cons-list">
+              <h4>Cons</h4>
+              <ul>
+                <li>Complex setup (8+ hours)</li>
+                <li>High cost ($50-200/day)</li>
+                <li>Overkill for small features</li>
+                <li>Requires extensive experience</li>
+                <li>Hard to debug across agents</li>
+                <li>Tmux proficiency required</li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="text-sm text-text-muted mt-4">
+            <strong>Best for:</strong> Large projects with parallel workstreams, Stage 7+ developers, organizations with significant AI budget
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF SELECTION -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of Selection
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow this decision tree to select the right orchestration approach:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>Do you need parallelism?</strong> (Multiple tasks working simultaneously)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">If NO: Do you have detailed specs? <code>Yes -> PRD-Ralph</code>, <code>No -> Basic Ralph</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">If YES: How many parallel agents do you need?</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><code>3-8 agents</code> -> CC Mirror Hub-and-Spoke</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><code>10+ agents</code> -> Are you Stage 7+ with $50+/day budget?</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">If YES: Gas Town Factory</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">If NO: Stay with CC Mirror, add worktrees for more parallelism</div>
+          </div>
+        </div>
+
+        <div class="scaling-diagram">
+          <pre>   SCALING PROGRESSION
+
+   SIMPLE -----------------------------------------> COMPLEX
+
+   Stage 1-3        Stage 4-5        Stage 6        Stage 7+
+   +---------+     +---------+     +---------+     +-------+
+   | Ralph   |---->|  PRD    |---->|CC Mirror|---->|  Gas  |
+   | (Basic) |     | Ralph   |     |Hub-Spoke|     | Town  |
+   +---------+     +---------+     +---------+     +-------+
+
+   1 agent         1 agent         3-8 agents      10+ agents
+   $5/day          $10/day         $50/day         $150/day</pre>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Common mistakes when selecting and operating orchestration approaches:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Starting with Gas Town
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Spending 2 weeks setting up Gas Town for a 2-day feature</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Assuming "most powerful" = "best choice"</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Start with Basic Ralph. Upgrade only when you hit specific limitations (need parallelism, need cost optimization). Gas Town's setup cost only pays off at factory scale.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Underestimating CC Mirror coordination
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Orchestrator context explodes, workers produce conflicting changes</div>
+          <div class="gotcha-detail"><strong>Threshold:</strong> >8 simultaneous workers typically causes coordination breakdown</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Keep CC Mirror to 3-5 workers per feature. Use dependency blocking. If you need more, consider multiple CC Mirror instances on separate worktrees.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            PRD-Ralph with vague acceptance criteria
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Tasks marked "complete" that aren't actually working</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Acceptance criteria like "authentication works" instead of "POST /login returns JWT"</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Make every acceptance criterion verifiable by automation. If you can't write a test for it, it's not specific enough.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Overnight Ralph with no stuck detection
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Wake up to find Ralph ran 50 iterations on the same failing task</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> No detection for "same task attempted 3+ times with no progress"</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add stuck detection: if git HEAD unchanged for 3 iterations, exit loop and alert. Check for infinite retry loops.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions in orchestration that have no perfect solution:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Simplicity vs. Parallelism
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Simpler approaches (Ralph) are easier to debug but slower. Parallel approaches (Gas Town) are faster but much harder to reason about when things go wrong.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Ralph runs take 5 hours when you need results in 1. Gas Town agents produce conflicts that take 3 hours to untangle.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Accept that parallelism complexity is a one-way door. Only open it when sequential is demonstrably too slow. Build debugging skills at each level before advancing.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost vs. Speed
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More agents = faster results = higher cost. At some point, diminishing returns: 10 agents aren't 10x faster than 5 because coordination overhead dominates.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Gas Town burns $200/day but only ships 2x what CC Mirror would for $50/day.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Measure cost-per-feature, not cost-per-day. Find your saturation point where adding agents no longer improves throughput proportionally.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Upfront Planning vs. Emergent Work
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> PRD-Ralph needs detailed specs upfront. But many features evolve as you build them. Gas Town can adapt, but requires experienced operators.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> PRD written at day 1 is 40% wrong by day 3. Basic Ralph handles pivots but loses velocity gains from structure.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use HOTL (Human On The Loop) variants for exploratory work. Reserve autonomous approaches for features with stable requirements.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          Selection Guide
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              START WITH RALPH WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're new to autonomous development</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Feature is well-scoped and fits in a day</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You want "set it and forget it" overnight</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Budget is constrained ($5-20/day)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simplicity > parallelism for your use case</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              UPGRADE TO CC MIRROR WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="arrow-right" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You need parallelism across domains</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="arrow-right" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Cost optimization matters (right model/task)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="arrow-right" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Features span frontend + backend + tests</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="arrow-right" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You want interactive development with oversight</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              UPGRADE TO GAS TOWN WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're Stage 7+ (10+ agent experience)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Project scale justifies the overhead</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Speed-to-market is critical</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Budget is $50-200/day</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're comfortable with emergence and chaos</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              USE HYBRID STRATEGIES WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="arrow-right" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Ralph + Worktrees:</strong> Parallel features without CC Mirror</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="arrow-right" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>CC Mirror by day, Ralph by night:</strong> Interactive + autonomous</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="arrow-right" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Gas Town + PRD:</strong> Factory scale with structured specs</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mt-8 mb-4">Quick Reference Commands</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Basic Ralph</span>
+./ralph.sh 25
+
+<span class="comment"># PRD-Ralph (same command, different prd.json structure)</span>
+./ralph.sh 25  <span class="comment"># With structured prd.json</span>
+
+<span class="comment"># CC Mirror</span>
+npx cc-mirror quick --provider mirror --name mclaude
+
+<span class="comment"># Gas Town</span>
+go install github.com/steveyegge/gastown/cmd/gt@latest
+gt init  <span class="comment"># Initialize town</span></pre>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if there was ONE "best" approach?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd use:</strong> Gas Town for everything, since it's "most powerful."<br>
+          <strong>Why this fails:</strong> 8 hours setup for a 2-day feature. $200/day budget for $20 of work.<br>
+          <strong>Hidden constraint revealed:</strong> Complexity has real costs. The "best" approach is the simplest that meets your needs.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible decision</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Question:</strong> Do I need parallelism?<br>
+          <strong>If NO:</strong> Ralph (basic or PRD)<br>
+          <strong>If YES:</strong> How many agents? 3-8 = CC Mirror. 10+ = Gas Town.<br>
+          <em>Everything else is refinement.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Matt Pocock: From basic loop to overnight shipping</div>
+        <div class="text-text-secondary text-sm">
+          Started with the simplest possible Ralph. Added PRD structure only when tracking became painful. Never needed Gas Town because his features are solo-dev scale. "The loop is the insight."
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">All four share INV-003: External state > internal memory</div>
+        <div class="text-text-secondary text-sm">
+          Whether Ralph's prd.json, CC Mirror's Task API, or Gas Town's inboxes - all approaches persist state externally because LLM memory is unreliable. The MECHANISM differs, the PRINCIPLE is identical.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Orchestration = Team Structures</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Ralph</strong> = Solo founder (1 person does everything)<br>
+          <strong>PRD-Ralph</strong> = Solo + PM (structured requirements)<br>
+          <strong>CC Mirror</strong> = Small team (5 specialists)<br>
+          <strong>Gas Town</strong> = Full engineering org (50+ people)<br>
+          <em>If you've scaled teams, you already understand the tradeoffs.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint -> four approaches</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Claude instances can't share memory directly<br>
+          -> Need external state for coordination<br>
+          -> More agents = more coordination overhead<br>
+          -> Simpler approaches have less overhead<br>
+          -> "Best" approach depends on whether overhead is justified<br>
+          -> Four approaches exist for four scales of justification
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Setup vs. Velocity Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Fast setup, slow execution:</strong> Ralph (30 min setup, sequential work)<br>
+          <strong>Medium setup, medium execution:</strong> CC Mirror (2 hrs, parallel but limited)<br>
+          <strong>Slow setup, fast execution:</strong> Gas Town (8+ hrs, maximum parallelism)<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> Setup cost amortizes over features. Single feature? Ralph wins. 10 features/week? Gas Town wins.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="decisions">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How coordination fails (invisibly)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>3-5 agents:</strong> Coordination smooth, conflicts rare<br>
+          <strong>6-8 agents:</strong> Occasional conflicts, manageable<br>
+          <strong>9-12 agents:</strong> Frequent conflicts, orchestrator context bloats<br>
+          <strong>13+ agents:</strong> Coordination overhead > work done<br><br>
+          <em>Critical: The gradient is invisible until coordination collapses.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your orchestration understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Which approach should I use?"<br>
+          -> Start with Basic Ralph, upgrade when limited<br>
+          <strong>Intermediate:</strong> "Why do costs vary so much?"<br>
+          -> More agents = more tokens = higher cost<br>
+          <strong>Advanced:</strong> "When is Gas Town actually worth it?"<br>
+          -> Only when you're shipping 5+ features/week<br>
+          <strong>Staff:</strong> "How do I measure saturation point?"<br>
+          -> Track cost-per-feature, not cost-per-day
+        </div>
+      </div>
+
+      <!-- APPROACHES SECTION -->
+      <div class="activity-item composition" data-section="approaches">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph + Git Worktrees</div>
+        <div class="text-text-secondary text-sm">
+          <strong>WORKS:</strong> Run multiple Ralph loops in parallel on separate worktrees. Get parallelism without CC Mirror complexity.<br>
+          <strong>THE CATCH:</strong> No coordination between loops. Works for independent features, fails for interdependent ones.<br>
+          <strong>RECOMMENDATION:</strong> Use when you have 3 independent features. Skip if features share code.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="approaches">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror + Day/Night Split</div>
+        <div class="text-text-secondary text-sm">
+          <strong>WORKS:</strong> Interactive CC Mirror during day (oversight), autonomous Ralph overnight (execution).<br>
+          <strong>WHY:</strong> Get human judgment for tricky decisions, unattended execution for clear tasks.<br>
+          <strong>THE CATCH:</strong> Requires good handoff discipline. Morning context reconstruction takes 15-30 min.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="approaches">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Steve Yegge: Building Gas Town itself</div>
+        <div class="text-text-secondary text-sm">
+          Built Gas Town using Gas Town. The factory built the factory. "You need to already be comfortable with 10+ agents before Gas Town makes sense. If CC Mirror feels chaotic, you're not ready."
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="approaches">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">All four share INV-001: Fresh context > extended session</div>
+        <div class="text-text-secondary text-sm">
+          Ralph restarts per iteration. CC Mirror gives workers fresh context per task. Gas Town Crew workers are ephemeral. Even Polecats get context refreshed on handoffs. The mechanism differs, the principle is constant.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="approaches">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How orchestration perception changes</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Week 1:</strong> "Ralph is so slow, I need Gas Town"<br>
+          <strong>Week 2:</strong> "Gas Town setup is taking forever"<br>
+          <strong>Week 3:</strong> "CC Mirror is the sweet spot"<br>
+          <strong>Month 3:</strong> "The right tool depends on the job"<br><br>
+          <em>Don't judge by week 1 feelings.</em>
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you start with Gas Town</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Start with Gas Town for first autonomous feature<br>
+          <strong>THEN:</strong> 8+ hours spent on setup<br>
+          <strong>THEN:</strong> Confusion about agent roles and inboxes<br>
+          <strong>THEN:</strong> Debug cycles take 3x longer (many moving parts)<br>
+          <strong>FINALLY:</strong> Abandon Gas Town, start over with Ralph<br><br>
+          <strong>THE FIX:</strong> Master Ralph first. Gas Town is for Stage 7+.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="path">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you skipped CC Mirror entirely?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd do:</strong> Ralph for small -> Gas Town for big, nothing in between.<br>
+          <strong>Why this fails:</strong> Huge jump in complexity. CC Mirror teaches multi-agent coordination at manageable scale.<br>
+          <strong>Hidden value:</strong> CC Mirror is the training wheels for Gas Town.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="path">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Scaling Path = Startup Growth Stages</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Ralph</strong> = Pre-seed (founder does everything)<br>
+          <strong>PRD-Ralph</strong> = Seed (founder + process)<br>
+          <strong>CC Mirror</strong> = Series A (small team, clear roles)<br>
+          <strong>Gas Town</strong> = Series C (departments, managers, process)<br>
+          <em>Skip stages at your peril.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When parallelism becomes necessary</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1 feature/week:</strong> Sequential Ralph is fine<br>
+          <strong>2-3 features/week:</strong> Starting to feel slow<br>
+          <strong>3-5 features/week:</strong> CC Mirror pays off<br>
+          <strong>5+ features/week:</strong> Gas Town territory<br><br>
+          <strong>THE INFLECTION:</strong> ~3 features/week<br>
+          <strong>DETECTION:</strong> You're context-switching more than coding? Time to parallelize.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At 10+ agents, debugging dominates</div>
+        <div class="text-text-secondary text-sm">
+          With 10 agents, any bug could come from 10 sources. Finding root cause takes 10x longer. Gas Town's complexity only pays off when features ship faster than debugging time.
+          <br><br>
+          <strong>THRESHOLD:</strong> If debugging takes >30% of your time, you have too many agents.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="gotchas">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If PRD acceptance criteria are vague</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Criteria like "authentication works"<br>
+          <strong>THEN:</strong> Claude marks task done with broken auth<br>
+          <strong>THEN:</strong> Next task builds on broken foundation<br>
+          <strong>THEN:</strong> Entire feature is unstable<br>
+          <strong>FINALLY:</strong> Morning reveals a chain of broken commits<br><br>
+          <strong>THE FIX:</strong> "POST /login returns 200 + JWT in body" - testable, specific
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Simplicity vs. Parallelism Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE DILEMMA:</strong><br>
+          - Simple (Ralph): Easy debug, but slow<br>
+          - Parallel (CC Mirror): Faster, but coordination overhead<br>
+          - Maximum (Gas Town): Fastest, but chaos potential<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> Coordination overhead is non-linear. 2 agents = 1 coordination. 10 agents = 45 potential coordinations (n*(n-1)/2).<br><br>
+          <strong>HEURISTIC:</strong> Stay as simple as possible until sequential is demonstrably too slow.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Automatic approach selection</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE QUESTION:</strong> Can we automatically select orchestration approach based on feature characteristics?<br>
+          <strong>WHY IT'S HARD:</strong> Feature complexity is hard to measure. Dependencies are discovered during work. Human judgment still required.<br>
+          <strong>CURRENT:</strong> Manual selection based on experience. No automation yet.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Understanding the hard parts</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Why is CC Mirror harder than Ralph?"<br>
+          -> More moving parts to debug<br>
+          <strong>Intermediate:</strong> "Why does Gas Town cost so much?"<br>
+          -> 10 agents = 10x tokens<br>
+          <strong>Advanced:</strong> "When does parallelism stop helping?"<br>
+          -> When coordination overhead > work done<br>
+          <strong>Staff:</strong> "How do I know I've hit saturation?"<br>
+          -> Cost-per-feature stops decreasing with more agents
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Molly Cantillon: Personal Panopticon</div>
+        <div class="text-text-secondary text-sm">
+          Runs 8 parallel Claude instances managing different life domains. Not Gas Town, not CC Mirror - custom coordination via email-like inboxes. "The hard part isn't the tech. It's deciding what to delegate."
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If these four don't fit</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need human gates?</strong> -> HOTL Ralph (human-on-the-loop variant)<br>
+          <strong>Need content, not code?</strong> -> Ralph Wiggum Marketer<br>
+          <strong>Need exploration?</strong> -> Single Claude session with human<br>
+          <strong>Need debugging?</strong> -> Interactive session, not autonomous loop
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you always used PRD-Ralph?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd do:</strong> Write detailed PRD for every feature, even quick fixes.<br>
+          <strong>Why this fails:</strong> 2-hour PRD for a 30-minute fix. Overhead dominates small tasks.<br>
+          <strong>Hidden constraint:</strong> PRD overhead must be < 50% of task time to be worthwhile.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How selection judgment evolves</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Month 1:</strong> "I need the most powerful approach"<br>
+          <strong>Month 2:</strong> "Powerful = complex = more debugging"<br>
+          <strong>Month 3:</strong> "Simple that works > complex that doesn't"<br>
+          <strong>Month 6:</strong> "Right tool for the job, every time"<br><br>
+          <em>Wisdom is matching approach to need, not maximizing capability.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Budget constraint -> approach choice</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Budget is $20/day<br>
+          -> Gas Town ($150/day) is impossible<br>
+          -> CC Mirror ($50/day) is borderline<br>
+          -> Ralph ($10/day) is comfortable<br>
+          -> PRD-Ralph adds structure without cost increase<br>
+          -> Best choice: PRD-Ralph with worktrees for limited parallelism
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="when">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How wrong approach choice degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "Gas Town setup taking longer than expected"<br>
+          <strong>Day 2:</strong> "Still configuring, no features shipped"<br>
+          <strong>Day 3:</strong> "Finally running, but agents confused"<br>
+          <strong>Day 4:</strong> "Debugging agent coordination issues"<br>
+          <strong>Day 5:</strong> "Feature would have shipped in Day 1 with Ralph"<br><br>
+          <em>Overly complex approach fails slowly, then all at once.</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block, .scaling-diagram');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

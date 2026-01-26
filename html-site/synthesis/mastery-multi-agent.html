@@ -1,0 +1,2266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Agent Architecture | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Architecture Comparison Table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+      font-size: 14px;
+    }
+
+    .comparison-table th {
+      background: #f4f4f5;
+      font-weight: 600;
+      color: #3f3f46;
+    }
+
+    .comparison-table tr:hover {
+      background: #fafafa;
+    }
+
+    /* Hierarchy Diagram */
+    .hierarchy-box {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #e4e4e7;
+      overflow-x: auto;
+      white-space: pre;
+      line-height: 1.5;
+    }
+
+    /* Role Card */
+    .role-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .role-name {
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 8px;
+    }
+
+    .role-function {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    /* Checkpoint Box */
+    .checkpoint-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #10b981;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .checkpoint-title {
+      font-weight: 600;
+      color: #166534;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid #3b82f6;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .info-title {
+      font-weight: 600;
+      color: #1e40af;
+      margin-bottom: 8px;
+    }
+
+    .info-content {
+      font-size: 14px;
+      color: #1e3a8a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Multi-Agent Architecture</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The Iron Law</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">Worker Separation</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-orchestrators" class="nav-item">Why Orchestrators?</a>
+          <a href="#why-tool-ownership" class="nav-item">Why Tool Ownership?</a>
+          <a href="#why-worker-preamble" class="nav-item">Why Worker Preamble?</a>
+        </div>
+      </div>
+
+      <!-- Architecture Comparison -->
+      <div class="nav-section" data-section="architectures">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Architectures</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#cc-mirror" class="nav-item">CC Mirror</a>
+          <a href="#gas-town" class="nav-item">Gas Town</a>
+          <a href="#ralph-loop" class="nav-item">Ralph Loop</a>
+          <a href="#worktrees" class="nav-item">Git Worktrees</a>
+        </div>
+      </div>
+
+      <!-- Path of a Task -->
+      <div class="nav-section" data-section="path">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="workflow" class="w-4 h-4"></i>
+          <span>Task Path</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#path" class="nav-item">The Flow</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Common Pitfalls</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Selection Guide</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Orchestrators coordinate. Workers execute. Never mix. This is the iron law of multi-agent architecture.</div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">Note: This Document's Status</div>
+          <div class="info-content">
+            This document provides a comprehensive overview of multi-agent patterns. For production implementations, see the specific deep-dive documents:
+            <code>multi-agent-cc-mirror-complete.md</code> for CC Mirror and <code>ralph-ecosystem-complete.md</code> for Ralph patterns.
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"You are the CONDUCTOR. Your agents play the instruments."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'ORCHESTRATORS COORDINATE. WORKERS EXECUTE. NEVER MIX.')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>ORCHESTRATORS COORDINATE. WORKERS EXECUTE. NEVER MIX.</code>
+          </div>
+
+          <div class="core-anchor">Violating this causes worker recursion, context explosion, and coordination failures.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          This is the foundational principle of ALL multi-agent architecture. The orchestrator decomposes tasks, assigns workers, tracks progress, and synthesizes results. Workers execute specific tasks using tools and report results. Workers NEVER spawn sub-agents or manage task graphs.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">The Separation in Practice</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>What They Do</th>
+              <th>What They DON'T Do</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Orchestrator</strong></td>
+              <td>Decompose tasks, assign workers, track progress, synthesize results</td>
+              <td>Write code, run commands, explore codebases</td>
+            </tr>
+            <tr>
+              <td><strong>Workers</strong></td>
+              <td>Execute specific tasks using tools, report results</td>
+              <td>Spawn sub-agents, manage task graphs, make architectural decisions</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Tool Ownership</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># ORCHESTRATOR uses directly:</span>
+Read (references, guides, agent outputs - 1-2 files max)
+TaskCreate, TaskUpdate, TaskGet, TaskList
+AskUserQuestion
+Task (to spawn workers)
+
+<span class="comment"># WORKERS use directly:</span>
+Read, Write, Edit, Bash
+Glob, Grep, WebFetch, WebSearch, LSP
+<span class="comment"># CAN'T: Spawn sub-agents or manage task graph</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-orchestrators" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY ORCHESTRATORS?</div>
+          <div class="decision-reasoning">
+            Without a central coordinator, agents make conflicting decisions. Two agents might edit the same file, implement overlapping features, or build incompatible interfaces. The orchestrator provides a single source of truth for what's being worked on.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Your orchestrator MUST track all task state. If you can't query the orchestrator for "what's in progress?", you've violated separation. The orchestrator is your project management layer.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-tool-ownership">
+          <div class="decision-why">WHY TOOL OWNERSHIP MATTERS?</div>
+          <div class="decision-reasoning">
+            If workers can spawn sub-agents, you get infinite recursion. Worker A spawns Worker B which spawns Worker C... each consuming context and API credits. The recursion is invisible until your bill arrives. Workers using orchestrator tools is like employees hiring other employees without HR approval.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Enforce tool boundaries in your worker preamble. Explicitly list what tools workers CAN use and what they CAN'T. Never give workers access to TaskCreate or Task tools.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-worker-preamble">
+          <div class="decision-why">WHY WORKER PREAMBLE?</div>
+          <div class="decision-reasoning">
+            LLMs follow instructions, but they also try to be helpful. Without explicit constraints, a worker asked to "implement auth" might decide to "helpfully" also implement the database, the API, and spawn sub-agents to do it faster. The preamble establishes the worker's sandbox.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Every worker MUST receive the preamble template. Don't assume workers know their constraints. State them explicitly every time.
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">The Worker Preamble Template</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>CONTEXT: You are a WORKER agent, not an orchestrator.
+
+RULES:
+- Complete ONLY the task described below
+- Use tools directly (Read, Write, Edit, Bash, etc.)
+- Do NOT spawn sub-agents
+- Do NOT call TaskCreate or TaskUpdate
+- Report your results with absolute file paths
+
+TASK:
+[Your specific task here]</pre>
+        </div>
+      </section>
+
+      <!-- Section 4: ARCHITECTURE COMPARISON -->
+      <section id="architectures" data-activity="architectures">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Architecture Comparison
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Four major multi-agent architectures exist in the Claude Code ecosystem. Each solves different problems at different scales.
+        </p>
+
+        <div class="hierarchy-box">SIMPLE <-----------------------------------------> COMPLEX
+
+[Ralph Loop]    [CC Mirror]    [Worktrees]    [Gas Town]
+     |               |              |              |
+Single agent    Multi-agent    Parallel       Agent factory
+Retry loop      Task-based     Isolation      Role-based
+Bash script     Native CC      Git-native     Full system</div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="cc-mirror">CC Mirror (Hub-and-Spoke)</h3>
+
+        <p class="text-text-secondary mb-4">
+          <strong>Source:</strong> @nummanali (Numman Ali) | <strong>Repo:</strong> github.com/numman-ali/cc-mirror
+        </p>
+
+        <p class="text-text-secondary mb-4">
+          CC Mirror unlocks Claude Code's disabled native multi-agent orchestration in an isolated environment. It exposes hidden task management primitives (TaskCreate, TaskList, TaskUpdate).
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Quick setup (3 commands)</span>
+npx cc-mirror quick --provider mirror --name mclaude
+mclaude
+<span class="string">"Load the orchestration skill and initiate"</span>
+
+<span class="comment"># Task management (within session)</span>
+TaskCreate <span class="string">"subject"</span>, <span class="string">"description"</span>, [<span class="string">"criteria"</span>]
+TaskList status=<span class="string">'open'</span>
+TaskUpdate id, addBlocks=[<span class="string">"other-id"</span>]</pre>
+        </div>
+
+        <div class="checkpoint-box">
+          <div class="checkpoint-title">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            Checkpoint: After CC Mirror Setup
+          </div>
+          <div class="text-sm text-green-800">
+            <strong>Verify:</strong> <code>which mclaude</code> should show path. In mclaude session, ask "List available task management commands" - should mention TaskCreate, TaskList, TaskGet, TaskUpdate.
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="gas-town">Gas Town (Agent Factory)</h3>
+
+        <p class="text-text-secondary mb-4">
+          <strong>Source:</strong> @steve_yegge (Steve Yegge) | <strong>Repo:</strong> github.com/steveyegge/gastown
+        </p>
+
+        <p class="text-text-secondary mb-4">
+          Gas Town is a <em>factory for agents</em>, not a better single agent. Designed for Stage 7+ developers running 10+ agents with hand management. "Claude Code is the world's biggest fuckin' ant. Everyone is focused on making their ant run longer... when nature prefers colonies."
+        </p>
+
+        <div class="hierarchy-box">+===============================================================+
+|                      GAS TOWN HIERARCHY                        |
++===============================================================+
+|                                                                |
+|  TOWN LEVEL (Global)                                           |
+|  +---------+  +---------+  +---------+                        |
+|  |  MAYOR  |  | DEACON  |  |  DOGS   |                        |
+|  |  coord  |  | monitor |  |  gates  |                        |
+|  +---------+  +---------+  +---------+                        |
+|       |                                                        |
+|       v                                                        |
+|  RIG LEVEL (Per-Project)                                       |
+|  +----------+  +----------+  +----------+                     |
+|  | REFINERY |  | WITNESS  |  | POLECAT  |                     |
+|  | decompose|  | observe  |  |  named   |                     |
+|  +----------+  +----------+  +----------+                     |
+|                                   |                            |
+|                                   v                            |
+|                             +----------+                       |
+|                             |   CREW   |                       |
+|                             |ephemeral |                       |
+|                             +----------+                       |
+|                                                                |
+|  HUMAN LEVEL                                                   |
+|  +-------------------------------------------+                |
+|  |               OVERSEER (YOU)               |                |
+|  |  Product Manager - Decision Maker - Boss   |                |
+|  +-------------------------------------------+                |
++===============================================================+</div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Installation</span>
+go install github.com/steveyegge/gastown/cmd/gt@latest
+
+<span class="comment"># Initialize and add rig</span>
+gt init
+gt rig add /path/to/repo
+
+<span class="comment"># Launch roles</span>
+gt mayor up
+gt refinery up beads
+gt polecat up beads alice</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="ralph-loop">Ralph Wiggum Loop (Iterative)</h3>
+
+        <p class="text-text-secondary mb-4">
+          <strong>Source:</strong> Geoffrey Huntley, popularized by @mattpocockuk, @ryancarson
+        </p>
+
+        <p class="text-text-secondary mb-4">
+          A bash loop that runs Claude Code repeatedly with fresh context until completion. NOT multi-agent in the traditional sense, but achieves autonomous overnight development through iteration.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this, 'while :; do cat PROMPT.md | claude ; done')">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># The core pattern</span>
+<span class="keyword">while</span> :; <span class="keyword">do</span> cat PROMPT.md | claude ; <span class="keyword">done</span>
+
+<span class="comment"># Official plugin version</span>
+/ralph-loop <span class="string">"Build REST API"</span> --completion-promise <span class="string">"COMPLETE"</span> --max-iterations 50</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="worktrees">Git Worktrees (Parallel Isolation)</h3>
+
+        <p class="text-text-secondary mb-4">
+          Running separate Claude instances in isolated git worktrees, each working on independent features that merge via standard git workflow.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Create worktrees for parallel work</span>
+git worktree add ../feature-auth feature-auth
+git worktree add ../feature-payments feature-payments
+
+<span class="comment"># Agent 1 in main checkout</span>
+cd ~/project && claude
+
+<span class="comment"># Agent 2 in worktree (separate terminal)</span>
+cd ../feature-auth && claude
+
+<span class="comment"># Merge when complete</span>
+git merge feature-auth feature-payments</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Quick Comparison Matrix</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Architecture</th>
+              <th>Setup</th>
+              <th>Cost</th>
+              <th>Parallelism</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ralph Loop</strong></td>
+              <td>5 min</td>
+              <td>$</td>
+              <td>None (serial)</td>
+              <td>Overnight builds</td>
+            </tr>
+            <tr>
+              <td><strong>CC Mirror</strong></td>
+              <td>5 min</td>
+              <td>$$</td>
+              <td>Native</td>
+              <td>80% of projects</td>
+            </tr>
+            <tr>
+              <td><strong>Worktrees</strong></td>
+              <td>10 min</td>
+              <td>$$$</td>
+              <td>Full isolation</td>
+              <td>Parallel features</td>
+            </tr>
+            <tr>
+              <td><strong>Gas Town</strong></td>
+              <td>Days</td>
+              <td>$$$$</td>
+              <td>Full factory</td>
+              <td>Stage 7+ scale</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Task (CC Mirror)
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a task through the CC Mirror system to see orchestration in action:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">Orchestrator receives high-level goal: <code>"Build user authentication"</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Orchestrator decomposes into tasks with <code>TaskCreate</code>: "Add users table", "Add auth middleware", "Add login form"</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Orchestrator sets dependencies with <code>addBlocks</code>/<code>addBlockedBy</code>: Login form blocked by middleware</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Orchestrator spawns worker for first unblocked task with <code>Task</code> tool</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Worker receives preamble + task description, begins implementation</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">Worker uses <code>Read</code>, <code>Write</code>, <code>Edit</code>, <code>Bash</code> to complete task</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Worker runs verification: <code>npm run typecheck && npm test</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Worker reports completion with file paths modified, key decisions made</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">Orchestrator marks task done with <code>TaskUpdate</code>, checks for unblocked tasks</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">Orchestrator spawns next worker for newly-unblocked task</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">11</div>
+            <div class="path-content">Repeat until <code>TaskList status='open'</code> returns empty</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">12</div>
+            <div class="path-content">Orchestrator synthesizes results and reports to human</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit in multi-agent systems, with concrete symptoms and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Worker Recursion
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Infinite agent spawning, runaway costs, API bills >$500 for simple features</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Workers not properly restricted from spawning sub-agents</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Always use the worker preamble template with explicit "Do NOT spawn sub-agents" rule</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Context Explosion
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Orchestrator gets "stupider" over time, loses track of goals, forgets early instructions</div>
+          <div class="gotcha-detail"><strong>Threshold:</strong> ~80K tokens context rot begins, quality cliff at 100K+</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Workers return summaries only. Orchestrator stays lean. Use <code>/compact</code> when needed.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Coordination Failures
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Conflicting edits, lost work, race conditions, two agents modifying same file</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Multiple agents touching same files without locking mechanism</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use git worktrees for isolation, OR implement file ownership per agent ("Worker 1: only touch src/api/")</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Dependency Inversion
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent tries to build UI before schema exists, features built on broken foundations</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Wrong task ordering in decomposition</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Always order: Schema -> Backend -> Frontend. Explicit <code>addBlockedBy</code> for every dependency.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Verification Bypass
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Complete" features that don't work, tests pass but functionality broken</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> No verification in acceptance criteria, or verification that doesn't actually test the right thing</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Always include <code>npm run typecheck passes</code>, add Playwright for UI verification</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Model Mismatch
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Expensive failures on simple tasks, weak output on complex tasks</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Using Opus for grep, Haiku for architecture decisions</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Match model to task: Haiku for file lookup, Sonnet for implementation, Opus for architecture</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions in multi-agent systems, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Coordination Overhead vs. Parallelism Benefit
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More agents = more parallelism but also more coordination cost. The orchestrator's context fills with status updates, task handoffs, and result synthesis. At some point, coordination cost exceeds parallelism benefit.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Adding more agents doesn't speed things up. Orchestrator becomes bottleneck. Tasks complete but integration fails.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start with 2-3 agents. Add incrementally. Measure if throughput actually increases. Sometimes sequential is faster.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Task Granularity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Too-small tasks have high overhead (spawning, context loading, result synthesis). Too-large tasks overflow worker context or produce unverifiable outputs.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Small tasks: workers spend more time loading context than working. Large tasks: workers lose track mid-task, produce broken code.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Rule of thumb: If description is longer than implementation, task is too small. If task can't be verified in one step, task is too large. Aim for 15-45 minute worker sessions.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost Unpredictability
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Multi-agent systems have non-linear cost scaling. One stuck task can trigger retry loops. One misconfigured worker can spawn infinite sub-agents. Costs can explode overnight.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> $500 bills for simple features. No correlation between work done and cost incurred.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Set hard limits: max-iterations on Ralph, crew.max_per_rig on Gas Town. Monitor token usage. Use Haiku for routine tasks. Review overnight runs in morning before approving more.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            No Standardized Protocol
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> CC Mirror, Gas Town, and custom solutions all have different task management APIs. Skills learned in one don't transfer to another. No interoperability.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Starting over when switching architectures. Incompatible tooling. Community fragmentation.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Choose one architecture and invest deeply. Learn the principles (separation, external state) which transfer even when APIs don't.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE MULTI-AGENT WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Tasks are parallelizable (independent features that don't share files)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're at Stage 5+ (comfortable with CLI Claude, YOLO mode)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Project is large enough that single-agent would take days</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You have budget for 2-10x single-agent cost</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Verification is automatable (tests, typecheck, linting)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE MULTI-AGENT WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Stage 1-4 developer (learn single-agent first, or "get face ripped off by chimpanzees")</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Small feature that fits in single session (orchestration overhead not worth it)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Highly coupled codebase (agents will conflict on shared files)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Cost-constrained project (multi-agent is expensive)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need guaranteed stability (community tools are beta)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Architecture Selection Decision Tree</h3>
+
+        <div class="code-block">
+          <pre><span class="comment"># What's your experience level?</span>
+
+Stage 1-4 (Single agent in IDE)
+    -> STOP. Use single Claude Code. Learn the basics first.
+
+Stage 5 (CLI single agent, YOLO)
+    |
+    +-- Want overnight autonomous work?
+    |   -> <span class="string">Ralph Wiggum Loop</span>
+    |
+    +-- Want quick multi-agent test?
+        -> <span class="string">CC Mirror</span> (3 commands, done)
+
+Stage 6 (3-5 parallel agents)
+    |
+    +-- Need task dependencies?
+    |   -> <span class="string">CC Mirror Native Orchestration</span>
+    |
+    +-- Building a product?
+        -> <span class="string">Ralph + Playwright</span>
+
+Stage 7+ (10+ agents, hand-managed)
+    |
+    +-- Cost-sensitive?
+    |   -> <span class="string">Enhanced Ralph with Haiku workers</span>
+    |
+    +-- Want structure + chaos tolerance?
+        -> <span class="string">GAS TOWN</span></pre>
+        </div>
+
+        <div class="info-box mt-8">
+          <div class="info-title">The 80/20 Rule</div>
+          <div class="info-content">
+            "CC Mirror covers 80% of use cases with zero effort. Gas Town for the remaining 20%." -- @nummanali
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ==================== ESSENCE SECTION ==================== -->
+
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if workers COULD spawn sub-agents?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Fully autonomous agents that delegate recursively.<br>
+          <strong>Why this fails:</strong> Infinite recursion. Worker A spawns B spawns C spawns D... each consuming context and credits.<br>
+          <strong>Hidden constraint revealed:</strong> Hierarchy requires explicit boundaries. "Helpful" autonomy becomes runaway chaos.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible multi-agent core</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">Orchestrator + Worker Preamble + Separation</code><br>
+          <strong>Essential:</strong> Central coordinator. Explicit worker boundaries.<br>
+          <strong>Everything else:</strong> Tooling for scale (CC Mirror, Gas Town) or reliability (worktrees).
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Steve Yegge: $4K/month, 10+ agents</div>
+        <div class="text-text-secondary text-sm">
+          "Claude Code is the world's biggest fuckin' ant. Everyone is focused on making their ant run longer... when nature prefers colonies." Built Gas Town because single-agent at scale is wrong abstraction.
+        </div>
+      </div>
+
+      <!-- ==================== CORE SECTION ==================== -->
+
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint -> FIVE decisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> LLMs are helpful → Will do more than asked if not constrained<br>
+          -> Must explicitly state worker boundaries<br>
+          -> Must separate orchestrator and worker roles<br>
+          -> Must restrict tool access per role<br>
+          -> Must use preamble template every time<br>
+          -> Must verify workers report, not decide
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Multi-Agent = Microservices Architecture</div>
+        <div class="text-text-secondary text-sm">
+          Orchestrator -> API Gateway / Service Mesh<br>
+          Workers -> Individual microservices<br>
+          Tool ownership -> Service boundaries<br>
+          Worker preamble -> Service contract<br>
+          Task dependencies -> Event-driven choreography<br><br>
+          <em>If you've designed microservices, you understand multi-agent.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror, Gas Town, Ralph all share INV-001</div>
+        <div class="text-text-secondary text-sm">
+          <strong>INV-001:</strong> Separation of coordination and execution.<br>
+          The pattern that works at 2 agents works at 20. The pattern that fails at 2 fails catastrophically at 20.
+        </div>
+      </div>
+
+      <!-- ==================== DECISIONS SECTION ==================== -->
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip the worker preamble</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Worker doesn't receive explicit boundaries<br>
+          <strong>THEN:</strong> Worker tries to be "helpful" - spawns sub-agents<br>
+          <strong>THEN:</strong> Sub-agents spawn their own sub-agents<br>
+          <strong>THEN:</strong> Infinite recursion, context explosion, API credits drain<br>
+          <strong>FINALLY:</strong> Morning reveals $500+ bill for simple feature<br><br>
+          <em>The fix: Preamble EVERY worker, EVERY time. No exceptions.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Worker Autonomy vs. Control</div>
+        <div class="text-text-secondary text-sm">
+          <strong>High autonomy:</strong> Workers can "figure it out," but may go off-rails<br>
+          <strong>Low autonomy:</strong> Predictable but orchestrator becomes bottleneck<br>
+          <strong>Medium:</strong> Balanced, but requires careful preamble design<br><br>
+          <strong>Heuristic:</strong> Start with maximum constraint, loosen only when stuck.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What's an orchestrator?" -> The coordinator<br>
+          <strong>Intermediate:</strong> "Why separate roles?" -> Prevent recursion<br>
+          <strong>Advanced:</strong> "When to use which model?" -> Match to task complexity<br>
+          <strong>Staff:</strong> "How to handle coordination overhead?" -> Lean orchestrator context<br>
+          <strong>Expert:</strong> "Cross-pattern adaptation?" -> Gas Town roles = CC Mirror tasks
+        </div>
+      </div>
+
+      <!-- ==================== ARCHITECTURES SECTION ==================== -->
+
+      <div class="activity-item gradient" data-section="architectures">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How multi-agent systems degrade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>2-3 agents:</strong> Clean coordination, clear ownership<br>
+          <strong>4-6 agents:</strong> Orchestrator context fills, decisions slow<br>
+          <strong>7-10 agents:</strong> Coordination overhead rivals execution time<br>
+          <strong>10+ agents:</strong> Without Gas Town, chaos. Conflicts, lost work.<br><br>
+          <em>Critical: The gradient is invisible until you hit 6+ agents.</em>
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="architectures">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror + Git Worktrees</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Yes, powerfully.<br>
+          <strong>Why it works:</strong> CC Mirror coordinates tasks. Worktrees isolate file systems. No conflicts.<br>
+          <strong>The benefit:</strong> True parallelism with dependency management.<br>
+          <strong>Recommendation:</strong> Use for parallel feature development with shared orchestrator.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="architectures">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Numman Ali: "80% of use cases"</div>
+        <div class="text-text-secondary text-sm">
+          Built CC Mirror because native orchestration was there but disabled. 3 commands to unlock. "80% of use cases with zero effort." Gas Town for the remaining 20% who need factory scale.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="architectures">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How architecture perception evolves</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Week 1:</strong> "CC Mirror seems easier than Gas Town"<br>
+          <strong>Week 2:</strong> "CC Mirror handles everything I need"<br>
+          <strong>Month 2:</strong> "I'm managing 8 agents manually, this is chaos"<br>
+          <strong>Month 3:</strong> "Gas Town's roles suddenly make sense"<br><br>
+          <em>Don't judge architecture by week 1 impressions.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="architectures">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At 10+ agents, model selection dominates cost</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IMPLICATION:</strong> At scale, using Opus for file lookups becomes $15-20/hour waste. Haiku for routine = $1-3/hour.<br>
+          <strong>THRESHOLD:</strong> 10+ agents, multi-hour runs<br>
+          <strong>Budget formula:</strong> Mayor/Refinery (Opus) + Polecats (Sonnet) + Crew (Haiku)
+        </div>
+      </div>
+
+      <!-- ==================== PATH SECTION ==================== -->
+
+      <div class="activity-item inversion" data-section="path">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if there were no task dependencies?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> All tasks in parallel, maximum throughput.<br>
+          <strong>Why this fails:</strong> UI needs backend. Backend needs schema. Login needs auth middleware.<br>
+          <strong>Hidden constraint:</strong> Code has implicit dependencies. Task graph makes them explicit.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip dependency management (Step 3)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip <code>addBlockedBy</code> declarations<br>
+          <strong>THEN:</strong> Worker starts UI before backend exists<br>
+          <strong>THEN:</strong> UI makes up API contract, backend implements different one<br>
+          <strong>THEN:</strong> Integration fails, both need rewrite<br>
+          <strong>FINALLY:</strong> 2x work, worse than sequential<br><br>
+          <em>The fix: Schema -> Backend -> Frontend. Always.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="path">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Cross-Pattern Equivalence
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror tasks = Gas Town roles</div>
+        <div class="text-text-secondary text-sm">
+          <strong>TaskCreate</strong> = Filing work for Refinery<br>
+          <strong>TaskList status='open'</strong> = Checking Polecat availability<br>
+          <strong>addBlockedBy</strong> = Dogs quality gates<br>
+          <strong>Worker completion</strong> = Polecat reporting to Mayor
+        </div>
+      </div>
+
+      <!-- ==================== GOTCHAS SECTION ==================== -->
+
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When orchestrator context flips from help to hurt</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-40K tokens:</strong> Pure benefit (clear state)<br>
+          <strong>40-60K:</strong> Diminishing returns (more to process)<br>
+          <strong>60-80K:</strong> Neutral (coordination cost = benefit)<br>
+          <strong>80K+:</strong> Net negative (context rot begins)<br><br>
+          <strong>THE INFLECTION:</strong> ~60K tokens<br>
+          <em>Detection: Orchestrator forgetting tasks? Check context size.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal agent count</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE QUESTION:</strong> How many agents maximize throughput for a given project?<br>
+          <strong>WHY IT'S HARD:</strong> Depends on task coupling, codebase structure, coordination overhead. No formula exists.<br>
+          <strong>CURRENT BEST:</strong> Start with 2-3, add incrementally, measure if throughput actually increases.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="gotchas">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cost unpredictability cascade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> No hard limits on agent behavior<br>
+          -> One stuck task triggers retry loop<br>
+          -> Retries consume more context per attempt<br>
+          -> More context = lower quality = more retries<br>
+          -> Runaway cost spiral<br>
+          -> $500 bill for simple feature
+        </div>
+      </div>
+
+      <!-- ==================== HARD SECTION ==================== -->
+
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Coordination Overhead vs. Parallelism</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE DILEMMA:</strong><br>
+          - More agents = more parallelism, but more coordination<br>
+          - Fewer agents = less coordination, but sequential bottlenecks<br>
+          - Optimal varies by project, team, and budget<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong><br>
+          Coordination overhead is invisible until it dominates. By then you've invested in the architecture.<br><br>
+          <em>Heuristic: If adding another agent doesn't feel like relief, you have too many.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="hard">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How task granularity degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Very small (5 min):</strong> 80% overhead, 20% work<br>
+          <strong>Small (15 min):</strong> 40% overhead, 60% work<br>
+          <strong>Medium (30-45 min):</strong> 20% overhead, 80% work (optimal)<br>
+          <strong>Large (1 hr+):</strong> Worker loses track, 50%+ broken output<br><br>
+          <em>Critical: Medium feels "too big" but performs best.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Molly Cantillon: Personal Panopticon</div>
+        <div class="text-text-secondary text-sm">
+          8 parallel Claude instances managing life domains: ~/nox (product), ~/metrics (data), ~/email, ~/growth, ~/trades, ~/health, ~/writing, ~/personal. Filesystem isolation prevents context pollution. "Each instance operates independently."
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cost management understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What will this cost?" -> $$ to $$$$ depending on architecture<br>
+          <strong>Intermediate:</strong> "How to reduce cost?" -> Use Haiku for routine tasks<br>
+          <strong>Advanced:</strong> "Cost formula?" -> Base + Per-Rig + Workers<br>
+          <strong>Staff:</strong> "Budget limits?" -> crew.max_per_rig, max-iterations<br>
+          <strong>Expert:</strong> "Cost vs. value?" -> Replaces 2-3 junior devs at $5K/month
+        </div>
+      </div>
+
+      <!-- ==================== WHEN SECTION ==================== -->
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you used multi-agent for a small feature?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Orchestrator + 3 workers for "Add button"<br>
+          <strong>Why this fails:</strong> Orchestration overhead (context loading, task decomposition, result synthesis) exceeds feature cost. Single agent does it in 2 minutes.<br>
+          <strong>Hidden constraint:</strong> Multi-agent has fixed overhead. Only makes sense above threshold.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If multi-agent isn't right for your use case</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need overnight autonomous?</strong> -> Ralph Loop (single agent iteration)<br>
+          <strong>Need quick debugging?</strong> -> Single Claude session<br>
+          <strong>Need cost-efficient?</strong> -> Ralph with Haiku<br>
+          <strong>Need team collaboration?</strong> -> Git worktrees + human orchestration
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Stage evolution perception</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Stage 4:</strong> "Multi-agent sounds powerful"<br>
+          <strong>Stage 5:</strong> "I tried it, my face got ripped off"<br>
+          <strong>Stage 6:</strong> "Oh, I needed to master single-agent first"<br>
+          <strong>Stage 7:</strong> "Now multi-agent multiplies my effectiveness"<br><br>
+          <em>Don't skip stages. The prerequisites are real.</em>
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph Loop + CC Mirror</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Yes, for different phases.<br>
+          <strong>Why it works:</strong> Ralph for overnight autonomous (serial). CC Mirror for daytime parallel work.<br>
+          <strong>Danger:</strong> Context doesn't transfer between systems.<br>
+          <strong>Recommendation:</strong> Use shared prd.json for state continuity.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At Stage 7+, human becomes bottleneck</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IMPLICATION:</strong> Agents can produce faster than you can review. Morning reveals 50+ commits. Review backlog accumulates. Quality suffers.<br>
+          <strong>THRESHOLD:</strong> 10+ agents, overnight runs<br>
+          <strong>Mitigation:</strong> Dogs quality gates (Gas Town), or batch commits for morning review.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Track which sections are in view
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

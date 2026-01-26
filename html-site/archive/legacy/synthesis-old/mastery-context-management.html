@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta data-pagefind-meta="section" content="Synthesis">
+  <meta data-pagefind-meta="category" content="Mastery">
+  <title>Context Management Mastery Guide - Claude Code Knowledge Base</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/sidebar.css">
+  <link rel="stylesheet" href="../css/search.css">
+</head>
+<body>
+  <nav class="left-nav" id="leftNav">
+    <div class="px-4 mb-4">
+      <a href="../index.html" class="text-xs font-semibold text-accent hover:text-accent-light uppercase tracking-wider">Claude Code KB</a>
+    </div>
+    <div class="nav-content"></div>
+  </nav>
+
+  <!-- Search Modal -->
+  <div class="search-modal" id="searchModal" aria-hidden="true">
+    <div class="search-overlay" onclick="closeSearch()"></div>
+    <div class="search-content">
+      <div class="search-header">
+        <div class="search-input-wrapper">
+          <span class="search-icon-input">&#128269;</span>
+          <input type="text" id="searchInput" placeholder="Search documentation..." autocomplete="off" />
+          <kbd class="search-kbd">ESC</kbd>
+        </div>
+      </div>
+      <div class="search-filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="synthesis">Synthesis</button>
+        <button class="filter-btn" data-filter="extractions">Extractions</button>
+      </div>
+      <div class="search-results" id="searchResults">
+        <div class="search-empty"><p>Start typing to search... (Press Cmd+K anytime)</p></div>
+      </div>
+      <div class="search-footer">
+        <span>Up/Down Navigate</span><span>Enter Select</span><span>ESC Close</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="search-trigger" onclick="openSearch()" aria-label="Search" style="float: right; margin-bottom: 1rem;">
+    <span class="search-icon">Cmd+K</span>
+    <span class="search-text">Search</span>
+  </button>
+
+  <div class="wide-container">
+    <!-- Breadcrumb Navigation -->
+    <nav class="nav-breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <a href="synthesis-index.html">Synthesis</a>
+      <span>/</span>
+      <span>Mastery</span>
+      <span>/</span>
+      <span>Context Management</span>
+    </nav>
+
+    <!-- You Are Here Context Box -->
+    <div class="you-are-here" style="background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%); border-left: 4px solid #2a7d7d; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+      <h3 style="color: #2a7d7d; margin-top: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px;">You Are Here</h3>
+      <p style="margin-bottom: 0;"><strong>Context management</strong> is THE primary constraint in Claude Code. Every optimization pattern ultimately addresses <strong>context window exhaustion</strong>. This guide covers fresh context iteration, file-based state, git as memory, and compaction strategies. Master this before advancing to multi-agent orchestration.</p>
+    </div>
+
+    <h1><span style="font-weight: 700;">Con</span>text Management: Complete Mastery Guide</h1>
+
+    <p class="conversational-lead">
+      <span style="font-weight: 700;">Con</span>text is finite. Fresh beats extended. Files beat memory. Every pattern in this knowledge base ultimately serves one goal: preventing context rot.
+    </p>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+      <div class="toc-title">Contents</div>
+      <ul>
+        <li><a href="#why-context">Why Context Is THE Constraint</a> - The brutal reality</li>
+        <li><a href="#context-rot">Context Rot</a> - What it looks like, how to detect it</li>
+        <li><a href="#fresh-context">Fresh Context Per Iteration</a> - The Ralph pattern foundation</li>
+        <li><a href="#file-state">File-Based External State</a> - The three core files</li>
+        <li><a href="#git-memory">Git as Memory</a> - Commits as checkpoints</li>
+        <li><a href="#compaction">Compaction Strategies</a> - When and how to compress</li>
+        <li><a href="#decision-tree">Decision Tree</a> - Which strategy when</li>
+        <li><a href="#checkpoints">Checkpoints</a> - Verify your setup</li>
+        <li><a href="#troubleshooting">Troubleshooting</a> - Common issues and recovery</li>
+      </ul>
+    </div>
+
+    <hr class="section-divider divider-context">
+
+    <!-- Why Context Section -->
+    <section id="why-context">
+      <h2><span style="font-weight: 700;">Why</span> Context Is THE Primary Constraint</h2>
+
+      <blockquote style="border-left: 3px solid #c97065; padding-left: 1rem; margin: 1.5rem 0; font-style: italic; color: #5c4b3a;">
+        "Context rot: LLMs get stupider with more tokens"
+        <cite style="display: block; margin-top: 0.5rem; font-size: 0.9em;">-- @mattpocockuk</cite>
+      </blockquote>
+
+      <p>Claude's context window (~200K tokens, ~100K effective for quality work) is a <strong>hard ceiling</strong> that shapes every workflow decision:</p>
+
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Context Level</th><th>Quality Impact</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>0-50%</td><td>Full capability</td></tr>
+          <tr><td>50-70%</td><td>Slight degradation possible</td></tr>
+          <tr><td>70-85%</td><td>Noticeable quality loss</td></tr>
+          <tr><td>85-95%</td><td>Significant degradation, instructions forgotten</td></tr>
+          <tr><td>95%+</td><td>Failure mode - hallucinations, contradictions, amnesia</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout-insight">
+        <div class="callout-title">The Fundamental Insight</div>
+        <blockquote style="margin: 0; padding: 0; border: none;">
+          "Each iteration spawns a NEW instance with NO memory of previous work. Continuity comes from: Git history, prd.json, progress.txt"
+          <cite style="display: block; margin-top: 0.5rem; font-size: 0.9em;">-- Ryan Carson</cite>
+        </blockquote>
+        <p style="margin-bottom: 0;"><strong>Memory is external. The agent is stateless.</strong> This isn't a bug - it's the architecture that enables reliability.</p>
+      </div>
+    </section>
+
+    <hr class="section-divider divider-warning">
+
+    <!-- Context Rot Section -->
+    <section id="context-rot">
+      <h2><span style="font-weight: 700;">Con</span>text Rot: What It Looks Like</h2>
+
+      <h3>Warning Signs</h3>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Sign</th><th>Severity</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Repeating earlier statements</td><td>Medium</td><td>Monitor closely</td></tr>
+          <tr><td>Instructions ignored</td><td>High</td><td>Compact or reset</td></tr>
+          <tr><td>Forgetting recent changes</td><td>High</td><td>Start fresh session</td></tr>
+          <tr><td>Contradictory responses</td><td>Critical</td><td>Reset immediately</td></tr>
+          <tr><td>Hallucinated files</td><td>Critical</td><td>Reset + verify state</td></tr>
+        </tbody>
+      </table>
+
+      <h3>The Six Symptoms</h3>
+      <ol>
+        <li><strong>Repetition</strong> - Claude starts repeating earlier statements</li>
+        <li><strong>Amnesia</strong> - Forgets work done 10 minutes ago</li>
+        <li><strong>Instruction Drift</strong> - CLAUDE.md directives ignored</li>
+        <li><strong>Truncation</strong> - Code cut off mid-function</li>
+        <li><strong>Hallucination</strong> - References files that don't exist</li>
+        <li><strong>False Completion</strong> - Marks tasks done without verification</li>
+      </ol>
+    </section>
+
+    <hr class="section-divider divider-procedure">
+
+    <!-- Fresh Context Section -->
+    <section id="fresh-context">
+      <h2><span style="font-weight: 700;">Fre</span>sh Context Per Iteration</h2>
+
+      <p><strong>The Pattern:</strong> Spawn a new agent instance for each task. No memory pollution. Clean slate always.</p>
+
+      <div class="ascii-diagram">
+Iteration 1 (fresh Claude instance)
+  --&gt; Read state from files (PRD, progress, git)
+  --&gt; Pick highest priority incomplete task
+  --&gt; Implement + verify
+  --&gt; Commit if passing
+  --&gt; Update external state
+  --&gt; Exit
+              | (no memory carried forward)
+Iteration 2 (fresh Claude instance)
+  --&gt; Read state from files (now updated)
+  --&gt; Repeat...
+      </div>
+
+      <h3>Why It Prevents Degradation</h3>
+      <ul>
+        <li><strong>No context accumulation</strong> - Quality never drops from token buildup</li>
+        <li><strong>No lossy compaction</strong> - Summaries lose detail; files don't</li>
+        <li><strong>Recoverable state</strong> - If agent fails, state is in git/files</li>
+        <li><strong>Sustainable duration</strong> - Can run for hours/days</li>
+      </ul>
+
+      <h3>Ralph Loop Script</h3>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; position: relative; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <button class="copy-btn" onclick="copyCode(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #2a7d7d; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer;">Copy</button>
+        <pre style="margin: 0; overflow-x: auto;"><code>#!/bin/bash
+set -e
+MAX_ITERATIONS=${1:-25}
+
+for (( i=1; i&lt;=$MAX_ITERATIONS; i++ )); do
+  echo "Iteration $i / $MAX_ITERATIONS"
+
+  claude "Review plans/prd.json and progress.txt.
+    Pick ONE task with passes: false.
+    Implement it. Run tests.
+    If passing, mark passes: true and commit.
+    Append learnings to progress.txt.
+    If ALL tasks complete, output: &lt;promise&gt;COMPLETE&lt;/promise&gt;" | tee output.txt
+
+  if grep -q "&lt;promise&gt;COMPLETE&lt;/promise&gt;" output.txt; then
+    echo "All tasks complete!"
+    break
+  fi
+done</code></pre>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">Key Rules</div>
+        <ul style="margin-bottom: 0;">
+          <li>Set <code>max-iterations</code> as safety limit (never infinite)</li>
+          <li>Size tasks to complete in ONE iteration</li>
+          <li>Use <code>&lt;promise&gt;COMPLETE&lt;/promise&gt;</code> as termination signal</li>
+        </ul>
+      </div>
+
+      <!-- Checkpoint -->
+      <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+        <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Checkpoint: Fresh Context Setup</div>
+        <p><strong>Where you are:</strong> You have a Ralph loop script that spawns fresh Claude instances for each task.</p>
+        <p><strong>Verify:</strong></p>
+        <div class="code-block" style="background: #fefcf3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+          <pre style="margin: 0;"><code>ls -la ralph.sh                 # Executable script exists
+jq '.userStories[0]' plans/prd.json  # PRD has task structure
+touch plans/progress.txt && ls -la plans/progress.txt  # Log file ready</code></pre>
+        </div>
+        <p><strong>Test single iteration:</strong> <code>./ralph.sh 1</code></p>
+      </div>
+    </section>
+
+    <hr class="section-divider divider-procedure">
+
+    <!-- File-Based State Section -->
+    <section id="file-state">
+      <h2><span style="font-weight: 700;">Fil</span>e-Based External State</h2>
+
+      <p><strong>The Pattern:</strong> Store ALL state in files. The agent reconstructs context by reading, not by remembering.</p>
+
+      <h3>The Three Core Files</h3>
+
+      <h4>1. progress.txt - Append-Only Learning Log</h4>
+      <p><strong>Purpose:</strong> Memory across iterations. Notes for "the next agent."</p>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; position: relative; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <button class="copy-btn" onclick="copyCode(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #2a7d7d; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer;">Copy</button>
+        <pre style="margin: 0; overflow-x: auto;"><code># Progress Log - Append Only (NEVER UPDATE)
+
+---
+
+## Iteration 1 (2026-01-09 10:00)
+- **Completed:** US-001 - Database schema created
+- **Learned:** Use .optional() with Zod for nullable fields
+- **Blocker:** None
+- **Next:** US-002 priority
+
+---
+
+## Iteration 2 (2026-01-09 10:15)
+- **Completed:** US-002 - API endpoint
+- **Learned:** Rate limiting needs 60s cooldown
+- **Pattern discovered:** Always test edge cases first</code></pre>
+      </div>
+      <p><strong>Critical Rule:</strong> APPEND ONLY. Never edit previous entries.</p>
+
+      <h4>2. prd.json - Task State Tracking</h4>
+      <p><strong>Purpose:</strong> Machine-readable task board with explicit pass/fail status.</p>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; position: relative; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <button class="copy-btn" onclick="copyCode(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #2a7d7d; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer;">Copy</button>
+        <pre style="margin: 0; overflow-x: auto;"><code>{
+  "project": "MyFeature",
+  "branchName": "feature/user-auth",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Add users table with email and password_hash",
+      "acceptanceCriteria": [
+        "Column 'email' exists with unique constraint",
+        "Column 'password_hash' is not null",
+        "npm run typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Completed iteration 1"
+    },
+    {
+      "id": "US-002",
+      "title": "Create login endpoint",
+      "acceptanceCriteria": [
+        "POST /api/auth/login returns JWT on valid credentials",
+        "Returns 401 on invalid credentials",
+        "npm run test passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}</code></pre>
+      </div>
+
+      <h4>3. CLAUDE.md - Project Context</h4>
+      <p><strong>Purpose:</strong> Onboarding documentation for stateless agent. Keep under 500 tokens.</p>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; position: relative; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <button class="copy-btn" onclick="copyCode(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #2a7d7d; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer;">Copy</button>
+        <pre style="margin: 0; overflow-x: auto;"><code># Project: MyApp
+
+## Tech Stack
+- Next.js 14, TypeScript, Prisma, PostgreSQL
+
+## Commands
+- `npm run dev` - Dev server (port 3000)
+- `npm test` - Run Jest tests
+- `npm run typecheck` - TypeScript check
+
+## Conventions
+- All API routes in src/api/
+- Use Zod for validation
+- Repository pattern for data access
+
+## Known Gotchas
+- Migrations need DEFAULT for existing data
+- Use .optional() for nullable Zod fields
+
+## File Locations
+- PRD: plans/prd.json
+- Progress: plans/progress.txt</code></pre>
+      </div>
+
+      <!-- Checkpoint -->
+      <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+        <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Checkpoint: File-Based State Setup</div>
+        <p><strong>Where you are:</strong> You have the three core state files.</p>
+        <p><strong>Verify:</strong></p>
+        <div class="code-block" style="background: #fefcf3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+          <pre style="margin: 0;"><code>ls -la CLAUDE.md plans/prd.json plans/progress.txt
+wc -w CLAUDE.md  # Should be under 300 words (~400 tokens)
+jq 'keys' plans/prd.json  # Should show ["project", "userStories"]</code></pre>
+        </div>
+        <p><strong>Your folder should look like:</strong></p>
+        <div class="ascii-diagram">
+project/
++-- CLAUDE.md              (project context)
++-- plans/
+|   +-- prd.json          (task tracking)
+|   +-- progress.txt      (session log)
++-- src/
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider divider-procedure">
+
+    <!-- Git as Memory Section -->
+    <section id="git-memory">
+      <h2><span style="font-weight: 700;">Git</span> as Memory</h2>
+
+      <p><strong>The Pattern:</strong> Git history is the ultimate external memory. Code changes persist across agent resets.</p>
+
+      <h3>What Git Provides</h3>
+      <ul>
+        <li><strong>Commits as Checkpoints</strong> - Each iteration's work is preserved</li>
+        <li><strong>Diff as Context</strong> - Agent can read what changed</li>
+        <li><strong>History as Narrative</strong> - Sequence of changes tells the story</li>
+        <li><strong>Rollback as Safety</strong> - Bad changes can be reverted</li>
+      </ul>
+
+      <h3>Git-Based Workflow</h3>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; position: relative; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <button class="copy-btn" onclick="copyCode(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #2a7d7d; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer;">Copy</button>
+        <pre style="margin: 0; overflow-x: auto;"><code># Before each Ralph iteration
+git checkout -b feature/task-name  # Isolated branch
+
+# After each successful task
+git add -p                         # Review each change
+git commit -m "US-001: Add users table"
+
+# Agent reads history for context
+git log --oneline -10
+git diff main..HEAD</code></pre>
+      </div>
+
+      <h3>Git Worktrees for Parallel Agents</h3>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; position: relative; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <button class="copy-btn" onclick="copyCode(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #2a7d7d; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer;">Copy</button>
+        <pre style="margin: 0; overflow-x: auto;"><code># Create isolated worktrees
+git worktree add ../wt-backend feature/backend
+git worktree add ../wt-frontend feature/frontend
+
+# Run parallel Ralph loops
+(cd ../wt-backend && ./ralph.sh 20) &
+(cd ../wt-frontend && ./ralph.sh 20) &
+wait
+
+# Merge results
+git merge wt-backend wt-frontend</code></pre>
+      </div>
+    </section>
+
+    <hr class="section-divider divider-procedure">
+
+    <!-- Compaction Section -->
+    <section id="compaction">
+      <h2><span style="font-weight: 700;">Com</span>paction and Optimization</h2>
+
+      <p><strong>The Pattern:</strong> Strategically compress context to extend working capacity.</p>
+
+      <h3>When Compaction Helps</h3>
+      <ul>
+        <li><strong>Approaching 60-70% context</strong> - Preemptive cleanup</li>
+        <li><strong>Exploratory work</strong> - After browsing many files</li>
+        <li><strong>Debugging sessions</strong> - Error messages accumulate</li>
+        <li><strong>Long conversations</strong> - Before quality degrades</li>
+      </ul>
+
+      <h3>Compaction Commands</h3>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; position: relative; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <button class="copy-btn" onclick="copyCode(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #2a7d7d; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer;">Copy</button>
+        <pre style="margin: 0; overflow-x: auto;"><code>/compact              # Compress current context
+/reset                # Full reset (last resort)</code></pre>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">Compaction is Lossy</div>
+        <p>Details get summarized. <strong>Prefer fresh context via Ralph loops over repeated compaction.</strong></p>
+      </div>
+
+      <h3>When Compaction Hurts</h3>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Situation</th><th>Problem</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Mid-complex task</td><td>Loses critical detail</td></tr>
+          <tr><td>After precise instructions</td><td>Instructions may be lost</td></tr>
+          <tr><td>Near completion</td><td>Disrupts flow</td></tr>
+          <tr><td>Fresh context</td><td>Nothing to compact</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Alternatives to Compaction</h3>
+      <ol>
+        <li><strong>Fresh session</strong> - Start new Claude instance</li>
+        <li><strong>Subagent delegation</strong> - Expensive operations in isolated context</li>
+        <li><strong>File-based state</strong> - Externalize instead of compacting</li>
+        <li><strong>Task sizing</strong> - Smaller tasks that complete before overflow</li>
+      </ol>
+
+      <blockquote style="border-left: 3px solid #2a7d7d; padding-left: 1rem; margin: 1.5rem 0; font-style: italic; color: #5c4b3a;">
+        "Put costly tools like browser control in subagents to protect your main context window tokens"
+        <cite style="display: block; margin-top: 0.5rem; font-size: 0.9em;">-- @TendiesOfWisdom</cite>
+      </blockquote>
+    </section>
+
+    <hr class="section-divider divider-procedure">
+
+    <!-- Decision Tree Section -->
+    <section id="decision-tree">
+      <h2><span style="font-weight: 700;">Dec</span>ision Tree: Which Strategy When?</h2>
+
+      <div class="ascii-diagram">
+START: "I need to work on X with Claude Code"
+  |
+  +-- Is X a single, small task (&lt; 30 min)?
+  |   +-- YES --&gt; Single session, no special context management
+  |   +-- NO --&gt; Continue
+  |
+  +-- Will X span multiple sessions?
+  |   +-- YES --&gt; Use file-based state (prd.json + progress.txt)
+  |   +-- NO --&gt; Consider fresh context per iteration anyway
+  |
+  +-- Is X truly long-running (hours/overnight)?
+  |   +-- YES --&gt; Full Ralph loop with external state
+  |   +-- NO --&gt; May not need automation
+  |
+  +-- Do I need to run multiple agents in parallel?
+  |   +-- YES --&gt; Git worktrees + parallel Ralph loops
+  |   +-- NO --&gt; Single agent workflow
+  |
+  +-- Does this project have long-term knowledge to preserve?
+  |   +-- YES --&gt; Consider Claude-Mem or structured archives
+  |   +-- NO --&gt; Fresh context patterns sufficient
+  |
+  +-- END: Select appropriate strategy
+      </div>
+
+      <h3>Tradeoff Matrix</h3>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Strategy</th><th>Freshness</th><th>Continuity</th><th>Complexity</th><th>Best For</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Single Session</strong></td><td>High</td><td>None</td><td>Low</td><td>Quick tasks</td></tr>
+          <tr><td><strong>Fresh Context / Ralph</strong></td><td>High</td><td>Via files</td><td>Medium</td><td>Features, long work</td></tr>
+          <tr><td><strong>File-Based State</strong></td><td>High</td><td>High</td><td>Medium</td><td>Multi-session projects</td></tr>
+          <tr><td><strong>Git as Memory</strong></td><td>High</td><td>High</td><td>Low</td><td>All projects</td></tr>
+          <tr><td><strong>Compaction</strong></td><td>Medium</td><td>Medium</td><td>Low</td><td>Session extension</td></tr>
+          <tr><td><strong>Subagent Delegation</strong></td><td>High</td><td>N/A</td><td>High</td><td>Expensive operations</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <hr class="section-divider divider-checkpoint">
+
+    <!-- Checkpoints Section -->
+    <section id="checkpoints">
+      <h2><span style="font-weight: 700;">Che</span>ckpoints: Implementation Journey</h2>
+
+      <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+        <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Checkpoint: Context Budget Understanding</div>
+        <p><strong>Recommended Context Allocation (~100K effective):</strong></p>
+        <div class="ascii-diagram">
++-- System prompt + CLAUDE.md:   ~5K (5%)
++-- Codebase context:            ~20K (20%)
++-- Current task:                ~2K (2%)
++-- Working memory:              ~30K (30%)
++-- Tool outputs:                ~20K (20%)
++-- Code generation:             ~15K (15%)
++-- Buffer for retries:          ~8K (8%)
+        </div>
+        <p><strong>Per-Task Token Estimates:</strong></p>
+        <ul>
+          <li>Read file (50 lines): ~1K</li>
+          <li>Git diff (small): ~500</li>
+          <li>Test output: ~2K</li>
+          <li>Error message: ~500</li>
+          <li>MCP tool call: ~1K overhead</li>
+        </ul>
+      </div>
+
+      <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+        <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Checkpoint: Claude HUD Monitoring</div>
+        <p><strong>Install context monitoring:</strong></p>
+        <div class="code-block" style="background: #fefcf3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+          <pre style="margin: 0;"><code>/plugin install claude-hud
+/claude-hud:setup</code></pre>
+        </div>
+        <p><strong>Action thresholds:</strong></p>
+        <ul>
+          <li>60%: Consider compacting</li>
+          <li>70%: Compact or start planning fresh session</li>
+          <li>85%: Critical - wrap up current task</li>
+          <li>90%+: Quality compromised</li>
+        </ul>
+      </div>
+
+      <!-- Milestone -->
+      <div class="milestone" style="background: linear-gradient(90deg, #6b9b7a 0%, #2a7d7d 100%); color: white; padding: 1rem 1.5rem; border-radius: 8px; text-align: center; margin: 2rem 0;">
+        Context is finite. Treat it like a precious resource. Fresh beats extended. Files beat memory.
+      </div>
+    </section>
+
+    <hr class="section-divider divider-warning">
+
+    <!-- Troubleshooting Section -->
+    <section id="troubleshooting">
+      <h2><span style="font-weight: 700;">Tro</span>ubleshooting</h2>
+
+      <details class="troubleshoot" style="border: 1px solid #c97065; border-radius: 8px; margin: 1rem 0;">
+        <summary style="background: #fef6f5; padding: 1rem; cursor: pointer; color: #c97065; font-weight: 600;">Claude repeating earlier statements</summary>
+        <div style="padding: 1rem;">
+          <p><strong>Severity:</strong> Medium - early warning sign</p>
+          <p><strong>Cause:</strong> Context accumulation causing model confusion</p>
+          <p><strong>Solution:</strong></p>
+          <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+            <pre style="margin: 0;"><code># Option 1: Compact
+/compact
+
+# Option 2: Start fresh (better for quality)
+exit
+claude
+"Continue from where we left off. Check git log for recent work."</code></pre>
+          </div>
+        </div>
+      </details>
+
+      <details class="troubleshoot" style="border: 1px solid #c97065; border-radius: 8px; margin: 1rem 0;">
+        <summary style="background: #fef6f5; padding: 1rem; cursor: pointer; color: #c97065; font-weight: 600;">Claude forgetting recent changes</summary>
+        <div style="padding: 1rem;">
+          <p><strong>Severity:</strong> High - quality already degraded</p>
+          <p><strong>Cause:</strong> Context window full, older memories being pushed out</p>
+          <p><strong>Solution:</strong></p>
+          <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+            <pre style="margin: 0;"><code># Immediate: Write state to file
+"Before we continue, write a summary of all changes so far to progress.txt"
+
+# Then start fresh
+exit
+claude
+"Read progress.txt and git log to understand current state"</code></pre>
+          </div>
+          <p><strong>Prevention:</strong> Use file-based external state from the beginning</p>
+        </div>
+      </details>
+
+      <details class="troubleshoot" style="border: 1px solid #c97065; border-radius: 8px; margin: 1rem 0;">
+        <summary style="background: #fef6f5; padding: 1rem; cursor: pointer; color: #c97065; font-weight: 600;">CLAUDE.md instructions being ignored</summary>
+        <div style="padding: 1rem;">
+          <p><strong>Severity:</strong> High - critical degradation</p>
+          <p><strong>Cause:</strong> CLAUDE.md content pushed out of effective context</p>
+          <p><strong>Solution:</strong></p>
+          <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+            <pre style="margin: 0;"><code># Force context refresh
+/reset
+
+# Or start completely fresh
+exit
+claude
+
+# Verify CLAUDE.md is being read
+"What does CLAUDE.md say about our test conventions?"</code></pre>
+          </div>
+          <p><strong>Prevention:</strong> Keep CLAUDE.md under 500 tokens, use Ralph pattern for long work</p>
+        </div>
+      </details>
+
+      <details class="troubleshoot" style="border: 1px solid #c97065; border-radius: 8px; margin: 1rem 0;">
+        <summary style="background: #fef6f5; padding: 1rem; cursor: pointer; color: #c97065; font-weight: 600;">Hallucinated files or references</summary>
+        <div style="padding: 1rem;">
+          <p><strong>Severity:</strong> Critical - trust broken</p>
+          <p><strong>Cause:</strong> Extreme context pressure causing confabulation</p>
+          <p><strong>Solution:</strong></p>
+          <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+            <pre style="margin: 0;"><code># Full reset, verify state
+/reset
+
+# Always verify claims
+ls -la path/to/claimed/file
+git log --oneline | head -20
+
+# Start fresh and be explicit
+exit
+claude
+"List all files in src/ before making any changes."</code></pre>
+          </div>
+          <p><strong>Prevention:</strong> Never work in critically degraded context, always verify</p>
+        </div>
+      </details>
+
+      <details class="troubleshoot" style="border: 1px solid #c97065; border-radius: 8px; margin: 1rem 0;">
+        <summary style="background: #fef6f5; padding: 1rem; cursor: pointer; color: #c97065; font-weight: 600;">Ralph stuck in infinite loop</summary>
+        <div style="padding: 1rem;">
+          <p><strong>Symptoms:</strong> Same task attempted repeatedly, no progress</p>
+          <p><strong>Cause:</strong> Task too large, criteria impossible, or verification failing</p>
+          <p><strong>Solution:</strong></p>
+          <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+            <pre style="margin: 0;"><code># Check why task is failing
+cat plans/progress.txt | tail -30
+jq '.userStories[] | select(.passes == false)' plans/prd.json
+
+# Diagnose:
+# - Is the task too big? Split it.
+# - Are criteria impossible? Revise them.
+# - Is verification broken? Fix test setup.</code></pre>
+          </div>
+          <p><strong>Prevention:</strong> Size tasks to complete in ONE iteration</p>
+        </div>
+      </details>
+
+      <h3>Emergency Recovery</h3>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; position: relative; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <button class="copy-btn" onclick="copyCode(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #2a7d7d; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer;">Copy</button>
+        <pre style="margin: 0; overflow-x: auto;"><code># Session completely unusable
+/reset
+
+# If still broken, full restart
+exit
+claude
+
+# Verify clean state
+"What is 2+2? What project are we working on?"
+# Should give fresh, coherent answers
+
+# Lost track of project state - reconstruct from git
+git log --oneline -20
+git status
+git diff HEAD
+cat plans/prd.json | jq '.userStories[] | {id, title, passes}'
+cat plans/progress.txt | tail -50</code></pre>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- The Commandments -->
+    <section>
+      <h2><span style="font-weight: 700;">The</span> Context Management Commandments</h2>
+
+      <ol>
+        <li><strong>Context is finite.</strong> Treat it like a precious resource.</li>
+        <li><strong>Fresh &gt; Extended.</strong> New instances beat long sessions.</li>
+        <li><strong>Files &gt; Memory.</strong> External state beats internal context.</li>
+        <li><strong>Git is your friend.</strong> Commits are checkpoints.</li>
+        <li><strong>Size tasks small.</strong> One iteration, one task.</li>
+        <li><strong>Monitor always.</strong> Know your context usage.</li>
+        <li><strong>Compact early.</strong> 60-70%, not 90%.</li>
+        <li><strong>Verify everything.</strong> Tests catch context-rot errors.</li>
+        <li><strong>Subagents isolate.</strong> Expensive ops in their own context.</li>
+        <li><strong>Archive and learn.</strong> Yesterday's runs teach tomorrow's.</li>
+      </ol>
+    </section>
+
+    <!-- Related Pages -->
+    <div class="related-pages" style="margin-top: 2rem; padding: 1rem; background: #f9f6f0; border-radius: 8px;">
+      <h4 style="margin-top: 0;">Related Documents</h4>
+      <ul>
+        <li><a href="architecture-complexity-ladder.html">Complexity Ladder</a> - Progression from Level 0-7</li>
+        <li><a href="mastery-ccmirror-complete.html">CC Mirror Complete</a> - Multi-agent orchestration</li>
+        <li><a href="principles-core.html">Core Principles</a> - The 8 foundational principles</li>
+      </ul>
+      <h4>Key Practitioners</h4>
+      <ul>
+        <li>@ghuntley - Ralph pattern creator</li>
+        <li>@ryancarson - Compounding runs, overnight development</li>
+        <li>@mattpocockuk - Context rot awareness, PRD strategies</li>
+      </ul>
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="footer-nav" style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e0d5c5;">
+      <a href="principles-core.html">Prev: Core Principles</a>
+      <a href="mastery-ccmirror-complete.html">Next: CC Mirror Complete</a>
+    </div>
+
+  </div>
+
+  <script src="../js/copy-code.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/global-nav.js"></script>
+  <script>
+    function copyCode(button) {
+      const codeBlock = button.parentElement.querySelector('code');
+      navigator.clipboard.writeText(codeBlock.textContent);
+      button.textContent = 'Copied!';
+      setTimeout(() => button.textContent = 'Copy', 2000);
+    }
+  </script>
+</body>
+</html>

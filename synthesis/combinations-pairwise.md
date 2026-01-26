@@ -1,5 +1,7 @@
 # Pairwise Combination Analysis
 
+> **You Are Here:** This document goes deep on two-pattern combinations, showing exactly what happens when you combine patterns in pairs. While combinations-matrix.md tells you WHAT works together, this document explains HOW and WHY those combinations unlock new capabilities. Use this when planning your first multi-pattern workflow.
+
 ---
 ## D-FINAL Integration
 **Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
@@ -812,6 +814,18 @@ esac
 
 ---
 
+### Checkpoint: Tooling + Workflow Patterns
+
+**You should now understand:**
+- [ ] How skills from sub-agents.directory integrate with Claude Code
+- [ ] The context percentage thresholds for task sizing decisions (50%, 70%, 85%)
+- [ ] How auto-formatting hooks maintain code quality automatically
+- [ ] The relationship between HUD visibility and workflow decisions
+
+**If unclear:** Re-read the Skills + Sub-Agents Directory section for skill loading patterns, and Claude HUD + Context-Aware Task Sizing for the decision matrix.
+
+---
+
 ## Philosophy + Implementation Combinations
 
 ### .md Files (Context) + Ralph Loop
@@ -1031,6 +1045,111 @@ The most powerful Claude Code workflows emerge from thoughtful pattern combinati
 5. **Model Selection + Task Phases** enables cost-optimized quality
 
 The key insight: **Patterns are LEGO blocks**. Each is useful alone, but the real power comes from combining them into systems greater than their parts.
+
+---
+
+---
+
+## Troubleshooting
+
+### Common Issue: Ralph + Playwright Screenshots Not Verifying
+
+**Symptom:** Ralph loop claims UI verification passed, but screenshots show broken layouts or missing elements.
+
+**Cause:** Playwright may be taking screenshots before the page fully renders, or the verification prompt isn't specific enough.
+
+**Fix:**
+1. Add explicit wait conditions before screenshots:
+```javascript
+await page.waitForLoadState('networkidle');
+await page.waitForSelector('.expected-element');
+```
+2. Make acceptance criteria more specific:
+```json
+"acceptanceCriteria": [
+  "Screenshot shows button with text 'Submit' at y < 500px",
+  "No console errors in browser",
+  "Element .login-form is visible"
+]
+```
+3. Put Playwright in a subagent to isolate browser context issues
+
+### Common Issue: Claude-Mem Injecting Irrelevant Context
+
+**Symptom:** Ralph iterations receive memories from unrelated past sessions, wasting context tokens on irrelevant information.
+
+**Cause:** Claude-Mem's semantic search is matching on general terms, not the specific story/task.
+
+**Fix:**
+1. Query with story ID explicitly: `search(query="US-003 authentication", type="pattern")`
+2. Use the timeline layer for recent context instead of broad search
+3. Tag memories with project identifiers during capture
+
+```bash
+# Before Ralph iteration, query specifically
+claude-mem search --query "US-003" --project "my-app" --limit 5
+```
+
+### Common Issue: Worktree Subagents Diverging Too Far
+
+**Symptom:** When merging worktree branches back to main, conflicts are massive because agents made incompatible architectural decisions.
+
+**Cause:** Agents worked in isolation without shared architectural constraints.
+
+**Fix:**
+1. Create shared AGENTS.md with architectural rules all worktrees read
+2. Use periodic "sync points" where agents check in before major decisions
+3. Assign a dedicated "merge agent" that monitors divergence:
+
+```bash
+# Check divergence before it gets too big
+git diff main..feature-auth --stat | tail -1
+# If changes exceed threshold, trigger sync
+```
+
+### Common Issue: Mobile + Poke Notifications Not Arriving
+
+**Symptom:** Hooks are configured for push notifications but phone never receives them during AFK runs.
+
+**Cause:** Common issues include wrong API URL, missing auth token, or the hook script failing silently.
+
+**Fix:**
+1. Test the notification script manually first:
+```bash
+# Test Poke directly
+curl -X POST "https://poke-api.com/send" \
+  -H "Authorization: Bearer $POKE_TOKEN" \
+  -d '{"message": "Test notification"}'
+```
+2. Add logging to the hook script:
+```bash
+#!/bin/bash
+echo "$(date): Hook triggered" >> ~/.claude/hooks/notify.log
+curl -X POST "$POKE_API_URL" -d "{\"message\": \"$1\"}" 2>> ~/.claude/hooks/notify.log
+```
+3. Verify the PreToolUse matcher is correct (should be `AskUserQuestion`, not `Ask`)
+
+### Common Issue: progress.txt + AGENTS.md Getting Out of Sync
+
+**Symptom:** Learnings in progress.txt contradict guidance in AGENTS.md, causing inconsistent agent behavior.
+
+**Cause:** progress.txt is append-only and may contain outdated patterns that were later refined.
+
+**Fix:**
+1. Periodically distill progress.txt into AGENTS.md (human-in-loop)
+2. Have Claude summarize and deduplicate at session end
+3. Use clear sections in AGENTS.md that override progress.txt:
+
+```markdown
+# AGENTS.md
+
+## Authoritative Patterns (override progress.txt)
+- Always use async/await, never callbacks
+- Always hash with bcrypt, never SHA
+
+## Historical Context (see progress.txt)
+- For detailed decision history, check progress.txt
+```
 
 ---
 

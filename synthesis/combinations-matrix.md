@@ -1,5 +1,7 @@
 # Pattern Combination Matrix
 
+> **You Are Here:** This is the master reference for combining Claude Code patterns. Use this when you've learned individual patterns (Ralph, Hooks, Subagents, etc.) and need to understand which patterns work together, which conflict, and which combinations give the best ROI. Start here before attempting any multi-pattern setup.
+
 ---
 ## D-FINAL Integration
 **Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
@@ -366,6 +368,18 @@ spawn_agent() {
 
 ---
 
+### Checkpoint: Understanding the Matrix
+
+**You should now understand:**
+- [ ] What the 5 compatibility ratings mean (Documented, Synergistic, Possible, Anti-pattern, Unexplored)
+- [ ] Which patterns are natural complements (high synergy)
+- [ ] Which patterns conflict and should never be combined
+- [ ] The basic mechanism of each documented combination
+
+**If unclear:** Re-read the Quick Reference Matrix and Detailed Combination Analysis sections above. For deeper understanding of any specific pattern, see the individual pattern documents in `extractions/orchestration/`.
+
+---
+
 ## Recommended First Combinations
 
 ### For Beginners (Stage 1-3)
@@ -544,6 +558,74 @@ git worktree add ../worktrees/feature-x feature-x-branch
 # tmux agent manager (for multiple instances)
 cargo install rpai && rpai
 ```
+
+---
+
+---
+
+## Troubleshooting
+
+### Common Issue: Pattern Combination Not Working
+
+**Symptom:** You've combined two patterns but aren't seeing the expected synergy - they seem to interfere with each other.
+
+**Cause:** Often this happens when both patterns try to manage the same resource (context, files, state) without coordination.
+
+**Fix:**
+1. Check if both patterns are writing to the same files (e.g., both using progress.txt)
+2. Verify that hooks aren't conflicting (multiple PostToolUse hooks on same matcher)
+3. Ensure only one orchestration system is active (CC Mirror OR Gas Town, never both)
+
+```bash
+# Debug: Check what hooks are active
+cat ~/.claude/settings.json | jq '.hooks'
+
+# Debug: Check for file conflicts
+ls -la *.txt *.json *.md | grep -E "(progress|prd|state)"
+```
+
+### Common Issue: Context Explosion in Multi-Pattern Setup
+
+**Symptom:** Context fills up rapidly (80%+ in HUD) when using multiple patterns together.
+
+**Cause:** Each pattern adds context overhead. Memory patterns (Claude-Mem) + rich state files (progress.txt) + verbose hooks = context bloat.
+
+**Fix:**
+1. Use subagents to isolate expensive operations
+2. Keep progress.txt lean (append only key learnings)
+3. Configure Claude-Mem to inject only on-demand, not automatically
+4. Use fresh context (Ralph pattern) if context exceeds 70%
+
+### Common Issue: Hooks Not Firing for Subagent Operations
+
+**Symptom:** PostToolUse hooks work for main agent but not for spawned subagents.
+
+**Cause:** Subagents may run in isolated contexts where project-level hooks aren't inherited.
+
+**Fix:**
+1. Configure hooks at the global level (`~/.claude/settings.json`) not project level
+2. Verify subagent inherits hook configuration
+3. Consider using CC Mirror which has built-in hook integration for workers
+
+```bash
+# Global hooks (applies to all sessions including subagents)
+cat ~/.claude/settings.json
+
+# Project hooks (may not apply to subagents)
+cat .claude/settings.json
+```
+
+### Common Issue: CC Mirror and Gas Town Confusion
+
+**Symptom:** You're trying to use both orchestration systems and agents are receiving conflicting instructions.
+
+**Cause:** These are competing paradigms. CC Mirror uses TaskCreate/TaskUpdate. Gas Town uses inbox-based coordination. They cannot coexist.
+
+**Fix:** Choose ONE orchestration system:
+- **CC Mirror:** For 80% of multi-agent use cases, simpler setup
+- **Gas Town:** Only for 10+ agent scenarios at Stage 7+
+
+Never mix them. If transitioning, fully remove one before implementing the other.
 
 ---
 

@@ -13,6 +13,8 @@ This content has been superseded by D-FINAL synthesis.
 
 A side-by-side comparison of four major orchestration strategies for autonomous AI-assisted development, from simplest to most complex.
 
+> **You Are Here:** This document compares four orchestration strategies (Basic Ralph, PRD-Ralph, CC Mirror, Gas Town) for running autonomous Claude Code workflows. Use this when deciding HOW to structure your agent automation, not WHAT architecture to use (see compare-architecture.md for that).
+
 ---
 
 ## The Same Goal
@@ -302,6 +304,17 @@ Gas Town (~/.gt)
 
 ---
 
+### Checkpoint: Orchestration Approaches
+**You should now understand:**
+- [ ] How Basic Ralph uses fresh context per iteration
+- [ ] How PRD-Ralph adds structured task management
+- [ ] How CC Mirror enables parallel workers with hub-and-spoke
+- [ ] How Gas Town creates a full agent factory with specialized roles
+
+**If unclear:** Re-read the "How it works" section for the approach you are considering.
+
+---
+
 ## Decision Matrix
 
 | Factor | Basic Ralph | PRD-Ralph | CC Mirror | Gas Town |
@@ -484,6 +497,72 @@ npx cc-mirror quick --provider mirror --name mclaude
 # Gas Town
 go install github.com/steveyegge/gastown/cmd/gt@latest
 gt init  # Initialize town
+```
+
+---
+
+## Troubleshooting
+
+### Common Issue: Ralph Loop Never Completes
+**Symptom:** Loop runs to MAX_ITERATIONS without outputting "PROMISE COMPLETE HERE".
+**Cause:** Completion criteria not achievable, or agent doesn't recognize when to signal completion.
+**Fix:** Check your prompt.md includes clear completion instructions. Verify acceptance criteria are realistic. Review progress.txt to see where the agent is getting stuck.
+
+```bash
+# Check if promise pattern exists in recent output
+grep -l "PROMISE COMPLETE" output.txt
+
+# Review what the agent has been doing
+tail -50 scripts/ralph/progress.txt
+```
+
+### Common Issue: PRD Tasks Not Being Marked Complete
+**Symptom:** Agent works on tasks but prd.json `passes` values stay `false`.
+**Cause:** Agent not updating prd.json, or acceptance criteria unclear.
+**Fix:** Ensure your prompt explicitly instructs the agent to update prd.json when criteria are met. Make acceptance criteria binary (yes/no testable).
+
+```bash
+# Check PRD status
+cat scripts/ralph/prd.json | jq '.userStories[] | {id, title, passes}'
+```
+
+### Common Issue: CC Mirror Workers Not Starting
+**Symptom:** Orchestrator creates tasks but workers never execute.
+**Cause:** Missing `run_in_background=True` flag, or workers not properly configured.
+**Fix:** Verify Task calls include background execution. Check worker preambles are set up correctly.
+
+```bash
+# Verify CC Mirror is running
+npx cc-mirror status
+```
+
+### Common Issue: Gas Town Agents Not Communicating
+**Symptom:** Agents running but not picking up work from inboxes.
+**Cause:** MCP Agent Mail not configured, or inbox paths incorrect.
+**Fix:** Verify MCP setup in each agent's config. Check inbox file paths match across agents.
+
+```bash
+# Check for stale handoffs
+find ~/.gt -name "inbox-*.json" -mmin +30
+
+# Verify agent processes are running
+pgrep -f "gt-" | head -5
+```
+
+### Common Issue: Overnight Run Produces No Results
+**Symptom:** Started Ralph loop before bed, wake up to no commits.
+**Cause:** Early failure that stopped the loop, or credentials/auth expired.
+**Fix:** Add error handling to your loop script. Check for auth token expiration on long runs.
+
+```bash
+# Check if loop script is still running
+ps aux | grep ralph
+
+# Check recent git activity
+git log --oneline --since="8 hours ago"
+
+# Review any error output
+cat /tmp/ralph-error.log
 ```
 
 ---

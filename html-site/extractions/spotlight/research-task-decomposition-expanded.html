@@ -1,0 +1,2204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Decomposition | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Strategy Table */
+    .strategy-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .strategy-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #3f3f46;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .strategy-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .strategy-table tr:hover {
+      background: #fafafa;
+    }
+
+    /* Decision Tree */
+    .decision-tree {
+      background: #f9fafb;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .decision-tree-title {
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .decision-tree pre {
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #3f3f46;
+      margin: 0;
+      overflow-x: auto;
+    }
+
+    /* Template Box */
+    .template-box {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .template-title {
+      font-weight: 600;
+      color: #0369a1;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Break complex tasks into agent-sized pieces with verifiable criteria. Decomposition quality determines orchestration success.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Each task must fit in one context window, have verifiable completion, and explicit dependencies."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'DECOMPOSITION = f(Task Size, Dependencies, Verification, Context)')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>DECOMPOSITION = f(Task Size, Dependencies, Verification, Context)</code>
+          </div>
+
+          <div class="core-anchor">Master this before mastering any orchestration tool.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          AI agents fail when tasks exceed context window (quality degrades), verification is impossible (vague "done" signals), dependencies are unclear (building on non-existent foundations), or scope is ambiguous (wandering fills context with tangents).
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">Decomposition Strategies</h3>
+
+        <table class="strategy-table">
+          <thead>
+            <tr>
+              <th>Strategy</th>
+              <th>Description</th>
+              <th>When to Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Horizontal (Parallel)</strong></td>
+              <td>Independent subtasks, no dependencies</td>
+              <td>Tasks can run simultaneously</td>
+            </tr>
+            <tr>
+              <td><strong>Vertical (Sequential)</strong></td>
+              <td>Ordered subtasks, each depends on previous</td>
+              <td>Order matters (schema -> backend -> UI)</td>
+            </tr>
+            <tr>
+              <td><strong>Hybrid</strong></td>
+              <td>Mix of parallel and sequential</td>
+              <td>Complex projects with both types</td>
+            </tr>
+            <tr>
+              <td><strong>Recursive</strong></td>
+              <td>Subtasks may need further decomposition</td>
+              <td>Large complex tasks (keep splitting)</td>
+            </tr>
+            <tr>
+              <td><strong>Domain-Based</strong></td>
+              <td>Split by technical domain</td>
+              <td>Feature development (FE/BE/DB)</td>
+            </tr>
+            <tr>
+              <td><strong>Phase-Based</strong></td>
+              <td>Split by workflow phase</td>
+              <td>Project workflows (design -> test)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="decision-tree">
+          <div class="decision-tree-title">
+            <i data-lucide="git-branch" class="w-4 h-4"></i>
+            Strategy Selection Decision Tree
+          </div>
+          <pre>START: "I have a complex task"
+|
++-- Can subtasks run independently?
+|   +-- YES -> Horizontal (parallel) decomposition
+|   +-- NO  -> Vertical (sequential) decomposition
+|
++-- Is the task domain-specific or workflow-oriented?
+|   +-- DOMAIN   -> Domain-based decomposition
+|   +-- WORKFLOW -> Phase-based decomposition
+|
++-- Does any subtask not fit in one session?
+|   +-- YES -> Recursive decomposition needed
+|   +-- NO  -> Stop decomposing
+|
++-- Are all acceptance criteria verifiable?
+|   +-- NO  -> Refine criteria
+|   +-- YES -> Continue
+|
++-- Are all dependencies explicit?
+    +-- NO  -> Document dependencies
+    +-- YES -> Decomposition complete</pre>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-verifiable" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY VERIFIABLE ACCEPTANCE CRITERIA?</div>
+          <div class="decision-reasoning">
+            Vague criteria like "works correctly" or "good UX" lead to false "done" signals. The agent marks tasks complete without proper verification. This compounds across iterations, producing garbage.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Every criterion must be checkable by the agent. "npm run typecheck passes" not "code is clean". "Button is green" not "looks nice". Include test commands as final criteria.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-agent-sized">
+          <div class="decision-why">WHY AGENT-SIZED TASKS?</div>
+          <div class="decision-reasoning">
+            Context degrades with tokens ("context rot"). At ~80K tokens, quality drops dramatically. If a task can't complete in one context window, the agent loses track mid-task and produces broken code.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              The 2-3 sentence test: if you can't describe the task in 2-3 sentences, split it. "Add investorType column with default 'cold'" is good. "Build the investor management system" is bad.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-explicit-deps">
+          <div class="decision-why">WHY EXPLICIT DEPENDENCIES?</div>
+          <div class="decision-reasoning">
+            Hidden dependencies cause race conditions and wasted work. Agent tries to build UI component before API exists. "Cannot find type X" errors everywhere. Previous work must be declared.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Every task should declare blockedBy and blocks. Standard order: schema -> backend -> frontend. Watch for "Module not found" errors - they signal missing dependencies.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE / TEMPLATES -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Task Templates
+        </h2>
+
+        <div class="template-box">
+          <div class="template-title">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            Basic Task Format
+          </div>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">## Task: [Title]</span>
+
+<span class="comment">### Description</span>
+<span class="string">[What to do in 2-3 sentences]</span>
+
+<span class="comment">### Acceptance Criteria</span>
+- [ ] <span class="string">[Verifiable criterion 1]</span>
+- [ ] <span class="string">[Verifiable criterion 2]</span>
+- [ ] <span class="string">npm run typecheck passes</span>
+- [ ] <span class="string">npm run test passes</span>
+
+<span class="comment">### Context</span>
+<span class="string">[Relevant information for this task]</span>
+
+<span class="comment">### Dependencies</span>
+- Blocked by: <span class="variable">[task-id or "none"]</span>
+- Blocks: <span class="variable">[task-id or "none"]</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="domain-template">Domain-Based Template</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">## Feature: [Feature Name]</span>
+
+<span class="comment">### Database Tasks (run first)</span>
+- DB-001: <span class="string">[Task]</span> | Criteria: <span class="string">[Verifiable]</span>
+
+<span class="comment">### Backend Tasks (can parallelize after DB)</span>
+- BE-001: <span class="string">[Task]</span> | Criteria: <span class="string">[Verifiable]</span>
+- BE-002: <span class="string">[Task]</span> | Criteria: <span class="string">[Verifiable]</span>
+
+<span class="comment">### Frontend Tasks (can parallelize after BE)</span>
+- FE-001: <span class="string">[Task]</span> | Criteria: <span class="string">[Verifiable]</span>
+- FE-002: <span class="string">[Task]</span> | Criteria: <span class="string">[Verifiable]</span>
+
+<span class="comment">### Integration Tasks (run last)</span>
+- INT-001: <span class="string">[Task]</span> | Depends: FE-*, BE-* | Criteria: <span class="string">[Verifiable]</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="cc-mirror-template">CC Mirror TaskCreate Format</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>TaskCreate: {
+  <span class="variable">subject</span>: <span class="string">"[Task title]"</span>,
+  <span class="variable">description</span>: <span class="string">"[What to do]"</span>,
+  <span class="variable">acceptance_criteria</span>: [<span class="string">"[Criterion 1]"</span>, <span class="string">"[Criterion 2]"</span>],
+  <span class="variable">domain_reference</span>: <span class="string">"[path/to/reference.md]"</span>,
+  <span class="variable">blocked_by</span>: [<span class="string">"[task-id]"</span>],
+  <span class="variable">blocks</span>: [<span class="string">"[task-id]"</span>],
+  <span class="variable">assigned_to</span>: <span class="string">"[worker-id or conductor]"</span>
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">prd.json Format (Ralph Loop)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>{
+  <span class="string">"project"</span>: <span class="string">"My Feature"</span>,
+  <span class="string">"branchName"</span>: <span class="string">"feature/my-feature"</span>,
+  <span class="string">"userStories"</span>: [
+    {
+      <span class="string">"id"</span>: <span class="string">"US-001"</span>,
+      <span class="string">"title"</span>: <span class="string">"Add users table schema"</span>,
+      <span class="string">"acceptanceCriteria"</span>: [
+        <span class="string">"Migration creates users table"</span>,
+        <span class="string">"npm run typecheck passes"</span>
+      ],
+      <span class="string">"priority"</span>: <span class="keyword">1</span>,
+      <span class="string">"blockedBy"</span>: [],
+      <span class="string">"blocks"</span>: [<span class="string">"US-002"</span>, <span class="string">"US-003"</span>],
+      <span class="string">"passes"</span>: <span class="keyword">false</span>
+    }
+  ]
+}</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Path of a Task: From Vague to Executable
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Like PostgreSQL's "follow the query," trace a vague request through decomposition until it becomes agent-executable subtasks. See every decision point and transformation.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">Scenario: "Build a notification system"</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">
+              <strong>Vague Task Arrives</strong><br>
+              Stakeholder says: "We need a notification system." No criteria, no scope, no boundaries. Classic enterprise request.
+              <div style="background: #fef3c7; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Red Flag:</strong> If given to agent now -> would build something, but probably wrong thing. Context overflow as agent explores.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">
+              <strong>Clarification Questions</strong><br>
+              What types of notifications? (email, push, in-app) What triggers them? (user actions, system events) Who configures them? (admin, users, both)
+              <div style="background: #ecfdf5; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Decision Branch:</strong> Answers clear? YES -> Continue. NO -> Get answers before proceeding.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">
+              <strong>Scope Emerges</strong><br>
+              After clarification: "Email notifications for user signups and password resets. Admin configures templates." Now we have boundaries.
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">
+              <strong>Identify Natural Boundaries</strong><br>
+              <strong>Database:</strong> Notification templates table, notification logs table.<br>
+              <strong>Backend:</strong> Template CRUD API, notification trigger service, email sending service.<br>
+              <strong>Frontend:</strong> Admin template editor, notification history view.
+              <div style="background: #e0f2fe; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Pattern Match:</strong> This is Domain-Based decomposition (FE/BE/DB).
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">
+              <strong>Check Dependency Order</strong><br>
+              DB tables must exist before BE API can use them. BE API must exist before FE can call them. This is Vertical ordering on top of Domain boundaries.
+              <div style="background: #ecfdf5; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Decision Branch:</strong> Can any tasks run parallel? YES -> Mark them. Template CRUD and notification service can parallel after DB.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">
+              <strong>Size Check: 2-3 Sentence Test</strong><br>
+              "Create notification_templates table with id, name, subject, body, created_at columns. Add migration." - Passes.<br>
+              "Build complete admin interface for template management" - FAILS. Too vague, too big.
+              <div style="background: #fef3c7; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Action:</strong> Recursive decomposition needed on "admin interface" -> Split into: list view, edit form, delete confirmation.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">
+              <strong>Add Verifiable Criteria</strong><br>
+              Each task gets machine-checkable acceptance:<br>
+              - "Migration runs without error" -> <code>npm run migrate</code><br>
+              - "API returns 200 on GET /templates" -> <code>curl test</code><br>
+              - "Tests pass" -> <code>npm run test</code>
+              <div style="background: #ecfdf5; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Decision Branch:</strong> Criteria machine-verifiable? YES -> Continue. NO -> Rewrite until testable.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">
+              <strong>Add Context</strong><br>
+              Each task includes what agent needs to know: existing patterns in codebase, relevant files to reference, naming conventions, any constraints (e.g., "use Resend for email, not Sendgrid").
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">
+              <strong>Document Dependencies</strong><br>
+              <code>
+              DB-001: notification_templates table (blocks: BE-001, BE-002)<br>
+              DB-002: notification_logs table (blocks: BE-003)<br>
+              BE-001: Template CRUD API (blockedBy: DB-001, blocks: FE-001)<br>
+              BE-002: Trigger service (blockedBy: DB-001, blocks: FE-002)<br>
+              ...
+              </code>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">
+              <strong>Final Validation Pass</strong><br>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+                <div style="background: #f0fdf4; padding: 8px 12px; border-radius: 6px; font-size: 13px;">
+                  All tasks fit one session?
+                </div>
+                <div style="background: #f0fdf4; padding: 8px 12px; border-radius: 6px; font-size: 13px;">
+                  All criteria verifiable?
+                </div>
+                <div style="background: #f0fdf4; padding: 8px 12px; border-radius: 6px; font-size: 13px;">
+                  All dependencies explicit?
+                </div>
+                <div style="background: #f0fdf4; padding: 8px 12px; border-radius: 6px; font-size: 13px;">
+                  Parallelism maximized?
+                </div>
+              </div>
+              <div class="path-verify" style="margin-top: 8px;">If any NO: iterate on that aspect until YES</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">11</div>
+            <div class="path-content">
+              <strong>Hand Off to Orchestrator</strong><br>
+              <div style="background: #e0f2fe; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Ralph:</strong> Load into prd.json, start loop<br>
+                <strong>CC Mirror:</strong> Create tasks via TaskCreate API<br>
+                <strong>Gas Town:</strong> Feed to Refinery (which validates your decomposition)
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">12</div>
+            <div class="path-content">
+              <strong>Monitor Execution</strong><br>
+              Watch for: stuck loops (bad criterion), dependency errors (missing blockedBy), context overflow (task too big). Each signals decomposition quality issue.
+              <div class="path-verify">Total transformation: ~25 minutes from vague request to 8+ executable subtasks</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">THE TRANSFORMATION</div>
+          <div class="decision-reasoning">
+            "Build a notification system" (5 words, unexecutable) became 8+ tasks, each with:<br>
+            - 2-3 sentence description<br>
+            - Machine-verifiable criteria<br>
+            - Explicit dependencies<br>
+            - Necessary context
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">Quality metric</div>
+            <div class="text-text-secondary text-sm">
+              Good decomposition = agent executes without asking clarifying questions. Each task self-contained. If agent gets stuck, decomposition failed.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          15 real problems with concrete fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Tasks Too Large (context overflow)
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent loses track mid-task, quality degrades, hallucinations appear</div>
+          <div class="gotcha-detail"><strong>Threshold:</strong> >40K tokens for implementation + testing</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Split until each fits one session. 15 min to fix.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Tasks Too Small (coordination overhead)
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> More time describing tasks than implementing them</div>
+          <div class="gotcha-detail"><strong>Threshold:</strong> Task description longer than expected code change</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Combine related tasks. 10 min to fix.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Vague Acceptance Criteria
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent marks tasks done without verification, false completion</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Criteria like "works correctly" or "looks good"</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Make verifiable - "tests pass", "button is green". 5 min to fix.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Hidden Dependencies
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Race conditions, "Cannot find type X" errors</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Implicit assumptions about what exists</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Document all explicitly with blockedBy/blocks. 10 min to fix.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Circular Dependencies
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Tasks blocked forever, no progress possible</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> A blocks B, B blocks C, C blocks A</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Review dependency graph, break cycles. 15 min to fix.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Missing Context
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Wrong implementation despite correct criteria</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Agent doesn't have enough information</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Include relevant context, reference files. 5 min to fix.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Wrong Decomposition Strategy
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Inefficient execution, tasks blocking unnecessarily</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Chose sequential when parallel was possible</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Re-evaluate with decision tree. 15 min to fix.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Over-Parallelization
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Coordination overhead dominates, thrashing</div>
+          <div class="gotcha-detail"><strong>Threshold:</strong> >5 parallel tasks typically problematic</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Limit parallel tasks, sequence some. 10 min to fix.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions without perfect solutions:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Finding the Right Size
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Too small = coordination overhead dominates. Too big = context overflow causes failure.</div>
+          <div class="hard-detail"><strong>Why no formula:</strong> It depends on task complexity, agent capability, verification overhead.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> "One session" heuristic. 2-3 sentence test. Iterate based on results.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Making Criteria Verifiable
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Some things are genuinely hard to specify. "Correct behavior" vs "tests pass" may diverge.</div>
+          <div class="hard-detail"><strong>Why it's fundamental:</strong> Verification is the foundation of autonomous execution.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Focus on observable outcomes. When impossible, use HOTL (Human On The Loop).</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Capturing All Dependencies
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Some dependencies are invisible until you hit them. "Unknown unknowns."</div>
+          <div class="hard-detail"><strong>Why it's fundamental:</strong> Complex systems have emergent coupling.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Review with checklist. Accept some re-planning as cost of exploration.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Human vs Agent Decomposition
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Human decomposition takes time but is more reliable. Agent decomposition (Refinery) scales but may miss nuance.</div>
+          <div class="hard-detail"><strong>When to delegate:</strong> Simple, well-defined domains. Not for novel or safety-critical.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Complex = human, simple = agent. Review agent decomposition before execution.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Parallelism vs Coordination
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More parallel = faster execution but more coordination overhead. Bottleneck shifts.</div>
+          <div class="hard-detail"><strong>Inflection point:</strong> ~5 parallel tasks is typical limit before coordination dominates.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Measure actual time. Don't parallelize for parallelism's sake.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              DECOMPOSITION IS ESSENTIAL WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multi-agent orchestration (CC Mirror, Gas Town)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Tasks exceeding one context window</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Parallel execution desired</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Complex dependencies exist</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multiple people/agents involved</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Task length >5 paragraphs</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Acceptance criteria >5 items</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DECOMPOSITION IS OVERKILL WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Single simple task fitting one session</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>One-shot operations (quick fixes)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Exploratory work with no defined end</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>No dependencies between parts</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Task description &lt; 2-3 sentences</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Quantitative Thresholds</h3>
+
+        <table class="strategy-table">
+          <thead>
+            <tr>
+              <th>Signal</th>
+              <th>Threshold</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Task length</td>
+              <td>>5 paragraphs</td>
+              <td>Decompose</td>
+            </tr>
+            <tr>
+              <td>Acceptance criteria</td>
+              <td>>5 items</td>
+              <td>Split task</td>
+            </tr>
+            <tr>
+              <td>Dependencies</td>
+              <td>>3 explicit</td>
+              <td>Document graph</td>
+            </tr>
+            <tr>
+              <td>Parallel opportunities</td>
+              <td>>2</td>
+              <td>Horizontal decomposition</td>
+            </tr>
+            <tr>
+              <td>Duration estimate</td>
+              <td>>1 session</td>
+              <td>Decompose</td>
+            </tr>
+            <tr>
+              <td>Files to modify</td>
+              <td>>10</td>
+              <td>Split by file group</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (4 items) -->
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Verifiable Criteria Universal</div>
+        <div class="text-text-secondary text-sm">
+          Every orchestrator (Ralph, CC Mirror, Gas Town) requires agent-verifiable acceptance criteria. This is not a Ralph thing or a CC Mirror thing. It's a multi-agent orchestration thing.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">One Session Heuristic</div>
+        <div class="text-text-secondary text-sm">
+          "Agent-sized" maps to single session across all patterns. Ralph, CC Mirror, Gas Town - all require tasks that fit one context window. The constraint is transformer attention, not the tool.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if agents had infinite context?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> No decomposition. One big task. No dependencies to track.<br>
+          <strong>Why this fails:</strong> 200K context is the limit. Quality degrades at 80K. Decomposition is the constraint made visible.<br>
+          <strong>Hidden insight:</strong> Decomposition skill IS the skill of working within transformer limits.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible core</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Minimal task:</strong> One description + one acceptance criterion that's verifiable.<br>
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">"Add column X" + "npm run typecheck passes"</code><br>
+          Everything else (dependencies, context, templates) is refinement.
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Context Finite -> Task Size -> Decomposition</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Agent context finite (200K) -> Quality degrades as context fills<br>
+          -> Tasks must complete before degradation<br>
+          -> Each task must fit in one session<br>
+          -> Large tasks must be decomposed<br>
+          -> Decomposition quality determines orchestration outcome
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Decomposition Skill Transfer</div>
+        <div class="text-text-secondary text-sm">
+          Master decomposition once, apply everywhere. Ralph, CC Mirror, Gas Town all benefit. The skill transfers because the constraint (context limits) is universal.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Task Decomposition = Work Breakdown Structure</div>
+        <div class="text-text-secondary text-sm">
+          Project management's WBS applies directly. Top-down decomposition, verifiable deliverables, dependency graphs. If you've done PM, you already know decomposition.<br><br>
+          <em>The difference: AI agents need machine-verifiable criteria, not human judgment.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="core">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What strategies exist?" -> The 6 strategies<br>
+          <strong>Intermediate:</strong> "When use which?" -> Decision tree<br>
+          <strong>Advanced:</strong> "What's the right size?" -> 2-3 sentence test<br>
+          <strong>Staff:</strong> "When let agent decompose?" -> Refinery pattern<br>
+          <strong>Expert:</strong> "What's truly impossible?" -> Fundamental tensions
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (5 items) -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Verification -> Acceptance Criteria -> Task Design</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Autonomous execution requires verification<br>
+          -> Verification requires observable outcomes<br>
+          -> Observable outcomes require specific criteria<br>
+          -> Criteria must be machine-checkable<br>
+          -> "npm run test passes" not "works correctly"
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip verifiable criteria</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Acceptance criteria = "works correctly"<br>
+          <strong>THEN:</strong> Agent marks done without verification<br>
+          <strong>THEN:</strong> Broken code enters codebase<br>
+          <strong>THEN:</strong> Future tasks inherit broken foundation<br>
+          <strong>FINALLY:</strong> 20 iterations on garbage foundation
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you leave dependencies implicit</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Dependencies not documented<br>
+          <strong>THEN:</strong> Agent attempts task before prereqs<br>
+          <strong>THEN:</strong> "Cannot find type X" errors<br>
+          <strong>THEN:</strong> Wasted iteration fixing prereqs first<br>
+          <strong>FINALLY:</strong> Correct ordering discovered through failure
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Decomposition Effort vs Execution Quality</div>
+        <div class="text-text-secondary text-sm">
+          <strong>More decomposition effort:</strong> Better execution, less agent confusion, fewer retries<br>
+          <strong>Less decomposition effort:</strong> Faster start, but more failures, more retries<br><br>
+          <em>Investment up front pays compound returns during execution.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Vague Criteria Disaster</div>
+        <div class="text-text-secondary text-sm">
+          Acceptance criteria: "Works correctly." Agent claimed complete after first implementation. UI completely broken. Tests didn't exist. Discovered on manual review after 15 iterations.
+        </div>
+      </div>
+
+      <!-- FILES SECTION (4 items) -->
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Decomposition + Domain Reference (CC Mirror)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> CC Mirror's domain_reference field improves task quality. Agent loads relevant context per-task.<br>
+          <strong>Key insight:</strong> Domain references = context without context overflow.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Decomposition + Refinery (Gas Town)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Gas Town's Refinery agent specializes in decomposition. Feed it complex tasks, get well-structured subtasks.<br>
+          <strong>When to use:</strong> Repeatable domains where patterns are established.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Anti-Composition
+        </div>
+        <div class="font-medium text-text-primary mb-2">Decomposition Without Context</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Fails:</strong> Perfect decomposition + missing context = wrong implementations.<br>
+          Context must travel WITH tasks. Task template must include relevant info.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="files">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Cross-Pattern Equivalence
+        </div>
+        <div class="font-medium text-text-primary mb-2">Same structure, different formats</div>
+        <div class="text-text-secondary text-sm">
+          <strong>prd.json:</strong> Ralph's task format<br>
+          <strong>TaskCreate:</strong> CC Mirror's task format<br>
+          <strong>Inbox:</strong> Gas Town's task format<br><br>
+          <em>All contain: title, description, criteria, dependencies. Format differs, essence same.</em>
+        </div>
+      </div>
+
+      <!-- PATH SECTION (3 items) -->
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">First decomposition vs Expert decomposition</div>
+        <div class="text-text-secondary text-sm">
+          <strong>First time:</strong> Overthink every boundary. Takes 2 hours. Still get it wrong.<br>
+          <strong>After 10 projects:</strong> Intuitive. 25 minutes. Usually right.<br>
+          <strong>Expert:</strong> See patterns before analyzing. 10 minutes. Know the gotchas.<br><br>
+          <em>Decomposition is a skill that improves with practice.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="path">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Better Requirements</div>
+        <div class="text-text-secondary text-sm">
+          Decomposition forces clearer thinking about what "done" means. Vague requirements become visible when you try to write acceptance criteria. Decomposition is a requirements clarification tool.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Hidden Dependency Failure</div>
+        <div class="text-text-secondary text-sm">
+          Decomposed "add feature" into 8 tasks. Missed that task 6 needed output from task 3. Discovered at task 6 when "type not found" error. Had to re-plan and re-execute.
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (5 items) -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When 5+ parallel tasks flip from benefit to cost</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-4 parallel:</strong> Linear speedup, coordination manageable<br>
+          <strong>5 parallel:</strong> Coordination overhead noticeable<br>
+          <strong>6+ parallel:</strong> Coordination dominates, thrashing begins<br><br>
+          <strong>THE INFLECTION:</strong> ~5 tasks<br>
+          <em>More parallel != faster. There's a ceiling.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When task size flips from "fits" to "must decompose"</div>
+        <div class="text-text-secondary text-sm">
+          <strong>~40K tokens:</strong> Task fits comfortably with room for verification<br>
+          <strong>60K tokens:</strong> Tight fit, quality starting to degrade<br>
+          <strong>80K+ tokens:</strong> Must decompose, context rot inevitable<br><br>
+          <em>Watch for repetition, contradictions, hallucinations as signals.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How vague criteria degrade across iterations</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Iteration 1:</strong> Task looks done. Agent confident.<br>
+          <strong>Iteration 5:</strong> Building on unchecked work. Foundation shaky.<br>
+          <strong>Iteration 10:</strong> Downstream errors compound.<br>
+          <strong>Iteration 15:</strong> Realize iteration 1 was wrong. Start over.<br><br>
+          <em>Vague criteria have compounding cost.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Over-Decomposition Overhead</div>
+        <div class="text-text-secondary text-sm">
+          Split feature into 50 tiny tasks. Coordination overhead dominated. Each task took longer to describe than implement. Should have been 8 tasks. 80% of time was coordination.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Missing Context Failure</div>
+        <div class="text-text-secondary text-sm">
+          Perfect decomposition, clear criteria, explicit dependencies. Agent implemented everything wrong because context about existing patterns wasn't included. Had to add context and redo.
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Detail vs Speed</div>
+        <div class="text-text-secondary text-sm">
+          <strong>More detail:</strong> Better agent understanding, fewer retries, higher quality<br>
+          <strong>Less detail:</strong> Faster decomposition, but more agent confusion<br><br>
+          <em>There's no formula. It's judgment. Err toward more detail when uncertain.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Parallel vs Simple</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Parallel:</strong> Faster total time, but more coordination complexity<br>
+          <strong>Sequential:</strong> Simpler to manage, but slower total time<br><br>
+          <em>Parallel is not free. Coordination has cost. Sequential is underrated.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal auto-decomposition</div>
+        <div class="text-text-secondary text-sm">
+          Can AI reliably decompose complex tasks? Gas Town's Refinery tries. Results vary. Human decomposition still more reliable for novel domains. Research ongoing.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Decomposition quality metrics</div>
+        <div class="text-text-secondary text-sm">
+          How do you measure decomposition quality before execution? Current approach: run it and see. No predictive metrics yet. Would unlock decomposition optimization.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (5 items) -->
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you decomposed a simple task?</div>
+        <div class="text-text-secondary text-sm">
+          Task: "Fix typo in README." Decomposed into 5 steps with dependencies.<br>
+          <strong>Result:</strong> 10x overhead. Coordination dominated. Single task was 30 seconds. Decomposed version took 15 minutes.<br><br>
+          <em>Decomposition has overhead. Don't pay it for simple tasks.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If decomposition isn't right</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Simple task?</strong> -> No decomposition, single session<br>
+          <strong>Need agent decomposition?</strong> -> Gas Town Refinery<br>
+          <strong>Exploratory work?</strong> -> Dynamic decomposition as you go<br>
+          <strong>Complex judgment?</strong> -> Human decomposes, agent executes
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Pattern Navigation
+        </div>
+        <div class="font-medium text-text-primary mb-2">Where decomposition fits in orchestration</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Ralph:</strong> Decomposition -> prd.json -> Sequential execution<br>
+          <strong>CC Mirror:</strong> Decomposition -> TaskCreate -> Parallel execution<br>
+          <strong>Gas Town:</strong> Refinery decomposes -> Inbox -> Parallel execution<br><br>
+          <em>Decomposition is input to orchestration, not a pattern itself.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Single task vs Project vs Career</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Single task:</strong> Decomposition overhead may not pay off<br>
+          <strong>Project:</strong> Decomposition skill compounds across tasks<br>
+          <strong>Career:</strong> Decomposition is transferable to any orchestration<br><br>
+          <em>Invest in the skill even if single tasks don't justify it.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Clearer Thinking</div>
+        <div class="text-text-secondary text-sm">
+          Regular decomposition practice improves overall problem-solving. You start seeing boundaries, dependencies, verification requirements in all work. Decomposition thinking becomes automatic.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

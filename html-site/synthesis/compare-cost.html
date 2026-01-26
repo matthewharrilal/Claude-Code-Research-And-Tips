@@ -1,0 +1,2287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cost-Optimized Architecture Design | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+    .code-block .number { color: #f59e0b; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Data Tables */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .data-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #3f3f46;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .data-table tr:hover {
+      background: #fafafa;
+    }
+
+    .data-table code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+    }
+
+    /* Cost Comparison Cards */
+    .cost-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .cost-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .cost-card-title {
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .cost-card-price {
+      font-weight: 700;
+      color: #0D9373;
+    }
+
+    .cost-card-detail {
+      font-size: 13px;
+      color: #71717a;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Highlight box for key formulas */
+    .formula-box {
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+      border: 1px solid #10b981;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .formula-box code {
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      display: block;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Cost Optimization</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">The Cost Equation</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-model-tiering" class="nav-item">Why Model Tiering?</a>
+          <a href="#why-fresh-context" class="nav-item">Why Fresh Context?</a>
+          <a href="#why-prompt-caching" class="nav-item">Why Prompt Caching?</a>
+        </div>
+      </div>
+
+      <!-- Model Selection -->
+      <div class="nav-section" data-section="models">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>Model Selection</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#model-selection" class="nav-item">Pricing Tiers</a>
+          <a href="#model-when" class="nav-item">When to Use Each</a>
+        </div>
+      </div>
+
+      <!-- Cost Patterns -->
+      <div class="nav-section" data-section="patterns">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Cost Patterns</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#patterns" class="nav-item">7 Optimization Patterns</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Common Mistakes</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Optimize</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Model tiering, fresh context, and prompt caching reduce AI costs 60-90% without quality loss.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Right-size every call. Opus for decisions. Haiku for errands."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Cost = (model_rate * tokens) * iterations * parallel_workers')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Cost = (model_rate * tokens) * iterations * parallel_workers</code>
+          </div>
+
+          <div class="core-anchor">Four levers. Model rate is the biggest. Everything else multiplies it.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Most teams waste 60-80% of their AI budget on two mistakes: using Opus when Sonnet suffices, and letting context accumulate until quality degrades. The fix isn't complex infrastructure. It's a discipline: match model capability to task complexity, reset context frequently, and cache what doesn't change.
+        </p>
+
+        <div class="formula-box">
+          <div class="font-semibold text-text-primary mb-3">The Cost Formula</div>
+          <code>Total Cost = Context Cost + Iteration Cost + Parallelism Overhead</code>
+          <code class="mt-2">Context Cost = tokens_per_iteration * model_rate * iterations</code>
+          <code>Iteration Cost = (setup + task + verification) * model_rate</code>
+          <code>Parallelism Overhead = workers * coordination_tokens * model_rate</code>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The formula reveals where to cut. Model rate affects everything. Token count compounds with iterations. Parallelism multiplies both. Optimize in that order: model first, tokens second, parallelism third.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-model-tiering" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY MODEL TIERING?</div>
+          <div class="decision-reasoning">
+            Opus output costs 60x more than Haiku output. For a 1000-token response: $0.075 (Opus) vs $0.00125 (Haiku). Most tasks don't need maximum reasoning. File lookups, test runs, and formatting don't require the smartest model.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Default to Sonnet. Use Haiku for simple tasks (file reads, status checks). Reserve Opus for architecture decisions and complex reasoning. One bad Opus call costs 60 Haiku calls. Make that trade consciously.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-fresh-context">
+          <div class="decision-why">WHY FRESH CONTEXT SAVES MONEY?</div>
+          <div class="decision-reasoning">
+            Context accumulates. A 10-iteration session with growing context costs ~$5-10. The same work with fresh context per iteration costs ~$2-4. That's 50-60% savings. Bonus: quality stays high because context rot doesn't accumulate.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use the Ralph pattern. Each iteration spawns fresh Claude. State persists in files (prd.json, progress.txt), not in context. You pay for 10K tokens per iteration instead of 100K tokens in a single session.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-prompt-caching">
+          <div class="decision-why">WHY PROMPT CACHING?</div>
+          <div class="decision-reasoning">
+            Anthropic's prompt caching provides 90% discount on cached content. If your system prompt is 5K tokens and you make 100 calls/day, uncached: $7.50/day. Cached: $1.88/day. That's $170/month saved on system prompts alone.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Put large, static content at the beginning of messages with cache_control. CLAUDE.md, project context, and instructions that don't change between calls. Cache write costs 25% more than base price. Cache read costs 90% less. Break-even is ~3-4 calls.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: MODEL SELECTION -->
+      <section id="model-selection" data-activity="models">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Model Selection Strategy
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          The price differential between models is dramatic. This table shows the fundamental cost landscape.
+        </p>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Input (per 1M tokens)</th>
+              <th>Output (per 1M tokens)</th>
+              <th>Cost Multiplier</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Claude 3.5 Haiku</strong></td>
+              <td>$0.25</td>
+              <td>$1.25</td>
+              <td>1x (baseline)</td>
+            </tr>
+            <tr>
+              <td><strong>Claude Sonnet 4</strong></td>
+              <td>$3.00</td>
+              <td>$15.00</td>
+              <td>12x</td>
+            </tr>
+            <tr>
+              <td><strong>Claude Opus 4.5</strong></td>
+              <td>$15.00</td>
+              <td>$75.00</td>
+              <td>60x</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="model-when">When to Use Each Model</h3>
+
+        <div class="cost-card">
+          <div class="cost-card-header">
+            <div class="cost-card-title">Opus 4.5 - The Architect</div>
+            <div class="cost-card-price">$15-20/hour</div>
+          </div>
+          <div class="cost-card-detail">
+            <strong>Use for:</strong> Complex reasoning, architecture decisions, orchestration planning, ambiguous requirements, quality-critical review.<br>
+            <strong>Rule:</strong> If a mistake cascades into expensive rework, use Opus.
+          </div>
+        </div>
+
+        <div class="cost-card">
+          <div class="cost-card-header">
+            <div class="cost-card-title">Sonnet 4 - The Workhorse</div>
+            <div class="cost-card-price">$5-10/hour</div>
+          </div>
+          <div class="cost-card-detail">
+            <strong>Use for:</strong> General implementation, worker tasks, most coding, test generation, code review.<br>
+            <strong>Rule:</strong> Default to Sonnet. Upgrade to Opus only when Sonnet fails or task needs complex reasoning.
+          </div>
+        </div>
+
+        <div class="cost-card">
+          <div class="cost-card-header">
+            <div class="cost-card-title">Haiku 3.5 - The Runner</div>
+            <div class="cost-card-price">$1-3/hour</div>
+          </div>
+          <div class="cost-card-detail">
+            <strong>Use for:</strong> File lookups, grep operations, test running, health checks, high-volume repetitive tasks.<br>
+            <strong>Rule:</strong> For embarrassingly parallel tasks, 10 Haiku workers outperform 1 Opus at 1/60th the cost.
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Gas Town Role-to-Model Mapping</h3>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Recommended Model</th>
+              <th>Hourly Cost Est.</th>
+              <th>Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Mayor</strong> (coordination)</td>
+              <td>Opus 4.5</td>
+              <td>$15-20</td>
+              <td>Complex cross-rig decisions</td>
+            </tr>
+            <tr>
+              <td><strong>Refinery</strong> (decomposition)</td>
+              <td>Opus 4.5</td>
+              <td>$15-20</td>
+              <td>Task breakdown is architectural</td>
+            </tr>
+            <tr>
+              <td><strong>Dogs</strong> (quality gates)</td>
+              <td>Sonnet</td>
+              <td>$5-8</td>
+              <td>Review requires judgment</td>
+            </tr>
+            <tr>
+              <td><strong>Polecat</strong> (named workers)</td>
+              <td>Sonnet</td>
+              <td>$5-10</td>
+              <td>Implementation work</td>
+            </tr>
+            <tr>
+              <td><strong>Witness</strong> (observation)</td>
+              <td>Haiku</td>
+              <td>$1-3</td>
+              <td>Logging, status tracking</td>
+            </tr>
+            <tr>
+              <td><strong>Deacon</strong> (health checks)</td>
+              <td>Haiku</td>
+              <td>$1-2</td>
+              <td>Simple monitoring</td>
+            </tr>
+            <tr>
+              <td><strong>Crew</strong> (ephemeral)</td>
+              <td>Haiku</td>
+              <td>$0.50-2</td>
+              <td>Quick, isolated tasks</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 5: COST PATTERNS -->
+      <section id="patterns" data-activity="patterns">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Cost Optimization Patterns
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Seven patterns that compound. Implement in order of ROI: model selection first, caching second, everything else follows.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">Pattern 1: Fresh Context (Ralph)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Traditional long session (expensive)</span>
+Iteration 1:  <span class="number">10K</span> context
+Iteration 5:  <span class="number">50K</span> context  <span class="comment"># 5x input cost</span>
+Iteration 10: <span class="number">100K</span> context <span class="comment"># 10x input cost</span>
+<span class="comment"># Quality degrading, more retries needed</span>
+
+<span class="comment"># Ralph fresh context (cheap)</span>
+Iteration 1:  <span class="number">10K</span> context
+Iteration 5:  <span class="number">10K</span> context  <span class="comment"># same cost</span>
+Iteration 10: <span class="number">10K</span> context  <span class="comment"># same cost</span>
+<span class="comment"># Quality maintained, fewer retries</span>
+
+<span class="comment"># Savings: 50-60%</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Pattern 2: Tiered Model Selection</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>orchestrator: opus   <span class="comment"># planning, coordination</span>
+    └── workers: sonnet <span class="comment"># implementation</span>
+            └── verification: haiku <span class="comment"># testing</span>
+
+<span class="comment"># Cost comparison:</span>
+All-Opus workflow:      <span class="variable">$100</span> (baseline)
+Tiered workflow:        <span class="variable">$35</span>  <span class="comment"># -65%</span>
+Aggressive Haiku use:   <span class="variable">$20</span>  <span class="comment"># -80%</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Pattern 3: Early Exit (Promise Pattern)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="keyword">if</span> grep -q <span class="string">"&lt;promise&gt;COMPLETE&lt;/promise&gt;"</span> output.txt; <span class="keyword">then</span>
+  <span class="keyword">echo</span> <span class="string">"Done early!"</span>
+  <span class="keyword">break</span>
+<span class="keyword">fi</span>
+
+<span class="comment"># Without early exit: Always runs MAX_ITERATIONS</span>
+<span class="comment"># With early exit: Average 60-70% of MAX_ITERATIONS</span>
+<span class="comment"># Savings: 30-40% on iteration costs</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Pattern 4: Prompt Caching</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>response = client.messages.create(
+    model=<span class="string">"claude-sonnet-4-20250514"</span>,
+    system=[{
+        <span class="string">"type"</span>: <span class="string">"text"</span>,
+        <span class="string">"text"</span>: <span class="string">"Large static system prompt..."</span>,
+        <span class="string">"cache_control"</span>: {<span class="string">"type"</span>: <span class="string">"ephemeral"</span>}  <span class="comment"># Cache this!</span>
+    }],
+    messages=[{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"Variable query"</span>}]
+)
+
+<span class="comment"># Cache write: 25% premium</span>
+<span class="comment"># Cache read: 90% discount</span>
+<span class="comment"># Break-even: ~3-4 calls with same system prompt</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Pattern 5: Batches API</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>batch = client.batches.create(
+    requests=[
+        {<span class="string">"custom_id"</span>: <span class="string">"req1"</span>, <span class="string">"params"</span>: {...}},
+        {<span class="string">"custom_id"</span>: <span class="string">"req2"</span>, <span class="string">"params"</span>: {...}},
+        <span class="comment"># Up to 100,000 requests per batch</span>
+    ]
+)
+
+<span class="comment"># 50% discount for non-urgent workloads</span>
+<span class="comment"># Best for: Bulk processing, overnight analysis</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Pattern 6: Subagent Token Isolation</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>Main Agent (lean)
+    │
+    └── Subagent: Browser Automation
+        └── (High token cost stays isolated)
+        └── Returns: Summary only
+
+<span class="comment"># Quote from @TendiesOfWisdom:</span>
+<span class="comment"># "Put costly tools like browser control in subagents</span>
+<span class="comment">#  to protect your main context window tokens"</span>
+
+<span class="comment"># Savings: 50-70% for browser/MCP-heavy workflows</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Pattern 7: Output Length Control</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>response = client.messages.create(
+    model=<span class="string">"claude-sonnet-4-20250514"</span>,
+    max_tokens=<span class="number">500</span>,  <span class="comment"># Hard limit</span>
+    messages=[{
+        <span class="string">"role"</span>: <span class="string">"user"</span>,
+        <span class="string">"content"</span>: <span class="string">"""
+        Respond in 3-5 sentences maximum.
+        Use bullet points, not paragraphs.
+        Skip preambles and conclusions.
+        """</span>
+    }]
+)
+
+<span class="comment"># Output tokens cost 5x more than input</span>
+<span class="comment"># Savings: 50-80% on output tokens</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real cost problems you'll hit, with concrete detection signals and fixes.
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            API bill 3x higher than expected
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Daily budget exceeded by noon. Cost tracking shows spikes you can't explain.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Using Opus for everything. Workers spawning sub-workers. Context accumulation in long sessions.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Audit model selection first. Check worker preambles prevent sub-spawning. Monitor context percentage with Claude HUD.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Ralph loop costs $50 instead of $15
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> 25-iteration loop costs 3x estimate. Late iterations are slow AND expensive.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Context not actually resetting. progress.txt grew to 50KB. Reading dominates thinking.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify fresh Claude per iteration. Check <code>wc -l progress.txt</code>. Archive and reset if >20KB.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Prompt caching shows no savings
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Expecting 90% discount but billing shows full prices.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> cache_control not set. Prompts too small (&lt;1024 tokens). Cache TTL expired.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify cache_control on system prompts. Check response.usage.cache_read_input_tokens. Ensure prompts exceed minimum.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Parallel workers duplicate work
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> 5 workers costs 15x a single worker (should be 5x). Same tasks repeated.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Poor task decomposition. Workers unaware of each other's assignments.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Ensure orchestrator assigns unique, non-overlapping tasks. Add task ID to each worker context.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Budget alerts never fire
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Exceeded monthly budget without warning. Discovered days later.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> No monitoring configured. Relying on manual checks.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Set up Anthropic Console budget alerts. Add local tracking: <code>echo "$(date),${COST}" >> ~/.claude/cost-log.csv</code></div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are genuine tensions without perfect solutions. Accept the trade-off, don't search for magic.
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost vs. Quality
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Cheaper models make more mistakes. Mistakes cost rework. Rework costs more than using the better model. But you can't use Opus for everything.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Haiku produces garbage 30% of the time. Sonnet is fine 90% of the time. Opus is overkill 80% of the time. How do you know which is which before you try?</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start cheap, escalate on failure. Fallback cascade: Haiku → Sonnet → Opus. Accept some rework is cheaper than over-engineering model selection.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Fresh Context vs. Accumulated Learning
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Fresh context saves money and maintains quality. But each iteration "forgets" 90% of the prior. progress.txt is lossy. Some re-learning is inevitable.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Iteration 15 repeats a mistake from iteration 3 that was "fixed" but not recorded. Or progress.txt grows so large it defeats the purpose.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Keep progress.txt under 20KB. Move permanent learnings to AGENTS.md. Accept re-learning as the cost of avoiding context rot.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Optimization ROI Uncertainty
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Setting up caching takes time. Implementing tiering takes time. Monitoring takes time. When does the optimization pay for itself?</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Spent a day implementing prompt caching for a workflow that runs 10x/day. Break-even: 6 months. Was this the right investment?</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Optimize what's expensive first. If daily spend is $5, don't invest days in optimization. If daily spend is $500, one hour of optimization is worth weeks of savings.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO OPTIMIZE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Optimize / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              OPTIMIZE COSTS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Daily spend exceeds $50 (optimization pays back quickly)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Running autonomous workflows (Ralph, Gas Town) overnight</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Using parallel workers (costs multiply)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Same system prompt used 100+ times/day (caching)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Bulk processing with flexible timelines (batching)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T OPTIMIZE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Daily spend is under $10 (focus on shipping)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quality is suffering (cheap isn't valuable if broken)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Exploration phase (don't optimize what might change)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>One-off tasks (setup cost exceeds savings)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Security-critical code (use Opus, accept the cost)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Budget Tiers by User Type</h3>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>User Type</th>
+              <th>Monthly Budget</th>
+              <th>Recommended Setup</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hobbyist</strong></td>
+              <td>$20-50</td>
+              <td>Pro subscription, occasional API</td>
+            </tr>
+            <tr>
+              <td><strong>Solo dev</strong></td>
+              <td>$100-300</td>
+              <td>Ralph loops, Sonnet-heavy</td>
+            </tr>
+            <tr>
+              <td><strong>Power user</strong></td>
+              <td>$500-1000</td>
+              <td>CC Mirror, tiered models</td>
+            </tr>
+            <tr>
+              <td><strong>Team</strong></td>
+              <td>$1000-3000</td>
+              <td>Gas Town minimal, shared infra</td>
+            </tr>
+            <tr>
+              <td><strong>Agency</strong></td>
+              <td>$3000-10000</td>
+              <td>Gas Town full, multi-project</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Top 10 Cost Optimization Strategies</h3>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Strategy</th>
+              <th>Potential Savings</th>
+              <th>Effort</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td><strong>Model selection</strong> (Haiku/Sonnet over Opus)</td>
+              <td>60-95%</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><strong>Prompt caching</strong> for large system prompts</td>
+              <td>90% on cached</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><strong>Batches API</strong> for bulk work</td>
+              <td>50%</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><strong>Output length limits</strong></td>
+              <td>50-80%</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td><strong>Subagent delegation</strong> for expensive tools</td>
+              <td>50-70%</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td><strong>Fresh context</strong> (Ralph pattern)</td>
+              <td>60-80%</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td><strong>Early exit conditions</strong></td>
+              <td>30-40%</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td><strong>Concise prompts</strong></td>
+              <td>10-50%</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td><strong>Context monitoring</strong> (Claude HUD)</td>
+              <td>20-30%</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td><strong>Model fallback cascade</strong></td>
+              <td>40-60%</td>
+              <td>Medium</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if all models cost the same?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Always use Opus. Maximum capability, always.<br>
+          <strong>Why this fails:</strong> Even if free, context windows still degrade. Model selection isn't just cost.<br>
+          <strong>Hidden constraint revealed:</strong> The right model is about task fit, not just budget.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible cost optimization</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">if task.simple: use haiku else: use sonnet</code><br>
+          <strong>Essential:</strong> Model tiering based on task complexity.<br>
+          <strong>Everything else:</strong> Refinements on top of this foundation.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@arvidkahl: $50-100+ per feature with Ralph</div>
+        <div class="text-text-secondary text-sm">
+          50 iterations overnight. "Expensive as hell" but shipped while sleeping. The question isn't "is it cheap" but "is the value worth the cost?"
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint → FIVE cost decisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Output tokens cost 5x input tokens<br>
+          → Control max_tokens on all calls<br>
+          → Prefer structured JSON over prose<br>
+          → Ask for bullet points, not paragraphs<br>
+          → Skip preambles and conclusions<br>
+          → Measure output tokens separately
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cost Optimization = Cloud Resource Tiering</div>
+        <div class="text-text-secondary text-sm">
+          Opus = m5.24xlarge (use for heavy compute)<br>
+          Sonnet = m5.xlarge (default workload)<br>
+          Haiku = t3.micro (background tasks)<br>
+          Spot instances = Batches API (50% off, flexible timing)<br><br>
+          <em>If you've optimized AWS bills, you already understand this.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How costs spiral (invisibly)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>$5/day</strong>: Normal, no action needed<br>
+          <strong>$15/day</strong>: Check model selection<br>
+          <strong>$50/day</strong>: Audit workflows, implement tiering<br>
+          <strong>$200/day</strong>: Something is wrong. Check for runaway workers.<br>
+          <strong>$500+/day</strong>: Emergency. Stop and investigate.<br><br>
+          <em>Costs creep. Set alerts at each threshold.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At scale: coordination costs dominate</div>
+        <div class="text-text-secondary text-sm">
+          <strong>At 1 worker:</strong> Pure task cost<br>
+          <strong>At 5 workers:</strong> 10-20% coordination overhead<br>
+          <strong>At 20 workers:</strong> Coordination can exceed task cost<br><br>
+          <strong>THRESHOLD:</strong> ~8-10 parallel workers<br>
+          <em>Beyond this, diminishing returns kick in hard.</em>
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (4 items) -->
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Model Selection Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Always Opus:</strong> Best quality, but 60x cost<br>
+          <strong>Always Haiku:</strong> Cheapest, but frequent failures<br>
+          <strong>Mixed:</strong> Optimal, but judgment required<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> You can't know task complexity before trying.<br>
+          <strong>HEURISTIC:</strong> Start cheap, escalate on failure.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip model tiering</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> You use Opus for everything<br>
+          <strong>THEN:</strong> Simple tasks cost 60x what they should<br>
+          <strong>THEN:</strong> Budget depleted faster<br>
+          <strong>THEN:</strong> Cut features to stay in budget<br>
+          <strong>FINALLY:</strong> Ship less while spending more<br><br>
+          <em>The fix: Default Sonnet. Opus only for complex reasoning.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="decisions">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How cost perception evolves</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "$5? That's nothing."<br>
+          <strong>Week 1:</strong> "$35/week. Getting real."<br>
+          <strong>Month 1:</strong> "$150/month. Need to optimize."<br>
+          <strong>Month 3:</strong> "Saving $100/month was worth 2 hours of setup."<br><br>
+          <em>Don't judge optimization by Day 1 costs.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="decisions">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Fresh context saves money across ALL patterns</div>
+        <div class="text-text-secondary text-sm">
+          Ralph, CC Mirror, Gas Town all share <strong>INV-003: External state > internal memory</strong>.<br><br>
+          The same principle that maintains quality ALSO reduces cost. Fresh context = fewer tokens = lower bills.
+        </div>
+      </div>
+
+      <!-- MODELS SECTION (4 items) -->
+      <div class="activity-item expertise" data-section="models">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your model selection skill?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Which model is best?" → Opus<br>
+          <strong>Intermediate:</strong> "When is Sonnet enough?" → Most implementation<br>
+          <strong>Advanced:</strong> "When is Haiku right?" → Parallel errands<br>
+          <strong>Staff:</strong> "Dynamic selection?" → Complexity classifier<br>
+          <strong>Expert:</strong> "Fallback cascade?" → Start cheap, escalate
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="models">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Code Review Pipeline: 93% savings</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Before:</strong> Full codebase + Opus = $300/month for 50 PRs/week<br>
+          <strong>After:</strong> Git diff only + tiered models + caching = $20/month<br><br>
+          <strong>Key insight:</strong> Context reduction mattered more than model selection.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="models">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Haiku Army + Sonnet Orchestrator</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works?</strong> Yes, extremely well.<br>
+          <strong>Pattern:</strong> Sonnet plans, Haiku executes in parallel.<br>
+          <strong>The benefit:</strong> 10 Haiku workers = 1/6th cost of 1 Opus, often faster.<br>
+          <strong>Recommendation:</strong> Use for embarrassingly parallel tasks (file processing, test runs).
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="models">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if Haiku was as smart as Opus?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Haiku for everything. 60x cheaper, no downside.<br>
+          <strong>Why this fails:</strong> Capability differences are real. Haiku fails on complex reasoning.<br>
+          <strong>Hidden constraint revealed:</strong> Cost optimization has a quality floor.
+        </div>
+      </div>
+
+      <!-- PATTERNS SECTION (4 items) -->
+      <div class="activity-item inflection" data-section="patterns">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When caching flips from overhead to savings</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-2 calls:</strong> Net negative (write cost > savings)<br>
+          <strong>3-4 calls:</strong> Break-even<br>
+          <strong>5-10 calls:</strong> 80%+ savings<br>
+          <strong>100+ calls:</strong> 90%+ savings<br><br>
+          <strong>THE INFLECTION:</strong> ~3-4 calls with same cached content<br>
+          <strong>DETECTION:</strong> Multiply daily calls by prompt size. If >5K tokens/day, cache.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="patterns">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Batching constraint → workflow changes</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Batches API requires 24-48h turnaround<br>
+          → Can't use for real-time work<br>
+          → Must separate urgent from deferrable<br>
+          → Need queue system for batch jobs<br>
+          → Results delivered async<br>
+          → Workflow must handle delayed responses
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="patterns">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal model routing</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> Can we automatically route tasks to optimal models before trying?<br>
+          <strong>Why it's hard:</strong> Complexity isn't obvious from prompt text alone.<br>
+          <strong>Current best practice:</strong> Start cheap, escalate on failure. No reliable pre-routing yet.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="patterns">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Fresh Context = Serverless Functions</div>
+        <div class="text-text-secondary text-sm">
+          Long session = EC2 instance (always running, accumulating state)<br>
+          Fresh context = Lambda (stateless, spins up fresh)<br>
+          State files = DynamoDB (external persistence)<br>
+          Iteration = Invocation (clean start each time)<br><br>
+          <em>If you've designed for serverless, you understand why fresh context is cheaper.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item violation" data-section="gotchas">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you don't monitor context size</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> You ignore context accumulation<br>
+          <strong>THEN:</strong> Each iteration costs more than the last<br>
+          <strong>THEN:</strong> Quality degrades silently<br>
+          <strong>THEN:</strong> Retries needed for degraded output<br>
+          <strong>FINALLY:</strong> Paying 3x for 0.5x quality<br><br>
+          <em>The fix: Claude HUD shows context %. Compact at 80%.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At iteration 50+: reading dominates thinking</div>
+        <div class="text-text-secondary text-sm">
+          <strong>At iteration 10:</strong> Read 5K, think 95K context<br>
+          <strong>At iteration 30:</strong> Read 30K, think 70K context<br>
+          <strong>At iteration 50:</strong> Read 50K+, thinking compressed<br><br>
+          <strong>THRESHOLD:</strong> ~20KB state files<br>
+          <em>Beyond this, you're paying for history, not work.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How budget overruns happen (invisibly)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10% over:</strong> Normal variance, ignore<br>
+          <strong>25% over:</strong> Something changed, investigate<br>
+          <strong>50% over:</strong> Model or workflow issue<br>
+          <strong>100% over:</strong> Runaway process or leak<br>
+          <strong>200%+ over:</strong> Emergency. Workers spawning workers.<br><br>
+          <em>Critical: Set alerts at 50% and 80% of daily budget.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="gotchas">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When "acceptable" costs become problems</div>
+        <div class="text-text-secondary text-sm">
+          <strong>First run:</strong> "$10 for a feature? Great!"<br>
+          <strong>10th run:</strong> "$100/month... getting significant"<br>
+          <strong>50th run:</strong> "$500/month on one workflow"<br>
+          <strong>100th run:</strong> "This is my biggest expense"<br><br>
+          <em>Today's acceptable is tomorrow's problem. Track from day 1.</em>
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Value Calculation Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE DILEMMA:</strong> How do you measure AI ROI?<br>
+          <strong>Hours saved:</strong> Hard to measure precisely<br>
+          <strong>Quality improvement:</strong> Subjective<br>
+          <strong>Developer happiness:</strong> Not in the budget<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> Value is context-dependent.<br>
+          <strong>HEURISTIC:</strong> If dev_hourly_rate * hours_saved > AI_cost, it's worth it.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Steve Yegge on Gas Town costs</div>
+        <div class="text-text-secondary text-sm">
+          "If you care about costs, don't use this."<br><br>
+          Gas Town runs multiple Claude accounts in parallel. Designed for capability, not economy. The warning is honest: some architectures optimize for power, not price.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cost optimization depth</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "How do I reduce costs?" → Use cheaper models<br>
+          <strong>Intermediate:</strong> "What's the ROI?" → Break-even calculation<br>
+          <strong>Advanced:</strong> "Where's the waste?" → Token-level analysis<br>
+          <strong>Staff:</strong> "Systemic savings?" → Architecture changes<br>
+          <strong>Expert:</strong> "Cost as feature?" → Intentional spending allocation
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="hard">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">The winning formula across all patterns</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">Fresh context + Tiered models + Early exit + Verification = Maximum value per dollar</code><br><br>
+          This formula appears in Ralph, CC Mirror, and Gas Town documentation. The principles are invariant.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (4 items) -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If cost optimization isn't your priority</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need maximum quality?</strong> → Use Opus, accept the cost<br>
+          <strong>Need fastest iteration?</strong> → Skip optimization, ship now<br>
+          <strong>Need simplicity?</strong> → Pro subscription, no API<br>
+          <strong>Need scale?</strong> → Focus on parallelism, optimize later
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you over-optimized?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Haiku for everything, minimal context, no caching overhead.<br>
+          <strong>Why this fails:</strong> Quality suffers. Rework costs exceed savings. Frustration increases.<br>
+          <strong>Hidden constraint revealed:</strong> Cost floor exists. Below it, you're trading value for savings.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cost Optimization + Ralph Pattern</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works?</strong> Extremely well. Natural fit.<br>
+          <strong>Why:</strong> Ralph's fresh context already saves 50-60%. Add tiering for another 60%.<br>
+          <strong>Compound effect:</strong> Combined savings: 80-90%<br>
+          <strong>Recommendation:</strong> Implement together. Synergies are strong.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="when">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Predictive cost modeling</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> Can we predict total cost before starting a workflow?<br>
+          <strong>Why it's hard:</strong> Iterations depend on task difficulty. Parallel scaling depends on task decomposability. Both are unknown upfront.<br>
+          <strong>Current best practice:</strong> Estimate 2x optimistic guess. Track actuals. Adjust.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

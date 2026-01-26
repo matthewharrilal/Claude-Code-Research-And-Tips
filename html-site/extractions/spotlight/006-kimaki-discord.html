@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kimaki Pattern | Discord Interface for AI Coding Agents</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Architecture Diagram */
+    .architecture-diagram {
+      background: #18181b;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .architecture-diagram pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #e4e4e7;
+      line-height: 1.5;
+    }
+
+    /* Feature Grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .feature-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .feature-card-title {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feature-card-desc {
+      font-size: 14px;
+      color: #71717a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="message-circle" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Discord becomes your AI coding interface: channels map to projects, threads are sessions, voice enables hands-free development.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Each channel is a window into a specific project on your machine."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'npx -y kimaki@latest')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>npx -y kimaki@latest</code>
+          </div>
+
+          <div class="core-anchor">That's all it takes. Discord becomes your AI coding interface.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Kimaki is a Discord bot that bridges chat messages to AI coding agents running on your local machine. When you send a message in a linked Discord channel, an AI agent reads/edits files, executes terminal commands, and searches your codebase.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">One Bot Per Machine Architecture</h3>
+
+        <div class="architecture-diagram">
+          <pre>Discord Server
+├── #project-a (Bot 1)
+├── #project-b (Bot 1)
+└── #project-c (Bot 2)
+      │
+      ▼
+Machine 1 (Kimaki Bot 1)
+├── OpenCode Server A → ~/projects/a
+└── OpenCode Server B → ~/projects/b
+
+Machine 2 (Kimaki Bot 2)
+└── OpenCode Server C → ~/projects/c</pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          <strong>Key Principle:</strong> Each Kimaki bot instance connects to exactly one machine. Multiple channels can map to different project directories on that machine. For multiple machines, run separate bot instances with different tokens.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="voice-pipeline">Voice Processing Pipeline</h3>
+
+        <div class="architecture-diagram">
+          <pre>Discord Voice (48kHz Stereo)
+         │
+         ▼
+    Opus Decoder
+         │
+         ▼
+    Downsampler (48kHz → 16kHz)
+         │
+         ▼
+    Mono Conversion
+         │
+         ▼
+    100ms Frame Chunking (3,200 samples)
+         │
+         ▼
+    Base64 Encoding
+         │
+         ▼
+    GenAI Worker (Gemini)
+         │
+         ▼
+    AI Response → Discord TTS/Text</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Key Features</h3>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-card-title">
+              <i data-lucide="message-square" class="w-4 h-4 text-accent"></i>
+              Text & File Interactions
+            </div>
+            <div class="feature-card-desc">Send messages in linked channels to trigger AI sessions. Attach files for inline context.</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card-title">
+              <i data-lucide="mic" class="w-4 h-4 text-accent"></i>
+              Voice Channel Support
+            </div>
+            <div class="feature-card-desc">Join voice channels and speak naturally. Real-time transcription via Gemini API.</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card-title">
+              <i data-lucide="git-branch" class="w-4 h-4 text-accent"></i>
+              Session Management
+            </div>
+            <div class="feature-card-desc">/session, /resume, /fork, /share - full session control via slash commands.</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card-title">
+              <i data-lucide="list" class="w-4 h-4 text-accent"></i>
+              Message Queue
+            </div>
+            <div class="feature-card-desc">Chain follow-up tasks with /queue without waiting for completion.</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card-title">
+              <i data-lucide="cpu" class="w-4 h-4 text-accent"></i>
+              Model Selection
+            </div>
+            <div class="feature-card-desc">Switch models per channel or session with /model command.</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-card-title">
+              <i data-lucide="webhook" class="w-4 h-4 text-accent"></i>
+              CI/CD Integration
+            </div>
+            <div class="feature-card-desc">Trigger sessions from GitHub Actions with npx kimaki send.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-one-bot" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY ONE BOT PER MACHINE?</div>
+          <div class="decision-reasoning">
+            Each bot connects to exactly one machine because the bot needs local filesystem access. You can't have a single bot securely accessing multiple machines without complex VPN/tunnel setups. The constraint simplifies security and ownership.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              If you have a laptop, a server, and a workstation, you need three bot instances with three tokens. Use <code>--data-dir</code> for isolated configurations on the same machine.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-channels">
+          <div class="decision-why">WHY CHANNEL = PROJECT?</div>
+          <div class="decision-reasoning">
+            Discord channels are natural organizational units. Mapping each channel to a project directory creates a clear mental model: #frontend talks to ~/projects/frontend, #backend talks to ~/projects/backend. No confusion about which codebase you're modifying.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Create channels that match your project structure. Messages in #my-api will only affect the codebase linked to that channel. Thread = session, channel = project.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-gemini">
+          <div class="decision-why">WHY GEMINI FOR VOICE?</div>
+          <div class="decision-reasoning">
+            Gemini has a good audio transcription API that handles real-time streaming audio. The voice processing pipeline requires: Opus decoding, downsampling, chunking, and transcription. Gemini handles this reliably with low latency.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Voice features require a Gemini API key in addition to your AI coding API key. Voice is optional - if you only need text, skip the Gemini setup.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY THREADS = SESSIONS?</div>
+          <div class="decision-reasoning">
+            Discord threads maintain context naturally - they're scoped conversations under a channel. This maps perfectly to coding sessions: start a task, create a thread, maintain context throughout, then archive when done.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Each new task creates a thread automatically. Use /resume to continue old sessions, /fork to branch from a point in history. Session state persists in SQLite at ~/.kimaki/discord-sessions.db.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY SQLITE FOR STATE?</div>
+          <div class="decision-reasoning">
+            No external database needed. SQLite is simple, local, and requires no setup. The database tracks 7 tables: thread_sessions, part_messages, bot_tokens, bot_api_keys, channel_directories, channel_models, and session_models.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              All state is in ~/.kimaki/discord-sessions.db. Back it up if you care about session history. Delete it to start fresh.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Kimaki data directory</span>
+~/.kimaki/
+├── discord-sessions.db    <span class="comment"># SQLite database (7 tables)</span>
+└── [additional config]
+
+<span class="comment"># Your project directory</span>
+~/projects/my-app/
+├── opencode.json          <span class="comment"># Model configuration</span>
+└── [your code]
+
+<span class="comment"># CLI options</span>
+npx kimaki                    <span class="comment"># Interactive setup</span>
+npx kimaki --restart          <span class="comment"># Re-enter credentials</span>
+npx kimaki --add-channels     <span class="comment"># Select projects</span>
+npx kimaki --data-dir &lt;path&gt;  <span class="comment"># Custom config location</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="bot-setup">Discord Bot Setup (Manual)</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">Go to <code>https://discord.com/developers/applications</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Create New Application → Navigate to Bot → Create Bot</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Copy Token (keep secure!)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Enable <strong>Server Members Intent</strong> (required)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Enable <strong>Message Content Intent</strong> (required)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">OAuth2 → URL Generator → Scopes: <code>bot</code>, <code>applications.commands</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Permissions: Send Messages, Create Threads, Read Message History, Connect, Speak</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Copy invite URL → Add bot to your server</div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Project Configuration (opencode.json)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>{
+  <span class="string">"model"</span>: <span class="string">"anthropic/claude-sonnet-4-20250514"</span>
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Permissions</h3>
+
+        <p class="text-text-secondary mb-4">Only these users can trigger sessions:</p>
+        <ul class="list-disc list-inside text-text-secondary mb-6 space-y-2">
+          <li>Server owners</li>
+          <li>Administrators</li>
+          <li>Users with "Manage Server" permission</li>
+          <li>Users with "Kimaki" role</li>
+        </ul>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a text message through the entire system:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>[T+0ms]</strong> User sends "Can you add error handling to the login function?" in #backend channel</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>[T+10ms]</strong> Discord.js event handler receives message → Permission check (admin/owner/Kimaki role)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>[T+20ms]</strong> Channel-to-directory lookup via SQLite: <code>channel_directories</code> → <code>/path/to/backend/</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>[T+30ms]</strong> Thread created with title: "Add error handling to login" → <code>session_id</code> generated</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>[T+50ms]</strong> OpenCode server spawned or retrieved for <code>/path/to/backend/</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>[T+100ms]</strong> AI agent executes: reads <code>src/auth/login.ts</code>, generates error handling code</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content"><strong>[T+2000ms]</strong> Response formatted: tool calls shown as <code>src/auth/login.ts (+15-3)</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content"><strong>[T+2100ms]</strong> Discord message updated in thread → Typing indicator stops</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content"><strong>[T+2200ms]</strong> Session persisted to SQLite: <code>thread_sessions</code>, <code>part_messages</code></div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="voice-path">Voice Message Flow</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>[T+0ms]</strong> User speaks "Can you refactor the user service?" in voice channel</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>[T+10ms]</strong> Discord voice stream received (48kHz Stereo Opus)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>[T+50ms]</strong> Audio processing: Opus decode → Downsample (48kHz → 16kHz) → Mono → 100ms chunks</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>[T+100ms]</strong> Base64 encoding → Gemini transcription → "Can you refactor the user service?"</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>[T+200ms]</strong> Same flow as text: Channel lookup → OpenCode → AI execution</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>[T+N ms]</strong> Response via text in channel (or voice TTS if configured)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          10 real problems you'll hit, with concrete fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #1: Missing intents error
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Missing required intents" on startup</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Enable Server Members Intent + Message Content Intent in Discord developer portal → 5 min fix</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #2: Port already in use
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Kimaki fails to start with port conflict</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Kill existing process or use <code>--data-dir ~/.kimaki-alt</code> → 2 min fix</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #3: OpenCode not found
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> CLI not installed or not in PATH</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>npm install -g @opencode-ai/cli</code> → 5 min fix</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #4: Bot doesn't respond
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Messages ignored, no thread created</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> User needs admin, owner, or "Kimaki" role → 2 min fix</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #5: Session times out
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> OpenCode health check failing</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check project config, test <code>opencode serve --port 9999</code> manually → 10 min fix</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #6: Voice not transcribing
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Speaking produces no response</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Run <code>--restart</code>, enter valid Gemini API key → 2 min fix</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #7: Bot won't join voice
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> No response when joining voice channel</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check Connect + Speak permissions in Discord → 2 min fix</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #8: Channel not linked
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Messages in channel produce no response</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Run <code>--add-channels</code> and select the project → 5 min fix</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #9: Multi-instance conflict
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Two bots fighting for same data-dir</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use different <code>--data-dir</code> for each instance → 2 min fix</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #10: Webhook issues for CI
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> <code>npx kimaki send</code> not working from GitHub Actions</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check channel ID format, use <code>--notify-only</code> for simple messages → 5 min fix</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions in Discord-as-interface, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            One Bot Per Machine Constraint
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> You can't control multiple machines with one bot without complex networking. Each machine needs its own bot instance and Discord token.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Accept the constraint. Create multiple bot applications in Discord. Use descriptive names: "Kimaki-Laptop", "Kimaki-Server", "Kimaki-Workstation".</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Voice Processing Latency
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Transcription adds ~200-500ms latency. Real-time voice coding feels slightly delayed compared to direct terminal input.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Accept the latency as the cost of hands-free operation. Use voice for high-level guidance, text for precision commands.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Discord Rate Limits
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Discord's API has request limits. Heavy usage can trigger throttling, especially with many concurrent sessions.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Kimaki has built-in rate limiting. For high-volume use, consider staggering requests or using queue commands.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Permission Management Complexity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Discord's role system is powerful but complex. Who can use the bot? Who can see outputs? Permissions cascade in non-obvious ways.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Create a single "Kimaki" role. Assign it to trusted users. Keep permissions simple rather than granular.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            OpenCode (Not Claude Code) Dependency
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Kimaki uses OpenCode, not Claude Code directly. Different backend, different patterns, different ecosystem.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Learn OpenCode-specific patterns. The concepts transfer (channels, sessions, tools), but implementation details differ.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Gemini API Key for Voice
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Voice requires another API key to manage. More credentials, more cost tracking, more potential failure points.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Consider voice optional. Start with text-only. Add voice when the workflow demands hands-free operation.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE KIMAKI WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Team collaboration - multiple developers, shared context visibility</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Mobile-first - need to fix code from phone/tablet</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Voice coding - hands-free development during commute or sketching</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Async monitoring - start task, check Discord later</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>CI/CD integration - build notifications and fix requests via webhooks</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE KIMAKI WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Single user, local only → Direct CLI is simpler</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Mac-specific automation → SYSTEM has more features</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>No Discord in your workflow → Don't add dependency</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Latency-critical work → Direct terminal is faster</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Security-sensitive environments → Discord adds exposure</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="combinations">Pattern Combinations</h3>
+
+        <div class="core-abstraction">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-border">
+                <th class="text-left py-3 pr-4 font-semibold">Kimaki +</th>
+                <th class="text-left py-3 pr-4 font-semibold">Use Case</th>
+                <th class="text-left py-3 pr-4 font-semibold">Complexity</th>
+                <th class="text-left py-3 font-semibold">Value</th>
+              </tr>
+            </thead>
+            <tbody class="text-text-secondary">
+              <tr class="border-b border-border">
+                <td class="py-3 pr-4 font-medium text-text-primary">Ralph</td>
+                <td class="py-3 pr-4">Discord interface for continuous iteration loops</td>
+                <td class="py-3 pr-4">Medium</td>
+                <td class="py-3">High</td>
+              </tr>
+              <tr class="border-b border-border">
+                <td class="py-3 pr-4 font-medium text-text-primary">Gas Town</td>
+                <td class="py-3 pr-4">Discord monitoring for agent factory output</td>
+                <td class="py-3 pr-4">Medium</td>
+                <td class="py-3">High</td>
+              </tr>
+              <tr class="border-b border-border">
+                <td class="py-3 pr-4 font-medium text-text-primary">CC Mirror</td>
+                <td class="py-3 pr-4">Chat-triggered multi-agent orchestration</td>
+                <td class="py-3 pr-4">Medium-High</td>
+                <td class="py-3">High</td>
+              </tr>
+              <tr class="border-b border-border">
+                <td class="py-3 pr-4 font-medium text-text-primary">Personal Panopticon</td>
+                <td class="py-3 pr-4">Domain-specific agents via Discord channels</td>
+                <td class="py-3 pr-4">Medium</td>
+                <td class="py-3">Very High</td>
+              </tr>
+              <tr class="border-b border-border">
+                <td class="py-3 pr-4 font-medium text-text-primary">MCP Tools</td>
+                <td class="py-3 pr-4">Discord-triggered tool execution</td>
+                <td class="py-3 pr-4">Low</td>
+                <td class="py-3">Medium</td>
+              </tr>
+              <tr>
+                <td class="py-3 pr-4 font-medium text-text-primary">CI/CD</td>
+                <td class="py-3 pr-4">Build notifications and fix requests</td>
+                <td class="py-3 pr-4">Low</td>
+                <td class="py-3">High</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Discord as Unified Control Plane</h3>
+
+        <div class="architecture-diagram">
+          <pre>Discord Server: "My Dev Operations"
+├── #ralph-main-project     (Kimaki → Ralph loop)
+├── #gas-town-control       (Kimaki → Gas Town Mayor)
+├── #gas-town-alerts        (Notifications from Deacon)
+├── #quick-tasks            (Kimaki → Ad-hoc requests)
+├── #ci-cd-channel          (Build notifications)
+└── Voice: dev-conversations (Voice coding)</pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          <strong>The Vision:</strong> A single Discord server becomes your unified interface for all AI coding operations. Mobile access to your entire development infrastructure. Team visibility into ongoing automated work. Voice support for hands-free interaction.
+        </p>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">Text-Only Single Project</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What's included:</strong> One channel, one project, no voice<br>
+          <strong>What's removed:</strong> Voice, multi-project, multi-instance<br>
+          <strong>When appropriate:</strong> Learning, experimentation, simple workflows
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="essence">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Mobile-First Mindset Shift</div>
+        <div class="text-text-secondary text-sm">
+          Having Discord access changes how you think about development. "Fix from anywhere" becomes possible. Commute time becomes productive time. The phone is now a development tool.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="essence">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Kimaki = ChatOps for AI Coding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What you know:</strong> Slack bots for DevOps (deploy commands, monitoring alerts)<br>
+          <strong>How it applies:</strong> Kimaki = same pattern for AI coding agents<br>
+          <em>If you've used ChatOps, you understand Kimaki.</em>
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with SYSTEM: Chat Interface Pattern</div>
+        <div class="text-text-secondary text-sm">
+          Both Kimaki and SYSTEM provide chat-native control of coding agents. The interface pattern is identical; the platform differs (Discord vs iMessage). Same mental model, different transport.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with All Patterns: External State Principle</div>
+        <div class="text-text-secondary text-sm">
+          SQLite database for session state exemplifies the core principle: external state beats internal memory. ~/.kimaki/discord-sessions.db = the filesystem IS the memory.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Bot per machine → FIVE decisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Bot needs local filesystem access<br>
+          → One bot per machine<br>
+          → Separate tokens for separate machines<br>
+          → Separate channels for clear ownership<br>
+          → Use --data-dir for isolation<br>
+          → Simple security model
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">OpenCode Connection Degradation</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% → 90%:</strong> Occasional timeouts, retries succeed<br>
+          <strong>90% → 70%:</strong> Frequent reconnects, some lost messages<br>
+          <strong>70% → 50%:</strong> Most sessions fail to establish<br>
+          <strong>50% → 0%:</strong> No coding capability, text-only notifications
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (4 items) -->
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if one bot controlled multiple machines?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> VPN tunnels, credential management, routing layer<br>
+          <strong>Why this fails:</strong> Complexity explosion, security surface, failure modes<br>
+          <strong>Hidden constraint revealed:</strong> One-bot-per-machine is a simplifying constraint, not a limitation
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if we skipped Discord?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd lose:</strong> Mobile access, team visibility, voice support, async monitoring<br>
+          <strong>What this reveals:</strong> Discord provides network effects - one interface, many access points<br>
+          <em>The dependency is the feature.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Voice needs transcription → Cascade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Voice input needs transcription<br>
+          → Need transcription API<br>
+          → Gemini has good streaming audio API<br>
+          → Additional API key required<br>
+          → Voice becomes optional feature<br>
+          → Text-only is the minimal viable setup
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Simplicity vs Multi-Machine</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> One bot is simple - clear ownership, easy setup<br>
+          <strong>Pull B:</strong> Multiple machines need multiple bots - more tokens, more management<br>
+          <strong>Resolution:</strong> Accept multiple instances. The simplicity of each instance is worth the multiplicity.
+        </div>
+      </div>
+
+      <!-- FILES SECTION (3 items) -->
+      <div class="activity-item expertise" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your Kimaki understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> Run setup wizard, basic commands<br>
+          <strong>Intermediate:</strong> Multi-instance, voice setup, custom models<br>
+          <strong>Advanced:</strong> CI/CD integration, Gas Town integration<br>
+          <strong>Expert:</strong> Extend source, create variants, contribute upstream
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Multi-Instance Discovery</div>
+        <div class="text-text-secondary text-sm">
+          Users kept hitting port conflicts when running multiple bots. The --data-dir solution emerged from community troubleshooting. Now documented as the standard multi-instance pattern.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="files">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If Kimaki file structure seems complex</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Simpler:</strong> Direct CLI - no Discord, no database, just terminal<br>
+          <strong>Different:</strong> SYSTEM - iMessage instead of Discord (Mac only)<br>
+          <strong>Heavier:</strong> Full web UI - more features, more setup
+        </div>
+      </div>
+
+      <!-- PATH SECTION (3 items) -->
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip intent enabling (Step 4-5)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip Server Members + Message Content intents<br>
+          <strong>THEN:</strong> Bot receives no message content<br>
+          <strong>THEN:</strong> All messages appear empty<br>
+          <strong>THEN:</strong> Bot can't parse commands<br>
+          <strong>FINALLY:</strong> Silent failure - bot joins but does nothing
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you map wrong channel to project</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> #frontend mapped to ~/projects/backend<br>
+          <strong>THEN:</strong> AI edits wrong codebase<br>
+          <strong>THEN:</strong> Commits land in wrong repo<br>
+          <strong>THEN:</strong> Git history polluted<br>
+          <strong>FINALLY:</strong> Manual cleanup required, trust lost
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Is Kimaki right at different scales?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Quick mobile fix:</strong> Yes - perfect use case<br>
+          <strong>Daily team workflow:</strong> Yes - team visibility shines<br>
+          <strong>Long-running tasks:</strong> Yes - async monitoring<br>
+          <strong>CI/CD integration:</strong> Yes - build notifications<br>
+          <strong>Production debugging:</strong> Maybe - prefer direct terminal for speed
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (3 items) -->
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">First Voice Setup Struggles</div>
+        <div class="text-text-secondary text-sm">
+          Early users struggled with Gemini key setup. Many assumed voice "just worked" without additional configuration. Documentation improved to emphasize: voice is optional, requires separate API key.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Voice Processing Degradation</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% → 90%:</strong> Occasional missed words, context intact<br>
+          <strong>90% → 70%:</strong> Frequent transcription errors, clarification needed<br>
+          <strong>70% → 50%:</strong> More errors than correct, frustrating<br>
+          <strong>50% → 0%:</strong> Unusable - fall back to text
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Claude Code Integration</div>
+        <div class="text-text-secondary text-sm">
+          Kimaki currently uses OpenCode, not Claude Code directly. Community feature request exists. No timeline. If you need Claude Code specifically, this is a blocker.
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Voice Latency vs Hands-Free Benefit</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> 200-500ms latency feels slow<br>
+          <strong>Pull B:</strong> Hands-free coding during commute is transformative<br>
+          <strong>Resolution:</strong> Accept latency for appropriate use cases. Don't use voice for precision work.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Multi-Machine Single Bot</div>
+        <div class="text-text-secondary text-sm">
+          No solution for controlling multiple machines from one bot without complex infrastructure. The one-bot-per-machine constraint is fundamental to the current architecture.
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="hard">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When team size makes Kimaki essential</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-2 developers:</strong> SYSTEM or direct CLI might suffice<br>
+          <strong>3+ developers:</strong> Kimaki's team visibility becomes essential<br>
+          <strong>THE INFLECTION:</strong> ~3 developers<br>
+          <em>Detection: Are you asking "what did the AI do?" → you need shared visibility</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@__morse Alternative Discovery</div>
+        <div class="text-text-secondary text-sm">
+          @__morse shared Kimaki as an alternative to SYSTEM for cross-platform Discord users. Different approach to the same problem: chat interface for AI coding. Thread gold for the community.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (5 items) -->
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Kimaki + Ralph = Discord-Monitored Loops</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Monitor Ralph iterations via Discord. Interrupt with new instructions. Fork from previous iterations.<br>
+          <strong>Pattern:</strong> Run Ralph in terminal, link project to Kimaki channel, watch progress on phone.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Kimaki + Gas Town = Agent Factory Monitoring</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Receive alerts from Mayor, monitor Dogs, interact with Refinery output.<br>
+          <strong>Pattern:</strong> Configure Gas Town to send notifications via <code>npx kimaki send --notify-only</code>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Team Visibility as Default</div>
+        <div class="text-text-secondary text-sm">
+          Discord makes AI work visible to the whole team automatically. No separate reporting needed. Everyone sees what the AI did. Transparency emerges from the architecture.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">When Kimaki isn't right</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Single user, Mac:</strong> SYSTEM - iMessage integration, more native<br>
+          <strong>No Discord dependency:</strong> Direct CLI - no platform lock-in<br>
+          <strong>Already use Slack:</strong> Community Slack integrations exist
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="when">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Ralph: Integration Target</div>
+        <div class="text-text-secondary text-sm">
+          Both Ralph and Gas Town documentation reference Kimaki as an integration target. The patterns compose: Ralph provides the loop, Kimaki provides the interface, together they enable mobile-monitored autonomous development.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

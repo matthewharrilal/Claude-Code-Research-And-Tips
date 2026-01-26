@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Core Principles of Agent Engineering
 
+> **You Are Here:** This is the philosophical foundation - the 8 core principles that explain WHY every Claude Code pattern works the way it does. Read this before trying to understand specific patterns, and return here when patterns fail to understand what went wrong. This is the "physics" from which all "engineering" derives.
+
 **Purpose:** The fundamental WHYs behind every pattern in Claude Code agent engineering. These principles are the bedrock from which all patterns derive. Understanding them enables you to create new patterns, adapt existing ones, and diagnose failures.
 
 **Synthesized:** 2026-01-09
@@ -110,6 +112,15 @@ Every pattern, every tool, every workflow decision must answer: **"How does this
 
 This isn't a bug. It's the architecture that enables reliability. Fighting it leads to failure; embracing it leads to robust systems.
 
+### Checkpoint: Principle 1
+**You should now understand:**
+- [ ] Why context windows have effective limits (~100K for quality work)
+- [ ] The 6 symptoms of context rot (repetition, amnesia, instruction drift, etc.)
+- [ ] How every pattern must answer "how does this affect context consumption?"
+- [ ] Why memory must be external, not internal
+
+**If unclear:** See `principles-anti-patterns.md` Section "Context Anti-Patterns" for detailed failure examples.
+
 ---
 
 ## Principle 2: External State > Internal Memory
@@ -193,6 +204,15 @@ This isn't a bug. It's the architecture that enables reliability. Fighting it le
 > "Each iteration spawns a NEW Amp instance with NO memory of previous work. Continuity comes from: Git history, prd.json, progress.txt"
 > -- Ryan Carson
 
+### Checkpoint: Principle 2
+**You should now understand:**
+- [ ] The three core files pattern: progress.txt, prd.json, CLAUDE.md
+- [ ] Why git commits are a form of external memory
+- [ ] The architecture diagram of ephemeral context vs. persistent external state
+- [ ] That compaction is lossy, but file storage is not
+
+**If unclear:** See `architecture-primitives.md` for detailed file format specifications.
+
 ---
 
 ## Principle 3: Fresh Context > Extended Sessions
@@ -270,6 +290,15 @@ Only for:
 - Debugging where context accumulation aids investigation
 
 Even then, monitor context usage and reset before 70%.
+
+### Checkpoint: Principle 3
+**You should now understand:**
+- [ ] The mathematical reality: extended sessions degrade, fresh context is constant quality
+- [ ] Why compaction is lossy but fresh context with file state is lossless
+- [ ] The fresh context pattern: read state, work, write state, exit
+- [ ] When extended sessions are acceptable (single small tasks, exploratory work)
+
+**If unclear:** See `principles-learning-loops.md` for how to maintain continuity across fresh contexts.
 
 ---
 
@@ -816,6 +845,61 @@ Before any multi-session or multi-agent work:
 8. **Explicit Communication** - File-based handoffs, not implicit coordination
 
 **The Meta-Principle:** When in doubt, externalize, isolate, verify, and restart fresh.
+
+---
+
+## Troubleshooting
+
+### Common Issue: Principle Violation Goes Unnoticed Until Failure
+**Symptom:** Pattern works for small tasks but fails catastrophically on larger ones
+**Cause:** Subtle principle violations that only manifest at scale
+**Fix:** Use the principle checklist before any multi-session or multi-agent work:
+- [ ] Is state externalized to survive session death? (P2)
+- [ ] Is each task completable in one context window? (P5)
+- [ ] Are quality gates defined and enforced? (P6)
+- [ ] Is orchestrator separated from workers? (P4)
+- [ ] Are agents isolated from each other? (P7)
+- [ ] Is communication explicit via files? (P8)
+
+### Common Issue: Fresh Context Pattern Feels Inefficient
+**Symptom:** Startup overhead each iteration seems wasteful
+**Cause:** Misunderstanding the tradeoff between consistency and speed
+**Fix:**
+1. Accept that reading state takes ~5-10 seconds but prevents hours of debugging
+2. Measure: fresh context iterations are MORE efficient over 10+ iterations
+3. The "inefficiency" is the feature - it prevents context rot
+
+### Common Issue: Orchestrator Keeps "Helping" With Implementation
+**Symptom:** Orchestrator context fills with code; loses coordination capacity
+**Cause:** Unclear role boundaries or orchestrator prompt too permissive
+**Fix:**
+1. Add explicit prohibition: "YOU DO NOT WRITE CODE. YOU DO NOT RUN COMMANDS."
+2. Restrict orchestrator tools to: TaskCreate, TaskUpdate, Task, AskUserQuestion, Read (1-2 files max)
+3. If orchestrator needs file content, spawn a Haiku worker to summarize
+
+### Common Issue: Tasks Never Seem "Atomic" Enough
+**Symptom:** Tasks keep expanding scope; never complete in one iteration
+**Cause:** Acceptance criteria too vague or task boundaries unclear
+**Fix:** Apply the 2-3 sentence test:
+- If you can't describe the task in 2-3 sentences, split it
+- Good: "Add investorType column to users table with default 'cold'. Run typecheck."
+- Bad: "Implement investor management with types, filtering, and reporting"
+
+### Common Issue: Quality Gates Slow Things Down
+**Symptom:** Tests take too long; tempted to skip them
+**Cause:** Misunderstanding the cost of broken code propagation
+**Fix:**
+1. Broken code in iteration N means iteration N+1 must debug first
+2. Debugging spirals can consume 5-10x the time saved by skipping tests
+3. If tests are too slow, invest in faster tests - don't skip them
+
+### Common Issue: Isolation Prevents Necessary Coordination
+**Symptom:** Agents can't share information; work duplicated
+**Cause:** Over-isolation without handoff mechanism
+**Fix:**
+1. Isolation doesn't mean no communication - it means EXPLICIT communication
+2. Use file-based handoffs: `handoff-agent1-to-agent2.json`
+3. The rule is: if it's not in a file, it doesn't exist
 
 ---
 

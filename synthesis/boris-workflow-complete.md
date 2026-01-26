@@ -1,5 +1,7 @@
 # Boris Cherny's Complete 13-Point Workflow
 
+> **You Are Here:** This is the canonical workflow from Boris Cherny, the creator of Claude Code. If you want to understand how the tool was designed to be used, start here. This document forms the foundation that other patterns (Ralph, CC Mirror, Gas Town) build upon. For multi-agent orchestration, see the D-FINAL documents. For context management details, see `synthesis/technical-context-management-advanced.md`.
+
 ---
 ## D-FINAL Integration
 **Validates invariants:** Model 1 (Context-First), Model 2 (External State), Model 3 (Fresh Context), Model 4 (Verification), Model 5 (Parallelization), Model 7 (Atomic Tasks), Model 8 (Model Tiering), Model 9 (Learning Compound), Model 10 (Simplicity)
@@ -357,6 +359,19 @@ verification commands.
 - Subagents complement Slash Commands (Step 7)—commands for mechanical ops, agents for cognitive work
 - verify-app integrates with Verification (Step 4)
 - code-simplifier runs before Commit Discipline (Step 12)
+
+---
+
+### Checkpoint: Core Workflow
+**You should now understand:**
+- [ ] Fresh Context principle (why many short sessions beat one long session)
+- [ ] CLAUDE.md as institutional memory (< 2500 tokens)
+- [ ] Task scoping template (TASK, SUCCESS CRITERIA, CONSTRAINTS, OUT OF SCOPE)
+- [ ] Verification loops (2-3x output quality improvement)
+- [ ] External state locations (CLAUDE.md, TODO.md, .claude/commands/)
+- [ ] Subagent spawning for specialized tasks
+
+**If unclear:** Start with CLAUDE.md setup and verification loops - these are the highest-impact practices.
 
 ---
 
@@ -755,6 +770,19 @@ git stash  # or commit
 
 ---
 
+### Checkpoint: Full Workflow Mastery
+**You should now understand:**
+- [ ] All 13 points and how they integrate
+- [ ] Context budget guidelines (< 50% for optimal quality)
+- [ ] Think keywords and when to use each tier
+- [ ] Error recovery decision tree
+- [ ] Commit discipline with /commit-push-pr
+- [ ] Session closure checklist
+
+**If unclear:** Practice the complete loop: Plan -> Code -> Simplify -> Verify -> Commit
+
+---
+
 ## Boris's Actual Practices
 
 ### Parallel Sessions: 10-15 Concurrent
@@ -929,6 +957,107 @@ Each session that updates CLAUDE.md increases effective capability for **all fut
 - [ ] Team CLAUDE.md discipline with GitHub Action
 - [ ] Subagent library for common workflows
 - [ ] Complete hook configuration
+
+---
+
+## Troubleshooting
+
+### Problem: "CLAUDE.md not being read on session start"
+
+**Symptom:** Claude doesn't know about project conventions. Keeps making mistakes documented in CLAUDE.md.
+
+**Cause:** File in wrong location, wrong case, or not in git root.
+
+**Fix:**
+```bash
+# Check location (must be at git root)
+ls -la $(git rev-parse --show-toplevel)/CLAUDE.md
+
+# Check case sensitivity (must be uppercase)
+# WRONG: claude.md, Claude.md
+# RIGHT: CLAUDE.md
+
+# Verify it's being read
+# At session start, ask:
+"What does CLAUDE.md say about our build commands?"
+```
+
+---
+
+### Problem: "Verification loops not running automatically"
+
+**Symptom:** Code changes committed without typecheck/test pass. Errors discovered in PR.
+
+**Cause:** Hooks not configured or not triggering.
+
+**Fix:**
+```bash
+# Verify hooks are configured
+cat ~/.claude/settings.json | grep -A10 PostToolUse
+
+# Correct hook configuration:
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Write|Edit",
+      "hooks": [{
+        "type": "command",
+        "command": "npm run typecheck && npm run test"
+      }]
+    }]
+  }
+}
+
+# Test hook manually
+npm run typecheck && npm run test
+```
+
+---
+
+### Problem: "Context degrading too quickly"
+
+**Symptom:** Quality drops after 15-20 minutes. Repetition, contradictions.
+
+**Cause:** Large files being read, verbose tool output, bloated CLAUDE.md.
+
+**Fix:**
+```bash
+# Check CLAUDE.md size
+wc -c CLAUDE.md
+# Should be < 10KB (< 2500 tokens)
+
+# Start fresh session more often
+# When context reaches 60%, consider /clear
+
+# Use targeted file reads, not directories
+# BAD: "Read the entire src/ directory"
+# GOOD: "Read src/auth/login.ts"
+```
+
+---
+
+### Problem: "Parallel sessions stepping on each other"
+
+**Symptom:** Git conflicts. Sessions editing same files. Work lost.
+
+**Cause:** Multiple sessions working same area without branch isolation.
+
+**Fix:**
+```bash
+# Use branches per session/task
+git checkout -b feature/auth-session-1
+# In another terminal:
+git checkout -b feature/auth-session-2
+
+# Or use explicit file ownership
+# Session 1: "Only modify src/api/*"
+# Session 2: "Only modify src/components/*"
+
+# Merge carefully
+git checkout main
+git merge feature/auth-session-1
+git merge feature/auth-session-2  # May need conflict resolution
+```
 
 ---
 

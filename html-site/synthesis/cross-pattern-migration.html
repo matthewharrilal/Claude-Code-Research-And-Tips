@@ -1,0 +1,2207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cross-Pattern Migration | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Migration Matrix */
+    .migration-matrix {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .migration-matrix table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .migration-matrix th {
+      background: #0D9373;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .migration-matrix td {
+      padding: 12px;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .migration-matrix tr:hover td {
+      background: #ecfdf5;
+    }
+
+    /* Trigger Signal Box */
+    .trigger-box {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-left: 4px solid #0ea5e9;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .trigger-title {
+      font-weight: 600;
+      color: #0369a1;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .trigger-detail {
+      font-size: 14px;
+      color: #0c4a6e;
+      margin-bottom: 8px;
+    }
+
+    /* Checklist Box */
+    .checklist-box {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .checklist-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .checklist-item .checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #d4d4d8;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Cross-Pattern Migration</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">ETL Mental Model</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-incremental" class="nav-item">Why Incremental?</a>
+          <a href="#why-parallel" class="nav-item">Why Parallel Operation?</a>
+          <a href="#why-preserve" class="nav-item">Why Preserve Patterns?</a>
+        </div>
+      </div>
+
+      <!-- Migration Paths -->
+      <div class="nav-section" data-section="paths">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Migration Paths</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#ralph-to-ccmirror" class="nav-item">Ralph to CC Mirror</a>
+          <a href="#ralph-to-gastown" class="nav-item">Ralph to Gas Town</a>
+          <a href="#gastown-to-claudeflow" class="nav-item">Gas Town to Claude-Flow</a>
+        </div>
+      </div>
+
+      <!-- Flow -->
+      <div class="nav-section" data-section="flow">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="workflow" class="w-4 h-4"></i>
+          <span>Path of Migration</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#flow" class="nav-item">The 4-Week Flow</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Anti-Patterns</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Migrate -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Migrate</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Migration is ETL: Extract patterns, Transform to new format, Load while old system runs.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Never lose learnings. Extract, transform, load. Keep the old system running until the new one proves itself."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'OLD_SYSTEM (running) + NEW_SYSTEM (testing) -> VERIFY -> CUTOVER')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>OLD_SYSTEM (running) + NEW_SYSTEM (testing) -> VERIFY -> CUTOVER</code>
+          </div>
+
+          <div class="core-anchor">Migration is a staged process, not a switch. The parallel operation period is the architecture.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Every orchestration migration follows the same fundamental pattern: run both systems in parallel until the new system proves stable. This isn't about being cautious - it's about having a fallback when reality differs from expectation.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          The critical insight is that learnings must survive migration. Your <code>progress.txt</code> patterns, your <code>prd.json</code> task sizing knowledge, your AGENTS.md accumulated wisdom - these represent weeks of iteration. Losing them during migration means re-learning everything.
+        </p>
+
+        <div class="migration-matrix">
+          <h4 class="font-semibold mb-3">Migration Decision Matrix</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>From</th>
+                <th>To</th>
+                <th>Key Trigger</th>
+                <th>Effort</th>
+                <th>Cost Change</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Ralph</td>
+                <td>CC Mirror</td>
+                <td>Need parallelization</td>
+                <td>1-2 hours</td>
+                <td>$10-30 -> $30-80/day</td>
+              </tr>
+              <tr>
+                <td>Ralph</td>
+                <td>Gas Town</td>
+                <td>Need roles + merge queue</td>
+                <td>4-8 hours</td>
+                <td>$10-30 -> $50-200/day</td>
+              </tr>
+              <tr>
+                <td>CC Mirror</td>
+                <td>Gas Town</td>
+                <td>Agents overwriting</td>
+                <td>2-4 hours</td>
+                <td>$30-80 -> $50-200/day</td>
+              </tr>
+              <tr>
+                <td>Gas Town</td>
+                <td>Claude-Flow</td>
+                <td>Need self-learning</td>
+                <td>2-4 hours</td>
+                <td>$50-200 -> $10-50/day</td>
+              </tr>
+              <tr>
+                <td>Gas Town</td>
+                <td>CC Mirror</td>
+                <td>Roles are overkill</td>
+                <td>2-3 hours</td>
+                <td>$50-200 -> $30-80/day</td>
+              </tr>
+              <tr>
+                <td>CC Mirror</td>
+                <td>Ralph</td>
+                <td>Parallelization not needed</td>
+                <td>1 hour</td>
+                <td>$30-80 -> $10-30/day</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-incremental" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY INCREMENTAL MIGRATION?</div>
+          <div class="decision-reasoning">
+            Big bang migrations fail because you don't know what you don't know. The new system always has edge cases that only appear in production. If you've deleted the old system, you have no fallback.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Run both systems for at least 2 weeks. Start by migrating one workflow, not everything. Set a cutover deadline, but be willing to extend if issues appear. Archive (don't delete) the old system after cutover.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-parallel">
+          <div class="decision-why">WHY PARALLEL OPERATION?</div>
+          <div class="decision-reasoning">
+            The new system needs to prove itself under real workload. Theoretical compatibility isn't the same as production stability. Parallel operation gives you confidence without risk.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Keep the old system running while testing the new. Route non-critical work to the new system first. Monitor both systems' outputs. Don't declare victory until you've run both for at least one full sprint/week.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-preserve">
+          <div class="decision-why">WHY PRESERVE PATTERNS?</div>
+          <div class="decision-reasoning">
+            Patterns represent iteration. Your <code>progress.txt</code> learnings, your task sizing intuitions, your verification workflows - these took weeks to develop. Starting fresh means re-learning all of it.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Before migration, run the export scripts. Transform patterns to the new format explicitly. Verify patterns are accessible in the new system. Document any translation losses. Accept that some re-learning is inevitable, but minimize it.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: MIGRATION PATHS -->
+      <section id="ralph-to-ccmirror" data-activity="paths">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Migration Paths
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">Ralph to CC Mirror</h3>
+
+        <div class="trigger-box">
+          <div class="trigger-title">
+            <i data-lucide="target" class="w-4 h-4"></i>
+            Trigger Signals
+          </div>
+          <div class="trigger-detail"><strong>1.</strong> "I'm waiting on Ralph while other work exists" - Single-threaded bottleneck</div>
+          <div class="trigger-detail"><strong>2.</strong> Stories have no dependencies between them - Could run in parallel</div>
+          <div class="trigger-detail"><strong>3.</strong> Overnight runs complete one feature only - Could do 3-4 features overnight</div>
+          <div class="trigger-detail"><strong>4.</strong> Context isolation would improve quality - Different features need different context</div>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">#!/bin/bash</span>
+<span class="comment"># ralph-to-ccmirror.sh</span>
+
+<span class="keyword">echo</span> <span class="string">"=== Migrating Ralph to CC Mirror ==="</span>
+
+<span class="variable">PROJECT_DIR</span>="${1:-.}"
+
+<span class="comment"># 1. Preserve Ralph state</span>
+cp -r "$PROJECT_DIR/scripts/ralph" "$PROJECT_DIR/scripts/ralph-backup"
+
+<span class="comment"># 2. Install CC Mirror</span>
+npx cc-mirror quick --provider mirror --name mclaude
+
+<span class="comment"># 3. Convert prd.json to CC Mirror tasks</span>
+<span class="comment"># Start mclaude and load orchestration skill</span>
+
+<span class="keyword">echo</span> <span class="string">"Migration prepared."</span>
+<span class="keyword">echo</span> <span class="string">""</span>
+<span class="keyword">echo</span> <span class="string">"In mclaude session:"</span>
+<span class="keyword">echo</span> <span class="string">"1. 'Load the orchestration skill and initiate'"</span>
+<span class="keyword">echo</span> <span class="string">"2. 'Import tasks from scripts/ralph/prd.json'"</span>
+<span class="keyword">echo</span> <span class="string">"3. CC Mirror will create TaskCreate calls for each story"</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="ralph-to-gastown">Ralph to Gas Town</h3>
+
+        <div class="trigger-box">
+          <div class="trigger-title">
+            <i data-lucide="target" class="w-4 h-4"></i>
+            Trigger Signals
+          </div>
+          <div class="trigger-detail"><strong>1.</strong> Running 5+ Claude instances simultaneously - Need role specialization</div>
+          <div class="trigger-detail"><strong>2.</strong> Agents overwriting each other's work - Need merge queue (Refinery)</div>
+          <div class="trigger-detail"><strong>3.</strong> Codebase > 100K LOC - Scale requires coordination</div>
+          <div class="trigger-detail"><strong>4.</strong> Want persistent named agents - Polecats vs ephemeral workers</div>
+          <div class="trigger-detail"><strong>5.</strong> $50-200/day API budget is viable - Factory economics work</div>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">#!/bin/bash</span>
+<span class="comment"># ralph-to-gastown.sh</span>
+
+<span class="keyword">set</span> -e
+
+<span class="variable">RALPH_PROJECT</span>="${1:?Usage: $0 <ralph-project-path>}"
+<span class="variable">RIG_NAME</span>="${2:-$(basename $RALPH_PROJECT)}"
+<span class="variable">GT_HOME</span>="${GT_HOME:-$HOME/gt}"
+
+<span class="keyword">echo</span> <span class="string">"=== Phase 1: Prerequisites ==="</span>
+go version || { <span class="keyword">echo</span> <span class="string">"Go 1.23+ required"</span>; exit 1; }
+
+<span class="keyword">echo</span> <span class="string">"=== Phase 2: Install Gas Town ==="</span>
+go install github.com/steveyegge/gastown/cmd/gt@latest
+gt install "$GT_HOME" --git
+
+<span class="keyword">echo</span> <span class="string">"=== Phase 3: Add rig ==="</span>
+cd "$GT_HOME"
+gt rig add "$RIG_NAME" "$RALPH_PROJECT"
+
+<span class="keyword">echo</span> <span class="string">"=== Phase 4: Convert prd.json to Beads ==="</span>
+<span class="keyword">if</span> [[ -f "$RALPH_PROJECT/scripts/ralph/prd.json" ]]; <span class="keyword">then</span>
+  jq -r '.userStories[] | select(.passes == false) | "bd create \"" + .title + "\""' \
+    "$RALPH_PROJECT/scripts/ralph/prd.json" | <span class="keyword">while</span> read cmd; <span class="keyword">do</span>
+    eval "$cmd"
+  <span class="keyword">done</span>
+<span class="keyword">fi</span>
+
+<span class="keyword">echo</span> <span class="string">"=== Migration complete ==="</span>
+<span class="keyword">echo</span> <span class="string">"Start with: gt mayor attach"</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="gastown-to-claudeflow">Gas Town to Claude-Flow</h3>
+
+        <div class="trigger-box">
+          <div class="trigger-title">
+            <i data-lucide="target" class="w-4 h-4"></i>
+            Trigger Signals
+          </div>
+          <div class="trigger-detail"><strong>1.</strong> Want self-learning routing - Need SONA architecture</div>
+          <div class="trigger-detail"><strong>2.</strong> Need consensus algorithms - Raft, Byzantine, Gossip</div>
+          <div class="trigger-detail"><strong>3.</strong> Want multi-provider LLM routing - OpenAI, Gemini, Ollama fallbacks</div>
+          <div class="trigger-detail"><strong>4.</strong> MCP-native is important - 170+ tools via MCP</div>
+          <div class="trigger-detail"><strong>5.</strong> Team prefers Node.js over Go</div>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Install Claude-Flow v3</span>
+npm install -g claude-flow@v3alpha
+
+<span class="comment"># Initialize in existing project</span>
+cd ~/gt/myproject
+npx claude-flow@v3alpha init --wizard
+
+<span class="comment"># Add as MCP server</span>
+claude mcp add claude-flow -- npx -y claude-flow@v3alpha
+
+<span class="comment"># Migrate Beads to AgentDB memory</span>
+bd list --json > /tmp/beads-export.json
+npx claude-flow@v3alpha memory import /tmp/beads-export.json \
+  --type "beads-migration" \
+  --metadata '{"source": "gas-town"}'</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF MIGRATION -->
+      <section id="flow" data-activity="flow">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Migration
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a migration through the 4-week timeline to see how the phases connect:
+        </p>
+
+        <div class="path-container">
+          <h4 class="font-semibold mb-4 text-text-primary">Week 0: Preparation</h4>
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">Document current state - what's working, what's not</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Run export scripts: <code>./export-ralph-patterns.sh</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Read destination system documentation thoroughly</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Set up destination (install, don't migrate yet)</div>
+          </div>
+        </div>
+
+        <div class="path-container">
+          <h4 class="font-semibold mb-4 text-text-primary">Week 1: Testing</h4>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Run test project on new system (hello-world equivalent)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">Verify basic functionality works end-to-end</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Start ONE workflow on new system (lowest risk)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Keep production on old system (don't migrate critical work)</div>
+          </div>
+        </div>
+
+        <div class="path-container">
+          <h4 class="font-semibold mb-4 text-text-primary">Week 2: Parallel</h4>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">Migrate more workflows to new system</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">Run parallel for critical paths (both systems do same work)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">11</div>
+            <div class="path-content">Document any translation issues or pattern losses</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">12</div>
+            <div class="path-content">Build confidence through comparison (new vs old outputs)</div>
+          </div>
+        </div>
+
+        <div class="path-container">
+          <h4 class="font-semibold mb-4 text-text-primary">Week 3-4: Cutover</h4>
+          <div class="path-step">
+            <div class="path-number">13</div>
+            <div class="path-content">All new work on new system (old system is read-only)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">14</div>
+            <div class="path-content">Old system kept for reference only (emergency fallback)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">15</div>
+            <div class="path-content">Address any remaining issues from parallel period</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">16</div>
+            <div class="path-content">Archive old system (don't delete!), update all documentation</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas (Anti-Patterns)
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Critical mistakes that derail migrations, with concrete symptoms and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Big Bang Migration
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Switch everything overnight, delete old system immediately</div>
+          <div class="gotcha-detail"><strong>Why it fails:</strong> When (not if) the new system has issues, you have no fallback</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Incremental migration. Parallel operation for 2+ weeks. Archive (don't delete) old system.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Losing Learned Patterns
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Start fresh, ignore progress.txt and AGENTS.md</div>
+          <div class="gotcha-detail"><strong>Why it fails:</strong> Patterns represent weeks of iteration. You'll re-learn everything painfully.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Run export scripts before migration. Transform patterns explicitly. Verify import after.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Skipping Verification Checkpoints
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Run full migration script without stopping to verify each phase</div>
+          <div class="gotcha-detail"><strong>Why it fails:</strong> Errors compound. A problem at Phase 2 corrupts Phase 3, 4, 5...</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Stop and verify after each phase. Check file existence, command outputs, git state.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Over-Engineering the Migration
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Building custom automation tools for every aspect of migration</div>
+          <div class="gotcha-detail"><strong>Why it fails:</strong> Migration is one-time. Time spent automating > time saved.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Simple scripts + manual verification. It's okay to copy-paste if it's once.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Migrating Without Understanding Destination
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Gas Town sounds cool, let me migrate"</div>
+          <div class="gotcha-detail"><strong>Why it fails:</strong> Each system has different prerequisites, workflows, and costs</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Read full docs. Run example project first. Understand daily workflow before committing.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Keeping Both Systems Indefinitely
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Run old and new forever "just in case"</div>
+          <div class="gotcha-detail"><strong>Why it fails:</strong> Split attention reduces effectiveness of both. Mental overhead compounds.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Set deadline. 2-week parallel max. Then archive old, commit to new fully.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions in migration, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Pattern Translation Loss
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Patterns encoded in one format don't translate perfectly to another. prd.json stories don't map 1:1 to Beads. progress.txt learnings lose context in AGENTS.md.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> After migration, you notice behaviors you relied on are missing. Implicit patterns became explicit ones that are now lost.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Document patterns in human-readable form before migration, not just the structured format. Some re-learning is inevitable. Budget time for it.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Timing the Jump
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Migrate too early, and you add complexity without benefit. Migrate too late, and you've suffered unnecessarily with the old system's limits.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Either you're managing Gas Town complexity for 3-agent work (overkill), or you're running 8 Ralph loops manually (underkill).</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use the trigger signals honestly. If you don't have 3+ signals, stay where you are. Complexity has carrying costs.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Downgrade Resistance
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Once you've invested in a complex system, it's psychologically hard to admit simpler would be better. Sunk cost fallacy applies to orchestration.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Running Gas Town for what Ralph could handle. Maintaining complexity that adds overhead without benefit.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Track actual value delivered. If factory-scale isn't producing factory-scale output, downgrade. Simplicity is a feature, not a failure.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Team Knowledge Fragmentation
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> If only one person knows the new system, they become a bottleneck. If everyone learns it, you multiply the learning cost.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "Ask Sarah, she knows Gas Town." Or: Two weeks of everyone learning instead of shipping.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> One person becomes the expert. They document heavily. Others learn incrementally. Don't require full team knowledge before migration.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO MIGRATE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Migrate / When to Stay
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              MIGRATE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You have 3+ trigger signals for the next level (not 1)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>The new system's costs fit your budget (check daily/monthly)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You have 4+ weeks of non-urgent work (time for parallel operation)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Current system's limits are actively blocking you (not theoretically)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You've read the destination's docs and understand the daily workflow</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              STAY WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Only 1-2 trigger signals - Optimize current system first</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Deadline pressure - Migration during crunch guarantees problems</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>New system sounds "cool" - Technical curiosity isn't a business reason</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Budget constraints - If $50-200/day is too much, Gas Town isn't for you</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Team resistance - Forcing adoption creates resentment, not productivity</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">State Preservation Checklist</h3>
+
+        <div class="checklist-box">
+          <h4 class="font-semibold mb-4 text-text-primary">Before Migration</h4>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Export progress.txt patterns to standalone doc</span>
+          </div>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Archive prd.json as migration-source.json</span>
+          </div>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Git commit all pending changes</span>
+          </div>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Document working verification commands</span>
+          </div>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Export successful prompt templates</span>
+          </div>
+        </div>
+
+        <div class="checklist-box">
+          <h4 class="font-semibold mb-4 text-text-primary">During Migration</h4>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Create mapping document (old concept -> new concept)</span>
+          </div>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Test each component before moving to next</span>
+          </div>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Keep old system running until new is verified</span>
+          </div>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Document any translation/conversion logic</span>
+          </div>
+        </div>
+
+        <div class="checklist-box">
+          <h4 class="font-semibold mb-4 text-text-primary">After Migration</h4>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Verify all tasks transferred correctly</span>
+          </div>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Run test task through new system end-to-end</span>
+          </div>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Confirm learnings accessible in new format</span>
+          </div>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Archive old system config (don't delete yet)</span>
+          </div>
+          <div class="checklist-item">
+            <span class="checkbox"></span>
+            <span>Update CLAUDE.md to reference new patterns</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you could migrate instantly?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> One-click system swap, zero parallel period, immediate full commitment.<br>
+          <strong>Why this fails:</strong> Edge cases only appear under real load. No fallback = one bug cascades to disaster.<br>
+          <strong>Hidden constraint:</strong> Migration stability comes from parallel operation, not migration speed.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible migration</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">export -> install new -> import -> verify -> cutover</code><br>
+          <strong>Essential:</strong> Export and verify steps.<br>
+          <strong>Everything else:</strong> Refinement for reliability.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="essence">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Migration = Database Migration</div>
+        <div class="text-text-secondary text-sm">
+          Schema change -> ETL pattern format<br>
+          Old DB read-only -> Old system reference-only<br>
+          Rollback plan -> Archive, don't delete<br>
+          Dual-write period -> Parallel operation<br><br>
+          <em>If you've migrated databases, you understand pattern migration.</em>
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint -> FIVE decisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Patterns represent weeks of iteration<br>
+          -> Must export before migration<br>
+          -> Must transform to new format explicitly<br>
+          -> Must verify import succeeded<br>
+          -> Must keep old system as fallback<br>
+          -> Must document translation losses
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-009: Learning must compound</div>
+        <div class="text-text-secondary text-sm">
+          Ralph, Gas Town, Claude-Flow all require learning preservation. The invariant holds across all orchestration levels: accumulated knowledge must survive system transitions.<br><br>
+          <em>If migration loses learnings, you violate the fundamental invariant.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="core">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ryan Carson: Ralph to Production Ralph</div>
+        <div class="text-text-secondary text-sm">
+          "First migration took 4 hours. Second migration (with learnings preserved) took 30 minutes. The export scripts paid off immediately."
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Parallel Duration Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Short parallel (1 week):</strong> Faster cutover, but less confidence<br>
+          <strong>Long parallel (4+ weeks):</strong> Maximum confidence, but mental overhead<br>
+          <strong>No parallel:</strong> Fastest, but no fallback<br><br>
+          <strong>Heuristic:</strong> 2 weeks minimum. Extend only if issues found.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip the export phase</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip pattern export before migration<br>
+          <strong>THEN:</strong> Old patterns exist only in old system format<br>
+          <strong>THEN:</strong> New system starts from zero knowledge<br>
+          <strong>THEN:</strong> Re-learn every pattern painfully<br>
+          <strong>FINALLY:</strong> Migration that should take 4 hours takes 4 weeks<br><br>
+          <em>Export is not optional. It's the difference between migration and restart.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Migration Understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "How do I switch systems?" -> Follow migration scripts<br>
+          <strong>Intermediate:</strong> "What if something breaks?" -> Parallel operation<br>
+          <strong>Advanced:</strong> "How do I preserve patterns?" -> ETL approach<br>
+          <strong>Staff:</strong> "When is the right time?" -> Trigger signal counting<br>
+          <strong>Expert:</strong> "When should I downgrade?" -> Simplicity > complexity
+        </div>
+      </div>
+
+      <!-- PATHS SECTION -->
+      <div class="activity-item composition" data-section="paths">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph + CC Mirror Hybrid</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works?</strong> Yes, during migration.<br>
+          <strong>How:</strong> Run Ralph for single-track work, CC Mirror for parallel. Gradually shift load.<br>
+          <strong>Danger:</strong> Don't stay hybrid forever. Pick one after 2 weeks.<br>
+          <strong>Use when:</strong> Gradual migration is safer than immediate cutover.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="paths">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How migrations fail gradually</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1-3:</strong> "This is going great!" (honeymoon)<br>
+          <strong>Day 4-7:</strong> "Hm, a few edge cases" (reality)<br>
+          <strong>Day 8-14:</strong> "Why is this harder than expected?" (complexity)<br>
+          <strong>Day 15+:</strong> Either "Worth it" or "Should have stayed"<br><br>
+          <em>Critical: Don't declare victory until Day 14+.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="paths">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How migration judgment changes</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "Why did I do this? Everything was fine."<br>
+          <strong>Day 7:</strong> "Okay, I see some benefits now."<br>
+          <strong>Day 21:</strong> "Can't imagine going back."<br>
+          <strong>Day 60:</strong> "Should have migrated sooner."<br><br>
+          <em>Don't judge migration by Day 1.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="paths">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Migration compounds confidence</div>
+        <div class="text-text-secondary text-sm">
+          First migration: 4-8 hours, high anxiety<br>
+          Second migration: 2-4 hours, moderate anxiety<br>
+          Third migration: 1-2 hours, comfortable<br><br>
+          <strong>Threshold:</strong> After 3 migrations, you understand the meta-pattern.<br>
+          <em>Migration skill itself compounds.</em>
+        </div>
+      </div>
+
+      <!-- FLOW SECTION -->
+      <div class="activity-item inflection" data-section="flow">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When parallel operation flips</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Week 1:</strong> Pure benefit (safety net)<br>
+          <strong>Week 2:</strong> Still beneficial (confidence building)<br>
+          <strong>Week 3:</strong> Neutral (overhead = safety)<br>
+          <strong>Week 4+:</strong> Net negative (split attention hurts both)<br><br>
+          <strong>THE INFLECTION:</strong> ~Week 3<br>
+          <em>Before: "Keep both running." After: "Commit to one."</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="flow">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Molly Cantillon: Panopticon Migration</div>
+        <div class="text-text-secondary text-sm">
+          "Migrated from 4 manual Claude sessions to 8-domain Panopticon. Week 1 was chaos. Week 3, it clicked. By Week 6, I couldn't remember how I worked before."<br><br>
+          <em>The 'click' comes around Week 3.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="flow">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip Week 0 (preparation)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Jump straight to installation<br>
+          <strong>THEN:</strong> No documented baseline<br>
+          <strong>THEN:</strong> Can't tell if issues are migration or pre-existing<br>
+          <strong>THEN:</strong> Debugging becomes archaeology<br>
+          <strong>FINALLY:</strong> 2-hour migration becomes 2-day investigation<br><br>
+          <em>Week 0 is not optional. It's cheap insurance.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if "big bang" was correct?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When it works:</strong> Trivial systems with no state. Hello-world migrations.<br>
+          <strong>Why it usually fails:</strong> Real systems have edge cases, state dependencies, accumulated patterns.<br>
+          <strong>Hidden constraint:</strong> The value of a system is in its accumulated state, not its structure.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="gotchas">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why checkpoints are mandatory</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Migration errors compound<br>
+          -> Phase 2 error corrupts Phase 3 input<br>
+          -> Phase 3 error corrupts Phase 4 input<br>
+          -> Final state is garbage<br>
+          -> Rollback is impossible (don't know where error started)<br>
+          -> Must restart from scratch<br><br>
+          <em>Checkpoints break the compound error chain.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Pattern loss quantification</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> How much learning is lost in migration?<br>
+          <strong>Why it's hard:</strong> Patterns are tacit. You don't know what you know until it's gone.<br>
+          <strong>Current practice:</strong> Qualitative assessment. "Does the new system feel as capable?"
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Sunk Cost Trap</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The dilemma:</strong><br>
+          -> Admit the complex system was overkill? (ego cost)<br>
+          -> Keep running it despite overhead? (productivity cost)<br>
+          -> Downgrade gracefully? (effort cost)<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> We're emotionally invested in our tooling.<br>
+          <strong>Heuristic:</strong> Track output, not setup complexity. If output doesn't justify complexity, downgrade.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Timing the Jump Understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Should I use Gas Town?" -> Count trigger signals<br>
+          <strong>Intermediate:</strong> "How many signals?" -> 3+ for migration<br>
+          <strong>Advanced:</strong> "What if I only have 2?" -> Optimize current first<br>
+          <strong>Staff:</strong> "When is 1 signal enough?" -> Never for migration, sometimes for exploration<br>
+          <strong>Expert:</strong> "What signals did I miss?" -> Retrospective pattern matching
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="hard">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Team Knowledge = System Documentation</div>
+        <div class="text-text-secondary text-sm">
+          Bus factor -> Migration knowledge single point of failure<br>
+          Documentation debt -> Undocumented patterns lost in migration<br>
+          Knowledge transfer -> Expert documents, others learn incrementally<br>
+          Tribal knowledge -> progress.txt patterns<br><br>
+          <em>If your team has documentation problems, migration amplifies them.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Steve Yegge: Gas Town Downgrade</div>
+        <div class="text-text-secondary text-sm">
+          "Sometimes I recommend people NOT use Gas Town. If you're running 3 agents, CC Mirror is fine. Gas Town is for 20+. Using a factory for small-batch work is overhead, not productivity."
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If migration isn't right for you</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Only 1-2 signals?</strong> -> Optimize current system (better PRD, better prompts)<br>
+          <strong>No parallel period available?</strong> -> Wait for calmer sprint<br>
+          <strong>Budget constrained?</strong> -> Downgrade, don't upgrade<br>
+          <strong>Team resistance?</strong> -> Run pilot with one volunteer first
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if "cool" was a valid reason?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When it works:</strong> Exploration time, personal projects, learning investment.<br>
+          <strong>Why it fails for production:</strong> Cool doesn't ship features. Cool doesn't reduce costs. Cool doesn't survive Monday morning.<br>
+          <strong>Hidden constraint:</strong> Production systems need business reasons, not technical curiosity.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Trigger signal perception over time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Month 1:</strong> "These limits are annoying but manageable"<br>
+          <strong>Month 3:</strong> "I'm working around limits daily"<br>
+          <strong>Month 6:</strong> "Why didn't I migrate sooner?"<br>
+          <strong>Month 12:</strong> "I forgot what the old limits felt like"<br><br>
+          <em>Limits normalize. Re-evaluate quarterly.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="when">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-001: Context is constraint</div>
+        <div class="text-text-secondary text-sm">
+          The same invariant that makes Ralph work (fresh context) makes migration necessary (context limits scale). As your orchestration grows, context management complexity grows. Migration to higher levels is inevitable if you keep scaling.<br><br>
+          <em>You will migrate eventually. The question is when.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Migration begets migration</div>
+        <div class="text-text-secondary text-sm">
+          <strong>First migration:</strong> Scary, slow, uncertain<br>
+          <strong>Second migration:</strong> You have a mental model<br>
+          <strong>Third migration:</strong> You have a playbook<br>
+          <strong>Fourth migration:</strong> It's just maintenance<br><br>
+          <em>Migration skill is its own meta-pattern.</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

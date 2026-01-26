@@ -1,0 +1,2234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subagent Spawning Best Practices | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Decision Matrix Table */
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .matrix-table th,
+    .matrix-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .matrix-table th {
+      background: #f4f4f5;
+      font-weight: 600;
+      color: #3f3f46;
+    }
+
+    .matrix-table td {
+      color: #3f3f46;
+    }
+
+    .matrix-table tr:hover td {
+      background: #fafafa;
+    }
+
+    .spawn-yes { color: #166534; font-weight: 500; }
+    .spawn-no { color: #991b1b; font-weight: 500; }
+    .spawn-maybe { color: #92400e; font-weight: 500; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Diagram Box */
+    .diagram-box {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .diagram-box pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #3f3f46;
+      line-height: 1.4;
+    }
+
+    /* Cost Table */
+    .cost-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .cost-table th,
+    .cost-table td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .cost-table th {
+      background: #f4f4f5;
+      font-weight: 600;
+      color: #3f3f46;
+    }
+
+    .cost-table .model-haiku { color: #84cc16; }
+    .cost-table .model-sonnet { color: #3b82f6; }
+    .cost-table .model-opus { color: #8b5cf6; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Subagent Spawning</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">The Trade-Off</a>
+          <a href="#decision-framework" class="nav-item">Decision Framework</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-spawn" class="nav-item">Why Spawn?</a>
+          <a href="#why-worker-preamble" class="nav-item">Why Worker Preamble?</a>
+          <a href="#why-model-selection" class="nav-item">Why Model Selection?</a>
+        </div>
+      </div>
+
+      <!-- Spawning Patterns -->
+      <div class="nav-section" data-section="patterns">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Spawning Patterns</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#sequential" class="nav-item">Sequential</a>
+          <a href="#parallel" class="nav-item">Parallel</a>
+          <a href="#coordination" class="nav-item">Coordination</a>
+        </div>
+      </div>
+
+      <!-- Path of a Task -->
+      <div class="nav-section" data-section="path">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="workflow" class="w-4 h-4"></i>
+          <span>Path of a Task</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#path" class="nav-item">The Flow</a>
+        </div>
+      </div>
+
+      <!-- Anti-Patterns -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Anti-Patterns</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">What Breaks</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Spawn -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Spawn</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Subagents isolate context for parallel work but cost 5-10K tokens overhead per spawn.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Subagents provide context isolation but come with overhead costs."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Task(subagent_type=\"worker\", prompt=\"...\", run_in_background=True)')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Task(subagent_type="worker", prompt="...", run_in_background=True)</code>
+          </div>
+
+          <div class="core-anchor">Every spawn is a trade-off: isolation benefit vs. token cost.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          A subagent is a fresh Claude instance with its own context window. The main agent spawns it, passes a task, and collects results. The subagent's work never pollutes the main context. This isolation is the value proposition.
+        </p>
+
+        <div class="diagram-box">
+          <pre>
+SUBAGENT OVERHEAD (per spawn)
+
+FIXED COSTS:
+├── Context initialization: ~2-5K tokens
+├── System prompt loading: ~1-3K tokens
+├── CLAUDE.md inheritance: ~1-2K tokens
+└── Tool initialization: ~1K tokens
+
+VARIABLE COSTS:
+├── Task description passage: varies
+├── Result communication: varies
+└── Coordination overhead: depends on complexity
+
+MINIMUM VIABLE SPAWN: ~5-10K tokens overhead
+          </pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4" id="decision-framework">The Golden Rule</h3>
+
+        <blockquote class="border-l-4 border-accent pl-4 py-2 mb-6 italic text-text-secondary">
+          "Using a subagent for a one-liner adds unnecessary overhead. Match the tool to the task complexity."
+        </blockquote>
+
+        <p class="text-text-secondary mb-6">
+          <strong>Break-even point:</strong> Tasks requiring ~15-20K+ tokens of focused work justify subagent spawn overhead. Below that, the main agent should handle it directly.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">Quick Reference: Decision Matrix</h3>
+
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Spawn?</th>
+              <th>Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Single file, small change</td>
+              <td class="spawn-no">NO</td>
+              <td>Main agent sufficient, overhead not justified</td>
+            </tr>
+            <tr>
+              <td>Multiple independent files</td>
+              <td class="spawn-yes">YES</td>
+              <td>Parallel efficiency, no context pollution</td>
+            </tr>
+            <tr>
+              <td>Research + implement</td>
+              <td class="spawn-yes">YES</td>
+              <td>Research doesn't pollute implementation context</td>
+            </tr>
+            <tr>
+              <td>Complex refactor (coupled files)</td>
+              <td class="spawn-maybe">MAYBE</td>
+              <td>Tightly coupled = single agent better</td>
+            </tr>
+            <tr>
+              <td>Testing + fixing</td>
+              <td class="spawn-yes">YES</td>
+              <td>Test output doesn't fill main context</td>
+            </tr>
+            <tr>
+              <td>Code review</td>
+              <td class="spawn-yes">YES</td>
+              <td>Adversarial review benefits from separate context</td>
+            </tr>
+            <tr>
+              <td>Simple grep/lookup</td>
+              <td class="spawn-no">NO</td>
+              <td>Main agent tools sufficient</td>
+            </tr>
+            <tr>
+              <td>Architecture decision</td>
+              <td class="spawn-yes">YES</td>
+              <td>Benefits from parallel exploration</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-spawn" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY SPAWN SUBAGENTS?</div>
+          <div class="decision-reasoning">
+            Main agent context is precious. Heavy tool outputs (browser, large files), exploratory research, or adversarial reviews can flood it. Subagents contain this mess in their own context window.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Ask yourself: "If this task fails or takes 50 tool calls, will it ruin my main conversation?" If YES, spawn a subagent to contain the potential mess. If NO, main agent is fine.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-worker-preamble">
+          <div class="decision-why">WHY WORKER PREAMBLE?</div>
+          <div class="decision-reasoning">
+            Without explicit instructions, subagents might spawn their own sub-subagents, creating recursive depth and cost explosion. Worker preambles prevent this by constraining what the subagent can do.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Always include: "You are a WORKER agent. Do NOT spawn sub-agents. Do NOT call TaskCreate." This prevents $50+ bills from recursive spawning.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-model-selection">
+          <div class="decision-why">WHY MODEL SELECTION MATTERS?</div>
+          <div class="decision-reasoning">
+            Opus costs 60x more than Haiku per token. Using Opus for file lookups wastes money. Using Haiku for architecture decisions produces poor results requiring retries.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Match model to task. Haiku for simple lookups (~$0.01-0.05), Sonnet for implementation (~$0.10-0.50), Opus for deep reasoning (~$0.50-2.00).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: SPAWNING PATTERNS -->
+      <section id="sequential" data-activity="patterns">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Spawning Patterns
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">Sequential Spawning</h3>
+
+        <p class="text-text-secondary mb-4">
+          <strong>When:</strong> Tasks have dependencies, output of one feeds input of next.
+        </p>
+
+        <div class="diagram-box">
+          <pre>
+SEQUENTIAL PATTERN
+
+Main Agent
+    |
+    +---> [Subagent 1: Research]
+    |           |
+    |           v Result
+    |
+    +---> [Subagent 2: Plan based on research]
+    |           |
+    |           v Result
+    |
+    +---> [Subagent 3: Implement based on plan]
+                |
+                v Result
+
+Main Agent synthesizes final result
+          </pre>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Sequential spawning pattern</span>
+<span class="comment"># Each subagent's output becomes context for the next</span>
+
+<span class="comment"># Step 1: Research</span>
+Task(
+    subagent_type=<span class="string">"research"</span>,
+    description=<span class="string">"Research best practices for authentication"</span>,
+    prompt=<span class="string">"Research and document authentication patterns..."</span>,
+    run_in_background=<span class="keyword">False</span>  <span class="comment"># Wait for completion</span>
+)
+
+<span class="comment"># Step 2: Plan (uses research output)</span>
+Task(
+    subagent_type=<span class="string">"architect"</span>,
+    description=<span class="string">"Create implementation plan"</span>,
+    prompt=<span class="string">"Based on the research findings, create a plan..."</span>,
+    run_in_background=<span class="keyword">False</span>
+)
+
+<span class="comment"># Step 3: Implement (uses plan)</span>
+Task(
+    subagent_type=<span class="string">"coder"</span>,
+    description=<span class="string">"Implement authentication"</span>,
+    prompt=<span class="string">"Following the approved plan, implement..."</span>,
+    run_in_background=<span class="keyword">False</span>
+)</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="parallel">Parallel Spawning</h3>
+
+        <p class="text-text-secondary mb-4">
+          <strong>When:</strong> Tasks are independent, can run simultaneously.
+        </p>
+
+        <div class="diagram-box">
+          <pre>
+PARALLEL PATTERN
+
+Main Agent (Orchestrator)
+    |
+    +-------------+-------------+-------------+
+    |             |             |             |
+    v             v             v             v
+[Subagent 1]  [Subagent 2]  [Subagent 3]  [Subagent 4]
+Frontend      Backend       Tests         Docs
+    |             |             |             |
+    +-------------+-------------+-------------+
+                      |
+                      v
+Main Agent collects and synthesizes results
+          </pre>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Parallel spawning pattern</span>
+<span class="comment"># All subagents run simultaneously with run_in_background=True</span>
+
+Task(
+    subagent_type=<span class="string">"frontend"</span>,
+    description=<span class="string">"Implement login form UI"</span>,
+    prompt=<span class="string">"Create the login form component..."</span>,
+    run_in_background=<span class="keyword">True</span>
+)
+
+Task(
+    subagent_type=<span class="string">"backend"</span>,
+    description=<span class="string">"Implement auth API"</span>,
+    prompt=<span class="string">"Create authentication endpoints..."</span>,
+    run_in_background=<span class="keyword">True</span>
+)
+
+Task(
+    subagent_type=<span class="string">"tester"</span>,
+    description=<span class="string">"Write auth tests"</span>,
+    prompt=<span class="string">"Create test suite for authentication..."</span>,
+    run_in_background=<span class="keyword">True</span>
+)
+
+<span class="comment"># Monitor and collect results with TaskList</span></pre>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Parallel agents on same files cause conflicts
+          </div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use file ownership rules or git worktrees for true isolation.</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="coordination">Coordination Strategies</h3>
+
+        <h4 class="font-medium text-base mb-3">Option 1: File-Based Context Sharing</h4>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>project/
+├── .agent-context/
+│   ├── research-findings.md      <span class="comment"># Subagent 1 writes, others read</span>
+│   ├── implementation-plan.md    <span class="comment"># Subagent 2 writes, coder reads</span>
+│   ├── progress.json             <span class="comment"># All agents update</span>
+│   └── handoff-notes.md          <span class="comment"># Inter-agent communication</span></pre>
+        </div>
+
+        <h4 class="font-medium text-base mb-3 mt-6">Option 2: Git-Based Context (Ralph Pattern)</h4>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>project/
+├── plans/
+│   ├── prd.json           <span class="comment"># Task status (passes: true/false)</span>
+│   └── progress.txt       <span class="comment"># Append-only learnings log</span>
+
+<span class="comment"># Each iteration's subagent:</span>
+<span class="comment"># 1. Reads prd.json for task status</span>
+<span class="comment"># 2. Reads progress.txt for previous learnings</span>
+<span class="comment"># 3. Does work</span>
+<span class="comment"># 4. Updates prd.json with completion status</span>
+<span class="comment"># 5. Appends to progress.txt</span>
+<span class="comment"># 6. Commits changes to git</span></pre>
+        </div>
+
+        <h4 class="font-medium text-base mb-3 mt-6">Status File Format</h4>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>{
+  <span class="string">"agent_id"</span>: <span class="string">"coder-1"</span>,
+  <span class="string">"current_task"</span>: <span class="string">"US-003: Implement login endpoint"</span>,
+  <span class="string">"status"</span>: <span class="string">"in_progress"</span>,
+  <span class="string">"started_at"</span>: <span class="string">"2026-01-13T10:30:00Z"</span>,
+  <span class="string">"files_touching"</span>: [<span class="string">"src/api/auth.ts"</span>, <span class="string">"src/models/user.ts"</span>],
+  <span class="string">"blockers"</span>: [],
+  <span class="string">"progress_pct"</span>: 60,
+  <span class="string">"notes"</span>: <span class="string">"Found existing auth utilities, will reuse"</span>
+}</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Path of a Subagent Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a task through the subagent spawning system:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">Main agent encounters task needing isolation (>15K tokens, parallel work, adversarial review)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Main agent decides: spawn sequential or parallel? Choose model (Haiku/Sonnet/Opus)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Main agent prepares task prompt with <strong>worker preamble</strong>: "You are a WORKER. Do NOT spawn sub-agents."</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Main agent calls <code>Task()</code> with <code>run_in_background=True/False</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Subagent spawns with fresh context (~5-10K tokens overhead)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">Subagent reads any context files (<code>.agent-context/</code>, <code>progress.txt</code>)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Subagent executes task using tools directly (Read, Write, Edit, Bash)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Subagent writes results to coordination files, updates status</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">Subagent outputs structured completion: <code>{"status": "complete", "files_modified": [...]}</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">Main agent collects results (if parallel: waits for all; if sequential: feeds to next)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">11</div>
+            <div class="path-content">Main agent synthesizes results, continues with main task</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: ANTI-PATTERNS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Anti-Patterns
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Common mistakes with concrete numbers and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Over-Spawning
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> $50+ bill for simple tasks. Each spawn is 5-10K tokens.</div>
+          <div class="gotcha-detail"><strong>Bad:</strong> <code>Task(prompt="Add a comment to line 42")</code> - 5-10K overhead for 10-token change</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> If task description is longer than likely implementation, don't spawn. Use <code>Edit()</code> directly.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Context Pollution
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Subagent produces irrelevant output, misses key requirements</div>
+          <div class="gotcha-detail"><strong>Bad:</strong> Dumping 50K tokens of codebase docs into subagent prompt</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Pass minimal, relevant context. "RELEVANT FILES: [list]. CONSTRAINTS: [list]. TASK: [specific]."</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Missing Coordination
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Parallel workers produce conflicting changes, git conflicts</div>
+          <div class="gotcha-detail"><strong>Bad:</strong> Two parallel agents both editing <code>src/auth.ts</code></div>
+          <div class="gotcha-detail"><strong>Fix:</strong> File ownership rules ("ONLY modify lines 1-50") or git worktrees for true isolation.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Deep Nesting
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Unexpected $50+ bill from one task, recursive agent spawning</div>
+          <div class="gotcha-detail"><strong>Bad:</strong> Subagent spawns sub-subagent spawns sub-sub-subagent</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Always include worker preamble: "Do NOT spawn sub-agents. Do NOT call TaskCreate."</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Wrong Model for Task
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> 10x overpay (Opus for lookups) or poor quality requiring retries (Haiku for architecture)</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Match model to task complexity. See Model Selection Guide below.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Isolation vs. Communication Cost
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Subagents provide context isolation, but passing context to them and getting results back costs tokens. The more context you share, the less isolation you have.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Either subagents miss important context (too little shared) OR subagent overhead approaches main agent cost (too much shared).</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Pass only what's needed. Use file-based coordination for persistent state. Accept that some redundancy is the cost of isolation.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Parallel Efficiency vs. Conflict Risk
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Parallel spawning is faster but risks file conflicts. Sequential is safe but slower.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Parallel agents produce conflicting changes. Sequential agents take 3x longer.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Parallelize only when truly independent. Use file ownership rules. Git worktrees for heavy parallelism.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Spawn Decision Judgment
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> "Should I spawn?" requires judgment. The 15-20K token break-even is a guideline, not a formula. Task complexity varies.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Over-spawning (high bills) or under-spawning (context pollution).</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start with the "context pollution test": Would 50 failed tool calls ruin your main conversation? If yes, spawn. Review bills and adjust.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO SPAWN -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Spawn / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              SPAWN WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Task requires >15K tokens of focused work (break-even point)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Heavy tool output would flood main context (browser, large files)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multiple independent tasks can run in parallel</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need adversarial review (separate context = different perspective)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Task might fail repeatedly (contain the mess)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T SPAWN WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple task (&lt;5K tokens) - overhead exceeds benefit</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Main agent already has all needed context</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Tasks are tightly coupled (serialize in main agent)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Task description longer than likely code change</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple grep/lookup - main agent tools sufficient</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Model Selection Guide</h3>
+
+        <table class="cost-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Input/1M</th>
+              <th>Output/1M</th>
+              <th>Typical Cost</th>
+              <th>Use For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="model-haiku">Haiku</td>
+              <td>$0.25</td>
+              <td>$1.25</td>
+              <td>$0.01-0.05</td>
+              <td>Lookups, simple transforms, status checks</td>
+            </tr>
+            <tr>
+              <td class="model-sonnet">Sonnet</td>
+              <td>$3.00</td>
+              <td>$15.00</td>
+              <td>$0.10-0.50</td>
+              <td>Standard implementation, tests, bug fixes</td>
+            </tr>
+            <tr>
+              <td class="model-opus">Opus</td>
+              <td>$15.00</td>
+              <td>$75.00</td>
+              <td>$0.50-2.00</td>
+              <td>Architecture, security, complex debugging</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">The Worker Preamble (Copy-Paste Ready)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Worker Preamble (prevents recursive spawning)</span>
+
+CONTEXT: You are a WORKER agent, not an orchestrator.
+
+RULES:
+- Complete ONLY the task described below
+- Use tools directly (Read, Write, Edit, Bash, etc.)
+- Do NOT spawn sub-agents
+- Do NOT call TaskCreate or TaskUpdate
+- Report your results with absolute file paths
+
+TASK:
+[Your specific task here]</pre>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible spawning decision</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Essential:</strong> "Would 50 failed tool calls ruin my main conversation?"<br>
+          <strong>If YES:</strong> Spawn.<br>
+          <strong>If NO:</strong> Main agent handles it.<br><br>
+          <em>Everything else is refinement for efficiency.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if subagents had ZERO overhead?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Spawn for everything. Maximum parallelism.<br>
+          <strong>Why this fails:</strong> 5-10K token overhead is transformer physics, not a bug. Context initialization is irreducible.<br>
+          <strong>Hidden constraint:</strong> Spawning IS the overhead made explicit.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Dan Shipper: 4-Terminal Workflow</div>
+        <div class="text-text-secondary text-sm">
+          Frontend, Backend, Test, Docs - all running in parallel. "Compound engineering is spawning specialists for what they're good at."
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint -> FIVE decisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Context windows are finite (200K max)<br>
+          -> Main context is precious (can't waste it)<br>
+          -> Isolation requires separate instances (subagents)<br>
+          -> Each instance has initialization overhead (5-10K)<br>
+          -> Overhead must be justified (>15K work)<br>
+          -> Simple tasks stay in main agent
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="core">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When spawning flips from cost to benefit</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-5K tokens:</strong> Pure waste (overhead dominates)<br>
+          <strong>5-15K tokens:</strong> Marginal (depends on context pollution risk)<br>
+          <strong>15-20K tokens:</strong> Break-even point<br>
+          <strong>20K+ tokens:</strong> Net benefit (isolation value exceeds overhead)<br><br>
+          <strong>THE INFLECTION:</strong> ~15-20K tokens of focused work
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Subagents = Microservices</div>
+        <div class="text-text-secondary text-sm">
+          Network call overhead -> Token overhead<br>
+          Service isolation -> Context isolation<br>
+          API contracts -> Task prompts<br>
+          Service mesh -> Coordination files<br><br>
+          <em>If you've designed microservices, you understand spawn trade-offs.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-003: External state > internal memory</div>
+        <div class="text-text-secondary text-sm">
+          Ralph, Gas Town, CC Mirror, Subagent Spawning all share this. Coordination files ARE the memory. If it's not in a file, it doesn't exist for the next agent.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (4 items) -->
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip the worker preamble</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> You skip "Do NOT spawn sub-agents"<br>
+          <strong>THEN:</strong> Subagent might spawn its own subagent<br>
+          <strong>THEN:</strong> Sub-subagent might spawn another<br>
+          <strong>THEN:</strong> Recursive depth, control lost<br>
+          <strong>FINALLY:</strong> $50+ bill from one "simple" task<br><br>
+          <em>The fix: Worker preamble is non-negotiable.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Model Selection Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Haiku:</strong> Cheap ($0.01-0.05), but weak for complex reasoning<br>
+          <strong>Sonnet:</strong> Balanced ($0.10-0.50), good for most tasks<br>
+          <strong>Opus:</strong> Powerful ($0.50-2.00), but 60x more expensive<br><br>
+          <strong>Heuristic:</strong> If retrying with Sonnet is cheaper than one Opus call, start with Sonnet.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Spawning decision understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "When do I spawn?" -> Context pollution test<br>
+          <strong>Intermediate:</strong> "Which model?" -> Match to task complexity<br>
+          <strong>Advanced:</strong> "Parallel or sequential?" -> Dependency analysis<br>
+          <strong>Staff:</strong> "What's minimal overhead?" -> Only pass what's needed<br>
+          <strong>Expert:</strong> "Cross-pattern coordination?" -> File-based state machines
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="decisions">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How spawning perception evolves</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Task 1:</strong> "Spawning feels like overhead"<br>
+          <strong>Task 5:</strong> "My main context is getting messy"<br>
+          <strong>Task 10:</strong> "Spawning keeps my main conversation clean"<br>
+          <strong>Task 20:</strong> "Spawn early, spawn often for complex work"<br><br>
+          <em>Don't judge spawning value from a single task.</em>
+        </div>
+      </div>
+
+      <!-- PATTERNS SECTION (5 items) -->
+      <div class="activity-item composition" data-section="patterns">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Sequential + Parallel Hybrid</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Research (seq) -> Plan (seq) -> (Frontend || Backend || Tests) parallel<br>
+          <strong>Danger:</strong> Parallel agents must have clear file ownership<br>
+          <strong>Recommendation:</strong> Parallelize only after dependencies resolved
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="patterns">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Boris Cherny: Multiple Reviewers Pattern</div>
+        <div class="text-text-secondary text-sm">
+          Security reviewer, performance reviewer, maintainability reviewer, correctness reviewer - all parallel. Different perspectives from context isolation. "Adversarial review benefits from separate contexts."
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="patterns">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Cross-Pattern Equivalence
+        </div>
+        <div class="font-medium text-text-primary mb-2">Coordination files = Gas Town components</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Main Agent</strong> = The Mayor (orchestrator)<br>
+          <strong>status.json</strong> = The Inbox (work queue)<br>
+          <strong>handoff-notes.md</strong> = The Refinery (persistent memory)<br>
+          <strong>Each Subagent</strong> = A Polecat (stateless worker)
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="patterns">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How parallel coordination fails</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100%:</strong> Agents working on truly independent files<br>
+          <strong>80%:</strong> Minor overlaps in shared utilities<br>
+          <strong>60%:</strong> Same file, different sections (risky)<br>
+          <strong>40%:</strong> Same file, overlapping lines (conflict)<br>
+          <strong>CLIFF:</strong> Git conflicts, lost work, merge nightmares<br><br>
+          <em>The gradient is invisible until the merge.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="patterns">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At 5+ parallel agents, coordination cost dominates</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Implication:</strong> File-based coordination works for 2-4 agents. Beyond 5, you need real orchestration (CC Mirror, Gas Town).<br><br>
+          <strong>Threshold:</strong> ~4-5 parallel agents before coordination overhead exceeds parallelism benefit
+        </div>
+      </div>
+
+      <!-- PATH SECTION (3 items) -->
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip structured completion (Step 9)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Subagent doesn't output structured completion<br>
+          <strong>THEN:</strong> Main agent can't tell if it finished<br>
+          <strong>THEN:</strong> Waits indefinitely or checks too early<br>
+          <strong>THEN:</strong> Timeout, incomplete work, confusion<br>
+          <strong>FINALLY:</strong> Manual intervention required<br><br>
+          <em>The fix: Require <code>{"status": "complete", "files_modified": [...]}</code></em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Status files seem like overhead... until they save you</div>
+        <div class="text-text-secondary text-sm">
+          <strong>First spawn:</strong> "Why write status.json?"<br>
+          <strong>Third spawn:</strong> "Which agent is doing what?"<br>
+          <strong>Fifth spawn:</strong> "Thank god for status.json"<br>
+          <strong>Tenth spawn:</strong> "Status files are the orchestration"
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Path understanding depth</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What's the flow?" -> Steps 1-11<br>
+          <strong>Intermediate:</strong> "Where are the failure points?" -> Steps 7, 9<br>
+          <strong>Advanced:</strong> "How to detect stuck agents?" -> 3+ attempts without progress<br>
+          <strong>Staff:</strong> "How to scale?" -> File-based state machines<br>
+          <strong>Expert:</strong> "What's minimal?" -> Skip status files for simple cases
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if over-spawning had no cost?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Spawn for every tool call. Maximum isolation.<br>
+          <strong>Why this fails:</strong> Tokens cost money. At $15/1M output for Opus, a 10K spawn costs $0.15.<br>
+          <strong>Hidden constraint:</strong> Cost IS the forcing function for spawn decisions.
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When context pollution flips from manageable to crisis</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-30K context:</strong> Everything fits, no problem<br>
+          <strong>30-60K context:</strong> Getting crowded, quality stable<br>
+          <strong>60-100K context:</strong> Early instructions fading<br>
+          <strong>100K+ context:</strong> Context rot, quality collapse<br><br>
+          <strong>THE INFLECTION:</strong> ~60K tokens before spawn becomes critical
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Automatic spawn decision</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> Can we automatically decide when to spawn based on task complexity prediction?<br>
+          <strong>Why hard:</strong> Task complexity isn't known until execution.<br>
+          <strong>Current:</strong> Human judgment + heuristics. No automation yet.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Context Pollution vs. Overhead</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Don't spawn:</strong> Risk main context pollution (long-term cost)<br>
+          <strong>Always spawn:</strong> Pay overhead for everything (immediate cost)<br>
+          <strong>The dilemma:</strong> Pollution cost is invisible until it compounds<br><br>
+          <strong>Heuristic:</strong> When in doubt about pollution, spawn. Overhead is visible and bounded.
+        </div>
+      </div>
+
+      <!-- HARD SECTION (3 items) -->
+      <div class="activity-item constraint" data-section="hard">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why perfect parallelism is impossible</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Real codebases have dependencies<br>
+          -> Dependencies create ordering requirements<br>
+          -> Ordering limits parallelism<br>
+          -> Parallel agents need coordination<br>
+          -> Coordination has overhead<br>
+          -> Maximum useful parallelism is ~4-5 agents
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="hard">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How spawn decision quality degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Fresh engineer:</strong> Clear judgment, follows heuristics<br>
+          <strong>Tired engineer:</strong> Shortcuts, "just spawn everything"<br>
+          <strong>Rushed engineer:</strong> "I'll handle it in main" -> pollution<br>
+          <strong>Burned engineer:</strong> Random decisions, inconsistent<br><br>
+          <em>Spawn decisions degrade with fatigue. Automate where possible.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Kaushik Gopal: Planning-First Methodology</div>
+        <div class="text-text-secondary text-sm">
+          "Always plan before spawning implementation workers. Research subagent -> Architect subagent -> Human approval -> Worker subagents. The planning phase catches 80% of coordination issues."
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (4 items) -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If spawning isn't right</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need stateful coordination?</strong> -> Ralph (file-based loops)<br>
+          <strong>Need factory-scale parallel?</strong> -> CC Mirror (multi-agent orchestration)<br>
+          <strong>Need human review gates?</strong> -> HOTL patterns<br>
+          <strong>Simple task?</strong> -> Main agent directly
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Spawning level = Thread pool sizing</div>
+        <div class="text-text-secondary text-sm">
+          <strong>No spawning</strong> = Single-threaded (simple, limited)<br>
+          <strong>Occasional spawn</strong> = Thread pool (managed parallelism)<br>
+          <strong>Aggressive spawn</strong> = Unlimited threads (chaos, expensive)<br><br>
+          <em>If you've tuned thread pools, you understand spawn decisions.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you never spawned?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd get:</strong> One agent doing everything sequentially<br>
+          <strong>Why this fails:</strong> Context pollution accumulates. At 100K tokens, quality collapses.<br>
+          <strong>Hidden insight:</strong> Spawning IS context management. Not spawning is implicit decision to pollute.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="when">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-001: Fresh context > extended sessions</div>
+        <div class="text-text-secondary text-sm">
+          Subagent spawning is this principle applied at task level. Ralph applies it at iteration level. Both recognize: context quality degrades, fresh starts restore it.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Track which sections are in view
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

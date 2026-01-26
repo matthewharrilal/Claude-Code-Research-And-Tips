@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta data-pagefind-meta="section" content="Synthesis">
+  <meta data-pagefind-meta="category" content="Architecture">
+  <title>Async Coordination Patterns for Multi-Agent Systems - Claude Code Knowledge Base</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/sidebar.css">
+  <link rel="stylesheet" href="../css/search.css">
+</head>
+<body>
+  <!-- Search Modal -->
+  <div class="search-modal" id="searchModal" aria-hidden="true">
+    <div class="search-overlay" onclick="closeSearch()"></div>
+    <div class="search-content">
+      <div class="search-header">
+        <div class="search-input-wrapper">
+          <span class="search-icon-input">&#128269;</span>
+          <input type="text" id="searchInput" placeholder="Search documentation..." autocomplete="off" />
+          <kbd class="search-kbd">ESC</kbd>
+        </div>
+      </div>
+      <div class="search-filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="synthesis">Synthesis</button>
+        <button class="filter-btn" data-filter="extractions">Extractions</button>
+      </div>
+      <div class="search-results" id="searchResults">
+        <div class="search-empty"><p>Start typing to search... (Press Cmd+K anytime)</p></div>
+      </div>
+      <div class="search-footer">
+        <span>Up/Down Navigate</span><span>Enter Select</span><span>ESC Close</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="search-trigger" onclick="openSearch()" aria-label="Search" style="float: right; margin-bottom: 1rem;">
+    <span class="search-icon">Cmd+K</span>
+    <span class="search-text">Search</span>
+  </button>
+
+  <div class="container">
+    <!-- Breadcrumb Navigation -->
+    <nav class="nav-breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <a href="synthesis-index.html">Synthesis</a>
+      <span>/</span>
+      <span>Async Coordination Patterns</span>
+    </nav>
+
+    <!-- You Are Here Context Box -->
+    <div class="you-are-here" style="background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%); border-left: 4px solid #2a7d7d; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+      <h3 style="color: #2a7d7d; margin-top: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px;">You Are Here</h3>
+      <p style="margin-bottom: 0;">You are exploring <strong>coordination infrastructure</strong> - the communication fabric that enables multiple AI agents to work together without stepping on each other's work. This document covers file reservations, message queues, and coordination patterns for Level 5-7 multi-agent systems.</p>
+    </div>
+
+    <h1><span class="bionic">Asy</span>nc <span class="bionic">Coo</span>rdination <span class="bionic">Pat</span>terns</h1>
+
+    <p class="conversational-lead">
+      The <span class="bionic">com</span>munication and <span class="bionic">coo</span>rdination layers that make multi-agent orchestration possible. From file reservations to NATS-based mesh networks, these patterns prevent conflicts and enable parallel work.
+    </p>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+      <div class="toc-title">Contents</div>
+      <ul>
+        <li><a href="#context">Where This Fits</a></li>
+        <li><a href="#agent-mail">Agent Mail File Reservation System</a></li>
+        <li><a href="#station-lattice">Station's Lattice Mesh Communication</a></li>
+        <li><a href="#email-vs-queue">Email-like vs Message-Queue Patterns</a></li>
+        <li><a href="#pre-commit-guards">Pre-commit Guards for Conflict Prevention</a></li>
+        <li><a href="#audit-trails">Thread-based Conversation Audit Trails</a></li>
+        <li><a href="#mental-models">Mental Models</a></li>
+        <li><a href="#integration-patterns">Integration Patterns</a></li>
+        <li><a href="#checkpoints">Checkpoints</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#source-attribution">Source Attribution</a></li>
+      </ul>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Context Section -->
+    <section id="context">
+      <h2><span class="bionic">Whe</span>re This <span class="bionic">Fit</span>s</h2>
+
+      <div class="ascii-diagram">
+                    COMPLEXITY LADDER POSITION
++-------------------------------------------------------------+
+| Level 0-3: Single agent, no coordination needed             |
+| Level 4: CC Mirror native orchestration                     |
+| Level 5: Multi-instance coordination         [*] YOU ARE    |
+| Level 6: External tool integration           [*]   HERE     |
+| Level 7: Factory-scale (Gas Town)            [*]            |
++-------------------------------------------------------------+
+      </div>
+
+      <p><span class="bionic">Asy</span>nc coordination patterns are <strong>infrastructure</strong> - they sit beneath the orchestration patterns you may already know:</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Pattern</th><th>What It Does</th><th>Coordination Need</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Single Claude</td><td>One agent, one task</td><td>None</td></tr>
+            <tr><td>Ralph Loop</td><td>Sequential iteration</td><td>File-based (progress.txt)</td></tr>
+            <tr><td>CC Mirror</td><td>Hub-and-spoke orchestration</td><td>Task queue (TaskCreate/TaskUpdate)</td></tr>
+            <tr><td>Gas Town</td><td>Factory with specialized roles</td><td><strong>Agent Mail or NATS infrastructure</strong></td></tr>
+            <tr><td>Parallel Swarms</td><td>Multiple simultaneous agents</td><td><strong>Critical - file conflicts likely</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Prerequisites</h3>
+      <p>Before diving into async coordination, you should understand:</p>
+      <ol>
+        <li><strong>Multi-Agent Concepts</strong> - Why multiple agents need to communicate</li>
+        <li><strong>File Conflicts</strong> - How parallel agents can overwrite each other's work</li>
+        <li><strong>Task Decomposition</strong> - Breaking work into parallelizable chunks</li>
+        <li><strong>Message Patterns</strong> - Basic pub/sub and request-reply concepts</li>
+      </ol>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Agent Mail Section -->
+    <section id="agent-mail">
+      <h2><span class="bionic">Age</span>nt Mail <span class="bionic">Fil</span>e <span class="bionic">Res</span>ervation <span class="bionic">Sys</span>tem</h2>
+
+      <h3>The Core Problem</h3>
+      <p>Multiple agents working on the same codebase asynchronously can step on each other's work:</p>
+
+      <div class="ascii-diagram">
+                    THE FILE CONFLICT PROBLEM
++-------------------------------------------------------------+
+|  Time T0: Agent A starts editing src/api/routes.py          |
+|  Time T1: Agent B starts editing src/api/routes.py          |
+|           (unaware of A)                                     |
+|  Time T2: Agent A commits their changes                      |
+|  Time T3: Agent B commits their changes                      |
+|           --> Agent B's commit OVERWRITES Agent A's work     |
+|           --> Both agents confused by unexpected diffs       |
+|           --> Human spends hours reconciling changes         |
++-------------------------------------------------------------+
+      </div>
+
+      <h3>TTL Leases: Advisory Reservations</h3>
+      <p>Agent Mail implements file reservations as <strong>TTL-based advisory leases</strong>:</p>
+
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Reserve files before editing
+file_reservation_paths(
+    project_key="/absolute/repo/path",
+    agent_name="GreenCastle",
+    paths=["src/api/**/*.py", "tests/api/**/*.py"],  # Glob patterns work
+    ttl_seconds=3600,           # 1 hour lease
+    exclusive=True,             # No shared access during lease
+    reason="br-123"             # Link to task/issue ID
+)</code></pre>
+      </div>
+
+      <h3>Key Properties of Reservations</h3>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Property</th><th>Behavior</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>TTL-Based</strong></td><td>Automatically expires after <code>ttl_seconds</code></td></tr>
+            <tr><td><strong>Advisory</strong></td><td>Not enforced by filesystem, agents choose to respect</td></tr>
+            <tr><td><strong>Glob Support</strong></td><td>Reserve <code>src/api/**/*.py</code> not just single files</td></tr>
+            <tr><td><strong>Exclusive/Shared</strong></td><td>Exclusive blocks all others; shared allows readers</td></tr>
+            <tr><td><strong>Traceable</strong></td><td><code>reason</code> links to task IDs for audit</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Exclusive vs Shared Access</h3>
+      <div class="ascii-diagram">
+                EXCLUSIVE vs SHARED RESERVATIONS
+
+  EXCLUSIVE (exclusive=True):
+  +-------------------+     +-------------------+
+  |   Agent A         |     |   Agent B         |
+  |   reserves        |     |   tries to        |
+  |   src/api/*.py    |     |   reserve         |
+  |   EXCLUSIVE       |     |   src/api/*.py    |
+  +-------------------+     +-------------------+
+           |                         |
+           v                         v
+      GRANTED                 CONFLICT RETURNED
+      (can edit)             (must wait or pivot)
+
+  SHARED (exclusive=False):
+  +-------------------+     +-------------------+
+  |   Agent A         |     |   Agent B         |
+  |   reserves        |     |   reserves        |
+  |   src/api/*.py    |     |   src/api/*.py    |
+  |   SHARED          |     |   SHARED          |
+  +-------------------+     +-------------------+
+           |                         |
+           v                         v
+      GRANTED                   GRANTED
+      (read-only OK)           (read-only OK)
+      </div>
+
+      <h3>Reservation Workflow</h3>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Step 1: Register identity
+register_agent(
+    project_key="/my/project",
+    agent_name="GreenCastle",       # Memorable adjective+noun
+    program="Claude Code",
+    model="Opus 4.5",
+    task_description="Backend API development"
+)
+
+# Step 2: Reserve work surface
+result = file_reservation_paths(
+    project_key="/my/project",
+    agent_name="GreenCastle",
+    paths=["src/api/**"],
+    ttl_seconds=3600,
+    exclusive=True,
+    reason="bd-101"
+)
+
+if result.conflicts:
+    # Another agent holds conflicting reservation
+    print(f"Conflict with: {result.conflicts}")
+    # Options:
+    # 1. Wait for expiry
+    # 2. Work on different files
+    # 3. Request shared (non-exclusive) access
+
+# Step 3: Do the work...
+# (Agent edits files within reserved paths)
+
+# Step 4: Release reservation
+release_file_reservations(
+    project_key="/my/project",
+    agent_name="GreenCastle"
+)</code></pre>
+      </div>
+
+      <h3>Valid Agent Names</h3>
+      <p>Agent Mail enforces memorable <strong>adjective+noun</strong> names:</p>
+      <ul>
+        <li><strong>Valid:</strong> GreenCastle, RedCat, BlueLake, SwiftFalcon</li>
+        <li><strong>Invalid:</strong> steve (Unix username), claude (program name), opus-4-1 (model identifier), MyAgent123 (has numbers)</li>
+      </ul>
+
+      <!-- Checkpoint -->
+      <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+        <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Checkpoint: Agent Mail Basics</div>
+        <p><strong>You should now understand:</strong></p>
+        <ul>
+          <li>Why file reservations prevent conflicts in multi-agent systems</li>
+          <li>The difference between exclusive and shared reservations</li>
+          <li>The register -> reserve -> work -> release workflow</li>
+          <li>Agent naming conventions (adjective+noun)</li>
+        </ul>
+        <p><strong>If unclear:</strong> See the Agent Mail repository documentation for detailed API reference.</p>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Station Lattice Section -->
+    <section id="station-lattice">
+      <h2><span class="bionic">Sta</span>tion's <span class="bionic">Lat</span>tice Mesh <span class="bionic">Com</span>munication</h2>
+
+      <h3>The Distributed Challenge</h3>
+      <p>Agent Mail solves coordination for agents on <strong>one machine</strong>. But what about distributed agent teams across <strong>multiple machines</strong>?</p>
+      <p>Station introduces <strong>Lattice</strong> - a NATS-based mesh network for distributed agent orchestration.</p>
+
+      <h3>NATS Foundation</h3>
+      <p>NATS isn't just "another message queue." It's purpose-built for:</p>
+      <ol>
+        <li><strong>Sub-millisecond latency</strong> at scale</li>
+        <li><strong>JetStream persistence</strong> with exactly-once semantics</li>
+        <li><strong>Built-in clustering</strong> for high availability</li>
+        <li><strong>KeyValue stores</strong> for distributed state</li>
+        <li><strong>Embedded server option</strong> for simple deployments</li>
+      </ol>
+
+      <h3>Lattice Architecture</h3>
+      <div class="ascii-diagram">
+                        LATTICE MESH ARCHITECTURE
++---------------------------------------------------------------------+
+|                        LATTICE MESH                                  |
+|  +---------------+    +---------------+    +---------------+         |
+|  |  Station A    |    |  Station B    |    |  Station C    |         |
+|  |  (Security)   |<-->|  (Orchestr.)  |<-->|   (SRE)       |         |
+|  |               |    |               |    |               |         |
+|  | VulnScanner   |    | Coordinator   |    | K8sHealth     |         |
+|  | CVELookup     |    |               |    | LogAnalyzer   |         |
+|  | NetworkAudit  |    |               |    | Deployer      |         |
+|  +---------------+    +---------------+    +---------------+         |
+|         |                   |                   |                    |
+|         +-------------------+-------------------+                    |
+|                             |                                        |
+|                    +--------v--------+                               |
+|                    |   NATS Server   |                               |
+|                    |   + JetStream   |                               |
+|                    +-----------------+                               |
++---------------------------------------------------------------------+
+      </div>
+
+      <h3>Three Operating Modes</h3>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Mode</th><th>Command</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Standalone</strong></td><td><code>stn serve</code></td><td>Default single-station, no mesh</td></tr>
+            <tr><td><strong>Orchestrator</strong></td><td><code>stn serve --orchestration</code></td><td>Runs embedded NATS (port 4222)</td></tr>
+            <tr><td><strong>Member</strong></td><td><code>stn serve --lattice &lt;url&gt;</code></td><td>Joins orchestrator mesh</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Message Flow Patterns</h3>
+      <div class="ascii-diagram">
+                    NATS MESSAGE FLOW PATTERNS
+
+  REQUEST-REPLY (Agent Invocation):
+  +-------------+                              +-------------+
+  | Orchestrator|  ------ Request ---------->  |   Member    |
+  | Station     |  <----- Response ----------  |   Station   |
+  +-------------+                              +-------------+
+
+  Subject: lattice.station.{stationID}.agent.invoke
+  Timeout: 5 minutes for agents, 10 minutes for workflows
+
+  PUB/SUB (Presence Heartbeats):
+  +-------------+
+  | Any Station |  ------ Heartbeat ------>  (All Subscribers)
+  +-------------+
+
+  Subject: lattice.presence.heartbeat
+  Interval: Every 10 seconds
+      </div>
+
+      <h3>NATS Subject Hierarchy</h3>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>lattice.
+|-- presence.
+|   |-- announce        # Station startup with full manifest
+|   |-- heartbeat       # Periodic health signal (10 sec)
+|   +-- goodbye         # Graceful shutdown notification
+|
+|-- station.{id}.
+|   +-- agent.invoke    # Agent invocation (request-reply)
+|
+|-- work.
+|   |-- {stationID}.assign  # Work assignment
+|   +-- {workID}.response   # Work responses/progress
+|
++-- events.
+    |-- StationJoined
+    |-- StationLeft
+    |-- AgentRegistered
+    |-- WorkAssigned
+    +-- ...</code></pre>
+      </div>
+
+      <h3>JetStream Event Sourcing</h3>
+      <p>All events are persisted to JetStream for audit and replay:</p>
+      <ul>
+        <li><code>DenyDelete: true</code> - No message deletion (immutable)</li>
+        <li><code>DenyPurge: true</code> - No stream purging</li>
+        <li>Append-only semantics for full audit trail</li>
+      </ul>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Email vs Queue Section -->
+    <section id="email-vs-queue">
+      <h2><span class="bionic">Ema</span>il-like vs <span class="bionic">Mes</span>sage-Queue <span class="bionic">Pat</span>terns</h2>
+
+      <h3>The Two Paradigms</h3>
+      <div class="ascii-diagram">
+            EMAIL-LIKE vs MESSAGE-QUEUE PATTERNS
+
+  EMAIL-LIKE (Agent Mail):              MESSAGE-QUEUE (NATS/Station):
+  ========================              =============================
+
+  +--------+     +--------+             +--------+     +--------+
+  | Agent  |     | Agent  |             | Agent  |     |  NATS  |
+  |   A    |     |   B    |             |   A    |     | Server |
+  +---+----+     +---+----+             +---+----+     +---+----+
+      |             |                       |             |
+      | send_message|                       | publish     |
+      +------------>|                       +------------>|
+      |             |                       |             |
+      |    (B polls |                       |             | notify
+      |     inbox)  |                       |             | (push)
+      |             |                       |             v
+      |             |                   +---+----+     +--------+
+      |             |                   | Agent  |<----| Agent  |
+      |             |                   |   A    |     |   B    |
+      |             |                   +--------+     +--------+
+
+  - Polling-based (async)               - Push-based (near real-time)
+  - Messages persist in inbox           - Messages persist in stream
+  - Threaded conversations              - Subject-based routing
+  - Human-readable (markdown)           - Structured payloads (JSON/Go)
+  - Single-machine focus                - Distributed by design
+      </div>
+
+      <h3>Comparison Matrix</h3>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Aspect</th><th>Email-Like (Agent Mail)</th><th>Message-Queue (NATS)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Delivery</strong></td><td>Polling inbox</td><td>Push via subscription</td></tr>
+            <tr><td><strong>Latency</strong></td><td>Higher (poll interval)</td><td>Sub-millisecond</td></tr>
+            <tr><td><strong>Persistence</strong></td><td>SQLite + Git markdown</td><td>JetStream streams</td></tr>
+            <tr><td><strong>Scaling</strong></td><td>Single machine</td><td>Multi-machine mesh</td></tr>
+            <tr><td><strong>Threading</strong></td><td>Built-in thread_id</td><td>Subject hierarchy</td></tr>
+            <tr><td><strong>Human Readability</strong></td><td>High (markdown)</td><td>Lower (structured)</td></tr>
+            <tr><td><strong>Setup Complexity</strong></td><td>Low (Python)</td><td>Medium (Go + NATS)</td></tr>
+            <tr><td><strong>Use Case</strong></td><td>Advisory coordination</td><td>Production orchestration</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>When to Use Each</h3>
+      <p><strong>Use Agent Mail When:</strong></p>
+      <ul>
+        <li>Agents are on the <strong>same machine</strong></li>
+        <li>Human oversight via web UI is important</li>
+        <li>Audit trails need to be human-readable</li>
+        <li>Advisory coordination is sufficient</li>
+      </ul>
+
+      <p><strong>Use NATS/Station When:</strong></p>
+      <ul>
+        <li>Agents are <strong>distributed across machines</strong></li>
+        <li>Sub-millisecond latency matters</li>
+        <li>You need guaranteed delivery semantics</li>
+        <li>Production-grade reliability is required</li>
+      </ul>
+
+      <h3>Hybrid Approach</h3>
+      <p>Both patterns can be combined:</p>
+      <div class="ascii-diagram">
+                    HYBRID COORDINATION ARCHITECTURE
+
+                      +-------------------+
+                      |   NATS Lattice    |
+                      | (cross-machine    |
+                      |  coordination)    |
+                      +--------+----------+
+                               |
+            +------------------+------------------+
+            |                  |                  |
+            v                  v                  v
+    +---------------+  +---------------+  +---------------+
+    |   Station A   |  |   Station B   |  |   Station C   |
+    | +----------+  |  | +----------+  |  | +----------+  |
+    | |Agent Mail|  |  | |Agent Mail|  |  | |Agent Mail|  |
+    | |(local    |  |  | |(local    |  |  | |(local    |  |
+    | | agents)  |  |  | | agents)  |  |  | | agents)  |  |
+    | +----------+  |  | +----------+  |  | +----------+  |
+    +---------------+  +---------------+  +---------------+
+
+  NATS handles inter-station communication
+  Agent Mail handles intra-station coordination
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Pre-commit Guards Section -->
+    <section id="pre-commit-guards">
+      <h2><span class="bionic">Pre</span>-commit <span class="bionic">Gua</span>rds for <span class="bionic">Con</span>flict <span class="bionic">Pre</span>vention</h2>
+
+      <h3>The Last Line of Defense</h3>
+      <p>Reservations are <strong>advisory</strong> - agents choose to respect them. Pre-commit guards add <strong>enforcement</strong> at the Git layer.</p>
+
+      <h3>Installation</h3>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Install pre-commit guard for Agent Mail
+mcp-agent-mail guard install &lt;project_key&gt; &lt;repo_path&gt;</code></pre>
+      </div>
+
+      <h3>How It Works</h3>
+      <div class="ascii-diagram">
+                    PRE-COMMIT GUARD WORKFLOW
+
+  Agent attempts:  git commit -m "Feature X"
+                              |
+                              v
+                  +------------------------+
+                  |    Pre-commit Hook     |
+                  |    Scans staged files  |
+                  +------------------------+
+                              |
+              +---------------+---------------+
+              |                               |
+              v                               v
+     No active exclusive             Active exclusive
+     reservation by                  reservation held
+     another agent                   by another agent
+              |                               |
+              v                               v
+         COMMIT PROCEEDS              COMMIT BLOCKED
+                                      "FILE_RESERVATION_CONFLICT"
+                                      "File X reserved by OtherAgent"
+      </div>
+
+      <h3>Configuration</h3>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Behavior</th><th>Configuration</th><th>Result</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Block</strong></td><td><code>AGENT_MAIL_GUARD_MODE=block</code></td><td>Commit fails with error</td></tr>
+            <tr><td><strong>Warn</strong></td><td><code>AGENT_MAIL_GUARD_MODE=warn</code></td><td>Warning printed, commit proceeds</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Example Output</h3>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>$ git commit -m "Add auth routes"
+BLOCKED: File 'src/api/routes.py' reserved by OtherAgent
+Reservation expires in: 45 minutes
+Options:
+  1. Wait for reservation to expire
+  2. Contact OtherAgent to coordinate
+  3. Use --no-verify to bypass (not recommended)</code></pre>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Audit Trails Section -->
+    <section id="audit-trails">
+      <h2><span class="bionic">Thr</span>ead-based <span class="bionic">Con</span>versation <span class="bionic">Aud</span>it <span class="bionic">Tra</span>ils</h2>
+
+      <h3>Why Audit Trails Matter</h3>
+      <p>Multi-agent systems can be difficult to debug. When something goes wrong:</p>
+      <ul>
+        <li>Which agent made which decision?</li>
+        <li>What information did they have?</li>
+        <li>How did they communicate?</li>
+        <li>Where did the breakdown occur?</li>
+      </ul>
+
+      <h3>Thread IDs as Audit Keys</h3>
+      <p>Agent Mail uses <code>thread_id</code> to group related messages:</p>
+
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># All messages about feature br-123 share thread_id
+send_message(
+    project_key="/my/project",
+    from_agent="GreenCastle",
+    to_agents=["RedCat", "BlueLake"],
+    thread_id="br-123",                    # Links to task/issue
+    subject="[br-123] Start: Auth API",
+    body="Implementation plan and status...",
+)
+
+# Later response in same thread
+send_message(
+    thread_id="br-123",                    # Same thread
+    from_agent="RedCat",
+    to_agents=["GreenCastle"],
+    subject="RE: [br-123] Start: Auth API",
+    body="Frontend ready for integration..."
+)</code></pre>
+      </div>
+
+      <h3>Dual-Persistence Architecture</h3>
+      <p>Agent Mail stores messages in <strong>two places</strong> for different access patterns:</p>
+      <div class="ascii-diagram">
+                    DUAL-PERSISTENCE ARCHITECTURE
+
+                       +------------------+
+                       |   Agent/Client   |
+                       +--------+---------+
+                                |
+                       HTTP (FastMCP 2.0)
+                                |
+                       +--------v---------+
+                       |   MCP Server     |
+                       +----+--------+----+
+                            |        |
+              +-------------+        +-------------+
+              |                                    |
+       +------v------+                    +--------v-------+
+       |   SQLite    |                    |   Git Repo     |
+       |   + FTS5    |                    |   (.md files)  |
+       +-------------+                    +----------------+
+
+       For: Fast queries,                 For: Human audit,
+       search, indexing                   version history,
+                                          portability
+      </div>
+
+      <h3>Searching Audit Trails</h3>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Search across all messages
+search_messages(
+    project_key="/my/project",
+    query="authentication error",
+    limit=50
+)
+
+# Advanced syntax
+search_messages(query="subject:auth body:\"token expired\" from:GreenCastle")</code></pre>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Mental Models Section -->
+    <section id="mental-models">
+      <h2><span class="bionic">Men</span>tal <span class="bionic">Mod</span>els</h2>
+
+      <h3>Mental Model 1: The Village Post Office</h3>
+      <div class="ascii-diagram">
+                    THE VILLAGE POST OFFICE MODEL
+
+  +------------------------------------------------------------------+
+  |                        THE VILLAGE                                |
+  +------------------------------------------------------------------+
+  |                                                                   |
+  |  +----------+  +----------+  +----------+  +----------+           |
+  |  |Blacksmith|  |  Baker   |  | Weaver   |  | Scribe   |           |
+  |  | (Agent)  |  | (Agent)  |  | (Agent)  |  | (Agent)  |           |
+  |  +----+-----+  +----+-----+  +----+-----+  +----+-----+           |
+  |       |             |             |             |                 |
+  |       +-------------+------+------+-------------+                 |
+  |                            |                                      |
+  |                     +------v------+                               |
+  |                     | POST OFFICE |                               |
+  |                     | (Server)    |                               |
+  |                     +-------------+                               |
+  |                            |                                      |
+  |                     +------v------+                               |
+  |                     | LAND OFFICE |                               |
+  |                     | (File       |                               |
+  |                     |  Reserv.)   |                               |
+  |                     +-------------+                               |
+  |                                                                   |
+  +------------------------------------------------------------------+
+      </div>
+      <p><strong>Key Insight:</strong> Agents don't need to know where other agents are. They just:</p>
+      <ol>
+        <li>Check their mailbox</li>
+        <li>Send letters to names</li>
+        <li>Register their work area</li>
+      </ol>
+
+      <h3>Mental Model 2: Advisory Locks vs Enforced Locks</h3>
+      <div class="ascii-diagram">
+                ADVISORY vs ENFORCED LOCKS
+
+  TRADITIONAL LOCKS:              AGENT MAIL RESERVATIONS:
+  ==================              =======================
+
+  +----------------+              +----------------+
+  |                |              |                |
+  |   LOCKED       |              | "I'M WORKING  |
+  |   KEEP OUT     |              |  HERE"        |
+  |   [door icon]  |              | [sign icon]   |
+  |                |              |                |
+  +----------------+              +----------------+
+
+  - Can't proceed if locked       - Can proceed (with warning)
+  - System enforces               - Agent chooses to respect
+  - All-or-nothing                - Shared/exclusive modes
+  - Deadlock possible             - TTL prevents deadlock
+
+  Think: Hotel room lock          Think: "Do Not Disturb" sign
+      </div>
+      <p><strong>Key Insight:</strong> File reservations are <strong>signals, not barriers</strong>. Well-behaved agents respect the signals.</p>
+
+      <h3>Mental Model 3: Async = Polling, Not Push</h3>
+      <div class="ascii-diagram">
+                    ASYNC POLLING MODEL
+
+  REAL-TIME CHAT:                 AGENT MAIL (ASYNC):
+  ===============                 ==================
+
+  Agent A: "Hey B!"               Agent A sends message
+  Agent B: "What?"                (message sits in inbox)
+  Agent A: "Look at this!"        Agent B working on task...
+  Agent B: "OK, looking..."       Agent B checks inbox between steps
+                                  "Oh, message from A"
+                                  Agent B responds
+
+  - Instant notification          - Poll between work steps
+  - Requires connection           - Works disconnected
+  - Interruptive                  - Non-interruptive
+  - Synchronous flow              - Asynchronous flow
+
+  Think: Slack DMs                Think: Email
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Integration Patterns Section -->
+    <section id="integration-patterns">
+      <h2><span class="bionic">Int</span>egration <span class="bionic">Pat</span>terns</h2>
+
+      <h3>Integration with Gas Town</h3>
+      <p>Gas Town's agent factory pattern naturally maps to Agent Mail:</p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Gas Town Role</th><th>Agent Mail Pattern</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Mayor</strong></td><td>Receives status updates from all roles</td></tr>
+            <tr><td><strong>Deacon</strong></td><td>Monitoring alerts via high-priority mail</td></tr>
+            <tr><td><strong>Dogs</strong></td><td>Quality gate results as threaded reports</td></tr>
+            <tr><td><strong>Refinery</strong></td><td>Task decomposition announced via threads</td></tr>
+            <tr><td><strong>Polecat</strong></td><td>Persistent workers with long-lived reservations</td></tr>
+            <tr><td><strong>Crew</strong></td><td>Ephemeral agents, short TTL reservations</td></tr>
+            <tr><td><strong>Overseer (You)</strong></td><td>Human inbox via web UI</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Integration with Ralph</h3>
+      <p>Ralph instances have no shared memory between iterations. Agent Mail provides external state:</p>
+
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># In PROMPT.md:
+"""
+Before starting:
+1. Register with Agent Mail
+2. Check inbox for messages from previous runs
+3. Reserve files you'll edit
+
+After finishing:
+1. Send summary to inbox (for next run)
+2. Release file reservations
+3. Exit cleanly
+"""
+
+# At start of each Ralph iteration
+register_agent(
+    project_key="/ralph/myproject",
+    agent_name="RalphWorker",
+    program="Ralph Loop",
+    model="Claude Sonnet 4"
+)
+
+# Check what previous iteration left
+inbox = fetch_inbox(
+    project_key="/ralph/myproject",
+    agent_name="RalphWorker",
+    limit=1
+)
+
+if inbox:
+    previous_context = inbox[0].body
+    # Use this to inform current iteration
+
+# Before exiting, leave note for next iteration
+send_message(
+    project_key="/ralph/myproject",
+    from_agent="RalphWorker",
+    to_agents=["RalphWorker"],  # To self
+    thread_id="continuity",
+    subject="[HANDOFF] Iteration N complete",
+    body=f"""
+    Completed: {tasks_done}
+    Remaining: {tasks_pending}
+    Blockers: {blockers}
+    Next iteration should: {recommendations}
+    """
+)</code></pre>
+      </div>
+
+      <h3>Combination Matrix</h3>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Async Pattern +</th><th>Use Case</th><th>Complexity</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Gas Town</td><td>Role-based messaging across 8 agent types</td><td>Medium</td><td>High</td></tr>
+            <tr><td>Ralph</td><td>Async Ralph with inter-iteration continuity</td><td>Medium</td><td>Medium</td></tr>
+            <tr><td>CC Mirror</td><td>Cross-model delegation and reporting</td><td>Medium</td><td>High</td></tr>
+            <tr><td>Beads</td><td>Thread IDs = Beads issue IDs for audit</td><td>Low</td><td>Very High</td></tr>
+            <tr><td>Pre-commit hooks</td><td>Block conflicting commits</td><td>Low</td><td>High</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Checkpoints Section -->
+    <section id="checkpoints">
+      <h2><span class="bionic">Che</span>ckpoints</h2>
+
+      <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+        <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Checkpoint 1: Agent Mail Server Running</div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code># Start server
+am
+# Expected: Server starting on http://127.0.0.1:8765
+
+# Verify health
+curl http://127.0.0.1:8765/health
+# Expected: {"status": "ok"}</code></pre>
+        </div>
+        <p><strong>You should see:</strong> Server startup message and health endpoint returns <code>ok</code></p>
+        <p><strong>If you don't:</strong> Check if port 8765 is available. Try <code>cd ~/projects/mcp_agent_mail && ./scripts/run_server_with_token.sh</code></p>
+      </div>
+
+      <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+        <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Checkpoint 2: Agent Registered</div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code># Registration
+register_agent(
+    project_key="/test",
+    agent_name="TestAgent",
+    program="test",
+    model="test"
+)
+# Expected: {"success": true, "agent_name": "TestAgent"}</code></pre>
+        </div>
+        <p><strong>You should see:</strong> Success response with agent name, agent appears in web UI at <code>http://127.0.0.1:8765/mail/agents</code></p>
+      </div>
+
+      <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+        <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Checkpoint 3: File Reservations Working</div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code># Reserve a file
+file_reservation_paths(
+    project_key="/test",
+    agent_name="TestAgent",
+    paths=["test.py"],
+    ttl_seconds=60,
+    exclusive=True
+)
+# Expected: {"success": true, "conflicts": []}</code></pre>
+        </div>
+        <p><strong>You should see:</strong> Reservation granted, no conflicts, reservation visible in web UI at <code>http://127.0.0.1:8765/mail/reservations</code></p>
+      </div>
+
+      <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+        <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Checkpoint 4: Station Lattice Connected</div>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          <pre><code># Start orchestrator
+stn serve --orchestration
+
+# In another terminal, check status
+stn lattice --nats nats://localhost:4222 status
+# Expected: Connection successful, station listed</code></pre>
+        </div>
+        <p><strong>You should see:</strong> Connection successful, station listed in mesh, agents discoverable</p>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Troubleshooting Section -->
+    <section id="troubleshooting">
+      <h2><span class="bionic">Tro</span>ubleshooting</h2>
+
+      <details class="troubleshoot">
+        <summary>from_agent not registered</summary>
+        <div>
+          <p><strong>Cause:</strong> Sending message before registration</p>
+          <p><strong>Fix:</strong> Always call <code>register_agent()</code> first</p>
+        </div>
+      </details>
+
+      <details class="troubleshoot">
+        <summary>FILE_RESERVATION_CONFLICT</summary>
+        <div>
+          <p><strong>Cause:</strong> Another agent holds exclusive reservation</p>
+          <p><strong>Fix:</strong> Wait for TTL expiry, use <code>exclusive=False</code>, or contact holding agent</p>
+        </div>
+      </details>
+
+      <details class="troubleshoot">
+        <summary>Authentication failed</summary>
+        <div>
+          <p><strong>Cause:</strong> Bearer token mismatch</p>
+          <p><strong>Fix:</strong> Check <code>HTTP_BEARER_TOKEN</code> in <code>.env</code>, or enable <code>HTTP_ALLOW_LOCALHOST_UNAUTHENTICATED=true</code></p>
+        </div>
+      </details>
+
+      <details class="troubleshoot">
+        <summary>Database is locked</summary>
+        <div>
+          <p><strong>Cause:</strong> SQLite concurrent write contention</p>
+          <p><strong>Fix:</strong> Run <code>mcp-agent-mail doctor repair</code></p>
+        </div>
+      </details>
+
+      <details class="troubleshoot">
+        <summary>Agent name rejected</summary>
+        <div>
+          <p><strong>Cause:</strong> Doesn't match adjective+noun pattern</p>
+          <p><strong>Fix:</strong> Use names like <code>GreenCastle</code>, <code>RedCat</code>, <code>BlueLake</code></p>
+        </div>
+      </details>
+
+      <details class="troubleshoot">
+        <summary>NATS connection refused</summary>
+        <div>
+          <p><strong>Cause:</strong> NATS not running</p>
+          <p><strong>Fix:</strong> Verify orchestrator status with <code>stn status</code>, ensure port 4222 is available</p>
+        </div>
+      </details>
+
+      <h3>Diagnostic Commands</h3>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Agent Mail diagnostics
+mcp-agent-mail doctor check
+mcp-agent-mail mail diagnostics
+mcp-agent-mail mail routing
+mcp-agent-mail projects maintenance
+
+# Station diagnostics
+stn status
+stn lattice --nats nats://localhost:4222 status
+stn lattice --nats nats://localhost:4222 agents
+
+# Check NATS connectivity
+nc -zv localhost 4222</code></pre>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Source Attribution Section -->
+    <section id="source-attribution">
+      <h2><span class="bionic">Sou</span>rce <span class="bionic">Att</span>ribution</h2>
+
+      <h3>Primary Sources</h3>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Source</th><th>URL</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>MCP Agent Mail Repository</td><td><a href="https://github.com/Dicklesworthstone/mcp_agent_mail">github.com/Dicklesworthstone/mcp_agent_mail</a></td></tr>
+            <tr><td>Station Repository</td><td><a href="https://github.com/cloudshipai/station">github.com/cloudshipai/station</a></td></tr>
+            <tr><td>CC Mirror Repository</td><td><a href="https://github.com/numman-ali/cc-mirror">github.com/numman-ali/cc-mirror</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Key Authors</h3>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Author</th><th>Contribution</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Jeffrey Emanuel (@Dicklesworthstone)</td><td>Agent Mail creator, "Agentic Coding Tooling Flywheel"</td></tr>
+            <tr><td>CloudShip AI</td><td>Station platform, NATS-based orchestration</td></tr>
+            <tr><td>Numman Ali (@nummanali)</td><td>CC Mirror, native orchestration discovery</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Related Documents</h3>
+      <ul>
+        <li><a href="architecture-complexity-ladder.html">Complexity Ladder</a> - Understanding Level 5-7 systems</li>
+        <li><a href="mastery-multi-agent.html">Multi-Agent Mastery</a> - Full multi-agent patterns</li>
+        <li><a href="compare-orchestration.html">Orchestration Comparison</a> - Comparing orchestration approaches</li>
+        <li><a href="mastery-ralph-complete.html">Ralph Complete</a> - Ralph loop patterns</li>
+      </ul>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Quick Reference Section -->
+    <section id="quick-reference">
+      <h2><span class="bionic">Qui</span>ck <span class="bionic">Ref</span>erence</h2>
+
+      <h3>Agent Mail Essentials</h3>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Register
+register_agent(project_key, agent_name, program, model)
+
+# Reserve
+file_reservation_paths(project_key, agent_name, paths, ttl_seconds, exclusive)
+
+# Message
+send_message(project_key, from_agent, to_agents, thread_id, subject, body)
+
+# Check inbox
+fetch_inbox(project_key, agent_name, limit)
+
+# Release
+release_file_reservations(project_key, agent_name)</code></pre>
+      </div>
+
+      <h3>Station Essentials</h3>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Install
+curl -fsSL https://raw.githubusercontent.com/cloudshipai/station/main/install.sh | bash
+
+# Initialize
+stn init --provider anthropic
+
+# Start orchestrator
+stn serve --orchestration
+
+# Join mesh
+stn serve --lattice nats://orchestrator:4222
+
+# Check status
+stn lattice --nats nats://localhost:4222 status</code></pre>
+      </div>
+
+      <h3>Key Decisions</h3>
+      <div class="ascii-diagram">
+Need file conflict prevention?
+--> Agent Mail file reservations
+
+Need cross-machine coordination?
+--> Station NATS mesh
+
+Need human-readable audit trails?
+--> Agent Mail (Git-backed markdown)
+
+Need sub-millisecond latency?
+--> Station (NATS native)
+
+Need both?
+--> Hybrid: NATS between stations, Agent Mail within
+      </div>
+    </section>
+
+    <!-- Footer Navigation -->
+    <nav class="footer-nav">
+      <a href="architecture-complexity-ladder.html" class="nav-prev">
+        <span class="nav-direction">Previous</span>
+        <span class="nav-title">Complexity Ladder</span>
+      </a>
+      <a href="mastery-multi-agent.html" class="nav-next">
+        <span class="nav-direction">Next</span>
+        <span class="nav-title">Multi-Agent Mastery</span>
+      </a>
+    </nav>
+
+    <!-- Tags -->
+    <div style="margin-top: 2rem;">
+      <span class="tag">#async-coordination</span>
+      <span class="tag">#agent-mail</span>
+      <span class="tag">#station</span>
+      <span class="tag">#nats</span>
+      <span class="tag">#file-reservations</span>
+      <span class="tag">#message-queue</span>
+      <span class="tag">#pub-sub</span>
+      <span class="tag">#audit-trails</span>
+      <span class="tag">#multi-agent</span>
+      <span class="tag">#distributed-systems</span>
+    </div>
+  </div>
+
+  <script src="../js/copy-code.js"></script>
+  <script src="../js/search.js"></script>
+<script src="../js/global-nav.js"></script>
+</body>
+</html>

@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Learning & Feedback Loop Engineering
 
+> **You Are Here:** This guide shows how to make each run better than the last through systematic learning accumulation. Read this after understanding basic patterns (Ralph, fresh context) to learn how to capture and compound learnings across sessions, runs, and projects. The key insight: systems that learn outperform systems that start fresh.
+
 **Status:** Definitive Reference
 **Synthesized:** 2026-01-09
 **Sources:** Ryan Carson's Compounding Ralph, Boris Cherny's Creator Workflow, Matt Pocock's Ralph Tips, Claude-Mem, and 30+ research extractions
@@ -47,6 +49,15 @@ Traditional Ralph starts fresh each session. Compounding Ralph adds:
 - Archived user story JSONs
 - Agent references past successes AND failures
 - Patterns discovered in one run inform the next
+
+### Checkpoint: Compounding Knowledge Pattern
+**You should now understand:**
+- [ ] The difference between fresh-start runs and compounding runs
+- [ ] How archived PRDs and learnings inform future runs
+- [ ] Why compounding is more valuable than single-run optimization
+- [ ] The multiplicative benefit: Run 10 is dramatically better than Run 1
+
+**If unclear:** Re-read Ryan Carson's insight above - this is the core idea of the entire document.
 
 ---
 
@@ -243,6 +254,15 @@ For knowledge that spans multiple projects:
   }
 }
 ```
+
+### Checkpoint: Feedback Loop Types
+**You should now understand:**
+- [ ] The 4 levels: within-session, cross-session, cross-run, cross-project
+- [ ] progress.txt with Codebase Patterns section for within-session
+- [ ] CLAUDE.md and AGENTS.md for cross-session
+- [ ] Archives for cross-run; Claude-Mem for cross-project
+
+**If unclear:** Focus on mastering levels 1-3 before attempting level 4 (Claude-Mem).
 
 ---
 
@@ -675,6 +695,67 @@ Semantic Memory (future sessions)
 9. **External over internal.** Files outlast context windows.
 
 10. **The agent is stateless.** Memory is architecture, not magic.
+
+---
+
+## Troubleshooting
+
+### Common Issue: progress.txt Becomes Too Large
+**Symptom:** Agent spends excessive time reading progress.txt; context fills quickly
+**Cause:** Unbounded accumulation without pruning
+**Fix:**
+1. Promote stable patterns to CLAUDE.md, then remove from progress.txt
+2. Archive old entries to `archives/` after each significant run
+3. Keep progress.txt focused on current session + recent patterns only
+4. Target: progress.txt should stay under 2000 tokens
+
+### Common Issue: Archives Not Being Referenced
+**Symptom:** Runs repeat the same mistakes despite archived learnings
+**Cause:** Prompt doesn't explicitly instruct archive review
+**Fix:** Add explicit archive instruction to prompt.md:
+```markdown
+## Before Starting
+1. Review `archives/` folder for recent runs
+2. Read `learnings.md` from most recent 2-3 runs
+3. Note patterns that worked AND failed
+4. Apply these insights to current implementation
+```
+
+### Common Issue: CLAUDE.md Becomes Bloated
+**Symptom:** CLAUDE.md exceeds 500 tokens; context budget consumed by instructions
+**Cause:** Promoting too many patterns without pruning
+**Fix:**
+1. CLAUDE.md is for permanent, project-wide patterns ONLY
+2. If a pattern is session-specific, keep it in progress.txt
+3. Prune quarterly: remove patterns that are now obvious or obsolete
+4. Use imports (`@docs/...`) for detailed references, not inline content
+
+### Common Issue: Verification Failures Corrupt Learning
+**Symptom:** False completions in archives; agent learns wrong patterns
+**Cause:** Marking complete without actual verification
+**Fix:**
+1. Every PRD item MUST include testable acceptance criteria
+2. Include `npm run typecheck passes` and `npm run test passes`
+3. If verification fails, learnings should note the FAILURE, not success
+4. Manual review archives periodically for corrupted learnings
+
+### Common Issue: Compounding Not Working (No Improvement Over Runs)
+**Symptom:** Run 10 is no better than Run 1
+**Cause:** Usually missing one of: archiving, referencing, or pattern promotion
+**Fix:** Verify the full cycle:
+1. [ ] Are you archiving after each run? (`./archive-run.sh`)
+2. [ ] Does prompt instruct agent to READ archives?
+3. [ ] Are learnings being promoted to Codebase Patterns section?
+4. [ ] Is agent ACTUALLY reading the files (check context usage)?
+
+### Common Issue: Cross-Project Learning Not Transferring
+**Symptom:** Claude-Mem configured but no cross-project benefit
+**Cause:** Retrieval not matching or injection not happening
+**Fix:**
+1. Verify Claude-Mem is capturing: check SQLite DB for entries
+2. Verify retrieval: manually query for relevant patterns
+3. Check injection rules in config: is `auto_inject: true`?
+4. Consider if patterns are truly cross-project or project-specific
 
 ---
 

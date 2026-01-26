@@ -1,0 +1,2506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swarm Topologies | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Topology Card */
+    .topology-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .topology-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .topology-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: #f4f4f5;
+      color: #3f3f46;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 8px;
+    }
+
+    .topology-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .topology-badge {
+      display: inline-flex;
+      padding: 4px 8px;
+      background: #ecfdf5;
+      color: #0D9373;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    /* ASCII Diagram Box */
+    .ascii-diagram {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+
+    .ascii-diagram pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #10b981;
+      line-height: 1.4;
+    }
+
+    /* Characteristics Table */
+    .char-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    .char-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: #f4f4f5;
+      font-weight: 600;
+      color: #3f3f46;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .char-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .char-table td:first-child {
+      font-weight: 500;
+      color: #18181b;
+    }
+
+    /* Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Selection Guide */
+    .selection-card {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .selection-question {
+      font-size: 15px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 12px;
+    }
+
+    .selection-answer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .selection-answer code {
+      background: #e4e4e7;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+    }
+
+    /* Consensus Box */
+    .consensus-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .consensus-header {
+      font-size: 16px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Quick Reference Table */
+    .quick-ref-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+
+    .quick-ref-table th {
+      text-align: left;
+      padding: 10px 12px;
+      background: #18181b;
+      font-weight: 600;
+      color: #ffffff;
+      border-bottom: 1px solid #3f3f46;
+    }
+
+    .quick-ref-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .quick-ref-table tr:hover td {
+      background: #fafafa;
+    }
+
+    .quick-ref-table code {
+      background: #f4f4f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="network" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Swarm Topologies</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- 14 Topologies -->
+      <div class="nav-section expanded" data-section="topologies">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>14+ Topologies</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#topologies" class="nav-item">Overview Matrix</a>
+          <a href="#sequential" class="nav-item">Sequential</a>
+          <a href="#concurrent" class="nav-item">Concurrent</a>
+          <a href="#hierarchical" class="nav-item">Hierarchical</a>
+          <a href="#mesh" class="nav-item">Mesh</a>
+          <a href="#moa" class="nav-item">Mixture-of-Agents</a>
+          <a href="#graph" class="nav-item">GraphWorkflow</a>
+          <a href="#forest" class="nav-item">ForestSwarm</a>
+        </div>
+      </div>
+
+      <!-- Consensus -->
+      <div class="nav-section" data-section="consensus">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span>Consensus</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#consensus" class="nav-item">Raft vs Byzantine</a>
+          <a href="#gossip" class="nav-item">Gossip Protocol</a>
+        </div>
+      </div>
+
+      <!-- Selection Guide -->
+      <div class="nav-section" data-section="selection">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="compass" class="w-4 h-4"></i>
+          <span>Selection Guide</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#selection" class="nav-item">Decision Tree</a>
+          <a href="#scale-selection" class="nav-item">Scale-Based</a>
+        </div>
+      </div>
+
+      <!-- Rust/NATS -->
+      <div class="nav-section" data-section="infrastructure">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="server" class="w-4 h-4"></i>
+          <span>Infrastructure</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#ccswarm" class="nav-item">CCSwarm (Rust)</a>
+          <a href="#nats" class="nav-item">NATS Backbone</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Topology Failures</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Swarm topologies are structural patterns that define how multiple AI agents coordinate, communicate, and collaborate.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          When you move beyond single-agent workflows (vanilla Claude Code, Ralph loops), you enter the territory of multi-agent systems. The question becomes: HOW do agents talk to each other? This is topology.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          This synthesis extracts topology patterns from four major frameworks: Claude-Flow v3 (54+ agents, enterprise), CCSwarm (Rust-native), Swarms Framework (14+ patterns), and Station (NATS messaging backbone).
+        </p>
+      </section>
+
+      <!-- Section 2: 14+ TOPOLOGIES CATALOG -->
+      <section id="topologies" data-activity="topologies">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The 14+ Topologies Catalog
+        </h2>
+
+        <!-- Quick Reference Table -->
+        <div class="overflow-x-auto mb-8">
+          <table class="quick-ref-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Topology</th>
+                <th>Agent Count</th>
+                <th>Parallelism</th>
+                <th>Best For</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td><strong>Sequential</strong></td>
+                <td>2-10</td>
+                <td>None</td>
+                <td>Pipelines, refinement chains</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><strong>Concurrent</strong></td>
+                <td>2-50</td>
+                <td>Full</td>
+                <td>Speed, parallel analysis</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><strong>Hierarchical</strong></td>
+                <td>3-100+</td>
+                <td>Partial</td>
+                <td>Enterprise, projects</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td><strong>Mesh</strong></td>
+                <td>5-20</td>
+                <td>Full</td>
+                <td>Distributed workloads</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td><strong>Ring</strong></td>
+                <td>3-30</td>
+                <td>Partial</td>
+                <td>Pipeline with feedback</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td><strong>Star</strong></td>
+                <td>3-50</td>
+                <td>Full</td>
+                <td>Simple coordination</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td><strong>Hybrid</strong></td>
+                <td>10-200+</td>
+                <td>Mixed</td>
+                <td>Factory scale</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td><strong>Mixture-of-Agents</strong></td>
+                <td>3-10</td>
+                <td>Full</td>
+                <td>Expert synthesis</td>
+              </tr>
+              <tr>
+                <td>9</td>
+                <td><strong>GraphWorkflow</strong></td>
+                <td>5-50</td>
+                <td>DAG-based</td>
+                <td>Complex pipelines</td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td><strong>ForestSwarm</strong></td>
+                <td>10-100+</td>
+                <td>Dynamic</td>
+                <td>Large agent pools</td>
+              </tr>
+              <tr>
+                <td>11</td>
+                <td><strong>GroupChat</strong></td>
+                <td>3-8</td>
+                <td>Turn-based</td>
+                <td>Discussion, debate</td>
+              </tr>
+              <tr>
+                <td>12</td>
+                <td><strong>MajorityVoting</strong></td>
+                <td>3-9 (odd)</td>
+                <td>Full</td>
+                <td>Decision making</td>
+              </tr>
+              <tr>
+                <td>13</td>
+                <td><strong>AgentRearrange</strong></td>
+                <td>2-20</td>
+                <td>Configurable</td>
+                <td>Dynamic workflows</td>
+              </tr>
+              <tr>
+                <td>14</td>
+                <td><strong>HeavySwarm</strong></td>
+                <td>5</td>
+                <td>Phased</td>
+                <td>Deep analysis</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Sequential Topology -->
+        <div class="topology-card" id="sequential">
+          <div class="topology-header">
+            <span class="topology-number">1</span>
+            <span class="topology-name">Sequential Workflow</span>
+            <span class="topology-badge">Basic</span>
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            Linear chain where each agent's output becomes the next agent's input. This is the simplest multi-agent topology.
+          </p>
+
+          <div class="ascii-diagram">
+            <pre>+----------+     +----------+     +----------+     +----------+
+|  Agent 1 | --> |  Agent 2 | --> |  Agent 3 | --> |  Result  |
+| Research |     |  Writer  |     |  Editor  |     |          |
++----------+     +----------+     +----------+     +----------+</pre>
+          </div>
+
+          <table class="char-table">
+            <tr><th>Aspect</th><th>Value</th></tr>
+            <tr><td>Parallelism</td><td>None - strictly sequential</td></tr>
+            <tr><td>Latency</td><td>Sum of all agent latencies</td></tr>
+            <tr><td>Failure mode</td><td>Single point - any failure stops chain</td></tr>
+            <tr><td>Memory usage</td><td>Low - one agent active at a time</td></tr>
+          </table>
+
+          <p class="text-text-muted text-sm"><strong>Use cases:</strong> Document pipelines (research -> write -> edit), step-by-step analysis, content refinement</p>
+        </div>
+
+        <!-- Concurrent Topology -->
+        <div class="topology-card" id="concurrent">
+          <div class="topology-header">
+            <span class="topology-number">2</span>
+            <span class="topology-name">Concurrent Workflow</span>
+            <span class="topology-badge">Speed</span>
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            Multiple agents work simultaneously on the same or different tasks. Maximum parallelism.
+          </p>
+
+          <div class="ascii-diagram">
+            <pre>              +------------+
+          +-->|  Agent 1   |--+
+          |   | Market     |  |
+          |   +------------+  |
+          |                   |
++-------+ |   +------------+  |     +---------+
+| Task  |-+-->|  Agent 2   |--+---->| Results |
+|       | |   | Financial  |  |     |         |
++-------+ |   +------------+  |     +---------+
+          |                   |
+          |   +------------+  |
+          +-->|  Agent 3   |--+
+              | Risk       |
+              +------------+</pre>
+          </div>
+
+          <table class="char-table">
+            <tr><th>Aspect</th><th>Value</th></tr>
+            <tr><td>Parallelism</td><td>Full - all agents execute simultaneously</td></tr>
+            <tr><td>Latency</td><td>Max of individual agent latencies</td></tr>
+            <tr><td>Failure mode</td><td>Independent - one failure doesn't stop others</td></tr>
+            <tr><td>Memory usage</td><td>High - all agents active simultaneously</td></tr>
+          </table>
+
+          <p class="text-text-muted text-sm"><strong>Use cases:</strong> Parallel data analysis, multi-perspective evaluation, speed-critical processing</p>
+        </div>
+
+        <!-- Hierarchical Topology -->
+        <div class="topology-card" id="hierarchical">
+          <div class="topology-header">
+            <span class="topology-number">3</span>
+            <span class="topology-name">Hierarchical Swarm</span>
+            <span class="topology-badge">Enterprise</span>
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            Director/Queen agent coordinates specialized workers with feedback loops. This is the Gas Town / Claude-Flow default.
+          </p>
+
+          <div class="ascii-diagram">
+            <pre>                +-------------------+
+                |   STRATEGIC QUEEN |
+                |     (Planning)    |
+                +---------+---------+
+                          |
+          +---------------+---------------+
+          |               |               |
+          v               v               v
+  +-------+-------+ +-----+-----+ +-------+-------+
+  | TACTICAL      | | ADAPTIVE  | |   SECURITY    |
+  | QUEEN         | | QUEEN     | |   ARCHITECT   |
+  +-------+-------+ +-----+-----+ +-------+-------+
+          |               |               |
+    +-----+-----+         |         +-----+-----+
+    |     |     |         |         |     |     |
+    v     v     v         v         v     v     v
++------+ +--+ +------+ +------+ +------+ +--+ +----+
+|Coder1| |C2| |Tester| |Analyt| |Review| |Do| |Opt |
++------+ +--+ +------+ +------+ +------+ +--+ +----+</pre>
+          </div>
+
+          <table class="char-table">
+            <tr><th>Aspect</th><th>Value</th></tr>
+            <tr><td>Parallelism</td><td>Partial - workers parallel, coordination serial</td></tr>
+            <tr><td>Latency</td><td>Director overhead + max worker latency</td></tr>
+            <tr><td>Failure mode</td><td>Director is critical, workers replaceable</td></tr>
+            <tr><td>Memory usage</td><td>Medium - workers share through director</td></tr>
+          </table>
+
+          <p class="text-text-muted text-sm"><strong>Use cases:</strong> Enterprise development teams, project management workflows, complex task decomposition</p>
+        </div>
+
+        <!-- Mesh Topology -->
+        <div class="topology-card" id="mesh">
+          <div class="topology-header">
+            <span class="topology-number">4</span>
+            <span class="topology-name">Mesh Network</span>
+            <span class="topology-badge">Resilient</span>
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            Agents connect directly to each other in a peer-to-peer network. No single point of failure.
+          </p>
+
+          <div class="ascii-diagram">
+            <pre>        +----------+
+        | Agent A  |
+        +----+-----+
+            /|\
+           / | \
+          /  |  \
+         v   v   v
++------+  +------+  +------+
+|Agent B|<->|Agent C|<->|Agent D|
++------+  +------+  +------+
+    \        |        /
+     \       |       /
+      v      v      v
+        +----------+
+        | Agent E  |
+        +----------+</pre>
+          </div>
+
+          <table class="char-table">
+            <tr><th>Aspect</th><th>Value</th></tr>
+            <tr><td>Parallelism</td><td>Full - any agent can communicate with any other</td></tr>
+            <tr><td>Failure mode</td><td>Resilient - no single point of failure</td></tr>
+            <tr><td>Memory usage</td><td>High - maintaining multiple connections</td></tr>
+            <tr><td>Best for</td><td>5-20 agents</td></tr>
+          </table>
+
+          <p class="text-text-muted text-sm"><strong>Use cases:</strong> Distributed workloads without central coordinator, decentralized decision making</p>
+        </div>
+
+        <!-- Mixture-of-Agents Topology -->
+        <div class="topology-card" id="moa">
+          <div class="topology-header">
+            <span class="topology-number">8</span>
+            <span class="topology-name">Mixture-of-Agents (MoA)</span>
+            <span class="topology-badge">Synthesis</span>
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            Multiple experts work in parallel, then an aggregator synthesizes their outputs. Expert panel simulation.
+          </p>
+
+          <div class="ascii-diagram">
+            <pre>              +----------------+
+          +-->| Python Expert  |--+
+          |   +----------------+  |
+          |                       |
++-------+ |   +----------------+  |     +------------+     +--------+
+| Task  |-+-->| Security Expert|--+---->| AGGREGATOR |---->| Result |
+|       | |   +----------------+  |     | (Synthesis)|     |        |
++-------+ |                       |     +------------+     +--------+
+          |   +----------------+  |
+          +-->| Arch Expert    |--+
+              +----------------+</pre>
+          </div>
+
+          <table class="char-table">
+            <tr><th>Aspect</th><th>Value</th></tr>
+            <tr><td>Parallelism</td><td>Full for experts, serial for aggregation</td></tr>
+            <tr><td>Latency</td><td>Max expert latency + aggregator latency</td></tr>
+            <tr><td>Agent count</td><td>3-10 experts + 1 aggregator</td></tr>
+            <tr><td>Failure mode</td><td>Expert failures reduce quality, aggregator critical</td></tr>
+          </table>
+
+          <p class="text-text-muted text-sm"><strong>Use cases:</strong> Complex problem solving, multi-domain expertise, consensus building</p>
+        </div>
+
+        <!-- GraphWorkflow Topology -->
+        <div class="topology-card" id="graph">
+          <div class="topology-header">
+            <span class="topology-number">9</span>
+            <span class="topology-name">GraphWorkflow (DAG)</span>
+            <span class="topology-badge">Complex</span>
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            Directed Acyclic Graph for complex dependencies. Like a build system for agent workflows.
+          </p>
+
+          <div class="ascii-diagram">
+            <pre>          +---+
+          | A |  (Data Collection)
+          +-+-+
+           /|\
+          / | \
+         v  v  v
+      +---+ +---+ +---+
+      | B | | C | | D |  (Parallel Analysis)
+      +-+-+ +-+-+ +-+-+
+        |     |     |
+        |     v     |
+        |   +---+   |
+        +-->| E |<--+  (Synthesis)
+            +-+-+
+              |
+              v
+            +---+
+            | F |  (Final Report)
+            +---+</pre>
+          </div>
+
+          <table class="char-table">
+            <tr><th>Aspect</th><th>Value</th></tr>
+            <tr><td>Parallelism</td><td>DAG-based - parallel where no dependencies</td></tr>
+            <tr><td>Latency</td><td>Critical path through DAG</td></tr>
+            <tr><td>Failure mode</td><td>Dependent nodes blocked by upstream failure</td></tr>
+          </table>
+
+          <p class="text-text-muted text-sm"><strong>Use cases:</strong> Build system-like dependencies, complex data pipelines, conditional execution paths</p>
+        </div>
+
+        <!-- ForestSwarm Topology -->
+        <div class="topology-card" id="forest">
+          <div class="topology-header">
+            <span class="topology-number">10</span>
+            <span class="topology-name">ForestSwarm</span>
+            <span class="topology-badge">Scale</span>
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            Dynamic agent selection using semantic similarity. Routes tasks to the best-matched specialist.
+          </p>
+
+          <div class="ascii-diagram">
+            <pre>+----------+      +-----------+      +---------------+      +---------------+
+|   Task   | ---> | Embedding | ---> | Tree Selection| ---> | Agent Select  |
++----------+      | [0.2,0.8] |      | "Finance Tree"|      | "Tax Speclist"|
+                  +-----------+      +---------------+      +---------------+
+                                            |
+                                            v
+                  +------------------------------------------------+
+                  |                    FOREST                       |
+                  |  +-------------+  +-------------+  +----------+ |
+                  |  |Finance Tree |  | Legal Tree  |  | Tech Tree| |
+                  |  | -Tax Agent  |  | -Contract   |  | -Backend | |
+                  |  | -Invest Agt |  | -IP Agent   |  | -Frontend| |
+                  |  +-------------+  +-------------+  +----------+ |
+                  +------------------------------------------------+</pre>
+          </div>
+
+          <table class="char-table">
+            <tr><th>Aspect</th><th>Value</th></tr>
+            <tr><td>Agent count</td><td>10-100+</td></tr>
+            <tr><td>Parallelism</td><td>Dynamic - routes to best agent</td></tr>
+            <tr><td>Failure mode</td><td>Fallback to next-best agent</td></tr>
+            <tr><td>Memory usage</td><td>Low per task - only one agent active</td></tr>
+          </table>
+
+          <p class="text-text-muted text-sm"><strong>Use cases:</strong> Large agent pools with specialization, dynamic task routing, scalable specialist networks</p>
+        </div>
+      </section>
+
+      <!-- Section 3: CONSENSUS ALGORITHMS -->
+      <section id="consensus" data-activity="consensus">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Consensus Algorithms
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          When multiple agents need to agree on state (what task to do, what result is correct), you need consensus. Different algorithms trade off consistency, latency, and fault tolerance.
+        </p>
+
+        <!-- Raft -->
+        <div class="consensus-card">
+          <div class="consensus-header">
+            <i data-lucide="crown" class="w-5 h-5 text-accent"></i>
+            Raft Consensus (Default)
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            Leader-based with strong consistency. A leader is elected, and all decisions flow through it. If the leader fails, a new election happens.
+          </p>
+
+          <div class="ascii-diagram">
+            <pre>   +----------+
+   |  LEADER  |  <-- Elected via voting
+   | (Queen)  |
+   +----+-----+
+        |
+        | Heartbeats + Log Replication
+        |
+   +----+----+----+----+----+
+   |    |    |    |    |    |
+   v    v    v    v    v    v
+ +--+ +--+ +--+ +--+ +--+ +--+
+ |F1| |F2| |F3| |F4| |F5| |F6|  Followers
+ +--+ +--+ +--+ +--+ +--+ +--+
+
+ Leader fails? --> New election
+ Follower fails? --> Continue with majority</pre>
+          </div>
+
+          <table class="char-table">
+            <tr><th>Property</th><th>Value</th></tr>
+            <tr><td>Consistency</td><td>Strong</td></tr>
+            <tr><td>Fault tolerance</td><td>f < n/2 (can lose up to half minus one)</td></tr>
+            <tr><td>Latency</td><td>15-35ms</td></tr>
+            <tr><td>Best for</td><td>Enterprise default, <20 agents</td></tr>
+          </table>
+        </div>
+
+        <!-- Byzantine -->
+        <div class="consensus-card">
+          <div class="consensus-header">
+            <i data-lucide="shield" class="w-5 h-5 text-red-500"></i>
+            Byzantine Fault Tolerant (BFT)
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            Handles malicious or buggy agents. Requires 2/3 majority to reach consensus. Higher latency but works even when some agents are actively sabotaging.
+          </p>
+
+          <table class="char-table">
+            <tr><th>Property</th><th>Value</th></tr>
+            <tr><td>Consistency</td><td>Strong</td></tr>
+            <tr><td>Fault tolerance</td><td>f < n/3 (tolerates up to 1/3 faulty)</td></tr>
+            <tr><td>Latency</td><td>50-100ms</td></tr>
+            <tr><td>Best for</td><td>Untrusted environments</td></tr>
+          </table>
+        </div>
+
+        <!-- Gossip -->
+        <div class="consensus-card" id="gossip">
+          <div class="consensus-header">
+            <i data-lucide="radio" class="w-5 h-5 text-purple-500"></i>
+            Gossip Protocol
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            Eventual consistency for large swarms. Information spreads exponentially as nodes "gossip" to their neighbors.
+          </p>
+
+          <div class="ascii-diagram">
+            <pre>Round 1:  Node A gossips to B, C, D
+          +---+
+          | A | ----> B, C, D
+          +---+
+
+Round 2:  B, C, D gossip to their neighbors
+          B ----> E, F
+          C ----> G, H
+          D ----> I, J
+
+Round N:  Eventually all nodes converge
+          (Exponential spread)
+
+Convergence: 99%+ agreement</pre>
+          </div>
+
+          <table class="char-table">
+            <tr><th>Property</th><th>Value</th></tr>
+            <tr><td>Consistency</td><td>Eventual</td></tr>
+            <tr><td>Fault tolerance</td><td>f < n/2</td></tr>
+            <tr><td>Latency</td><td>10-40ms per round</td></tr>
+            <tr><td>Best for</td><td>Large swarms (100+ agents)</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 4: SELECTION GUIDE -->
+      <section id="selection" data-activity="selection">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Topology Selection Guide
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Use this decision tree to select the right topology for your use case.
+        </p>
+
+        <div class="selection-card">
+          <div class="selection-question">What's your coordination need?</div>
+
+          <div class="selection-answer">
+            <i data-lucide="arrow-right" class="w-4 h-4 text-accent"></i>
+            <span>Linear dependency (A must complete before B)?</span>
+            <code>SequentialWorkflow</code>
+          </div>
+
+          <div class="selection-answer">
+            <i data-lucide="arrow-right" class="w-4 h-4 text-accent"></i>
+            <span>Independent parallel work?</span>
+            <code>ConcurrentWorkflow</code>
+          </div>
+
+          <div class="selection-answer">
+            <i data-lucide="arrow-right" class="w-4 h-4 text-accent"></i>
+            <span>Boss delegates to workers with feedback?</span>
+            <code>HierarchicalSwarm</code>
+          </div>
+
+          <div class="selection-answer">
+            <i data-lucide="arrow-right" class="w-4 h-4 text-accent"></i>
+            <span>Experts synthesize opinions?</span>
+            <code>MixtureOfAgents</code>
+          </div>
+
+          <div class="selection-answer">
+            <i data-lucide="arrow-right" class="w-4 h-4 text-accent"></i>
+            <span>Complex dependencies (DAG)?</span>
+            <code>GraphWorkflow</code>
+          </div>
+
+          <div class="selection-answer">
+            <i data-lucide="arrow-right" class="w-4 h-4 text-accent"></i>
+            <span>Dynamic routing to specialists?</span>
+            <code>ForestSwarm</code>
+          </div>
+
+          <div class="selection-answer">
+            <i data-lucide="arrow-right" class="w-4 h-4 text-accent"></i>
+            <span>Peer-to-peer without central coordinator?</span>
+            <code>Mesh</code>
+          </div>
+
+          <div class="selection-answer">
+            <i data-lucide="arrow-right" class="w-4 h-4 text-accent"></i>
+            <span>Conversational collaboration?</span>
+            <code>GroupChat</code>
+          </div>
+
+          <div class="selection-answer">
+            <i data-lucide="arrow-right" class="w-4 h-4 text-accent"></i>
+            <span>Voting/consensus needed?</span>
+            <code>MajorityVoting</code>
+          </div>
+
+          <div class="selection-answer">
+            <i data-lucide="arrow-right" class="w-4 h-4 text-accent"></i>
+            <span>Don't know? Let the framework decide:</span>
+            <code>SwarmRouter(swarm_type="auto")</code>
+          </div>
+        </div>
+
+        <!-- Scale-Based Selection -->
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="scale-selection">Scale-Based Selection</h3>
+
+        <div class="overflow-x-auto mb-8">
+          <table class="quick-ref-table">
+            <thead>
+              <tr>
+                <th>Agent Count</th>
+                <th>Recommended Topologies</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Plain Agent class</td>
+                <td>No orchestration needed</td>
+              </tr>
+              <tr>
+                <td>2-5</td>
+                <td>Sequential, Concurrent</td>
+                <td>Simple coordination</td>
+              </tr>
+              <tr>
+                <td>5-20</td>
+                <td>Hierarchical, MoA, Mesh</td>
+                <td>Medium complexity</td>
+              </tr>
+              <tr>
+                <td>20-50</td>
+                <td>GraphWorkflow, Star</td>
+                <td>Structured dependencies</td>
+              </tr>
+              <tr>
+                <td>50-100</td>
+                <td>ForestSwarm, Hybrid</td>
+                <td>Large agent pools</td>
+              </tr>
+              <tr>
+                <td>100+</td>
+                <td>Hybrid with Gossip consensus</td>
+                <td>Factory scale</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 5: INFRASTRUCTURE -->
+      <section id="ccswarm" data-activity="infrastructure">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Infrastructure Patterns
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">CCSwarm: Rust-Native Coordination</h3>
+
+        <p class="text-text-secondary mb-4">
+          CCSwarm uses Rust's type system to encode valid state machine transitions at compile time. Invalid sequences become compile errors, not runtime crashes.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">// States are types, not runtime values</span>
+<span class="keyword">struct</span> Uninitialized;
+<span class="keyword">struct</span> Configured;
+<span class="keyword">struct</span> Connected;
+<span class="keyword">struct</span> Executing;
+
+<span class="keyword">struct</span> Agent&lt;State&gt; {
+    config: Option&lt;Config&gt;,
+    connection: Option&lt;Connection&gt;,
+    _state: PhantomData&lt;State&gt;,
+}
+
+<span class="comment">// Only valid transitions compile</span>
+<span class="keyword">impl</span> Agent&lt;Uninitialized&gt; {
+    <span class="keyword">fn</span> configure(self, config: Config) -> Agent&lt;Configured&gt; {
+        Agent {
+            config: Some(config),
+            connection: None,
+            _state: PhantomData,
+        }
+    }
+}
+
+<span class="comment">// COMPILE ERROR: No such method on Agent&lt;Uninitialized&gt;</span>
+<span class="comment">// agent.execute_task(task);  // Won't compile!</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="nats">NATS Messaging Backbone (Station)</h3>
+
+        <p class="text-text-secondary mb-4">
+          Station uses NATS with JetStream for production-grade messaging infrastructure. The Lattice architecture allows stations to form a mesh network.
+        </p>
+
+        <div class="ascii-diagram">
+          <pre>+------------------------------------------------------------------+
+|                         LATTICE MESH                              |
+|  +---------------+    +---------------+    +---------------+      |
+|  |  Station A    |    |  Station B    |    |  Station C    |      |
+|  |  (Security)   |<-->|  (Orchestr.)  |<-->|   (SRE)       |      |
+|  |               |    |               |    |               |      |
+|  | VulnScanner   |    | Coordinator   |    | K8sHealth     |      |
+|  | CVELookup     |    |               |    | LogAnalyzer   |      |
+|  +---------------+    +---------------+    +---------------+      |
+|          |                   |                   |                 |
+|          +-------------------+-------------------+                 |
+|                              |                                    |
+|                     +--------+--------+                           |
+|                     |   NATS Server   |                           |
+|                     |   + JetStream   |                           |
+|                     +-----------------+                           |
++------------------------------------------------------------------+</pre>
+        </div>
+
+        <div class="overflow-x-auto mb-8">
+          <table class="quick-ref-table">
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Command</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Standalone</td>
+                <td><code>stn serve</code></td>
+                <td>Default single-station, no mesh</td>
+              </tr>
+              <tr>
+                <td>Orchestrator</td>
+                <td><code>stn serve --orchestration</code></td>
+                <td>Runs embedded NATS (port 4222)</td>
+              </tr>
+              <tr>
+                <td>Member</td>
+                <td><code>stn serve --lattice &lt;url&gt;</code></td>
+                <td>Joins orchestrator mesh</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Topology-specific failures you'll encounter and how to fix them.
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Sequential chain breaks mid-execution
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent 1 completes -> Agent 2 fails -> Agent 3 never starts</div>
+          <div class="gotcha-detail"><strong>Fix 1:</strong> Add retry logic with <code>max_loops=3</code></div>
+          <div class="gotcha-detail"><strong>Fix 2:</strong> Implement per-agent fallback models</div>
+          <div class="gotcha-detail"><strong>Fix 3:</strong> Add checkpointing between agents to resume from failure</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Concurrent workflow produces inconsistent results
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent 1: "Price is $100", Agent 2: "Price is $150", Agent 3: "Price is $120"</div>
+          <div class="gotcha-detail"><strong>Fix 1:</strong> Add aggregation step to synthesize conflicting information</div>
+          <div class="gotcha-detail"><strong>Fix 2:</strong> Use MixtureOfAgents instead for built-in synthesis</div>
+          <div class="gotcha-detail"><strong>Fix 3:</strong> Add MajorityVoting for factual questions</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Hierarchical director bottleneck
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Director overwhelmed with 50+ workers, response times increasing</div>
+          <div class="gotcha-detail"><strong>Fix 1:</strong> Add intermediate leaders (1 director + 5 team leads + 10 workers each)</div>
+          <div class="gotcha-detail"><strong>Fix 2:</strong> Reduce feedback loop frequency</div>
+          <div class="gotcha-detail"><strong>Fix 3:</strong> Switch to Hybrid topology with multiple hierarchies</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Consensus never achieves
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Timeout: could not reach agreement"</div>
+          <div class="gotcha-detail"><strong>Fix 1:</strong> Increase timeout (e.g., 10000ms)</div>
+          <div class="gotcha-detail"><strong>Fix 2:</strong> Lower threshold (e.g., 0.5 instead of 0.66)</div>
+          <div class="gotcha-detail"><strong>Fix 3:</strong> Switch algorithm (Gossip for scale, Raft for simplicity)</div>
+          <div class="gotcha-detail"><strong>Fix 4:</strong> Check for network partitions or agent failures</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix.
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Topology Selection is Context-Dependent
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> The "best" topology depends on your specific workload, agent capabilities, latency requirements, and failure modes. There's no universal answer.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> What works for 5 agents fails at 50. What works for code review fails for data analysis.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start simple (Sequential/Concurrent), measure, then evolve. Use SwarmRouter auto-selection to learn what the framework thinks.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Observability at Scale
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> With 50+ agents, understanding what's happening is hard. Traditional logging drowns in noise. Tracing helps but adds overhead.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "Something went wrong somewhere" - hard to diagnose which agent, which message, which decision.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Structured logging with correlation IDs. OpenTelemetry for distributed tracing. Accept that some opacity is the cost of scale.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost Multiplies with Agents
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More agents = more API calls = higher costs. A 10-agent concurrent workflow costs 10x a single agent.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Unexpected bills. "Why did that cost $50 for a simple task?"</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use smaller models for simpler agents. Implement caching. Consider Rust-based CCSwarm for 93% cost reduction claims.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE SWARM TOPOLOGIES WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Task can be decomposed into independent subtasks</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multiple perspectives improve output quality</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Parallelism can reduce latency meaningfully</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Fault tolerance is important (resilient topologies)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You have clear coordination requirements</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE SWARM TOPOLOGIES WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>A single Claude session suffices</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Ralph pattern (simple loops) meets your needs</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Cost is primary concern (swarms multiply API calls)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Debugging is hard enough already</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Team lacks distributed systems experience</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-text-muted text-sm">
+          <strong>Rule of thumb:</strong> Start with the simplest pattern that could work (often Sequential or Ralph loops). Add complexity only when you hit a wall that simpler approaches can't solve.
+        </p>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if agents could share memory?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> One massive context, all agents read/write simultaneously.<br>
+          <strong>Why this fails:</strong> Context windows are per-agent. No shared memory exists at the LLM layer.<br>
+          <strong>Hidden constraint:</strong> Topologies ARE the solution to this constraint.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="essence">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Topologies = Team Org Charts</div>
+        <div class="text-text-secondary text-sm">
+          Sequential = Assembly line<br>
+          Hierarchical = Corporate management<br>
+          Mesh = Flat startup<br>
+          ForestSwarm = Consulting firm routing<br><br>
+          <em>If you've managed humans, you already understand these trade-offs.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cross-Pattern DNA: "Coordination Has Cost"</div>
+        <div class="text-text-secondary text-sm">
+          Every topology adds overhead. Sequential = chain latency. Concurrent = memory. Hierarchical = director bottleneck. Mesh = N^2 communication.<br><br>
+          <strong>The invariant:</strong> No free coordination. Choose your cost.
+        </div>
+      </div>
+
+      <!-- TOPOLOGIES SECTION -->
+      <div class="activity-item constraint" data-section="topologies">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint -> topology choice</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Agents can't share context<br>
+          -> Must communicate through messages/files<br>
+          -> Communication has latency<br>
+          -> Topology defines communication paths<br>
+          -> Path complexity = latency + cost<br>
+          -> Choose topology for YOUR constraint priority
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="topologies">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Which topology should I use?" -> Sequential<br>
+          <strong>Intermediate:</strong> "Why is Hierarchical slower?" -> Coordination overhead<br>
+          <strong>Advanced:</strong> "When does Mesh beat Hierarchical?" -> When no natural leader<br>
+          <strong>Staff:</strong> "Can I combine topologies?" -> Yes, that's Hybrid<br>
+          <strong>Expert:</strong> "What consensus for 200 agents?" -> Gossip
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="topologies">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The simplest swarm that works</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">Agent A -> Agent B</code><br><br>
+          Two agents, sequential. That's it.<br>
+          <strong>Everything beyond:</strong> Optimization for specific constraints.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="topologies">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude-Flow v3: 54+ agents in production</div>
+        <div class="text-text-secondary text-sm">
+          Enterprise swarm orchestration. Hierarchical topology with Raft consensus. Strategic Queen + Tactical Queens + Worker agents. Proof that Hierarchical scales to enterprise.
+        </div>
+      </div>
+
+      <!-- CONSENSUS SECTION -->
+      <div class="activity-item tradeoff" data-section="consensus">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Raft vs Gossip</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Raft:</strong> Strong consistency, lower latency, but bottleneck at leader<br>
+          <strong>Gossip:</strong> Eventual consistency, scales better, but no instant agreement<br><br>
+          <strong>THE DILEMMA:</strong> <20 agents? Raft. >100 agents? Gossip. In between? Measure.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="consensus">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip consensus in Mesh</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> 10 agents in mesh without consensus<br>
+          <strong>THEN:</strong> No agreement on which agent handles task<br>
+          <strong>THEN:</strong> Multiple agents duplicate work OR no agent acts<br>
+          <strong>FINALLY:</strong> Wasted cost, inconsistent results<br><br>
+          <em>Mesh without consensus = chaos</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="consensus">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When consensus matters more</div>
+        <div class="text-text-secondary text-sm">
+          <strong>5 agents:</strong> "Why do I need consensus? Just coordinate manually."<br>
+          <strong>20 agents:</strong> "Okay, Raft makes sense for leader election."<br>
+          <strong>50 agents:</strong> "Raft leader is overwhelmed. Need Gossip."<br>
+          <strong>200 agents:</strong> "Gossip is essential. Raft can't scale."<br><br>
+          <em>Consensus complexity grows with agent count.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="consensus">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Adaptive consensus</div>
+        <div class="text-text-secondary text-sm">
+          What if consensus algorithm automatically adapted to swarm size? Start with Raft, transition to Gossip at threshold? No production-ready implementation yet.
+        </div>
+      </div>
+
+      <!-- SELECTION SECTION -->
+      <div class="activity-item gradient" data-section="selection">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How wrong topology degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Slightly wrong:</strong> Works but inefficient (10-30% slower)<br>
+          <strong>Moderately wrong:</strong> Bottlenecks emerge, timeouts increase<br>
+          <strong>Very wrong:</strong> Cascading failures, deadlocks<br>
+          <strong>Completely wrong:</strong> Nothing works, system hangs<br><br>
+          <em>Wrong topology fails gradually, then suddenly.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="selection">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When to upgrade topology</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-5 agents:</strong> Sequential/Concurrent sufficient<br>
+          <strong>5-20 agents:</strong> Consider Hierarchical for coordination<br>
+          <strong>20-50 agents:</strong> Need structured routing (ForestSwarm)<br>
+          <strong>50+ agents:</strong> Hybrid mandatory, Gossip consensus<br><br>
+          <strong>THE INFLECTION:</strong> ~20 agents is where simple breaks
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="selection">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Sequential + Concurrent</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pattern:</strong> Research (sequential) -> Analysis (concurrent) -> Synthesis (sequential)<br>
+          <strong>Implementation:</strong> <code>AgentRearrange(flow="A -> B,C,D -> E")</code><br>
+          <strong>Works:</strong> When phases have different coordination needs
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="selection">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If swarm topologies are overkill</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Simple task?</strong> -> Single Claude session<br>
+          <strong>Iterative refinement?</strong> -> Ralph loops<br>
+          <strong>Human in loop?</strong> -> HOTL Ralph<br>
+          <strong>Just need parallelism?</strong> -> CC Mirror
+        </div>
+      </div>
+
+      <!-- INFRASTRUCTURE SECTION -->
+      <div class="activity-item inversion" data-section="infrastructure">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why Rust for CCSwarm?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What if it were Python?</strong><br>
+          Runtime type checks. GIL limits parallelism. Memory grows unbounded.<br><br>
+          <strong>Why Rust works:</strong> Compile-time state validation. Lock-free channels. 70% memory reduction. Invalid state sequences are compile errors.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="infrastructure">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Cross-Pattern Equivalence
+        </div>
+        <div class="font-medium text-text-primary mb-2">NATS = Message bus for agents</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Kafka:</strong> For data pipelines<br>
+          <strong>NATS:</strong> For agent coordination<br>
+          <strong>Why NATS:</strong> Lower latency, simpler, built-in request-reply<br><br>
+          <em>If you've used Kafka, NATS is the lightweight alternative for real-time agent messaging.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="infrastructure">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">CCSwarm: 93% cost reduction (claimed)</div>
+        <div class="text-text-secondary text-sm">
+          Rust-native coordination with channel-based orchestration. Zero lock contention. Type-state pattern ensures compile-time safety. 70% memory reduction vs Python alternatives.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="infrastructure">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Type-state enables fearless refactoring</div>
+        <div class="text-text-secondary text-sm">
+          When state transitions are in the type system, the compiler catches invalid sequences. Refactoring a 50-agent swarm? Compiler shows all broken paths. No runtime surprises.
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item violation" data-section="gotchas">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip error handling in Sequential</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Agent 2 fails without retry logic<br>
+          <strong>THEN:</strong> Chain stops at Agent 2<br>
+          <strong>THEN:</strong> Agents 3, 4, 5 never run<br>
+          <strong>THEN:</strong> Partial result or no result<br>
+          <strong>FINALLY:</strong> User sees failure, no graceful degradation
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why does Hierarchical bottleneck?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What if director had infinite capacity?</strong><br>
+          Then Hierarchical would scale linearly. But directors are single agents with context limits.<br><br>
+          <strong>The fix:</strong> Add intermediate leaders. Hierarchical becomes Hybrid.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="gotchas">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Debug
+        </div>
+        <div class="font-medium text-text-primary mb-2">First diagnostic commands</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px; display: block; margin-bottom: 4px;">npx claude-flow@v3alpha doctor</code>
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px; display: block; margin-bottom: 4px;">npx claude-flow@v3alpha perf diagnose</code>
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px; display: block;">stn lattice status</code>
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Observability Paradox</div>
+        <div class="text-text-secondary text-sm">
+          <strong>More logging:</strong> Better debugging, but noise drowns signal<br>
+          <strong>Less logging:</strong> Cleaner output, but blind to failures<br>
+          <strong>Tracing:</strong> Full visibility, but adds latency overhead<br><br>
+          <em>No perfect answer. Balance based on failure frequency.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Understanding topology selection</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Just tell me which one to use"<br>
+          <strong>Intermediate:</strong> "I can follow the decision tree"<br>
+          <strong>Advanced:</strong> "I understand the trade-offs"<br>
+          <strong>Staff:</strong> "I can design custom topologies"<br>
+          <strong>Expert:</strong> "I can predict emergent behaviors"
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Self-optimizing topologies</div>
+        <div class="text-text-secondary text-sm">
+          What if the swarm could observe its own performance and restructure? Start as Hierarchical, detect bottleneck, automatically split into Hybrid? No production-ready implementation exists.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you used swarms for everything?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Simple task + swarm:</strong> 10x cost, 5x latency, debugging nightmare<br>
+          <strong>Why this fails:</strong> Coordination overhead dominates small tasks<br><br>
+          <em>Swarms are for problems that NEED coordination, not problems that CAN use it.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Swarm Complexity = Team Size</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1 person:</strong> No coordination needed<br>
+          <strong>2-5 people:</strong> Simple sync (Sequential/Concurrent)<br>
+          <strong>5-20 people:</strong> Need a manager (Hierarchical)<br>
+          <strong>20-50 people:</strong> Need departments (Hybrid)<br>
+          <strong>50+ people:</strong> Need org design expertise<br><br>
+          <em>Brooks's Law applies to swarms too.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">Complete pattern landscape</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Level 0-1:</strong> Vanilla Claude Code<br>
+          <strong>Level 2-4:</strong> Ralph loops<br>
+          <strong>Level 3-4:</strong> CC Mirror, Subagents<br>
+          <strong>Level 5-6:</strong> Swarm Topologies (YOU ARE HERE)<br>
+          <strong>Level 6-7:</strong> Gas Town, Hive-Mind
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Topology choice affects team skills</div>
+        <div class="text-text-secondary text-sm">
+          Choosing complex topologies = requiring distributed systems expertise on your team. Can't debug Mesh consensus without understanding distributed systems fundamentals. The topology IS a hiring signal.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

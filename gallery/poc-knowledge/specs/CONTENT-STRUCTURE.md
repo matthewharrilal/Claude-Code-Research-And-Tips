@@ -38,15 +38,16 @@
 ```
 ┌──────────┬─────────────────────────────────────────┬────────────────────────────────┐
 │ LEFT NAV │           MAIN PANEL                    │      ACTIVITY ZONE             │
-│  240px   │           (flexible, largest)           │        (~400-450px)            │
-│          │                                         │   (larger than nav)            │
+│  240px   │           (flexible, largest)           │   480px (resizable 280-900px)  │
+│  fixed   │           margin-based                  │   fixed, user-resizable        │
 └──────────┴─────────────────────────────────────────┴────────────────────────────────┘
 ```
 
 **Rationale:**
-- Activity Zone is larger than old 280px to accommodate deeper content
+- Activity Zone is 480px default (was 280px) to accommodate deeper content
+- User-resizable 280-900px range with localStorage persistence
 - Still smaller than Main Panel to maintain focus hierarchy
-- Main Panel is flexible, takes remaining space
+- Main Panel is flexible, takes remaining space via margins
 
 ---
 
@@ -240,6 +241,46 @@ DON'T USE RALPH WHEN:
 
 ---
 
+## Activity Zone: The Mindset
+
+**Staff engineers don't need more facts. They need cognitive tools that change how they think.**
+
+Every piece of Operational Intelligence content should pass this test:
+> "Does this change how I REASON about the topic, or just add to what I KNOW?"
+
+### The Mental Shift
+
+| Descriptive (OLD) | Generative (NEW) |
+|-------------------|------------------|
+| "Ralph shares INV-003 with Gas Town" | "What constraint forced this design? If it didn't exist, what would you build instead?" |
+| "Context degrades at 80K tokens" | "How does this fail GRADUALLY before it fails completely? What's invisible?" |
+| "Use small tasks" | "When does this help become a hindrance? Where's the inflection point?" |
+| "Fresh context beats extended sessions" | "At what time horizon does this feel wrong but work right?" |
+
+### Generation Questions (Use These)
+
+For every main panel concept, ask:
+
+1. **INVERSION**: "What if the opposite were true? Why would it fail?"
+2. **CONSTRAINT CHAIN**: "What forced this decision? What would change if the constraint changed?"
+3. **FAILURE GRADIENT**: "How does this degrade before it breaks? What's invisible until too late?"
+4. **TIME HORIZON**: "At what scale (hour/day/week/month) does this feel different?"
+5. **VIOLATION CHAIN**: "If someone skips this, what cascade happens?"
+6. **ANALOGICAL BRIDGE**: "What does the reader already know that maps to this?"
+7. **EXPERTISE GRADIENT**: "What question would a beginner/intermediate/staff/expert ask?"
+8. **TRADE-OFF TENSION**: "What's the genuine dilemma with no perfect answer?"
+
+### The Worldview to Embody
+
+When generating content, think AS a staff engineer:
+- **Constraint-first**: Every pattern exists because of a constraint. Name it.
+- **Derivation over memorization**: Patterns aren't gospel—they're crystallized solutions. When constraints change, derive new patterns.
+- **Failure mode analysis**: Every design decision addresses a specific failure mode. If you can't name it, you're probably creating one.
+- **Systems over solutions**: Are you teaching a recipe or teaching how to cook?
+- **Judgment over rules**: Real engineering requires trade-offs with no perfect answer.
+
+---
+
 ## Activity Zone: Content Types
 
 The Activity Zone provides **operational intelligence**: cross-pattern reasoning, system-level effects, and real-world evidence.
@@ -393,6 +434,356 @@ Need debugging, not building?
 
 ---
 
+## Activity Zone: Generative Content Types (NEW)
+
+These 10 content types transform the Activity Zone from **descriptive** (what happens) to **generative** (how to think). They place readers in a staff engineer's worldview—not just facts, but judgment patterns and mental machinery.
+
+### Type 1: INVERSION LENS
+
+**Visual indicator:** Indigo left border (#4f46e5), rotate-ccw icon
+
+**Core Question:** "What if the opposite? Why would it fail?"
+
+**Purpose:** Reveals hidden constraints by showing why alternatives don't work.
+
+**Format:**
+```
+INVERSION: What if [opposite were true]?
+You'd design: [The alternative approach]
+Why this fails: [The constraint that breaks it]
+Hidden constraint revealed: [What this teaches us]
+```
+
+**Example:**
+```
+INVERSION: What if context DIDN'T degrade?
+You'd design: One long session per feature, no external files, no restarts.
+Why this fails: 80K token context rot is transformer physics, not a bug.
+Hidden constraint revealed: Ralph IS the constraint made visible.
+```
+
+---
+
+### Type 2: CONSTRAINT CHAIN
+
+**Visual indicator:** Violet left border (#8b5cf6), link-2 icon
+
+**Core Question:** "What forced this? What cascades from it?"
+
+**Purpose:** Shows how one constraint produces 5+ downstream decisions.
+
+**Format:**
+```
+ROOT CONSTRAINT: [The forcing function]
+→ [First downstream decision]
+→ [Second downstream decision]
+→ [Third downstream decision]
+→ [Fourth downstream decision]
+→ [Fifth downstream decision]
+
+One constraint, FIVE downstream decisions.
+```
+
+**Example:**
+```
+ROOT CONSTRAINT: Context finite (200K) → Quality degrades as context fills
+→ Fresh context beats extended sessions
+→ State must persist externally (files)
+→ Each iteration must be self-contained
+→ Tasks must complete in one context window
+→ Verification must be automatable
+
+One constraint, FIVE downstream decisions.
+```
+
+---
+
+### Type 3: FAILURE GRADIENT
+
+**Visual indicator:** Rose left border (#f43f5e), trending-down icon
+
+**Core Question:** "How does this fail gradually?"
+
+**Purpose:** Prevents overconfidence by showing invisible degradation before the cliff.
+
+**Format:**
+```
+FAILURE GRADIENT: [What degrades]
+[High%] → [Range]: [Subtle symptoms]
+[Mid%] → [Range]: [Noticeable symptoms]
+[Low%] → [Range]: [Serious symptoms]
+[Cliff] → [Range]: [Catastrophic symptoms]
+
+Critical: [The key insight about invisibility]
+```
+
+**Example:**
+```
+FAILURE GRADIENT: Context Quality
+100% → 90% (40-60K): Subtle drift, you won't notice
+90% → 70% (60-80K): Repetition, compression
+70% → 50% (80-100K): Instructions forgotten
+50% → CLIFF (100K+): Hallucinations, amnesia
+
+Critical: The gradient is invisible until the cliff.
+```
+
+---
+
+### Type 4: TIME HORIZON SHIFT
+
+**Visual indicator:** Cyan left border (#06b6d4), clock icon
+
+**Core Question:** "At what scale is this right?"
+
+**Purpose:** Fixes short-term optimization bias by showing how judgments flip over time.
+
+**Format:**
+```
+TIME HORIZON: [The thing being evaluated]
+[Early point]: "[How it feels]"
+[Mid point]: "[How perception shifts]"
+[Late point]: "[The opposite feeling]"
+[Very late]: "[The mature understanding]"
+
+[Heuristic about when to judge]
+```
+
+**Example:**
+```
+TIME HORIZON: progress.txt Reading (Step 5)
+ITERATION 3: "Reading progress.txt feels like overhead"
+ITERATION 8: "Wait, Claude is repeating solved mistakes"
+ITERATION 15: "progress.txt is why late iterations are FASTER"
+ITERATION 30: "This is institutional memory"
+
+Don't judge Ralph by iteration 2.
+```
+
+---
+
+### Type 5: VIOLATION CHAIN
+
+**Visual indicator:** Orange left border (#f97316), alert-octagon icon
+
+**Core Question:** "If I skip this, what cascade happens?"
+
+**Purpose:** Shows causal consequences that make rules feel necessary, not arbitrary.
+
+**Format:**
+```
+IF: [The thing you might skip]
+THEN: [First consequence]
+THEN: [Second consequence]
+THEN: [Third consequence]
+FINALLY: [Ultimate failure]
+
+THE FIX: [What to do instead]
+```
+
+**Example:**
+```
+IF: You skip "run typecheck and tests" (step 7)
+THEN: Claude marks tasks done without verification
+THEN: Broken code enters git
+THEN: Future iterations inherit broken foundation
+THEN: Errors compound faster than learnings
+FINALLY: Morning reveals 20 bad commits
+
+THE FIX: Never skip verification. One bad commit poisons all future iterations.
+```
+
+---
+
+### Type 6: TRADE-OFF TENSION
+
+**Visual indicator:** Amber left border (#f59e0b), scale icon
+
+**Core Question:** "What's the genuine dilemma?"
+
+**Purpose:** Presents both-valid tensions that require judgment, not rules.
+
+**Format:**
+```
+THE DILEMMA: [The tension]
+• [Option A]: [Benefit], but [cost]
+• [Option B]: [Benefit], but [cost]
+• [Option C]: [Benefit], but [cost]
+
+WHY NO PERFECT ANSWER: [Why this is hard]
+
+HEURISTIC: [Rule of thumb]
+```
+
+**Example:**
+```
+THE DILEMMA: Task Size
+• Very small tasks: Safe, but spawn overhead dominates
+• Medium tasks: Balanced, but judgment required
+• Large tasks: Efficient, but context collapse risk
+
+WHY NO PERFECT ANSWER: Optimal varies by codebase, task type, and Claude model.
+
+HEURISTIC: If the task description is longer than the code change,
+you've decomposed too far.
+```
+
+---
+
+### Type 7: ANALOGICAL BRIDGE
+
+**Visual indicator:** Fuchsia left border (#d946ef), git-compare icon
+
+**Core Question:** "What do I already know that applies?"
+
+**Purpose:** Maps to familiar concepts, making new patterns learnable faster.
+
+**Format:**
+```
+[NEW CONCEPT] = [FAMILIAR CONCEPT]
+[Element A] → [Familiar element A]
+[Element B] → [Familiar element B]
+[Element C] → [Familiar element C]
+[Element D] → [Familiar element D]
+
+If you've [done familiar thing], you already understand [new concept].
+```
+
+**Example:**
+```
+RALPH = Stateless Web Servers
+HTTP stateless → Fresh context per iteration
+Database → prd.json, progress.txt, git
+Session cookie → Files read at iteration start
+Horizontal scaling → Parallel Ralph loops
+
+If you've designed stateless web services, you already understand Ralph.
+```
+
+---
+
+### Type 8: EXPERTISE GRADIENT
+
+**Visual indicator:** Emerald left border (#10b981), bar-chart-3 icon
+
+**Core Question:** "How deeply do I understand?"
+
+**Purpose:** Self-calibration through questions at each expertise level.
+
+**Format:**
+```
+EXPERTISE GRADIENT: [Topic]
+
+BEGINNER: "[Beginner question]"
+→ [Beginner answer]
+
+INTERMEDIATE: "[Intermediate question]"
+→ [Intermediate answer]
+
+ADVANCED: "[Advanced question]"
+→ [Advanced answer]
+
+STAFF: "[Staff question]"
+→ [Staff answer]
+
+EXPERT: "[Expert question]"
+→ [Expert answer]
+```
+
+**Example:**
+```
+EXPERTISE GRADIENT: File Structure
+
+BEGINNER: "What files do I need?"
+→ The 4 files: ralph.sh, prompt.md, prd.json, progress.txt
+
+INTERMEDIATE: "Why these specific files?"
+→ Each file serves exactly ONE purpose in the task path
+
+ADVANCED: "What's the minimal file set?"
+→ Just while loop + prompt. Everything else is reliability.
+
+STAFF: "When would I add more files?"
+→ When you need: confidence scoring (Dr. Ralph), human gates (HOTL)
+
+EXPERT: "How do these files compose with other patterns?"
+→ prd.json = Gas Town inbox. progress.txt = Refinery analog.
+```
+
+---
+
+### Type 9: MINIMAL PATTERN
+
+**Visual indicator:** Lime left border (#84cc16), minimize-2 icon
+
+**Core Question:** "What's the simplest version?"
+
+**Purpose:** Reveals essence by stripping to the minimum that still works.
+
+**Format:**
+```
+MINIMAL VIABLE [PATTERN]:
+[The absolute minimum code/config]
+
+[Component A] is essential.
+[Component B] is essential.
+Everything else is refinement for [quality attribute].
+```
+
+**Example:**
+```
+MINIMAL VIABLE RALPH:
+while :; do cat PROMPT.md | claude; done
++ a PROMPT.md that says "Do task X, exit when done"
+
+The loop is essential. Fresh context is essential.
+Everything else is refinement for reliability.
+```
+
+---
+
+### Type 10: INFLECTION POINT
+
+**Visual indicator:** Yellow left border (#eab308), activity icon
+
+**Core Question:** "When does benefit flip to cost?"
+
+**Purpose:** Shows where compound benefits become compound liabilities.
+
+**Format:**
+```
+INFLECTION POINT: [What's being measured]
+[Range A]: [Net benefit description]
+[Range B]: [Diminishing returns description]
+[Range C]: [Neutral description]
+[Range D+]: [Net negative description]
+
+THE INFLECTION: ~[threshold]
+
+BEFORE INFLECTION: "[Rule that applies]"
+AFTER INFLECTION: "[Opposite rule that applies]"
+
+DETECTION: [How to know you've crossed it]
+```
+
+**Example:**
+```
+INFLECTION POINT: progress.txt Size
+0-10KB: Pure benefit (learnings compound)
+10-20KB: Diminishing returns (more to read)
+20-30KB: Neutral (reading cost = thinking benefit)
+30KB+: Net negative (context wasted on history)
+
+THE INFLECTION: ~20KB
+
+BEFORE INFLECTION: "Always append. Never delete."
+AFTER INFLECTION: "Archive to AGENTS.md. Start fresh."
+
+DETECTION: Late iterations worse than early ones? Check file size.
+```
+
+---
+
 ## Content Density Guidelines
 
 **Main Panel:**
@@ -434,7 +825,7 @@ Main Panel sections:
 - [ ] What's Hard (honest about complexity)
 - [ ] When to Use / When Not (with alternatives)
 
-Activity Zone content types:
+Activity Zone - Original Content Types (Foundational):
 - [ ] At least 2 Invariant Connections
 - [ ] At least 2 Second-Order Effects
 - [ ] At least 2 Composition Cases
@@ -442,8 +833,35 @@ Activity Zone content types:
 - [ ] At least 2 Production War Stories
 - [ ] Alternative Paths section
 
+Activity Zone - Generative Content Types (Advanced):
+- [ ] At least 2 Inversion Lenses (reveal hidden constraints)
+- [ ] At least 2 Constraint Chains (show cascade from root constraint)
+- [ ] At least 2 Failure Gradients (show invisible degradation)
+- [ ] At least 2 Time Horizon Shifts (show how judgments flip)
+- [ ] At least 2 Violation Chains (show consequences of skipping)
+- [ ] At least 2 Trade-Off Tensions (present genuine dilemmas)
+- [ ] At least 2 Analogical Bridges (map to familiar concepts)
+- [ ] At least 2 Expertise Gradients (questions by level)
+- [ ] At least 1 Minimal Pattern (essence stripped down)
+- [ ] At least 1 Inflection Point (where benefit flips to cost)
+
+---
+
+## Quality Test for Generative Content
+
+Content is "generative" (not just "descriptive") when the reader can answer YES to any of:
+
+1. **Changed reasoning**: "Did this change how I THINK about the topic?"
+2. **Constraint awareness**: "Can I name the constraint that forced this design?"
+3. **Cascade tracing**: "Can I trace what happens if I violate this?"
+4. **Analogy unlocked**: "Do I now see this maps to something I already know?"
+5. **Self-calibration**: "Do I know which expertise level I'm at?"
+6. **Inflection awareness**: "Do I know when this advice STOPS being true?"
+
+If the reader can only answer "I now know more facts," the content is descriptive, not generative. Rewrite it.
+
 ---
 
 ## Tags
 
-`#spec` `#content-structure` `#main-panel` `#activity-zone` `#staff-engineer` `#documentation-depth`
+`#spec` `#content-structure` `#main-panel` `#activity-zone` `#staff-engineer` `#documentation-depth` `#generative-content` `#cognitive-tools`

@@ -13,6 +13,8 @@ This content has been superseded by D-FINAL synthesis.
 
 A comprehensive guide to balancing cost versus capability when building AI agent systems with Claude Code.
 
+> **You Are Here:** This document provides cost optimization strategies, model selection guidance, and budget engineering for Claude Code usage. Use this when API costs are becoming a concern or when planning budget for autonomous workflows.
+
 ---
 
 ## Table of Contents
@@ -149,6 +151,17 @@ Use Haiku for:
 | **Witness** (observation) | Haiku | $1-3 | Logging, status tracking |
 | **Deacon** (health checks) | Haiku | $1-2 | Simple monitoring |
 | **Crew** (ephemeral) | Haiku | $0.50-2 | Quick, isolated tasks |
+
+---
+
+### Checkpoint: Cost Factors
+**You should now understand:**
+- [ ] The four primary cost factors (Model, Tokens, Iterations, Parallelism)
+- [ ] The dramatic price differences between Haiku, Sonnet, and Opus
+- [ ] When to use each model tier based on task requirements
+- [ ] The "context rot" problem and why fresh context saves money
+
+**If unclear:** Re-read the Model Selection Strategy section, especially the tables showing when to use each model.
 
 ---
 
@@ -750,6 +763,76 @@ Fresh context + Tiered models + Early exit + Verification = Maximum value per do
 ## Tags
 
 `#cost-optimization` `#model-selection` `#pricing` `#tokens` `#caching` `#batching` `#ralph-wiggum` `#cc-mirror` `#gas-town` `#budget-engineering` `#roi-analysis` `#haiku` `#sonnet` `#opus`
+
+---
+
+## Troubleshooting
+
+### Common Issue: Unexpected High Costs
+**Symptom:** API bill much higher than estimated; daily budget exceeded quickly.
+**Cause:** Using Opus for simple tasks, context accumulation, or workers spawning sub-workers.
+**Fix:** Audit your model selection. Check Claude HUD for context percentage. Review worker preambles.
+
+```bash
+# Check Anthropic Console for usage breakdown
+# https://console.anthropic.com/settings/usage
+
+# Quick local cost estimation (if tracking)
+cat ~/.claude/cost-log.csv | tail -20
+```
+
+### Common Issue: Ralph Loop Costs More Than Expected
+**Symptom:** 25-iteration loop costs $50+ instead of expected $10-20.
+**Cause:** Context not actually resetting between iterations; large progress.txt being loaded.
+**Fix:** Verify loop script starts fresh Claude instance each iteration. Prune progress.txt regularly.
+
+```bash
+# Check progress.txt size
+wc -l scripts/ralph/progress.txt
+
+# If too large, archive and reset
+mv scripts/ralph/progress.txt scripts/ralph/progress-archive-$(date +%Y%m%d).txt
+echo "# Progress" > scripts/ralph/progress.txt
+```
+
+### Common Issue: Model Tier Confusion
+**Symptom:** Tasks failing with Haiku that should work; overspending on Opus for simple tasks.
+**Cause:** Incorrect task-to-model matching; not testing with cheaper models first.
+**Fix:** Default to Sonnet. Only use Haiku for truly simple tasks (lookups, status checks). Only use Opus for complex reasoning or architecture decisions.
+
+### Common Issue: Prompt Caching Not Working
+**Symptom:** Expecting 90% savings but seeing full prices.
+**Cause:** Cache control not properly configured; prompts too small to cache; TTL expired.
+**Fix:** Verify `cache_control` is set on system prompts. Ensure prompts are > 1024 tokens. Check cache hit rates in API response.
+
+```python
+# Verify cache is being used
+response = client.messages.create(...)
+print(f"Cache read tokens: {response.usage.cache_read_input_tokens}")
+print(f"Cache creation tokens: {response.usage.cache_creation_input_tokens}")
+```
+
+### Common Issue: Budget Alerts Not Firing
+**Symptom:** Exceeded budget without notification; discovered overspend days later.
+**Cause:** No monitoring in place; Anthropic Console alerts not configured.
+**Fix:** Set up Anthropic Console budget alerts. Add local tracking to your workflow.
+
+```bash
+# Add to ralph.sh or similar
+COST_FILE=~/.claude/cost-log.csv
+DAILY_LIMIT=50
+
+TODAY_SPEND=$(awk -F',' -v d=$(date +%Y-%m-%d) '$1 ~ d {sum+=$4} END {print sum}' $COST_FILE)
+if (( $(echo "$TODAY_SPEND > $DAILY_LIMIT" | bc -l) )); then
+  echo "WARNING: Daily spend ($TODAY_SPEND) exceeds limit ($DAILY_LIMIT)"
+  # Send alert via Slack webhook, email, etc.
+fi
+```
+
+### Common Issue: Parallel Workers Duplicating Work
+**Symptom:** Multiple workers doing same task; costs 3-5x higher than expected for parallel work.
+**Cause:** Poor task decomposition; workers not aware of each other's assignments.
+**Fix:** Ensure orchestrator assigns unique, non-overlapping tasks. Add task ID to each worker context.
 
 ---
 

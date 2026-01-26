@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Deriving Patterns from First Principles
 
+> **You Are Here:** This is the "teach a person to fish" guide - how to CREATE new patterns rather than just use existing ones. Read this after mastering `principles-core.md` and several existing patterns. This doc transforms you from a pattern consumer into a pattern creator.
+
 **Purpose:** Teach the derivation process so you can invent new patterns, not just copy existing ones.
 
 **Philosophy:** Every major Claude Code pattern emerged from someone applying a few core principles to a specific constraint. Understanding this process is more valuable than memorizing patterns.
@@ -93,6 +95,15 @@ New agent instances with external state beat long conversations with internal me
 Agents that share state conflict. Agents in isolated environments (branches, worktrees, containers) can work in parallel.
 
 **Implication:** Design for isolation first, coordination second.
+
+### Checkpoint: Core Principles Understanding
+**You should now understand:**
+- [ ] All 7 core principles and their implications
+- [ ] Why context is the PRIMARY constraint that shapes all other decisions
+- [ ] The relationship between external state and fresh context
+- [ ] How isolation enables parallelism while separation enables clarity
+
+**If unclear:** See `principles-core.md` for detailed explanation of each principle before proceeding.
 
 ---
 
@@ -236,6 +247,15 @@ done
 - Human intervention? Yes - can CTRL+C, edit files, restart
 
 **Result:** Ralph Wiggum pattern
+
+### Checkpoint: Ralph Derivation
+**You should now understand:**
+- [ ] How to identify the constraint (long-running autonomy without degradation)
+- [ ] Which principles address that constraint (context, fresh context, external state, verification)
+- [ ] How to select primitives that implement those principles
+- [ ] The validation questions that confirm a pattern works
+
+**If unclear:** Re-trace the 4 steps above for Ralph before moving to the next example.
 
 ---
 
@@ -805,6 +825,64 @@ You are now at step 3.
 | Human oversight | External state + Hooks | Notification patterns |
 | Cost optimization | Separation | Model selection matrix |
 | Recovery | External state + Verification | Checkpointing |
+
+---
+
+## Troubleshooting
+
+### Common Issue: Derived Pattern Fails in Practice
+**Symptom:** Pattern looks correct on paper but fails when executed
+**Cause:** Usually a missed validation question or incomplete primitive selection
+**Fix:**
+1. Re-run the validation checklist rigorously:
+   - [ ] Respects context limits?
+   - [ ] State recoverable on failure?
+   - [ ] Verification steps included?
+   - [ ] Human can intervene?
+   - [ ] Terminates reliably?
+2. Check for missing primitives (often: external memory, termination condition)
+3. Test with a trivial example before scaling
+
+### Common Issue: Can't Identify the Right Principles
+**Symptom:** Constraint is clear but unsure which principles apply
+**Cause:** Incomplete understanding of principle implications
+**Fix:** Use this mapping:
+- Long-running work? → P1 (Context), P3 (Fresh), P2 (External)
+- Quality degradation? → P3 (Fresh), P6 (Verification)
+- Parallel work? → P7 (Isolation), P4 (Separation)
+- Coordination needed? → P4 (Separation), P2 (External)
+
+### Common Issue: Primitives Don't Compose Cleanly
+**Symptom:** Primitives work individually but conflict when combined
+**Cause:** Incompatible primitives or missing "glue" primitive
+**Fix:**
+1. Check the compatibility matrix in `architecture-composition-rules.md`
+2. Add handoff mechanisms between incompatible primitives
+3. Consider if you need a wrapper/coordinator primitive
+
+### Common Issue: Pattern Too Complex
+**Symptom:** Derived pattern has 10+ primitives; hard to understand
+**Cause:** Over-engineering; trying to solve too many constraints at once
+**Fix:**
+1. Decompose into smaller patterns that compose
+2. Start with minimal viable pattern, add primitives incrementally
+3. Ask: "What's the simplest pattern that addresses the primary constraint?"
+
+### Common Issue: Reinventing Existing Patterns
+**Symptom:** Spend time deriving a pattern that already exists
+**Cause:** Not checking existing pattern catalog first
+**Fix:**
+1. Before deriving, search existing patterns in `architecture-composition-rules.md`
+2. Ask: "Is my constraint similar to one that led to Ralph/CC Mirror/etc.?"
+3. Consider adapting an existing pattern rather than creating from scratch
+
+### Common Issue: Derivation Feels Too Abstract
+**Symptom:** Understand theory but can't apply to real problem
+**Cause:** Need more concrete practice
+**Fix:**
+1. Work through all 5 practice problems in this guide
+2. Pick a real constraint from your work and derive a pattern
+3. Compare your derivation to how community experts solved similar problems
 
 ---
 

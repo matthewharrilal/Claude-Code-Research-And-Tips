@@ -1,5 +1,7 @@
 # Ralph Ecosystem: Complete Variant Documentation
 
+> **You Are Here:** This is the complete reference for all Ralph Wiggum loop variants - the pattern that enables "ship while you sleep" autonomous development. If you want to run Claude overnight with fresh context per iteration, start here. For multi-agent orchestration (CC Mirror, Gas Town), see `synthesis/mastery-multi-agent.md`. For Boris's foundational workflow, see `synthesis/boris-workflow-complete.md`.
+
 ---
 ## D-FINAL Integration
 **Validates invariants:** Model 1 (Context-First), Model 2 (External State), Model 3 (Fresh Context), Model 4 (Verification), Model 7 (Atomic Tasks), Model 9 (Learning Compound), Model 11 (Ralph Mindset), Model 13 (Validator Consensus)
@@ -43,6 +45,17 @@ Before diving into variants, understand the core philosophy that unites them:
 2. **External Memory Architecture** - Git, prd.json, progress.txt persist state
 3. **Small, Verifiable Tasks** - Complete in one context window
 4. **Failure as Data** - Each failure informs the next attempt
+
+---
+
+### Checkpoint: Ralph Philosophy
+**You should now understand:**
+- [ ] The four pillars (fresh context, external memory, small tasks, failure as data)
+- [ ] Ralph as "eager but somewhat dim junior developer"
+- [ ] Why fresh context per iteration prevents quality degradation
+- [ ] How git/prd.json/progress.txt persist state across sessions
+
+**If unclear:** Re-read "The Ralph Philosophy" section before proceeding to variants.
 
 ---
 
@@ -682,6 +695,17 @@ If ALL stories pass:
 
 ---
 
+### Checkpoint: Core Variants
+**You should now understand:**
+- [ ] Basic Ralph - Standard feature development
+- [ ] Dr. Ralph - Confidence thresholds for uncertainty
+- [ ] Rate-Limited Ralph - Cost and API management
+- [ ] Compounding Ralph - Learning accumulation across runs
+
+**If unclear:** Start with Basic Ralph and master it before attempting specialized variants.
+
+---
+
 ## 5. Marathon Ralph
 
 ### Origin
@@ -1275,6 +1299,17 @@ Multi-agent coordination with support for Claude, Kiro CLI, Q Chat, Gemini, and 
 **Repository:** [github.com/frankbria/ralph-claude-code](https://github.com/frankbria/ralph-claude-code)
 
 Features intelligent exit detection with dual-condition gate (heuristic + explicit signal) and 308 passing tests.
+
+---
+
+### Checkpoint: Advanced Variants
+**You should now understand:**
+- [ ] Marathon Ralph - Full SDLC with phases
+- [ ] Lisa - Specification generation before implementation
+- [ ] Zeroshot - Multi-agent validation (planner, implementer, validators)
+- [ ] HOTL/AFK/Parallel variants for specific use cases
+
+**If unclear:** Advanced variants add complexity - use them when simpler variants are insufficient.
 
 ---
 

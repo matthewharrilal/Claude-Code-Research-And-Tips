@@ -5,6 +5,10 @@
 
 ---
 
+> **You Are Here:** This is your **decision companion** when facing ambiguous choices. When you know WHAT you want to do but not WHICH approach to use, consult this guide. It provides decision trees, scenario-based recommendations, and common mistake patterns to help you choose wisely.
+
+---
+
 ## D-FINAL Integration
 
 **Relationship:** This judgment guide serves as the **decision-making companion** - focused on real-time tradeoff analysis and contextual wisdom. D-FINAL serves as the **production reference manual** - comprehensive technical documentation with decision trees, checklists, and implementation patterns.
@@ -67,6 +71,16 @@ Is this a simple, single task?
             |
             +-- No --> PRD-driven Ralph loop
 ```
+
+### Checkpoint: Orchestration Selection
+
+**After using the decision tree above, you should be able to answer:**
+- [ ] Is my task simple enough for a single session, or does it need structure?
+- [ ] Do I need to walk away (AFK) or can I stay present?
+- [ ] If autonomous, can I write clear acceptance criteria?
+- [ ] If parallel, how many features and how deep the specialization?
+
+**If unclear:** Start with single session. Add complexity only when it demonstrably fails.
 
 ---
 
@@ -380,6 +394,20 @@ Level 7: Gas Town factory
 
 ---
 
+### Checkpoint: Your Current Level
+
+**Honestly assess where you are:**
+- [ ] Level 0-1: I re-explain context each session, struggle with consistency
+- [ ] Level 2-3: I use CLAUDE.md, have tried loops, sometimes they work
+- [ ] Level 4-5: I run PRD-driven Ralph reliably, exploring multi-agent
+- [ ] Level 6-7: I orchestrate parallel agents, understand factory patterns
+
+**If you selected multiple levels:** You're probably at the lower one. Master it first.
+
+**If unclear:** See [MASTER-PLAYBOOK.md](./MASTER-PLAYBOOK.md) Part 2 for detailed level descriptions.
+
+---
+
 ## The Judgment Framework
 
 ### Step 1: Assess Complexity
@@ -553,6 +581,123 @@ Start simple. Add complexity only when the simpler approach demonstrably fails.
 > "Given excellent upfront specification, we can already achieve meaningful unattended software production in 2026."
 
 The capability is real. The judgment is knowing when and how to deploy it.
+
+---
+
+---
+
+## Troubleshooting Judgment Decisions
+
+### Issue: Chose Wrong Pattern, Now Stuck
+
+**Symptom:** Started with complex pattern (CC Mirror, Gas Town), now drowning in coordination overhead.
+
+**Diagnosis:** You jumped to complexity before mastering simpler approaches.
+
+**Fix:**
+1. Pause the complex setup
+2. Fall back to PRD-driven Ralph for the current feature
+3. Complete the feature with simpler approach
+4. Revisit multi-agent AFTER you've shipped with Ralph 5+ times
+
+**Terminal example - falling back:**
+```bash
+# Stop the multi-agent chaos
+pkill -f "claude"
+
+# Go simple - PRD-driven Ralph
+cd ~/project
+./scripts/ralph/ralph.sh 25
+
+# Ship the feature, THEN evaluate if you need complexity
+```
+
+---
+
+### Issue: Pattern Works Sometimes, Fails Others
+
+**Symptom:** Same setup succeeds 60% of the time, fails mysteriously other times.
+
+**Diagnosis:** Usually task sizing or acceptance criteria issues.
+
+**Checklist:**
+```
+[ ] Tasks fit in one context window? (check token counts)
+[ ] Acceptance criteria are VERIFIABLE? (not "works well")
+[ ] Dependencies ordered correctly? (no circular refs)
+[ ] Typecheck included in EVERY story? (catches silent breakage)
+```
+
+**Fix:** Pick a failing run, examine prd.json and progress.txt, find the vague criterion.
+
+---
+
+### Issue: Can't Decide Between Patterns
+
+**Symptom:** Analysis paralysis - Ralph vs CC Mirror vs something else?
+
+**The Universal Escape Hatch:**
+
+When in doubt: **Single interactive session.**
+
+```bash
+# Just start talking to Claude
+claude
+
+# Describe what you want to build
+# Let Claude help you decompose
+# THEN decide if you need automation
+```
+
+Interactive is always available. Complexity is a choice you can make later.
+
+---
+
+### Issue: Budget Exploding
+
+**Symptom:** Costs way higher than expected for the output achieved.
+
+**Diagnosis matrix:**
+
+| If you're using... | Check... |
+|-------------------|----------|
+| Opus for everything | Switch to Sonnet for implementation |
+| Long sessions | Switch to fresh context (Ralph) |
+| Multi-agent | Check for infinite loops |
+| Gas Town | You signed up for $50-200/day |
+
+**Quick fix:**
+```bash
+# Add to ralph.sh
+MAX_COST=50  # dollars
+CURRENT_COST=$(cat ~/.claude/costs.log | tail -1)
+if [ "$CURRENT_COST" -gt "$MAX_COST" ]; then
+    echo "Budget exceeded!"
+    exit 1
+fi
+```
+
+---
+
+### Issue: Quality Lower Than Interactive
+
+**Symptom:** Autonomous output is worse than when you work interactively.
+
+**Diagnosis:** Usually one of:
+1. Tasks too vague (Claude guesses wrong)
+2. No verification (errors compound)
+3. Context pollution (long sessions)
+
+**Fix:** Add these to every prd.json story:
+```json
+{
+  "acceptanceCriteria": [
+    "npm run typecheck passes",  // <-- ALWAYS
+    "npm run test passes",       // <-- ALWAYS
+    "Specific verifiable condition"
+  ]
+}
+```
 
 ---
 

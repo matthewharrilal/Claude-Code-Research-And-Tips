@@ -1,5 +1,7 @@
 # Internationalization & Regional Adaptation
 
+> **You Are Here:** This document covers international and non-English usage of Claude Code - language configuration, regional infrastructure, time zone workflows, and compliance considerations. If you're a non-English developer or work with global teams, this is your guide. For core workflows, see `synthesis/boris-workflow-complete.md`. For multi-agent patterns, see `synthesis/mastery-multi-agent.md`.
+
 **Status:** Frontier Synthesis
 **Synthesized:** 2026-01-09
 **Focus:** Non-English users, regional considerations, and global Claude Code workflows
@@ -799,6 +801,17 @@ For organizations with strict data residency:
 
 ---
 
+### Checkpoint: International Setup
+**You should now understand:**
+- [ ] How to configure Claude Code for non-English responses
+- [ ] Regional infrastructure limitations (WebSearch US-only)
+- [ ] Time zone patterns for overnight runs and team handoffs
+- [ ] GDPR and data residency considerations
+
+**If unclear:** Re-read the "Language Support" and "Regional Considerations" sections above.
+
+---
+
 ## Quick Reference
 
 ### Language Configuration
@@ -842,6 +855,110 @@ date -u  # Always log in UTC for team coordination
     "apiTimeout": 180000
   }
 }
+```
+
+---
+
+## Troubleshooting
+
+### Problem: "Claude responds in English despite language configuration"
+
+**Symptom:** You configured responseLanguage but Claude still answers in English.
+
+**Cause:** Configuration not being read, or explicit English prompt overriding setting.
+
+**Fix:**
+```json
+// Verify in ~/.claude/settings.json:
+{
+  "model": {
+    "responseLanguage": "ja"
+  }
+}
+
+// Or add to CLAUDE.md:
+## Language
+- Respond in Japanese (日本語で応答してください)
+- Write code comments in Japanese and English
+```
+
+---
+
+### Problem: "WebSearch not working (non-US region)"
+
+**Symptom:** WebSearch tool returns error or is unavailable.
+
+**Cause:** WebSearch is US-only at this time.
+
+**Fix:**
+```bash
+# Alternative 1: Use WebFetch with specific URLs
+"Fetch and analyze this article: https://example.com/page"
+
+# Alternative 2: Use Playwright MCP for browser automation
+# Add to .claude/settings.json:
+{
+  "mcp": {
+    "servers": {
+      "playwright": {
+        "command": "npx",
+        "args": ["@anthropic-ai/mcp-server-playwright"]
+      }
+    }
+  }
+}
+```
+
+---
+
+### Problem: "High latency in Asia-Pacific region"
+
+**Symptom:** Responses take 5-10 seconds, feels sluggish.
+
+**Cause:** Distance to Anthropic's US-based API servers.
+
+**Fix:**
+```json
+// In ~/.claude/settings.json:
+{
+  "behavior": {
+    "streamResponses": true,
+    "apiTimeout": 180000
+  },
+  "performance": {
+    "retries": 5,
+    "retryDelay": "exponential"
+  }
+}
+
+// Also consider:
+// - Use Ralph loops for overnight work (latency doesn't matter while sleeping)
+// - Batch operations to reduce round-trips
+// - Cache file reads locally
+```
+
+---
+
+### Problem: "Character encoding issues in terminal"
+
+**Symptom:** Japanese/Chinese/Korean characters display as boxes or garbage.
+
+**Cause:** Terminal not configured for UTF-8.
+
+**Fix:**
+```bash
+# Check terminal encoding
+echo $LANG
+# Should be something like: en_US.UTF-8 or ja_JP.UTF-8
+
+# Set UTF-8 if not set
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# For permanent fix, add to ~/.zshrc or ~/.bashrc
+
+# On macOS Terminal:
+# Preferences → Profiles → Text → Character encoding = Unicode (UTF-8)
 ```
 
 ---

@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Domain Isolation Patterns
 
+> **You Are Here:** This guide teaches you how to run multiple Claude Code instances across separate life/work domains without context pollution. Essential reading if you want to scale beyond single-project usage to managing entire life systems (the "Personal Panopticon" approach). Prerequisite: understand basic Claude Code usage (Level 0-1 from complexity ladder).
+
 A comprehensive guide to isolating Claude Code instances across life and work domains, derived from the Personal Panopticon architecture and community best practices.
 
 ---
@@ -91,6 +93,15 @@ cd ~/nox && claude    cd ~/trades && claude cd ~/health && claude
 ```
 
 No conflicts. No waiting. Each agent works on its domain while others work in parallel.
+
+### Checkpoint: Domain Isolation Fundamentals
+**You should now understand:**
+- [ ] Why context pollution degrades agent performance
+- [ ] The 8 domain categories in the Panopticon model
+- [ ] How directory isolation enables parallel execution
+- [ ] The security benefits of domain separation
+
+**If unclear:** Re-read "Why Domain Isolation Matters" above before proceeding.
 
 ---
 
@@ -274,6 +285,23 @@ git worktree add ../nox-feature-payments feature-payments
 ```
 
 Each worktree can run its own Claude Code instance without conflicts.
+
+### Checkpoint: Implementation Patterns
+**You should now understand:**
+- [ ] How to create domain-specific CLAUDE.md files
+- [ ] tmux session management for parallel instances
+- [ ] The difference between separate repos vs. git worktrees
+- [ ] When to use worktrees within a domain
+
+**Terminal verification:**
+```bash
+# You should be able to run multiple sessions:
+tmux new-session -d -s trades "cd ~/trades && claude"
+tmux new-session -d -s health "cd ~/health && claude"
+tmux ls  # Should show both sessions
+```
+
+**If unclear:** Practice creating and switching between tmux sessions before proceeding.
 
 ---
 
@@ -553,6 +581,78 @@ cat ~/shared/handoff-*.json | jq -s '.'
 # Correlation agent reads all briefs
 cat ~/trades/briefs/latest.md ~/health/status/current.json ~/nox/blockers.md
 ```
+
+---
+
+---
+
+## Troubleshooting
+
+### Common Issue: Domain Agent Accesses Wrong Directory
+**Symptom:** Agent reads/writes files outside its domain directory
+**Cause:** Missing directory constraints or agent started from wrong path
+**Fix:**
+1. Always start agents with explicit `cd ~/domain && claude`
+2. Add path restrictions in domain's CLAUDE.md:
+```markdown
+## Boundaries
+- This agent operates ONLY within ~/trades/
+- Never access files outside this directory
+```
+3. Use `.claudeignore` to exclude parent directories
+
+### Common Issue: Handoffs Not Being Read
+**Symptom:** Receiving domain ignores handoff files; no cross-domain awareness
+**Cause:** Handoff files not mentioned in CLAUDE.md or wrong path
+**Fix:**
+1. Add explicit handoff instruction to receiving domain's CLAUDE.md:
+```markdown
+## Cross-Domain Integration
+Before any task, check ~/shared/ for handoffs from other domains.
+Read handoff-*-to-[this-domain].json files.
+```
+2. Verify handoff file path matches exactly
+
+### Common Issue: Too Many Domains (Domain Sprawl)
+**Symptom:** Managing 15+ domains; high overhead; unclear boundaries
+**Cause:** Over-fragmentation; created domains for minor concerns
+**Fix:**
+1. Start with 3-5 core domains, expand only when clear need emerges
+2. Consolidate related concerns (e.g., "finance" includes both "trades" and "expenses")
+3. Use subagents within domains instead of creating new domains
+
+### Common Issue: Cron Jobs Fail Silently
+**Symptom:** Scheduled domain runs don't produce expected output
+**Cause:** Environment differences between cron and interactive shell
+**Fix:**
+1. Use full paths in cron:
+```bash
+0 6 * * * cd /Users/you/trades && /usr/local/bin/claude "Generate morning brief" > briefs/$(date +\%Y-\%m-\%d).md 2>&1
+```
+2. Log stderr to diagnose: `2>&1 | tee /tmp/cron-trades.log`
+3. Ensure API credentials are available to cron environment
+
+### Common Issue: tmux Sessions Lost After Reboot
+**Symptom:** All domain sessions gone; must manually restart
+**Cause:** tmux sessions don't persist across system restarts
+**Fix:**
+1. Create a startup script that recreates sessions:
+```bash
+#!/bin/bash
+# ~/.claude/start-domains.sh
+for domain in nox trades health email; do
+  tmux new-session -d -s $domain "cd ~/$domain && claude"
+done
+```
+2. Add to login items or use tmux-resurrect plugin
+
+### Common Issue: Context Pollution Despite Isolation
+**Symptom:** Agent behavior suggests knowledge from other domains
+**Cause:** Shared ~/.claude/ config or global CLAUDE.md bleeding through
+**Fix:**
+1. Use domain-specific `.claude/` directories, not global
+2. Check ~/.claude/CLAUDE.md for generic instructions that apply everywhere
+3. Verify agent is reading the correct domain CLAUDE.md (check path in startup)
 
 ---
 

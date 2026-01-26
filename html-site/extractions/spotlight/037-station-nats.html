@@ -1,0 +1,2120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Station: NATS-Based Agent Orchestration | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    .path-timing {
+      font-size: 12px;
+      color: #71717a;
+      margin-top: 4px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Architecture Diagram */
+    .architecture-diagram {
+      background: #18181b;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .architecture-diagram pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #e4e4e7;
+      line-height: 1.5;
+    }
+
+    /* Table Styles */
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .info-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #3f3f46;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .info-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .info-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .info-table code {
+      background: #f4f4f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="radio-tower" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">NATS-powered mesh network for distributed AI agents with sub-millisecond coordination and persistent audit trails.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Traditional agent setups isolate AI agents by team. Synthesizing results across tools requires manual coordination. NATS changes that."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'stn init --provider anthropic && stn up')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>stn init --provider anthropic && stn up</code>
+          </div>
+
+          <div class="core-anchor">Two commands to production-grade agent orchestration.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Station is a <strong>mesh network for AI agents</strong>. Think of it as Kubernetes service discovery, but for Claude instances. Each Station hosts specialized agents. The Lattice mesh connects them with NATS pub/sub messaging. The result: agents on Station A can invoke agents on Station B in sub-milliseconds.
+        </p>
+
+        <div class="architecture-diagram">
+          <pre>
+                        LATTICE MESH
+  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+  │  Station A   │    │  Station B   │    │  Station C   │
+  │  (Security)  │◄──►│  (Orchestr.) │◄──►│   (SRE)      │
+  │              │    │              │    │              │
+  │ VulnScanner  │    │ Coordinator  │    │ K8sHealth    │
+  │ CVELookup    │    │              │    │ LogAnalyzer  │
+  │ NetworkAudit │    │              │    │ Deployer     │
+  └──────────────┘    └──────────────┘    └──────────────┘
+         │                   │                   │
+         └───────────────────┼───────────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │   NATS Server   │
+                    │   + JetStream   │
+                    └─────────────────┘
+          </pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="core-nats">The NATS Foundation</h3>
+
+        <p class="text-text-secondary mb-6">
+          NATS isn't just "another message queue." It's purpose-built for sub-millisecond latency at scale. Station leverages the full NATS stack:
+        </p>
+
+        <table class="info-table">
+          <thead>
+            <tr>
+              <th>NATS Feature</th>
+              <th>Station Use</th>
+              <th>Why It Matters</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Core Pub/Sub</td>
+              <td>Agent invocation, presence heartbeats</td>
+              <td>Sub-millisecond message delivery</td>
+            </tr>
+            <tr>
+              <td>JetStream Persistence</td>
+              <td>Event sourcing, audit trails</td>
+              <td>Exactly-once semantics, replay history</td>
+            </tr>
+            <tr>
+              <td>KeyValue Stores</td>
+              <td>Agent/station registry</td>
+              <td>Microsecond reads, consistent state</td>
+            </tr>
+            <tr>
+              <td>Embedded Server</td>
+              <td>Orchestrator mode</td>
+              <td>Single-binary deployment</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-nats" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY NATS (NOT KAFKA, RABBITMQ)?</div>
+          <div class="decision-reasoning">
+            Sub-millisecond latency matters for agent coordination. Kafka is optimized for throughput (millions of messages/sec) but adds latency. RabbitMQ requires separate broker deployment. NATS provides embedded server option for simple deployments AND can scale to distributed clusters.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Start with <code>stn serve --orchestration</code> (embedded NATS). Scale to external NATS cluster when needed. No broker management for simple deployments.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-jetstream">
+          <div class="decision-why">WHY JETSTREAM FOR PERSISTENCE?</div>
+          <div class="decision-reasoning">
+            Every agent invocation, work assignment, and status change is an event. JetStream provides exactly-once semantics and append-only storage. <code>DenyDelete: true</code> and <code>DenyPurge: true</code> create immutable audit trails—critical for compliance and debugging.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Full audit trail without additional infrastructure. Replay any time window for debugging. Query events for compliance reporting. Default 7-day retention, 1GB storage.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-three-modes">
+          <div class="decision-why">WHY THREE OPERATING MODES?</div>
+          <div class="decision-reasoning">
+            Different scales need different setups. <strong>Standalone</strong>: development, no mesh. <strong>Orchestrator</strong>: runs embedded NATS, central hub. <strong>Member</strong>: joins existing mesh. This enables gradual adoption—start simple, scale when needed.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Start with standalone. When you need multi-machine coordination, add orchestrator. Scale to multi-member mesh for production. Each mode is a progression, not a replacement.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY PRESENCE HEARTBEATS?</div>
+          <div class="decision-reasoning">
+            In distributed systems, stations fail. Presence heartbeats (default: 10 seconds) + TTL (default: 30 seconds) mean dead stations are detected automatically. Work reroutes to healthy stations without manual intervention.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              No manual health checks. No orchestrator monitoring. Stations self-report liveness. Missed heartbeats trigger cleanup. Network partitions auto-heal on reconnection.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY GO (NOT PYTHON, RUST)?</div>
+          <div class="decision-reasoning">
+            NATS has first-class Go support (nats.go). Go's concurrency model matches the pub/sub paradigm. Performance is excellent. Readable codebase means easy contributions. Single-binary deployment simplifies operations.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              One binary, no runtime dependencies. Easy to understand and extend. Cross-platform builds. No Python environment management for the Station itself.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>~/.local/share/station/            <span class="comment"># Station home (XDG)</span>
+<span class="comment">├── config.yaml                    # Main configuration</span>
+<span class="comment">├── lattice/                       # NATS JetStream storage</span>
+│   ├── streams/                   <span class="comment"># Event streams</span>
+│   └── kv/                        <span class="comment"># KeyValue stores</span>
+│       ├── lattice-stations       <span class="comment"># Station manifests</span>
+│       └── lattice-agents         <span class="comment"># Agent manifests</span>
+<span class="comment">├── agents/                        # Agent definitions</span>
+│   └── *.prompt                   <span class="comment"># Dotprompt agent files</span>
+<span class="comment">├── logs/                          # Agent execution logs</span>
+└── workspaces/                    <span class="comment"># Project workspaces</span>
+
+<span class="comment"># Service Ports</span>
+8585 - Web UI
+8586 - MCP Server
+8587 - Agent MCP
+4222 - NATS (Orchestrator mode)
+8222 - NATS HTTP monitoring
+16686 - Jaeger UI</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="config-yaml">config.yaml - Lattice Configuration</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="variable">lattice:</span>
+  <span class="variable">mode:</span> <span class="string">orchestrator</span>  <span class="comment"># standalone | orchestrator | member</span>
+  <span class="variable">station_id:</span> <span class="string">"my-station-001"</span>
+  <span class="variable">station_name:</span> <span class="string">"Security Station"</span>
+
+  <span class="comment"># Orchestrator mode (embedded NATS)</span>
+  <span class="variable">embedded:</span>
+    <span class="variable">port:</span> <span class="string">4222</span>
+    <span class="variable">http_port:</span> <span class="string">8222</span>
+    <span class="variable">store_dir:</span> <span class="string">~/.local/share/station/lattice</span>
+    <span class="variable">auth:</span>
+      <span class="variable">enabled:</span> <span class="keyword">true</span>
+      <span class="variable">token:</span> <span class="string">"secure-bearer-token"</span>
+
+  <span class="comment"># Member mode (connect to orchestrator)</span>
+  <span class="variable">nats:</span>
+    <span class="variable">url:</span> <span class="string">"nats://orchestrator:4222"</span>
+    <span class="variable">auth:</span>
+      <span class="variable">token:</span> <span class="string">"secure-bearer-token"</span>
+    <span class="variable">reconnect_wait_sec:</span> <span class="string">2</span>
+    <span class="variable">max_reconnects:</span> <span class="string">-1</span>  <span class="comment"># Unlimited</span>
+
+  <span class="comment"># Routing & discovery</span>
+  <span class="variable">presence_ttl_sec:</span> <span class="string">30</span>
+  <span class="variable">cleanup_interval_sec:</span> <span class="string">60</span>
+  <span class="variable">timeout_sec:</span> <span class="string">60</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="agent-prompt">Agent Definition (.prompt file)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">---</span>
+<span class="variable">name:</span> <span class="string">security-scanner</span>
+<span class="variable">description:</span> <span class="string">Scans code for vulnerabilities</span>
+<span class="variable">tags:</span>
+  - <span class="string">security</span>
+  - <span class="string">scanning</span>
+<span class="variable">model:</span> <span class="string">claude-3-5-sonnet</span>
+<span class="variable">max_steps:</span> <span class="string">8</span>
+<span class="variable">tools:</span>
+  - <span class="string">filesystem</span>
+  - <span class="string">web</span>
+<span class="variable">input:</span>
+  <span class="variable">type:</span> <span class="string">object</span>
+  <span class="variable">properties:</span>
+    <span class="variable">target:</span>
+      <span class="variable">type:</span> <span class="string">string</span>
+      <span class="variable">description:</span> <span class="string">Target to scan</span>
+  <span class="variable">required:</span>
+    - <span class="string">target</span>
+<span class="comment">---</span>
+
+[system]
+You are a security scanning agent...
+
+[user]
+Scan {{target}} for vulnerabilities.</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a security scan request through the Station mesh:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">
+              Orchestrator receives request: <code>call_agent("security-scanner", "Scan /app for vulnerabilities")</code>
+              <div class="path-timing">T+0ms</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">
+              AgentRouter queries Registry via NATS KeyValue: <code>GET from lattice-agents</code>
+              <div class="path-timing">T+1ms - Finds security-scanner on Station-B</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">
+              Invoker sends to Station-B: <code>lattice.station.{stationB-id}.agent.invoke</code>
+              <div class="path-timing">T+2ms - Timeout: 5 minutes</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">
+              Station-B receives, locates local agent, begins execution
+              <div class="path-timing">T+5ms</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">
+              Agent executes with configured tools (filesystem, web)
+              <div class="path-timing">T+10ms to T+45s - Depends on task complexity</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">
+              Agent completes, returns result via NATS reply
+              <div class="path-timing">T+45s - Includes DurationMs, ToolCallCount</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">
+              Event published to JetStream: <code>lattice.events.AgentInvoked</code>
+              <div class="path-timing">T+45s - Stored in append-only stream for audit</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">
+              Result returned to orchestrator, trace exported to Jaeger
+              <div class="path-timing">T+45s - Full distributed trace available</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-6">NATS Subject Hierarchy</h3>
+
+        <div class="code-block">
+          <pre>lattice.
+├── presence.
+│   ├── announce        <span class="comment"># Station startup with full manifest</span>
+│   ├── heartbeat       <span class="comment"># Periodic signal (default: 10 seconds)</span>
+│   └── goodbye         <span class="comment"># Graceful shutdown notification</span>
+├── station.{id}.
+│   └── agent.invoke    <span class="comment"># Agent invocation (request-reply)</span>
+├── work.
+│   ├── {stationID}.assign  <span class="comment"># Work assignment</span>
+│   └── {workID}.response   <span class="comment"># Work responses</span>
+└── events.
+    ├── StationJoined
+    ├── StationLeft
+    ├── AgentRegistered
+    ├── WorkAssigned
+    └── ...</pre>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit, with specific fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            1. Agent name collision across stations
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Agent already exists" error, routing confusion</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Same agent name registered on multiple stations</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use unique names per station, or prefix with station name: <code>security-station-vuln-scanner</code></div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            2. Presence timeout - Station shows offline
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Station appears offline in mesh despite running</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Heartbeat missed, TTL expired (default 30s)</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check network, increase <code>presence_ttl_sec</code> if latency is high</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            3. JetStream not enabled
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> KeyValue operations fail, "stream not found"</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> JetStream not configured on NATS server</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use <code>stn serve --orchestration</code> (auto-enables JetStream) or add JetStream config to external NATS</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 10 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            4. Port conflict on startup
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Address already in use" on 8585, 4222, etc.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Previous Station instance or conflicting service</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>lsof -i :8585</code> to find, then kill or change ports in config</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            5. Authentication mismatch
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Authorization failed" when member joins mesh</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Token/credentials don't match between orchestrator and member</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify auth config matches exactly. Check credential file permissions: <code>chmod 600</code></div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            6. TLS certificate issues
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Connection refused despite correct URL</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Cert path wrong, CA chain incomplete, or cert expired</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify paths, check <code>openssl x509 -in cert.pem -noout -dates</code></div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 15-30 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            7. Agent invocation timeout
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent call hangs, times out after 5 minutes</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Agent task takes longer than default timeout</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Increase <code>timeout_sec</code> in config, or break task into smaller pieces</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            8. Event stream full
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Events not publishing, disk usage high</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> MaxBytes (default 1GB) or MaxAge (default 7 days) reached</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Increase limits or enable cleanup policy in stream config</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            9. Missing API key
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Provider not configured" on agent execution</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> ANTHROPIC_API_KEY (or equivalent) not set</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>export ANTHROPIC_API_KEY="sk-ant-..."</code> before <code>stn up</code></div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 1 minute</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            10. Jaeger traces missing
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> No traces in Jaeger UI at :16686</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Jaeger not running, or OTEL endpoint not set</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Run <code>stn jaeger up</code> BEFORE <code>stn up</code>, ensure OTEL_EXPORTER_OTLP_ENDPOINT set</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 minutes</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Distributed Complexity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Multiple stations = multiple failure modes. Network partitions, clock skew, split brain scenarios. Single-station is simpler.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Distributed systems are fundamentally harder than single-node. No framework eliminates this complexity.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Start with standalone mode. Add mesh incrementally. Use Jaeger traces extensively. Design for eventual consistency.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            NATS Learning Curve
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> NATS is a different paradigm from HTTP/REST. Pub/sub, subjects, streams, consumers—new mental models required.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Most developers are HTTP-native. NATS concepts don't map directly to REST patterns.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Study NATS basics before Station. Use <code>nats</code> CLI for debugging. Understand subjects as hierarchical namespaces.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Debugging Across Stations
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> When a request fails, which station is the problem? Traces span multiple processes, logs are distributed.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Correlation across boundaries requires infrastructure. Human intuition fails at scale.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Enable Jaeger from day one. Use trace IDs in all logging. Check NATS monitoring at :8222 for message flow issues.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Agent Manifest Consistency
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> When you update an agent definition, the change must propagate across the mesh. Registry updates aren't instant.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Distributed state is eventually consistent. No global lock exists.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Restart stations after agent changes. Use presence announcements to force refresh. Accept brief inconsistency windows.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost at Scale
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Each station runs full Claude instances. More stations = more API costs. Mesh overhead isn't free.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> LLM costs scale linearly with usage. No caching reduces unique queries.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Budget per-station. Monitor token usage. Use cheaper models for simple agents. Consider agent consolidation.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE STATION WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multi-machine agent coordination required</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Audit trail requirements (compliance, debugging)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Dynamic agent discovery needed (agents come and go)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Sub-second message latency requirements</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multiple specialized agent teams (security, SRE, DevOps)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Team comfortable with NATS/Docker infrastructure</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE STATION WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Single machine is sufficient - Use Gas Town or CC Mirror</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple orchestration needs - CC Mirror is simpler</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Budget constrained - Ralph loops have lower infrastructure cost</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>No audit requirements - JetStream overhead unnecessary</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>HTTP latency acceptable - HTTP-based coordination is simpler</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-6">Graduation Path</h3>
+
+        <div class="code-block">
+          <pre><span class="comment"># Complexity Ladder Position</span>
+Level 0-4: Single session → Ralph loops
+Level 5: Multi-agent → CC Mirror
+Level 5-6: Multi-machine → <span class="string">Station standalone</span>
+Level 6+: Production mesh → <span class="string">Station orchestrator + members</span>
+
+<span class="comment"># The decision tree</span>
+Single machine? → Gas Town / CC Mirror
+Multi-machine? → Station
+  └── Development? → Standalone mode
+  └── Production? → Orchestrator + Members
+      └── 3+ stations? → External NATS cluster</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-6">Integration Points</h3>
+
+        <table class="info-table">
+          <thead>
+            <tr>
+              <th>Station +</th>
+              <th>Use Case</th>
+              <th>How It Works</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Gas Town</td>
+              <td>NATS messaging layer for Dogs</td>
+              <td>Mayor → Orchestrator, Dogs → Member stations</td>
+            </tr>
+            <tr>
+              <td>Ralph</td>
+              <td>Message-driven iteration</td>
+              <td>Replace shell loop with NATS work assignment</td>
+            </tr>
+            <tr>
+              <td>CC Mirror</td>
+              <td>Multi-model coordination</td>
+              <td>CC Mirror for decomposition, Station for distribution</td>
+            </tr>
+            <tr>
+              <td>Personal Panopticon</td>
+              <td>Domain station mesh</td>
+              <td>8 specialized stations, centralized discovery</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">Two commands to mesh orchestration</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">stn init && stn up</code><br>
+          <strong>Essential:</strong> NATS messaging, agent registry, work distribution.<br>
+          <strong>Everything else:</strong> Scaling refinement.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Before Station: 30-minute manual workflow</div>
+        <div class="text-text-secondary text-sm">
+          "Aggregating results across security agents, SRE agents, DevOps agents took 30+ minutes of manual coordination. With Station Lattice: seconds."
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="essence">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Station = Kubernetes for Agents</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Service discovery</strong> → Agent registry<br>
+          <strong>Pod-to-pod networking</strong> → NATS mesh<br>
+          <strong>ConfigMaps</strong> → .prompt files<br>
+          <strong>Health probes</strong> → Presence heartbeats<br><br>
+          <em>If you've operated k8s, Station architecture is familiar.</em>
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Kubernetes: Service Discovery</div>
+        <div class="text-text-secondary text-sm">
+          Station's Registry + Presence is k8s-style service discovery for agents. Same DNS-like lookup, same health-based routing, same eventual consistency model.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Event Sourcing: Append-Only</div>
+        <div class="text-text-secondary text-sm">
+          JetStream streams with <code>DenyDelete</code>, <code>DenyPurge</code> follow event sourcing pattern. Same as CQRS systems—immutable history, replay capability.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Ralph: External State</div>
+        <div class="text-text-secondary text-sm">
+          Station stores state in JetStream KeyValue just like Ralph uses progress.txt. Same "external state > internal memory" principle, same crash resilience.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Emergent Load Balancing</div>
+        <div class="text-text-secondary text-sm">
+          NATS queue groups automatically distribute work across available agents. No explicit load balancer configuration needed—it emerges from the messaging pattern.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Distributed agents → FIVE constraints cascade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Agents on different machines<br>
+          → Need message transport (HTTP too slow)<br>
+          → Need service discovery (can't hardcode IPs)<br>
+          → Need health detection (machines fail)<br>
+          → Need audit trail (who did what)<br>
+          → Need eventual consistency (no global lock)<br><br>
+          <em>NATS satisfies all five.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Latency vs. Persistence</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Core NATS:</strong> Sub-millisecond, no persistence<br>
+          <strong>JetStream:</strong> ~1-5ms, persistent<br><br>
+          <strong>THE TENSION:</strong> Can't have both optimal. Station uses JetStream for events (need audit), Core for presence (need speed).
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Simplicity vs. Features</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Embedded NATS:</strong> Simple (single binary), limited (no clustering)<br>
+          <strong>External NATS:</strong> Complex (separate deployment), capable (full clustering)<br><br>
+          <em>Three modes let you choose your position on this trade-off.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="decisions">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">vs Kafka, vs HTTP-based</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Kafka:</strong> Higher latency, better for high-volume streaming<br>
+          <strong>HTTP polling:</strong> No infrastructure, but latency and no persistence<br>
+          <strong>RabbitMQ:</strong> Mature but requires separate broker
+        </div>
+      </div>
+
+      <!-- FILES SECTION (3 items) -->
+      <div class="activity-item expertise" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your Station understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What files do I need?" → config.yaml, .prompt<br>
+          <strong>Intermediate:</strong> "What do the ports mean?" → 4222=NATS, 8585=UI<br>
+          <strong>Advanced:</strong> "How does registry work?" → KeyValue stores<br>
+          <strong>Staff:</strong> "How to debug mesh issues?" → nats CLI + Jaeger<br>
+          <strong>Expert:</strong> "Custom routing?" → AgentRouter locality
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Station + Jaeger</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> OpenTelemetry tracing across distributed stations.<br>
+          <strong>Required:</strong> Set OTEL_EXPORTER_OTLP_ENDPOINT, run <code>stn jaeger up</code> first.<br>
+          <strong>Value:</strong> See request flow across entire mesh.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Station + Gas Town: NATS for Dogs</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Mayor</strong> → Station Orchestrator mode<br>
+          <strong>Deacon</strong> → Station's Registry + Presence<br>
+          <strong>Dogs</strong> → Member stations with specialized agents<br>
+          <strong>Refinery</strong> → JetStream event streams
+        </div>
+      </div>
+
+      <!-- PATH SECTION (3 items) -->
+      <div class="activity-item constraint" data-section="path">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Heartbeat → TTL → Cleanup cascade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Missed heartbeats</strong> (10s default)<br>
+          → TTL expires (30s default)<br>
+          → Station marked offline<br>
+          → Registry updated<br>
+          → Work rerouted to healthy stations<br><br>
+          <em>Automatic failure detection and recovery.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="path">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Single Station Offline</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100%:</strong> Full mesh healthy, all agents available<br>
+          <strong>90%:</strong> One station offline, its agents unavailable<br>
+          <strong>Graceful:</strong> Work continues on other stations<br>
+          <strong>Recovery:</strong> Station reconnects, re-announces, resumes<br><br>
+          <em>Partial failure is survivable.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip event publishing</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip JetStream for events<br>
+          <strong>THEN:</strong> No audit trail<br>
+          <strong>THEN:</strong> Can't debug past failures<br>
+          <strong>THEN:</strong> Compliance failures<br>
+          <strong>FINALLY:</strong> No replay capability for recovery<br><br>
+          <em>Events aren't optional in production.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Agent Name Collision Chaos</div>
+        <div class="text-text-secondary text-sm">
+          Two stations registered "vuln-scanner". Router picked randomly. Security team got SRE station's scanner. Wrong tool, wrong results. Fixed with prefixes.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">JetStream Stream Full</div>
+        <div class="text-text-secondary text-sm">
+          Events stopped publishing silently. MaxBytes hit 1GB. Discovered days later when audit report empty. Fixed with monitoring + increased limits.
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When stream size flips from asset to liability</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-500MB:</strong> Pure benefit (rich audit trail)<br>
+          <strong>500MB-1GB:</strong> Queries slow down<br>
+          <strong>1GB+:</strong> MaxBytes hit, events dropped<br><br>
+          <strong>THE INFLECTION:</strong> ~500MB<br>
+          <em>Set retention policy before you hit it.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if NATS had no embedded option?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd need:</strong> Separate NATS deployment, Docker, k8s manifest.<br>
+          <strong>Why embedded matters:</strong> <code>stn serve --orchestration</code> runs everything in one process.<br>
+          <em>Embedded NATS is why Station is approachable.</em>
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item horizon" data-section="hard">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Setup cost vs. long-term gains</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Week 1:</strong> "This is complex, why not HTTP?"<br>
+          <strong>Week 2:</strong> "Oh, auto-discovery is nice"<br>
+          <strong>Week 4:</strong> "Audit trails saved our compliance audit"<br>
+          <strong>Month 3:</strong> "Can't imagine going back"<br><br>
+          <em>Infrastructure investment pays off over time.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="hard">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Orchestrator Down</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Immediate:</strong> No new agent discovery, no new work assignment<br>
+          <strong>Members:</strong> Continue independently with cached registry<br>
+          <strong>Recovery:</strong> Orchestrator restarts, members reconnect<br><br>
+          <em>Design for orchestrator failure—it will happen.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Network Partition Resilience</div>
+        <div class="text-text-secondary text-sm">
+          Presence heartbeats + TTL mean partitions auto-heal. Station A loses connectivity, TTL expires, marked offline. Connectivity returns, re-announces, back online. No manual intervention.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal mesh topology</div>
+        <div class="text-text-secondary text-sm">
+          When should you add another station vs. more agents on existing station? No formula exists. Heuristic: if agent latency matters, co-locate with data.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (5 items) -->
+      <div class="activity-item inflection" data-section="when">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">3+ Stations: Mesh Complexity Threshold</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-2 stations:</strong> Simple, direct communication<br>
+          <strong>3+ stations:</strong> Mesh dynamics emerge, routing complexity increases<br><br>
+          <strong>THE INFLECTION:</strong> 3 stations<br>
+          <em>Above 3, consider external NATS cluster for visibility.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you DON'T need multi-machine?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Single machine:</strong> Gas Town gives you agent orchestration without mesh complexity.<br>
+          <strong>Simple coordination:</strong> CC Mirror is lighter weight.<br>
+          <strong>Station value:</strong> Only emerges with DISTRIBUTED requirements.<br><br>
+          <em>Don't use Station for single-machine.</em>
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Station + Ralph: Message-Driven Iteration</div>
+        <div class="text-text-secondary text-sm">
+          Replace shell loop with NATS work assignment. Benefits: distributed Ralph across machines, progress streaming, persistent state in JetStream.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Station + CC Mirror</div>
+        <div class="text-text-secondary text-sm">
+          <strong>CC Mirror:</strong> Task decomposition, model coordination<br>
+          <strong>Station:</strong> Distributed execution across machines<br>
+          <strong>Combined:</strong> CC Mirror decides WHAT, Station executes WHERE
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="when">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">Propulsion: Auto-Execute on Assignment</div>
+        <div class="text-text-secondary text-sm">
+          Roadmap feature: agents auto-execute when work arrives, no polling. Like event-driven serverless, but for agents. Not yet implemented.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="when">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">Multi-Provider Federation</div>
+        <div class="text-text-secondary text-sm">
+          Multiple AI providers in same mesh—route by capability. Anthropic agents alongside OpenAI agents. Provider selection based on task requirements.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

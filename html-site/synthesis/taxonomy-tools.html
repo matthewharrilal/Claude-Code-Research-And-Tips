@@ -1,0 +1,2337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tool Integration Taxonomy | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Tool Card */
+    .tool-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .tool-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .tool-card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .tool-card-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #ecfdf5;
+      color: #0D9373;
+    }
+
+    /* Table Styles */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .data-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #3f3f46;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .data-table tr:hover {
+      background: #fafafa;
+    }
+
+    .data-table code {
+      background: #f4f4f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Tool Integration Taxonomy</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">The Extension Architecture</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-hooks" class="nav-item">Why Hooks?</a>
+          <a href="#why-mcp" class="nav-item">Why MCP?</a>
+          <a href="#why-skills" class="nav-item">Why Skills?</a>
+        </div>
+      </div>
+
+      <!-- Tool Categories -->
+      <div class="nav-section" data-section="categories">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="folder" class="w-4 h-4"></i>
+          <span>Tool Categories</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hooks-system" class="nav-item">Hooks System</a>
+          <a href="#mcp-servers" class="nav-item">MCP Servers</a>
+          <a href="#plugins" class="nav-item">Plugins</a>
+          <a href="#skills" class="nav-item">Skills</a>
+          <a href="#sub-agents" class="nav-item">Sub-Agents</a>
+        </div>
+      </div>
+
+      <!-- Path of a Tool -->
+      <div class="nav-section" data-section="path">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Path of a Tool</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#path" class="nav-item">The Flow</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Practical Problems</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Hooks, MCP, plugins, skills, and sub-agents extend Claude Code through layered integration patterns.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Claude Code is the host. Everything else plugs in through standardized interfaces."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Hooks (shell) + MCP (protocol) + Skills (markdown) + Plugins (bundles)')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Hooks (shell) + MCP (protocol) + Skills (markdown) + Plugins (bundles)</code>
+          </div>
+
+          <div class="core-anchor">Five extension points. Same host. Different abstraction levels.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Claude Code exposes five distinct integration points, each at a different abstraction level. Hooks are shell commands triggered by lifecycle events. MCP is a protocol for external tools. Skills are markdown instructions. Plugins bundle multiple integration types. Sub-agents are isolated Claude instances.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          The key insight: each extension type solves a different problem. Hooks are for automation (auto-format on save). MCP is for data access (connect to databases). Skills are for workflows (complex procedures). Plugins are for distribution (share your stack). Sub-agents are for parallelism (spawn workers).
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Extension hierarchy (low to high abstraction)</span>
+
+<span class="variable">HOOKS</span>        <span class="comment"># Shell commands on lifecycle events</span>
+    ↓
+<span class="variable">MCP</span>          <span class="comment"># JSON-RPC protocol for tools/resources</span>
+    ↓
+<span class="variable">SKILLS</span>       <span class="comment"># Markdown instruction sets</span>
+    ↓
+<span class="variable">SUB-AGENTS</span>   <span class="comment"># Isolated Claude instances</span>
+    ↓
+<span class="variable">PLUGINS</span>      <span class="comment"># Bundles of hooks + MCP + skills + commands</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-hooks" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY HOOKS?</div>
+          <div class="decision-reasoning">
+            Hooks are shell commands, not AI prompts. They execute on lifecycle events (PreToolUse, PostToolUse, SessionStart, SessionEnd, Stop). This is automation at the lowest level - no LLM reasoning, just deterministic execution.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use hooks for tasks that should ALWAYS happen: auto-formatting, security gates, notifications, audit logging. If you want Claude to reason about whether to do something, that's not a hook.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-mcp">
+          <div class="decision-why">WHY MCP (MODEL CONTEXT PROTOCOL)?</div>
+          <div class="decision-reasoning">
+            MCP is "USB-C for AI" - a standardized protocol for connecting Claude to external data and tools. Instead of building custom integrations, MCP provides a single interface that works across different AI systems.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              When you need to access external data (databases, APIs, file systems), look for an MCP server first. The ecosystem has hundreds of pre-built servers. Only build custom if no server exists for your use case.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-skills">
+          <div class="decision-why">WHY SKILLS?</div>
+          <div class="decision-reasoning">
+            Skills are markdown files that extend Claude's capabilities through instructions, not code. They load into context when relevant, teaching Claude new workflows without requiring API changes.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Write skills when you have a complex workflow Claude should follow. Skills are recipes. If you find yourself repeating the same multi-step instructions, that's a skill waiting to be extracted.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: TOOL CATEGORIES -->
+      <section id="hooks-system" data-activity="categories">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Tool Categories
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">Hooks System</h3>
+
+        <p class="text-text-secondary mb-4">
+          Hooks are event-driven shell commands that execute automatically on Claude Code lifecycle events.
+        </p>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Hook Event</th>
+              <th>Trigger Point</th>
+              <th>Common Use Cases</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>PreToolUse</code></td>
+              <td>Before any tool runs</td>
+              <td>Validation, security gates, approval flows</td>
+            </tr>
+            <tr>
+              <td><code>PostToolUse</code></td>
+              <td>After any tool completes</td>
+              <td>Auto-formatting, linting, notifications</td>
+            </tr>
+            <tr>
+              <td><code>SessionStart</code></td>
+              <td>When session begins</td>
+              <td>Context loading, environment setup</td>
+            </tr>
+            <tr>
+              <td><code>SessionEnd</code></td>
+              <td>When session ends</td>
+              <td>Cleanup, summary generation</td>
+            </tr>
+            <tr>
+              <td><code>Stop</code></td>
+              <td>Exit/completion attempts</td>
+              <td>Ralph loop continuation, cleanup</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">// ~/.claude/settings.json</span>
+{
+  <span class="string">"hooks"</span>: {
+    <span class="string">"PreToolUse"</span>: [{
+      <span class="string">"matcher"</span>: <span class="string">"Bash"</span>,
+      <span class="string">"hooks"</span>: [{
+        <span class="string">"type"</span>: <span class="string">"command"</span>,
+        <span class="string">"command"</span>: <span class="string">"~/.claude/hooks/security-gate.sh"</span>
+      }]
+    }],
+    <span class="string">"PostToolUse"</span>: [{
+      <span class="string">"matcher"</span>: <span class="string">"Edit"</span>,
+      <span class="string">"command"</span>: <span class="string">"prettier --write $FILE"</span>
+    }]
+  }
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="mcp-servers">MCP Servers</h3>
+
+        <p class="text-text-secondary mb-4">
+          MCP (Model Context Protocol) is an open protocol enabling Claude to connect to external data sources and tools via JSON-RPC 2.0.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">// MCP Architecture</span>
++--------------------------------------------------+
+|            MCP Host (Claude Code)                 |
++-------------------+------------------------------+
+                    |
+         +----------+----------+
+         |          |          |
+     +---v--+   +---v--+  +---v--+
+     |Client|   |Client|  |Client|
+     +---+--+   +---+--+  +---+--+
+         |          |          |
+    +----v---+ +----v---+ +----v---+
+    |Server A| |Server B| |Server C|
+    |(STDIO) | |(STDIO) | |(HTTP)  |
+    +--------+ +--------+ +--------+</pre>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Server</th>
+              <th>Package</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Filesystem</td>
+              <td><code>@modelcontextprotocol/server-filesystem</code></td>
+              <td>Secure file operations</td>
+            </tr>
+            <tr>
+              <td>GitHub</td>
+              <td><code>@modelcontextprotocol/server-github</code></td>
+              <td>GitHub API integration</td>
+            </tr>
+            <tr>
+              <td>Memory</td>
+              <td><code>@modelcontextprotocol/server-memory</code></td>
+              <td>Knowledge graph persistence</td>
+            </tr>
+            <tr>
+              <td>Sequential Thinking</td>
+              <td><code>@modelcontextprotocol/server-sequential-thinking</code></td>
+              <td>Reflective problem-solving</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="plugins">Plugins</h3>
+
+        <p class="text-text-secondary mb-4">
+          Plugins are full packages combining code, hooks, commands, skills, and MCP integrations.
+        </p>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-title">code-review</div>
+            <div class="tool-card-badge">Official</div>
+          </div>
+          <p class="text-text-secondary text-sm mb-2">5 parallel Sonnet agents for comprehensive code review.</p>
+          <p class="text-text-muted text-xs">Command: <code>/code-review</code></p>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-title">ralph-wiggum</div>
+            <div class="tool-card-badge">Official</div>
+          </div>
+          <p class="text-text-secondary text-sm mb-2">Self-perpetuating autonomous loops with Stop hook.</p>
+          <p class="text-text-muted text-xs">Commands: <code>/ralph-loop</code>, <code>/cancel-ralph</code></p>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-title">Claude HUD</div>
+            <div class="tool-card-badge">Community</div>
+          </div>
+          <p class="text-text-secondary text-sm mb-2">Context remaining, tools executing, subagents running, todo progress.</p>
+          <p class="text-text-muted text-xs">Author: @jarrodwatts</p>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-title">Claude-Mem</div>
+            <div class="tool-card-badge">Community</div>
+          </div>
+          <p class="text-text-secondary text-sm mb-2">Persistent memory with semantic compression. Up to 95% fewer tokens.</p>
+          <p class="text-text-muted text-xs">Author: @thedotmack</p>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="skills">Skills System</h3>
+
+        <p class="text-text-secondary mb-4">
+          Skills are Markdown files that extend Claude Code's capabilities as recipes, templates, or instruction sets.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Skill locations</span>
+.claude/skills/              <span class="comment"># Project-specific</span>
+~/.claude/skills/            <span class="comment"># Global</span>
+
+<span class="comment"># Skill structure</span>
+<span class="keyword"># Skill Name</span>
+
+<span class="keyword">## Purpose</span>
+One-liner description
+
+<span class="keyword">## Mental Model</span>
+Metaphor/framework for understanding
+
+<span class="keyword">## Instructions</span>
+Detailed guidance
+
+<span class="keyword">## Rules/Constraints</span>
+What to do and not do</pre>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Skills</th>
+              <th>Sub-Agents</th>
+              <th>Hooks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>What</td>
+              <td>Instruction sets</td>
+              <td>Mini-Claudes</td>
+              <td>Shell commands</td>
+            </tr>
+            <tr>
+              <td>Context</td>
+              <td>Main conversation</td>
+              <td>Isolated window</td>
+              <td>N/A</td>
+            </tr>
+            <tr>
+              <td>Trigger</td>
+              <td>Query relevance/manual</td>
+              <td>Task tool</td>
+              <td>Lifecycle events</td>
+            </tr>
+            <tr>
+              <td>Best For</td>
+              <td>Complex workflows</td>
+              <td>Multi-step reasoning</td>
+              <td>Automation</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="sub-agents">Sub-Agents</h3>
+
+        <p class="text-text-secondary mb-4">
+          Sub-agents are specialized mini-Claudes with isolated context windows for focused tasks.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># .claude/agents/react-specialist.yaml</span>
+<span class="variable">name</span>: react-specialist
+<span class="variable">description</span>: React component implementation
+<span class="variable">model</span>: sonnet
+<span class="variable">context</span>: fork
+
+<span class="comment"># Model Selection Guidelines</span>
+<span class="keyword">Haiku</span>   <span class="comment"># Errand runner: fetch files, grep, simple lookups</span>
+<span class="keyword">Sonnet</span>  <span class="comment"># Capable worker: implementation, test generation</span>
+<span class="keyword">Opus</span>    <span class="comment"># Complex reasoning: architecture decisions, ambiguous tasks</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TOOL -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Tool
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a hook through the system to see how the pieces connect:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">You configure a hook in <code>~/.claude/settings.json</code> with a matcher and command</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Claude Code starts a session, loads hook configuration</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Claude decides to use a tool (e.g., Edit a file)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Before execution: <code>PreToolUse</code> hooks matching "Edit" run</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Hook receives <code>$EVENT_DATA</code> JSON blob with tool input</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">Hook script executes, can inspect/validate/block</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">If hook exits 0: tool proceeds. If non-zero: tool blocked</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Tool executes (Edit writes to file)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">After execution: <code>PostToolUse</code> hooks matching "Edit" run</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">PostToolUse hook receives <code>$FILE</code> env var with edited path</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">11</div>
+            <div class="path-content">Hook runs auto-formatter: <code>prettier --write $FILE</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">12</div>
+            <div class="path-content">Claude continues with formatted file in context</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit, with concrete numbers and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Hook not triggering
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Your hook command doesn't execute when expected</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Incorrect matcher name (case-sensitive!), wrong file path, or missing execute permissions</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Valid matchers: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion, Task, WebFetch, WebSearch. Run <code>chmod +x</code> on your script.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            MCP server connection failed
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> <code>Error: Failed to connect to MCP server</code></div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Server not installed, wrong command path, or missing environment variables</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Test server manually: <code>npx @modelcontextprotocol/inspector npx @modelcontextprotocol/server-name</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Skill not auto-loading
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Skill doesn't trigger when you expect it to</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Skill file in wrong location, invalid frontmatter, or query doesn't match triggers</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use explicit invocation: <code>"Load the X skill and initiate"</code> or <code>/skill skill-name</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Sub-agent spawns but doesn't return
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Task tool hangs or agent doesn't complete</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Task too large, context exhaustion, or missing completion criteria</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add explicit completion instructions: "Report your results with absolute file paths when done"</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Plugin installation fails
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> <code>/plugin install</code> returns error</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Marketplace not added, version incompatibility, or network issues</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> First run <code>/plugin marketplace add author/repo</code>, then <code>/plugin install plugin-name</code></div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Tool Selection Paralysis
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Five extension types exist. Which one is right? Hooks, MCP, skills, plugins, sub-agents all solve overlapping problems. No clear decision tree exists.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Building a hook when you needed a skill. Using MCP when a simple hook would suffice. Over-engineering with plugins for a one-off task.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start with the simplest option. Hook > Skill > MCP > Sub-agent > Plugin. Only escalate when simpler options fail. Ask: "Is this automation (hook) or reasoning (skill)?"</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Context Budget Management
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Every extension consumes context. MCP tool descriptions, skill instructions, sub-agent prompts all compete for the same 200K window. More tools = less room for actual work.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Quality degrades as you add more MCP servers. Claude "forgets" project details after loading a large skill. Sub-agents return incomplete results.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Audit your MCP servers - disable unused ones. Keep skills focused (one purpose per skill). Use Haiku sub-agents for simple lookups to save Opus context for reasoning.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Debugging Invisible Layers
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> When something fails, which layer broke? Hook didn't fire? MCP server crashed? Skill instruction unclear? Sub-agent context exhausted? The integration stack is invisible.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "It worked yesterday." Hours spent on the wrong layer. Shotgun debugging across hooks, MCP, and skills simultaneously.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Add logging to every hook. Use MCP Inspector for protocol debugging. Keep audit trails. When debugging, disable all extensions and re-enable one at a time.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE HOOKS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Task should ALWAYS happen (auto-format, lint)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>No reasoning required (deterministic)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Shell command can do the job</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Security gates that must not be bypassed</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE HOOKS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Claude needs to reason about whether to do it</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Task varies based on context</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You want conditional behavior</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE MCP WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Accessing external data (databases, APIs)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>A server already exists for your use case</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You need structured tool responses</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Integration should work across AI systems</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE MCP WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>A simple hook would work</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>No server exists and building one is overkill</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You need workflow orchestration (use skills)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE SKILLS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Complex multi-step workflow</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Repeating the same instructions</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Claude needs domain-specific reasoning</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Workflow can be expressed in markdown</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE SKILLS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple automation (use hooks)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need external data access (use MCP)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need parallel execution (use sub-agents)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE SUB-AGENTS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Parallel execution needed</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Task should be isolated from main context</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Different model needed for task (Haiku for lookups)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Specialized prompt for focused reasoning</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE SUB-AGENTS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Task is simple enough for main context</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Result needs to be in main conversation</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Spawn overhead dominates task time</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if Claude had NO extension points?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Custom forks of Claude Code for each use case.<br>
+          <strong>Why this fails:</strong> Maintenance nightmare. No ecosystem. No sharing.<br>
+          <strong>Hidden constraint revealed:</strong> Extension points ARE the product.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The simplest extension</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">echo "hello" >> log.txt</code> in a PostToolUse hook.<br>
+          <strong>Essential:</strong> Event trigger + shell command.<br>
+          <strong>Everything else:</strong> Sophistication for specific problems.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@jarrodwatts: Claude HUD plugin</div>
+        <div class="text-text-secondary text-sm">
+          Built context visibility into Claude Code. "I needed to see what was happening inside." Now shows context remaining, tools executing, subagents running - all via hooks updating every 300ms.
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude Code Extensions = VS Code Extensions</div>
+        <div class="text-text-secondary text-sm">
+          Hooks = VS Code tasks<br>
+          MCP = Language Server Protocol<br>
+          Skills = Snippets + keybindings<br>
+          Plugins = Extension packs<br><br>
+          <em>If you've extended VS Code, you already understand the architecture.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint: Claude can't persist</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Claude instances are stateless between invocations<br>
+          &rarr; Need hooks for state persistence (SessionEnd)<br>
+          &rarr; Need MCP for external data access<br>
+          &rarr; Need skills for workflow memory<br>
+          &rarr; Need plugins to bundle persistence patterns<br>
+          &rarr; Need sub-agents to isolate state scope
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Every pattern needs external state</div>
+        <div class="text-text-secondary text-sm">
+          Ralph, Gas Town, CC Mirror all share INV-003: External state > internal memory.<br>
+          <strong>Tools are the bridge:</strong> Hooks write state. MCP reads state. Skills define state schemas.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How extension complexity degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-2 tools:</strong> Clear, maintainable<br>
+          <strong>3-5 tools:</strong> Interactions emerge, test harder<br>
+          <strong>6-10 tools:</strong> Debugging requires detective work<br>
+          <strong>10+ tools:</strong> "Which layer broke?"<br><br>
+          <em>Critical: Add tools slowly. Each doubles interaction surface.</em>
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (5 items) -->
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Hooks vs Skills: The Automation Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Hooks:</strong> Deterministic, fast, no context cost. But no reasoning.<br>
+          <strong>Skills:</strong> Reasoning, flexible, context-aware. But consume tokens.<br><br>
+          <strong>Heuristic:</strong> If the task never varies, use a hook. If it needs judgment, use a skill.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your tool understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What tools exist?" &rarr; The 5 types<br>
+          <strong>Intermediate:</strong> "Which one for my problem?" &rarr; Decision criteria<br>
+          <strong>Advanced:</strong> "How do they compose?" &rarr; Hook + MCP + skill combos<br>
+          <strong>Staff:</strong> "What's the context cost?" &rarr; Token budgeting<br>
+          <strong>Expert:</strong> "How do I build new types?" &rarr; Plugin development
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you use MCP when you need a hook</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Use MCP server for simple automation<br>
+          <strong>THEN:</strong> Server adds tool descriptions to context<br>
+          <strong>THEN:</strong> Claude reasons about whether to use it<br>
+          <strong>THEN:</strong> Sometimes it doesn't (LLM variance)<br>
+          <strong>FINALLY:</strong> Inconsistent automation<br><br>
+          <em>The fix: Hooks are deterministic. Use them for must-always-happen.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="decisions">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How tool choice looks over time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "I'll just add this MCP server"<br>
+          <strong>Week 1:</strong> "Why are there 8 MCP servers?"<br>
+          <strong>Month 1:</strong> "Context is always 60% MCP tool descriptions"<br>
+          <strong>Month 3:</strong> "I disabled 5 servers and everything improved"<br><br>
+          <em>Audit your tools monthly. Remove unused ones.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if MCP didn't exist?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd build:</strong> Custom tool integrations for each AI system.<br>
+          <strong>Why this fails:</strong> No ecosystem. Every integration is bespoke.<br>
+          <strong>Hidden constraint revealed:</strong> MCP is "USB-C for AI" - standardization enables ecosystem.
+        </div>
+      </div>
+
+      <!-- CATEGORIES SECTION (6 items) -->
+      <div class="activity-item composition" data-section="categories">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Hooks + MCP Memory Server</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> SessionEnd hook triggers MCP memory save.<br>
+          <strong>Danger:</strong> Memory server is another context consumer.<br>
+          <strong>Recommendation:</strong> Use for long-running projects. Skip for quick tasks.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="categories">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Skills + Sub-Agents</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Orchestrator skill spawns specialized sub-agents.<br>
+          <strong>Danger:</strong> Orchestration overhead. Sub-agent context isolation means repeated setup.<br>
+          <strong>Recommendation:</strong> Use for parallel tasks. CC Mirror skill is the reference implementation.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="categories">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At 5+ MCP servers, discovery breaks</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IMPLICATION:</strong> Claude can't reason about 20+ tools effectively. It starts ignoring some.<br>
+          <strong>THRESHOLD:</strong> ~5 MCP servers before you need explicit tool selection in prompts.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="categories">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@thedotmack: Claude-Mem plugin</div>
+        <div class="text-text-secondary text-sm">
+          Built persistent memory with semantic compression. "Up to 95% fewer tokens, ~20x more tool calls." 3-layer retrieval: search() &rarr; timeline() &rarr; get_observations(). SQLite + Chroma vector DB.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="categories">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Sub-Agents = Microservices</div>
+        <div class="text-text-secondary text-sm">
+          Haiku = Lambda function (cheap, fast, stateless)<br>
+          Sonnet = Container (capable, balanced)<br>
+          Opus = Full VM (expensive, powerful, for complex reasoning)<br><br>
+          <em>Match agent model to task complexity, like matching compute to workload.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="categories">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal tool discovery</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE QUESTION:</strong> How should Claude discover which tools to use among 50+ options?<br>
+          <strong>WHY IT'S HARD:</strong> Tool descriptions consume context. Reasoning about tools consumes tokens.<br>
+          <strong>CURRENT PRACTICE:</strong> Manual curation. Disable unused servers.
+        </div>
+      </div>
+
+      <!-- PATH SECTION (3 items) -->
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip chmod +x on your hook script</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Hook script not executable<br>
+          <strong>THEN:</strong> Hook silently fails (no error, just doesn't run)<br>
+          <strong>THEN:</strong> You think hooks don't work<br>
+          <strong>THEN:</strong> Hours debugging the wrong layer<br>
+          <strong>FINALLY:</strong> "Oh, it was just chmod"<br><br>
+          <em>The fix: Always chmod +x. Always test scripts manually first.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="path">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When PreToolUse gates flip from help to hurt</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-2 gates:</strong> Pure benefit (catch dangerous commands)<br>
+          <strong>3-5 gates:</strong> Friction noticeable (more blocked operations)<br>
+          <strong>5+ gates:</strong> Net negative (Claude workarounds, user frustration)<br><br>
+          <strong>THE INFLECTION:</strong> ~3 PreToolUse gates<br>
+          <em>Detection: Are you approving gates more than they're blocking bad actions?</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Hook debugging understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Why isn't my hook running?" &rarr; Check chmod, check path<br>
+          <strong>Intermediate:</strong> "How do I debug hook input?" &rarr; Log $EVENT_DATA<br>
+          <strong>Advanced:</strong> "How do I test without Claude?" &rarr; Manual: TOOL_NAME=X ./script.sh<br>
+          <strong>Staff:</strong> "How do I audit all hook executions?" &rarr; Centralized logging hook
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why is matcher case-sensitive?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What if it wasn't?</strong> "bash" would match "Bash" would match "BASH".<br>
+          <strong>Why this fails:</strong> Tool names are identifiers, not strings. Consistency matters.<br>
+          <strong>Hidden constraint:</strong> The constraint IS the documentation. If you get the case wrong, you learn the right case.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Skill Auto-Loading vs Explicit Loading</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Auto-load:</strong> Convenient when it works. Mysterious when it doesn't.<br>
+          <strong>Explicit:</strong> Reliable but requires knowing skill name.<br><br>
+          <strong>Heuristic:</strong> Use auto-load for frequently-used skills. Use explicit for rare skills.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At 10+ skills, naming collisions emerge</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IMPLICATION:</strong> Two skills with similar triggers compete. Claude picks semi-randomly.<br>
+          <strong>THRESHOLD:</strong> ~10 skills before you need naming conventions.<br>
+          <strong>FIX:</strong> Prefix skills: <code>project-</code>, <code>domain-</code>, <code>workflow-</code>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Sub-agent timeout debugging</div>
+        <div class="text-text-secondary text-sm">
+          "Spent 2 hours debugging why sub-agents weren't returning. The task was 'implement the entire auth system' - too big. Split into 5 focused tasks, all completed in minutes." The lesson: sub-agents need atomic tasks.
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="hard">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Context budget constraint cascades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> 200K context window is fixed<br>
+          &rarr; MCP tool descriptions consume context<br>
+          &rarr; Skills consume context when loaded<br>
+          &rarr; Sub-agent results consume context when returned<br>
+          &rarr; Every extension competes for same budget<br>
+          &rarr; More tools = less room for actual work
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Capability vs Simplicity</div>
+        <div class="text-text-secondary text-sm">
+          <strong>More tools:</strong> More capability, but more complexity, more debugging, more context cost.<br>
+          <strong>Fewer tools:</strong> Simpler, faster, cheaper. But capability gaps.<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> Your needs change. Today's "essential" tool is tomorrow's context waste.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="hard">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How debugging difficulty scales</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1 layer (just hooks):</strong> Easy - check script output<br>
+          <strong>2 layers (hooks + MCP):</strong> Medium - check both<br>
+          <strong>3 layers (hooks + MCP + skills):</strong> Hard - which layer failed?<br>
+          <strong>4+ layers:</strong> Detective work - disable and re-enable<br><br>
+          <em>Critical: Add layers slowly. Test each layer in isolation.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Tool cost attribution</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE QUESTION:</strong> Which tools are worth their context cost? How do you measure ROI?<br>
+          <strong>WHY IT'S HARD:</strong> Value is subjective. Context cost is measurable but benefit isn't.<br>
+          <strong>CURRENT PRACTICE:</strong> Gut feel. Remove tools that "feel unused."
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (4 items) -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If these tools aren't right for your use case</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need browser automation?</strong> &rarr; Playwright MCP or Browserbase<br>
+          <strong>Need persistent memory?</strong> &rarr; Claude-Mem plugin or MCP Memory Server<br>
+          <strong>Need multi-agent orchestration?</strong> &rarr; CC Mirror skill<br>
+          <strong>Need context visibility?</strong> &rarr; Claude HUD plugin
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Tool Selection = Architecture Selection</div>
+        <div class="text-text-secondary text-sm">
+          Hooks = Synchronous middleware<br>
+          MCP = API gateway<br>
+          Skills = Domain services<br>
+          Sub-agents = Worker processes<br>
+          Plugins = Microservice bundles<br><br>
+          <em>Choose tools like you choose architecture: simplest that works.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How tool needs evolve</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Week 1:</strong> "I need everything!" (install all MCP servers)<br>
+          <strong>Month 1:</strong> "Why is Claude so slow?" (context bloat)<br>
+          <strong>Month 3:</strong> "Less is more" (curated tool set)<br>
+          <strong>Month 6:</strong> "I build my own" (custom plugins)<br><br>
+          <em>Everyone goes through the bloat-then-curate cycle.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="when">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">All orchestration patterns use these tools</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Ralph:</strong> Stop hook for loop continuation<br>
+          <strong>Gas Town:</strong> Sub-agents as Polecats<br>
+          <strong>CC Mirror:</strong> Skill for orchestration, sub-agents for workers<br><br>
+          <em>Master these tools, master the patterns.</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

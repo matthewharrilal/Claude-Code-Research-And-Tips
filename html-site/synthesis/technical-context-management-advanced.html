@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Context Management | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+    .code-block .number { color: #f59e0b; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Table Styles */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .data-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #3f3f46;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .data-table tr:hover {
+      background: #fafafa;
+    }
+
+    /* Threshold Box */
+    .threshold-box {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border: 1px solid #10b981;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .threshold-title {
+      font-weight: 600;
+      color: #065f46;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .threshold-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #0D9373;
+      margin-bottom: 8px;
+    }
+
+    .threshold-desc {
+      font-size: 14px;
+      color: #047857;
+    }
+
+    /* Layer Box */
+    .layer-box {
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .layer-header {
+      padding: 16px 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .layer-header.layer-1 {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .layer-header.layer-2 {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .layer-header.layer-3 {
+      background: #fce7f3;
+      color: #9d174d;
+    }
+
+    .layer-content {
+      padding: 16px 20px;
+      background: #ffffff;
+    }
+
+    .layer-content ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #3f3f46;
+    }
+
+    .layer-content li {
+      margin-bottom: 8px;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Quick Reference Card */
+    .quick-ref-card {
+      background: #ffffff;
+      border: 2px solid #0D9373;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .quick-ref-title {
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quick-ref-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .quick-ref-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .quick-ref-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .quick-ref-item code {
+      background: #f4f4f5;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Context Management</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">The 60% Rule</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-60-percent" class="nav-item">Why 60%?</a>
+          <a href="#why-clear-not-compact" class="nav-item">Why /clear Not /compact?</a>
+          <a href="#why-three-layers" class="nav-item">Why Three Layers?</a>
+        </div>
+      </div>
+
+      <!-- Context Architecture -->
+      <div class="nav-section" data-section="architecture">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>Context Architecture</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#architecture" class="nav-item">Three Layers</a>
+          <a href="#thoughts-dir" class="nav-item">thoughts/ Directory</a>
+          <a href="#budget-allocation" class="nav-item">Budget Allocation</a>
+        </div>
+      </div>
+
+      <!-- Path of Context -->
+      <div class="nav-section" data-section="path">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Path of Context</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#path" class="nav-item">Session Lifecycle</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Practical Problems</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Context is finite working memory. Budget it at 60%, externalize state, reset proactively.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Context window isn't storage. It's working memory. Claude needs headroom to think."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, '60% input = 40% for reasoning, generation, self-correction')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>60% input = 40% for reasoning, generation, self-correction</code>
+          </div>
+
+          <div class="core-anchor">That's the whole principle. Everything else is implementation.</div>
+        </div>
+
+        <div class="threshold-box">
+          <div class="threshold-title">
+            <i data-lucide="target" class="w-5 h-5"></i>
+            The 60% Rule
+          </div>
+          <div class="threshold-value">60%</div>
+          <div class="threshold-desc">Maximum context utilization before quality degradation begins. Not a suggestion - it's physics.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The context window isn't just storage - it's working memory. Claude needs headroom for reasoning (planning the response structure), generation (producing the actual output), and self-correction (re-reading and adjusting mid-response).
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          At 60% input utilization, approximately 40% remains for these operations. Push past this, and Claude begins cutting corners - responses get shorter, instructions get ignored, quality degrades invisibly until it collapses.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Quality Degradation Table</h3>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Context Level</th>
+              <th>Quality</th>
+              <th>Recommendation</th>
+              <th>Warning Signs</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>&lt;40%</code></td>
+              <td><span class="text-green-600 font-medium">Excellent</span></td>
+              <td>Ideal operating range</td>
+              <td>None</td>
+            </tr>
+            <tr>
+              <td><code>40-60%</code></td>
+              <td><span class="text-emerald-600 font-medium">Good</span></td>
+              <td>Safe zone, normal operation</td>
+              <td>None</td>
+            </tr>
+            <tr>
+              <td><code>60-80%</code></td>
+              <td><span class="text-amber-600 font-medium">Degrading</span></td>
+              <td>Consider reset or <code>/compact</code></td>
+              <td>Slight repetition, longer responses</td>
+            </tr>
+            <tr>
+              <td><code>&gt;80%</code></td>
+              <td><span class="text-red-600 font-medium">Poor</span></td>
+              <td>Reset required immediately</td>
+              <td>Instructions ignored, contradictions</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Quick Estimation</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Characters to tokens: divide by 4</span>
+wc -c CLAUDE.md
+<span class="comment"># Output: 12500 CLAUDE.md</span>
+<span class="comment"># Estimate: 12500 / 4 = ~3,125 tokens</span>
+
+<span class="comment"># Budget calculation example:</span>
+<span class="variable">Total context window:</span> <span class="number">200K</span> tokens
+<span class="variable">Effective capacity:</span>   <span class="number">~100K</span> tokens (quality threshold)
+<span class="variable">60% of effective:</span>     <span class="number">~60K</span> tokens input budget
+<span class="variable">Remaining for output:</span> <span class="number">~40K</span> tokens</pre>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-60-percent" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY 60% SPECIFICALLY?</div>
+          <div class="decision-reasoning">
+            The context window isn't just storage - it's working memory. Claude needs headroom for reasoning (planning), generation (producing output), and self-correction (adjusting mid-response). At 60% input utilization, approximately 40% remains for these operations.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Monitor your context percentage before heavy operations. If you're at 55% and about to read a large file, you'll cross 60% and quality may degrade. Plan resets before crossing the threshold, not after symptoms appear.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-clear-not-compact">
+          <div class="decision-why">WHY /CLEAR + /CATCHUP, NOT /COMPACT?</div>
+          <div class="decision-reasoning">
+            <code>/compact</code> performs lossy compression. Details get summarized. Instructions get shortened. You lose fidelity with no control over what's lost. <code>/clear</code> gives you a known-good state - completely fresh. <code>/catchup</code> then reloads only what matters from git.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              For session resets, always use <code>/clear + /catchup</code>. It's predictable. You know exactly what context Claude has. Reserve <code>/compact</code> for mid-session when you want to continue but need more room - and accept that some detail will be lost.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-three-layers">
+          <div class="decision-why">WHY THREE LAYERS OF CONTEXT?</div>
+          <div class="decision-reasoning">
+            Different context has different lifetimes. CLAUDE.md is permanent (checked into git). Project context is session-specific (feature you're building). Conversation context is volatile (current discussion). Treating all context the same leads to bloat or loss.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Keep CLAUDE.md lean (10% of budget max). Load project context per session. Let conversation context be disposable - that's what <code>/clear</code> is for. Only persist what needs to survive across sessions.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: CONTEXT ARCHITECTURE -->
+      <section id="architecture" data-activity="architecture">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Context Architecture
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Context management isn't one thing - it's three distinct layers with different lifetimes, budgets, and management strategies.
+        </p>
+
+        <div class="layer-box">
+          <div class="layer-header layer-1">
+            <i data-lucide="database" class="w-4 h-4"></i>
+            Layer 1: GLOBAL (CLAUDE.md) - ~10% budget
+          </div>
+          <div class="layer-content">
+            <ul>
+              <li><strong>Contents:</strong> Repository constitution (conventions, commands), tool documentation (30%+ usage threshold only), known gotchas and guardrails</li>
+              <li><strong>Budget:</strong> ~20K tokens max (~10% of context)</li>
+              <li><strong>Lifetime:</strong> Permanent (checked into git)</li>
+              <li><strong>Management:</strong> Edit rarely. Audit quarterly for bloat.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="layer-box">
+          <div class="layer-header layer-2">
+            <i data-lucide="folder" class="w-4 h-4"></i>
+            Layer 2: PROJECT (Session-specific) - ~30-40% budget
+          </div>
+          <div class="layer-content">
+            <ul>
+              <li><strong>Contents:</strong> Current feature/PR context, task-specific documentation, files loaded via <code>/add-dir</code> or reads</li>
+              <li><strong>Budget:</strong> ~30-40% of context</li>
+              <li><strong>Lifetime:</strong> Disposable per session</li>
+              <li><strong>Management:</strong> Load fresh each session. Don't accumulate.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="layer-box">
+          <div class="layer-header layer-3">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+            Layer 3: SESSION (Conversation memory) - ~25-30% budget
+          </div>
+          <div class="layer-content">
+            <ul>
+              <li><strong>Contents:</strong> Current conversation state, file reads, tool outputs, responses</li>
+              <li><strong>Budget:</strong> ~25-30% of context (most volatile)</li>
+              <li><strong>Lifetime:</strong> Single session</li>
+              <li><strong>Management:</strong> Compactable via <code>/clear + /catchup</code></li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="thoughts-dir">The thoughts/ Directory Pattern</h3>
+
+        <p class="text-text-secondary mb-4">
+          Each new Claude session starts fresh - no memory of previous conversations. Without external state, all reasoning is lost. The <code>thoughts/</code> directory acts as Claude's long-term memory.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>project/
+<span class="comment">├── thoughts/                    # Claude's external memory</span>
+│   ├── README.md                <span class="comment"># Directory purpose</span>
+│   ├── research-[task].md       <span class="comment"># Phase 1: Investigation</span>
+│   ├── plan-[task].md           <span class="comment"># Phase 2: Strategy</span>
+│   ├── progress-[task].md       <span class="comment"># Phase 3: Running log</span>
+│   ├── complete-[task].md       <span class="comment"># Phase 4: Summary</span>
+│   ├── decisions/               <span class="comment"># Architectural decisions</span>
+│   │   ├── 001-database.md
+│   │   └── 002-auth-flow.md
+│   └── debug/                   <span class="comment"># Debug session logs</span>
+│       └── 2026-01-13-memory-leak.md
+└── src/</pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Add to your CLAUDE.md: "When working on complex tasks, read relevant <code>thoughts/*</code> files for context, update progress files during work, create new files for new investigations. Never delete thoughts files - they are institutional memory."
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="budget-allocation">Enterprise Budget Allocation</h3>
+
+        <p class="text-text-secondary mb-4">
+          From Shrivu Shankar's production workflow (team consuming several billion tokens per month):
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="comment">│ CONTEXT BUDGET ALLOCATION (180K effective tokens)               │</span>
+<span class="comment">├─────────────────────────────────────────────────────────────────┤</span>
+│ System prompt + CLAUDE.md:        <span class="number">~10-15K</span> (<span class="number">5-8%</span>)   <span class="comment">← Keep lean</span>  │
+│ Codebase context (files read):    <span class="number">~30-40K</span> (<span class="number">15-20%</span>)              │
+│ Current task specification:       <span class="number">~5K</span> (<span class="number">2-3%</span>)                    │
+│ Working memory (conversation):    <span class="number">~50-60K</span> (<span class="number">25-30%</span>)              │
+│ Tool outputs (tests, diffs):      <span class="number">~30-40K</span> (<span class="number">15-20%</span>)              │
+│ Code generation output:           <span class="number">~25-30K</span> (<span class="number">12-15%</span>)              │
+│ Buffer for retries:               <span class="number">~15-20K</span> (<span class="number">8-10%</span>)  <span class="comment">← Emergency</span>  │
+<span class="comment">└─────────────────────────────────────────────────────────────────┘</span></pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          <strong>The Critical Insight:</strong> Shrivu's 13KB CLAUDE.md (approximately 3,250 words / ~4,300 tokens including overhead) leaves <strong>90% of context available for actual work</strong>. Most users make the opposite mistake - bloated CLAUDE.md files that consume 30-50% of context before any work begins.
+        </p>
+      </section>
+
+      <!-- Section 5: PATH OF CONTEXT -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of Context
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow context through a session lifecycle to see how the layers interact:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>Session Start:</strong> Claude loads CLAUDE.md (Layer 1). Context: ~10%</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">You describe your task. Claude reads relevant files (Layer 2). Context: ~30-40%</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">First implementation. Claude generates code, runs tests. Context: ~50%</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Iteration. Debug output, error messages, fixes. Context: ~60%</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>60% Threshold:</strong> Quality begins subtle degradation. Check <code>/context</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">More iteration. Context: ~70-80%. You may not notice problems yet.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content"><strong>Symptoms appear:</strong> Instructions ignored, repetition, contradictions. Context: &gt;80%</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content"><strong>Proactive reset:</strong> Externalize state to <code>thoughts/progress-[task].md</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">Execute <code>/clear</code>. Layer 3 (conversation) wiped. Layers 1+2 reloaded.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">Execute <code>/catchup</code>. Git-changed files reloaded. Context: ~30% (fresh)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">11</div>
+            <div class="path-content">Read <code>thoughts/progress-[task].md</code>. State recovered. Continue work.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">12</div>
+            <div class="path-content"><strong>Task complete:</strong> Commit changes, update progress, ready for next task.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit, with concrete numbers and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Context fills too quickly
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> You hit 60% after just 2-3 file reads</div>
+          <div class="gotcha-detail"><strong>Causes:</strong> Large CLAUDE.md (&gt;15KB), reading entire directories, verbose tool output</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Audit CLAUDE.md size (<code>wc -c CLAUDE.md</code>, target &lt;15KB). Use <code>.claudeignore</code> aggressively. Read specific files, not entire directories.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Quality degraded but context shows &lt;60%
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Instructions ignored even though /context shows safe levels</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Context measurement includes system overhead. Or recent compaction lost critical detail.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check conversation turn count. Re-read CLAUDE.md explicitly. Start fresh session (safest).</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Lost track of project state
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> You can't remember what was done or what's next</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> No external state. Relying on conversation memory that's been cleared/lost.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Reconstruct from git (<code>git log --oneline -20</code>, <code>git status</code>, <code>git diff HEAD</code>). Check <code>thoughts/progress-*.md</code>. Fresh start with explicit context reload.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            /compact loses critical instructions
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> After compaction, Claude "forgets" project conventions</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> /compact performs lossy compression. It decides what's "important" to keep.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify critical context after compaction. Re-read CLAUDE.md explicitly. For resets, prefer <code>/clear + /catchup</code> over <code>/compact</code>.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            The Visibility Problem
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Context degradation is invisible until catastrophic. You don't see 70% quality - you see 100% until suddenly 50%.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Everything seems fine, then suddenly Claude is ignoring instructions or contradicting itself.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Monitor context proactively. Reset at 60% regardless of visible quality. Treat threshold as physics, not a suggestion.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Fresh vs. Accumulated Context
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Fresh context gives peak quality but loses learnings. Accumulated context preserves learnings but degrades quality. No perfect balance exists.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Fresh sessions repeat mistakes. Extended sessions make new ones.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use <code>thoughts/</code> directory for institutional memory. Accept some re-learning as the cost of fresh context. Bias toward fresh.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            External State Discipline
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Externalizing state takes effort. It's easier to "just continue" than to write progress files. But "just continue" leads to lost work.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> You lose work when sessions crash or context resets unexpectedly.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Build the habit. Every 30 minutes, externalize critical state. Treat progress.txt as insurance, not overhead.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Debugging Session Quality
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Debugging sessions accumulate error messages, stack traces, and failed attempts. This bloats context faster than any other work type.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Debug sessions hit 80%+ context faster than implementation sessions.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start fresh sessions specifically for debugging. Summarize findings before continuing. Consider debug sessions "write-off" contexts that will need reset.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use These Techniques
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE THESE TECHNIQUES WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Sessions extend beyond 30 minutes (context accumulates)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Working on multi-day features (need state persistence)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quality degradation observed (instructions ignored)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Team uses shared CLAUDE.md (budget discipline matters)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Running autonomous/overnight workflows (no human monitoring)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              SIMPLER APPROACH IS FINE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quick one-off tasks (&lt;15 min) - just work, don't manage</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple questions - context management is overhead</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Learning/exploring - accept lower efficiency for discovery</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Small files, simple codebase - won't hit 60% anyway</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Chat-style interaction - quality degradation less critical</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Quick Reference Card</h3>
+
+        <div class="quick-ref-card">
+          <div class="quick-ref-title">
+            <i data-lucide="bookmark" class="w-4 h-4"></i>
+            Commands to Remember
+          </div>
+          <div class="quick-ref-grid">
+            <div class="quick-ref-item">
+              <code>/context</code>
+              <span>Check current usage</span>
+            </div>
+            <div class="quick-ref-item">
+              <code>/clear</code>
+              <span>Complete reset</span>
+            </div>
+            <div class="quick-ref-item">
+              <code>/catchup</code>
+              <span>Reload git-changed files</span>
+            </div>
+            <div class="quick-ref-item">
+              <code>/compact</code>
+              <span>Lossy compression (avoid for resets)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-ref-card">
+          <div class="quick-ref-title">
+            <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+            Session Start Checklist
+          </div>
+          <div class="text-text-secondary text-sm space-y-2">
+            <div>1. Read CLAUDE.md (automatic)</div>
+            <div>2. Check <code>git status</code></div>
+            <div>3. Check <code>git log -5</code></div>
+            <div>4. Read <code>thoughts/progress-*.md</code> if continuing work</div>
+            <div>5. Verify context % with <code>/context</code> before heavy work</div>
+          </div>
+        </div>
+
+        <div class="quick-ref-card">
+          <div class="quick-ref-title">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            Pre-Reset Checklist
+          </div>
+          <div class="text-text-secondary text-sm space-y-2">
+            <div>1. Externalize critical state to <code>thoughts/progress-[task].md</code></div>
+            <div>2. Commit any pending changes</div>
+            <div>3. Note what to resume with</div>
+            <div>4. Execute <code>/clear + /catchup</code></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if context were infinite?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Never reset, accumulate everything, no external state needed.<br>
+          <strong>Why this fails:</strong> Attention scales O(n^2). Infinite context = infinite cost + quality degradation.<br>
+          <strong>Hidden constraint:</strong> Context management IS the skill because context is finite.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible core</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">if context > 60%: reset</code><br>
+          <strong>Essential:</strong> The threshold. Proactive reset.<br>
+          <strong>Everything else:</strong> Refinement for sustainability.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shrivu Shankar: Billion-token scale</div>
+        <div class="text-text-secondary text-sm">
+          Team consuming several billion tokens per month at enterprise scale. 13KB CLAUDE.md leaves 90% context for work. Most users do the opposite.
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How context quality degrades (invisibly)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% → 95%</strong> (&lt;40%): Perfect, ideal range<br>
+          <strong>95% → 85%</strong> (40-60%): Still good, safe zone<br>
+          <strong>85% → 70%</strong> (60-80%): Subtle drift begins<br>
+          <strong>70% → CLIFF</strong> (&gt;80%): Instructions ignored, contradictions<br><br>
+          <em>Critical: The gradient is invisible until the cliff.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Context = RAM, not Disk</div>
+        <div class="text-text-secondary text-sm">
+          Context window = Working RAM<br>
+          Files = Persistent disk storage<br>
+          /clear = Reboot<br>
+          thoughts/ = Swap file that persists across reboots<br><br>
+          <em>If you've managed memory in systems, you understand context management.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-003: External state > internal memory</div>
+        <div class="text-text-secondary text-sm">
+          Context management, Ralph, Gas Town, and CC Mirror all share this invariant. The pattern that persists state in files rather than conversation memory.<br><br>
+          <em>If you understand this for context, you understand it for all orchestration.</em>
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint → five decisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Context finite (200K) → Quality degrades past 60%<br>
+          → Must monitor context percentage proactively<br>
+          → Must reset before symptoms, not after<br>
+          → Must externalize state for persistence<br>
+          → Must keep CLAUDE.md lean (&lt;10%)<br>
+          → Must treat fresh context as better than extended
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you use /compact for resets</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> You use /compact instead of /clear + /catchup<br>
+          <strong>THEN:</strong> Lossy compression loses instructions<br>
+          <strong>THEN:</strong> Claude "forgets" project conventions<br>
+          <strong>THEN:</strong> You debug phantom issues<br>
+          <strong>FINALLY:</strong> Hours lost to unpredictable state<br><br>
+          <em>The fix: /clear for resets, /compact only for mid-session room.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The CLAUDE.md Size Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Very small (&lt;5KB):</strong> More work budget, but missing guidance<br>
+          <strong>Medium (5-15KB):</strong> Balanced, 90% context for work<br>
+          <strong>Large (&gt;20KB):</strong> Comprehensive, but 20%+ context consumed before work<br><br>
+          <em>Heuristic: If you include tool docs, only for tools used 30%+ of sessions.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">60% Rule Understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What's the 60% rule?" → Don't exceed 60% context<br>
+          <strong>Intermediate:</strong> "Why 60%?" → Headroom for reasoning<br>
+          <strong>Advanced:</strong> "When does it not apply?" → Quick tasks, exploration<br>
+          <strong>Staff:</strong> "How do I monitor?" → /context, character estimation<br>
+          <strong>Expert:</strong> "What's the real threshold?" → Varies by task complexity
+        </div>
+      </div>
+
+      <!-- ARCHITECTURE SECTION -->
+      <div class="activity-item composition" data-section="architecture">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">thoughts/ + CLAUDE.md</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> CLAUDE.md for permanent conventions, thoughts/ for session state.<br>
+          <strong>Danger:</strong> Don't duplicate. Permanent learnings go to CLAUDE.md, not thoughts/.<br>
+          <strong>Recommendation:</strong> Promote thoughts/ entries to CLAUDE.md monthly.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="architecture">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How thoughts/ perception evolves</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "This is overhead, I'll just remember"<br>
+          <strong>Day 3:</strong> "Where was I? What did I decide?"<br>
+          <strong>Day 7:</strong> "thoughts/ saved me 2 hours today"<br>
+          <strong>Day 30:</strong> "This is how I work now"<br><br>
+          <em>Don't judge by day 1. Judge by day 7.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="architecture">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ashley Ha: thoughts/ directory origin</div>
+        <div class="text-text-secondary text-sm">
+          ML background, systematic methodology. Created the thoughts/ pattern for complex projects. "Claude's working memory is the conversation. Long-term memory must be files."
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="architecture">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At 50+ sessions, thoughts/ becomes institutional memory</div>
+        <div class="text-text-secondary text-sm">
+          What started as session state becomes project documentation. Decisions recorded, rationale preserved, onboarding accelerated for new team members reading thoughts/decisions/.<br><br>
+          <em>Emergent property: individual hygiene → team knowledge base.</em>
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip externalization at Step 8</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> You /clear without externalizing state<br>
+          <strong>THEN:</strong> Critical context lost<br>
+          <strong>THEN:</strong> Next session starts from scratch<br>
+          <strong>THEN:</strong> You redo work already done<br>
+          <strong>FINALLY:</strong> Multi-day features take weeks<br><br>
+          <em>The fix: Every /clear preceded by thoughts/ update.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="path">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When debugging context exceeds implementation context</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-3 debug cycles:</strong> Normal iteration<br>
+          <strong>3-5 debug cycles:</strong> Context filling fast<br>
+          <strong>5-7 debug cycles:</strong> Approaching threshold<br>
+          <strong>7+ debug cycles:</strong> Reset now, you're debugging context rot<br><br>
+          <strong>THE INFLECTION:</strong> ~5 debug cycles<br>
+          <em>Detection: If fixes make things worse, it's context, not code.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="path">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Session lifecycle = Database transaction</div>
+        <div class="text-text-secondary text-sm">
+          Session start = BEGIN TRANSACTION<br>
+          Work = Operations<br>
+          thoughts/ update = Checkpoint<br>
+          /clear = COMMIT + new transaction<br>
+          No thoughts/ update = ROLLBACK risk<br><br>
+          <em>If you understand transactions, you understand session lifecycle.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if CLAUDE.md were unlimited?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd include:</strong> Every convention, every tool doc, every edge case.<br>
+          <strong>Why this fails:</strong> 50KB CLAUDE.md = 25% context consumed before work starts.<br>
+          <strong>Hidden constraint:</strong> CLAUDE.md size discipline IS context management.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal context monitoring UX</div>
+        <div class="text-text-secondary text-sm">
+          How should context percentage be surfaced? Always visible? Warning at threshold? Auto-suggest reset?<br><br>
+          <strong>Current state:</strong> Manual /context check. No automation.<br>
+          <strong>Open question:</strong> Would proactive warnings help or annoy?
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Diagnosing "quality degraded but &lt;60%"</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Bug in Claude?" → No, check context.<br>
+          <strong>Intermediate:</strong> "Measurement wrong?" → Maybe, check turn count.<br>
+          <strong>Advanced:</strong> "Recent compaction?" → Verify critical context remains.<br>
+          <strong>Staff:</strong> "Instruction drift?" → Re-read CLAUDE.md explicitly.<br>
+          <strong>Expert:</strong> "Just reset" → Fresh session is fastest fix.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How "lost track of state" cascades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Mild:</strong> "Wait, what file was I editing?" → 5 min recovery<br>
+          <strong>Moderate:</strong> "What's the current approach?" → 15 min git log review<br>
+          <strong>Severe:</strong> "What was the goal?" → Re-read thoughts/, 30 min<br>
+          <strong>Critical:</strong> "Where's my work?" → No external state, start over<br><br>
+          <em>Prevention cost: 2 min thoughts/ update. Recovery cost: 5 min to start over.</em>
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Fresh Context vs. Accumulated Learnings</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE DILEMMA:</strong><br>
+          <strong>Fresh context:</strong> Peak quality, but loses learnings<br>
+          <strong>Extended context:</strong> Preserves learnings, but quality degrades<br>
+          <strong>External state:</strong> Bridges both, but requires discipline<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> External state is lossy - you choose what to write.<br>
+          <em>Bias toward fresh. Accept some re-learning as the cost.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="hard">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">External state discipline perception</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Session 1:</strong> "This is overhead, I'll just remember"<br>
+          <strong>Session 3:</strong> "I lost 30 minutes to missing state"<br>
+          <strong>Session 10:</strong> "External state saves time"<br>
+          <strong>Session 30:</strong> "How did I ever work without this?"<br><br>
+          <em>The discipline investment pays back by session 10.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Matt Pocock: Context rot symptoms</div>
+        <div class="text-text-secondary text-sm">
+          Prolific practitioner, detailed explanations. Documented context rot: "Claude starts repeating earlier statements, ignoring instructions, making contradictions. If iteration 20 is worse than iteration 5, your context is rotting."
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="hard">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Debug sessions → context explosion</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Debugging produces verbose output<br>
+          → Stack traces consume tokens<br>
+          → Failed attempts accumulate<br>
+          → Context fills faster than implementation<br>
+          → Quality degrades mid-debug<br>
+          → Debugging context rot looks like code bugs
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If full context management isn't right</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Quick one-off tasks?</strong> → Just work, don't manage<br>
+          <strong>Learning/exploring?</strong> → Accept lower efficiency<br>
+          <strong>Chat-style interaction?</strong> → Quality degradation less critical<br>
+          <strong>Small codebase?</strong> → Won't hit 60% anyway
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you applied this to everything?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd do:</strong> Monitor context, externalize state, reset at 60% for every interaction.<br>
+          <strong>Why this fails:</strong> Overhead exceeds benefit for quick tasks.<br>
+          <strong>Hidden insight:</strong> Context management scales with session length.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Context Management + Ralph</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Ralph's fresh-context-per-iteration IS context management.<br>
+          <strong>Benefit:</strong> Ralph automates the reset cycle.<br>
+          <strong>Key insight:</strong> Ralph is context management as architecture.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At team scale, context discipline compounds</div>
+        <div class="text-text-secondary text-sm">
+          Individual context management → Shared CLAUDE.md conventions → Consistent team experience → Lower debugging time → Higher velocity.<br><br>
+          <em>Emergent property: individual discipline → team productivity multiplier.</em>
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="when">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">Minimum viable context management</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">/context</code> before heavy work<br>
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">/clear + /catchup</code> when &gt;60%<br><br>
+          <strong>That's it.</strong> Everything else is refinement.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Track which sections are in view
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

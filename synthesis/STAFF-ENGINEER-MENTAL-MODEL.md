@@ -6,6 +6,10 @@
 
 ---
 
+> **You Are Here:** This is **frontier thinking** for practitioners who've mastered the basics and want to understand where AI-assisted development is heading. If you're comfortable with Ralph loops and exploring multi-agent systems, this document provides the mental models of staff engineers building at the cutting edge. If you're still learning basics, start with [MASTER-PLAYBOOK.md](./MASTER-PLAYBOOK.md) first.
+
+---
+
 ## D-FINAL Integration
 
 **Relationship:** This staff engineer guide serves as the **strategic thinking companion** - focused on frontier mental models, practitioner wisdom, and paradigm-level thinking about agent systems. D-FINAL serves as the **production reference manual** - comprehensive technical documentation with 16 validated mental models, implementation patterns, and operational procedures.
@@ -69,6 +73,18 @@ They require:
 - Supervision, not blind trust
 - Understanding of their limitations
 - Not unlimited ambition
+
+---
+
+### Checkpoint: Six Waves Understanding
+
+**You should now be able to answer:**
+- [ ] What wave is the industry mostly operating at? (Wave 3-4)
+- [ ] What wave are you currently at in your own work?
+- [ ] What's the productivity multiplier between waves? (5x)
+- [ ] Why are camels "demanding"? (task decomposition, supervision, limitations)
+
+**If unclear:** Re-read the 5x Multiplier Rule - it explains why skipping waves doesn't work.
 
 ---
 
@@ -230,6 +246,21 @@ Everything else is secondary. Manage context or fail.
 
 ---
 
+### Checkpoint: Production Reality
+
+**You should internalize these numbers:**
+- [ ] AI project failure rate: 80%+ (2x typical IT projects)
+- [ ] Multi-agent system failures: 41-86.7%
+- [ ] Error amplification (independent agents): 17.2x
+- [ ] Error amplification (centralized): 4.4x
+- [ ] 20-step workflow success rate at 95% per step: ~36%
+
+**If these numbers surprise you:** You're underestimating production challenges. Multi-agent is hard.
+
+**If unclear:** See the $47,000 lesson - monitoring and cost caps are non-negotiable.
+
+---
+
 ## The Staff Engineer Mental Model
 
 Synthesizing all of the above into actionable thinking:
@@ -375,6 +406,163 @@ Key themes across these voices:
 3. **Production at Scale** - Focus on reliability, observability, enterprise deployment
 4. **Hidden Features** - Reverse-engineering and enabling disabled capabilities
 5. **Systems Thinking** - Applying distributed systems concepts to agents
+
+---
+
+---
+
+## Troubleshooting at Staff Engineer Scale
+
+### Issue: Team Not Adopting Agent Workflows
+
+**Symptom:** You've mastered agent orchestration but team members resist or fail to adopt.
+
+**Cause:** Usually one of:
+1. Jumping to complexity (Wave 4-5) before team masters basics (Wave 3)
+2. No shared vocabulary (they don't understand Ralph, PRD-driven, etc.)
+3. Insufficient tooling (each person reinventing the wheel)
+
+**Fix:**
+```bash
+# Start with shared CLAUDE.md (Level 1)
+# This is the minimal team-wide standard
+cat > CLAUDE.md << 'EOF'
+# Team Standards
+
+## Code Standards
+- TypeScript strict mode
+- Zod for validation
+- Always run: npm run typecheck && npm run test
+
+## Agent Usage
+- Never commit without typecheck passing
+- Use progress.txt for learnings
+EOF
+
+git add CLAUDE.md && git commit -m "chore: Add team Claude standards"
+```
+
+Then ladder the team up together.
+
+---
+
+### Issue: Multi-Agent System Coordination Breaking Down
+
+**Symptom:** Orchestrator and workers get out of sync, tasks duplicated or dropped, costs spiraling.
+
+**Cause:** Usually architectural violation of the Iron Law or missing centralized state.
+
+**Diagnostic terminal commands:**
+```bash
+# Check for runaway processes
+ps aux | grep claude | wc -l
+# Expected: manageable number (< 10 for most setups)
+
+# Check for centralized state
+cat scripts/ralph/prd.json | jq '.userStories | length'
+cat scripts/ralph/prd.json | jq '[.userStories[] | select(.passes == false)] | length'
+
+# Check iteration history
+tail -50 scripts/ralph/progress.txt
+```
+
+**Fix:** Apply centralized orchestration (4.4x vs 17.2x error amplification):
+```
+Orchestrator: ONLY coordinates, NEVER codes
+Workers: ONLY execute, NEVER spawn sub-agents
+State: Single source of truth (prd.json or Beads)
+```
+
+---
+
+### Issue: Gas Town / Factory-Scale Chaos
+
+**Symptom:** Running 10+ agents, losing track of what's happening, costs unpredictable.
+
+**Cause:** Factory-scale requires factory-scale monitoring.
+
+**Minimum monitoring setup:**
+```bash
+# Cost monitoring (essential)
+cat > ~/.claude/hooks/cost-monitor.sh << 'EOF'
+#!/bin/bash
+COST=$(cat ~/.claude/costs.log | tail -1)
+if [ "$COST" -gt "${MAX_DAILY_COST:-100}" ]; then
+    curl -d "Cost cap exceeded: $COST" ntfy.sh/your-topic
+    pkill -f "claude"
+fi
+EOF
+chmod +x ~/.claude/hooks/cost-monitor.sh
+
+# Agent count monitoring
+watch -n 60 'ps aux | grep claude | wc -l'
+```
+
+**Reality check:** If you're running Gas Town without:
+- [ ] Cost caps
+- [ ] Iteration limits
+- [ ] Process monitoring
+- [ ] Notification hooks
+
+...you're headed for the $47,000 lesson.
+
+---
+
+### Issue: Context Degradation Across Agent Swarm
+
+**Symptom:** Individual agents working well, but coordinated output declining over time.
+
+**Cause:** Orchestrator context filling with worker reports.
+
+**Fix:** Orchestrator context hygiene:
+```markdown
+# Orchestrator Prompt (add to bottom)
+
+## Context Management
+- Summarize worker outputs to key facts only
+- Don't store full task descriptions after delegation
+- Use TaskGet sparingly - trust workers to report
+- Clear completed tasks from working memory
+```
+
+---
+
+### Issue: "50 First Dates" Across Sessions
+
+**Symptom:** Each session starts from scratch, no continuity, re-explaining everything.
+
+**Cause:** Missing structured memory (Beads or equivalent).
+
+**Quick fix (before Beads):**
+```bash
+# End-of-session ritual
+cat > scripts/session-close.sh << 'EOF'
+#!/bin/bash
+echo "## Session $(date +%Y-%m-%d)" >> AGENTS.md
+echo "### Learnings" >> AGENTS.md
+cat scripts/ralph/progress.txt | tail -20 >> AGENTS.md
+echo "" >> AGENTS.md
+git add AGENTS.md && git commit -m "docs: Session learnings $(date +%Y-%m-%d)"
+EOF
+```
+
+**Better fix:** Adopt Beads or equivalent structured memory.
+
+---
+
+### Checkpoint: Staff Engineer Readiness
+
+**You're ready for staff-level agent architecture if:**
+- [ ] You can explain the Six Waves and identify your current wave
+- [ ] You understand why error amplification is 17.2x for independent vs 4.4x for centralized
+- [ ] You've experienced context degradation and know how to prevent it
+- [ ] You can articulate the Iron Law and why it matters
+- [ ] You understand Yegge's $10-12/hour/agent economics
+- [ ] You have a mental model for when to break the rules (exploration, prototyping)
+
+**If you checked fewer than 4:** Focus on [MASTER-PLAYBOOK.md](./MASTER-PLAYBOOK.md) first. Build mastery progressively.
+
+**If you checked 4+:** You're ready for frontier work. Follow the new voices, experiment with swarms, but maintain the fundamentals.
 
 ---
 

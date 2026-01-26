@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opus 4.5 + Ralph + Playwright | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Stack Diagram */
+    .stack-diagram {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .stack-component {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #18181b;
+      color: #10b981;
+      border-radius: 6px;
+      margin: 4px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Browser-verified Ralph: Playwright screenshots close the visual feedback gap, iterating until UI actually works.</div>
+        </div>
+
+        <p class="text-text-secondary mb-4">
+          <strong>Source:</strong> @weswinder (Wes Winder) - 12+ year developer, founder of #1 vibe coding community
+        </p>
+        <p class="text-text-secondary mb-4">
+          <strong>Complexity Level:</strong> Level 4-5 on the complexity ladder (PRD-driven loops with browser verification)
+        </p>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Self-Correcting UI Loop
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Claude can write code but can't SEE what renders. Playwright gives Claude eyes."</div>
+
+          <div class="stack-diagram">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;">
+              <span class="stack-component">Opus 4.5</span>
+              <span style="color: #71717a;">+</span>
+              <span class="stack-component">Ralph Loop</span>
+              <span style="color: #71717a;">+</span>
+              <span class="stack-component">Playwright</span>
+            </div>
+            <div style="text-align: center; margin-top: 16px; color: #71717a; font-size: 12px;">
+              Reasoning + Persistence + Visual Verification = Self-Correcting UI Development
+            </div>
+          </div>
+
+          <div class="core-anchor">The combination creates what feels like AGI for UI work: it doesn't give up, it sees what's wrong, it fixes itself.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Every time you build UI with Claude, you experience the gap: Claude writes code, says "done", you open the browser... and see a broken layout, missing elements, or completely wrong output. Claude marks features "complete" based on successful file writes and no TypeScript errors. But none of these verify <strong>visual correctness</strong>.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># The transformation:</span>
+
+<span class="comment"># BEFORE (Code-Only Loop)</span>
+Claude writes CSS → Claude says "done" → You check browser → Broken!
+
+<span class="comment"># AFTER (Browser-Verified Loop)</span>
+Claude writes CSS → <span class="string">Playwright screenshots</span> → Claude analyzes screenshot
+→ Claude sees it's broken → <span class="string">Iterates automatically</span> → Repeat until correct</pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          <strong>Opus 4.5</strong> handles complex visual understanding and makes fewer mistakes per iteration. <strong>Ralph</strong> provides persistence through external state. <strong>Playwright</strong> provides actual visual feedback, not just code analysis.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-opus" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY OPUS 4.5 (NOT SONNET)?</div>
+          <div class="decision-reasoning">
+            Opus 4.5 "handles complex visual understanding, makes fewer mistakes" according to @weswinder. For UI work, you're asking Claude to reason about screenshots - layout, spacing, colors. Opus 4.5's multimodal reasoning is stronger, reducing iterations needed.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Fewer iterations needed per story, but higher per-iteration cost. For UI-heavy work, the reduced iteration count usually offsets the higher model cost.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-playwright">
+          <div class="decision-why">WHY PLAYWRIGHT (NOT PUPPETEER)?</div>
+          <div class="decision-reasoning">
+            Playwright has official Anthropic MCP server integration. Cross-browser support. Modern async API. The MCP integration means Claude can call browser automation natively without shell hacks.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use the MCP server for cleanest integration: <code style="background: #e4e4e7; padding: 2px 6px; border-radius: 4px;">@anthropic/mcp-server-playwright</code>. If MCP isn't available, Playwright's CLI works too.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-subagent">
+          <div class="decision-why">WHY BROWSER VERIFICATION IN SUBAGENT?</div>
+          <div class="decision-reasoning">
+            @TendiesOfWisdom's insight: "Browser output is expensive." Page HTML can be 50K+ tokens. Screenshot analysis adds 1K-3K tokens. If these bloat your main agent's context, you'll hit context overflow mid-feature. Subagent isolation protects the main context window.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Spawn a Task for browser verification. The subagent returns only PASS/FAIL + brief summary. Your main Ralph loop stays lean.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY VISUAL CRITERIA SEPARATE FROM ACCEPTANCE CRITERIA?</div>
+          <div class="decision-reasoning">
+            Tests pass != looks right. npm test verifies functional behavior. But layout issues, CSS bugs, wrong colors - tests don't catch these. Visual criteria are verified via screenshot analysis, not test runners.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              In prd.json, have both <code style="background: #e4e4e7; padding: 2px 6px; border-radius: 4px;">acceptanceCriteria</code> (tests) and <code style="background: #e4e4e7; padding: 2px 6px; border-radius: 4px;">visualCriteria</code> (screenshot analysis) for UI stories.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>your-project/
+<span class="comment">├── scripts/ralph/              # The Ralph + Playwright system</span>
+│   ├── ralph.sh                <span class="comment"># The loop engine (chmod +x)</span>
+│   ├── prompt.md               <span class="comment"># Agent instructions with browser protocol</span>
+│   ├── prd.json                <span class="comment"># Stories with visualCriteria</span>
+│   ├── progress.txt            <span class="comment"># External memory (append-only)</span>
+│   └── screenshots/            <span class="comment"># Browser verification evidence</span>
+│       ├── UI-001.png          <span class="comment"># Per-story screenshots</span>
+│       ├── UI-002.png
+│       └── current.png         <span class="comment"># Current iteration screenshot</span>
+├── CLAUDE.md                   <span class="comment"># Project context</span>
+└── package.json                <span class="comment"># Must have dev server script</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="ralph-sh">ralph.sh - Loop Engine with Screenshot Support</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">#!/bin/bash</span>
+<span class="comment"># scripts/ralph/ralph.sh - Opus 4.5 + Ralph + Playwright Loop</span>
+<span class="keyword">set</span> -e
+
+<span class="variable">MAX_ITERATIONS</span>=<span class="variable">${1:-10}</span>
+<span class="variable">SCRIPT_DIR</span>="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+<span class="variable">SCREENSHOTS_DIR</span>="$SCRIPT_DIR/screenshots"
+
+<span class="comment"># Create screenshots directory</span>
+mkdir -p "$SCREENSHOTS_DIR"
+
+<span class="keyword">echo</span> <span class="string">"=========================================="</span>
+<span class="keyword">echo</span> <span class="string">" OPUS 4.5 + RALPH + PLAYWRIGHT"</span>
+<span class="keyword">echo</span> <span class="string">" Max iterations: $MAX_ITERATIONS"</span>
+<span class="keyword">echo</span> <span class="string">"=========================================="</span>
+
+<span class="keyword">for</span> i <span class="keyword">in</span> $(seq 1 $MAX_ITERATIONS); <span class="keyword">do</span>
+  <span class="keyword">echo</span> <span class="string">"=== Iteration $i of $MAX_ITERATIONS ==="</span>
+
+  <span class="comment"># Clear previous screenshot</span>
+  rm -f "$SCREENSHOTS_DIR/current.png"
+
+  OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" \
+    | claude --dangerously-skip-permissions 2>&1 \
+    | tee /dev/stderr) || true
+
+  <span class="keyword">if</span> <span class="keyword">echo</span> "$OUTPUT" | grep -q <span class="string">"&lt;promise&gt;COMPLETE&lt;/promise&gt;"</span>; <span class="keyword">then</span>
+    <span class="keyword">echo</span> <span class="string">"ALL STORIES COMPLETE!"</span>
+    <span class="keyword">exit</span> 0
+  <span class="keyword">fi</span>
+
+  <span class="keyword">if</span> <span class="keyword">echo</span> "$OUTPUT" | grep -q <span class="string">"&lt;promise&gt;BLOCKED&lt;/promise&gt;"</span>; <span class="keyword">then</span>
+    <span class="keyword">echo</span> <span class="string">"BLOCKED - Human input needed"</span>
+    <span class="keyword">exit</span> 2
+  <span class="keyword">fi</span>
+
+  sleep 2
+<span class="keyword">done</span>
+
+<span class="keyword">echo</span> <span class="string">"MAX ITERATIONS REACHED"</span>
+<span class="keyword">exit</span> 1</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="prompt-md">prompt.md - With Browser Verification Protocol</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Opus 4.5 + Ralph + Playwright Agent</span>
+
+<span class="comment">## Your Core Loop</span>
+
+1. Read `scripts/ralph/prd.json` for story list
+2. Read `scripts/ralph/progress.txt` for learnings
+3. Pick ONE story where `passes: false`
+4. Implement the story
+5. <span class="string">Verify with Playwright (spawn subagent)</span>
+6. If visual verification passes: mark `passes: true`, commit
+7. If visual verification fails: note what's wrong, iterate
+8. APPEND learnings to progress.txt
+
+<span class="comment">## Browser Verification via Subagent</span>
+
+For UI stories, spawn a verification subagent:
+
+<span class="string">Task: Verify UI at [URL] against these criteria:</span>
+<span class="string">- [Visual criterion 1]</span>
+<span class="string">- [Visual criterion 2]</span>
+
+<span class="string">Return only:</span>
+<span class="string">1. PASS or FAIL</span>
+<span class="string">2. 2-3 sentence summary</span>
+<span class="string">3. If FAIL, the specific criterion that failed</span>
+
+<span class="string">Save screenshot to: scripts/ralph/screenshots/[story-id].png</span>
+
+<span class="comment">## Stop Conditions</span>
+
+- All stories pass → `&lt;promise&gt;COMPLETE&lt;/promise&gt;`
+- Blocked → `&lt;promise&gt;BLOCKED&lt;/promise&gt;`
+- Otherwise: end normally, loop restarts</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="prd-json">prd.json - With Visual Criteria</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>{
+  <span class="string">"project"</span>: <span class="string">"My App"</span>,
+  <span class="string">"branchName"</span>: <span class="string">"ralph/ui-features"</span>,
+  <span class="string">"devServerUrl"</span>: <span class="string">"http://localhost:3000"</span>,
+  <span class="string">"userStories"</span>: [
+    {
+      <span class="string">"id"</span>: <span class="string">"UI-001"</span>,
+      <span class="string">"title"</span>: <span class="string">"Add login form component"</span>,
+      <span class="string">"page"</span>: <span class="string">"/login"</span>,
+      <span class="string">"acceptanceCriteria"</span>: [
+        <span class="string">"Email input field is visible"</span>,
+        <span class="string">"Password input field is visible"</span>,
+        <span class="string">"npm run typecheck passes"</span>
+      ],
+      <span class="string">"visualCriteria"</span>: [
+        <span class="string">"Form width is reasonable (300-500px)"</span>,
+        <span class="string">"Inputs have visible borders"</span>,
+        <span class="string">"Form is centered on page"</span>
+      ],
+      <span class="string">"priority"</span>: 1,
+      <span class="string">"passes"</span>: <span class="keyword">false</span>
+    }
+  ]
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Playwright MCP Configuration</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">// ~/.claude/settings.json</span>
+{
+  <span class="string">"mcpServers"</span>: {
+    <span class="string">"playwright"</span>: {
+      <span class="string">"command"</span>: <span class="string">"npx"</span>,
+      <span class="string">"args"</span>: [<span class="string">"-y"</span>, <span class="string">"@anthropic/mcp-server-playwright"</span>]
+    }
+  }
+}</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Path of a Task: Login Form
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a UI feature through the system to see how browser verification changes the flow:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><code>ralph.sh</code> starts iteration 1. Reads <code>prompt.md</code> (~500 tokens)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Agent reads <code>prd.json</code>: finds UI-001 with <code>passes: false</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Agent reads <code>progress.txt</code>: no prior learnings yet</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Agent implements: creates <code>LoginForm.tsx</code>, adds route handler</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Runs <code>npm run typecheck</code> - PASSES</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>Browser verification via subagent:</strong> Spawns Task to verify at localhost:3000/login</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Subagent: Playwright navigates, waits for <code>networkidle</code>, takes screenshot</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Screenshot analysis: Email input? YES. Password input? YES. Form centered? <strong>NO (left-aligned!)</strong></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content"><strong>FAIL</strong> - Agent iterates within same session, updates CSS for centering</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">New screenshot - Form centered? YES. All visual criteria pass.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">11</div>
+            <div class="path-content"><strong>PASS</strong> - Commits: <code>feat: UI-001 - Add login form</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">12</div>
+            <div class="path-content">Updates <code>prd.json</code>: UI-001 <code>passes: true</code>. APPENDs to <code>progress.txt</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">13</div>
+            <div class="path-content">Iteration ends. More stories remain? Loop continues to iteration 2.</div>
+          </div>
+        </div>
+
+        <p class="text-text-secondary">
+          <strong>Time estimate:</strong> ~1-2 minutes per iteration. For a 5-story feature: 15-30 iterations, 30-60 minutes total.
+        </p>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit with browser verification, with specific fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #1: Browser not found
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Executable doesn't exist at /path/to/chromium"</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code style="background: #fef3c7; padding: 2px 6px; border-radius: 4px;">npx playwright install chromium</code></div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #2: Context overflow with browser output
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Claude responses get cut off, quality degrades mid-task</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Browser HTML in main context (can be 50K+ tokens)</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use subagents for browser work - they isolate context</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 min refactor</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #3: Dev server not running
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "net::ERR_CONNECTION_REFUSED"</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Start <code style="background: #fef3c7; padding: 2px 6px; border-radius: 4px;">npm run dev</code> in separate terminal before running Ralph</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 1 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #4: Screenshot shows blank page
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Screenshot is white but page works manually</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Screenshot taken before page fully loads</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add <code style="background: #fef3c7; padding: 2px 6px; border-radius: 4px;">waitForLoadState('networkidle')</code> or wait for specific selector</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #5: Tests pass but visual is wrong
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> npm test passes, browser shows broken UI</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Tests don't cover visual rendering</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add <code style="background: #fef3c7; padding: 2px 6px; border-radius: 4px;">visualCriteria</code> separate from <code style="background: #fef3c7; padding: 2px 6px; border-radius: 4px;">acceptanceCriteria</code></div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #6: Screenshot too large (token explosion)
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Token count explodes, slow analysis</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use <code style="background: #fef3c7; padding: 2px 6px; border-radius: 4px;">fullPage: false</code> or crop to specific region</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #7: MCP server not connected
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "no browser tool available"</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Restart Claude Code after config changes to ~/.claude/settings.json</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #8: Ralph stuck on same story
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Same story attempted 5+ iterations</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Split story into smaller pieces, or add hints in <code style="background: #fef3c7; padding: 2px 6px; border-radius: 4px;">notes</code> field</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 10 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #9: Race condition on screenshot
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Screenshot taken mid-render, partially loaded</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Wait for specific selector visibility before screenshot</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 3 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #10: Port mismatch
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Screenshots show wrong page or 404</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify <code style="background: #fef3c7; padding: 2px 6px; border-radius: 4px;">devServerUrl</code> in prd.json matches your actual port</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 1 min</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Visual Verification is Expensive
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Screenshots + multimodal analysis = high token count. Each visual verification costs 1000-3000 tokens in the subagent.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Subagent isolation (don't pollute main context). Use <code style="background: #fef2f2; padding: 2px 6px; border-radius: 4px;">fullPage: false</code> to minimize screenshot size. Focus on presence/absence, not pixel-perfect.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            "Looks Right" is Subjective
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Claude's visual judgment != your visual judgment. What Claude thinks is "centered" might not match your expectation.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Write explicit visual criteria. Not "looks good" but "form width between 300-500px, centered horizontally". The more specific, the better.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Browser State Complexity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Auth, cookies, JS state, animations - all affect what the screenshot shows. The page at T+0 != T+2 seconds.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start from consistent state. Fresh browser context. Wait for networkidle. If auth needed, include login steps in test setup.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Screenshot Analysis Has Limits
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Claude can't see subtle CSS issues, animations, or hover states from a static screenshot. Micro-animations, transitions, responsive behavior at different breakpoints.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Focus on what screenshots CAN verify: element presence, basic layout, text content. Accept that some verification requires human eyes.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost Scaling Non-Linear
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More visual stories = more browser overhead. Not just linear cost increase - each screenshot adds context pressure.</div>
+          <div class="hard-detail"><strong>Estimates:</strong> 5 iterations: $2-5. 10 iterations: $4-10. 50 iterations (overnight): $20-50.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Set budget caps. Prioritize which stories need visual verification. Not every story needs screenshots.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE THIS PATTERN WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>3+ UI stories with visual components in backlog</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Daily budget of $10-50 (browser adds ~50% cost)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Stage 4+ developer (Ralph familiarity assumed)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Frontend-heavy project with visual requirements</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Low visual test coverage (Playwright fills the gap)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Medium to high visual complexity</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE THIS PATTERN WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Backend-only APIs - basic Ralph is sufficient</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Single UI change - setup overhead not justified</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Highly interactive UI (animations, complex state)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Below Stage 4 - learn basic Ralph first</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Tight budget - browser verification is expensive</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>CI/CD environment - needs different architecture</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Graduation Path</h3>
+
+        <div class="code-block">
+          <pre><span class="comment"># Complexity Ladder Position</span>
+
+Level 3: Basic Ralph (no browser)
+    |
+Level 4: ADD Playwright verification  <span class="string">&lt;-- YOU ARE HERE</span>
+    |
+Level 5: ADD parallel worktrees
+    |
+Level 6: CC Mirror orchestration with browser-enabled workers</pre>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Ralph: External State</div>
+        <div class="text-text-secondary text-sm">
+          Browser screenshots become external state just like progress.txt. Both solve the same problem: avoiding agent memory limitations. The screenshot folder IS memory.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Gas Town: Quality Gates</div>
+        <div class="text-text-secondary text-sm">
+          Playwright verification is a quality gate - same role as Dogs in Gas Town. Both validate before marking complete.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@weswinder: Login Flow in 20 Minutes</div>
+        <div class="text-text-secondary text-sm">
+          5 stories, 12 iterations, fully working auth UI. "opus 4.5 with ralph wiggum and playwright is agi" - the combination creates emergent capability.
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Perception Constraint</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> "Claude can't SEE what renders"<br>
+          → Need external perception (Playwright)<br>
+          → Need screenshot capability<br>
+          → Need visual analysis (Opus 4.5)<br>
+          → Need subagent isolation (context protection)<br><br>
+          <em>The entire pattern exists because of this constraint.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Playwright = QA Tester</div>
+        <div class="text-text-secondary text-sm">
+          QA looks at the actual product, not just tests. Playwright is automated QA - visual verification that humans would do manually. Same role, different execution.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Screenshot Archive as Audit Trail</div>
+        <div class="text-text-secondary text-sm">
+          After 20+ stories, the screenshots folder becomes a visual history of UI evolution. Useful for regression detection, stakeholder demos, and debugging "when did this break?"
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if we trusted tests alone?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip visual verification, trust npm test<br>
+          <strong>THEN:</strong> Layout bugs ship. Spacing wrong. Colors off.<br>
+          <strong>WHY:</strong> Tests verify behavior, not appearance.<br><br>
+          <em>Visual verification is necessary, not optional, for UI work.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if we kept browser in main context?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> No subagent, browser output in main agent<br>
+          <strong>THEN:</strong> Token overflow at story 3 or 4<br>
+          <strong>WHY:</strong> Page HTML can be 50K+ tokens<br><br>
+          <em>Subagent isolation is load-bearing architecture.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cost vs Confidence</div>
+        <div class="text-text-secondary text-sm">
+          <strong>More screenshots</strong> = more confidence, but more cost<br>
+          <strong>Fewer screenshots</strong> = cheaper, but might miss bugs<br><br>
+          <em>Resolution: Use subagents to reduce cost per screenshot. Limit fullPage. Prioritize which stories need visual verification.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Specificity vs Flexibility</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Specific visualCriteria</strong> = clear pass/fail, but brittle<br>
+          <strong>Vague visualCriteria</strong> = flexible, but false positives<br><br>
+          <em>Resolution: Focus on presence/layout, not pixels. "Form centered" not "form at 50.2% from left".</em>
+        </div>
+      </div>
+
+      <!-- FILES SECTION -->
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Opus + Ralph + Playwright (The Trifecta)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> The named combination from @weswinder.<br>
+          Opus reasoning + Ralph persistence + Playwright eyes = self-correcting UI loop.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Parallel Worktrees + Browser Verification</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Multiple Ralph instances, each with own browser context, working on different UI areas in parallel.<br>
+          <strong>Danger:</strong> Coordination complexity. Port conflicts.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="files">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with CC Mirror: Subagent Isolation</div>
+        <div class="text-text-secondary text-sm">
+          Browser work in subagent mirrors CC Mirror's worker isolation. Both patterns protect main orchestrator context from expensive operations.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> Run the script, basic stories<br>
+          <strong>Intermediate:</strong> Custom wait strategies, subagent tuning<br>
+          <strong>Advanced:</strong> Multi-viewport testing, visual regression<br>
+          <strong>Expert:</strong> Build custom verification tools
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item gradient" data-section="path">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How visual verification fails</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10% degraded:</strong> Occasional blank screenshots (timing)<br>
+          <strong>50% degraded:</strong> Frequent blanks, wrong page state<br>
+          <strong>90% degraded:</strong> Can't get valid screenshot reliably<br>
+          <strong>Total failure:</strong> Complete visual blindness<br><br>
+          <em>Recovery: Add explicit waits. Check dev server. Verify port.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip visual criteria</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip visualCriteria, only use acceptanceCriteria<br>
+          <strong>THEN:</strong> Agent marks "done" without visual check<br>
+          <strong>THEN:</strong> Visual bugs ship to git<br>
+          <strong>THEN:</strong> Morning reveals broken UI despite passing tests<br><br>
+          <em>The whole point of this pattern is wasted.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How judgment evolves</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Story 1:</strong> "This is slow, taking screenshots every time"<br>
+          <strong>Story 5:</strong> "Oh, it caught that centering bug I would have missed"<br>
+          <strong>Story 10:</strong> "I sleep while it builds, wake to working UI"<br>
+          <strong>Story 20:</strong> "Screenshot folder is my visual changelog"
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When browser overhead flips to value</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-2 stories:</strong> Setup overhead > benefit<br>
+          <strong>3-5 stories:</strong> <em>THE INFLECTION</em> - pattern pays off<br>
+          <strong>10+ stories:</strong> Clear ROI, screenshots compound<br>
+          <strong>20+ stories:</strong> Visual regression detection emerges<br><br>
+          <em>Don't judge the pattern by your first story.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Visual diff detection</div>
+        <div class="text-text-secondary text-sm">
+          Currently: Manual screenshot comparison. No automated visual diff between iterations. Someone could build: pixel-diff between screenshots, highlight changes, auto-detect regressions.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Animation/interaction testing</div>
+        <div class="text-text-secondary text-sm">
+          Playwright can click, but verifying animations and transitions from static screenshots is hard. Dynamic behavior verification is an open problem.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@TendiesOfWisdom: Context Overflow</div>
+        <div class="text-text-secondary text-sm">
+          User ran browser in main context, hit limit at story 3. Solution: Added subagent pattern. "The feedback loop is everything, but put costly tools like browser control in subagents."
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item minimal" data-section="hard">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">Naive Browser Ralph (for small scale)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What's included:</strong> Ralph + inline Playwright (no subagent)<br>
+          <strong>What's removed:</strong> Subagent isolation, complex waits<br>
+          <strong>When appropriate:</strong> 1-2 simple UI stories<br><br>
+          <em>Works for quick tests, but won't scale.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="hard">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Token Economics Cascade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> "Browser output is expensive"<br>
+          → Need context isolation (subagent)<br>
+          → Need Task tool spawning<br>
+          → Need minimal return payloads (PASS/FAIL only)<br>
+          → Need separate screenshot storage<br><br>
+          <em>Subagent architecture driven by token economics.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Visual Criteria Discipline</div>
+        <div class="text-text-secondary text-sm">
+          Writing explicit visualCriteria forces you to think about what "done" actually looks like. This discipline improves requirements even without the automation.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Basic Ralph (no browser)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Backend APIs, non-visual work<br>
+          <strong>When worse:</strong> Any UI work with visual requirements<br>
+          <strong>Link:</strong> mastery-ralph-complete.md
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Manual Claude + Screenshot Paste</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> One-off visual fixes, debugging<br>
+          <strong>When worse:</strong> Multiple stories, overnight runs<br>
+          <strong>How:</strong> Screenshot manually, paste into Claude chat
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Existing E2E Suite (Cypress)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Already have Cypress E2E tests<br>
+          <strong>When worse:</strong> No existing E2E infrastructure<br>
+          <strong>Consideration:</strong> Playwright integrates better with Claude MCP
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="when">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">The "$50 Overnight Run"</div>
+        <div class="text-text-secondary text-sm">
+          50 iterations overnight for complex dashboard. Successfully completed 25 stories. Morning: fully working admin panel. Cost estimates validated in production.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Pattern = Autonomous Car with Camera</div>
+        <div class="text-text-secondary text-sm">
+          Basic Ralph = car without cameras (can drive but can't see)<br>
+          +Playwright = car with cameras (can see, can self-correct)<br>
+          +Opus 4.5 = better neural net (fewer mistakes per mile)<br><br>
+          <em>If you've thought about self-driving, you understand this pattern.</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

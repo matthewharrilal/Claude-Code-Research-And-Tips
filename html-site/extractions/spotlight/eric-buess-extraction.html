@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eric Buess: The Unhobbled Stack | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Component Grid */
+    .component-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 900px) {
+      .component-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .component-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 20px;
+      transition: box-shadow 0.2s;
+    }
+
+    .component-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    .component-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .component-title {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+
+    .component-why {
+      font-size: 13px;
+      color: #0D9373;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .component-desc {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-time {
+      flex-shrink: 0;
+      width: 60px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #71717a;
+      font-family: 'Fira Code', monospace;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    .path-component {
+      display: inline-block;
+      background: #ecfdf5;
+      color: #0D9373;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Phase Timeline */
+    .phase-timeline {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 24px;
+    }
+
+    .phase-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px dashed #e4e4e7;
+    }
+
+    .phase-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .phase-number {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .phase-content {
+      flex: 1;
+    }
+
+    .phase-title {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 8px;
+    }
+
+    .phase-week {
+      font-size: 12px;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    .phase-items {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .phase-gate {
+      font-size: 13px;
+      color: #0D9373;
+      font-weight: 500;
+      margin-top: 8px;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Cost Table */
+    .cost-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .cost-table th,
+    .cost-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .cost-table th {
+      background: #f4f4f5;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .cost-table td {
+      color: #3f3f46;
+    }
+
+    .cost-warning {
+      color: #dc2626;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Unhobble Claude Code: LSP, hooks, subagents, adversarial validation, Ralph loops, and voice for 10x.</div>
+        </div>
+
+        <p class="text-text-secondary mb-4">
+          <strong>Source:</strong> Eric Buess (@EricBuess) crystallized what the Claude Code power user community was reaching toward: the idea that default Claude Code is <em>intentionally limited</em> - and that with the right stack, you can "unhobble" it.
+        </p>
+
+        <blockquote class="border-l-4 border-accent pl-4 italic text-text-secondary mb-6">
+          "LSP + hooks + subagents + adversarial validations + Ralph Wiggum loops + 2 way voice (stt/tts) loops is a magical 10x Claude Code experience. Your default Claude Code harness is begging you to unhobble it."
+        </blockquote>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The 6-Component Unhobbled Stack
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Treat Claude Code not as a chat tool, but as a persistent autonomous developer agent that works continuously while you sleep, clean, drive, or exercise."</div>
+
+          <div class="core-anchor">Each component unlocks a specific capability. Together, they transform a chat tool into an autonomous development partner.</div>
+        </div>
+
+        <div class="component-grid">
+          <div class="component-card">
+            <div class="component-title">
+              <span class="component-number">1</span>
+              LSP Integration
+            </div>
+            <div class="component-why">WHY: Claude navigates codebases like an IDE user</div>
+            <div class="component-desc">
+              Real-time diagnostics, type information, go-to-definition, find references. Claude "sees" code structure, not just text. Semantic understanding beats grepping.
+            </div>
+          </div>
+
+          <div class="component-card">
+            <div class="component-title">
+              <span class="component-number">2</span>
+              Hooks Architecture
+            </div>
+            <div class="component-why">WHY: Deterministic automation without AI reasoning</div>
+            <div class="component-desc">
+              PreToolUse, PostToolUse, SessionStart, Stop. Auto-formatting, linting gates, notifications, security checks. <strong>Hooks are shell commands, NOT AI prompts.</strong>
+            </div>
+          </div>
+
+          <div class="component-card">
+            <div class="component-title">
+              <span class="component-number">3</span>
+              Subagent Orchestration
+            </div>
+            <div class="component-why">WHY: Parallel processing + context isolation</div>
+            <div class="component-desc">
+              Isolated Claude instances with own context windows. Expensive operations don't pollute main session. Specialization: code-simplifier, verify-app, adversarial-critic.
+            </div>
+          </div>
+
+          <div class="component-card">
+            <div class="component-title">
+              <span class="component-number">4</span>
+              Adversarial Validation
+            </div>
+            <div class="component-why">WHY: Single-agent systems drift toward confirmation bias</div>
+            <div class="component-desc">
+              Architect proposes, Critic challenges. Multiple perspectives catch edge cases. Productive conflict reveals hidden assumptions. Quality through opposition.
+            </div>
+          </div>
+
+          <div class="component-card">
+            <div class="component-title">
+              <span class="component-number">5</span>
+              Ralph Wiggum Loops
+            </div>
+            <div class="component-why">WHY: Multi-hour autonomous sessions survive context limits</div>
+            <div class="component-desc">
+              External state files (prd.json, progress.txt). Fresh context per iteration. Stop hook re-injects prompt. <code>while :; do cat PROMPT.md | claude; done</code>
+            </div>
+          </div>
+
+          <div class="component-card">
+            <div class="component-title">
+              <span class="component-number">6</span>
+              2-Way Voice (STT/TTS)
+            </div>
+            <div class="component-why">WHY: Untethered development - cardio coding</div>
+            <div class="component-desc">
+              Superwhisper/Wispr for speech-to-text. macOS <code>say</code> for text-to-speech. Work while walking, exercising. Natural language flow without typing friction.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-hooks" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY HOOKS, NOT AI, FOR AUTOMATION?</div>
+          <div class="decision-reasoning">
+            "Hooks are shell commands, NOT AI prompts. They're for deterministic automation." AI reasoning for automation = unpredictable, expensive, slow. Hooks are cheap, fast, reliable.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use hooks for formatting, notifications, security gates - never for decisions. If you need reasoning, spawn a subagent. Mixing AI into hooks destroys the reliability guarantee.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-subagents">
+          <div class="decision-why">WHY SUBAGENTS FOR BROWSER WORK?</div>
+          <div class="decision-reasoning">
+            "Browser output is expensive. Protect main context from token bloat." A single Playwright session can consume 50K+ tokens. In main context, that's 25% of your window gone on one operation.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Isolate costly operations in subagents. Subagent returns summary only - "Login works, homepage renders, 3 console errors." Main context stays lean and focused.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-adversarial">
+          <div class="decision-why">WHY ADVERSARIAL VALIDATION?</div>
+          <div class="decision-reasoning">
+            "Single-agent systems drift toward confirmation bias." Claude will convince itself its code is correct. A DHH-persona critic asks "Why not use existing form library?" - and catches what self-review misses.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              For architecture decisions, security code, public APIs - spawn a critic. For mechanical transformations and tests-passing code, skip it. Match validation intensity to risk.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY EXTERNAL STATE (PROGRESS.TXT)?</div>
+          <div class="decision-reasoning">
+            "Fresh starts + external memory beats growing conversations." Long conversations suffer context rot. Each Ralph iteration sees: static prompt + current file state + git history. State lives in files, not conversation.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Never rely on "Claude remembering" something. If it's not in a file, it doesn't exist. progress.txt must be append-only. The filesystem IS the memory.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY TIERED MODEL SELECTION?</div>
+          <div class="decision-reasoning">
+            "Haiku for errands, Opus for thinking." Not every task needs Opus. Eric's recommended split: Haiku 5%, Sonnet 75%, Opus 20%. Match model capability to task complexity.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Simple file operations, formatting, notifications: Haiku. Standard development work: Sonnet. Architecture decisions, complex debugging, adversarial review: Opus.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>my-project/
+<span class="comment">├── .claude/</span>
+│   └── settings.json              <span class="comment"># Hooks configuration</span>
+├── scripts/
+│   ├── hooks/
+│   │   ├── notify.sh              <span class="comment"># AskUserQuestion notification</span>
+│   │   ├── security-gate.sh       <span class="comment"># Bash command security check</span>
+│   │   ├── smart-format.sh        <span class="comment"># PostToolUse formatting</span>
+│   │   └── ralph-continue.sh      <span class="comment"># Stop hook for Ralph loops</span>
+│   ├── ralph/
+│   │   ├── ralph.sh               <span class="comment"># Main loop script</span>
+│   │   ├── PROMPT.md              <span class="comment"># Static instructions</span>
+│   │   ├── prd.json               <span class="comment"># Task tracking</span>
+│   │   └── progress.txt           <span class="comment"># Append-only learnings</span>
+│   └── subagents/
+│       ├── worker-preamble.md     <span class="comment"># Worker agent template</span>
+│       ├── code-simplifier.md     <span class="comment"># Refactoring specialist</span>
+│       ├── verify-app.md          <span class="comment"># Testing specialist</span>
+│       └── adversarial-critic.md  <span class="comment"># Challenge assumptions</span>
+├── CLAUDE.md                      <span class="comment"># Project context</span>
+├── AGENTS.md                      <span class="comment"># Permanent agent documentation</span>
+└── .env                           <span class="comment"># API keys, limits (gitignored)</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="hooks-config">Hooks Configuration</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>{
+  <span class="string">"hooks"</span>: {
+    <span class="string">"PreToolUse"</span>: [
+      {
+        <span class="string">"matcher"</span>: <span class="string">"AskUserQuestion"</span>,
+        <span class="string">"hooks"</span>: [{ <span class="string">"type"</span>: <span class="string">"command"</span>, <span class="string">"command"</span>: <span class="string">"~/.claude/hooks/notify.sh"</span> }]
+      },
+      {
+        <span class="string">"matcher"</span>: <span class="string">"Bash"</span>,
+        <span class="string">"hooks"</span>: [{ <span class="string">"type"</span>: <span class="string">"command"</span>, <span class="string">"command"</span>: <span class="string">"~/.claude/hooks/security-gate.sh"</span> }]
+      }
+    ],
+    <span class="string">"PostToolUse"</span>: [
+      {
+        <span class="string">"matcher"</span>: <span class="string">"Edit"</span>,
+        <span class="string">"hooks"</span>: [{ <span class="string">"type"</span>: <span class="string">"command"</span>, <span class="string">"command"</span>: <span class="string">"~/.claude/hooks/smart-format.sh"</span> }]
+      }
+    ],
+    <span class="string">"SessionEnd"</span>: [
+      {
+        <span class="string">"type"</span>: <span class="string">"command"</span>,
+        <span class="string">"command"</span>: <span class="string">"~/.claude/hooks/ralph-continue.sh"</span>
+      }
+    ]
+  }
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Worker Preamble Template</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Worker Agent Instructions</span>
+
+CONTEXT: You are a WORKER agent, not an orchestrator.
+
+RULES:
+- Complete ONLY the task described below
+- Use tools directly (Read, Write, Edit, Bash)
+- Do NOT spawn sub-agents
+- Do NOT call TaskCreate or TaskUpdate
+- Report results with absolute file paths
+- Ask orchestrator if blocked
+
+TASK:
+[Specific task here]</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Path of an Overnight Session
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a feature through the unhobbled stack, from evening setup to morning review:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-time">T-5min</div>
+            <div class="path-content">
+              User creates <code>prd.json</code> with stories: login form, validation, session management. All stories: <code>passes: false</code>
+            </div>
+          </div>
+
+          <div class="path-step">
+            <div class="path-time">T-3min</div>
+            <div class="path-content">
+              User reviews <code>PROMPT.md</code>. Completion promise defined. Validators configured.
+            </div>
+          </div>
+
+          <div class="path-step">
+            <div class="path-time">T-1min</div>
+            <div class="path-content">
+              User starts Ralph loop: <code>./scripts/ralph/ralph.sh 50</code>
+              <span class="path-component">Component 5: Ralph</span>
+            </div>
+          </div>
+
+          <div class="path-step">
+            <div class="path-time">T+0min</div>
+            <div class="path-content">
+              <strong>ITERATION 1 BEGINS.</strong> Claude reads PROMPT.md + prd.json + progress.txt.
+            </div>
+          </div>
+
+          <div class="path-step">
+            <div class="path-time">T+2min</div>
+            <div class="path-content">
+              Claude picks story: "Login form". Starts implementation.
+            </div>
+          </div>
+
+          <div class="path-step">
+            <div class="path-time">T+5min</div>
+            <div class="path-content">
+              Edit tool triggers PostToolUse hook. <code>smart-format.sh</code> runs Prettier.
+              <span class="path-component">Component 2: Hooks</span>
+            </div>
+          </div>
+
+          <div class="path-step">
+            <div class="path-time">T+7min</div>
+            <div class="path-content">
+              Claude needs type information. Uses LSP for hover documentation.
+              <span class="path-component">Component 1: LSP</span>
+            </div>
+          </div>
+
+          <div class="path-step">
+            <div class="path-time">T+10min</div>
+            <div class="path-content">
+              Claude spawns <code>verify-app</code> subagent. Isolated context runs tests. Returns: PASS + summary.
+              <span class="path-component">Component 3: Subagents</span>
+            </div>
+          </div>
+
+          <div class="path-step">
+            <div class="path-time">T+12min</div>
+            <div class="path-content">
+              Complex decision needed. Spawns adversarial critic (DHH persona). Critic: "Why not use existing form library?"
+              <span class="path-component">Component 4: Adversarial</span>
+            </div>
+          </div>
+
+          <div class="path-step">
+            <div class="path-time">T+15min</div>
+            <div class="path-content">
+              Story complete. Updates prd.json: <code>passes: true</code>. Commits: <code>feat: login form component</code>. APPENDS to progress.txt.
+            </div>
+          </div>
+
+          <div class="path-step">
+            <div class="path-time">T+16min</div>
+            <div class="path-content">
+              Claude attempts to exit. SessionEnd hook fires. Checks prd.json - stories incomplete. Re-injects PROMPT.md.
+              <span class="path-component">Component 5: Ralph</span>
+            </div>
+          </div>
+
+          <div class="path-step">
+            <div class="path-time">T+3hrs</div>
+            <div class="path-content">
+              All stories complete. Claude outputs: <code>&lt;promise&gt;COMPLETE&lt;/promise&gt;</code>. Ralph loop exits successfully.
+            </div>
+          </div>
+
+          <div class="path-step">
+            <div class="path-time">MORNING</div>
+            <div class="path-content">
+              User reviews prd.json status, git log, runs <code>npm run test</code>. Merges successful work.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas (12 Practical Problems)
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit, with concrete numbers and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #1: Runaway loop costs
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> $500+ unexpected overnight bill</div>
+          <div class="gotcha-detail"><strong>Threshold:</strong> >50 iterations without cost monitoring</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Set MAX_ITERATIONS in ralph.sh. Use API cost limits. <strong>Time to fix:</strong> 2 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #2: Hook not firing
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Formatting/notifications don't run</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Matcher syntax wrong, path not found</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check matcher patterns, verify script paths are absolute. <strong>Time to fix:</strong> 10-15 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #3: Subagent context pollution
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Main agent gets confused after subagent returns</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Subagent returning too much context</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use worker preamble, enforce summary-only returns. <strong>Time to fix:</strong> 15-30 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #4: Adversarial deadlock
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Critic never approves, loop stalls</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Critic too strict, no approval threshold</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Set max review rounds (3-5), time-box review. <strong>Time to fix:</strong> 5-10 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #5: Ralph infinite loop
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Loop never exits, max iterations always hit</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Completion promise not detected, task impossible</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check promise format exactly, add stuck detection (same HEAD 3x = exit). <strong>Time to fix:</strong> 5-10 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #6: Voice transcription errors
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Wrong commands executed, code messed up</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> STT misinterprets technical terms</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use Superwhisper AI correction, review before execute. <strong>Continuous</strong></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #7: progress.txt bloat
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Late iterations slower than early ones</div>
+          <div class="gotcha-detail"><strong>Threshold:</strong> >20KB progress.txt degrades quality</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Archive to AGENTS.md periodically, keep recent learnings only. <strong>Time to fix:</strong> 15-30 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #8: Validator false positives
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Good code rejected, iteration wasted</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Validator too strict, doesn't match project conventions</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Tune validator criteria, add exception handling. <strong>Time to fix:</strong> 20-40 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #9: LSP server crash
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Lose semantic navigation mid-session</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Memory limits, corrupt project state</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Restart language server, check memory limits. <strong>Time to fix:</strong> 2-5 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #10: Security gate too strict
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Legitimate commands blocked</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Gate doesn't whitelist common patterns</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Whitelist npm, git, common CLI tools. <strong>Time to fix:</strong> 10-20 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #11: Model mismatch
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Simple tasks use Opus, complex tasks fail on Haiku</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> No tiered model selection implemented</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Implement Haiku 5% / Sonnet 75% / Opus 20% selection. <strong>Time to fix:</strong> 15-30 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #12: Context window overflow
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Claude stops making sense in late iterations</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Costly operations in main context</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use subagents for browser/test output, prune aggressively. <strong>Time to fix:</strong> 10-20 min</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard (Fundamental Tensions)
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are NOT bugs to fix. They're genuine dilemmas to manage:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Autonomy vs. Cost
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More autonomy = more iterations = more tokens = more cost. The 10x productivity comes with 10x API bills.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Overnight runs cost $300. Team budget blown in a week.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Budget caps, tiered models, clear completion criteria. Accept that some tasks aren't worth autonomous execution.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Validation vs. Speed
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More validation = higher quality but slower throughput. Adversarial review on every task is overkill.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Simple tasks take 10x longer. Critic always finds something.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Risk-based validation. Critical paths get full review. Routine changes skip it. Match validation to consequence.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Isolation vs. Context
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Subagents are protected from pollution, but they can't see the full picture. Sometimes they need context they don't have.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Subagent makes locally-optimal choice that breaks global invariant.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Careful context passing in task descriptions. Summarized project constraints. Accept some re-work.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Trust vs. Verification
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Full trust is fast but risky. Full verification is slow but safe. No perfect middle ground exists.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Trusted code breaks production. Or: nothing ships because everything needs approval.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Graduated trust based on task type and history. Build trust incrementally, not all at once.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Voice vs. Precision
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Voice is fast but transcription is imperfect. Technical terms, code syntax, exact variable names - voice struggles.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "Create userSchema" becomes "create user scheme".</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Use voice for high-level direction, keyboard for precision. Review before execute. Don't voice-code into production.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Complexity vs. Reliability
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More components = more capability, but also more failure modes. 6 components means 6 things that can break.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Hook fails silently. Subagent spawns infinitely. LSP crashes. Debugging takes longer than manual work.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Start with Phase 1, add complexity incrementally. Validate each gate before proceeding. Accept that some domains stay simple.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE UNHOBBLED STACK WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Stage 4+ developer (comfortable with Claude Code basics)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Daily budget $30-300 (components increase cost)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Ongoing project (weeks+) - setup investment needs payoff</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Medium-high chaos tolerance (more components = more failure modes)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Terminal comfort (hooks, scripts, voice all terminal-based)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Desire for autonomy (if you prefer manual control, stay vanilla)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE UNHOBBLED WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>New to Claude Code - learn basics first (Boris vanilla approach)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple one-off task - overkill for quick work</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Budget-constrained - components add cost</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Team environment - custom configs hard to share</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need predictability - autonomy is less predictable</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="phases">Phased Adoption Path</h3>
+
+        <div class="phase-timeline">
+          <div class="phase-item">
+            <div class="phase-number">1</div>
+            <div class="phase-content">
+              <div class="phase-title">Foundation</div>
+              <div class="phase-week">Week 1</div>
+              <div class="phase-items">PostToolUse hook for formatting. PreToolUse hook for notifications. CLAUDE.md with project context. Cost monitoring.</div>
+              <div class="phase-gate">Gate: Comfortable with hooks</div>
+            </div>
+          </div>
+
+          <div class="phase-item">
+            <div class="phase-number">2</div>
+            <div class="phase-content">
+              <div class="phase-title">Parallelization</div>
+              <div class="phase-week">Week 2</div>
+              <div class="phase-items">Git worktrees for isolation. 2-3 parallel sessions. Shared CLAUDE.md pattern. Verification loops (tests, linting).</div>
+              <div class="phase-gate">Gate: Comfortable with parallel work</div>
+            </div>
+          </div>
+
+          <div class="phase-item">
+            <div class="phase-number">3</div>
+            <div class="phase-content">
+              <div class="phase-title">Automation</div>
+              <div class="phase-week">Week 3</div>
+              <div class="phase-items">Ralph loop implementation. progress.txt archiving. Subagent delegation. Tiered model selection (Haiku/Sonnet/Opus).</div>
+              <div class="phase-gate">Gate: Successful overnight run</div>
+            </div>
+          </div>
+
+          <div class="phase-item">
+            <div class="phase-number">4</div>
+            <div class="phase-content">
+              <div class="phase-title">Advanced</div>
+              <div class="phase-week">Week 4</div>
+              <div class="phase-items">Adversarial validation. Context monitoring (Claude HUD). Mobile/async workflow. Voice interface (optional).</div>
+              <div class="phase-gate">Gate: Full unhobbled stack operational</div>
+            </div>
+          </div>
+
+          <div class="phase-item">
+            <div class="phase-number">5</div>
+            <div class="phase-content">
+              <div class="phase-title">Optimization</div>
+              <div class="phase-week">Week 5+</div>
+              <div class="phase-items">Cost analysis and tuning. CLAUDE.md refinement. Pattern extraction to slash commands. Project-specific automations.</div>
+              <div class="phase-gate">Gate: 10x productivity achieved</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Cost Reality</h3>
+
+        <table class="cost-table">
+          <thead>
+            <tr>
+              <th>Configuration</th>
+              <th>Daily Cost</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Light usage</td>
+              <td>$5-15</td>
+              <td>Occasional Claude Code sessions</td>
+            </tr>
+            <tr>
+              <td>Medium (8 hours)</td>
+              <td>$30-75</td>
+              <td>Full workday, mixed tasks</td>
+            </tr>
+            <tr>
+              <td>Heavy (parallel + Ralph)</td>
+              <td>$100-300</td>
+              <td>Multiple parallel sessions</td>
+            </tr>
+            <tr>
+              <td class="cost-warning">Uncontrolled overnight</td>
+              <td class="cost-warning">$500+</td>
+              <td class="cost-warning">No MAX_ITERATIONS, no cost limits</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible unhobbled core</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Phase 1 Only:</strong> PostToolUse formatting + PreToolUse notifications + CLAUDE.md<br><br>
+          That's 2 hooks and 1 file. Everything else is enhancement.<br>
+          <em>Start here. Add complexity only when Phase 1 feels limiting.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Eric: "Shipped 3 features during 5-day conference"</div>
+        <div class="text-text-secondary text-sm">
+          2-3 hours total hands-on time. Ralph loops ran overnight. Phone notifications for questions. Validated the overnight autonomous workflow.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Molly Cantillon: Jmail, 18M users</div>
+        <div class="text-text-secondary text-sm">
+          Built overnight with Claude Code. Production system at scale, not a demo. Proof that unhobbled stacks work for real products.
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Ralph: External State</div>
+        <div class="text-text-secondary text-sm">
+          Eric's progress.txt/prd.json mirrors Ralph's external state pattern. State survives context resets. The filesystem IS the memory.<br><br>
+          <strong>THE PRINCIPLE:</strong> External state > internal memory
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Boris: Fresh Context</div>
+        <div class="text-text-secondary text-sm">
+          Eric's "context rot" understanding aligns with Boris's fresh context principle. Kill and restart beats extending sessions.<br><br>
+          <strong>THE PRINCIPLE:</strong> Fresh context > extended sessions
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Gas Town: Worker Specialization</div>
+        <div class="text-text-secondary text-sm">
+          Eric's subagent specialists (code-simplifier, verify-app, adversarial-critic) mirror Gas Town's role specialization.<br><br>
+          <strong>THE PRINCIPLE:</strong> Specialized workers > generalist agents
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Unhobbled = CI/CD for AI Development</div>
+        <div class="text-text-secondary text-sm">
+          Hooks = Pipeline stages<br>
+          Validators = Quality gates<br>
+          Subagents = Specialized build steps<br>
+          Ralph loops = Continuous deployment<br><br>
+          <em>If you've built CI/CD pipelines, you already understand the unhobbled stack.</em>
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if we used AI for hooks?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd get:</strong> Unpredictable automation. Expensive formatting. Slow notifications. Random failures.<br><br>
+          <strong>Why it fails:</strong> AI reasoning for automation = latency, cost, nondeterminism.<br><br>
+          <em>Hooks are for determinism, not intelligence. The inversion reveals why shell commands are the right choice.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Browser output is expensive" -> Subagent Architecture</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Browser output = 50K+ tokens per session<br>
+          -> Need context isolation<br>
+          -> Subagent pattern (isolated context windows)<br>
+          -> Worker preamble (prevent subagent recursion)<br>
+          -> Summary-only returns (protect main context)<br><br>
+          <em>One constraint (token economics) forced the entire subagent design.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Claude sessions end" -> Ralph Architecture</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Sessions are ephemeral<br>
+          -> Need external state (progress.txt)<br>
+          -> Need loop continuation (Stop hook)<br>
+          -> Need completion promise (exit signal)<br>
+          -> Need fresh context per iteration<br><br>
+          <em>Session ephemerality drives the entire Ralph architecture.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Trust Gradient Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Low trust:</strong> Manual approval, high quality, slow<br>
+          <strong>Medium trust:</strong> Auto-accept routine, manual risky<br>
+          <strong>High trust:</strong> Full autonomy + verification loops<br>
+          <strong>Maximum:</strong> Overnight Ralph + adversarial validation<br><br>
+          <em>No single trust level is optimal. Match to task risk.</em>
+        </div>
+      </div>
+
+      <!-- FILES SECTION -->
+      <div class="activity-item expertise" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What files do I need?" -> The structure shown<br>
+          <strong>Intermediate:</strong> "Why these hooks?" -> PreToolUse for gates, Post for cleanup<br>
+          <strong>Advanced:</strong> "When add subagents?" -> When operations cost >10K tokens<br>
+          <strong>Staff:</strong> "Cross-pattern?" -> Worker preamble = CC Mirror pattern<br>
+          <strong>Expert:</strong> "Customize?" -> Project-specific adversarial personas
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Unhobbled + Playwright</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Visual verification catches UI bugs tests miss.<br>
+          <strong>How:</strong> Put Playwright in verify-app subagent.<br>
+          <strong>Danger:</strong> Browser context in main = token explosion.<br><br>
+          <em>Composition works IF you respect context isolation.</em>
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Unhobbled + CC Mirror</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Use CC Mirror's task DAG with unhobbled components.<br>
+          <strong>How:</strong> CC Mirror orchestrates, Eric's hooks/subagents execute.<br>
+          <strong>Result:</strong> Structured multi-agent with automation at each step.
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When is unhobbled worth it?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Single feature (hours):</strong> No - setup overhead not worth it<br>
+          <strong>Sprint (days):</strong> Maybe - if features are substantial<br>
+          <strong>Project (weeks):</strong> Yes - investment starts paying off<br>
+          <strong>Ongoing (months):</strong> Absolutely - compound benefits dominate<br><br>
+          <em>Don't judge unhobbled by a single task. Judge by accumulated productivity.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip the Stop hook</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip SessionEnd hook<br>
+          <strong>THEN:</strong> Claude exits after each iteration<br>
+          <strong>THEN:</strong> No continuation, manual restarts needed<br>
+          <strong>THEN:</strong> Not a loop, just repeated single sessions<br>
+          <strong>FINALLY:</strong> No overnight autonomy - defeats the purpose<br><br>
+          <em>The Stop hook IS Ralph. Without it, you're just running Claude manually.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="path">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="trending-up" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Compound Learning</div>
+        <div class="text-text-secondary text-sm">
+          progress.txt accumulates learnings. Each iteration benefits from all previous. Iteration 20 is faster than iteration 5 because patterns have been captured.<br><br>
+          <em>This is the compound benefit the time horizon shift reveals.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When components flip from help to hurt</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-3 components:</strong> Pure benefit, each adds capability<br>
+          <strong>4 components:</strong> Optimal balance for most projects<br>
+          <strong>5-6 components:</strong> Complexity overhead starts showing<br>
+          <strong>6+ components:</strong> Debugging time > benefit time<br><br>
+          <strong>THE INFLECTION:</strong> ~4 components<br>
+          <em>Add the 5th and 6th only if you've mastered 1-4.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How cost runaway happens (invisibly)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% -> 90%:</strong> Slightly over budget, you don't notice<br>
+          <strong>90% -> 70%:</strong> Double expected, "maybe a busy day"<br>
+          <strong>70% -> 50%:</strong> 5x expected, "something's wrong"<br>
+          <strong>50% -> CLIFF:</strong> Account suspended, work lost<br><br>
+          <em>Set alerts at 2x expected. Don't wait for the cliff.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal adversarial personas</div>
+        <div class="text-text-secondary text-sm">
+          Which critic personas work best for which domains? DHH for simplicity, Security Engineer for auth code, Chaos Engineer for infrastructure. No systematic study exists.<br><br>
+          <em>Currently: Trial and error. Future: Domain-specific persona libraries.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Voice-first IDE</div>
+        <div class="text-text-secondary text-sm">
+          Full voice-driven development without fallback to keyboard. Wispr and Superwhisper are advancing, but technical term transcription remains imperfect.<br><br>
+          <em>Status: Active development. Not production-ready.</em>
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Speed vs. Quality: The Central Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Full autonomy:</strong> Max speed, risk of bad code<br>
+          <strong>Full validation:</strong> Max quality, slow throughput<br><br>
+          <strong>Resolution:</strong> Risk-based. Validate critical paths, skip routine. Match validation intensity to consequence of failure.<br><br>
+          <em>There's no universally optimal point. Context determines the balance.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="hard">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if complexity DIDN'T have failure modes?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd use:</strong> All 6 components from day 1. Maximum capability immediately.<br><br>
+          <strong>Why this fails:</strong> Each component adds surface area. 6 components = 6 potential failures. Debugging a hook interacting with a subagent calling an adversarial critic... nightmare.<br><br>
+          <em>The tension is real. Phased adoption is the mitigation, not a workaround.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="trending-up" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Trust Calibration</div>
+        <div class="text-text-secondary text-sm">
+          As you use the stack, your trust gradient self-calibrates. You learn which tasks are safe for full autonomy, which need gates, which require human review.<br><br>
+          <em>Trust develops through experience. The stack teaches you where to trust.</em>
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">Boris Vanilla Approach</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Simplicity, reliability, learning Claude Code basics<br>
+          <strong>When worse:</strong> Maximum capability, autonomy needs, overnight work<br><br>
+          They're opposite ends of the same spectrum. Eric's for power users, Boris's for reliability.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">Gas Town</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Factory-scale multi-agent, team-like output<br>
+          <strong>When worse:</strong> Solo developer, simpler project needs<br><br>
+          Gas Town is larger scale. Eric's stack is powerful individual developer. Choose based on project size.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you used unhobbled for a one-off task?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd spend:</strong> 2 hours setting up hooks, subagents, Ralph loop<br>
+          <strong>For a task that takes:</strong> 30 minutes with plain Claude<br><br>
+          <em>Unhobbled is investment. One-offs don't recoup the investment.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="when">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Phased Adoption Understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What phase should I start?" -> Phase 1, always<br>
+          <strong>Intermediate:</strong> "When add Phase 2?" -> When hooks feel natural<br>
+          <strong>Advanced:</strong> "Skip phases?" -> No. Each gate validates readiness<br>
+          <strong>Staff:</strong> "Customize phases?" -> Yes, adapt to your project<br>
+          <strong>Expert:</strong> "Cross-phase?" -> Some Phase 4 tools in Phase 2 projects
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="when">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Runaway $800 Day</div>
+        <div class="text-text-secondary text-sm">
+          Early adopter left unhobbled stack running overnight without limits. No MAX_ITERATIONS, no cost alerts. Woke up to $800 bill. Added cost monitoring as mandatory to community recommendations.<br><br>
+          <em>Every safeguard in Section 6 comes from someone's expensive lesson.</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

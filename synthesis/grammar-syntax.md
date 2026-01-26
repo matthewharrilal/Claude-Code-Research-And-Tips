@@ -1,5 +1,7 @@
 # Agent Pattern Syntax Rules
 
+> **You Are Here:** This document defines **how to combine primitives** from the vocabulary into valid compositions. Think of `grammar-vocabulary.md` as the dictionary (what words mean) and this document as the grammar rules (how to form sentences). Use this when designing multi-agent systems, autonomous loops, or any pattern that combines multiple primitives. If a composition fails at runtime, check here first—you may have a syntax error.
+
 ---
 ## D-FINAL Integration
 **Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
@@ -160,6 +162,19 @@ while has_tasks: (fetch → execute → verify)
 
 ---
 
+### Checkpoint: Composition Operators
+**You should now understand:**
+- [ ] Sequential (`→`): A completes, then B starts with A's output
+- [ ] Parallel (`||`): A and B run concurrently with isolated state
+- [ ] Nested (`⊃`): B operates within A's lifecycle
+- [ ] Conditional (`?`): Branch based on predicate
+- [ ] Loop (`∿`): Repeat until termination condition
+- [ ] Fork-Join (`⋔⋀`): Split, execute in parallel, merge results
+
+**If unclear:** Re-read each operator's "Semantics" section, especially the constraints.
+
+---
+
 ## Valid Compositions
 
 ### 1. Loop + State + Quality
@@ -276,6 +291,17 @@ else:
 - Isolation prevents conflicts during execution
 - Join point handles merge resolution
 - Parallelism has clear boundaries
+
+---
+
+### Checkpoint: Valid Compositions
+**You should now understand:**
+- [ ] Loop + State + Quality: How autonomous execution with quality gates works
+- [ ] Orchestrator + Workers: Clear role separation with handoff points
+- [ ] Nested Loops with Escalation: Bounded retries with human fallback
+- [ ] Fork-Join (CC Mirror): Worktree isolation for parallel execution
+
+**If unclear:** Trace through Template 1 (Ralph Core) step-by-step, identifying each phase.
 
 ---
 
@@ -442,6 +468,18 @@ else:
 
 ---
 
+### Checkpoint: Syntax Errors
+**You should now understand:**
+- [ ] Why workers must never spawn sub-workers (Error 1)
+- [ ] Why orchestrators must never use tools directly (Error 2)
+- [ ] Why parallel execution requires isolated state (Error 3)
+- [ ] Why loops need termination conditions (Error 4)
+- [ ] Why quality gates must precede commits (Error 7)
+
+**If unclear:** For each error, compare the "INVALID" code with the "Fix" to see the correction.
+
+---
+
 ## Pattern Templates
 
 ### Template 1: Basic Autonomous Loop (Ralph Core)
@@ -590,6 +628,17 @@ def execute_hierarchical(objective, depth=0, max_depth=3):
 
 ---
 
+### Checkpoint: Pattern Templates
+**You should now understand:**
+- [ ] Template 1 (Ralph Core): Selection → Execution → Verification → Continuation
+- [ ] Template 2 (CC Mirror): Orchestrator spawns workers in worktrees, awaits, merges
+- [ ] Template 3 (Retry): Exponential backoff with max attempts
+- [ ] Template 4 (State Machine): Valid state transitions prevent invalid operations
+
+**If unclear:** Implement Template 1 manually in bash to internalize the flow.
+
+---
+
 ## Syntax Validation Checklist
 
 Use this checklist to verify your pattern composition is syntactically valid before implementation.
@@ -698,3 +747,174 @@ merge_strategy ::= 'sequential' | 'octopus' | 'resolve_conflicts'
 ---
 
 *This grammar enables composing complex agentic systems from validated primitives. Every pattern should be expressible in these terms; if it's not, either the pattern needs refactoring or the grammar needs extension.*
+
+---
+
+## Troubleshooting
+
+### Common Issue: Loop Never Terminates
+
+**Symptom:** Ralph loop runs forever, burning API costs
+
+**Cause:** No reachable termination condition, or stop-condition never triggers
+
+**Fix:**
+1. Verify your stop-condition is detectable:
+```bash
+# Check if COMPLETE marker is being written
+grep -r "COMPLETE" .
+
+# Verify detection logic
+if grep -q "<promise>COMPLETE</promise>" output.txt; then
+    echo "Would exit here"
+fi
+```
+
+2. Add bounded iteration as safety:
+```bash
+# Bounded loop with early exit
+for (( i=1; i<=25; i++ )); do
+    output=$(claude -p "$(cat PROMPT.md)")
+    echo "$output" | tee output.txt
+    if grep -q "<promise>COMPLETE</promise>" output.txt; then
+        echo "Completed at iteration $i"
+        break
+    fi
+done
+```
+
+---
+
+### Common Issue: Parallel Workers Conflict
+
+**Symptom:** Merge conflicts, overwritten changes, race conditions
+
+**Cause:** Parallel workers sharing mutable state (same branch, same files)
+
+**Fix:** Use worktree isolation:
+```bash
+# Create isolated worktrees for each worker
+git worktree add ../worker-1 -b feature-auth
+git worktree add ../worker-2 -b feature-payment
+git worktree add ../worker-3 -b feature-notifications
+
+# Workers operate in isolation
+cd ../worker-1 && claude "implement auth"
+cd ../worker-2 && claude "implement payment"
+cd ../worker-3 && claude "implement notifications"
+
+# Merge sequentially at join point
+git checkout main
+git merge feature-auth
+git merge feature-payment
+git merge feature-notifications
+
+# Cleanup
+git worktree remove ../worker-1
+git worktree remove ../worker-2
+git worktree remove ../worker-3
+```
+
+---
+
+### Common Issue: Orchestrator Doing Worker's Job
+
+**Symptom:** Orchestrator context fills up, quality degrades, no task isolation
+
+**Cause:** Orchestrator writing code instead of delegating to workers
+
+**Fix:** Verify orchestrator tool usage:
+```
+ALLOWED for Orchestrators:
+- Read (1-2 files max for orientation)
+- Task, TaskCreate, TaskUpdate, TaskList, TaskGet
+- AskUserQuestion
+
+FORBIDDEN for Orchestrators:
+- Write, Edit (code modification)
+- Bash (command execution)
+- Grep, Glob (extensive searching)
+```
+
+If orchestrator needs to understand code, spawn a research subagent:
+```python
+# Instead of:
+orchestrator.read_many_files()  # Pollutes context
+
+# Do this:
+Task("Analyze the auth module and summarize key patterns")
+```
+
+---
+
+### Common Issue: Quality Gate After Commit
+
+**Symptom:** Bad code gets committed, requires manual revert
+
+**Cause:** Gate ordering wrong—commit happens before verification
+
+**Fix:** Always verify BEFORE commit:
+```bash
+# WRONG order
+git commit -m "feature"
+npm test  # Too late!
+
+# CORRECT order
+npm run typecheck && npm test && npm run lint
+if [ $? -eq 0 ]; then
+    git commit -m "feature: verified"
+else
+    echo "Quality gate failed, not committing"
+fi
+```
+
+---
+
+### Common Issue: Sequential Chain Breaks Silently
+
+**Symptom:** Later steps in sequence never run, no error visible
+
+**Cause:** Using `;` instead of `&&`, or swallowing errors
+
+**Fix:** Use explicit error handling:
+```bash
+# Silent failure (bad)
+task_a; task_b; task_c
+
+# Explicit chaining (good)
+task_a && task_b && task_c
+
+# With error capture (better)
+set -e  # Exit on any error
+task_a
+task_b
+task_c
+```
+
+---
+
+### Common Issue: Pattern Doesn't Fit Grammar
+
+**Symptom:** Can't express your design using the composition operators
+
+**Cause:** Either the pattern is invalid, or it needs decomposition
+
+**Fix:**
+1. Break pattern into smaller pieces:
+```
+# Too complex
+ComplexPattern
+
+# Decomposed
+Part1 → Part2 → Part3
+where Part2 = SubA || SubB
+```
+
+2. Check against the formal grammar (EBNF section)
+3. If truly valid but not expressible, document as grammar extension candidate
+
+---
+
+## Tags
+
+`#syntax` `#grammar` `#composition` `#operators` `#validation` `#templates` `#anti-patterns`

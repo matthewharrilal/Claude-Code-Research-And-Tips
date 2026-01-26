@@ -1,0 +1,2369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Agent Patterns | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    /* Pattern Card */
+    .pattern-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .pattern-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .pattern-level {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .level-0-2 { background: #dbeafe; color: #1e40af; }
+    .level-3-4 { background: #dcfce7; color: #166534; }
+    .level-5 { background: #fef3c7; color: #92400e; }
+    .level-6 { background: #fce7f3; color: #9d174d; }
+    .level-7 { background: #fee2e2; color: #991b1b; }
+
+    .pattern-name {
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .pattern-description {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 12px;
+    }
+
+    .pattern-command {
+      background: #18181b;
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #10b981;
+      position: relative;
+    }
+
+    /* Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Decision Tree */
+    .decision-tree {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .decision-tree-title {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .decision-node {
+      padding: 12px 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      margin-left: 24px;
+    }
+
+    .decision-node:first-child {
+      margin-left: 0;
+      background: #ecfdf5;
+      border-color: #0D9373;
+    }
+
+    .decision-question {
+      font-weight: 500;
+      color: #18181b;
+      margin-bottom: 8px;
+    }
+
+    .decision-answer {
+      font-size: 13px;
+      color: #3f3f46;
+      display: flex;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .decision-answer code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+    }
+
+    /* Pattern Comparison Table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .comparison-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #18181b;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .comparison-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .comparison-table tr:hover {
+      background: #fafafa;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Graduation Path */
+    .graduation-path {
+      background: linear-gradient(135deg, #fafafa 0%, #f4f4f5 100%);
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .graduation-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px dashed #e4e4e7;
+    }
+
+    .graduation-step:last-child {
+      border-bottom: none;
+    }
+
+    .graduation-level {
+      flex-shrink: 0;
+      width: 80px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .graduation-content {
+      flex: 1;
+    }
+
+    .graduation-pattern {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 4px;
+    }
+
+    .graduation-outgrow {
+      font-size: 13px;
+      color: #71717a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Your complete map to multi-agent orchestration: from solo loops to factory-scale parallel swarms.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Pattern Landscape
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Every multi-agent pattern solves the same problem differently: how to coordinate AI agents while managing context, cost, and complexity."</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Multi-agent orchestration isn't one thing - it's a spectrum from simple bash loops to factory-scale parallel swarms. Understanding WHERE each pattern lives helps you choose correctly.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="complexity-axis">Axis 1: Complexity Level (0-7)</h3>
+
+        <div class="pattern-card">
+          <div class="pattern-card-header">
+            <span class="pattern-level level-0-2">Level 0-2</span>
+            <span class="pattern-name">Single Session / CLAUDE.md</span>
+          </div>
+          <div class="pattern-description">
+            No orchestration. One Claude instance with context managed via CLAUDE.md files. Most users never need more than this.
+          </div>
+          <div class="pattern-command">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            claude "Implement this feature"
+          </div>
+        </div>
+
+        <div class="pattern-card">
+          <div class="pattern-card-header">
+            <span class="pattern-level level-3-4">Level 3-4</span>
+            <span class="pattern-name">Ralph Wiggum Loop</span>
+          </div>
+          <div class="pattern-description">
+            Sequential fresh-context iterations. Each loop spawns new Claude, reads state from files (prd.json, progress.txt), completes ONE task, commits, exits. Overnight feature shipping.
+          </div>
+          <div class="pattern-command">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            ./ralph.sh 25  # Run 25 iterations
+          </div>
+        </div>
+
+        <div class="pattern-card">
+          <div class="pattern-card-header">
+            <span class="pattern-level level-5">Level 5</span>
+            <span class="pattern-name">CC Mirror</span>
+          </div>
+          <div class="pattern-description">
+            Native multi-agent with TaskCreate/TaskUpdate API. 5-7 parallel workers. Hub-and-spoke coordination. Covers 80% of use cases with zero setup. The "sweet spot" for most developers.
+          </div>
+          <div class="pattern-command">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            npx cc-mirror quick --provider mirror --name mclaude
+          </div>
+        </div>
+
+        <div class="pattern-card">
+          <div class="pattern-card-header">
+            <span class="pattern-level level-6">Level 6</span>
+            <span class="pattern-name">CC Mirror + Git Worktrees</span>
+          </div>
+          <div class="pattern-description">
+            Enhanced parallelism via isolated git worktrees. Each agent owns a worktree (separate branch checkout). Enables true parallel feature development without merge conflicts.
+          </div>
+          <div class="pattern-command">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            git worktree add ../feature-branch feature-branch
+          </div>
+        </div>
+
+        <div class="pattern-card">
+          <div class="pattern-card-header">
+            <span class="pattern-level level-7">Level 7+</span>
+            <span class="pattern-name">Gas Town</span>
+          </div>
+          <div class="pattern-description">
+            Factory-scale orchestration. 8+ persistent workers (Polecats), role-based hierarchy (Mayor, Deacon, Dogs, Refinery). Requires Stage 7+ developer experience. "If you have any doubt, you can't use it."
+          </div>
+          <div class="pattern-command">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            go install github.com/steveyegge/gastown/cmd/gt@latest
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="coordination-axis">Axis 2: Coordination Model</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Coordination</th>
+              <th>Patterns</th>
+              <th>State Management</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>File-based</strong></td>
+              <td>Ralph (progress.txt), Panopticon (handoffs)</td>
+              <td>prd.json, progress.txt, git commits</td>
+            </tr>
+            <tr>
+              <td><strong>Task API</strong></td>
+              <td>CC Mirror (TaskCreate/Update)</td>
+              <td>Native task graph with dependencies</td>
+            </tr>
+            <tr>
+              <td><strong>Role-based</strong></td>
+              <td>Gas Town (Mayor, Deacon, etc.)</td>
+              <td>Beads (git-backed persistent memory)</td>
+            </tr>
+            <tr>
+              <td><strong>Domain-isolated</strong></td>
+              <td>Panopticon (8 parallel directories)</td>
+              <td>Per-domain filesystem isolation</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS (Pattern Selection) -->
+      <section id="decision-tree" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Pattern Selection
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Choosing the wrong pattern is the #1 cause of multi-agent failure. Use this decision tree.
+        </p>
+
+        <div class="decision-tree">
+          <div class="decision-tree-title">
+            <i data-lucide="git-branch" class="w-5 h-5 text-accent"></i>
+            START: "I need multi-agent orchestration"
+          </div>
+
+          <div class="decision-node">
+            <div class="decision-question">How much setup time can you invest?</div>
+            <div class="decision-answer"><span style="color: #0D9373; font-weight: 500;">&lt;5 min</span> <code>CC Mirror</code> (if you need parallelism)</div>
+            <div class="decision-answer"><span style="color: #0D9373; font-weight: 500;">&lt;30 min</span> <code>Ralph</code> (if sequential is OK)</div>
+            <div class="decision-answer"><span style="color: #0D9373; font-weight: 500;">Hours+</span> <code>Gas Town</code> (if complexity justifies it)</div>
+          </div>
+
+          <div class="decision-node" id="budget-criteria">
+            <div class="decision-question">What's your daily budget?</div>
+            <div class="decision-answer"><span style="color: #0D9373; font-weight: 500;">&lt;$20</span> <code>Ralph</code> - Sequential, most efficient</div>
+            <div class="decision-answer"><span style="color: #0D9373; font-weight: 500;">$20-100</span> <code>CC Mirror</code> - Parallel, reasonable cost</div>
+            <div class="decision-answer"><span style="color: #0D9373; font-weight: 500;">$100+</span> <code>Gas Town</code> - Factory scale</div>
+          </div>
+
+          <div class="decision-node" id="experience-criteria">
+            <div class="decision-question">What's your experience stage?</div>
+            <div class="decision-answer"><span style="color: #0D9373; font-weight: 500;">Stage 0-4</span> Start with <code>Ralph</code></div>
+            <div class="decision-answer"><span style="color: #0D9373; font-weight: 500;">Stage 5-6</span> <code>CC Mirror</code> appropriate</div>
+            <div class="decision-answer"><span style="color: #0D9373; font-weight: 500;">Stage 7+</span> <code>Gas Town</code> available</div>
+          </div>
+
+          <div class="decision-node">
+            <div class="decision-question">Do you need parallelism?</div>
+            <div class="decision-answer"><span style="color: #0D9373; font-weight: 500;">No</span> <code>Ralph</code> - Sequential simpler</div>
+            <div class="decision-answer"><span style="color: #0D9373; font-weight: 500;">3-7 agents</span> <code>CC Mirror</code></div>
+            <div class="decision-answer"><span style="color: #0D9373; font-weight: 500;">8+ agents</span> <code>Gas Town</code> or <code>CC Mirror + worktrees</code></div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY EXPERIENCE STAGE MATTERS</div>
+          <div class="decision-reasoning">
+            Steve Yegge's warning about Gas Town: "If you have any doubt whatsoever, then you can't use it." Complex patterns require experience to debug. A Stage 4 developer using Gas Town will "have their face ripped off by chimpanzees."
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              If you haven't successfully managed 10+ agents manually, don't use factory-scale patterns. Graduate through the complexity ladder: Ralph first, then CC Mirror, then consider Gas Town.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY CC MIRROR IS THE SWEET SPOT</div>
+          <div class="decision-reasoning">
+            @nummanali: "CC Mirror covers 80% of use cases with zero effort." Native task API, parallel workers, built-in monitoring. The right choice for most developers most of the time.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              When in doubt, use CC Mirror. Only go simpler (Ralph) if you truly don't need parallelism. Only go complex (Gas Town) if CC Mirror's 5-7 agents isn't enough.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Multi-Agent Pattern Files</span>
+<span class="comment">├── Ralph Pattern</span>
+│   ├── plans/prd.json           <span class="comment"># Task tracking (passes: true/false)</span>
+│   ├── plans/progress.txt       <span class="comment"># Append-only learnings</span>
+│   └── scripts/ralph.sh         <span class="comment"># Loop script</span>
+│
+<span class="comment">├── CC Mirror Pattern</span>
+│   ├── ~/.cc-mirror/            <span class="comment"># Mirror installation</span>
+│   └── variant-name/            <span class="comment"># Named variant for project</span>
+│
+<span class="comment">├── Panopticon Pattern</span>
+│   ├── ~/nox/                   <span class="comment"># Domain 1 (company/product)</span>
+│   ├── ~/metrics/               <span class="comment"># Domain 2 (analytics)</span>
+│   ├── ~/email/                 <span class="comment"># Domain 3 (communications)</span>
+│   └── ~/shared/handoffs/       <span class="comment"># Inter-domain handoffs</span>
+│
+<span class="comment">├── Git Worktrees</span>
+│   ├── main-repo/               <span class="comment"># Primary checkout</span>
+│   └── worktrees/
+│       ├── feature-a/           <span class="comment"># Agent 1 worktree</span>
+│       └── feature-b/           <span class="comment"># Agent 2 worktree</span>
+│
+<span class="comment">└── Gas Town</span>
+    └── ~/.gt/                   <span class="comment"># Gas Town home</span>
+        ├── HQ/                  <span class="comment"># Town-level management</span>
+        ├── Rigs/                <span class="comment"># Project repos</span>
+        └── Inbox/               <span class="comment"># Work queue</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="quick-commands">Quick Command Reference</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Command</th>
+              <th>Setup Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ralph</strong></td>
+              <td><code>./ralph.sh 25</code></td>
+              <td>5 min</td>
+            </tr>
+            <tr>
+              <td><strong>CC Mirror</strong></td>
+              <td><code>npx cc-mirror quick --provider mirror --name mclaude</code></td>
+              <td>5 min</td>
+            </tr>
+            <tr>
+              <td><strong>Git Worktree</strong></td>
+              <td><code>git worktree add ../feature-branch feature-branch</code></td>
+              <td>1 min</td>
+            </tr>
+            <tr>
+              <td><strong>Panopticon</strong></td>
+              <td><code>cd ~/domain && caffeinate -i && claude</code></td>
+              <td>30 min</td>
+            </tr>
+            <tr>
+              <td><strong>rpai</strong></td>
+              <td><code>cargo install rpai && rpai</code></td>
+              <td>2 min</td>
+            </tr>
+            <tr>
+              <td><strong>Gas Town</strong></td>
+              <td><code>gt</code></td>
+              <td>Hours</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Path of a Task: Follow Through Three Patterns
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Like PostgreSQL's "follow the query," trace a single task through each major pattern. See how the same work flows differently through Ralph, CC Mirror, and Gas Town.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">Scenario: "Add user authentication feature"</h3>
+
+        <div class="path-container" style="margin-bottom: 24px;">
+          <div style="font-weight: 600; color: #0D9373; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="repeat" class="w-4 h-4"></i>
+            RALPH PATTERN: Sequential Fresh-Context
+          </div>
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">
+              <strong>Task Enters prd.json</strong><br>
+              You decompose "auth feature" into userStories: schema migration, backend endpoints, frontend forms. Each has <code>passes: false</code>.
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">
+              <strong>ralph.sh Loop Starts</strong><br>
+              Script runs <code>cat PROMPT.md | claude-code</code>. Fresh Claude instance spawns with zero context. Reads prd.json, sees first incomplete task.
+              <div style="background: #ecfdf5; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Decision Branch:</strong> All tasks pass? YES -> Loop exits. NO -> Pick first <code>passes: false</code> task.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">
+              <strong>Claude Executes ONE Task</strong><br>
+              Implements schema migration. Runs verification: <code>npm run typecheck && npm test</code>. Updates prd.json: <code>passes: true</code>. Appends learnings to progress.txt.
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">
+              <strong>Commit and Exit</strong><br>
+              Claude commits changes, exits cleanly. Context destroyed. Loop iteration complete.
+              <div style="background: #e0f2fe; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Key Insight:</strong> Fresh context each loop = no degradation. Can run 25+ iterations overnight.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">
+              <strong>Loop Repeats</strong><br>
+              New Claude instance, reads state from files, picks next task. Continues until all <code>passes: true</code>.
+              <div class="path-verify">Total: Sequential execution, ~3-4 hours for full feature</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="path-container" style="margin-bottom: 24px;">
+          <div style="font-weight: 600; color: #8b5cf6; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="git-branch" class="w-4 h-4"></i>
+            CC MIRROR PATTERN: Parallel Task API
+          </div>
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">
+              <strong>Conductor Receives Task</strong><br>
+              Main agent (Conductor) receives "add auth feature." Decomposes into subtasks using <code>TaskCreate</code> API.
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">
+              <strong>TaskCreate Spawns Workers</strong><br>
+              Conductor creates 3 tasks: schema, backend, frontend. Sets <code>blockedBy</code> dependencies. Schema has no blockers; backend/frontend block on schema.
+              <div style="background: #ecfdf5; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Decision Branch:</strong> Task has blockers? YES -> Worker waits. NO -> Worker starts immediately.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">
+              <strong>Worker Picks Up Task</strong><br>
+              Worker 1 sees unblocked schema task. Claims it via <code>TaskUpdate: in_progress</code>. Begins implementation in isolated context.
+              <div style="background: #fef3c7; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Failure Point:</strong> If worker preamble missing "Do NOT spawn sub-agents" -> infinite recursion possible
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">
+              <strong>Task Completes, Dependencies Unblock</strong><br>
+              Worker 1 finishes schema, marks <code>TaskUpdate: completed</code>. System automatically unblocks backend/frontend tasks. Workers 2 and 3 can now start in parallel.
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">
+              <strong>Parallel Execution</strong><br>
+              Workers 2 and 3 implement backend and frontend simultaneously. No coordination overhead - they don't share files.
+              <div style="background: #e0f2fe; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Key Insight:</strong> Parallelism where possible, dependencies enforced automatically.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">
+              <strong>Conductor Monitors</strong><br>
+              Via <code>TaskList</code>, Conductor sees all tasks completing. When all done, reports completion.
+              <div class="path-verify">Total: Parallel execution, ~1.5 hours for full feature (3x faster than Ralph)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="path-container">
+          <div style="font-weight: 600; color: #ef4444; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="factory" class="w-4 h-4"></i>
+            GAS TOWN PATTERN: Factory-Scale Orchestration
+          </div>
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">
+              <strong>Task Enters Inbox</strong><br>
+              "Add auth feature" arrives at Mayor's Inbox. Mayor is the top-level coordinator for the Town.
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">
+              <strong>Mayor Routes to Refinery</strong><br>
+              Mayor recognizes this needs decomposition. Routes to Refinery agent, which specializes in task breakdown.
+              <div style="background: #ecfdf5; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Decision Branch:</strong> Task atomic? YES -> Direct to Polecat. NO -> Route to Refinery first.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">
+              <strong>Refinery Decomposes</strong><br>
+              Refinery breaks task into 8+ atomic work units. Creates Beads (git-backed persistent memory) for each. Assigns to appropriate Rigs (project repos).
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">
+              <strong>Deacon Assigns to Polecats</strong><br>
+              Deacon (supervisor) receives decomposed tasks. Assigns to available Polecats (persistent workers). Each Polecat owns a worktree.
+              <div style="background: #fef3c7; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Failure Point:</strong> Without crew limits -> unbounded Polecat creation -> cost explosion
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">
+              <strong>Polecats Execute in Parallel</strong><br>
+              8 Polecats work simultaneously across git worktrees. Each has isolated context, shared Beads for coordination.
+              <div style="background: #e0f2fe; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Key Insight:</strong> Factory scale - 8+ parallel workers with role-based hierarchy.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">
+              <strong>Dogs Monitor Quality</strong><br>
+              Dogs (watchdog agents) verify work quality. If issues found, route back through Refinery for correction.
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">
+              <strong>Mayor Reports Completion</strong><br>
+              When all Polecats finish and Dogs approve, Mayor marks task complete. Updates HQ status.
+              <div class="path-verify">Total: Factory execution, ~45 min for full feature (but hours of setup)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">SAME TASK, THREE PATHS, THREE SPEEDS</div>
+          <div class="decision-reasoning">
+            Ralph: Sequential, simple, slowest execution but zero setup.<br>
+            CC Mirror: Parallel, moderate complexity, good balance.<br>
+            Gas Town: Factory scale, complex, fastest execution but hours of setup.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">Migration signals</div>
+            <div class="text-text-secondary text-sm">
+              <strong>Ralph hitting ceiling?</strong> Graduate to CC Mirror for parallelism.<br>
+              <strong>CC Mirror's 5-7 agents not enough?</strong> Consider Gas Town.<br>
+              <strong>Setup time > execution time?</strong> You've chosen wrong. Simplify.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Cross-pattern issues you'll hit regardless of which pattern you choose:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Context rot is universal
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Quality degrades at ~80K tokens regardless of pattern</div>
+          <div class="gotcha-detail"><strong>Applies to:</strong> ALL patterns - Ralph, CC Mirror, Gas Town, everything</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Fresh context per major unit of work. This is why Ralph exists.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            CC Mirror Windows compatibility
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Install fails on Windows</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Unix-specific dependencies</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use WSL2. CC Mirror designed for Unix environments.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Git worktrees merge conflicts
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Parallel edits clash when merging back</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Multiple agents editing overlapping files</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use file-level ownership. Each agent owns specific directories/files.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Subagent infinite recursion
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Workers spawn workers spawn workers...</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Missing "Iron Law" in worker preamble</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Worker preamble must include: "Do NOT spawn sub-agents. Do NOT call TaskCreate."</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Gas Town cost explosion
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> $500+ daily spend</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Unbounded crew creation, no limits</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Set crew limits. Gas Town requires budget discipline.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Vague completion signals
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agents claim "done" but work isn't actually complete</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> No verifiable acceptance criteria</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> ALWAYS include testable criteria: "npm run typecheck passes", not "code is clean".</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions in multi-agent orchestration. These aren't bugs - they're physics.
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Coordination vs Speed
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More agents = more throughput, but also more coordination overhead. At some point, coordination cost exceeds benefit.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Adding agent #6 doesn't make things faster. Agents waiting on each other. Deadlocks.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Balance parallelism with coordination cost. ~5-7 agents is often optimal before overhead dominates.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost vs Throughput
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More agents = more API calls = more money. Parallelism is expensive.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Budget exhausted before project complete. Surprise bills.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Budget caps. Model selection (Haiku for simple tasks, Sonnet for complex). Daily cost monitoring.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Isolation vs Sharing
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Agents need isolated execution (no conflicts), but also shared context (coordination). Can't have both perfectly.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Agents duplicating work. Agents unaware of each other's changes. State sync issues.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> File-based handoffs (explicit sharing points). Git as coordination layer. Accept some duplication as cost of isolation.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Mental Model Shift
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Multi-agent requires thinking like an orchestrator, not a programmer. This takes time to internalize.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Micromanaging agents. Not trusting delegation. Reverting to single-agent habits.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Expect weeks to internalize. Start with simpler patterns. Review what worked after each run.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Debugging Distributed Systems
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Multi-agent failures are harder to trace than single-agent failures. Which agent? When? Why?</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "Something broke but I don't know what." Hours spent on investigation.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Good logging (rpai, Claude HUD). Checkpointing. Keep patterns simpler than you think you need.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Best Pattern</th>
+              <th>Alternative</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Single overnight feature</td>
+              <td><code>Ralph</code></td>
+              <td>CC Mirror</td>
+              <td>Sequential simpler for one thing</td>
+            </tr>
+            <tr>
+              <td>Parallel independent tasks</td>
+              <td><code>CC Mirror</code></td>
+              <td>Git worktrees</td>
+              <td>Native parallelism</td>
+            </tr>
+            <tr>
+              <td>Multiple life domains</td>
+              <td><code>Panopticon</code></td>
+              <td>-</td>
+              <td>Domain isolation unique</td>
+            </tr>
+            <tr>
+              <td>Factory-scale development</td>
+              <td><code>Gas Town</code></td>
+              <td>Claude-Flow</td>
+              <td>Role-based orchestration</td>
+            </tr>
+            <tr>
+              <td>Team collaboration</td>
+              <td><code>CC Mirror</code></td>
+              <td>Custom</td>
+              <td>Task API for visibility</td>
+            </tr>
+            <tr>
+              <td>Budget-constrained</td>
+              <td><code>Ralph</code></td>
+              <td>Manual</td>
+              <td>Lowest cost</td>
+            </tr>
+            <tr>
+              <td>Maximum throughput</td>
+              <td><code>Gas Town</code></td>
+              <td>CC Mirror + worktrees</td>
+              <td>8+ parallel agents</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="graduation">Graduation Path</h3>
+
+        <div class="graduation-path">
+          <div class="graduation-step">
+            <div class="graduation-level level-0-2">Level 0-2</div>
+            <div class="graduation-content">
+              <div class="graduation-pattern">Single session + CLAUDE.md</div>
+              <div class="graduation-outgrow">Outgrow when: Need persistence across sessions</div>
+            </div>
+          </div>
+          <div class="graduation-step">
+            <div class="graduation-level level-3-4">Level 3-4</div>
+            <div class="graduation-content">
+              <div class="graduation-pattern">Ralph Wiggum Loop</div>
+              <div class="graduation-outgrow">Outgrow when: Need parallelism</div>
+            </div>
+          </div>
+          <div class="graduation-step">
+            <div class="graduation-level level-5">Level 5</div>
+            <div class="graduation-content">
+              <div class="graduation-pattern">CC Mirror</div>
+              <div class="graduation-outgrow">Outgrow when: Need 8+ agents, custom roles</div>
+            </div>
+          </div>
+          <div class="graduation-step">
+            <div class="graduation-level level-6">Level 6</div>
+            <div class="graduation-content">
+              <div class="graduation-pattern">CC Mirror + Git Worktrees</div>
+              <div class="graduation-outgrow">Outgrow when: Need factory-scale coordination</div>
+            </div>
+          </div>
+          <div class="graduation-step">
+            <div class="graduation-level level-7">Level 7+</div>
+            <div class="graduation-content">
+              <div class="graduation-pattern">Gas Town</div>
+              <div class="graduation-outgrow">At the frontier</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE MULTI-AGENT WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Work can be parallelized (independent tasks)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You have clear task decomposition</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Budget supports multiple agents</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Experience stage matches pattern complexity</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Throughput matters more than cost</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE MULTI-AGENT WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Tasks are inherently sequential</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Tight budget constraints</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Single Claude session is sufficient</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're at Stage 0-3 (learn basics first)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Debugging time exceeds benefits</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (4 items) -->
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">External State is Universal</div>
+        <div class="text-text-secondary text-sm">
+          Every multi-agent pattern - Ralph, CC Mirror, Gas Town, Panopticon - uses external state (files, git, API). NONE rely on LLM memory. This is the DNA all patterns share.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Fresh Context Principle</div>
+        <div class="text-text-secondary text-sm">
+          Every pattern benefits from fresh context per major unit. Ralph makes this explicit (loop restarts). CC Mirror does it per worker. Gas Town does it per crew. The constraint is universal.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Irreducible Multi-Agent</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Minimal setup:</strong> Two terminal windows. One main Claude, one helper Claude. That's multi-agent.<br><br>
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">cd ~/project && claude</code> (x2)<br><br>
+          Everything else is refinement for scale and coordination.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Molly Cantillon: 8 Parallel Domains</div>
+        <div class="text-text-secondary text-sm">
+          "Personal Panopticon" - 8 parallel Claude instances managing different life domains (nox, metrics, email, growth, trades, health, writing, personal). Jmail built overnight. Proof that multi-agent works at scale.
+        </div>
+      </div>
+
+      <!-- CORE SECTION (5 items) -->
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Patterns = Programming Languages</div>
+        <div class="text-text-secondary text-sm">
+          You wouldn't use C for a web script or Python for kernel code. Same principle: you don't use Gas Town for a single feature or Ralph for factory-scale development.<br><br>
+          <em>Right tool for the job. The tool IS the pattern.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Context Finite → Pattern Selection Forced</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Context finite (200K) → Quality degrades as context fills<br>
+          → Single sessions hit ceiling → Multi-agent needed for scale<br>
+          → Coordination required → Patterns emerge to manage coordination<br>
+          → Pattern complexity ladder exists → Must match experience to pattern
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How Pattern Mismatch Degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10%:</strong> Slight inefficiency (using CC Mirror when Ralph would suffice)<br>
+          <strong>50%:</strong> Significant overhead (setup time > development time)<br>
+          <strong>90%:</strong> Blocking frustration (Gas Town at Stage 4)<br>
+          <strong>100%:</strong> Project abandoned, try different approach
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="core">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Pattern Fit by Project Duration</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1 feature (hours):</strong> Ralph best, CC Mirror overkill, Gas Town way overkill<br>
+          <strong>1 project (days-weeks):</strong> Ralph good, CC Mirror best, Gas Town maybe<br>
+          <strong>Ongoing (months):</strong> Ralph limited, CC Mirror good, Gas Town best
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph + Git Worktrees</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Parallel Ralph loops on separate branches for multi-feature development.<br>
+          <strong>How:</strong> Each worktree gets its own Ralph loop, merging back at completion.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (5 items) -->
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If You Ignore Stage Requirements</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Stage 4 developer uses Gas Town<br>
+          <strong>THEN:</strong> Can't debug failures, overwhelmed by complexity<br>
+          <strong>THEN:</strong> Days lost to orchestration problems<br>
+          <strong>THEN:</strong> Project fails or regresses to simpler pattern<br>
+          <strong>FINALLY:</strong> Steve Yegge: "Face ripped off by chimpanzees"
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Overkill Selection</div>
+        <div class="text-text-secondary text-sm">
+          Developer used Gas Town for a simple feature. Days of setup for what would have been a 30-minute Ralph task. The pattern's power became its liability.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Setup Cost vs Long-Term Gain</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Complex patterns (Gas Town) enable factory scale<br>
+          <strong>Pull B:</strong> Simple patterns (Ralph) work immediately<br><br>
+          <strong>Resolution:</strong> Match setup investment to project duration. Days of setup needs months of use.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Pattern Selection Understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Which pattern should I use?" → Check decision tree<br>
+          <strong>Intermediate:</strong> "Why these criteria?" → Experience + budget + parallelism<br>
+          <strong>Advanced:</strong> "When to migrate?" → Ceiling signals<br>
+          <strong>Staff:</strong> "Can I combine?" → Yes, with care<br>
+          <strong>Expert:</strong> "Can I design new patterns?" → At frontier
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror: 80% With Zero Effort</div>
+        <div class="text-text-secondary text-sm">
+          @nummanali's claim that CC Mirror covers 80% of use cases implies: most developers should default to CC Mirror, not debate patterns. The decision becomes binary: "Is CC Mirror enough?"
+        </div>
+      </div>
+
+      <!-- FILES SECTION (4 items) -->
+      <div class="activity-item analogy" data-section="files">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Cross-Pattern Equivalence
+        </div>
+        <div class="font-medium text-text-primary mb-2">File Structure Mappings</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Ralph prd.json</strong> = Gas Town Inbox = CC Mirror Task Queue<br>
+          <strong>Ralph progress.txt</strong> = Gas Town Beads = CC Mirror history<br>
+          <strong>Git commits</strong> = Universal checkpoint mechanism<br><br>
+          Different syntax, same concepts.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror + Claude HUD</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Monitoring layer for any orchestration pattern.<br>
+          <strong>Why:</strong> HUD shows context remaining, tool execution, to-do progress regardless of underlying pattern.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Anti-Composition
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror + Gas Town: Don't Mix</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Fails:</strong> Conflicting orchestration models. Both want to be the coordinator.<br>
+          <strong>Rule:</strong> One orchestration pattern per project. Choose, don't combine.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="files">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">Pattern Interoperability</div>
+        <div class="text-text-secondary text-sm">
+          <strong>UNSOLVED:</strong> Agents from different patterns can't easily collaborate. A Ralph worker can't hand off to a Gas Town polecat. Pattern boundaries are hard walls.
+        </div>
+      </div>
+
+      <!-- PATH SECTION (3 items) -->
+      <div class="activity-item inversion" data-section="path">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you skipped the decision tree?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Jump straight to "most powerful" pattern<br>
+          <strong>Why this fails:</strong> Power ≠ fit. Gas Town for a feature is overkill. Ralph for factory is underkill.<br>
+          <strong>Hidden constraint:</strong> The decision tree IS the pattern selection skill.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Pattern Migration Success</div>
+        <div class="text-text-secondary text-sm">
+          @nummanali: Graduated from Ralph to CC Mirror. "3x throughput increase." The graduation path works when you follow the signals.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="path">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">No Pattern (Manual)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Simple tasks, learning Claude Code, debugging<br>
+          <strong>When worse:</strong> Any scale, any persistence, any coordination<br><br>
+          Sometimes the answer is "don't use multi-agent yet."
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item invariant" data-section="gotchas">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Verification Required</div>
+        <div class="text-text-secondary text-sm">
+          Every pattern needs verifiable completion criteria. "Done" without tests is not done. This is why: <code>npm run typecheck && npm test</code> appears in Ralph, CC Mirror, AND Gas Town instructions.
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When Agent Count Flips to Cost</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Below ~5-7 agents:</strong> More agents = more throughput<br>
+          <strong>At 5-7 agents:</strong> Coordination overhead begins to dominate<br>
+          <strong>Above 8+ agents:</strong> Need factory-scale patterns (Gas Town) or overhead kills gains<br><br>
+          <strong>THE INFLECTION:</strong> ~5-8 agents before coordination dominates
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="gotchas">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If Workers Can Spawn Workers</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Worker preamble doesn't include "Do NOT spawn sub-agents"<br>
+          <strong>THEN:</strong> Workers spawn workers spawn workers<br>
+          <strong>THEN:</strong> Exponential agent explosion<br>
+          <strong>THEN:</strong> Cost explosion, chaos<br>
+          <strong>FINALLY:</strong> Emergency kill -9 everything
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cost Visibility</div>
+        <div class="text-text-secondary text-sm">
+          Multi-agent makes token spend visible as operational metric. You can't ignore cost when running 5 agents. This forces cost discipline that single-session users avoid.
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Simplicity vs Power</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Simple patterns (Ralph) are limited but reliable<br>
+          <strong>Pull B:</strong> Powerful patterns (Gas Town) are capable but complex<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> This is fundamental. There's no pattern that's both simple AND powerful. You trade one for the other.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="hard">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if debugging distributed was easy?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Maximum parallelism always<br>
+          <strong>Why this fails:</strong> Debugging distributed is fundamentally hard. Multiple agents = multiple failure points = harder trace.<br>
+          <strong>Hidden constraint:</strong> Debugging difficulty is why simpler patterns exist.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">Auto-Pattern Selection</div>
+        <div class="text-text-secondary text-sm">
+          <strong>UNSOLVED:</strong> No AI that chooses the appropriate pattern for you. You still need human judgment for pattern selection. This is an active research area.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Under-Selection Pain</div>
+        <div class="text-text-secondary text-sm">
+          Developer used Ralph for parallel need. Sequential bottleneck, slow iteration. Should have used CC Mirror. Pattern selection error in the other direction.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (4 items) -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If Multi-Agent Isn't Right</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Tasks inherently sequential?</strong> → Single Claude session<br>
+          <strong>Tight budget?</strong> → Ralph (cheapest)<br>
+          <strong>Stage 0-3?</strong> → Learn basics first, skip multi-agent<br>
+          <strong>Debugging > benefits?</strong> → Simplify pattern
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When Judgment Evolves</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Month 1:</strong> "Which pattern?" (confused)<br>
+          <strong>Month 3:</strong> "CC Mirror is usually right" (default)<br>
+          <strong>Month 6:</strong> "I know when to deviate" (intuition)<br>
+          <strong>Month 12:</strong> "I combine patterns" (mastery)
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="when">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When Setup Time Exceeds Task Time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Below threshold:</strong> Worth the pattern investment<br>
+          <strong>At threshold:</strong> Break-even (setup = task)<br>
+          <strong>Above threshold:</strong> Diminishing returns, simpler pattern better<br><br>
+          <strong>THE FLIP:</strong> When setup > task, you've over-engineered.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cross-Pattern Learning</div>
+        <div class="text-text-secondary text-sm">
+          Learning one pattern accelerates learning others. Ralph teaches external state. CC Mirror teaches coordination. Gas Town teaches scale. Mental models transfer.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block, .pattern-command');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre ? pre.textContent : codeBlock.textContent.replace('Copy', '').trim();
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

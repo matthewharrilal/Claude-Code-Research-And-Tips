@@ -125,6 +125,17 @@ Ask yourself: **"If this task fails or takes 50 tool calls, will it ruin my main
 
 ---
 
+### Checkpoint: The Spawning Decision
+**You should now understand:**
+- [ ] Minimum viable spawn overhead (~5-10K tokens)
+- [ ] Break-even point (~15-20K tokens of focused work)
+- [ ] The "context pollution test" for spawn decisions
+- [ ] When to spawn vs when main agent is sufficient
+
+**If unclear:** Re-read "The Spawning Decision Framework" and "When to Spawn" sections.
+
+---
+
 ## 3. Spawning Patterns
 
 ### 3.1 Sequential Spawning
@@ -472,6 +483,17 @@ if subagent.attempts > 3 and not subagent.progress:
     # 2. Escalate to human
     # 3. Skip and continue with other tasks
 ```
+
+---
+
+### Checkpoint: Pattern Selection
+**You should now understand:**
+- [ ] Sequential vs parallel vs hybrid spawning patterns
+- [ ] Independent vs dependent task classification
+- [ ] File-based, prompt-based, and git-based context sharing
+- [ ] Status files and progress tracking mechanisms
+
+**If unclear:** Review the spawning pattern diagrams and implementation examples above.
 
 ---
 
@@ -904,6 +926,103 @@ Treating agents as team members who forget everything overnight:
 │  - Worker preambles preventing recursion                         │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Troubleshooting
+
+### Problem: "Subagent produces wrong output, ignores instructions"
+
+**Symptom:** Worker agent returns unrelated work or misses key requirements.
+
+**Cause:** Instructions too long, buried in noise, or context exceeded.
+
+**Fix:**
+```markdown
+# Structure worker prompts with clear hierarchy:
+## ROLE (who you are)
+You are a WORKER agent...
+
+## TASK (exactly what to do - put this EARLY)
+Implement the login form component.
+
+## CONSTRAINTS (what NOT to do)
+- Do NOT spawn sub-agents
+- Do NOT modify files outside src/components/
+
+## CONTEXT (supporting info - can be longer)
+[Relevant background...]
+
+# Rule: Task description should be in first 500 words
+```
+
+---
+
+### Problem: "Parallel workers produce conflicting changes"
+
+**Symptom:** Git conflicts, or one worker overwrites another's changes.
+
+**Cause:** No file ownership rules, or workers touching shared resources.
+
+**Fix:**
+```bash
+# Option 1: Explicit file ownership
+# In each worker's prompt, specify:
+OWNERSHIP: This worker ONLY modifies:
+- src/components/LoginForm.tsx
+- src/components/LoginForm.test.tsx
+
+# Option 2: Git worktrees (true isolation)
+git worktree add ../worker-frontend -b feature/frontend
+git worktree add ../worker-backend -b feature/backend
+# Each worker runs in separate worktree, merge later
+
+# Option 3: Sequential for shared files
+# If workers must touch same file, serialize them
+```
+
+---
+
+### Problem: "Can't tell when subagent finished"
+
+**Symptom:** Main agent waiting indefinitely, or checking too early/often.
+
+**Cause:** No completion signal protocol.
+
+**Fix:**
+```json
+// Require structured completion output:
+// In worker preamble:
+When complete, output EXACTLY:
+{
+  "status": "complete",
+  "files_modified": ["..."],
+  "summary": "..."
+}
+
+// In orchestrator, parse for this pattern:
+// If not seen after timeout, check status file
+```
+
+---
+
+### Problem: "Subagent spawned sub-subagents, costs exploded"
+
+**Symptom:** Unexpected depth of agents, $50+ bill from one task.
+
+**Cause:** Missing worker preamble that prevents recursive spawning.
+
+**Fix:**
+```markdown
+# ALWAYS include in worker preamble:
+
+RULES:
+- Complete ONLY the task described below
+- Use tools directly (Read, Write, Edit, Bash)
+- Do NOT spawn sub-agents
+- Do NOT call TaskCreate or TaskUpdate
+- You are a WORKER, not an orchestrator
 ```
 
 ---

@@ -1,5 +1,7 @@
 # 15 Innovation Combinations Deep-Dive
 
+> **You Are Here:** This is a frontier exploration document - 15 experimental innovation combinations at the edge of Claude Code development. These are theoretical designs ready for prototyping, not production-proven patterns. For proven patterns, see `synthesis/mastery-multi-agent.md` (CC Mirror, Gas Town) or `synthesis/ralph-ecosystem-complete.md` (Ralph variants). Use this for inspiration when you've mastered the fundamentals.
+
 **Purpose:** Detailed implementation sketches for unexplored innovation combinations at the frontier of Claude Code development.
 
 **Generated:** 2026-01-09
@@ -2319,6 +2321,17 @@ Stay in your lane. Do database work excellently.
 
 ---
 
+### Checkpoint: Innovation Readiness
+**Before attempting any innovation, verify:**
+- [ ] Mastered Boris workflow fundamentals (see `boris-workflow-complete.md`)
+- [ ] Comfortable with context management (see `technical-context-management-advanced.md`)
+- [ ] Experience with subagent spawning (see `technical-subagent-spawning-best-practices.md`)
+- [ ] Appropriate budget for experimentation (parallel agents multiply costs)
+
+**If unclear on fundamentals:** Return to mastery documents. These innovations assume fluency with core patterns.
+
+---
+
 ## Innovation Priority Ranking
 
 Based on complexity, benefit, cost, and ease of experimentation:
@@ -2444,6 +2457,73 @@ These 15 innovations represent the **frontier of Claude Code development**. They
 ## Tags
 
 `#frontier` `#innovations` `#ralph-colonies` `#cross-domain` `#specification-swarm` `#learned-skills` `#self-scaling` `#skill-fusion` `#intelligent-kanban` `#adversarial-testing` `#spec-regeneration` `#live-context` `#skeptical-panopticon` `#memory-augmented` `#always-on-verifier` `#spec-first-vibe` `#specialist-squads`
+
+---
+
+## Troubleshooting Innovation Experiments
+
+### Problem: "Innovation experiment failing immediately"
+
+**Symptom:** Script errors or agent confusion when trying a new pattern.
+
+**Cause:** Missing prerequisites or misconfigured environment.
+
+**Fix:**
+```bash
+# Verify prerequisites are installed
+claude --version     # Claude Code CLI
+gt --version         # Gas Town (if using)
+npx cc-mirror doctor # CC Mirror (if using)
+
+# Check hook configuration
+cat ~/.claude/settings.json | jq '.hooks'
+
+# Test simpler version first
+# E.g., for Ralph Colonies, start with 2 colonies not 5
+```
+
+---
+
+### Problem: "Costs exploding during experiment"
+
+**Symptom:** $50+ spent in one session exploring a pattern.
+
+**Cause:** Parallel agents without iteration limits, or wrong model selection.
+
+**Fix:**
+```bash
+# Always set iteration limits
+MAX_ITERATIONS=10  # Never unlimited for experiments
+
+# Use Haiku for exploration, Sonnet only when needed
+claude --model haiku "Test this pattern..."
+
+# Monitor costs throughout
+/cost  # Check frequently
+
+# Kill runaway agents
+pkill -f claude
+```
+
+---
+
+### Problem: "Agents producing conflicting work"
+
+**Symptom:** Two workers edited the same file, or results don't integrate.
+
+**Cause:** Missing coordination mechanism or file ownership rules.
+
+**Fix:**
+```markdown
+# In worker preamble, add explicit ownership:
+OWNERSHIP:
+- This worker ONLY modifies: src/auth/*.ts
+- DO NOT touch: src/api/*, src/models/*
+- If you need changes in other areas, write to .agent-context/requests.md
+
+# Or use git worktrees for true isolation:
+git worktree add ../worker-1 -b worker-1-branch
+```
 
 ---
 

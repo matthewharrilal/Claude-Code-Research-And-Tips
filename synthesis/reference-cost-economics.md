@@ -1,5 +1,7 @@
 # Cost Estimation & Token Economics Reference
 
+> **You Are Here:** This is the complete cost reference for Claude Code - pricing tables, pattern costs, optimization strategies, and ROI frameworks. Use this when budgeting projects, comparing approaches, or optimizing spend. For context management (which affects cost), see `synthesis/technical-context-management-advanced.md`. For multi-agent costs, see `synthesis/mastery-multi-agent.md`.
+
 > **The Complete Guide to Claude Code Costs, Optimization Strategies, and ROI Measurement**
 >
 > From API pricing to pattern cost analysis to organizational ROI frameworks
@@ -127,6 +129,17 @@ For Claude Sonnet 4/4.5 with 1M context enabled:
 | Multi-agent orchestration | Max 20x or API |
 | Predictable high-volume | Subscription |
 | Variable/bursty usage | API pay-per-token |
+
+---
+
+### Checkpoint: Pricing Fundamentals
+**You should now understand:**
+- [ ] Current model pricing (Haiku < Sonnet < Opus)
+- [ ] Prompt caching savings (up to 90% on cached content)
+- [ ] Batch API discount (50% off)
+- [ ] Subscription tiers and when each makes sense
+
+**If unclear:** Review the pricing tables above before proceeding to pattern costs.
 
 ---
 
@@ -288,6 +301,17 @@ Use Batch API for:
 | 500+ users | 10K-15K | 0.25-0.35 |
 
 **Example:** 200 users × 20K TPM = 4 million total TPM organization limit.
+
+---
+
+### Checkpoint: Cost Optimization
+**You should now understand:**
+- [ ] Model selection strategy (Haiku for setup, Sonnet for builds, Opus for reviews)
+- [ ] Context management impact on costs
+- [ ] Prompt caching implementation for repeated contexts
+- [ ] When to use batch processing
+
+**If unclear:** Practice the model selection workflow on your next project.
 
 ---
 

@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Context and Memory Pattern Taxonomy
 
+> **You Are Here:** This is the **memory and persistence reference** for Claude Code. If you're trying to solve the "no persistent memory" problem, understand context window management, or implement multi-agent memory sharing, this document covers every pattern from simple CLAUDE.md to sophisticated Claude-Mem and Gas Town Beads. **Note:** This file is DEPRECATED - for current content, see `D-FINAL-implementation.md` Sections 1-2.
+
 **Synthesis Date:** 2026-01-09
 **Agent:** Claude Opus 4.5
 **Method:** Exhaustive cross-reference of all extractions in orchestration/, philosophy/, tooling/, techniques/, cross-cutting/
@@ -219,6 +221,24 @@ Iteration 2 (2026-01-09 10:15):
 | Arbitrary data formats | No cross-domain search |
 | Unlimited storage | File organization debt |
 | Works with any tool | Requires discipline |
+
+---
+
+### Checkpoint: File-Based State
+**You should now understand:**
+- [ ] The 4 file-based patterns: CLAUDE.md, progress.txt, prd.json, Filesystem as Memory
+- [ ] Why progress.txt is APPEND-ONLY (never update)
+- [ ] What to log in each iteration
+- [ ] The tradeoffs of each pattern (see table above)
+
+**If unclear:** Re-read Section 2.1 or see `mastery-context-management.md` for practical guidance
+
+**Terminal verification:**
+```bash
+# Test your memory files exist
+ls -la CLAUDE.md plans/prd.json plans/progress.txt 2>/dev/null
+# You should see: files with recent modification times
+```
 
 ---
 
@@ -517,6 +537,17 @@ Gas Town (~/.gt)
 | Git versioning | Steep learning curve |
 | Multi-agent ready | Requires Go |
 | Production-scale | Stage 7+ only |
+
+---
+
+### Checkpoint: Memory Persistence Patterns
+**You should now understand:**
+- [ ] All 3 persistence categories: File-Based, Git-Based, External
+- [ ] Claude-Mem's 3-layer retrieval: search() -> timeline() -> get_observations()
+- [ ] MCP Server state vs plugin state
+- [ ] The Ralph Complete Stack (progress.txt + prd.json + git + CLAUDE.md)
+
+**If unclear:** Re-read Sections 2.1-2.4 or explore the specific extraction files referenced
 
 ---
 
@@ -1270,6 +1301,77 @@ tail -50 progress.txt
 
 ---
 
+---
+
+## Troubleshooting
+
+### Common Issue: Context Window Fills Up Too Quickly
+**Symptom:** Quality degrades mid-task, agent forgets earlier context
+**Cause:** Too much context loaded, or expensive operations in main context
+**Fix:**
+1. Check your token budget allocation (Section 3 has the framework)
+2. Move expensive tools to subagents (Playwright, MCP, large file reads)
+3. Use fresh context per iteration (Ralph pattern)
+4. Enable auto-compact in CC Mirror
+5. Verify CLAUDE.md isn't bloated: `wc -l CLAUDE.md` (should be <500 lines)
+
+### Common Issue: progress.txt Getting Too Large
+**Symptom:** Progress file consuming too much context, slowing iterations
+**Cause:** Not pruning old learnings
+**Fix:**
+```bash
+# 1. Check current size
+wc -l plans/progress.txt
+# If > 100 entries, consider archiving
+
+# 2. Archive old entries
+head -50 plans/progress.txt > plans/progress-archive-$(date +%Y-%m).txt
+tail -50 plans/progress.txt > plans/progress-new.txt
+mv plans/progress-new.txt plans/progress.txt
+
+# 3. Keep archive reference in progress.txt
+echo "# Older entries archived to progress-archive-*.txt" | cat - plans/progress.txt > temp && mv temp plans/progress.txt
+```
+
+### Common Issue: Claude-Mem Not Finding Relevant Context
+**Symptom:** Semantic search returns irrelevant results
+**Cause:** Query too broad, or observations not properly tagged
+**Fix:**
+1. Use specific type filters: `search(query="auth bug", type="bugfix")`
+2. Always batch IDs in get_observations (never single fetches)
+3. Check Chroma DB health: `ls -la ~/.claude-mem/chroma/`
+4. Rebuild embeddings if corrupted: reinstall claude-mem plugin
+
+### Common Issue: Git History Not Providing Enough Context
+**Symptom:** Future iterations don't understand what was done before
+**Cause:** Poor commit messages or missing context in commits
+**Fix:**
+1. Use meaningful commit messages:
+   ```
+   feat(US-001): Add user authentication schema
+
+   - Created users table with email, password_hash
+   - Added migration for existing data
+   - Typecheck passes
+   ```
+2. Reference story IDs in commits
+3. Include "why" not just "what"
+4. Commit after each story completion, not in bulk
+
+### Common Issue: Multi-Agent Memory Conflicts
+**Symptom:** Agents overwrite each other's state, or miss handoffs
+**Cause:** Unclear ownership or timing issues
+**Fix:**
+1. Use explicit file ownership (each agent owns its directory)
+2. Use handoff protocol with timestamps and acknowledgment
+3. For shared state, use TaskCreate/TaskUpdate dependencies
+4. Consider using file locks for critical sections:
+   ```bash
+   flock -x /tmp/shared.lock -c "write_to_shared_file"
+   ```
+
+---
+
 ## Tags
 
 `#taxonomy` `#context-management` `#memory` `#persistence` `#file-based` `#git-based` `#claude-mem` `#fresh-context` `#compaction` `#token-optimization` `#multi-agent` `#orchestration` `#ralph` `#panopticon` `#gas-town` `#claude-md` `#prd-json` `#progress-txt` `#worktrees` `#handoffs`
@@ -1277,3 +1379,4 @@ tail -50 progress.txt
 ---
 
 *Taxonomy compiled from exhaustive cross-reference of all extractions in the Claude-Research-And-Tips repository. Patterns represent community best practices as of 2026-01-09.*
+*Wave-3 Enhanced: 2026-01-19*

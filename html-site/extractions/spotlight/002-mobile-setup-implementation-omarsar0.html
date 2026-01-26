@@ -1,0 +1,2169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Setup Implementation | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    .path-verify {
+      font-size: 13px;
+      color: #10b981;
+      margin-top: 8px;
+    }
+
+    .path-time {
+      font-size: 12px;
+      color: #71717a;
+      margin-top: 4px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Dependencies Checklist */
+    .deps-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 600px) {
+      .deps-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dep-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .dep-item code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+    }
+
+    /* File Location Box */
+    .file-location {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .file-location-path {
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      color: #166534;
+      font-weight: 500;
+    }
+
+    .file-location-desc {
+      font-size: 13px;
+      color: #3f3f46;
+      margin-top: 4px;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Prerequisite link */
+    .prereq-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 8px;
+      color: #059669;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+
+    .prereq-link:hover {
+      background: #d1fae5;
+      border-color: #6ee7b7;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="smartphone" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Copy-paste ready: tmux auto-attach, notification hooks, port allocation, and mosh configuration for mobile Claude.</div>
+        </div>
+
+        <div class="mb-6">
+          <span class="text-sm text-text-muted">Prerequisite reading:</span>
+          <a href="001-mobile-claude-code-dabit3.html" class="prereq-link ml-2">
+            <i data-lucide="book-open" class="w-4 h-4"></i>
+            Mobile Claude Code Conceptual Guide (dabit3)
+          </a>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Mobile Claude = tmux + hooks + mosh + worktrees. Four components, complete setup."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'mosh --ssh=\"ssh -p 47892\" user@100.x.x.x')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>mosh --ssh="ssh -p 47892" user@100.x.x.x</code>
+          </div>
+
+          <div class="core-anchor">Connect from phone, survive network transitions, get notified when Claude needs you.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          This is the implementation companion to dabit3's conceptual guide. Where that explains WHY, this provides the exact code. Every block is copy-paste ready. Every path is absolute.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">The Four Components</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div class="p-4 bg-bg-subtle border border-border rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="terminal" class="w-4 h-4 text-accent"></i>
+              <span class="font-semibold">tmux Auto-Attach</span>
+            </div>
+            <p class="text-sm text-text-muted">Session persistence. Reconnect to running Claude instantly.</p>
+          </div>
+          <div class="p-4 bg-bg-subtle border border-border rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="bell" class="w-4 h-4 text-accent"></i>
+              <span class="font-semibold">Notification Hooks</span>
+            </div>
+            <p class="text-sm text-text-muted">Push alerts when Claude needs input. Phone buzzes within 2-3 seconds.</p>
+          </div>
+          <div class="p-4 bg-bg-subtle border border-border rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="wifi" class="w-4 h-4 text-accent"></i>
+              <span class="font-semibold">mosh Connection</span>
+            </div>
+            <p class="text-sm text-text-muted">Network-resilient shell. Survives WiFi to cellular, phone sleep.</p>
+          </div>
+          <div class="p-4 bg-bg-subtle border border-border rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="git-branch" class="w-4 h-4 text-accent"></i>
+              <span class="font-semibold">Git Worktrees</span>
+            </div>
+            <p class="text-sm text-text-muted">Parallel Claude agents. Each branch isolated with unique ports.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-pretooluse" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY PreToolUse (NOT PostToolUse)?</div>
+          <div class="decision-reasoning">
+            PreToolUse fires BEFORE the tool runs. For AskUserQuestion, this means you get notified BEFORE Claude waits for your input. PostToolUse would notify AFTER the question was asked and answered - useless for mobile.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Always use PreToolUse for notifications. PostToolUse is for logging/auditing after the fact.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-jq">
+          <div class="decision-why">WHY jq (NOT Python/Node)?</div>
+          <div class="decision-reasoning">
+            jq is purpose-built for JSON in shell scripts. It's lightweight (single binary), reliable, and standard on most systems. Python or Node would add dependencies and complexity for a simple JSON extraction.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Install jq: <code class="bg-bg-muted px-2 py-1 rounded text-sm">apt install jq</code>. Use it for all JSON parsing in hooks.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-hash-ports">
+          <div class="decision-why">WHY HASH-BASED PORTS (NOT Random)?</div>
+          <div class="decision-reasoning">
+            Hash-based ports are deterministic: same branch name always gets the same port. This means you can bookmark dev server URLs. Random ports would change every session, breaking your workflow.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Theoretical collision risk exists (~1% for 10 branches), but determinism is worth it. Override manually if collision occurs.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-custom-port">
+          <div class="decision-why">WHY CUSTOM SSH PORT 47892 (NOT 22)?</div>
+          <div class="decision-reasoning">
+            Security through obscurity as an addition to other measures (VPN, key auth). Port 22 is targeted by automated scanners. Custom port reduces noise in logs and adds a small barrier.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Choose any high port (1024-65535). Update SSH config: <code class="bg-bg-muted px-2 py-1 rounded text-sm">Port 47892</code> in /etc/ssh/sshd_config.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          File Structure
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Complete file locations with copy-paste ready code. Every path is absolute.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">File Locations Summary</h3>
+
+        <div class="file-location">
+          <div class="file-location-path">~/.claude/settings.json</div>
+          <div class="file-location-desc">Hook configuration - tells Claude when to run notification script</div>
+        </div>
+
+        <div class="file-location">
+          <div class="file-location-path">~/.claude/hooks/poke-notify.sh</div>
+          <div class="file-location-desc">Notification script - sends push to your phone</div>
+        </div>
+
+        <div class="file-location">
+          <div class="file-location-path">~/.zshrc (or ~/.bashrc)</div>
+          <div class="file-location-desc">tmux auto-attach - session persistence on login</div>
+        </div>
+
+        <div class="file-location">
+          <div class="file-location-path">~/Code/myproject/</div>
+          <div class="file-location-desc">Git worktrees - each branch in separate directory</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="settings-json">~/.claude/settings.json</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>{
+  <span class="string">"hooks"</span>: {
+    <span class="string">"PreToolUse"</span>: [{
+      <span class="string">"matcher"</span>: <span class="string">"AskUserQuestion"</span>,
+      <span class="string">"hooks"</span>: [{
+        <span class="string">"type"</span>: <span class="string">"command"</span>,
+        <span class="string">"command"</span>: <span class="string">"~/.claude/hooks/poke-notify.sh question"</span>
+      }]
+    }]
+  }
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="poke-notify">~/.claude/hooks/poke-notify.sh</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">#!/bin/bash</span>
+<span class="comment"># Mobile notification script for Claude Code</span>
+<span class="comment"># Sends push notification when Claude needs user input</span>
+
+<span class="comment"># Extract the question from Claude's event data</span>
+<span class="variable">QUESTION</span>=$(echo "<span class="variable">$EVENT_DATA</span>" | jq -r '.tool_input.questions[0].question')
+
+<span class="comment"># Your project name (set this per-project or use pwd)</span>
+<span class="variable">PROJECT_NAME</span>=$(basename "$(pwd)")
+
+<span class="comment"># Build the notification message</span>
+<span class="variable">MESSAGE</span>="<span class="variable">$PROJECT_NAME</span>: Claude needs input - <span class="variable">$QUESTION</span>"
+
+<span class="comment"># Send to Poke (replace with your API URL and token)</span>
+curl -s -X POST "https://api.pokepush.com/notify" \
+  -H "Authorization: Bearer <span class="variable">$POKE_TOKEN</span>" \
+  -H "Content-Type: application/json" \
+  -d "{\"message\": \"<span class="variable">$MESSAGE</span>\"}"</pre>
+        </div>
+
+        <p class="text-sm text-text-muted mb-6">
+          <strong>After creating:</strong> <code>chmod +x ~/.claude/hooks/poke-notify.sh</code>
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="zshrc">~/.zshrc - tmux Auto-Attach</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># tmux auto-attach: join existing session or create new</span>
+<span class="keyword">if</span> [[ -z "<span class="variable">$TMUX</span>" ]]; <span class="keyword">then</span>
+  tmux attach -t main 2>/dev/null || tmux new -s main
+<span class="keyword">fi</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Port Allocation Script</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># port_for_branch.py - Deterministic port from branch name</span>
+<span class="keyword">import</span> sys
+
+branch_name = sys.argv[1] <span class="keyword">if</span> len(sys.argv) > 1 <span class="keyword">else</span> <span class="string">"main"</span>
+hash_val = sum(ord(c) <span class="keyword">for</span> c <span class="keyword">in</span> branch_name)
+django_port = 8001 + (hash_val % 99)
+
+print(django_port)</pre>
+        </div>
+
+        <p class="text-sm text-text-muted mb-6">
+          <strong>Usage:</strong> <code>python port_for_branch.py sidebar</code> returns <code>8047</code>
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Git Worktree Structure</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Create worktrees for parallel Claude agents</span>
+git worktree add ../myproject-sidebar feature/sidebar
+git worktree add ../myproject-dark-mode feature/dark-mode
+
+<span class="comment"># Result:</span>
+~/Code/
+├── myproject/              <span class="comment"># main branch (original)</span>
+├── myproject-sidebar/      <span class="comment"># feature/sidebar (worktree)</span>
+└── myproject-dark-mode/    <span class="comment"># feature/dark-mode (worktree)</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Dependencies Checklist</h3>
+
+        <div class="deps-grid">
+          <div class="dep-item">
+            <i data-lucide="check-circle" class="w-4 h-4 text-accent"></i>
+            <span><code>tmux</code> - Session persistence</span>
+          </div>
+          <div class="dep-item">
+            <i data-lucide="check-circle" class="w-4 h-4 text-accent"></i>
+            <span><code>mosh</code> - Network-resilient shell</span>
+          </div>
+          <div class="dep-item">
+            <i data-lucide="check-circle" class="w-4 h-4 text-accent"></i>
+            <span><code>jq</code> - JSON parsing</span>
+          </div>
+          <div class="dep-item">
+            <i data-lucide="check-circle" class="w-4 h-4 text-accent"></i>
+            <span><code>curl</code> - HTTP requests</span>
+          </div>
+          <div class="dep-item">
+            <i data-lucide="check-circle" class="w-4 h-4 text-accent"></i>
+            <span><code>git</code> - Worktrees</span>
+          </div>
+          <div class="dep-item">
+            <i data-lucide="check-circle" class="w-4 h-4 text-accent"></i>
+            <span>Poke/Pushover account</span>
+          </div>
+          <div class="dep-item">
+            <i data-lucide="check-circle" class="w-4 h-4 text-accent"></i>
+            <span>Termius/Blink app</span>
+          </div>
+          <div class="dep-item">
+            <i data-lucide="check-circle" class="w-4 h-4 text-accent"></i>
+            <span>VPS with Tailscale</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Path of a Notification: Follow the Signal
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Like PostgreSQL's "follow the query," trace a mobile notification from Claude's need to your phone buzzing. See every decision point and what happens at each stage.
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">
+              <strong>Claude Prepares to Ask</strong><br>
+              Claude is working autonomously. It encounters ambiguity and needs clarification. It prepares to call <code>AskUserQuestion</code> tool.<br>
+              <div class="path-verify">Internal state: Tool call queued, not yet executed</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">
+              <strong>PreToolUse Hook Fires</strong><br>
+              BEFORE the tool executes, Claude Code checks <code>~/.claude/settings.json</code>. It finds <code>PreToolUse</code> hook with matcher <code>AskUserQuestion</code>.<br>
+              <div style="background: #ecfdf5; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Decision Branch:</strong> Does matcher match? <code>AskUserQuestion</code> == <code>AskUserQuestion</code>? YES -> Execute hook
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">
+              <strong>Hook Script Spawns</strong><br>
+              Claude Code executes <code>~/.claude/hooks/poke-notify.sh question</code>. The script receives event data via <code>$EVENT_DATA</code> environment variable (JSON payload).<br>
+              <div style="background: #fef3c7; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Failure Point:</strong> If script not executable -> "permission denied" -> silent failure, no notification
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">
+              <strong>jq Extracts Question</strong><br>
+              Script runs: <code>echo "$EVENT_DATA" | jq -r '.tool_input.questions[0].question'</code><br>
+              Extracts the actual question text Claude wants to ask you.<br>
+              <div style="background: #fef3c7; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Failure Point:</strong> If jq not installed -> empty QUESTION variable -> notification says "Claude needs input - "
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">
+              <strong>curl Sends to Poke API</strong><br>
+              Script constructs message: <code>"$PROJECT_NAME: Claude needs input - $QUESTION"</code> and POSTs to Poke API with your token.<br>
+              <div style="background: #ecfdf5; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Decision Branch:</strong> API responds 200? YES -> Notification queued. NO (401) -> Token invalid, check dashboard.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">
+              <strong>Poke Server Delivers</strong><br>
+              Poke's infrastructure routes the push notification to your phone via APNs (iOS) or FCM (Android). Typically 1-2 seconds.<br>
+              <div class="path-verify">Observable: Phone buzzes, notification appears</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">
+              <strong>Meanwhile: Claude Waits</strong><br>
+              Back on the server, Claude's <code>AskUserQuestion</code> tool has now executed. Claude is blocked, waiting for your response. The terminal shows the question prompt.<br>
+              <div style="background: #e0f2fe; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Key Insight:</strong> PreToolUse fired BEFORE Claude started waiting. You're notified the moment Claude needs you, not after.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">
+              <strong>You Connect via Mosh</strong><br>
+              Open Termius/Blink on phone. Run <code>mosh --ssh="ssh -p 47892" user@100.x.x.x</code>. Mosh handshakes, attaches to your server.<br>
+              <div style="background: #ecfdf5; padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 13px;">
+                <strong>Decision Branch:</strong> Existing tmux session? YES -> Auto-attach. NO -> Create new session.
+              </div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">
+              <strong>tmux Auto-Attaches</strong><br>
+              Your <code>.zshrc</code> runs <code>tmux attach -t main 2>/dev/null || tmux new -s main</code>. You're immediately in the same session where Claude is waiting.<br>
+              <div class="path-verify">Observable: You see Claude's question prompt exactly as you left it</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">
+              <strong>You Respond, Claude Continues</strong><br>
+              Type your answer, press Enter. Claude receives input, resumes work. The loop continues autonomously until the next question.<br>
+              <div class="path-verify">Total latency: ~2-5 seconds from Claude's need to your phone buzz</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Setup Flow: Fresh VM to Working Mobile</h3>
+
+        <p class="text-text-secondary mb-4">
+          Setup steps with timing estimates. Total time: ~35 minutes.
+        </p>
+
+        <div class="deps-grid">
+          <div class="dep-item">
+            <span class="font-semibold">1.</span> Base VM setup <span class="text-text-muted">(~10 min)</span>
+          </div>
+          <div class="dep-item">
+            <span class="font-semibold">2.</span> tmux auto-attach <span class="text-text-muted">(~2 min)</span>
+          </div>
+          <div class="dep-item">
+            <span class="font-semibold">3.</span> Claude Code install <span class="text-text-muted">(~5 min)</span>
+          </div>
+          <div class="dep-item">
+            <span class="font-semibold">4.</span> Hook directory <span class="text-text-muted">(~1 min)</span>
+          </div>
+          <div class="dep-item">
+            <span class="font-semibold">5.</span> Notification script <span class="text-text-muted">(~3 min)</span>
+          </div>
+          <div class="dep-item">
+            <span class="font-semibold">6.</span> settings.json <span class="text-text-muted">(~3 min)</span>
+          </div>
+          <div class="dep-item">
+            <span class="font-semibold">7.</span> Test notification <span class="text-text-muted">(~5 min)</span>
+          </div>
+          <div class="dep-item">
+            <span class="font-semibold">8.</span> Git worktrees <span class="text-text-muted">(~5 min, optional)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Implementation-specific issues with concrete fixes and verification.
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            mosh doesn't forward SSH agent
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> <code>git push</code> returns "Permission denied (publickey)"</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Inside tmux, run <code>ssh-add ~/.ssh/id_ed25519</code></div>
+          <div class="gotcha-detail"><strong>Verify:</strong> <code>ssh-add -l</code> shows your key</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            settings.json invalid JSON
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Hooks don't fire, no errors shown</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Validate with <code>cat ~/.claude/settings.json | jq .</code></div>
+          <div class="gotcha-detail"><strong>Verify:</strong> jq outputs formatted JSON without errors</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Hook script not executable
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Hooks don't fire, "permission denied" in logs</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>chmod +x ~/.claude/hooks/poke-notify.sh</code></div>
+          <div class="gotcha-detail"><strong>Verify:</strong> <code>ls -la</code> shows <code>-rwxr-xr-x</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            $EVENT_DATA not available
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Script runs but QUESTION is empty</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Ensure hook type is "command" (not "url")</div>
+          <div class="gotcha-detail"><strong>Verify:</strong> Add <code>echo "$EVENT_DATA" >> /tmp/debug.log</code> to script</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            jq not installed
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Script fails silently, no notification</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>apt install jq</code> or <code>brew install jq</code></div>
+          <div class="gotcha-detail"><strong>Verify:</strong> <code>which jq</code> returns path</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Poke API token invalid
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> No notifications, curl returns 401</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Re-copy token from Poke dashboard, check for trailing spaces</div>
+          <div class="gotcha-detail"><strong>Verify:</strong> <code>curl -v ...</code> returns 200</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Port collision between branches
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Address already in use" when starting dev server</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use different branch names, or manually set port</div>
+          <div class="gotcha-detail"><strong>Verify:</strong> <code>lsof -i :8047</code> shows which process</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            tmux session name conflict
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "duplicate session: main" error</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Kill existing: <code>tmux kill-session -t main</code></div>
+          <div class="gotcha-detail"><strong>Verify:</strong> <code>tmux ls</code> shows sessions</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Worktree on same branch
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "fatal: 'feature/x' is already checked out" error</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Each worktree needs unique branch</div>
+          <div class="gotcha-detail"><strong>Verify:</strong> <code>git worktree list</code> shows distinct branches</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Relative path in hook command
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "command not found" error</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use absolute path: <code>~/.claude/hooks/poke-notify.sh</code></div>
+          <div class="gotcha-detail"><strong>Verify:</strong> Run command manually in terminal</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental implementation challenges, not simple fixes:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            JSON Event Structure Changes
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Claude updates may change the event JSON format. Your jq query that works today might break tomorrow.</div>
+          <div class="hard-detail"><strong>Why hard:</strong> No versioned API contract for hook events.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Pin Claude version in production. Check release notes before updating. Add fallback paths in script.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Notification Service API Changes
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Poke, Pushover, ntfy all have their own APIs. If they change, your script breaks.</div>
+          <div class="hard-detail"><strong>Why hard:</strong> External dependency you don't control.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Abstract notification layer. Create <code>notify()</code> function that can swap backends.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cross-Shell Compatibility
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> zsh and bash have subtle differences. Auto-attach that works in zsh might fail in bash.</div>
+          <div class="hard-detail"><strong>Why hard:</strong> Shell scripting is not standardized.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Test in both. Use POSIX-compatible syntax where possible. Document shell-specific quirks.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Hook Execution Environment
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Hooks run in a limited environment. Not all environment variables available. PATH may differ.</div>
+          <div class="hard-detail"><strong>Why hard:</strong> Isolation is intentional but poorly documented.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use absolute paths for all commands. Export required variables explicitly. Debug with logging.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Worktree Merge Complexity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Multiple worktrees = multiple active branches = complex merge situations.</div>
+          <div class="hard-detail"><strong>Why hard:</strong> Git fundamentally assumes single working directory.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Merge frequently. Keep feature branches short-lived. Use clear naming conventions.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE THIS GUIDE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You've read the dabit3 conceptual guide and want implementation</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You need exact copy-paste code for your setup</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're debugging an existing mobile setup</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're comfortable with shell scripting basics</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You want terminal-first mobile workflow</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE THIS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You want conceptual understanding first - Read dabit3 guide</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You prefer GUI over terminal - Use Superconductor iOS</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You want zero-config solution - Use Replit mobile</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You need team features/dashboard - Use AI Maestro</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're not comfortable with shell scripting</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with all hooks: Event-driven architecture</div>
+        <div class="text-text-secondary text-sm">
+          PreToolUse hook = same pattern as Git hooks, CI hooks, browser event listeners. Event fires, handler runs. If you understand any event system, you understand Claude hooks.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Ralph: External state files</div>
+        <div class="text-text-secondary text-sm">
+          tmux sessions + worktrees = same "state in files" pattern as Ralph's prd.json and progress.txt. Both use filesystem as memory.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Unix: Everything is a file</div>
+        <div class="text-text-secondary text-sm">
+          Configuration in files, hooks as scripts, state in directories. Pure Unix philosophy. If you know Unix, this setup is familiar.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">omarsar0 amplification: 86K views</div>
+        <div class="text-text-secondary text-sm">
+          Elvis shared mgranda's implementation to 86K views, 625 likes, 704 bookmarks. Community validation that this exact code works.
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item minimal" data-section="core">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">Just tmux auto-attach</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The irreducible core:</strong> <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">tmux attach || tmux new</code><br>
+          <strong>Gives you:</strong> Session persistence only.<br>
+          <strong>Omits:</strong> Notifications, worktrees, port allocation.<br>
+          Start here if you just want basic mobile access.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Configuration as Documentation</div>
+        <div class="text-text-secondary text-sm">
+          Well-commented configs become self-documenting. Your settings.json IS the specification. Future you (or teammates) can read intent from the code.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Reproducibility</div>
+        <div class="text-text-secondary text-sm">
+          Exact code = can recreate setup identically. New team member? Give them this doc. New VM? Run these commands. DevOps principle applied to Claude.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if we didn't use jq?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Alternative:</strong> Python, Node, or grep/sed<br>
+          <strong>Why it fails:</strong> Python needs runtime, Node adds 100MB, grep is brittle.<br>
+          <strong>Revealed:</strong> jq is the only tool purpose-built for this exact job.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if hooks were inline in settings.json?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Alternative:</strong> Embed script content directly in JSON<br>
+          <strong>Why it fails:</strong> Can't version control independently, can't share, can't test.<br>
+          <strong>Revealed:</strong> Separate scripts = modularity = maintainability.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude events are JSON</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Events are JSON<br>
+          -> Need JSON parser<br>
+          -> jq is lightest<br>
+          -> Shell script possible<br>
+          -> No heavy dependencies<br>
+          -> Works on any Unix system
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Branches need isolation</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Parallel Claude agents<br>
+          -> Need isolated directories<br>
+          -> Git worktrees fit<br>
+          -> Each has own port<br>
+          -> Port must be deterministic<br>
+          -> Hash-based allocation
+        </div>
+      </div>
+
+      <!-- FILES SECTION -->
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">This + dabit3 conceptual guide</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Concept (WHY) + Implementation (HOW) = complete understanding.<br>
+          <strong>Order matters:</strong> Read dabit3 first for mental model, then this for exact code.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">This + ntfy (self-hosted)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Replace Poke curl with ntfy curl. Same pattern, open-source backend.<br>
+          <strong>Benefit:</strong> No third-party dependency, self-hosted privacy.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="files">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">ntfy instead of Poke</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Want self-hosted, open source, no account required.<br>
+          <strong>Trade-off:</strong> Need to run ntfy server or use public instance.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="files">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Blink instead of Termius</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Prefer native mosh support, want built-in keys management.<br>
+          <strong>Trade-off:</strong> iOS only, less cross-platform.
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Setup time vs ongoing benefit</div>
+        <div class="text-text-secondary text-sm">
+          <strong>One-time:</strong> ~35 minutes setup<br>
+          <strong>Ongoing:</strong> Hours saved per week from mobile access<br>
+          <strong>Break-even:</strong> ~2 mobile sessions<br>
+          <strong>The flip:</strong> After day 1, pure benefit
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip chmod +x</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip making script executable<br>
+          <strong>THEN:</strong> Hook silently fails<br>
+          <strong>THEN:</strong> No notification sent<br>
+          <strong>THEN:</strong> Claude waits, you don't know<br>
+          <strong>FINALLY:</strong> Wasted mobile time debugging
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you use invalid JSON</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> settings.json has syntax error<br>
+          <strong>THEN:</strong> Claude ignores entire file<br>
+          <strong>THEN:</strong> All hooks disabled<br>
+          <strong>THEN:</strong> No notifications, no customization<br>
+          <strong>FINALLY:</strong> Default Claude behavior only
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">mgranda's original implementation</div>
+        <div class="text-text-secondary text-sm">
+          Built the exact code in this guide. Blog post at granda.org documented the journey. This IS production-tested configuration.
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How settings.json corruption degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10% degraded:</strong> One hook has typo - that hook fails, others work<br>
+          <strong>50% degraded:</strong> JSON structure broken - all hooks fail<br>
+          <strong>100% failure:</strong> Invalid JSON - Claude may refuse to start<br><br>
+          <em>Detection: <code>jq .</code> is your validator</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How notification script degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10% degraded:</strong> Occasional timeout - some notifications lost<br>
+          <strong>50% degraded:</strong> API auth broken - many notifications lost<br>
+          <strong>100% failure:</strong> Script not executable - all notifications lost<br><br>
+          <em>Detection: Manual curl test</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Auto-generating settings.json</div>
+        <div class="text-text-secondary text-sm">
+          Currently manual. Could be scripted with interactive wizard: "Which events to notify? Which service to use?" No community solution yet.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Multi-service abstraction</div>
+        <div class="text-text-secondary text-sm">
+          Currently hardcoded to one service. Abstract <code>notify()</code> function could support Poke, ntfy, Telegram, Discord with config switch. Opportunity for community tool.
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Simplicity vs Flexibility</div>
+        <div class="text-text-secondary text-sm">
+          <strong>PULL A:</strong> Hardcode Poke - simple, works, single point of failure<br>
+          <strong>PULL B:</strong> Abstract notification layer - flexible, complex, maintenance burden<br><br>
+          <strong>Resolution:</strong> Start simple (hardcode), abstract later (when you need second service)
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Hash determinism vs Collision risk</div>
+        <div class="text-text-secondary text-sm">
+          <strong>PULL A:</strong> Deterministic ports - predictable, bookmarkable URLs<br>
+          <strong>PULL B:</strong> Collision risk - theoretical ~1% with 10 branches<br><br>
+          <strong>Resolution:</strong> Accept low collision risk. Manual override if it happens.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> "Copy-paste the code" - Can set up, can't customize<br>
+          <strong>Intermediate:</strong> "Understand each line" - Can adapt for different services<br>
+          <strong>Advanced:</strong> "Build new hook types" - Can create custom automation<br>
+          <strong>Expert:</strong> "Share with community" - Can document patterns for others
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="hard">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude hooks = Git hooks</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What you know:</strong> pre-commit, post-commit, pre-push<br>
+          <strong>How it applies:</strong> PreToolUse = pre-commit for Claude actions<br>
+          <strong>Same pattern:</strong> Event fires, script runs, can block or modify<br><br>
+          <em>If you've written a Git hook, you can write a Claude hook.</em>
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item inflection" data-section="when">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When configuration complexity hurts</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-3 hooks:</strong> Pure benefit, easy to maintain<br>
+          <strong>4-5 hooks:</strong> Some overhead, worth it<br>
+          <strong>6+ hooks:</strong> Maintenance burden growing<br>
+          <strong>10+ hooks:</strong> Consider tooling/abstraction<br><br>
+          <strong>THE INFLECTION:</strong> ~5 custom hooks before complexity hurts
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you skipped the conceptual guide?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd have:</strong> Working setup, no understanding<br>
+          <strong>Why it fails:</strong> First problem = debugging nightmare<br>
+          <strong>Revealed:</strong> Implementation without concept = cargo cult<br><br>
+          <em>The conceptual guide is not optional. It's foundational.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="when">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Port collision discovery</div>
+        <div class="text-text-secondary text-sm">
+          Developer had two branches with similar names. Both got same port. Confusion ensued. Led to documenting hash algorithm and manual override option.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If this guide isn't right for you</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Want concepts first?</strong> -> dabit3 mobile guide<br>
+          <strong>Want GUI?</strong> -> Superconductor iOS<br>
+          <strong>Want zero-config?</strong> -> Replit mobile<br>
+          <strong>Want team features?</strong> -> AI Maestro
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

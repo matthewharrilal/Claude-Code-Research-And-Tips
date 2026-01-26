@@ -1,0 +1,2370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anti-Patterns | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #ef4444;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #ef4444;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Anti-Pattern Box */
+    .anti-pattern-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .anti-pattern-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .anti-pattern-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    .anti-pattern-detail strong {
+      color: #991b1b;
+    }
+
+    /* Fix Box */
+    .fix-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #22c55e;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-top: 12px;
+    }
+
+    .fix-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #166534;
+      margin-bottom: 8px;
+    }
+
+    .fix-content {
+      font-size: 14px;
+      color: #166534;
+    }
+
+    /* Warning Box */
+    .warning-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .warning-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .warning-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+    .code-block .danger { color: #ef4444; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Checklist Box */
+    .checklist-box {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .checklist-title {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 16px;
+    }
+
+    .checklist-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .checklist-item code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Category Grid */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .category-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.2s;
+    }
+
+    .category-card:hover {
+      border-color: #0D9373;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .category-icon {
+      width: 40px;
+      height: 40px;
+      background: #fef2f2;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .category-icon i {
+      color: #ef4444;
+    }
+
+    .category-name {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 8px;
+    }
+
+    .category-desc {
+      font-size: 14px;
+      color: #71717a;
+    }
+
+    /* Recovery Box */
+    .recovery-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid #3b82f6;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .recovery-title {
+      font-weight: 600;
+      color: #1d4ed8;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .recovery-detail {
+      font-size: 14px;
+      color: #1e40af;
+      margin-bottom: 8px;
+    }
+
+    /* When Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-avoid {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-ok {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-avoid .when-title { color: #991b1b; }
+    .when-ok .when-title { color: #166534; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-avoid .when-item { color: #991b1b; }
+    .when-ok .when-item { color: #166534; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Summary Table */
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+
+    .summary-table th,
+    .summary-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+      font-size: 14px;
+    }
+
+    .summary-table th {
+      background: #f4f4f5;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .summary-table td {
+      color: #3f3f46;
+    }
+
+    .summary-table tr:hover td {
+      background: #fafafa;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Anti-Patterns</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The Core Failure Mode</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="skull" class="w-4 h-4"></i>
+          <span>Root Causes</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">The 4 Root Causes</a>
+        </div>
+      </div>
+
+      <!-- Context Anti-Patterns -->
+      <div class="nav-section expanded" data-section="context">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="brain" class="w-4 h-4"></i>
+          <span>Context</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#context-patterns" class="nav-item">Long Conversations</a>
+          <a href="#compaction" class="nav-item">Compaction Blindness</a>
+          <a href="#codebase-reading" class="nav-item">Reading Everything</a>
+        </div>
+      </div>
+
+      <!-- Orchestration -->
+      <div class="nav-section" data-section="orchestration">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Orchestration</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#recursive-explosion" class="nav-item">Recursive Explosion</a>
+          <a href="#role-confusion" class="nav-item">Role Confusion</a>
+          <a href="#completion-detection" class="nav-item">Completion Detection</a>
+        </div>
+      </div>
+
+      <!-- Task Design -->
+      <div class="nav-section" data-section="tasks">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="list-todo" class="w-4 h-4"></i>
+          <span>Task Design</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#task-sizing" class="nav-item">Task Sizing</a>
+          <a href="#vague-criteria" class="nav-item">Vague Criteria</a>
+        </div>
+      </div>
+
+      <!-- Security & Cost -->
+      <div class="nav-section" data-section="security">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+          <span>Security & Cost</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#security-patterns" class="nav-item">Security Failures</a>
+          <a href="#cost-patterns" class="nav-item">Cost Explosions</a>
+        </div>
+      </div>
+
+      <!-- Detection -->
+      <div class="nav-section" data-section="detection">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="search" class="w-4 h-4"></i>
+          <span>Detection</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#detection" class="nav-item">Red Flags</a>
+          <a href="#checklists" class="nav-item">Checklists</a>
+        </div>
+      </div>
+
+      <!-- Recovery -->
+      <div class="nav-section" data-section="recovery">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          <span>Recovery</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#recovery" class="nav-item">Recovery Strategies</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Anti-Pattern Essence</div>
+          <div class="essence-text">Anti-patterns aren't mistakes - they're constraint violations that compound until catastrophic failure.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          This is the "what NOT to do" guide - a comprehensive catalog of failure modes organized by root cause. Read this when something goes wrong to diagnose the issue, or before starting a complex project to avoid known pitfalls.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          <strong>Companion to:</strong> <code class="bg-bg-muted px-2 py-1 rounded text-sm">principles-core.md</code> (the WHY). This doc shows the consequences of violating those principles.
+        </p>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION - Root Causes -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The 4 Root Causes
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Every anti-pattern traces back to one of four constraint violations."</div>
+
+          <div class="core-code">
+            <code>CONTEXT + ORCHESTRATION + VERIFICATION + PERMISSIONS = FAILURE SURFACE</code>
+          </div>
+
+          <div class="core-anchor">If you understand these four, you'll predict most failures before they happen.</div>
+        </div>
+
+        <div class="category-grid">
+          <div class="category-card">
+            <div class="category-icon">
+              <i data-lucide="brain" class="w-5 h-5"></i>
+            </div>
+            <div class="category-name">Context Violations</div>
+            <div class="category-desc">Long sessions, context rot, filling windows with junk. The model "forgets" or hallucinates.</div>
+          </div>
+
+          <div class="category-card">
+            <div class="category-icon">
+              <i data-lucide="git-branch" class="w-5 h-5"></i>
+            </div>
+            <div class="category-name">Orchestration Violations</div>
+            <div class="category-desc">Workers spawning workers, role confusion, missing completion detection. Infinite loops, runaway costs.</div>
+          </div>
+
+          <div class="category-card">
+            <div class="category-icon">
+              <i data-lucide="check-circle" class="w-5 h-5"></i>
+            </div>
+            <div class="category-name">Verification Violations</div>
+            <div class="category-desc">Trusting Claude's claims, skipping tests, single-point verification. Bugs compound silently.</div>
+          </div>
+
+          <div class="category-card">
+            <div class="category-icon">
+              <i data-lucide="shield" class="w-5 h-5"></i>
+            </div>
+            <div class="category-name">Permission Violations</div>
+            <div class="category-desc">Dangerous commands whitelisted, secrets in context, no path restrictions. Security catastrophes.</div>
+          </div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Each anti-pattern in this guide maps to one or more of these root causes. Understanding the root cause helps you generalize: you'll avoid not just the documented anti-patterns, but novel variations.
+        </p>
+      </section>
+
+      <!-- Section 3: CONTEXT ANTI-PATTERNS -->
+      <section id="context-patterns" data-activity="context">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Context Anti-Patterns
+        </h2>
+
+        <div class="anti-pattern-box">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Long Single-Thread Conversations
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Context fills, response quality progressively degrades, instructions get ignored, Claude "forgets" recent work or hallucinates file contents.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Context rot accumulates. As conversations grow, earlier instructions and context get compressed or lost. The model struggles to maintain coherence across hundreds of turns.</div>
+          <div class="anti-pattern-detail"><strong>Warning signs:</strong></div>
+          <ul class="list-disc list-inside text-sm text-text-secondary ml-4 mb-4">
+            <li>Repetitive or contradictory responses</li>
+            <li>CLAUDE.md directives being ignored</li>
+            <li>Claude referencing files that don't exist</li>
+            <li>Truncated code outputs (functions cut off mid-definition)</li>
+            <li>Claude "forgets" work done 30 minutes ago</li>
+          </ul>
+          <div class="fix-box">
+            <div class="fix-label">The Fix</div>
+            <div class="fix-content">
+              Use Ralph pattern: fresh context per iteration. Persist state externally (files, git history, progress.txt). Start new sessions for unrelated tasks. Use <code>/compact</code> proactively at 60-70% context usage.
+            </div>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box" id="compaction">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Trusting Compaction Blindly
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Important nuance lost during summarization. Critical instructions or edge cases get dropped.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Compaction is lossy. The model must decide what's "important" without knowing your actual priorities. Subtle but critical details often get compressed away.</div>
+          <div class="anti-pattern-detail"><strong>Warning signs:</strong> Post-compaction behavior changes, specific instructions no longer followed, context from early conversation lost.</div>
+          <div class="fix-box">
+            <div class="fix-label">The Fix</div>
+            <div class="fix-content">
+              Maintain external state manually (reflection files, progress logs). Use explicit instruction files (CLAUDE.md) that survive compaction. Compact proactively at 60-70% rather than waiting for auto-compact at 95%.
+            </div>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box" id="codebase-reading">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Reading Entire Codebase
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Context fills immediately with thousands of tokens, leaving no room for actual work.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Context window (~200K tokens) cannot hold a full codebase. Filling it with code leaves no room for reasoning or output.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># BAD: Fills context with junk</span>
+<span class="danger">"Read all the files in src/ to understand the architecture"</span>
+
+<span class="comment"># GOOD: Targeted reads</span>
+<span class="string">"Read src/index.ts and src/config.ts to understand the entry point"</span></pre>
+          </div>
+
+          <div class="fix-box">
+            <div class="fix-label">The Fix</div>
+            <div class="fix-content">
+              Use .claudeignore aggressively. Request targeted reads (specific files for specific tasks). Use subagents for exploration (isolated context). Let Claude search with Glob/Grep rather than loading everything upfront.
+            </div>
+          </div>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Including Build Outputs in Context
+          </div>
+          <div class="warning-detail"><strong>What happens:</strong> node_modules/, dist/, .next/, coverage/ consume massive context budget uselessly.</div>
+          <div class="code-block" style="margin-top: 12px; margin-bottom: 0;">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># .claudeignore</span>
+node_modules/
+dist/
+build/
+.next/
+.cache/
+*.log
+coverage/</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: ORCHESTRATION ANTI-PATTERNS -->
+      <section id="orchestration-patterns" data-activity="orchestration">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Orchestration Anti-Patterns
+        </h2>
+
+        <div class="anti-pattern-box" id="recursive-explosion">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Workers Spawning Workers (Recursive Explosion)
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> A worker agent spawns subagents, which spawn more subagents, creating exponential context explosion and potential infinite loops.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> No coordination between nested subagents. Context explodes geometrically. Workers lose sight of the original task.</div>
+          <div class="anti-pattern-detail"><strong>Warning signs:</strong> Subagent depth >2 levels, context usage spiking unexpectedly, tasks taking 10x longer than expected, runaway API costs.</div>
+
+          <div class="fix-box">
+            <div class="fix-label">The Fix: Worker Preamble Pattern</div>
+            <div class="code-block" style="margin-top: 12px; margin-bottom: 0;">
+              <button class="copy-btn" onclick="copyCodeBlock(this)">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                Copy
+              </button>
+              <pre><span class="keyword">CONTEXT:</span> You are a WORKER agent, not an orchestrator.
+
+<span class="keyword">RULES:</span>
+- Complete ONLY the task described below
+- Use tools directly (Read, Write, Edit, Bash, etc.)
+- Do NOT spawn sub-agents
+- Do NOT call TaskCreate or TaskUpdate
+- Report your results with absolute file paths</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box" id="role-confusion">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Orchestrator Using Tools Directly
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Orchestrator gets distracted by implementation details. Role confusion between planning and execution.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Mixing concerns leads to scope creep. Orchestrator should think at the coordination level, not get lost in file edits.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># CC Mirror Principle:</span>
+<span class="danger">YOU DO NOT WRITE CODE. YOU DO NOT RUN COMMANDS.
+YOU DO NOT EXPLORE CODEBASES.</span>
+<span class="string">You are the CONDUCTOR. Your agents play the instruments.</span>
+
+<span class="comment"># Orchestrator uses:</span>
+TaskCreate, TaskList, TaskGet, TaskUpdate
+AskUserQuestion
+Task (to spawn workers)
+Read (reference files only, 1-2 max)
+
+<span class="comment"># Workers use:</span>
+Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch, LSP</pre>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box" id="completion-detection">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            No Completion Detection
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Agents run indefinitely without knowing when to stop. Infinite loops consuming API budget.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Without explicit completion criteria, agents have no way to know the task is done.</div>
+
+          <div class="fix-box">
+            <div class="fix-label">The Fix: Completion Promise Pattern</div>
+            <div class="code-block" style="margin-top: 12px; margin-bottom: 0;">
+              <button class="copy-btn" onclick="copyCodeBlock(this)">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                Copy
+              </button>
+              <pre><span class="keyword">if</span> grep -q <span class="string">"PROMISE COMPLETE HERE"</span> output.txt; <span class="keyword">then</span>
+  <span class="keyword">break</span>
+<span class="keyword">fi</span>
+
+<span class="comment"># Or use testable completion criteria:</span>
+- All PRD items have passes: true
+- Tests pass: npm test exits 0
+- Build succeeds: npm run build exits 0</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: TASK DESIGN ANTI-PATTERNS -->
+      <section id="task-sizing" data-activity="tasks">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Task Design Anti-Patterns
+        </h2>
+
+        <div class="anti-pattern-box">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Tasks Too Large (Context Collapse)
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Scope creep, context exhaustion, incomplete work, degraded quality mid-task.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Tasks exceeding single context window capacity cannot be completed coherently.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># BAD: Too large</span>
+<span class="danger">"Build the entire authentication system"</span>
+
+<span class="comment"># GOOD: Right-sized</span>
+<span class="string">"Implement the login endpoint with:
+1. Email/password validation
+2. JWT token generation
+3. Rate limiting (5 attempts/minute)"</span></pre>
+          </div>
+
+          <div class="checklist-box">
+            <div class="checklist-title">Sizing Heuristics</div>
+            <div class="checklist-item">
+              <i data-lucide="check" class="w-4 h-4 text-accent flex-shrink-0"></i>
+              <span>~100-500 lines of code change</span>
+            </div>
+            <div class="checklist-item">
+              <i data-lucide="check" class="w-4 h-4 text-accent flex-shrink-0"></i>
+              <span>~1-3 files modified</span>
+            </div>
+            <div class="checklist-item">
+              <i data-lucide="check" class="w-4 h-4 text-accent flex-shrink-0"></i>
+              <span>~30-60 minutes equivalent human time</span>
+            </div>
+            <div class="checklist-item">
+              <i data-lucide="check" class="w-4 h-4 text-accent flex-shrink-0"></i>
+              <span>Clear, testable success criteria</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box" id="vague-criteria">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Vague Acceptance Criteria
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Claude produces wrong outputs because it doesn't know what "done" looks like.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Ambiguity invites interpretation. Claude's interpretation may not match yours.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># BAD: Vague</span>
+<span class="danger">"Make it work"
+"Fix the bug"
+"Clean up the code"</span>
+
+<span class="comment"># GOOD: Testable criteria</span>
+{
+  <span class="string">"delete_video_shows_confirmation"</span>: {
+    <span class="string">"description"</span>: <span class="string">"Delete video shows confirmation dialog before deleting"</span>,
+    <span class="string">"acceptance"</span>: <span class="string">"User clicks delete, modal appears with 'Confirm' and 'Cancel',
+                    clicking 'Cancel' preserves video"</span>
+  }
+}</pre>
+          </div>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Tasks Too Small (Overhead Exceeds Value)
+          </div>
+          <div class="warning-detail"><strong>What happens:</strong> More time spent spawning agents than doing useful work.</div>
+          <div class="warning-detail"><strong>Why it fails:</strong> Agent startup, context loading, and coordination overhead outweighs trivial task value.</div>
+          <div class="warning-detail"><strong>Examples too small:</strong> "Add a comment to line 42", "Rename variable x to count"</div>
+          <div class="warning-detail"><strong>Just right:</strong> "Implement the User model with email, password hash, and created_at fields"</div>
+        </div>
+      </section>
+
+      <!-- Section 6: SECURITY & COST ANTI-PATTERNS -->
+      <section id="security-patterns" data-activity="security">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Security & Cost Anti-Patterns
+        </h2>
+
+        <div class="anti-pattern-box">
+          <div class="anti-pattern-title">
+            <i data-lucide="shield-alert" class="w-4 h-4"></i>
+            --dangerously-skip-permissions Everywhere
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Claude can execute ANY command, including destructive ones.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> No safety net. One wrong <code>rm -rf</code> and your work is gone.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># DANGEROUS: Never do this</span>
+<span class="danger">alias claude='claude --dangerously-skip-permissions'</span>
+
+<span class="comment"># SAFE: Granular permissions</span>
+{
+  <span class="string">"permissions"</span>: {
+    <span class="string">"commands"</span>: {
+      <span class="string">"git status"</span>: <span class="string">"allow-always"</span>,
+      <span class="string">"npm test"</span>: <span class="string">"allow-always"</span>,
+      <span class="string">"npm run build"</span>: <span class="string">"allow-always"</span>
+    },
+    <span class="string">"blockedPatterns"</span>: [
+      <span class="danger">"rm -rf"</span>,
+      <span class="danger">"sudo"</span>,
+      <span class="danger">"git push --force"</span>,
+      <span class="danger">"git reset --hard"</span>
+    ]
+  }
+}</pre>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box">
+          <div class="anti-pattern-title">
+            <i data-lucide="key" class="w-4 h-4"></i>
+            .env Files in Context
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> API keys, passwords, tokens leak into conversation history.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Credentials become part of context, potentially logged or exposed.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Minimum .claudeignore</span>
+.env*
+*.pem
+*.key
+credentials.json
+secrets/
+node_modules/
+dist/
+build/
+.next/
+coverage/
+*.log</pre>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box" id="cost-patterns">
+          <div class="anti-pattern-title">
+            <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+            No Iteration Limits (Runaway Costs)
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Runaway loops consume unlimited API budget. Bills hit hundreds of dollars.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Without limits, loops run until external intervention.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># The fix: Always set limits</span>
+<span class="variable">MAX_ITERATIONS</span>=25
+timeout 3600 ./ralph.sh 50  <span class="comment"># 1 hour max</span></pre>
+          </div>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Opus for Everything
+          </div>
+          <div class="warning-detail"><strong>What happens:</strong> Massive API bills. $500+ for tasks that could cost $20.</div>
+          <div class="warning-detail"><strong>Why it fails:</strong> Using premium model for routine tasks.</div>
+          <table class="summary-table" style="margin-top: 12px;">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Use Case</th>
+                <th>Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Haiku</td>
+                <td>Simple lookups, file fetching, transforms</td>
+                <td>Cheapest</td>
+              </tr>
+              <tr>
+                <td>Sonnet</td>
+                <td>Implementation, test generation, patterns</td>
+                <td>Medium</td>
+              </tr>
+              <tr>
+                <td>Opus</td>
+                <td>Architecture, complex reasoning, ambiguous tasks</td>
+                <td>Expensive (60x Haiku)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 7: DETECTION -->
+      <section id="detection" data-activity="detection">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          Detection & Red Flags
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Catch anti-patterns early. These red flags indicate you're heading toward a failure mode:
+        </p>
+
+        <div class="checklist-box" id="checklists">
+          <div class="checklist-title">Red Flag Detection</div>
+          <div class="checklist-item">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 flex-shrink-0"></i>
+            <span>Same file edited 5+ times without progress? <strong>Verification loop</strong></span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 flex-shrink-0"></i>
+            <span>Multiple grep/glob calls with no results? <strong>Exploration loop</strong></span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 flex-shrink-0"></i>
+            <span>Context >90% without task completion? <strong>Context collapse imminent</strong></span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 flex-shrink-0"></i>
+            <span>Token consumption rate 3x normal? <strong>Runaway agent</strong></span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 flex-shrink-0"></i>
+            <span>Circular edit patterns? <strong>Logic error</strong></span>
+          </div>
+        </div>
+
+        <div class="checklist-box">
+          <div class="checklist-title">Pre-Session Checklist</div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>Git working directory clean or stashed?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>On dedicated branch (not main/master)?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>.claudeignore excludes sensitive files and build outputs?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>CLAUDE.md updated with current project context?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>Safe commands whitelisted?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>Correct model selected for task complexity?</span>
+          </div>
+        </div>
+
+        <div class="checklist-box">
+          <div class="checklist-title">Post-Session Checklist</div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>All changes reviewed before commit?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>Tests passing?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>No credentials in code/context?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>Session costs within budget?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>Learnings captured for future sessions?</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 8: RECOVERY STRATEGIES -->
+      <section id="recovery" data-activity="recovery">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          Recovery Strategies
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          When you've hit an anti-pattern, here's how to recover:
+        </p>
+
+        <div class="recovery-box">
+          <div class="recovery-title">
+            <i data-lucide="brain" class="w-4 h-4"></i>
+            From Context Overflow
+          </div>
+          <div class="code-block" style="margin-top: 12px; margin-bottom: 0;">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Compact immediately</span>
+/compact
+
+<span class="comment"># If severely degraded</span>
+/reset
+
+<span class="comment"># Start focused session</span>
+claude <span class="string">"Focus only on src/auth/ - implement OAuth flow"</span></pre>
+          </div>
+        </div>
+
+        <div class="recovery-box">
+          <div class="recovery-title">
+            <i data-lucide="file-x" class="w-4 h-4"></i>
+            From File Corruption
+          </div>
+          <div class="code-block" style="margin-top: 12px; margin-bottom: 0;">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Discard changes to specific file</span>
+git checkout -- path/to/file.ts
+
+<span class="comment"># Recovery from stash</span>
+git stash pop
+
+<span class="comment"># Hard reset (CAREFUL)</span>
+git reset --hard HEAD</pre>
+          </div>
+        </div>
+
+        <div class="recovery-box">
+          <div class="recovery-title">
+            <i data-lucide="infinity" class="w-4 h-4"></i>
+            From Infinite Loops
+          </div>
+          <div class="code-block" style="margin-top: 12px; margin-bottom: 0;">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Graceful interrupt</span>
+Ctrl+C
+
+<span class="comment"># Harder interrupt</span>
+Ctrl+\
+
+<span class="comment"># Force kill</span>
+pkill -9 -f claude
+
+<span class="comment"># Break Ralph loop</span>
+echo <span class="string">"PROMISE COMPLETE HERE"</span> >> progress.txt</pre>
+          </div>
+        </div>
+
+        <div class="recovery-box">
+          <div class="recovery-title">
+            <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+            From Cost Runaway
+          </div>
+          <div class="recovery-detail">1. Kill all Claude processes: <code>pkill -f claude</code></div>
+          <div class="recovery-detail">2. Check Anthropic dashboard for usage</div>
+          <div class="recovery-detail">3. Set hard budget limits in console</div>
+          <div class="recovery-detail">4. Review what caused high usage</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Summary: Core Anti-Pattern Categories</h3>
+
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Root Cause</th>
+              <th>Prevention</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Context</strong></td>
+              <td>Growing conversations</td>
+              <td>Fresh context per iteration (Ralph)</td>
+            </tr>
+            <tr>
+              <td><strong>Orchestration</strong></td>
+              <td>Role confusion</td>
+              <td>Strict orchestrator/worker separation</td>
+            </tr>
+            <tr>
+              <td><strong>Task Design</strong></td>
+              <td>Wrong sizing</td>
+              <td>30-60 min atomic tasks</td>
+            </tr>
+            <tr>
+              <td><strong>Verification</strong></td>
+              <td>Blind trust</td>
+              <td>Layered testing requirements</td>
+            </tr>
+            <tr>
+              <td><strong>Memory</strong></td>
+              <td>In-context only</td>
+              <td>External file-based state</td>
+            </tr>
+            <tr>
+              <td><strong>Cost</strong></td>
+              <td>No limits</td>
+              <td>Iteration caps, model matching</td>
+            </tr>
+            <tr>
+              <td><strong>Security</strong></td>
+              <td>Weak permissions</td>
+              <td>Blocklists, read-only configs</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="when-grid" style="margin-top: 40px;">
+          <div class="when-avoid">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              WHEN NOT TO USE CLAUDE CODE
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Real-time systems (latency-critical code)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Security-critical code (crypto, auth core)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Highly novel domains (cutting-edge research)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Complex stateful debugging (race conditions)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>5+ repeated failures on same task</span>
+            </div>
+          </div>
+
+          <div class="when-ok">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              RED FLAGS THAT INDICATE WRONG TOOL
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Escalating costs without progress</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quality degradation mid-session</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Context constantly full despite compaction</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Human review finding many bugs</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Same mistakes repeated across sessions</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if anti-patterns were just "different approaches"?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Long sessions for "accumulated context", workers spawning workers for "emergent coordination".<br>
+          <strong>Why this fails:</strong> Transformer attention has hard limits. Workers have no coordination mechanism.<br>
+          <strong>Hidden constraint:</strong> Anti-patterns aren't style choices - they're physics violations.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="essence">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One violated constraint produces FIVE downstream failures</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Context finite (~200K tokens)<br>
+          -> Long sessions degrade quality<br>
+          -> Degraded quality produces bugs<br>
+          -> Bugs require debugging iterations<br>
+          -> Debugging fills more context<br>
+          -> Total context collapse
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Anti-patterns violate INV-001, INV-003, INV-005</div>
+        <div class="text-text-secondary text-sm">
+          <strong>INV-001:</strong> Context is primary constraint (violated by long sessions)<br>
+          <strong>INV-003:</strong> External state > internal memory (violated by trusting Claude's memory)<br>
+          <strong>INV-005:</strong> Verification is mandatory (violated by skipping tests)<br>
+          <em>Every anti-pattern maps to invariant violations.</em>
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Anti-patterns = Technical Debt</div>
+        <div class="text-text-secondary text-sm">
+          Context violations -> Memory leaks<br>
+          Orchestration violations -> Thread deadlocks<br>
+          Verification violations -> Missing tests<br>
+          Permission violations -> SQL injection<br><br>
+          <em>If you've debugged production systems, you already understand anti-patterns.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="core">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your anti-pattern understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What are the anti-patterns?" -> This doc<br>
+          <strong>Intermediate:</strong> "Why are these bad?" -> Root cause analysis<br>
+          <strong>Advanced:</strong> "How do I detect early?" -> Red flags section<br>
+          <strong>Staff:</strong> "How do patterns interact?" -> Compound failures<br>
+          <strong>Expert:</strong> "What's the meta-pattern?" -> Constraint violation recognition
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="core">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">$300 overnight bill from runaway loop</div>
+        <div class="text-text-secondary text-sm">
+          User ran Ralph without iteration limits. Loop got stuck on failing test, iterated 200+ times. Morning revealed massive API bill and no progress. <strong>Fix:</strong> MAX_ITERATIONS=25 is now standard.
+        </div>
+      </div>
+
+      <!-- CONTEXT SECTION -->
+      <div class="activity-item gradient" data-section="context">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How context quality degrades (invisibly)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% -> 90%</strong> (40-60K): Subtle drift, you won't notice<br>
+          <strong>90% -> 70%</strong> (60-80K): Repetition, compression<br>
+          <strong>70% -> 50%</strong> (80-100K): Instructions forgotten<br>
+          <strong>50% -> CLIFF</strong> (100K+): Hallucinations, amnesia<br><br>
+          <em>Critical: The gradient is invisible until the cliff.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="context">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When to compact (the 60-70% rule)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-60%:</strong> Full quality, no action needed<br>
+          <strong>60-70%:</strong> Compact NOW (sweet spot)<br>
+          <strong>70-90%:</strong> Quality degrading, compact urgently<br>
+          <strong>90-95%:</strong> Auto-compact triggers (lossy)<br>
+          <strong>95%+:</strong> Context collapse imminent<br><br>
+          <strong>THE INFLECTION:</strong> ~65% is optimal compact point
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="context">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you "just keep going" past 80K tokens</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> You extend sessions past 80K tokens<br>
+          <strong>THEN:</strong> Early instructions get compressed<br>
+          <strong>THEN:</strong> Claude contradicts earlier work<br>
+          <strong>THEN:</strong> You debug the contradiction<br>
+          <strong>FINALLY:</strong> Debugging fills more context, accelerating collapse<br><br>
+          <em>The fix: Kill and restart. Don't debug context rot.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="context">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How context rot feels over time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>30 min:</strong> "This is going great!"<br>
+          <strong>60 min:</strong> "Hmm, it repeated itself"<br>
+          <strong>90 min:</strong> "Why did it ignore my last instruction?"<br>
+          <strong>120 min:</strong> "It's making things up now"<br><br>
+          <em>Don't judge session health by the first 30 minutes.</em>
+        </div>
+      </div>
+
+      <!-- ORCHESTRATION SECTION -->
+      <div class="activity-item minimal" data-section="orchestration">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The simplest orchestration that works</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">Orchestrator -> Worker (single level)</code><br><br>
+          <strong>Essential:</strong> One orchestrator, one worker level<br>
+          <strong>Refinement:</strong> Task management, parallel workers<br>
+          <strong>Anti-pattern:</strong> Worker -> Worker -> Worker (recursion)
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="orchestration">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Orchestrator involvement dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Hands-off:</strong> Workers may drift from goal<br>
+          <strong>Hands-on:</strong> Orchestrator becomes bottleneck<br>
+          <strong>Micro-manage:</strong> Orchestrator does worker's job<br><br>
+          <strong>HEURISTIC:</strong> Orchestrator sets goals, checks results. Never edits files.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="orchestration">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if workers COULD spawn subagents?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> "Emergent coordination" through recursive spawning<br>
+          <strong>Why this fails:</strong> No shared state, no coordination, exponential cost<br>
+          <strong>Hidden constraint:</strong> Workers have no view of the whole. Only orchestrators do.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="orchestration">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal completion detection</div>
+        <div class="text-text-secondary text-sm">
+          When should an autonomous loop stop? Promise patterns work but are brittle. Test-based detection misses edge cases. Human review gates add latency. No universal solution yet.
+        </div>
+      </div>
+
+      <!-- TASKS SECTION -->
+      <div class="activity-item expertise" data-section="tasks">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Task decomposition understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "How big should tasks be?" -> 30-60 min<br>
+          <strong>Intermediate:</strong> "What's too small?" -> When description > code<br>
+          <strong>Advanced:</strong> "How to split?" -> By logical boundaries<br>
+          <strong>Staff:</strong> "Dependencies?" -> DAG-based ordering<br>
+          <strong>Expert:</strong> "Parallel?" -> Independent tasks run together
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="tasks">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Task sizing = User story sizing</div>
+        <div class="text-text-secondary text-sm">
+          Epic -> Feature branch (too big)<br>
+          Story -> Single iteration (just right)<br>
+          Subtask -> Inline edit (too small)<br><br>
+          <em>If you've done Agile, you already know task sizing.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="tasks">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you use vague acceptance criteria</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> "Make it work" as criteria<br>
+          <strong>THEN:</strong> Claude interprets "work" differently than you<br>
+          <strong>THEN:</strong> You reject the output<br>
+          <strong>THEN:</strong> Claude tries again with same vague goal<br>
+          <strong>FINALLY:</strong> 5+ iterations, no progress, frustration<br><br>
+          <em>The fix: Testable criteria. "npm test exits 0" not "it works".</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="tasks">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At 50+ tasks, decomposition quality compounds</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Good decomposition:</strong> 50 tasks complete linearly<br>
+          <strong>Poor decomposition:</strong> Dependencies create bottlenecks, rework multiplies<br><br>
+          <em>Task quality at start determines velocity at end.</em>
+        </div>
+      </div>
+
+      <!-- SECURITY SECTION -->
+      <div class="activity-item warstory" data-section="security">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Production .env leaked to Claude context</div>
+        <div class="text-text-secondary text-sm">
+          Developer ran <code>cat .env</code> in Claude session. API keys became part of context. Session exported for debugging included credentials. Keys had to be rotated. <strong>Fix:</strong> .claudeignore for all .env files.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="security">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why --dangerously-skip-permissions is... dangerous</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> No permission checks<br>
+          -> Any command can execute<br>
+          -> Destructive commands included<br>
+          -> One hallucination away from rm -rf<br>
+          -> No recovery from deleted files<br><br>
+          <em>The flag name is the warning.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="security">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Convenience vs. Security</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Full permissions:</strong> Fast, but one mistake = disaster<br>
+          <strong>No permissions:</strong> Safe, but constant interrupts<br>
+          <strong>Granular whitelist:</strong> Balanced, but requires setup<br><br>
+          <strong>HEURISTIC:</strong> Whitelist safe commands, keep destructive blocked.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="security">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cost awareness over time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Week 1:</strong> "Opus for everything, I want quality"<br>
+          <strong>Week 2:</strong> "Wait, that bill seems high"<br>
+          <strong>Week 4:</strong> "$500/month on simple lookups?"<br>
+          <strong>Week 8:</strong> "Haiku for exploration, Sonnet for work, Opus for architecture"<br><br>
+          <em>Model matching is a learned skill.</em>
+        </div>
+      </div>
+
+      <!-- DETECTION SECTION -->
+      <div class="activity-item gradient" data-section="detection">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How anti-patterns compound</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1 violation:</strong> Minor inefficiency, recoverable<br>
+          <strong>2 violations:</strong> Compounding problems, harder recovery<br>
+          <strong>3 violations:</strong> Session likely unrecoverable<br>
+          <strong>4+ violations:</strong> Stop. Reset. Start fresh.<br><br>
+          <em>Anti-patterns multiply, they don't add.</em>
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="detection">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Detection
+        </div>
+        <div class="font-medium text-text-primary mb-2">The simplest red flag checklist</div>
+        <div class="text-text-secondary text-sm">
+          <strong>3 questions before each session:</strong><br>
+          1. Clean git state?<br>
+          2. Dedicated branch?<br>
+          3. .claudeignore configured?<br><br>
+          <em>If any answer is "no", fix before starting.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="detection">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When debugging becomes the problem</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-2 retries:</strong> Normal iteration<br>
+          <strong>3-4 retries:</strong> Check task clarity<br>
+          <strong>5+ retries:</strong> Stop. The task or context is the problem.<br><br>
+          <strong>THE INFLECTION:</strong> 5 retries = wrong tool or wrong task<br>
+          <em>After 5 failures, step back and reassess.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="detection">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">When Claude Code isn't right</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Security-critical?</strong> -> Human expert review<br>
+          <strong>Novel domain?</strong> -> Research-first approach<br>
+          <strong>Race conditions?</strong> -> Dedicated debugging tools<br>
+          <strong>Real-time?</strong> -> Manual implementation
+        </div>
+      </div>
+
+      <!-- RECOVERY SECTION -->
+      <div class="activity-item expertise" data-section="recovery">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Recovery skill progression</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "How do I stop it?" -> Ctrl+C<br>
+          <strong>Intermediate:</strong> "How do I undo?" -> git checkout<br>
+          <strong>Advanced:</strong> "How do I prevent?" -> Checklists<br>
+          <strong>Staff:</strong> "How do I detect early?" -> Red flags<br>
+          <strong>Expert:</strong> "How do I design out?" -> Architecture
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="recovery">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Infinite loop caught by git stash</div>
+        <div class="text-text-secondary text-sm">
+          Developer's Ralph loop went infinite. Killed it, but files were in inconsistent state. Recovered via <code>git stash</code> from before the run. <strong>Lesson:</strong> Always start from clean git state.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="recovery">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if there was no recovery?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Bulletproof prevention, no second chances<br>
+          <strong>Why this fails:</strong> Perfection is impossible, humans make mistakes<br>
+          <strong>Hidden truth:</strong> Recovery strategies ARE the safety net. Prevention + Recovery = Resilience.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="recovery">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Anti-Patterns + Ralph Pattern</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Ralph's fresh context prevents context rot anti-pattern.<br>
+          <strong>Synergy:</strong> External state prevents memory loss anti-pattern.<br>
+          <strong>Note:</strong> Ralph doesn't prevent task design anti-patterns - those require human judgment.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="recovery">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">All recovery strategies share one invariant</div>
+        <div class="text-text-secondary text-sm">
+          <strong>INV-008:</strong> Git is the source of truth<br><br>
+          Every recovery (context overflow, file corruption, infinite loops) relies on git for rollback. If your git state was clean before the failure, recovery is possible. If not, recovery is painful.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(239, 68, 68, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

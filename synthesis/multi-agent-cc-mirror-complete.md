@@ -1,5 +1,7 @@
 # CC Mirror and Multi-Agent Orchestration: Complete Technical Reference
 
+> **You Are Here:** This is the definitive technical reference for CC Mirror - the tool that unlocks Claude Code's hidden multi-agent orchestration. If you want parallel workers with task dependencies and minimal setup, start here. For comparison with other orchestration patterns (Gas Town, Ralph), see the D-FINAL documents. For Ralph-specific details, see `synthesis/ralph-ecosystem-complete.md`.
+
 **The Hidden Multi-Agent API That Anthropic Built But Disabled**
 
 > "Claude Code - Official Multi Agent Orchestration. This is a disabled feature, but through CC Mirror, I have been able to enable it. It is so simple, yet powerful and IMO beats every orchestration I've seen. There's no point building your own."
@@ -225,6 +227,17 @@ Fan-out work, collect results, synthesize:
               | (Orchestrator)   |
               +------------------+
 ```
+
+---
+
+### Checkpoint: CC Mirror Fundamentals
+**You should now understand:**
+- [ ] What CC Mirror unlocks (TaskCreate, TaskList, TaskUpdate, TaskGet)
+- [ ] Hub-and-spoke architecture with orchestrator and workers
+- [ ] The three coordination patterns (fan-out, pipeline, map-reduce)
+- [ ] When to use CC Mirror vs standard Task() tool
+
+**If unclear:** Re-read sections 1-2 on architecture and communication patterns.
 
 ---
 
@@ -539,6 +552,17 @@ Tasks:
 [wait] #5 Write integration tests (blocked by #4)
 [wait] #6 Create API documentation (blocked by #4)
 ```
+
+---
+
+### Checkpoint: Orchestration Mastery
+**You should now understand:**
+- [ ] The Iron Law: Conductor doesn't write code
+- [ ] Tool ownership division (orchestrator vs worker)
+- [ ] Model selection by task complexity
+- [ ] Domain reference files for task decomposition
+
+**If unclear:** Practice with a simple 3-task fan-out before attempting complex workflows.
 
 ---
 

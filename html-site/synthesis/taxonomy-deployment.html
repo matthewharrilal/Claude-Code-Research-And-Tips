@@ -1,0 +1,2395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deployment Architecture Taxonomy | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed (proportional to main, less than main) */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer - Draggable divider between Main Panel and Activity Zone */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    /* Prevent text selection during resize */
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    /* Hide resizer when Activity Zone is hidden (responsive) */
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Architecture Diagram */
+    .architecture-diagram {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .architecture-diagram pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #e4e4e7;
+      line-height: 1.5;
+    }
+
+    /* Comparison Table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .comparison-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #3f3f46;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .comparison-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .comparison-table tr:hover {
+      background: #fafafa;
+    }
+
+    /* Deployment Card */
+    .deployment-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .deployment-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .deployment-card-icon {
+      width: 40px;
+      height: 40px;
+      background: #ecfdf5;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0D9373;
+    }
+
+    .deployment-card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .deployment-card-subtitle {
+      font-size: 13px;
+      color: #71717a;
+    }
+
+    /* Subsection headers */
+    .subsection-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #18181b;
+      margin-top: 32px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e4e4e7;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Deployment Taxonomy</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">Deployment Spectrum</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-isolation" class="nav-item">Why Isolation Matters?</a>
+          <a href="#why-network-controls" class="nav-item">Why Network Controls?</a>
+          <a href="#why-persistence" class="nav-item">Why Session Persistence?</a>
+        </div>
+      </div>
+
+      <!-- Infrastructure Patterns -->
+      <div class="nav-section" data-section="patterns">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="server" class="w-4 h-4"></i>
+          <span>Infrastructure Patterns</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#patterns" class="nav-item">Local Development</a>
+          <a href="#remote-patterns" class="nav-item">Remote Access</a>
+          <a href="#container-patterns" class="nav-item">Containerized</a>
+          <a href="#serverless-patterns" class="nav-item">Serverless</a>
+        </div>
+      </div>
+
+      <!-- Path of a Request -->
+      <div class="nav-section" data-section="path">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Path of a Request</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#path" class="nav-item">Decision Flow</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Practical Problems</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Claude Code deployment spans local CLI to serverless cloud, each trading isolation for convenience.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"More isolation = more safety, less convenience. Choose based on trust level."</div>
+
+          <div class="architecture-diagram">
+            <pre>                LOCAL <-------------------------> CLOUD
+                  |                                     |
+  Direct CLI --------> VM/SSH --------> Container --------> Serverless
+       |                  |                   |                    |
+  Bare metal         Persistent          Isolated            Ephemeral
+  Full access        Terminal            Sandboxed           Managed
+  No isolation       Manual              Reproducible        Scalable</pre>
+          </div>
+
+          <div class="core-anchor">Every deployment pattern is a point on this spectrum. Match isolation to risk.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Claude Code can run anywhere: your laptop, a cloud VM, a Docker container, or a serverless function. The key insight is that each deployment pattern trades off between <strong>isolation</strong> (safety from destructive actions), <strong>persistence</strong> (session continuity), and <strong>convenience</strong> (setup overhead).
+        </p>
+
+        <h3 class="subsection-title">Key Dimensions</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>Spectrum</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Isolation</strong></td>
+              <td>None --> Process --> Container --> VM --> Cloud Sandbox</td>
+            </tr>
+            <tr>
+              <td><strong>Persistence</strong></td>
+              <td>Ephemeral --> Session --> Persistent --> Durable</td>
+            </tr>
+            <tr>
+              <td><strong>Scalability</strong></td>
+              <td>Single Instance --> Parallel --> Auto-Scaling</td>
+            </tr>
+            <tr>
+              <td><strong>Network</strong></td>
+              <td>Full Access --> Allowlist --> API-Only --> Isolated</td>
+            </tr>
+            <tr>
+              <td><strong>Security</strong></td>
+              <td>Permissive --> Gated --> Sandboxed --> Zero-Trust</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-isolation" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY ISOLATION MATTERS?</div>
+          <div class="decision-reasoning">
+            Claude Code has full bash access. It can <code>rm -rf /</code>, install packages, make network requests. In supervised interactive mode, you approve each action. In autonomous mode (--dangerously-skip-permissions), mistakes can be catastrophic. Isolation contains the blast radius.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Never run YOLO mode on your main machine. Use containers or VMs for overnight autonomous work. The extra setup time is insurance against destructive commands.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-network-controls">
+          <div class="decision-why">WHY NETWORK CONTROLS?</div>
+          <div class="decision-reasoning">
+            Agents can exfiltrate data, download malware, or make unexpected API calls. Network isolation limits what an agent can access. At minimum, allowlist only api.anthropic.com. For sensitive work, use full network isolation with a proxy.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Don't give agents full internet access when they don't need it. Use <code>--network none</code> in Docker for read-only tasks. Use egress proxies for production deployments.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-persistence">
+          <div class="decision-why">WHY SESSION PERSISTENCE?</div>
+          <div class="decision-reasoning">
+            SSH connections drop. Networks fail. Agents run for hours. Without session persistence (tmux, mosh), you lose work when connections break. tmux sessions survive disconnects, letting you reconnect and continue.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Always use tmux for remote Claude Code sessions. Use mosh instead of SSH for mobile connections. Configure auto-attach so reconnection is automatic.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: INFRASTRUCTURE PATTERNS -->
+      <section id="patterns" data-activity="patterns">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Infrastructure Patterns
+        </h2>
+
+        <h3 class="subsection-title">Local Development Patterns</h3>
+
+        <div class="deployment-card">
+          <div class="deployment-card-header">
+            <div class="deployment-card-icon">
+              <i data-lucide="terminal" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="deployment-card-title">Direct CLI</div>
+              <div class="deployment-card-subtitle">Zero setup, full access, interactive approval</div>
+            </div>
+          </div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Basic usage</span>
+claude
+
+<span class="comment"># With specific model</span>
+claude --model claude-opus-4-5-20251101
+
+<span class="comment"># Continue previous session</span>
+claude --continue
+
+<span class="comment"># Headless/scripted mode</span>
+claude --print <span class="string">"Review this file"</span> < file.ts</pre>
+          </div>
+          <p class="text-text-secondary text-sm">
+            <strong>When to use:</strong> Personal development, interactive exploration, supervised coding.
+          </p>
+        </div>
+
+        <div class="deployment-card">
+          <div class="deployment-card-header">
+            <div class="deployment-card-icon">
+              <i data-lucide="layout-grid" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="deployment-card-title">tmux-Based Sessions</div>
+              <div class="deployment-card-subtitle">Persistent sessions, multiple parallel agents</div>
+            </div>
+          </div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># ~/.tmux.conf for Claude Code</span>
+set -g mouse on
+set -g history-limit 100000
+set -g base-index 1
+
+<span class="comment"># Auto-save sessions</span>
+set -g @plugin <span class="string">'tmux-plugins/tmux-resurrect'</span>
+set -g @plugin <span class="string">'tmux-plugins/tmux-continuum'</span>
+set -g @continuum-restore <span class="string">'on'</span>
+set -g @resurrect-processes <span class="string">'claude node python'</span>
+
+<span class="comment"># Status bar showing git branch</span>
+set -g status-right <span class="string">'#(cd #{pane_current_path} && git branch --show-current)'</span></pre>
+          </div>
+        </div>
+
+        <div class="deployment-card">
+          <div class="deployment-card-header">
+            <div class="deployment-card-icon">
+              <i data-lucide="git-branch" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="deployment-card-title">Git Worktrees for Parallel Isolation</div>
+              <div class="deployment-card-subtitle">Branch-based parallelization without conflicts</div>
+            </div>
+          </div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment">#!/bin/bash</span>
+<span class="comment"># spawn-parallel-agent.sh</span>
+
+BRANCH=$1
+TASK=$2
+WORKTREE_DIR=<span class="string">"../worktrees/$BRANCH"</span>
+
+<span class="comment"># Create worktree</span>
+git worktree add <span class="string">"$WORKTREE_DIR"</span> -b <span class="string">"$BRANCH"</span> 2>/dev/null || \
+git worktree add <span class="string">"$WORKTREE_DIR"</span> <span class="string">"$BRANCH"</span>
+
+<span class="comment"># Launch Claude in worktree</span>
+cd <span class="string">"$WORKTREE_DIR"</span>
+tmux new-window -n <span class="string">"$BRANCH"</span> <span class="string">"claude '$TASK'"</span>
+
+echo <span class="string">"Agent started in $WORKTREE_DIR"</span></pre>
+          </div>
+        </div>
+
+        <h3 class="subsection-title" id="remote-patterns">Remote Access Patterns</h3>
+
+        <div class="deployment-card">
+          <div class="deployment-card-header">
+            <div class="deployment-card-icon">
+              <i data-lucide="cloud" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="deployment-card-title">Cloud VM with Tailscale</div>
+              <div class="deployment-card-subtitle">Secure VPN access, no public SSH exposure</div>
+            </div>
+          </div>
+
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Tier</th>
+                <th>Cost/Month</th>
+                <th>Best For</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Hetzner</strong></td>
+                <td>CX31 (4 vCPU, 8GB)</td>
+                <td>$13</td>
+                <td>Best value (EU)</td>
+              </tr>
+              <tr>
+                <td><strong>Vultr</strong></td>
+                <td>vhf-8c-32gb</td>
+                <td>~$210 (or $7/day)</td>
+                <td>US, hourly billing</td>
+              </tr>
+              <tr>
+                <td><strong>DigitalOcean</strong></td>
+                <td>s-4vcpu-8gb</td>
+                <td>$48</td>
+                <td>Simple UX</td>
+              </tr>
+              <tr>
+                <td><strong>Oracle Cloud</strong></td>
+                <td>Always Free</td>
+                <td>$0</td>
+                <td>Budget option</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Setup pattern (Hetzner)</span>
+
+<span class="comment"># 1. Create VM</span>
+hcloud server create --name claude-dev --type cx31 --image ubuntu-24.04
+
+<span class="comment"># 2. Install Tailscale</span>
+curl -fsSL https://tailscale.com/install.sh | sh
+tailscale up
+
+<span class="comment"># 3. Harden SSH (Tailscale only)</span>
+ufw allow from 100.64.0.0/10  <span class="comment"># Tailscale CIDR only</span>
+ufw enable
+
+<span class="comment"># 4. Install Claude Code</span>
+npm install -g @anthropic-ai/claude-code
+
+<span class="comment"># 5. Configure tmux auto-attach</span>
+echo <span class="string">'if [[ -z "$TMUX" ]]; then tmux attach -t main 2>/dev/null || tmux new -s main; fi'</span> >> ~/.zshrc</pre>
+          </div>
+        </div>
+
+        <h3 class="subsection-title" id="container-patterns">Containerized Patterns</h3>
+
+        <div class="deployment-card">
+          <div class="deployment-card-header">
+            <div class="deployment-card-icon">
+              <i data-lucide="box" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="deployment-card-title">Secure Docker Setup</div>
+              <div class="deployment-card-subtitle">Production-grade containerization with security controls</div>
+            </div>
+          </div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Dockerfile</span>
+FROM node:20-alpine
+
+<span class="comment"># Security hardening</span>
+RUN apk add --no-cache dumb-init git
+RUN npm install -g @anthropic-ai/claude-code
+
+<span class="comment"># Non-root user</span>
+RUN addgroup -g 1000 claude && adduser -u 1000 -G claude -D claude
+USER claude
+
+WORKDIR /workspace
+ENTRYPOINT [<span class="string">"/usr/bin/dumb-init"</span>, <span class="string">"--"</span>]
+CMD [<span class="string">"claude"</span>]</pre>
+          </div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># docker-compose.yml</span>
+version: <span class="string">'3.8'</span>
+services:
+  claude:
+    build: .
+    volumes:
+      - ./project:/workspace
+      - claude-config:/home/claude/.claude
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=100M,mode=1777
+
+volumes:
+  claude-config:</pre>
+          </div>
+        </div>
+
+        <h3 class="subsection-title" id="serverless-patterns">Serverless Patterns</h3>
+
+        <div class="deployment-card">
+          <div class="deployment-card-header">
+            <div class="deployment-card-icon">
+              <i data-lucide="cloud-lightning" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="deployment-card-title">Cloudflare Workers + Agent SDK</div>
+              <div class="deployment-card-subtitle">Fully serverless with Durable Objects for persistence</div>
+            </div>
+          </div>
+          <div class="architecture-diagram">
+            <pre>  Worker (Stateless Compute)
+  +-- Claude Agent SDK
+  +-- Skills (mini-apps)
+  +-- Tool orchestration
+  +-- WebSocket for real-time
+        |
+        v
+  Durable Object (Stateful)
+  +-- Session persistence
+  +-- Transcript storage
+  +-- Resume on sandbox death
+        |
+        v
+  Sandbox (Code Execution)
+  +-- Tier: standard-2 (required for >10s)
+  +-- Dynamic code writing
+  +-- Safe execution environment</pre>
+          </div>
+          <p class="text-text-secondary text-sm mb-4">
+            <strong>The Stack:</strong> Claude Agent SDK (reliable tool loop) + Skills (composable mini-apps) + Sandbox (safe code execution) = Production-capable serverless agent.
+          </p>
+          <p class="text-text-secondary text-sm">
+            <strong>Starter Template:</strong> github.com/craigsdennis/claude-in-the-box
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A REQUEST (DECISION TREE) -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Decision Flow
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Choose your deployment pattern based on what you're building and your constraints:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>Personal dev work (supervised)?</strong> --> LOCAL CLI. Add tmux for persistence.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>Overnight autonomous tasks?</strong> --> LOCAL + RALPH LOOP (if can use local machine) or CLOUD VM + RALPH LOOP</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>Multi-agent parallel work?</strong> --> GIT WORKTREES (if branch conflicts likely) or TMUX PARALLEL SESSIONS</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>Team/production deployment?</strong> --> CONTAINERIZED with security controls (if no sandbox needed) or CLOUDFLARE SANDBOX / E2B</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>Mobile-first workflow?</strong> --> HOME MAC + TAILSCALE (if always-on machine) or CLOUD VM + TAILSCALE</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>Browser automation needed?</strong> --> LOCAL CHROME MCP (if dev only) or BROWSERBASE (production/parallel)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content"><strong>Enterprise deployment?</strong> --> HYBRID: Cloudflare Workers + VPC endpoints + SSO</div>
+          </div>
+        </div>
+
+        <h3 class="subsection-title">Isolation Level Selection</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>Reading/exploring only?</strong> --> No sandbox needed</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>Writing files in project?</strong> --> PATH RESTRICTIONS in config</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>Running shell commands?</strong> --> WHITELIST commands (if known safe) or CONTAINER with limits</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>Autonomous overnight work?</strong> --> CONTAINER or VM isolation required</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>Running untrusted/generated code?</strong> --> CLOUD SANDBOX (Cloudflare/E2B)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit when deploying Claude Code, with fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            SSH Session Drops During Long Operation
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Claude Code disconnects mid-task, work lost</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> SSH connection timeout, network instability</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use mosh instead of SSH. Use tmux. Configure SSH keepalive: <code>ServerAliveInterval 60</code> in ~/.ssh/config</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Docker Container Permission Denied
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Claude Code can't write to mounted volumes</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> UID/GID mismatch between container and host</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Match UID in Dockerfile: <code>adduser -u 1000 -G claude -D claude</code>. Or use <code>--user $(id -u):$(id -g)</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Tailscale MagicDNS Not Resolving
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Can't reach server by hostname, only IP</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> DNS not configured or MagicDNS not enabled</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Enable MagicDNS in Tailscale admin. Run <code>tailscale up --reset</code> to re-authenticate.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Cloudflare Worker Hitting CPU Limits
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Request terminated, "Worker exceeded CPU time limit"</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Free tier: 10ms CPU/request. Paid: 30s CPU.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> For complex tasks, use Cloudflare Queue or Durable Objects. Or switch to dedicated VM.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            API Key Not Found in Container
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "ANTHROPIC_API_KEY not set" error</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Environment variable not passed to container</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Pass at runtime: <code>docker run -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY</code>. Or use .env file with docker-compose.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Push Notifications Not Arriving
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent finishes but no mobile notification</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Hook not configured, service not running, or rate limited</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Test notification service directly. Check hook is executable: <code>chmod +x ~/.claude/hooks/notify.sh</code></div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions in deployment architecture that don't have clean solutions:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Security vs. Convenience
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More isolation = more setup. Full sandboxing = complex infrastructure. No isolation = fast but risky. No perfect balance exists.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Team avoids secure setups because "too slow." Or spends hours on infrastructure instead of building.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Match isolation to risk, not to "best practice." YOLO in containers is fine. YOLO on production machines is not. Context matters.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost vs. Availability
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Always-on VMs cost money. Stopping VMs when idle saves money but breaks mobile workflows. Serverless scales but has cold starts and limits.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Surprised by cloud bills. Or missing agent notifications because VM was stopped.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use hourly billing (Vultr). Stop VMs when idle via iOS Shortcuts. Use home Mac for $0 always-on option.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Portability vs. Optimization
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Generic containers work everywhere but aren't optimized. Provider-specific setups (Cloudflare Workers, AWS Lambda) are optimized but lock you in.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Spending time on infrastructure that doesn't transfer. Or suboptimal performance because using lowest common denominator.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start with Docker (portable). Only optimize for specific providers when scale demands it. Keep skills portable between deployments.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use Each Pattern
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              LOCAL CLI
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quick prototyping and exploration</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Supervised AI-assisted coding</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Single feature development</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Learning and experimentation</span>
+            </div>
+          </div>
+
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              CLOUD VM + TAILSCALE
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Mobile-first workflows</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Overnight autonomous development</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Always-on agent availability</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multi-device access needed</span>
+            </div>
+          </div>
+
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              DOCKER CONTAINERS
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Reproducible environments</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>CI/CD integration</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Autonomous work with isolation</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Safe YOLO mode</span>
+            </div>
+          </div>
+
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              CLOUDFLARE WORKERS
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Production agents at scale</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multi-tenant applications</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Chatbots and email agents</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Auto-scaling requirements</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="when-grid">
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              AVOID LOCAL CLI WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Unsupervised overnight work --> Use containers</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Running untrusted code --> Use cloud sandbox</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need mobile access --> Use cloud VM</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              AVOID SERVERLESS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Long-running tasks (>30s) --> Use VM or container</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Heavy compute workloads --> Use dedicated VM</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need persistent filesystem --> Use cloud VM</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="subsection-title">Quick Reference: Deployment Selection</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Recommended Deployment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Quick prototyping</td>
+              <td>Local CLI</td>
+            </tr>
+            <tr>
+              <td>Single feature, overnight</td>
+              <td>Local + Ralph Loop</td>
+            </tr>
+            <tr>
+              <td>Multiple life domains</td>
+              <td>Panopticon (isolated directories)</td>
+            </tr>
+            <tr>
+              <td>Team parallel features</td>
+              <td>Git worktrees + tmux</td>
+            </tr>
+            <tr>
+              <td>Production app</td>
+              <td>Docker + security hardening</td>
+            </tr>
+            <tr>
+              <td>Serverless agents</td>
+              <td>Cloudflare Workers + Sandbox</td>
+            </tr>
+            <tr>
+              <td>Browser automation at scale</td>
+              <td>Browserbase</td>
+            </tr>
+            <tr>
+              <td>Mobile-first development</td>
+              <td>Cloud VM + Tailscale + push notifications</td>
+            </tr>
+            <tr>
+              <td>Self-improving systems</td>
+              <td>Infinite Orchestra (Docker 24/7)</td>
+            </tr>
+            <tr>
+              <td>Industrial scale (10+ agents)</td>
+              <td>Gas Town</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if there was no deployment choice?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd have:</strong> One-size-fits-all infrastructure. Either too locked down (slow iteration) or too permissive (security nightmare).<br>
+          <strong>Why this fails:</strong> Risk profiles vary wildly. Prototyping needs speed. Production needs isolation.<br>
+          <strong>Hidden constraint:</strong> The deployment taxonomy exists because trust varies by context.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The simplest deployment</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">claude</code><br>
+          <strong>That's it.</strong> Direct CLI on your machine.<br>
+          Everything else is adding isolation, persistence, or scale.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">dabit3: Full development from phone</div>
+        <div class="text-text-secondary text-sm">
+          Cloud VM at $7/day, Termius + Tailscale, 6 parallel Claude windows in tmux. "Phone buzzes when agent needs input. Respond via Termius. Kick off next task while walking."
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How isolation levels fail</div>
+        <div class="text-text-secondary text-sm">
+          <strong>No isolation (local CLI):</strong> Fast setup, but one <code>rm -rf</code> = disaster<br>
+          <strong>Process isolation:</strong> Limits scope, but still shares filesystem<br>
+          <strong>Container:</strong> Strong isolation, but UID/permission gotchas<br>
+          <strong>VM:</strong> Maximum isolation, but slow startup and overhead<br><br>
+          <em>Each level trades convenience for safety. Know where you are.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Deployment Spectrum = Trust Levels</div>
+        <div class="text-text-secondary text-sm">
+          Local CLI = Trusting yourself with sudo<br>
+          Container = Trusting a contractor with keys<br>
+          VM = Trusting a contractor in a monitored workspace<br>
+          Cloud Sandbox = Trusting a contractor via security camera<br><br>
+          <em>Match isolation to how much you trust the agent's judgment.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">From "bash access" to full taxonomy</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Claude Code has full bash access<br>
+          --> Can run ANY command, including destructive ones<br>
+          --> Need isolation for unsupervised work<br>
+          --> Multiple isolation levels (process, container, VM)<br>
+          --> Need persistence for long-running work<br>
+          --> tmux, mosh, session recovery patterns
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Isolation Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE DILEMMA:</strong><br>
+          - <strong>No isolation:</strong> Fast, but risky<br>
+          - <strong>Container:</strong> Good balance, but setup overhead<br>
+          - <strong>Full VM:</strong> Maximum safety, but expensive and slow<br><br>
+          <strong>HEURISTIC:</strong> Use least isolation that lets you sleep at night.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you run YOLO on your main machine</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Use --dangerously-skip-permissions on main machine<br>
+          <strong>THEN:</strong> Agent runs any command without approval<br>
+          <strong>THEN:</strong> One bad command (rm -rf, git force push) executes<br>
+          <strong>THEN:</strong> Hours of work lost, or worse<br>
+          <strong>FINALLY:</strong> Morning reveals destruction<br><br>
+          <em>YOLO is for containers and VMs only. Never your main machine.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Deployment understanding depth</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "How do I run Claude Code?" --> Just type <code>claude</code><br>
+          <strong>Intermediate:</strong> "How do I run overnight?" --> tmux + Ralph loop<br>
+          <strong>Advanced:</strong> "How do I isolate?" --> Docker with security opts<br>
+          <strong>Staff:</strong> "How do I scale?" --> Cloudflare Workers + Durable Objects<br>
+          <strong>Expert:</strong> "How do I compose?" --> Multi-agent orchestration infra
+        </div>
+      </div>
+
+      <!-- PATTERNS SECTION -->
+      <div class="activity-item invariant" data-section="patterns">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">All patterns share INV-003: External State</div>
+        <div class="text-text-secondary text-sm">
+          Local CLI, Cloud VM, Docker, Serverless -- all rely on external state (filesystem, git, database) rather than in-memory state. This is the same invariant that makes Ralph work.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="patterns">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Docker + Git Worktrees</div>
+        <div class="text-text-secondary text-sm">
+          <strong>WORKS:</strong> Yes, excellently<br>
+          <strong>WHY:</strong> Each worktree in its own container = full isolation + no branch conflicts<br>
+          <strong>THE WIN:</strong> Scale agents horizontally without fear<br>
+          <strong>SETUP:</strong> One docker-compose with replicas mapping to worktrees
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="patterns">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cloudflare Workers + Skills</div>
+        <div class="text-text-secondary text-sm">
+          <strong>WORKS:</strong> Yes, this is the production pattern<br>
+          <strong>WHY:</strong> Skills developed locally, deployed unchanged to Workers<br>
+          <strong>THE WIN:</strong> Same code runs in dev and prod<br>
+          <strong>DANGER:</strong> Free tier has 10ms CPU limit. Use paid for agents.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="patterns">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">0xSero: Self-improving Docker Orchestra</div>
+        <div class="text-text-secondary text-sm">
+          "Set goal to 'improve itself' and it added Docker containerization to protect the host machine." The agent learned isolation was necessary for self-improvement.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="patterns">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@burcs: System - Mac as API via Cloudflare</div>
+        <div class="text-text-secondary text-sm">
+          Cloudflare Worker brain controlling local Mac body via tunnel. Can play music, send texts, create Linear issues, run Shortcuts. Zero exposed ports, full local machine control.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="patterns">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How infrastructure needs evolve</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "Local CLI is fine"<br>
+          <strong>Week 1:</strong> "I need tmux for persistence"<br>
+          <strong>Month 1:</strong> "I need a VM for mobile access"<br>
+          <strong>Month 3:</strong> "I need containers for overnight work"<br>
+          <strong>Month 6:</strong> "I need orchestration for multi-agent"<br><br>
+          <em>Your infrastructure will evolve. Plan for it.</em>
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item analogy" data-section="path">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Decision Tree = Security Audit</div>
+        <div class="text-text-secondary text-sm">
+          The deployment decision tree is essentially a security audit:<br>
+          - What can go wrong?<br>
+          - What's the blast radius?<br>
+          - What's the recovery path?<br><br>
+          <em>If you've done security reviews, you already understand this.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="path">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you always used maximum isolation?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd get:</strong> Maximum safety, but 10x setup time for every task<br>
+          <strong>Why this fails:</strong> Simple prototyping doesn't need VM overhead<br>
+          <strong>Hidden constraint:</strong> Iteration speed matters. Over-isolation kills velocity.
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="path">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When to upgrade your deployment</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Local --> Cloud VM:</strong> When you need mobile access<br>
+          <strong>Interactive --> Containers:</strong> When you run overnight<br>
+          <strong>Single --> Multi-agent:</strong> When parallel work needed<br>
+          <strong>Self-hosted --> Serverless:</strong> When you need scale<br><br>
+          <strong>DETECTION:</strong> Friction in your workflow = time to upgrade
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item violation" data-section="gotchas">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip tmux for remote work</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> SSH directly without tmux<br>
+          <strong>THEN:</strong> Network blip disconnects session<br>
+          <strong>THEN:</strong> Running Claude process orphaned or killed<br>
+          <strong>THEN:</strong> Mid-task work lost, state inconsistent<br>
+          <strong>FINALLY:</strong> Manual cleanup and restart required<br><br>
+          <em>Always use tmux for remote Claude sessions.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">UID mismatch compounds over time</div>
+        <div class="text-text-secondary text-sm">
+          At first: "Permission denied on one file"<br>
+          After 10 runs: "Half my files have wrong ownership"<br>
+          After 50 runs: "I need to chown -R my entire project"<br><br>
+          <strong>THRESHOLD:</strong> Fix UID mismatch on first occurrence, not later
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Automatic recovery from session drops</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE QUESTION:</strong> Can agents automatically recover from disconnection?<br>
+          <strong>WHY IT'S HARD:</strong> Need to detect partial state, resume without duplication, handle concurrent writes<br>
+          <strong>CURRENT:</strong> Manual tmux reconnection. No automation yet.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Troubleshooting deployment issues</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "It doesn't work" --> Check API key is set<br>
+          <strong>Intermediate:</strong> "Permission denied" --> Check UID/GID<br>
+          <strong>Advanced:</strong> "Intermittent failures" --> Check network, SSH config<br>
+          <strong>Staff:</strong> "Performance issues" --> Check container limits, cold starts<br>
+          <strong>Expert:</strong> "Scale problems" --> Check Durable Object limits, queue depths
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Cost-Availability Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE DILEMMA:</strong><br>
+          - <strong>Always-on VM:</strong> Available but costs $48-210/mo<br>
+          - <strong>Stop when idle:</strong> Cheap but breaks mobile workflow<br>
+          - <strong>Serverless:</strong> Pay-per-use but has limits<br>
+          - <strong>Home Mac:</strong> Free but depends on home internet<br><br>
+          <strong>HEURISTIC:</strong> Hourly billing + iOS Shortcuts to start/stop
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="hard">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How security posture degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100%:</strong> Fresh setup, all controls in place<br>
+          <strong>90%:</strong> "Just this once" skip a permission check<br>
+          <strong>70%:</strong> YOLO mode becomes default for convenience<br>
+          <strong>50%:</strong> Security controls feel like overhead<br>
+          <strong>CLIFF:</strong> One destructive command, no isolation<br><br>
+          <em>Security hygiene degrades invisibly. Audit periodically.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="hard">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">From "portability" to vendor lock-in</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Want optimal performance<br>
+          --> Use provider-specific features (Durable Objects, Lambda@Edge)<br>
+          --> Code becomes provider-dependent<br>
+          --> Migration requires rewrite<br>
+          --> Stuck with one provider<br>
+          --> Pricing changes hit hard
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If these patterns don't fit</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need browser automation?</strong> --> Browserbase or Playwright MCP<br>
+          <strong>Need multi-agent coordination?</strong> --> CC Mirror or Gas Town<br>
+          <strong>Need enterprise SSO?</strong> --> Cloudflare Zero Trust + Workers<br>
+          <strong>Need GPU compute?</strong> --> Modal, RunPod, or dedicated instance
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="when">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">All deployments share verification need</div>
+        <div class="text-text-secondary text-sm">
+          Local, remote, containerized, serverless -- all need verification loops (tests, typecheck) to catch agent mistakes. Deployment pattern changes, verification invariant remains.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Deployment Selection = Car Selection</div>
+        <div class="text-text-secondary text-sm">
+          Local CLI = Walking (simple, no overhead, limited range)<br>
+          Cloud VM = Personal car (flexible, maintenance required)<br>
+          Docker = Rental car (standardized, disposable)<br>
+          Serverless = Taxi (pay-per-use, no ownership)<br><br>
+          <em>Match the vehicle to the journey.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="when">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Molly Cantillon: Personal Panopticon</div>
+        <div class="text-text-secondary text-sm">
+          8 parallel Claude instances, each in its own directory: ~/nox (company), ~/trades (finance), ~/health (wellness), etc. "Reverse the data asymmetry that institutions have over you."
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deployment preferences evolve</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Just give me the simplest" (local CLI)<br>
+          <strong>3 months:</strong> "I need this to work overnight" (Ralph + containers)<br>
+          <strong>6 months:</strong> "I need this from anywhere" (cloud VM + mobile)<br>
+          <strong>1 year:</strong> "I need this at scale" (serverless + orchestration)<br><br>
+          <em>Start simple. Complexity finds you.</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        // Elements
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        // Bind methods
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Track which sections are in view
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

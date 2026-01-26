@@ -15,6 +15,8 @@ This content has been superseded by D-FINAL synthesis.
 **Synthesized:** 2026-01-09
 **Sources:** Claude HUD, rpai, Ralph patterns, CC Mirror, Gas Town, and community monitoring practices
 
+> **You Are Here:** This document covers tools and techniques for monitoring Claude Code agent sessions, including Claude HUD, rpai, and custom monitoring scripts. Use this when you need visibility into what your agents are doing, especially during long-running or overnight autonomous workflows.
+
 ---
 
 ## Why Observability Matters
@@ -242,6 +244,17 @@ while true; do
   sleep 10
 done
 ```
+
+---
+
+### Checkpoint: Observability Tools
+**You should now understand:**
+- [ ] How to install and configure Claude HUD for context monitoring
+- [ ] How to use rpai for multi-agent tmux management
+- [ ] How to set up tmux layouts for agent monitoring
+- [ ] How to use git-based monitoring for durable tracking
+
+**If unclear:** Re-read the tool installation sections, or try installing Claude HUD first (easiest starting point).
 
 ---
 
@@ -802,6 +815,90 @@ Without observability, you're running a distributed system blind. With it, you c
 - Context Management mastery guide (synthesis/mastery-context-management.md)
 - Orchestration patterns taxonomy (synthesis/taxonomy-orchestration.md)
 - Cost optimization research (extractions/cross-cutting/research-cost-optimization-expanded.md)
+
+---
+
+## Troubleshooting
+
+> **Note:** See the "Debugging Agent Issues" section above for detailed troubleshooting of context exhaustion, quality gate loops, worker recursion, and coordination deadlock.
+
+### Common Issue: Claude HUD Not Displaying
+**Symptom:** Installed Claude HUD but statusline is empty or shows errors.
+**Cause:** Plugin not properly activated, or terminal doesn't support required features.
+**Fix:** Verify plugin installation and run setup command.
+
+```bash
+# Verify installation
+/plugin list
+
+# Re-run setup
+/claude-hud:setup
+
+# Check config file exists
+cat ~/.claude/plugins/claude-hud/config.json
+```
+
+### Common Issue: rpai Not Detecting Agents
+**Symptom:** rpai shows empty list even though agents are running in tmux.
+**Cause:** Agents not running in tmux panes, or rpai not recognizing agent process names.
+**Fix:** Ensure agents are in tmux (not separate terminal windows). Check that process names match expected patterns.
+
+```bash
+# Verify tmux session exists
+tmux list-sessions
+
+# Check for agent processes
+pgrep -f "claude\|cursor\|codex"
+
+# Run rpai with verbose output
+rpai --debug
+```
+
+### Common Issue: Git Monitoring Shows No Activity
+**Symptom:** monitoring script reports no commits, but agent appears to be working.
+**Cause:** Agent not committing changes, or checking wrong branch/repo.
+**Fix:** Verify agent is configured to commit. Check you're in the correct directory.
+
+```bash
+# Check current directory and branch
+pwd
+git branch
+
+# Look for uncommitted changes
+git status
+
+# Check if agent is set to auto-commit
+grep -i "commit" CLAUDE.md
+```
+
+### Common Issue: Alerts Not Sending
+**Symptom:** Threshold exceeded but no Slack/desktop notification received.
+**Cause:** Webhook URL incorrect, or notification script not running.
+**Fix:** Test webhook manually. Verify monitoring script is running.
+
+```bash
+# Test Slack webhook
+curl -X POST "$SLACK_WEBHOOK" -d '{"text":"Test alert"}'
+
+# Test desktop notification (macOS)
+osascript -e 'display notification "Test" with title "Agent Monitor"'
+
+# Check if monitoring script is running
+ps aux | grep "monitor\|alert"
+```
+
+### Common Issue: Dashboard Shows Stale Data
+**Symptom:** Dashboard displays old metrics; doesn't update in real-time.
+**Cause:** Refresh interval too long, or script stopped.
+**Fix:** Reduce sleep interval. Check script is still running.
+
+```bash
+# Check if dashboard script is running
+ps aux | grep dashboard
+
+# Restart with shorter interval
+./dashboard.sh  # Default is 30 seconds
+```
 
 ---
 

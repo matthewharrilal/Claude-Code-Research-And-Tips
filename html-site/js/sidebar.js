@@ -1,6 +1,15 @@
 /**
  * Sidebar Navigation - Journey Pages
  * Handles toggle, mobile overlay, auto-expand current page, and keyboard navigation
+ *
+ * Version: 2.0 | Updated: 2026-01-19 | Phase: 3-NAV
+ *
+ * Features:
+ * - Auto-detection of current page based on URL
+ * - Auto-expansion of section containing current page
+ * - Mobile sidebar with overlay
+ * - Keyboard accessibility (Enter, Space, Escape)
+ * - ARIA attributes for screen readers
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -10,7 +19,90 @@ document.addEventListener('DOMContentLoaded', function() {
   const sidebarOverlay = document.querySelector('.sidebar-overlay');
   const navSections = document.querySelectorAll('.nav-section');
 
-  // Toggle sidebar on mobile
+  // ============================================================================
+  // AUTO-DETECTION: Mark current page and expand its section
+  // ============================================================================
+
+  /**
+   * Detect and mark the current page in navigation
+   * Uses URL matching to find the corresponding nav link
+   */
+  function detectCurrentPage() {
+    const currentPath = window.location.pathname;
+    const currentFile = currentPath.split('/').pop() || 'index.html';
+
+    // Get all nav links
+    const navLinks = document.querySelectorAll('.sidebar-nav a');
+    let foundCurrent = false;
+
+    navLinks.forEach(link => {
+      const href = link.getAttribute('href');
+      if (!href) return;
+
+      // Extract the filename from the href
+      const linkFile = href.split('/').pop();
+
+      // Match by filename
+      if (linkFile === currentFile) {
+        // Also check path segments for more precise matching
+        const hrefParts = href.split('/').filter(p => p && p !== '..' && p !== '.');
+        const pathParts = currentPath.split('/').filter(p => p);
+
+        // Check if enough path segments match
+        const matchingSegments = hrefParts.filter(part => pathParts.includes(part));
+
+        // Require at least the filename to match, prefer more specific matches
+        if (matchingSegments.length >= 1) {
+          const navPage = link.closest('.nav-page');
+          if (navPage && !foundCurrent) {
+            navPage.classList.add('current');
+            foundCurrent = true;
+
+            // Expand parent section
+            const parentSection = navPage.closest('.nav-section');
+            if (parentSection) {
+              parentSection.classList.add('open');
+              const title = parentSection.querySelector('.nav-section-title');
+              title?.setAttribute('aria-expanded', 'true');
+            }
+          }
+        }
+      }
+    });
+
+    // Fallback: try matching by data-section attribute
+    if (!foundCurrent) {
+      detectByPathSegment();
+    }
+
+    return foundCurrent;
+  }
+
+  /**
+   * Fallback detection using URL path segments and data-section attributes
+   */
+  function detectByPathSegment() {
+    const currentPath = window.location.pathname;
+    const pathSegments = currentPath.split('/').filter(p => p);
+
+    // Look for matching section based on path
+    navSections.forEach(section => {
+      const sectionName = section.dataset.section;
+      if (sectionName && pathSegments.includes(sectionName)) {
+        section.classList.add('open');
+        const title = section.querySelector('.nav-section-title');
+        title?.setAttribute('aria-expanded', 'true');
+      }
+    });
+  }
+
+  // Run auto-detection
+  const foundCurrentPage = detectCurrentPage();
+
+  // ============================================================================
+  // MOBILE SIDEBAR: Open/close with overlay
+  // ============================================================================
+
   function openSidebar() {
     sidebar?.classList.add('open');
     sidebarOverlay?.classList.add('visible');
@@ -55,7 +147,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Toggle nav sections (accordion behavior) with keyboard support
+  // ============================================================================
+  // SECTION ACCORDION: Toggle sections open/closed
+  // ============================================================================
+
   navSections.forEach(section => {
     const title = section.querySelector('.nav-section-title');
 
@@ -82,23 +177,30 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Auto-expand section containing current page
+  // ============================================================================
+  // SCROLL TO CURRENT: Ensure current page is visible in sidebar
+  // ============================================================================
+
   const currentPage = document.querySelector('.nav-page.current');
   if (currentPage) {
+    // If current page was already marked in HTML, ensure its section is open
     const parentSection = currentPage.closest('.nav-section');
-    if (parentSection) {
+    if (parentSection && !parentSection.classList.contains('open')) {
       parentSection.classList.add('open');
       const title = parentSection.querySelector('.nav-section-title');
       title?.setAttribute('aria-expanded', 'true');
     }
 
-    // Scroll current page into view in sidebar
+    // Scroll current page into view in sidebar (delayed for DOM settlement)
     setTimeout(() => {
       currentPage.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
   }
 
-  // Close sidebar when clicking a nav link (mobile)
+  // ============================================================================
+  // MOBILE: Close sidebar when clicking nav links
+  // ============================================================================
+
   const navLinks = document.querySelectorAll('.sidebar a');
   navLinks.forEach(link => {
     link.addEventListener('click', function() {
@@ -108,6 +210,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+
+
+// ==============================================================================
+// COPY CODE FUNCTIONALITY
+// ==============================================================================
 
 /**
  * Copy code functionality

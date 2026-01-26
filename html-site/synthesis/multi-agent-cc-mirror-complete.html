@@ -1,0 +1,2309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CC Mirror Multi-Agent Orchestration | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer - Draggable divider between Main Panel and Activity Zone */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    /* Prevent text selection during resize */
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    /* Hide resizer when Activity Zone is hidden (responsive) */
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Iron Law Box */
+    .iron-law-box {
+      background: linear-gradient(135deg, #fef2f2 0%, #fff7ed 100%);
+      border: 2px solid #ef4444;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .iron-law-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .iron-law-content {
+      font-size: 15px;
+      color: #7f1d1d;
+      font-weight: 500;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Architecture Diagram */
+    .architecture-diagram {
+      background: #18181b;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #e4e4e7;
+      overflow-x: auto;
+      line-height: 1.4;
+    }
+
+    .architecture-diagram .highlight {
+      color: #10b981;
+    }
+
+    .architecture-diagram .muted {
+      color: #6b7280;
+    }
+
+    /* Comparison Table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .comparison-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #3f3f46;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .comparison-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .comparison-table tr:hover {
+      background: #fafafa;
+    }
+
+    /* Tool Ownership Grid */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 700px) {
+      .tool-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .tool-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .tool-card-title {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tool-card.orchestrator {
+      border-left: 4px solid #0D9373;
+    }
+
+    .tool-card.worker {
+      border-left: 4px solid #3b82f6;
+    }
+
+    .tool-list {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .tool-list code {
+      background: #f4f4f5;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">CC Mirror Pattern</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">Philosophy + Code</a>
+          <a href="#hub-spoke" class="nav-item">Hub-and-Spoke Model</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-hidden-api" class="nav-item">Why Hidden API?</a>
+          <a href="#why-iron-law" class="nav-item">The Iron Law</a>
+          <a href="#why-task-graph" class="nav-item">Why Task Graph?</a>
+        </div>
+      </div>
+
+      <!-- Implementation -->
+      <div class="nav-section" data-section="implementation">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="folder" class="w-4 h-4"></i>
+          <span>Implementation</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#quick-start" class="nav-item">Quick Start (3 Commands)</a>
+          <a href="#task-api" class="nav-item">Task Management API</a>
+          <a href="#worker-patterns" class="nav-item">Worker Patterns</a>
+        </div>
+      </div>
+
+      <!-- Path of a Task -->
+      <div class="nav-section" data-section="path">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Path of a Task</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#path" class="nav-item">The Flow</a>
+          <a href="#coordination" class="nav-item">Coordination Patterns</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Practical Problems</a>
+          <a href="#troubleshooting" class="nav-item">Troubleshooting</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+          <a href="#comparison" class="nav-item">Pattern Comparison</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">CC Mirror unlocks Anthropic's hidden multi-agent orchestration for parallel task execution with dependency tracking.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Anthropic built it. Anthropic disabled it. CC Mirror enables it."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'npx cc-mirror quick --provider mirror --name mclaude')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>npx cc-mirror quick --provider mirror --name mclaude</code>
+          </div>
+
+          <div class="core-anchor">That unlocks TaskCreate, TaskList, TaskUpdate, TaskGet. Everything else is orchestration.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          CC Mirror patches Claude Code's minified JavaScript to enable internal APIs that Anthropic built but turned off. These APIs provide a complete task graph with dependency management, ownership tracking, and team visibility. You get multi-agent orchestration without building infrastructure.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          The key insight: Claude Code already HAS the primitives for multi-agent work. The orchestrator spawns workers, workers claim tasks from a shared queue, tasks can block other tasks. This is production-grade orchestration hiding in plain sight.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="hub-spoke">The Hub-and-Spoke Model</h3>
+
+        <div class="architecture-diagram">
+<pre>              +------------------+
+              |   <span class="highlight">ORCHESTRATOR</span>   |
+              |   (Conductor)    |
+              +--------+---------+
+                       |
+                       | <span class="muted">Task() with run_in_background=True</span>
+                       |
+       +---------------+---------------+
+       |               |               |
+       v               v               v
+  +---------+   +---------+   +---------+
+  | <span class="highlight">Worker1</span> |   | <span class="highlight">Worker2</span> |   | <span class="highlight">Worker3</span> |
+  | (Coder) |   | (Tester)|   | (Docs)  |
+  +---------+   +---------+   +---------+
+        |             |             |
+        +-------------+-------------+
+                      |
+               <span class="muted">Shared Filesystem</span>
+               <span class="muted">(handoff files)</span></pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The orchestrator never writes code. The orchestrator never reads more than 1-2 files. The orchestrator creates tasks, spawns workers, and synthesizes results. Workers do the actual work. This separation is the Iron Law.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-hidden-api" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY HIDDEN API?</div>
+          <div class="decision-reasoning">
+            Anthropic built TaskCreate, TaskList, TaskUpdate, TaskGet into Claude Code but disabled them. Why? Likely for safety, cost control, or staged rollout. CC Mirror patches the minified JS to flip them back on.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              These APIs exist because Anthropic intended multi-agent orchestration. You're not hacking unsupported features - you're enabling designed functionality. But it IS beta. Updates may break it.
+            </div>
+          </div>
+        </div>
+
+        <div class="iron-law-box" id="why-iron-law">
+          <div class="iron-law-title">
+            <i data-lucide="shield" class="w-5 h-5"></i>
+            THE IRON LAW
+          </div>
+          <div class="iron-law-content">
+            YOU DO NOT WRITE CODE. YOU DO NOT RUN COMMANDS. YOU DO NOT EXPLORE CODEBASES.<br><br>
+            You are the CONDUCTOR. Your agents play the instruments.
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY THE IRON LAW?</div>
+          <div class="decision-reasoning">
+            If the orchestrator writes code, it pollutes its own context. If the orchestrator explores the codebase, it loses strategic view. If the orchestrator does worker work, it becomes a bottleneck. The role separation is architectural.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Delegation threshold: If you're reading more than 2 files, spawn an agent instead. If you're writing any code, you've violated the law. The orchestrator's job is to think, not to do.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-task-graph">
+          <div class="decision-why">WHY TASK GRAPH?</div>
+          <div class="decision-reasoning">
+            Tasks support blocks/blockedBy relationships. When Task A blocks Task B, the system prevents workers from claiming Task B until Task A resolves. This is automatic dependency resolution - no manual orchestration needed.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Model your work as a DAG. "Implement API" blocks "Write tests" blocks "Update docs". Workers automatically pick up the next available task. You don't coordinate - the system does.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: IMPLEMENTATION -->
+      <section id="quick-start" data-activity="implementation">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Implementation
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">Quick Start (3 Commands)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Step 1: Create isolated variant</span>
+<span class="variable">npx</span> cc-mirror quick --provider mirror --name mclaude
+
+<span class="comment"># Step 2: Launch it</span>
+<span class="variable">mclaude</span>
+
+<span class="comment"># Step 3: In the terminal</span>
+<span class="string">"Load the orchestration skill and initiate"</span></pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          That's it. 3 steps to multi-agent orchestration. The variant creates an isolated Claude instance with the orchestration primitives enabled.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="task-api">Task Management API</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># TaskCreate - Create with dependencies</span>
+{
+  <span class="string">"subject"</span>: <span class="string">"Implement authentication middleware"</span>,
+  <span class="string">"description"</span>: <span class="string">"Create Express middleware for JWT verification"</span>,
+  <span class="string">"acceptanceCriteria"</span>: [
+    <span class="string">"Middleware validates JWT signature"</span>,
+    <span class="string">"Returns 401 on invalid/expired token"</span>,
+    <span class="string">"npm run typecheck passes"</span>
+  ],
+  <span class="string">"priority"</span>: 1,
+  <span class="string">"blockedBy"</span>: [<span class="string">"task-id-001"</span>],
+  <span class="string">"blocks"</span>: [<span class="string">"task-id-003"</span>, <span class="string">"task-id-004"</span>]
+}
+
+<span class="comment"># TaskList - Query available tasks</span>
+<span class="variable">TaskList</span> --status=open --no-owner --not-blocked
+
+<span class="comment"># TaskUpdate - Claim and update</span>
+{
+  <span class="string">"taskId"</span>: <span class="string">"task-id-002"</span>,
+  <span class="string">"owner"</span>: <span class="string">"worker-agent-id"</span>,
+  <span class="string">"status"</span>: <span class="string">"in_progress"</span>,
+  <span class="string">"comments"</span>: [<span class="string">"Found edge case in token parsing"</span>]
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Tool Ownership Division</h3>
+
+        <div class="tool-grid">
+          <div class="tool-card orchestrator">
+            <div class="tool-card-title">
+              <i data-lucide="crown" class="w-4 h-4 text-accent"></i>
+              Orchestrator Uses
+            </div>
+            <div class="tool-list">
+              <p class="mb-2"><code>Read</code> (1-2 files max)</p>
+              <p class="mb-2"><code>TaskCreate</code>, <code>TaskList</code>, <code>TaskGet</code>, <code>TaskUpdate</code></p>
+              <p class="mb-2"><code>Task</code> (to spawn workers)</p>
+              <p><code>AskUserQuestion</code></p>
+            </div>
+          </div>
+          <div class="tool-card worker">
+            <div class="tool-card-title">
+              <i data-lucide="wrench" class="w-4 h-4 text-blue-500"></i>
+              Workers Use
+            </div>
+            <div class="tool-list">
+              <p class="mb-2"><code>Read</code>, <code>Write</code>, <code>Edit</code>, <code>Bash</code></p>
+              <p class="mb-2"><code>Glob</code>, <code>Grep</code>, <code>WebFetch</code></p>
+              <p class="mb-2"><strong class="text-red-600">NEVER:</strong> <code>Task*</code>, spawn sub-agents</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="worker-patterns">Worker Preamble Template</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="variable">CONTEXT</span>: You are a WORKER agent, not an orchestrator.
+
+<span class="variable">RULES</span>:
+- Complete ONLY the task described below
+- Use tools directly (Read, Write, Edit, Bash, etc.)
+- Do NOT spawn sub-agents
+- Do NOT call TaskCreate or TaskUpdate
+- Report your results with absolute file paths
+
+<span class="variable">TASK</span>:
+[Your specific task here]</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Model Selection by Complexity</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Use Case</th>
+              <th>Spawn Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Haiku</strong></td>
+              <td>Errand runner: fetch files, grep, simple lookups</td>
+              <td>5-10 in parallel</td>
+            </tr>
+            <tr>
+              <td><strong>Sonnet</strong></td>
+              <td>Capable worker: structured implementation, tests</td>
+              <td>2-5 parallel</td>
+            </tr>
+            <tr>
+              <td><strong>Opus</strong></td>
+              <td>Complex reasoning, architecture decisions</td>
+              <td>1 (sequential)</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a task through the CC Mirror system to see how orchestration flows:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">User describes goal to orchestrator: "Build auth system"</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Orchestrator decomposes into <code>TaskCreate</code> calls with dependencies</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Task graph established: Task 1 (schema) blocks Task 2 (API) blocks Task 3 (tests)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Orchestrator spawns Worker A with <code>Task(run_in_background=True)</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Worker A receives preamble: "You are a WORKER agent..."</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">Worker A claims Task 1, implements, runs tests, marks <code>status: resolved</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Task 2 automatically unblocks (dependency resolved)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Orchestrator spawns Worker B for Task 2 (parallel with Worker C for Task 4 if unblocked)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">Workers complete, orchestrator synthesizes results</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content"><code>TaskList</code> shows all tasks resolved, orchestrator reports to user</div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="coordination">Coordination Patterns</h3>
+
+        <h4 class="font-medium text-base mb-3 text-text-secondary">Pattern 1: Fan-Out (Parallel Dispatch)</h4>
+        <div class="architecture-diagram">
+<pre>           +------------------+
+           |   <span class="highlight">ORCHESTRATOR</span>   |
+           +--------+---------+
+                    |
+    +---------------+---------------+
+    |               |               |
+    v               v               v
++--------+   +--------+   +--------+
+|<span class="highlight">Worker A</span>|   |<span class="highlight">Worker B</span>|   |<span class="highlight">Worker C</span>|
++--------+   +--------+   +--------+
+  <span class="muted">(parallel execution - no dependencies)</span></pre>
+        </div>
+
+        <h4 class="font-medium text-base mb-3 mt-6 text-text-secondary">Pattern 2: Pipeline (Sequential Handoffs)</h4>
+        <div class="architecture-diagram">
+<pre>+--------+     +--------+     +--------+
+| Task 1 | --> | Task 2 | --> | Task 3 |
+| Schema |     | Backend|     |  Tests |
++--------+     +--------+     +--------+
+    |             ^   |           ^
+    +--<span class="highlight">blocks</span>-----+   +--<span class="highlight">blocks</span>---+</pre>
+        </div>
+
+        <h4 class="font-medium text-base mb-3 mt-6 text-text-secondary">Pattern 3: Map-Reduce (Parallel + Aggregation)</h4>
+        <div class="architecture-diagram">
+<pre>              +------------------+
+              |   <span class="highlight">ORCHESTRATOR</span>   |
+              +--------+---------+
+                       |
+         <span class="muted">MAP PHASE</span>     |
+                       |
+   +-------------------+-------------------+
+   |                   |                   |
+   v                   v                   v
++--------+        +--------+        +--------+
+|Research|        |Research|        |Research|
+|  Auth  |        | Payment|        |  DB    |
++--------+        +--------+        +--------+
+   |                   |                   |
+   +-------------------+-------------------+
+                       |
+        <span class="muted">REDUCE PHASE</span>   v
+              +------------------+
+              |    <span class="highlight">SYNTHESIZE</span>    |
+              | (Orchestrator)   |
+              +------------------+</pre>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit with CC Mirror, with concrete symptoms and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Skill file not loading
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Claude says it doesn't know about TaskCreate/TaskUpdate</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> cc_mirror_mode not set, or skill file missing</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Run <code>npx cc-mirror doctor</code> to verify installation. Check ~/.claude/settings.json for cc_mirror: true</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Workers touching same files
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Multiple workers modify same file, edits overwrite each other</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Task decomposition didn't isolate file ownership</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add explicit file ownership to task descriptions: "Ownership: src/auth/*.ts - DO NOT MODIFY: src/components/*"</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Context collapse in orchestrator
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Orchestrator forgets task state, makes inconsistent decisions</div>
+          <div class="gotcha-detail"><strong>Threshold:</strong> >70% context usage, or too many workers spawned</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Enable auto-compact in settings.json. Run /compact proactively. Monitor with /context</div>
+        </div>
+
+        <div class="gotcha-box" id="troubleshooting">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Hidden API disappeared after update
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> CC Mirror was working, Claude Code updated, now broken</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Claude Code update changed minified JS, patch no longer applies</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Run <code>npx cc-mirror update</code>. Check GitHub issues for compatibility. This is beta - expect breakage.</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Emergency Recovery</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Kill all stuck workers</span>
+pkill -f "claude"
+
+<span class="comment"># Check task state</span>
+npx cc-mirror tasks list --all
+
+<span class="comment"># Clear stuck tasks</span>
+npx cc-mirror tasks clean --stuck
+
+<span class="comment"># Full reset (loses task state)</span>
+npx cc-mirror remove mclaude
+npx cc-mirror quick --provider mirror --name mclaude</pre>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions in multi-agent orchestration, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Beta Feature Instability
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> CC Mirror patches disabled Anthropic internals. Any Claude Code update can break it. You're trading stability for capability.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Commands stop working after updates. New Claude Code versions have different JS structure.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Pin Claude Code version for production work. Check CC Mirror releases before updating. Have fallback to standard Task() tool.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Parallel Worker Conflicts
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Parallel execution is the point, but parallel git operations conflict. Multiple workers touching same files corrupt output.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Merge conflicts, overwritten changes, corrupted files.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use git worktrees for true isolation. Assign file ownership explicitly in task descriptions. Use branch-per-worker strategy.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Production Readiness Gap
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> CC Mirror is great for demos and personal projects, but lacks production requirements: custom observability, business logic gates, precise state control.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Can't integrate with existing monitoring. No way to add domain-specific validation.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use for prototyping, not production. For production, build custom orchestration on standard Task() tool or use Gas Town.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            The 80/20 Rule
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> CC Mirror covers 80% of use cases with zero effort. The remaining 20% needs custom work - but you don't know which 20% until you're in it.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Start with CC Mirror, hit limitation, have to rebuild.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Evaluate complexity upfront. If you're building something that needs custom orchestration, start with Gas Town or custom Task() patterns.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE CC MIRROR WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Tasks have clear decomposition with dependencies</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need parallel execution with automatic dependency resolution</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quick setup matters (3 commands)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Projects benefit from task persistence across sessions</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Personal projects and prototyping</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE CC MIRROR WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need production reliability - Use custom orchestration</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need custom observability - Build on Task() tool</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Sequential iteration is fine - Use Ralph loops</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Running 10+ agents regularly - Use Gas Town</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need official Anthropic support</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="comparison">Pattern Comparison</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>CC Mirror</th>
+              <th>Gas Town</th>
+              <th>Ralph Loop</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Setup Time</strong></td>
+              <td>&lt;5 minutes</td>
+              <td>Hours+</td>
+              <td>&lt;10 minutes</td>
+            </tr>
+            <tr>
+              <td><strong>Complexity</strong></td>
+              <td>Low</td>
+              <td>High (Stage 7+)</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td><strong>Execution</strong></td>
+              <td>Parallel</td>
+              <td>Parallel</td>
+              <td>Sequential</td>
+            </tr>
+            <tr>
+              <td><strong>Dependencies</strong></td>
+              <td>Built-in blocks/blockedBy</td>
+              <td>Inbox-based</td>
+              <td>Manual ordering</td>
+            </tr>
+            <tr>
+              <td><strong>Use Case</strong></td>
+              <td>80% generic</td>
+              <td>20% complex</td>
+              <td>Overnight features</td>
+            </tr>
+            <tr>
+              <td><strong>Cost</strong></td>
+              <td>Normal</td>
+              <td>"Expensive as hell"</td>
+              <td>Moderate</td>
+            </tr>
+            <tr>
+              <td><strong>Author</strong></td>
+              <td>@nummanali</td>
+              <td>@steve_yegge</td>
+              <td>@mattpocockuk</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if Anthropic enabled these APIs?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd have:</strong> Official support, documented behavior, stable interfaces.<br>
+          <strong>Why they didn't:</strong> Likely safety concerns, cost control, or staged rollout.<br>
+          <strong>Hidden insight:</strong> CC Mirror's existence proves multi-agent is THE direction.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible core</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">npx cc-mirror quick --provider mirror --name mclaude</code><br>
+          <strong>Essential:</strong> Task graph with dependencies.<br>
+          <strong>Everything else:</strong> Orchestration patterns on top.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@nummanali: "So simple, yet powerful"</div>
+        <div class="text-text-secondary text-sm">
+          "Claude Code - Official Multi Agent Orchestration. This is a disabled feature, but through CC Mirror, I have been able to enable it. It is so simple, yet powerful and IMO beats every orchestration I've seen. There's no point building your own."
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-003: External state > internal memory</div>
+        <div class="text-text-secondary text-sm">
+          CC Mirror, Ralph, Gas Town all share this. Task state lives in files/database, not in Claude's context. Workers are stateless. The system remembers, agents forget.
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror = Kubernetes for Agents</div>
+        <div class="text-text-secondary text-sm">
+          Orchestrator = Control Plane<br>
+          Workers = Pods<br>
+          TaskCreate = kubectl apply<br>
+          blocks/blockedBy = Dependencies<br><br>
+          <em>If you've done K8s, you already understand CC Mirror.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint -> FIVE decisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Orchestrator context is limited<br>
+          -> Orchestrator can't write code<br>
+          -> Orchestrator can't explore codebase<br>
+          -> Workers must be specialized<br>
+          -> Tasks must be atomic<br>
+          -> Dependencies must be explicit
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How orchestrator quality degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% -> 90%</strong> (1-3 workers): Clean decisions<br>
+          <strong>90% -> 70%</strong> (4-6 workers): Some repetition<br>
+          <strong>70% -> 50%</strong> (7-10 workers): Losing track of task state<br>
+          <strong>50% -> CLIFF</strong> (10+ workers): Contradictory spawns<br><br>
+          <em>Critical: Use /compact before hitting the cliff.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At 10+ workers, coordination cost dominates</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IMPLICATION:</strong> The hub-and-spoke model has scaling limits. Beyond ~10 parallel workers, the orchestrator becomes the bottleneck.<br><br>
+          <strong>THRESHOLD:</strong> ~10 workers, ~50% context usage
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if the orchestrator wrote code?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd have:</strong> Faster initial implementation.<br>
+          <strong>Why this fails:</strong> Context pollution. Same agent writes and reviews. No parallelism.<br>
+          <strong>Hidden constraint:</strong> The Iron Law IS the architecture.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If orchestrator explores codebase</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Orchestrator reads 10+ files to "understand"<br>
+          <strong>THEN:</strong> Context fills with code, not strategy<br>
+          <strong>THEN:</strong> Task decomposition degrades<br>
+          <strong>THEN:</strong> Workers get vague instructions<br>
+          <strong>FINALLY:</strong> Workers fail, orchestrator blames them<br><br>
+          <em>THE FIX: Delegate exploration to workers. Orchestrator stays strategic.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Task granularity dilemma</div>
+        <div class="text-text-secondary text-sm">
+          * <strong>Very small:</strong> Safe, but spawn overhead dominates<br>
+          * <strong>Medium:</strong> Balanced, but judgment required<br>
+          * <strong>Large:</strong> Efficient, but worker context collapse risk<br><br>
+          <em>Heuristic: If worker needs to read 20+ files, task is too big.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Understanding the Iron Law</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Why can't orchestrator write code?"<br>
+          -> Because it pollutes context<br>
+          <strong>Intermediate:</strong> "How do I verify worker output?"<br>
+          -> Read result summaries, not full code<br>
+          <strong>Advanced:</strong> "When do I break the rule?"<br>
+          -> Never. Delegate verification to another worker.<br>
+          <strong>Staff:</strong> "What about quick fixes?"<br>
+          -> Still delegate. The rule IS the architecture.
+        </div>
+      </div>
+
+      <!-- IMPLEMENTATION SECTION -->
+      <div class="activity-item composition" data-section="implementation">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror + Git Worktrees</div>
+        <div class="text-text-secondary text-sm">
+          <strong>WORKS:</strong> True parallel isolation. No merge conflicts.<br>
+          <strong>HOW:</strong> <code>git worktree add ../agent-1 task-1-branch</code><br>
+          <strong>RECOMMENDATION:</strong> Essential for any non-trivial parallel work.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="implementation">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Skill file is ~5,299 tokens</div>
+        <div class="text-text-secondary text-sm">
+          From @nummanali: "The additional instructions guide the orchestrator to manage sub agents, saving its own tokens significantly." One-time cost that pays off through efficient delegation.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="implementation">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How model selection feels over time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>TASK 1:</strong> "Haiku seems too simple for this"<br>
+          <strong>TASK 5:</strong> "Actually, Haiku handles file lookups fine"<br>
+          <strong>TASK 10:</strong> "Sonnet for implementation, Haiku for grunt work"<br>
+          <strong>TASK 20:</strong> "Model selection is my highest-leverage decision"<br><br>
+          <em>Don't judge by the first task.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="implementation">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-005: Verification must be automatable</div>
+        <div class="text-text-secondary text-sm">
+          CC Mirror shares this with Ralph: acceptance criteria must be checkable by the system. "npm run typecheck passes" works. "Looks good" doesn't.
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item analogy" data-section="path">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Task Graph = Git Commit Graph</div>
+        <div class="text-text-secondary text-sm">
+          blocks/blockedBy = parent commits<br>
+          Task resolution = commit completion<br>
+          Parallel workers = parallel branches<br>
+          Orchestrator synthesis = merge commit<br><br>
+          <em>If you understand git DAGs, you understand task graphs.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip dependency declaration</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Task 2 depends on Task 1 output but no blockedBy set<br>
+          <strong>THEN:</strong> Workers claim both simultaneously<br>
+          <strong>THEN:</strong> Task 2 fails with missing input<br>
+          <strong>THEN:</strong> Wasted tokens, wasted time<br>
+          <strong>FINALLY:</strong> Have to re-run with proper dependencies<br><br>
+          <em>THE FIX: Model dependencies upfront. The graph IS the plan.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="path">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Map-Reduce unlocks research workflows</div>
+        <div class="text-text-secondary text-sm">
+          <strong>AT SCALE:</strong> 5+ research workers exploring different areas simultaneously, orchestrator synthesizes findings.<br>
+          <strong>IMPLICATION:</strong> Research that took days in sequential mode takes hours.<br>
+          <strong>THRESHOLD:</strong> Any exploration task with 3+ independent areas.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="path">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal worker count</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE QUESTION:</strong> How many parallel workers maximize throughput?<br>
+          <strong>WHY IT'S HARD:</strong> Depends on task type, model, codebase size, dependencies.<br>
+          <strong>CURRENT BEST:</strong> Start with 2-3, scale up until context pressure.
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When auto-compact flips from optional to essential</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-50% context:</strong> Optional (clean orchestration)<br>
+          <strong>50-70% context:</strong> Recommended (starting to repeat)<br>
+          <strong>70-85% context:</strong> Essential (quality degrading)<br>
+          <strong>85%+ context:</strong> Already too late (contradictions)<br><br>
+          <strong>THE INFLECTION:</strong> ~70% context<br>
+          <em>Detection: Orchestrator repeats same task creation? Check /context.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How file conflicts escalate</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1 conflict:</strong> Easy manual fix<br>
+          <strong>2-3 conflicts:</strong> Annoying but recoverable<br>
+          <strong>4-6 conflicts:</strong> Starting to question architecture<br>
+          <strong>7+ conflicts:</strong> Throw away, restart with worktrees<br><br>
+          <em>Critical: If you're seeing conflicts, you're already in trouble. Prevent, don't fix.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="gotchas">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why CC Mirror breaks on updates</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> CC Mirror patches minified JS<br>
+          -> Anthropic updates Claude Code<br>
+          -> Minified JS structure changes<br>
+          -> Patch no longer applies cleanly<br>
+          -> Hidden APIs stop working<br>
+          -> Your orchestration breaks
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@nummanali on context collapse</div>
+        <div class="text-text-secondary text-sm">
+          "This is using a new beta feature for Claude Code. Just make sure auto compact is on. It did ever break, I've not had it stop once yet." Auto-compact is essential, not optional.
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Simplicity vs. Customization</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE DILEMMA:</strong><br>
+          * CC Mirror: 80% cases, zero effort, but limited customization<br>
+          * Gas Town: 20% cases, heavy setup, but full control<br>
+          * Custom Task(): Any case, medium effort, your maintenance burden<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> Each trades off differently.<br>
+          <em>Heuristic: Start with CC Mirror, graduate to Gas Town when you hit walls.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="hard">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if CC Mirror had official support?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd have:</strong> Stable APIs, documentation, help when things break.<br>
+          <strong>Why you don't:</strong> Anthropic hasn't released it officially.<br>
+          <strong>Hidden insight:</strong> CC Mirror is a preview of where Claude Code is going.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Understanding production readiness</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "CC Mirror just works!"<br>
+          -> For simple cases, yes<br>
+          <strong>Intermediate:</strong> "How do I add logging?"<br>
+          -> You can't, it's internal<br>
+          <strong>Advanced:</strong> "How do I integrate with Datadog?"<br>
+          -> Build custom orchestration instead<br>
+          <strong>Staff:</strong> "Is this production-ready?"<br>
+          -> No. Use for prototyping, build custom for production.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="hard">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How "80% coverage" feels over time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>WEEK 1:</strong> "CC Mirror handles everything!"<br>
+          <strong>WEEK 2:</strong> "Hit a limitation, worked around it"<br>
+          <strong>WEEK 3:</strong> "Another workaround..."<br>
+          <strong>WEEK 4:</strong> "Should have built custom from the start"<br><br>
+          <em>Know your use case complexity upfront.</em>
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If CC Mirror isn't right for you</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need sequential iteration?</strong> -> Ralph loops<br>
+          <strong>Need 10+ parallel agents?</strong> -> Gas Town<br>
+          <strong>Need production observability?</strong> -> Custom Task() orchestration<br>
+          <strong>Need official support?</strong> -> Standard Claude Code features
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror + Ralph</div>
+        <div class="text-text-secondary text-sm">
+          <strong>WORKS:</strong> Ralph for overnight single-feature, CC Mirror for daytime parallel sprints.<br>
+          <strong>DANGER:</strong> Don't mix them in the same session.<br>
+          <strong>RECOMMENDATION:</strong> Pick one per project phase.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Pattern Selection = Tool Selection</div>
+        <div class="text-text-secondary text-sm">
+          CC Mirror = Docker (quick, standardized, limited)<br>
+          Gas Town = Kubernetes (powerful, complex, flexible)<br>
+          Ralph = Cron job (simple, sequential, reliable)<br>
+          Custom = Bare metal (full control, your burden)<br><br>
+          <em>Choose the right abstraction level for your needs.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="when">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">All patterns share INV-001: Task atomicity</div>
+        <div class="text-text-secondary text-sm">
+          CC Mirror, Gas Town, Ralph all require tasks that complete in one context window. The underlying constraint is the same; orchestration patterns differ.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="when">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Automatic pattern selection</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE QUESTION:</strong> Can we auto-detect which pattern fits a project?<br>
+          <strong>WHY IT'S HARD:</strong> Depends on team, codebase, feature, timeline, budget.<br>
+          <strong>CURRENT BEST:</strong> Human judgment based on complexity ladder.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        // Elements
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        // Bind methods
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Track which sections are in view
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

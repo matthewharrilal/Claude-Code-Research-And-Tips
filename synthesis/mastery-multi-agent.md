@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Multi-Agent Architecture: Complete Mastery Guide
 
+> **You Are Here:** This is a DEPRECATED document - the content has been moved to D-FINAL synthesis. For current multi-agent guidance, see `synthesis/multi-agent-cc-mirror-complete.md` for CC Mirror, `synthesis/ralph-ecosystem-complete.md` for Ralph patterns, or the D-FINAL documents. This file is preserved for reference only.
+
 > **The definitive guide to multi-agent orchestration with Claude Code.** Synthesized from CC Mirror, Gas Town, Infinite Orchestra, community patterns, and production deployments.
 
 ---

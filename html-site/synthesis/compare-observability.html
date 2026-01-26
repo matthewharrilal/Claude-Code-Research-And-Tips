@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Observability & Monitoring Patterns | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Metrics Table */
+    .metrics-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .metrics-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .metrics-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .metrics-table tr:hover {
+      background: #fafafa;
+    }
+
+    .threshold-warning {
+      color: #f59e0b;
+      font-weight: 500;
+    }
+
+    .threshold-critical {
+      color: #ef4444;
+      font-weight: 500;
+    }
+
+    /* Dashboard Layout Demo */
+    .dashboard-demo {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #e4e4e7;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    /* Tool Card */
+    .tool-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .tool-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .tool-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .tool-card-source {
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Color-coded context bars */
+    .context-bar {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .context-bar.green { background: #dcfce7; color: #166534; }
+    .context-bar.yellow { background: #fef3c7; color: #92400e; }
+    .context-bar.red { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Observability Patterns</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">Four Pillars</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-observe" class="nav-item">Why Observe?</a>
+          <a href="#why-external" class="nav-item">Why External Tools?</a>
+          <a href="#why-git" class="nav-item">Why Git-Based?</a>
+        </div>
+      </div>
+
+      <!-- Tool Landscape -->
+      <div class="nav-section" data-section="tools">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="wrench" class="w-4 h-4"></i>
+          <span>Tool Landscape</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#tools" class="nav-item">Overview</a>
+          <a href="#claude-hud" class="nav-item">Claude HUD</a>
+          <a href="#rpai" class="nav-item">rpai</a>
+          <a href="#tmux-monitoring" class="nav-item">tmux Layouts</a>
+          <a href="#git-monitoring" class="nav-item">Git Monitoring</a>
+        </div>
+      </div>
+
+      <!-- Path of a Metric -->
+      <div class="nav-section" data-section="path">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Path of a Metric</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#path" class="nav-item">The Flow</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Practical Problems</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Agent observability transforms opaque AI systems into debuggable, optimizable workflows through external monitoring.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Agents are opaque by default. Visibility is earned through instrumentation."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'watch -n5 \'git log --oneline -5 && cat progress.txt | tail -10\'')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>watch -n5 'git log --oneline -5 && cat progress.txt | tail -10'</code>
+          </div>
+
+          <div class="core-anchor">Git is your durable event log. Everything else is convenience.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Unlike traditional software where you can set breakpoints, AI agents operate as black boxes. They consume tokens, make decisions, and produce outputs with minimal visibility into their reasoning.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">The Four Pillars of Agent Observability</h3>
+
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>Pillar</th>
+              <th>Purpose</th>
+              <th>Without It</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Failure Detection</strong></td>
+              <td>Catch issues before they compound</td>
+              <td>Broken code accumulates silently</td>
+            </tr>
+            <tr>
+              <td><strong>Behavior Understanding</strong></td>
+              <td>Know what the agent is actually doing</td>
+              <td>"Staring into the void"</td>
+            </tr>
+            <tr>
+              <td><strong>Performance Optimization</strong></td>
+              <td>Identify bottlenecks and waste</td>
+              <td>Runaway token consumption</td>
+            </tr>
+            <tr>
+              <td><strong>Debugging Capability</strong></td>
+              <td>Trace issues to root cause</td>
+              <td>Hours lost to mysterious failures</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <blockquote class="border-l-4 border-accent pl-4 italic text-text-secondary mb-6">
+          "Makes the hidden control plane of Claude Code visible, which is critical for debugging long-horizon tasks."
+          <span class="block text-sm mt-2 not-italic">-- @gurtej__gill_</span>
+        </blockquote>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-observe" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY OBSERVE AGENTS?</div>
+          <div class="decision-reasoning">
+            When running agents for hours or overnight, critical failures happen invisibly: context silently exhausts, quality degrades without warning, tasks fail in ways that aren't immediately obvious, and learning compounds invisibly (good or bad).
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Without observability, you're running a distributed system blind. Morning reveals 20 bad commits, wasted tokens, and no understanding of why. Even 5 minutes of setup pays dividends.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-external">
+          <div class="decision-why">WHY EXTERNAL TOOLS?</div>
+          <div class="decision-reasoning">
+            The agent can't observe itself reliably. When context degrades, the agent loses awareness. External tools (Claude HUD, tmux watchers, git monitors) provide ground truth that doesn't degrade with the agent.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Never rely on the agent to report its own health. Claude HUD reads context from the control plane, not from Claude's self-assessment. Git commits are ground truth; the agent's claim of "done" is not.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-git">
+          <div class="decision-why">WHY GIT-BASED MONITORING?</div>
+          <div class="decision-reasoning">
+            Git commits are the only truly durable record of agent activity. Terminal output scrolls away. Session logs get truncated. But git history persists across sessions, agent resets, and even system reboots.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Always include git-based monitoring, even if using fancier tools. When Claude HUD crashes or rpai misses an agent, <code>git log</code> still works. Git is your event log of last resort.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: TOOL LANDSCAPE -->
+      <section id="tools" data-activity="tools">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The Tool Landscape
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Four complementary tools at different visibility levels. Pick based on your complexity and needs.
+        </p>
+
+        <!-- Claude HUD -->
+        <div class="tool-card" id="claude-hud">
+          <div class="tool-card-header">
+            <i data-lucide="monitor" class="w-6 h-6 text-accent"></i>
+            <div>
+              <div class="tool-card-title">Claude HUD - Native Session Visibility</div>
+              <div class="tool-card-source">@jarrodwatts | github.com/jarrodwatts/claude-hud</div>
+            </div>
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            The most direct solution for Claude Code visibility. A plugin that renders real-time session data in your terminal statusline.
+          </p>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Installation</span>
+/plugin marketplace add jarrodwatts/claude-hud
+/plugin install claude-hud
+/claude-hud:setup</pre>
+          </div>
+
+          <h4 class="font-semibold mb-3">Sample Output</h4>
+          <div class="dashboard-demo">[Opus 4.5] ████████░░ 35% | 1 MCPs | ⏳ 1m
+✓ Read x2 | ✓ WebFetch x1 | ✓ Skill x1 | ✓ Edit x1</div>
+
+          <h4 class="font-semibold mb-3">Color-Coded Context Bar</h4>
+          <table class="metrics-table">
+            <thead>
+              <tr>
+                <th>Color</th>
+                <th>Context Level</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="context-bar green">Green</span></td>
+                <td>0-50%</td>
+                <td>Full capability, continue working</td>
+              </tr>
+              <tr>
+                <td><span class="context-bar yellow">Yellow</span></td>
+                <td>50-70%</td>
+                <td>Monitor closely, consider compacting soon</td>
+              </tr>
+              <tr>
+                <td><span class="context-bar red">Red</span></td>
+                <td>70-85%</td>
+                <td>Compact now or wrap up current task</td>
+              </tr>
+              <tr>
+                <td><span class="context-bar red">Flashing</span></td>
+                <td>85%+</td>
+                <td>Token breakdown appears, quality degrading</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- rpai -->
+        <div class="tool-card" id="rpai">
+          <div class="tool-card-header">
+            <i data-lucide="layout-grid" class="w-6 h-6 text-accent"></i>
+            <div>
+              <div class="tool-card-title">rpai - tmux Multi-Agent Manager</div>
+              <div class="tool-card-source">@radoslav11 | cargo install rpai</div>
+            </div>
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            When running multiple agents in parallel, rpai provides a unified TUI for monitoring and navigation.
+          </p>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Installation and Usage</span>
+cargo install rpai
+<span class="comment"># Run in any tmux session with agents</span>
+rpai</pre>
+          </div>
+
+          <h4 class="font-semibold mb-3">Demo Interface</h4>
+          <div class="dashboard-demo">┌─────────────────────────────────────────────┐
+│  RPAI - Agent Monitor                       │
+├─────────────────────────────────────────────┤
+│  [1] CURSOR AGENT    ██████ running         │
+│  [2] CLAUDE AGENT    ██████ running         │
+│  [3] CODEX AGENT     ██████ idle            │
+├─────────────────────────────────────────────┤
+│  Preview: Claude is executing Python...     │
+│  > import pandas as pd                      │
+│  > df = pd.read_csv('data.csv')            │
+└─────────────────────────────────────────────┘</div>
+
+          <blockquote class="border-l-4 border-accent pl-4 italic text-text-secondary">
+            "Parallel agents feel like herding caffeinated cats."
+            <span class="block text-sm mt-2 not-italic">-- @FutbolmeAI</span>
+          </blockquote>
+        </div>
+
+        <!-- tmux Monitoring -->
+        <div class="tool-card" id="tmux-monitoring">
+          <div class="tool-card-header">
+            <i data-lucide="layout-template" class="w-6 h-6 text-accent"></i>
+            <div>
+              <div class="tool-card-title">tmux/Terminal Monitoring</div>
+              <div class="tool-card-source">Manual multi-pane setups</div>
+            </div>
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            For custom monitoring needs without rpai. Flexible but requires manual setup.
+          </p>
+
+          <h4 class="font-semibold mb-3">Recommended Layout</h4>
+          <div class="dashboard-demo">┌────────────────────────────────────────────┐
+│              Agent Output (main)            │
+│                                             │
+│  claude "Implement feature X..."            │
+│                                             │
+├─────────────────────┬──────────────────────┤
+│    Test Watcher     │    Context HUD       │
+│                     │                       │
+│  npm test --watch   │  [HUD output here]   │
+├─────────────────────┴──────────────────────┤
+│              Git Log / Status               │
+│  watch -n5 'git log --oneline -5'          │
+└────────────────────────────────────────────┘</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Create the layout</span>
+tmux split-window -v -p 30
+tmux split-window -h
+tmux select-pane -t 0
+
+<span class="comment"># Or use tmuxinator config</span>
+<span class="comment"># ~/.tmuxinator/agent-dev.yml</span>
+name: agent-dev
+windows:
+  - main:
+      layout: main-vertical
+      panes:
+        - claude
+        - npm test --watch
+        - watch -n2 'cat scripts/ralph/progress.txt | tail -20'</pre>
+          </div>
+        </div>
+
+        <!-- Git Monitoring -->
+        <div class="tool-card" id="git-monitoring">
+          <div class="tool-card-header">
+            <i data-lucide="git-branch" class="w-6 h-6 text-accent"></i>
+            <div>
+              <div class="tool-card-title">Git-Based Monitoring</div>
+              <div class="tool-card-source">The most durable form of agent observability</div>
+            </div>
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            Git history provides durable observability. Changes persist across sessions and agent resets.
+          </p>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Key Queries</span>
+git log --oneline --since="1 hour ago" | wc -l  <span class="comment"># Commit frequency</span>
+git branch -v                                    <span class="comment"># Branch state</span>
+git log --oneline -10                            <span class="comment"># Recent activity</span>
+git diff HEAD~1                                  <span class="comment"># Last iteration changes</span>
+gh pr status                                     <span class="comment"># PR status</span>
+git status --short                               <span class="comment"># Uncommitted changes</span></pre>
+          </div>
+
+          <h4 class="font-semibold mb-3">Automated Monitoring Script</h4>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment">#!/bin/bash</span>
+<span class="comment"># monitor-git.sh - Run in a tmux pane</span>
+<span class="keyword">while</span> true; <span class="keyword">do</span>
+  clear
+  <span class="keyword">echo</span> <span class="string">"=== Git Monitor ==="</span>
+  <span class="keyword">echo</span> <span class="string">""</span>
+  <span class="keyword">echo</span> <span class="string">"Recent commits:"</span>
+  git log --oneline -5
+  <span class="keyword">echo</span> <span class="string">""</span>
+  <span class="keyword">echo</span> <span class="string">"Status:"</span>
+  git status --short
+  <span class="keyword">echo</span> <span class="string">""</span>
+  <span class="keyword">echo</span> <span class="string">"Last commit: $(git log -1 --format='%ar')"</span>
+  sleep 10
+<span class="keyword">done</span></pre>
+          </div>
+        </div>
+
+        <!-- Tool Comparison Matrix -->
+        <h3 class="font-semibold text-lg mb-4 mt-8">Tool Comparison Matrix</h3>
+
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Visibility Level</th>
+              <th>Setup Effort</th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Claude HUD</strong></td>
+              <td>Session-level</td>
+              <td>Quick (5 min)</td>
+              <td>Single-agent development</td>
+            </tr>
+            <tr>
+              <td><strong>rpai</strong></td>
+              <td>Multi-agent</td>
+              <td>Quick (Rust install)</td>
+              <td>Parallel agents in tmux</td>
+            </tr>
+            <tr>
+              <td><strong>tmux layout</strong></td>
+              <td>Terminal-level</td>
+              <td>Medium</td>
+              <td>Custom monitoring needs</td>
+            </tr>
+            <tr>
+              <td><strong>Git monitoring</strong></td>
+              <td>Commit-level</td>
+              <td>Low</td>
+              <td>All workflows, durability</td>
+            </tr>
+            <tr>
+              <td><strong>Custom scripts</strong></td>
+              <td>Any level</td>
+              <td>High</td>
+              <td>Production, automation</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 5: PATH OF A METRIC -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Metric
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a monitoring metric through the system to see how pieces connect:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">Agent starts iteration, Claude HUD displays <code>0%</code> context usage</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Agent reads files, context bar turns <span class="context-bar green">green (0-50%)</span></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Agent implements task, context grows, bar shifts to <span class="context-bar yellow">yellow (50-70%)</span></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Tests run, agent commits, <code>git log</code> watcher shows new commit</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Progress.txt watcher shows new entry appended</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">prd.json shows task marked <code>passes: true</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">If context reaches <span class="context-bar red">red (70-85%)</span>, human gets alert</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Iteration ends, Ralph loop restarts, HUD resets to <code>0%</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">If no commit in 10+ min, alert triggers "stuck detection"</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">Human reviews metrics, decides to continue or intervene</div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Metrics to Track</h3>
+
+        <h4 class="font-semibold mb-3">Health Metrics</h4>
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Source</th>
+              <th>Warning</th>
+              <th>Critical</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Context Usage %</td>
+              <td>Claude HUD</td>
+              <td class="threshold-warning">> 60%</td>
+              <td class="threshold-critical">> 85%</td>
+            </tr>
+            <tr>
+              <td>Iteration Count</td>
+              <td>Ralph loop output</td>
+              <td class="threshold-warning">Approaching max</td>
+              <td class="threshold-critical">At max</td>
+            </tr>
+            <tr>
+              <td>Time Per Task</td>
+              <td>Progress log timestamps</td>
+              <td class="threshold-warning">> 10 min</td>
+              <td class="threshold-critical">> 30 min</td>
+            </tr>
+            <tr>
+              <td>Failure Rate</td>
+              <td>Test output, git logs</td>
+              <td class="threshold-warning">> 1 consecutive</td>
+              <td class="threshold-critical">> 3 consecutive</td>
+            </tr>
+            <tr>
+              <td>Token Consumption</td>
+              <td>Claude HUD, API logs</td>
+              <td class="threshold-warning">> 50% budget</td>
+              <td class="threshold-critical">> 80% budget</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4 class="font-semibold mb-3 mt-6">Progress Metrics</h4>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Quick PRD status check</span>
+cat scripts/ralph/prd.json | jq '{
+  total: (.userStories | length),
+  complete: (.userStories | map(select(.passes)) | length),
+  remaining: (.userStories | map(select(.passes == false)) | length)
+}'</pre>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit, with concrete symptoms and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Context exhausts silently
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent produces truncated responses, ignores instructions, makes contradictory statements</div>
+          <div class="gotcha-detail"><strong>Threshold:</strong> 85%+ context usage, especially without Claude HUD installed</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Install Claude HUD. Never run long sessions without context visibility. Run <code>/compact</code> at 70%.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            rpai not detecting agents
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> rpai shows empty list even though agents are running</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Agents running in separate terminals, not tmux panes</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Ensure agents run IN tmux (not separate Terminal.app windows). Run <code>rpai --debug</code> to see detection.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Git monitoring shows no activity
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Watch script reports "no commits" but agent appears working</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Agent not configured to commit, or checking wrong branch/directory</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify <code>pwd</code> and <code>git branch</code>. Check CLAUDE.md for commit instructions. Look at <code>git status</code> for uncommitted changes.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Alerts not sending
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Threshold exceeded but no Slack/desktop notification</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Webhook URL misconfigured, or monitoring script stopped</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Test webhook manually: <code>curl -X POST "$SLACK_WEBHOOK" -d '{"text":"Test"}'</code>. Check <code>ps aux | grep monitor</code> to verify script running.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Dashboard shows stale data
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Dashboard displays old metrics, doesn't update</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Refresh interval too long, or script crashed</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check <code>ps aux | grep dashboard</code>. Restart with shorter sleep interval. Consider using <code>watch</code> command.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Observability vs. Overhead
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More monitoring = better visibility, but also more setup, more things to break, more cognitive load during development.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Spending more time configuring dashboards than writing code. Alert fatigue from too many notifications.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start minimal (just git monitoring). Add tools incrementally as pain points emerge. Claude HUD is the best cost/benefit ratio for single-agent work.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            The Invisible Gradient
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Context degradation is invisible until catastrophic. The agent doesn't know it's degrading. You can't see it without tools.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "Everything seemed fine" until you review the git history and see quality cliff at iteration 15.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Always use Claude HUD for long sessions. Trust the color codes, not the agent's confidence. Act on yellow, not red.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Multi-Agent Coordination Debugging
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> When multiple agents run in parallel, failures cascade. Agent A breaks, Agent B builds on broken foundation, Agent C has no idea.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> All agents report "success" but integrated system is broken. No single agent log shows the root cause.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use rpai for unified view. Add cross-agent health checks. Consider reducing parallelism until coordination patterns mature.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Semantic vs. Syntactic Verification
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Tests pass (syntax) but the implementation is wrong (semantics). "UI complete" but button is in wrong place.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> prd.json shows all green, but feature doesn't actually work as intended.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Add visual verification (Playwright). Include semantic acceptance criteria, not just "tests pass". Human review gates for subjective quality.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE OBSERVABILITY WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Running agents for >30 minutes unattended</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Using Ralph loops or any autonomous pattern</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Running multiple agents in parallel</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Production or overnight workflows</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Debugging mysterious agent failures</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Optimizing token costs</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              SKIP OBSERVABILITY WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quick interactive sessions (&lt;10 min)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Exploratory work with human always watching</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Low-stakes throwaway experiments</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Setup would take longer than the task itself</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Quick Reference: Monitoring Checklist</h3>
+
+        <div class="tool-card">
+          <h4 class="font-semibold mb-3">Per-Session</h4>
+          <ul class="space-y-2 text-sm text-text-secondary">
+            <li class="flex gap-2"><input type="checkbox" disabled> Claude HUD installed and visible</li>
+            <li class="flex gap-2"><input type="checkbox" disabled> Context usage below 70%</li>
+            <li class="flex gap-2"><input type="checkbox" disabled> Recent commits appearing</li>
+            <li class="flex gap-2"><input type="checkbox" disabled> Tests passing</li>
+          </ul>
+
+          <h4 class="font-semibold mb-3 mt-6">Per-Iteration (Ralph)</h4>
+          <ul class="space-y-2 text-sm text-text-secondary">
+            <li class="flex gap-2"><input type="checkbox" disabled> Progress.txt updated</li>
+            <li class="flex gap-2"><input type="checkbox" disabled> Git commit made</li>
+            <li class="flex gap-2"><input type="checkbox" disabled> prd.json task marked complete</li>
+            <li class="flex gap-2"><input type="checkbox" disabled> No repeated failures</li>
+          </ul>
+
+          <h4 class="font-semibold mb-3 mt-6">Daily (Production)</h4>
+          <ul class="space-y-2 text-sm text-text-secondary">
+            <li class="flex gap-2"><input type="checkbox" disabled> Review progress.txt for patterns</li>
+            <li class="flex gap-2"><input type="checkbox" disabled> Check token/cost usage</li>
+            <li class="flex gap-2"><input type="checkbox" disabled> Verify test pass rates</li>
+            <li class="flex gap-2"><input type="checkbox" disabled> Look for stuck tasks</li>
+          </ul>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if agents were transparent by default?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Built-in dashboards, automatic logging, visible state at all times.<br>
+          <strong>Why this fails:</strong> LLMs don't have introspectable state like traditional software. "Thinking" isn't a variable you can print.<br>
+          <strong>Hidden constraint revealed:</strong> Observability is EXTERNAL because internal state is emergent, not explicit.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible observability core</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">watch -n10 'git log --oneline -5'</code><br>
+          <strong>Essential:</strong> Git commit history.<br>
+          <strong>Everything else:</strong> Convenience layers on top.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="essence">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Agent Observability = Distributed Systems Monitoring</div>
+        <div class="text-text-secondary text-sm">
+          Agents are nodes (can fail independently)<br>
+          Context is memory (finite, degrades under pressure)<br>
+          Git is the event log (durable record)<br>
+          Claude HUD is metrics collector (real-time visibility)<br><br>
+          <em>If you've monitored microservices, you already understand agent observability.</em>
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-007: External verification > agent self-report</div>
+        <div class="text-text-secondary text-sm">
+          Ralph, Gas Town, CC Mirror all share this: never trust the agent's claim of "done." External verification (tests, git commits, human review) is ground truth.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How context degrades (invisibly)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% - 90%</strong> (40-60K): Perfect performance, no visible change<br>
+          <strong>90% - 70%</strong> (60-80K): Subtle repetition, you might not notice<br>
+          <strong>70% - 50%</strong> (80-100K): Instructions drift, contradictions appear<br>
+          <strong>50% - CLIFF</strong> (100K+): Hallucinations, forgotten goals<br><br>
+          <em>Critical: You cannot feel the gradient without tools.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="core">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@is_lu_is: "Staring into the void"</div>
+        <div class="text-text-secondary text-sm">
+          Before Claude HUD existed, running overnight agents was "staring into the void." Morning reveals either a completed feature or a mess of bad commits with no understanding of when things went wrong.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One opacity → FOUR requirements</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> LLMs don't expose internal state<br>
+          → Must observe inputs/outputs, not "thinking"<br>
+          → Must use external tools (agent can't self-monitor)<br>
+          → Must persist observations (agent forgets)<br>
+          → Must define health via proxy metrics (commits, tests)
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (4 items) -->
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Polling Frequency Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>High frequency (1s):</strong> Real-time visibility, but resource overhead<br>
+          <strong>Medium (10s):</strong> Balanced, but may miss fast failures<br>
+          <strong>Low (30s+):</strong> Lightweight, but stale data<br><br>
+          <em>Heuristic: 10-30 seconds is sufficient. Faster is CPU overhead without benefit.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you rely on agent self-assessment</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> You ask the agent "are you okay?"<br>
+          <strong>THEN:</strong> At 85% context, agent says "yes, I'm fine"<br>
+          <strong>THEN:</strong> You continue trusting degraded output<br>
+          <strong>THEN:</strong> 5 more bad iterations before visible failure<br>
+          <strong>FINALLY:</strong> Root cause debugging is impossible<br><br>
+          <em>The fix: Trust Claude HUD colors, not Claude's confidence.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Observability Understanding Levels</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What tools exist?" → Claude HUD, rpai, git watch<br>
+          <strong>Intermediate:</strong> "When to use each?" → Complexity ladder<br>
+          <strong>Advanced:</strong> "How to customize?" → Alert scripts, dashboards<br>
+          <strong>Staff:</strong> "What metrics matter?" → Context %, velocity, failure rate<br>
+          <strong>Expert:</strong> "How to predict failures?" → Leading vs lagging indicators
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if git wasn't available?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Custom event logs, database writes, file timestamps.<br>
+          <strong>Why this works with git:</strong> Git is already there, already durable, already shows meaningful actions (commits = real progress).<br>
+          <strong>Hidden insight:</strong> Observability should leverage existing infrastructure, not add new dependencies.
+        </div>
+      </div>
+
+      <!-- TOOLS SECTION (5 items) -->
+      <div class="activity-item composition" data-section="tools">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude HUD + rpai</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Claude HUD per session + rpai for multi-agent overview.<br>
+          <strong>Synergy:</strong> rpai shows which agents are running, HUD shows depth of each.<br>
+          <strong>Limitation:</strong> rpai only works in tmux. HUD only for Claude Code.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="tools">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph + Git Monitoring</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Git commit frequency = iteration velocity.<br>
+          <strong>Insight:</strong> "No commits in 10 min" = stuck detection.<br>
+          <strong>Script:</strong> <code>git log -1 --format='%ct'</code> + timestamp comparison → alert trigger.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="tools">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@jarrodwatts: Building Claude HUD</div>
+        <div class="text-text-secondary text-sm">
+          Created after running overnight sessions blind. "I needed to know when context was dying without staring at terminal output." Now used by thousands of Claude Code developers.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="tools">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Semantic quality metrics</div>
+        <div class="text-text-secondary text-sm">
+          Tests pass != code is good. How do you measure "quality drift" before cliff? Current state: human review or post-hoc analysis. No real-time semantic quality metric exists yet.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="tools">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If these tools don't fit</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need API-level monitoring?</strong> → Custom middleware around API calls<br>
+          <strong>Need cross-repo visibility?</strong> → Build dashboard pulling from multiple git repos<br>
+          <strong>Need historical analysis?</strong> → Export progress.txt to time-series DB
+        </div>
+      </div>
+
+      <!-- PATH SECTION (4 items) -->
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How observability value evolves</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Iteration 1:</strong> "Why do I need monitoring?"<br>
+          <strong>Iteration 5:</strong> "Git log is actually useful"<br>
+          <strong>Iteration 15:</strong> "Claude HUD saved me from context rot"<br>
+          <strong>Iteration 30:</strong> "I can't imagine running without dashboards"<br><br>
+          <em>Don't judge observability ROI by session 1.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="path">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When monitoring investment pays off</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-5 iterations:</strong> Overhead seems wasteful<br>
+          <strong>5-10 iterations:</strong> Start catching issues early<br>
+          <strong>10-20 iterations:</strong> ROI clearly positive<br>
+          <strong>20+ iterations:</strong> Can't imagine working without<br><br>
+          <strong>THE INFLECTION:</strong> ~10 iterations<br>
+          <em>Before: feels like overhead. After: feels essential.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="path">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At 50+ iterations, metrics become predictive</div>
+        <div class="text-text-secondary text-sm">
+          With enough history, you can predict failures: "This iteration pattern (no commit + high context) usually precedes stuck loop." Retrospective analysis becomes proactive intervention.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you ignore yellow warnings</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Context hits 60% (yellow), you continue<br>
+          <strong>THEN:</strong> Hits 75%, quality subtly degrading<br>
+          <strong>THEN:</strong> Hits 85%, but task "almost done"<br>
+          <strong>THEN:</strong> Hits 95%, commits bad code<br>
+          <strong>FINALLY:</strong> Next iteration builds on garbage<br><br>
+          <em>The fix: Act on yellow, not red.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Alert fatigue progression</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Week 1:</strong> Every alert investigated thoroughly<br>
+          <strong>Week 2:</strong> Some alerts dismissed quickly<br>
+          <strong>Week 4:</strong> Alerts become background noise<br>
+          <strong>Week 8:</strong> Critical alert missed because "probably nothing"<br><br>
+          <em>Mitigation: Fewer, higher-signal alerts beats many low-signal ones.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Log Everything vs. Log Noise</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Log everything:</strong> Never miss an issue, but storage bloat, noise<br>
+          <strong>Log selectively:</strong> Clean signals, but might miss edge cases<br><br>
+          <em>Heuristic: Log state changes (commits, task completions, threshold crossings). Not every token.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Debugging skill levels</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Why did it fail?" → Check if tests pass<br>
+          <strong>Intermediate:</strong> "When did it fail?" → Git log timestamps<br>
+          <strong>Advanced:</strong> "What caused failure?" → Context % at failure time<br>
+          <strong>Staff:</strong> "Was this predictable?" → Leading indicators before failure<br>
+          <strong>Expert:</strong> "How to prevent category?" → Systemic patterns across failures
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="gotchas">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">rpai detection = Process monitoring</div>
+        <div class="text-text-secondary text-sm">
+          <code>rpai</code> detecting agents = <code>ps aux | grep</code> finding processes<br>
+          Wrong terminal = wrong namespace<br>
+          tmux panes = process groups<br><br>
+          <em>If you understand Unix process trees, you understand rpai's detection model.</em>
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Visibility vs. Velocity</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE DILEMMA:</strong><br>
+          More dashboards = safer but slower setup<br>
+          Less monitoring = faster start but blind flying<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong><br>
+          Optimal monitoring depends on session length, risk tolerance, and task complexity.<br><br>
+          <em>Heuristic: 5-minute setup (git watch + Claude HUD) is always worth it.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="hard">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why semantic verification is hard</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> "Correct" is context-dependent<br>
+          → Tests verify syntax, not intent<br>
+          → Intent requires human understanding<br>
+          → Human understanding doesn't scale to overnight<br>
+          → Must use proxy metrics (tests, types)<br>
+          → Proxies have false positives/negatives
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Cross-agent causality</div>
+        <div class="text-text-secondary text-sm">
+          When Agent A's output breaks Agent B, which log has the root cause? Current state: manual correlation across logs. No unified cross-agent tracing exists.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Gas Town Witness Pattern</div>
+        <div class="text-text-secondary text-sm">
+          Steve Yegge's Gas Town includes a "Witness" role per rig: a dedicated monitoring agent watching worker output. The orchestrator doesn't watch everything; specialized observers handle their domain.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (5 items) -->
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you monitored a 5-minute session?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Setup time:</strong> 5 minutes<br>
+          <strong>Session time:</strong> 5 minutes<br>
+          <strong>Ratio:</strong> 1:1 (overhead equals work)<br><br>
+          <strong>Why this fails:</strong> Short sessions don't need observability. You're watching anyway.<br>
+          <em>Observability ROI scales with session length.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When to add each tool</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Session &lt;30 min:</strong> Just git log<br>
+          <strong>Session 30-60 min:</strong> Add Claude HUD<br>
+          <strong>Session 1-4 hours:</strong> Add tmux watcher panes<br>
+          <strong>Overnight:</strong> Add alerts, health checks<br>
+          <strong>Multi-agent:</strong> Add rpai<br><br>
+          <em>Complexity ladder for observability matches session length.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If full observability is overkill</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Just want context visibility?</strong> → Claude HUD only<br>
+          <strong>Just want failure detection?</strong> → git commit watcher only<br>
+          <strong>Just want cost tracking?</strong> → API usage logs only<br>
+          <strong>Want everything?</strong> → Full stack described here
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Observability enables autonomy</div>
+        <div class="text-text-secondary text-sm">
+          Teams that invest in observability run longer unattended sessions. Longer sessions = more work done overnight. More overnight work = higher effective productivity. <strong>Observability is an autonomy multiplier.</strong>
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="when">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">Absolute minimum viable observability</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">watch -n30 'git log --oneline -3'</code><br><br>
+          <strong>If you do nothing else:</strong> Watch git commits. Commits = progress. No commits = problem. Everything else is enhancement.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

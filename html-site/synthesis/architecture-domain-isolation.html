@@ -1,0 +1,2173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domain Isolation Patterns | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed (proportional to main, less than main) */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer - Draggable divider between Main Panel and Activity Zone */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    /* Prevent text selection during resize */
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    /* Hide resizer when Activity Zone is hidden (responsive) */
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Domain Grid */
+    .domain-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .domain-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .domain-card {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .domain-card code {
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      color: #0D9373;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .domain-card span {
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Principle Table */
+    .principle-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+
+    .principle-table th,
+    .principle-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .principle-table th {
+      background: #fafafa;
+      font-weight: 600;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .principle-table td {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .principle-table td:first-child {
+      font-weight: 500;
+      color: #18181b;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Quote Block */
+    .quote-block {
+      background: #fafafa;
+      border-left: 4px solid #0D9373;
+      border-radius: 0 8px 8px 0;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      font-style: italic;
+      color: #3f3f46;
+    }
+
+    .quote-attribution {
+      font-style: normal;
+      font-weight: 500;
+      color: #71717a;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Domain Isolation</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">Philosophy + Code</a>
+          <a href="#panopticon" class="nav-item">The Panopticon Model</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-context-isolation" class="nav-item">Why Context Isolation?</a>
+          <a href="#why-filesystem-separation" class="nav-item">Why Filesystem Separation?</a>
+          <a href="#why-explicit-handoffs" class="nav-item">Why Explicit Handoffs?</a>
+        </div>
+      </div>
+
+      <!-- File Structure -->
+      <div class="nav-section" data-section="files">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="folder" class="w-4 h-4"></i>
+          <span>Implementation</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#file-structure" class="nav-item">Directory Structure</a>
+          <a href="#domain-claude-md" class="nav-item">Domain CLAUDE.md</a>
+          <a href="#process-isolation" class="nav-item">Process Isolation</a>
+        </div>
+      </div>
+
+      <!-- Path of a Domain -->
+      <div class="nav-section" data-section="path">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Path of a Domain</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#path" class="nav-item">The Flow</a>
+          <a href="#cross-domain" class="nav-item">Cross-Domain Coordination</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Practical Problems</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Isolated domains with separate Claude instances prevent context pollution while enabling parallel life-system management.</div>
+        </div>
+
+        <div class="quote-block">
+          "The feeling is hard to name. It is the violent gap between how blind you were and how obvious everything feels now with an observer that reads all the feeds, catches what you've unconsciously dropped, notices patterns across domains you'd kept stubbornly separate, and---crucially---tells you what to do about it."
+          <div class="quote-attribution">-- Molly Cantillon, Personal Panopticon</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Each domain gets its own Claude instance, its own directory, its own context. No cross-contamination."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'cd ~/$domain && claude')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>cd ~/trades && claude  # Domain-isolated instance</code>
+          </div>
+
+          <div class="core-anchor">Directory isolation IS context isolation. That's the whole pattern.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The Panopticon architecture runs 8 parallel Claude instances, each confined to its own directory. The health agent knows nothing about trades. The email agent knows nothing about code. This isn't a bug---it's the feature. Isolation prevents context pollution and enables specialized optimization.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="panopticon">The 8 Parallel Isolated Domains</h3>
+
+        <div class="domain-grid">
+          <div class="domain-card">
+            <code>~/nox</code>
+            <span>Company/Product</span>
+          </div>
+          <div class="domain-card">
+            <code>~/metrics</code>
+            <span>Analytics/Data</span>
+          </div>
+          <div class="domain-card">
+            <code>~/email</code>
+            <span>Communications</span>
+          </div>
+          <div class="domain-card">
+            <code>~/growth</code>
+            <span>Marketing</span>
+          </div>
+          <div class="domain-card">
+            <code>~/trades</code>
+            <span>Finance/Trading</span>
+          </div>
+          <div class="domain-card">
+            <code>~/health</code>
+            <span>Fitness/Wellness</span>
+          </div>
+          <div class="domain-card">
+            <code>~/writing</code>
+            <span>Content Creation</span>
+          </div>
+          <div class="domain-card">
+            <code>~/personal</code>
+            <span>Life Admin</span>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">How Isolation Works</h3>
+
+        <table class="principle-table">
+          <thead>
+            <tr>
+              <th>Principle</th>
+              <th>Implementation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Directory isolation</td>
+              <td>Each instance runs in its own <code>~/{domain}</code> directory</td>
+            </tr>
+            <tr>
+              <td>No cross-contamination</td>
+              <td>Agents cannot read/write outside their directory</td>
+            </tr>
+            <tr>
+              <td>Independent context</td>
+              <td>Each instance has fresh context, no shared conversation history</td>
+            </tr>
+            <tr>
+              <td>Domain-specific memory</td>
+              <td>Each directory contains its own notes, data, and history</td>
+            </tr>
+            <tr>
+              <td>Explicit handoffs</td>
+              <td>Information crosses domains only through deliberate file-based handoffs</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-context-isolation" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY CONTEXT ISOLATION?</div>
+          <div class="decision-reasoning">
+            Claude's context window is finite. When a single instance handles everything---finances, health, code, personal admin---the context becomes diluted. "Context rot" means the model forgets early instructions, contradicts itself, loses track of goals. Isolation means each domain agent maintains a focused, specialized context that deepens over time.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Never run a "master" Claude that handles everything. If you're asking Claude about your portfolio AND your workout AND your code in the same session, you've already lost. Split domains, split instances.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-filesystem-separation">
+          <div class="decision-why">WHY FILESYSTEM SEPARATION?</div>
+          <div class="decision-reasoning">
+            Different domains need different tools (brokerage APIs vs WHOOP integration), different schedules (overnight trading data vs post-workout health sync), different models (Opus for complex reasoning vs Sonnet for drafting), and different verification levels (strict testing for production code vs loose for personal notes).
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Create a separate <code>CLAUDE.md</code> for each domain with domain-specific rules. <code>~/trades/CLAUDE.md</code> says "never execute actual trades." <code>~/email/CLAUDE.md</code> says "drafts require approval, never auto-send." Filesystem IS configuration.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-explicit-handoffs">
+          <div class="decision-why">WHY EXPLICIT HANDOFFS?</div>
+          <div class="decision-reasoning">
+            Despite strict isolation, some scenarios require cross-domain awareness: morning brief synthesis, schedule conflicts, pattern recognition (sleep quality affecting productivity). But implicit sharing breaks isolation. The handoff pattern creates controlled, auditable information flow.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use <code>~/shared/handoff-{source}-to-{target}.json</code> for cross-domain communication. The receiving domain reads handoffs explicitly. No magic sharing. Every cross-domain data flow is visible and deliberate.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Implementation
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">Directory Structure</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>~/
+<span class="comment">├── nox/                        # Company/product domain</span>
+│   ├── CLAUDE.md               <span class="comment"># Company-specific rules</span>
+│   ├── .claude/
+│   │   ├── settings.json       <span class="comment"># Domain permissions</span>
+│   │   └── commands/           <span class="comment"># Domain slash commands</span>
+│   └── [project files]
+│
+<span class="comment">├── trades/                     # Finance domain</span>
+│   ├── CLAUDE.md               <span class="comment"># Finance rules, risk limits</span>
+│   ├── briefs/                 <span class="comment"># Daily morning briefs</span>
+│   ├── data/                   <span class="comment"># Market data pulls</span>
+│   └── .secrets/               <span class="comment"># Brokerage credentials</span>
+│
+<span class="comment">├── health/                     # Wellness domain</span>
+│   ├── CLAUDE.md               <span class="comment"># Health tracking rules</span>
+│   ├── workouts/               <span class="comment"># Generated workout plans</span>
+│   └── integrations/           <span class="comment"># WHOOP, Apple Health exports</span>
+│
+<span class="comment">├── shared/                     # Cross-domain handoffs</span>
+│   ├── handoff-trades-to-personal.json
+│   ├── handoff-health-to-nox.json
+│   └── daily-synthesis.md
+│
+<span class="comment">└── correlation/                # Meta-observer domain</span>
+    ├── CLAUDE.md               <span class="comment"># Read-only cross-domain rules</span>
+    ├── feeds/                  <span class="comment"># Symlinks to domain outputs</span>
+    └── output/
+        └── daily-synthesis.md</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="domain-claude-md">Domain-Specific CLAUDE.md</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># ~/trades/CLAUDE.md</span>
+
+<span class="comment">## Domain: Personal Finance & Trading</span>
+
+<span class="comment">### Data Sources</span>
+- Brokerage exports in ./data/
+- Congressional disclosures from House API
+- Polymarket odds via MCP
+- X sentiment from firehose
+
+<span class="comment">### Morning Brief Protocol</span>
+1. Pull overnight data
+2. Cross-reference against positions
+3. Flag material changes
+4. Output to ./briefs/YYYY-MM-DD.md
+
+<span class="comment">### Risk Rules</span>
+- <span class="keyword">NEVER</span> execute actual trades
+- Flag any position >5% of portfolio
+- Always note data freshness</pre>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># ~/health/CLAUDE.md</span>
+
+<span class="comment">## Domain: Fitness & Wellness</span>
+
+<span class="comment">### Integrations</span>
+- WHOOP exports in ./data/whoop/
+- Apple Health exports in ./data/apple-health/
+
+<span class="comment">### Workout Generation</span>
+- Account for travel schedule in ./calendar/
+- Adapt to recovery scores
+- Prefer bodyweight when traveling
+
+<span class="comment">### Sleep Protocol</span>
+- If recovery <66%, suggest lighter day
+- Track sleep debt across week</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="process-isolation">Process Isolation with tmux</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">#!/bin/bash</span>
+<span class="comment"># start-domains.sh - Launch all domain instances</span>
+
+<span class="variable">DOMAINS</span>=<span class="string">"nox metrics email growth trades health writing personal"</span>
+
+<span class="keyword">for</span> domain <span class="keyword">in</span> $DOMAINS; <span class="keyword">do</span>
+    cd ~/$domain
+    tmux new-session -d -s $domain <span class="string">"claude"</span>
+<span class="keyword">done</span>
+
+<span class="keyword">echo</span> <span class="string">"All domains launched. Use 'tmux attach -t <domain>' to connect."</span></pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Each domain runs in its own tmux session. Use <code>tmux ls</code> to see all domains, <code>tmux attach -t trades</code> to connect to a specific domain, and <code>Ctrl-b d</code> to detach (keeps running).
+        </p>
+      </section>
+
+      <!-- Section 5: PATH OF A DOMAIN -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Domain
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow how a domain operates in isolation and coordinates with others:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">You create <code>~/{domain}/</code> directory with its own <code>CLAUDE.md</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Launch domain: <code>cd ~/{domain} && claude</code> in its own tmux session</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Claude reads domain-specific <code>CLAUDE.md</code> (fresh context, domain rules only)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Agent operates within directory boundaries, reading domain-specific data</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Agent writes outputs to domain directory (briefs, plans, analysis)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">When cross-domain info needed: agent writes to <code>~/shared/handoff-{domain}-to-*.json</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Other domains check <code>~/shared/</code> for handoffs per their <code>CLAUDE.md</code> instructions</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Correlation agent (optional) reads all handoffs, synthesizes daily brief</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">Cron schedules domain runs (6 AM trades brief, post-workout health sync)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">All domains run in parallel, no context sharing, maximum focus</div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="cross-domain">Cross-Domain Coordination</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Handoff file structure</span>
+{
+  <span class="string">"from"</span>: <span class="string">"trades"</span>,
+  <span class="string">"to"</span>: <span class="string">"personal"</span>,
+  <span class="string">"timestamp"</span>: <span class="string">"2026-01-26T06:30:00Z"</span>,
+  <span class="string">"summary"</span>: <span class="string">"Portfolio up 2.3% overnight. No action required."</span>,
+  <span class="string">"flags"</span>: [],
+  <span class="string">"data_freshness"</span>: <span class="string">"2026-01-26T06:00:00Z"</span>
+}</pre>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Scheduled cross-domain synthesis (cron)</span>
+0 6 * * * cd ~/trades && claude <span class="string">"Generate morning brief"</span> > briefs/$(date +%Y-%m-%d).md
+5 6 * * * cd ~/health && claude <span class="string">"Analyze overnight recovery"</span> > status/current.json
+10 6 * * * cd ~/correlation && claude <span class="string">"Synthesize daily brief from all domains"</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit when implementing domain isolation:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Agent accesses wrong directory
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent reads/writes files outside its domain directory</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Missing directory constraints or agent started from wrong path</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Always start agents with explicit <code>cd ~/domain && claude</code>. Add path restrictions in CLAUDE.md: "This agent operates ONLY within ~/trades/"</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Handoffs not being read
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Receiving domain ignores handoff files; no cross-domain awareness</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Handoff files not mentioned in CLAUDE.md or wrong path</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add explicit handoff instruction: "Before any task, check ~/shared/ for handoffs from other domains."</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            tmux sessions lost after reboot
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> All domain sessions gone; must manually restart</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> tmux sessions don't persist across system restarts</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Create startup script that recreates sessions. Add to login items or use tmux-resurrect plugin.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Context pollution despite isolation
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent behavior suggests knowledge from other domains</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Shared ~/.claude/ config or global CLAUDE.md bleeding through</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use domain-specific <code>.claude/</code> directories. Check ~/.claude/CLAUDE.md for generic instructions.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Cron jobs fail silently
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Scheduled domain runs don't produce expected output</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Environment differences between cron and interactive shell</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use full paths in cron: <code>/usr/local/bin/claude</code>. Log stderr: <code>2>&1 | tee /tmp/cron-trades.log</code></div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions in domain isolation architecture:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Over-Isolation vs. Under-Isolation
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Too isolated = domains become silos with no awareness, duplicate work, conflicting decisions. Too connected = context pollution returns, isolation benefits lost.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Over-isolation: Trading decision ignores health crash. Under-isolation: Generic, unfocused outputs.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> The correlation engine pattern provides read-only cross-domain awareness without violating isolation. Schedule cross-domain synthesis at specific times.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Domain Sprawl
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> It's tempting to create micro-domains for every concern. But managing 15+ instances creates overhead that exceeds the isolation benefit.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Unclear domain boundaries, constant handoffs for simple tasks, overhead of context-switching between too many domains.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start with 3-5 core domains. Use subagents within domains instead of creating new domains. Consolidate related concerns.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            The Anthropic Trade-off
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Domain isolation provides local privacy (domains don't see each other), but Anthropic's API sees all domains. You get isolation from yourself, not from Anthropic.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> N/A - this is a known, accepted trade-off, not a solvable problem.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Accept the trade-off: "Their visibility into your thinking for access to a thousand-clone attention span. In this case, chosen beats imposed."</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Goodhart's Law in Life Optimization
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Optimizing domain metrics can lead to hollow victories. WHOOP says recovered but you feel like death. The system says productive but life feels empty.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Trusting the brief over lived experience, gaming your own metrics, losing sight of actual goals.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Maintain a "meta-level outside the system." Periodic human review. Be ready to delete a domain if it stops serving. "We must continue to live outside it."</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE DOMAIN ISOLATION WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Managing 3+ distinct life/work areas with different tools and rules</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need parallel execution without context interference</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Privacy boundaries matter (health data separate from work code)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Want "self-legibility" - AI observer across multiple life domains</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Can invest in per-domain CLAUDE.md and startup scripts</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE DOMAIN ISOLATION WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Single project focus - Just use one Claude instance</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need constant cross-domain reasoning - Use correlation engine instead</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quick exploration - Overhead of setup not worth it</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Team shared context needed - Use shared workspace pattern</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Domains highly interdependent - Isolation creates friction</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if all domains shared context?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> One Claude instance managing everything, unified memory.<br>
+          <strong>Why this fails:</strong> Context window fills with irrelevant cross-domain noise. Health data pollutes code discussions. Quality degrades everywhere.<br>
+          <strong>Hidden constraint revealed:</strong> Isolation IS the feature, not the limitation.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible core</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">cd ~/domain && claude</code><br>
+          <strong>Essential:</strong> Separate directory. Separate instance.<br>
+          <strong>Everything else:</strong> CLAUDE.md, handoffs, tmux - all refinement.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Molly Cantillon: Personal Panopticon</div>
+        <div class="text-text-secondary text-sm">
+          8 parallel Claude instances managing entire life. Built Jmail (18M users) overnight. "The violent gap between how blind you were and how obvious everything feels now."
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Domain Isolation = Microservices Architecture</div>
+        <div class="text-text-secondary text-sm">
+          Isolated domains = Independent microservices<br>
+          ~/shared/ handoffs = API contracts between services<br>
+          Domain CLAUDE.md = Service-specific configuration<br>
+          Correlation agent = API gateway / orchestrator<br><br>
+          <em>If you've designed microservices, you already understand domain isolation.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint produces SIX decisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Context window is finite (200K tokens)<br>
+          → Mixed domains fill context with irrelevant information<br>
+          → Domain isolation keeps context focused<br>
+          → Each domain needs its own directory<br>
+          → Cross-domain sharing needs explicit mechanism<br>
+          → Handoff files create audit trail<br>
+          → Correlation engine enables synthesis without pollution
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Domain Isolation shares INV-003 with Ralph</div>
+        <div class="text-text-secondary text-sm">
+          Both patterns: External state > internal memory.<br>
+          Ralph: prd.json, progress.txt persist across iterations.<br>
+          Domains: CLAUDE.md, handoff files persist across sessions.<br>
+          <em>Same principle, different scale.</em>
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you run one "master" Claude</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Single Claude handles trades, health, code, email<br>
+          <strong>THEN:</strong> Context fills with mixed-domain information<br>
+          <strong>THEN:</strong> Model starts forgetting earlier instructions<br>
+          <strong>THEN:</strong> Health advice influences code suggestions<br>
+          <strong>FINALLY:</strong> All domains get diluted, generic outputs<br><br>
+          <em>The fix: One domain, one instance.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Isolation-Coordination Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE DILEMMA:</strong><br>
+          - Strict isolation: Max focus, but miss cross-domain insights<br>
+          - Heavy coordination: Rich synthesis, but context pollution returns<br>
+          - Moderate: Balance, but judgment required<br><br>
+          <strong>HEURISTIC:</strong> Default to isolation. Add coordination explicitly only when needed.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deeply do you understand isolation?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "How many domains should I have?" → Start with 3-5<br>
+          <strong>Intermediate:</strong> "How do domains communicate?" → Handoff files<br>
+          <strong>Advanced:</strong> "When is isolation overhead too high?" → >8 domains<br>
+          <strong>Staff:</strong> "How does this compose with Ralph?" → Each domain can run its own Ralph loop<br>
+          <strong>Expert:</strong> "What's the meta-level?" → Correlation engine + human review
+        </div>
+      </div>
+
+      <!-- FILES SECTION -->
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Domain Isolation + Ralph Loop</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Each domain can run its own Ralph loop for autonomous overnight work.<br>
+          <strong>Pattern:</strong> ~/trades/scripts/ralph/ runs trading analysis Ralph loop.<br>
+          <strong>Danger:</strong> Don't let Ralph cross domain boundaries. Keep prd.json domain-specific.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Domain Isolation + Git Worktrees</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> When single domain needs parallel work streams, use git worktrees.<br>
+          <strong>Pattern:</strong> ~/nox/ main + ~/nox-feature-auth/ + ~/nox-feature-payments/<br>
+          <strong>Benefit:</strong> Worktrees are isolation WITHIN a domain. Different from cross-domain isolation.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="files">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How perception of CLAUDE.md evolves</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "CLAUDE.md feels like overhead"<br>
+          <strong>Week 1:</strong> "Wait, the agent keeps doing wrong things!"<br>
+          <strong>Week 2:</strong> "CLAUDE.md is why domain agents stay focused"<br>
+          <strong>Month 1:</strong> "This is domain-specific institutional memory"<br><br>
+          <em>Don't judge domain setup by day 1.</em>
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item effect" data-section="path">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At 8+ domains, coordination cost exceeds isolation benefit</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Phenomenon:</strong> Handoff file management becomes a job. Context-switching between domains consumes attention. You spend more time on coordination than work.<br>
+          <strong>Threshold:</strong> ~8 domains is the inflection point.<br>
+          <strong>Mitigation:</strong> Consolidate related concerns. Use subagents within domains.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="path">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Handoff Protocol = Message Queues</div>
+        <div class="text-text-secondary text-sm">
+          ~/shared/ directory = Message broker<br>
+          handoff-*.json files = Messages with routing<br>
+          "from"/"to" fields = Queue routing keys<br>
+          timestamp = Message ordering<br><br>
+          <em>If you've used message queues, you already understand handoffs.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip handoff protocol</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Domains communicate through shared files directly<br>
+          <strong>THEN:</strong> No audit trail of cross-domain communication<br>
+          <strong>THEN:</strong> Can't track where information came from<br>
+          <strong>THEN:</strong> Debug becomes impossible<br>
+          <strong>FINALLY:</strong> Isolation benefits lost, worse than single instance<br><br>
+          <em>The fix: Always use explicit handoff files.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When domain count flips from benefit to burden</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-3 domains:</strong> Clear benefit (focused context)<br>
+          <strong>4-6 domains:</strong> Optimal range (specialization without overhead)<br>
+          <strong>7-8 domains:</strong> Diminishing returns (coordination effort rises)<br>
+          <strong>9+ domains:</strong> Net negative (overhead exceeds benefit)<br><br>
+          <strong>THE INFLECTION:</strong> ~6-8 domains<br>
+          <em>Detection: Spending more time on coordination than domain work.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How isolation fails gradually</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% → 90%:</strong> Occasional file access outside domain (no harm)<br>
+          <strong>90% → 70%:</strong> Regular cross-domain reads without handoffs<br>
+          <strong>70% → 50%:</strong> Domains start "knowing" about each other implicitly<br>
+          <strong>50% → CLIFF:</strong> Context pollution returns, isolation meaningless<br><br>
+          <em>Critical: The gradient is invisible until you audit file access patterns.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why does global CLAUDE.md pollute?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What if ~/.claude/CLAUDE.md was always read?</strong><br>
+          Then every domain inherits global rules. Domain-specific CLAUDE.md overridden.<br><br>
+          <strong>Why this matters:</strong> Global config creates implicit coupling between domains.<br>
+          <em>Hidden constraint: Domain config must be domain-specific.</em>
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Over-Isolation vs. Under-Isolation</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE DILEMMA:</strong><br>
+          - Over-isolated: Silos with no awareness, duplicate work, conflicting decisions<br>
+          - Under-isolated: Context pollution, generic outputs, lost benefits<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> Optimal balance depends on your domains and workflow.<br><br>
+          <em>Heuristic: If domains can operate independently for 24 hours, isolation is right.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal correlation frequency</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> How often should the correlation agent synthesize? Daily? Per-change? On-demand?<br>
+          <strong>Why it's hard:</strong> Too frequent = overhead. Too rare = miss emergent patterns.<br>
+          <strong>Current practice:</strong> Daily morning synthesis. No dynamic trigger yet.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Molly Cantillon: Goodhart Warning</div>
+        <div class="text-text-secondary text-sm">
+          "Goodhart says optimize for a metric and you game your way to hollow victory."<br><br>
+          WHOOP says recovered but you feel like death. System says productive but life feels empty.<br><br>
+          <em>Lesson: Maintain a meta-level outside the system.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Understanding the Anthropic trade-off</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Is my data private?" → Between domains, yes. From Anthropic, no.<br>
+          <strong>Intermediate:</strong> "Can I avoid Anthropic seeing?" → Not with Claude.<br>
+          <strong>Advanced:</strong> "Is this acceptable?" → Depends on your threat model.<br>
+          <strong>Staff:</strong> "What's the trade-off?" → Visibility for capability.<br>
+          <strong>Expert:</strong> "Chosen beats imposed." → You opted in; this isn't surveillance.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If Domain Isolation isn't right for you</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Single project focus?</strong> → One Claude instance is fine<br>
+          <strong>Need team shared context?</strong> → Shared workspace pattern<br>
+          <strong>Highly interdependent domains?</strong> → Correlation engine as primary<br>
+          <strong>Quick exploration?</strong> → Skip setup overhead
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if domains were highly interdependent?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Heavy handoff traffic, frequent correlation runs, near-real-time sync.<br>
+          <strong>Why this fails:</strong> At that point, you've recreated a single context with extra steps.<br>
+          <strong>Hidden constraint revealed:</strong> Domain isolation assumes domains can operate independently.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How value perception evolves</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Week 1:</strong> "This feels like a lot of setup"<br>
+          <strong>Week 2:</strong> "Wait, my domains are getting really good at their jobs"<br>
+          <strong>Month 1:</strong> "I can't imagine going back to one Claude"<br>
+          <strong>Month 3:</strong> "This is self-legibility - I understand my life better"<br><br>
+          <em>Don't judge domain isolation by week 1 overhead.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="when">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Domain Isolation shares INV-001 with all patterns</div>
+        <div class="text-text-secondary text-sm">
+          <strong>INV-001:</strong> Context is a constraint, not a resource.<br><br>
+          Ralph: Fresh context per iteration.<br>
+          Gas Town: Specialized agents with focused context.<br>
+          Domain Isolation: Separate context per life domain.<br><br>
+          <em>Same principle at different scales: personal, project, life-system.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At month 3, domain expertise compounds</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Phenomenon:</strong> Each domain's CLAUDE.md accumulates learnings. Domain agents "know" your patterns, preferences, edge cases.<br>
+          <strong>Implication:</strong> What felt like overhead at week 1 becomes institutional memory.<br>
+          <strong>Threshold:</strong> ~3 months for substantial domain expertise compounding.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Boris Cherny: Parallel Sessions Workflow</div>
+        <div class="text-text-secondary text-sm">
+          Claude Code creator uses isolated sessions for different work streams. "I have Claude open in multiple terminals, each with different context."<br><br>
+          <em>Even the creator uses domain isolation principles.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="files">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Automated domain boundary detection</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> Can we automatically detect when context is becoming mixed-domain?<br>
+          <strong>Why it's hard:</strong> Domain boundaries are semantic, not syntactic. "Health" and "productivity" overlap.<br>
+          <strong>Current practice:</strong> Manual domain design. Human judgment for boundaries.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="path">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Privacy constraint cascades to architecture</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Health data should not mingle with work code<br>
+          → Need separate directories<br>
+          → Need separate Claude instances<br>
+          → Need separate CLAUDE.md rules<br>
+          → Need explicit handoff protocol<br>
+          → Need correlation engine for synthesis<br>
+          <em>Privacy concern → Full Panopticon architecture</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     *
+     * Designed for extraction to standalone module.
+     * Auto-initializes on elements with [data-resizer] attribute.
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        // Elements
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        // Bind methods
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        // Restore saved width
+        this.restoreWidth();
+
+        // Attach mousedown listener
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return; // Left click only
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        // Visual feedback
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        // Listen on document for full-range movement
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        // Calculate new width (dragging left = larger activity zone)
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        // Apply constraints
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        // Update styles
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        // Remove visual feedback
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        // Clean up listeners
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        // Persist width
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Track which sections are in view
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

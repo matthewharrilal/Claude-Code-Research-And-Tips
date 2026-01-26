@@ -212,6 +212,17 @@ Never delete thoughts files - they are institutional memory.
 
 ---
 
+### Checkpoint: Context Budget Mastery
+**You should now understand:**
+- [ ] The 60% rule and why it matters (working memory headroom)
+- [ ] Three-layer context architecture (Global, Project, Session)
+- [ ] How to calculate your effective token budget
+- [ ] When and why to use /clear + /catchup vs /compact
+
+**If unclear:** Re-read "Context Budget Reference" and "Management Strategies" sections.
+
+---
+
 ## Context Recovery
 
 ### After Compaction
@@ -284,6 +295,16 @@ For long-running work, checkpoint progress to CLAUDE.md:
 ```
 
 **Warning:** This adds tokens to every session. Keep it brief. Remove when work is complete.
+
+---
+
+### Checkpoint: Recovery Protocols
+**You should now understand:**
+- [ ] How to recover from compaction (verify critical context, re-inject if lost)
+- [ ] Session handoff protocol (git status, log, progress files)
+- [ ] When to use CLAUDE.md checkpoints for long-running work
+
+**If unclear:** Practice the "Minimum Recovery Protocol" on your next session start.
 
 ---
 

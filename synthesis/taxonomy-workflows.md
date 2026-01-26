@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Workflow Pattern Taxonomy
 
+> **You Are Here:** This is the **complete workflow reference** for Claude Code usage patterns. If you're deciding how to structure your development workflow (PRD-driven, Kanban, goal-conditioned, hybrid), verification patterns (tests, browser, screenshots), or stop conditions, this document covers every pattern with decision guides. **Note:** This file is DEPRECATED - for current content, see `D-FINAL-implementation.md` Section 3.
+
 **Comprehensive Classification of AI Agent Workflow Patterns**
 
 **Compiled:** 2026-01-09
@@ -343,6 +345,24 @@ Tasks:
 
 ---
 
+### Checkpoint: Task Management
+**You should now understand:**
+- [ ] The 6 task management approaches (PRD-Driven, Kanban, Goal-Conditioned, Phase-Based, TodoWrite, TaskCreate)
+- [ ] Why JSON over Markdown for PRD files
+- [ ] The 2-3 sentence test for task sizing
+- [ ] The difference between TodoWrite (ephemeral) and TaskCreate (multi-agent)
+
+**If unclear:** Re-read Section 1 or see `mastery-ralph-complete.md` for PRD-driven workflow
+
+**Terminal verification:**
+```bash
+# Test your PRD is valid JSON
+cat plans/prd.json | jq '.userStories | length'
+# You should see: number of stories in your PRD
+```
+
+---
+
 ## Verification Patterns
 
 ### Verification Hierarchy
@@ -494,6 +514,17 @@ Always include "don't break" criteria:
   ]
 }
 ```
+
+---
+
+### Checkpoint: Verification Patterns
+**You should now understand:**
+- [ ] The 6 verification methods and their priority order
+- [ ] Why browser verification is critical for UI work
+- [ ] Negative verification (what NOT to break)
+- [ ] Property-based testing for mathematical/data tasks
+
+**If unclear:** Re-read the Verification Patterns section or see Anthropic's best practices documentation
 
 ---
 
@@ -1563,6 +1594,81 @@ Ralph is not about making the agent smarter. It's about:
 
 ---
 
+## Troubleshooting
+
+### Common Issue: Agent Marks Task Complete But It's Not Done
+**Symptom:** Story marked `passes: true` but feature doesn't work
+**Cause:** Missing verification steps, or acceptance criteria too vague
+**Fix:**
+1. Always include `npm run typecheck passes` in acceptance criteria
+2. Add specific, testable criteria: "Response contains user email" not "Works correctly"
+3. Use browser verification for UI tasks
+4. Add negative criteria: "No console errors"
+5. If using Playwright, include screenshot step for proof
+
+### Common Issue: Loop Gets Stuck on Same Story
+**Symptom:** Same story attempted repeatedly across iterations
+**Cause:** Tests failing, or criteria impossible to meet
+**Fix:**
+```bash
+# 1. Check progress.txt for failure pattern
+grep -A3 "STORY-ID" plans/progress.txt
+
+# 2. Verify tests actually work
+npm run test -- --grep "story name"
+
+# 3. Check if story is too large (split if needed)
+# Good: "Add login button to header"
+# Bad: "Build authentication system"
+
+# 4. Add stuck handling to prompt:
+# "After 3 failed attempts on same story, add BLOCKED note and move to next"
+```
+
+### Common Issue: Cost Spiraling Out of Control
+**Symptom:** Ralph loop consuming much more than expected
+**Cause:** Too many iterations, wrong model, or tasks too large
+**Fix:**
+1. Set max iterations: `./ralph.sh 25` (not unlimited)
+2. Use model stepping: start Haiku, escalate to Sonnet/Opus only if needed
+3. Right-size tasks (see Task Sizing Heuristics section)
+4. Use subagents for expensive operations (Playwright, MCP)
+5. Track costs: `claude --print-cost` after sessions
+
+### Common Issue: Verification Passes But Production Fails
+**Symptom:** All tests green, but bug in deployed code
+**Cause:** Test coverage gap, or environment differences
+**Fix:**
+1. Add integration tests that match production environment
+2. Include E2E tests for critical paths
+3. Use property-based testing for edge cases
+4. Add staging environment verification step
+5. Include "don't break existing" negative criteria
+
+### Common Issue: Human Can't Keep Up with Parallel Agents
+**Symptom:** Multiple agents running, human overwhelmed
+**Cause:** Too many agents without proper monitoring
+**Fix:**
+1. Start with 2-3 agents max (Personal Panopticon recommendation)
+2. Use push notifications (Pushover/ntfy) for attention-needed events
+3. Set up Claude HUD or rpai for visibility
+4. Have agents write progress to shared location
+5. Schedule review checkpoints, don't try real-time monitoring
+
+### Common Issue: Fresh Context Loses Important Information
+**Symptom:** New iteration doesn't know critical context from previous
+**Cause:** Not capturing learnings in progress.txt or CLAUDE.md
+**Fix:**
+1. End each iteration with progress.txt update:
+   - What was completed (reference story ID)
+   - What was learned (patterns, gotchas)
+   - What to do next
+2. Update CLAUDE.md with discovered patterns
+3. Use meaningful git commit messages
+4. Include "read progress.txt first" in prompt
+
+---
+
 ## Sources
 
 ### Primary Sources (Repository Extractions)
@@ -1598,5 +1704,6 @@ Ralph is not about making the agent smarter. It's about:
 ---
 
 *Compiled: 2026-01-09*
+*Wave-3 Enhanced: 2026-01-19*
 *Source: All files in `/extractions/` directory*
 *Agent: Claude Opus 4.5*

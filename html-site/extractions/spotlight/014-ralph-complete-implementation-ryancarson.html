@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ralph Complete Implementation - Ryan Carson | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Flowchart */
+    .flowchart {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .flowchart pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #3f3f46;
+      line-height: 1.4;
+    }
+
+    /* Success Factors Grid */
+    .factors-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .factors-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .factor-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .factor-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .factor-title {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+
+    .factor-desc {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    /* Source badge */
+    .source-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+    }
+
+    .source-badge a {
+      color: #0D9373;
+      text-decoration: none;
+    }
+
+    .source-badge a:hover {
+      text-decoration: underline;
+    }
+
+    /* Real results box */
+    .results-box {
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .results-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .result-item {
+      padding: 16px;
+    }
+
+    .result-number {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0D9373;
+    }
+
+    .result-label {
+      font-size: 12px;
+      color: #3f3f46;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Source Badge -->
+      <div class="source-badge">
+        <i data-lucide="user" class="w-4 h-4 text-text-muted"></i>
+        <span class="text-sm text-text-secondary">
+          <strong>@ryancarson</strong> (Builder in Residence @Ampcode) |
+          <a href="https://github.com/snarktank/ralph" target="_blank">GitHub</a> |
+          <a href="https://snarktank.github.io/ralph/" target="_blank">Live Demo</a>
+        </span>
+      </div>
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Production-ready Ralph: complete bash script, PRD schema, progress tracking - learnings compound across runs.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Ryan Carson's implementation is the most complete, reproducible Ralph guide available. It includes a GitHub repository with all files, a live demo site, and real production results: <strong>13 user stories completed in ~15 iterations over ~1 hour</strong>.
+        </p>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Ralph is an autonomous AI coding loop that ships features while you sleep."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'while :; do cat prompt.md | amp --dangerously-allow-all ; done')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>while :; do cat prompt.md | amp --dangerously-allow-all ; done</code>
+          </div>
+
+          <div class="core-anchor">Created by @GeoffreyHuntley, this runs your agent repeatedly until all tasks complete. Memory persists via git + text files.</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">The Ralph Flowchart</h3>
+
+        <div class="flowchart">
+          <pre>
+You write PRD (Define features)
+       |
+       v
+Convert to prd.json (Small user stories)
+       |
+       v
+Run ralph.sh (Start autonomous)
+       |
+       v
+Agent picks story (passes: false)
+       |
+       v
+Implements it (Writes code/tests)
+       |
+       v
+Tests pass? --> Yes --> Commits changes
+       |                     |
+       No                    v
+       |              Updates prd.json (passes: true)
+       |                     |
+       v                     v
+Log failure       Logs to progress.txt + Updates AGENTS.md
+       |                     |
+       v                     v
+Commit anyway    More stories? --> Yes --> Loop
+       |              |
+       |              No
+       |              |
+       v              v
+   [Loop]         Done! &lt;promise&gt;COMPLETE&lt;/promise&gt;
+          </pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="success-factors">6 Critical Success Factors</h3>
+
+        <div class="factors-grid">
+          <div class="factor-card">
+            <div class="factor-title">
+              <span class="factor-number">1</span>
+              Small Stories
+            </div>
+            <div class="factor-desc">Must fit in one context window. "Build auth system" is too big. "Add login form", "Add email validation" are right-sized.</div>
+          </div>
+
+          <div class="factor-card">
+            <div class="factor-title">
+              <span class="factor-number">2</span>
+              Feedback Loops
+            </div>
+            <div class="factor-desc">Ralph needs fast feedback: <code>npm run typecheck</code>, <code>npm test</code>. Without these, broken code compounds.</div>
+          </div>
+
+          <div class="factor-card">
+            <div class="factor-title">
+              <span class="factor-number">3</span>
+              Explicit Criteria
+            </div>
+            <div class="factor-desc">Not "works correctly" but specific: "Email/password fields", "Validates email format", "typecheck passes".</div>
+          </div>
+
+          <div class="factor-card">
+            <div class="factor-title">
+              <span class="factor-number">4</span>
+              Learnings Compound
+            </div>
+            <div class="factor-desc">By story 10, Ralph knows patterns from stories 1-9. progress.txt = session memory, AGENTS.md = permanent docs.</div>
+          </div>
+
+          <div class="factor-card">
+            <div class="factor-title">
+              <span class="factor-number">5</span>
+              AGENTS.md Updates
+            </div>
+            <div class="factor-desc">"When modifying X, also update Y." Permanent knowledge for future agents. Don't add story-specific details.</div>
+          </div>
+
+          <div class="factor-card">
+            <div class="factor-title">
+              <span class="factor-number">6</span>
+              Browser Testing
+            </div>
+            <div class="factor-desc">For UI changes, use dev-browser skill. "Not complete until verified with screenshot." Tests pass != looks right.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-directory" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY scripts/ralph/ DIRECTORY?</div>
+          <div class="decision-reasoning">
+            Organized structure that's portable across projects. All Ralph files in one place, easy to copy to any new project.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Copy the entire <code>scripts/ralph/</code> folder to any project. Customize prompt.md and prd.json for your needs. The structure is project-agnostic.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-priority">
+          <div class="decision-why">WHY PRIORITY FIELD IN STORIES?</div>
+          <div class="decision-reasoning">
+            Deterministic ordering. Agent always picks the same story (highest priority, passes=false). No ambiguity about what to work on next.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Set priority 1 for foundational work (schema), then 2 for dependent features, etc. Agent won't try to build UI before the data layer exists.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-progress">
+          <div class="decision-why">WHY progress.txt FOR LEARNINGS?</div>
+          <div class="decision-reasoning">
+            Session memory that survives iterations. Each fresh Claude instance reads progress.txt first, learns what worked in previous iterations.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use "APPEND" (caps) in prompt.md. Models interpret "update" as "replace". Add reusable patterns to the TOP under "Codebase Patterns" section.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY branchName IN prd.json?</div>
+          <div class="decision-reasoning">
+            Feature isolation. Agent checks it's on the correct branch before working. All feature work stays isolated until you merge.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Create branch before running Ralph. Set branchName in prd.json. Review entire feature as one PR when complete.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY "FAIL FAST, COMMIT ANYWAY"?</div>
+          <div class="decision-reasoning">
+            Recoverability. Even failed iterations leave a git commit. You can bisect to find where things went wrong. Better than silent corruption.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Check <code>git log --oneline</code> after runs. You'll see exactly what happened at each iteration. Rollback is easy with git reset.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>scripts/ralph/
+<span class="comment">├── ralph.sh      # The loop script</span>
+<span class="comment">├── prompt.md     # Instructions for each iteration</span>
+<span class="comment">├── prd.json      # Task list with user stories</span>
+<span class="comment">└── progress.txt  # Learnings + patterns</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="ralph-sh">ralph.sh - The Loop Engine</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">#!/bin/bash</span>
+<span class="keyword">set</span> -e
+
+<span class="variable">MAX_ITERATIONS</span>=<span class="variable">${1:-10}</span>
+<span class="variable">SCRIPT_DIR</span>="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+<span class="keyword">echo</span> <span class="string">"Starting Ralph"</span>
+
+<span class="keyword">for</span> i <span class="keyword">in</span> $(seq 1 $MAX_ITERATIONS); <span class="keyword">do</span>
+  <span class="keyword">echo</span> <span class="string">"=== Iteration $i ==="</span>
+
+  OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" \
+    | amp --dangerously-allow-all 2>&1 \
+    | tee /dev/stderr) || true
+
+  <span class="keyword">if</span> <span class="keyword">echo</span> "$OUTPUT" | grep -q <span class="string">"&lt;promise&gt;COMPLETE&lt;/promise&gt;"</span>; <span class="keyword">then</span>
+    <span class="keyword">echo</span> <span class="string">"Done!"</span>
+    <span class="keyword">exit</span> 0
+  <span class="keyword">fi</span>
+
+  sleep 2
+<span class="keyword">done</span>
+
+<span class="keyword">echo</span> <span class="string">"Max iterations reached"</span>
+<span class="keyword">exit</span> 1</pre>
+        </div>
+
+        <p class="text-sm text-text-muted mb-6">Make executable: <code>chmod +x scripts/ralph/ralph.sh</code>. For Claude Code: replace <code>amp --dangerously-allow-all</code> with <code>claude --dangerously-skip-permissions</code>.</p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="prompt-md">prompt.md - Agent Instructions</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Ralph Agent Instructions</span>
+
+<span class="comment">## Your Task</span>
+
+1. Read `scripts/ralph/prd.json`
+2. Read `scripts/ralph/progress.txt` (check Codebase Patterns first)
+3. Check you're on the correct branch
+4. Pick highest priority story where `passes: false`
+5. Implement that ONE story
+6. Run typecheck and tests
+7. Update AGENTS.md files with learnings
+8. Commit: `feat: [ID] - [Title]`
+9. Update prd.json: `passes: true`
+10. APPEND learnings to progress.txt
+
+<span class="comment">## Progress Format</span>
+
+APPEND to progress.txt:
+
+---
+## [Date] - [Story ID]
+- What was implemented
+- Files changed
+- **Learnings:**
+  - Patterns discovered
+  - Gotchas encountered
+
+<span class="comment">## Codebase Patterns</span>
+
+Add reusable patterns to the TOP of progress.txt:
+
+## Codebase Patterns
+- Migrations: Use IF NOT EXISTS
+- React: useRef&lt;Timeout | null&gt;(null)
+
+<span class="comment">## Stop Condition</span>
+
+If ALL stories pass, reply:
+&lt;promise&gt;COMPLETE&lt;/promise&gt;
+
+Otherwise end normally.</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="prd-json">prd.json - Task Board</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>{
+  <span class="string">"branchName"</span>: <span class="string">"ralph/feature"</span>,
+  <span class="string">"userStories"</span>: [
+    {
+      <span class="string">"id"</span>: <span class="string">"US-001"</span>,
+      <span class="string">"title"</span>: <span class="string">"Add login form"</span>,
+      <span class="string">"acceptanceCriteria"</span>: [
+        <span class="string">"Email/password fields"</span>,
+        <span class="string">"Validates email format"</span>,
+        <span class="string">"typecheck passes"</span>
+      ],
+      <span class="string">"priority"</span>: 1,
+      <span class="string">"passes"</span>: <span class="keyword">false</span>,
+      <span class="string">"notes"</span>: <span class="string">""</span>
+    }
+  ]
+}</pre>
+        </div>
+
+        <div class="text-sm text-text-muted mb-6">
+          <strong>Key fields:</strong> <code>branchName</code> = branch to use | <code>priority</code> = lower = first | <code>passes</code> = set true when done | <code>notes</code> = hints for stuck agent
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="progress-txt">progress.txt - Memory</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Ralph Progress Log</span>
+Started: 2024-01-15
+
+<span class="comment">## Codebase Patterns</span>
+- Migrations: IF NOT EXISTS
+- Types: Export from actions.ts
+
+<span class="comment">## Key Files</span>
+- db/schema.ts
+- app/auth/actions.ts
+---</pre>
+        </div>
+
+        <p class="text-sm text-text-muted mb-6">Ralph APPENDs after each story. <strong>Patterns accumulate across iterations.</strong> Keep under 20KB or quality degrades.</p>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          What you'll see when running Ralph with 13 user stories:
+        </p>
+
+        <div class="code-block">
+          <pre>$ ./scripts/ralph/ralph.sh 25
+
+Starting Ralph
+
+=== Iteration 1 ===
+
+[Amp/Claude loading...]               <span class="comment"># Agent starting (5-10 seconds)</span>
+
+Reading scripts/ralph/prd.json...
+Found 13 user stories:
+  US-001: Create evaluation model      <span class="comment"># Priority 1, will work on this</span>
+  US-002: Add scoring system
+  US-003: Create evaluation form
+  [...]
+
+Reading scripts/ralph/progress.txt...
+  ## Codebase Patterns (found 3)
+  - Migrations: IF NOT EXISTS
+  - Types: Export from actions.ts
+  - API: Use server actions
+
+Selecting: US-001 (priority 1, passes=false)
+
+[Working on US-001...]                <span class="comment"># Agent implementing (30-90 seconds)</span>
+
+Creating: db/schema/evaluation.ts
+  - Added evaluation table
+  - Used IF NOT EXISTS pattern        <span class="comment"># Applied learned pattern!</span>
+
+Running typecheck... No errors
+Running tests... 3 tests passed
+
+Updating prd.json: US-001 passes = true
+
+Committing:
+  git commit -m "feat: US-001 - Create evaluation model"
+
+APPEND to progress.txt:
+  ---
+  ## 2026-01-07 - US-001
+  - Implemented evaluation model
+  - Learnings: Schema type export pattern works well
+
+=== Iteration 2 ===
+[...]                                  <span class="comment"># Continues through stories</span>
+
+=== Iteration 15 ===
+
+Reading prd.json...
+  All 13 stories: passes = true
+
+&lt;promise&gt;COMPLETE&lt;/promise&gt;
+
+Done!
+Total time: ~1 hour
+Commits: 13</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="monitoring">Monitoring While Running</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Terminal 2 - Watch Story Progress</span>
+watch -n 10 'jq ".userStories[] | {id, passes}" scripts/ralph/prd.json'
+
+<span class="comment"># Terminal 3 - Watch Learnings</span>
+tail -f scripts/ralph/progress.txt
+
+<span class="comment"># Output (updates every 10 seconds):</span>
+{ "id": "US-001", "passes": true }
+{ "id": "US-002", "passes": true }
+{ "id": "US-003", "passes": false }   <span class="comment"># Currently working</span>
+{ "id": "US-004", "passes": false }
+[...]</pre>
+        </div>
+
+        <p class="text-sm text-text-muted mt-4">
+          <strong>Timing:</strong> Per iteration: 2-5 minutes | 13 stories: ~15 iterations | Total time: ~1 hour | <strong>What to do:</strong> Walk away or sleep. DON'T edit files in the working directory.
+        </p>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems from production use, with concrete fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Idempotent Migrations
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Column already exists" errors</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use <code>ADD COLUMN IF NOT EXISTS email TEXT;</code></div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Interactive Prompts
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Script hangs waiting for input</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>echo -e "\n\n\n" | npm run db:generate</code></div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Schema Changes Cascade
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Type errors in unrelated files after schema change</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check server actions, UI components, API routes - fix them (not scope creep)</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 10 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Story Too Big
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Context overflow, incomplete implementations</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Split into smaller stories. If you can't describe in 2-3 sentences, too big.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> Planning phase</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Vague Acceptance Criteria
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent interprets differently than you expected</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Be specific: "dropdown has 3 options" not "dropdown works correctly"</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> Planning phase</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Notes Field Unused
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent stuck on same issue repeatedly</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add hints to the <code>notes</code> field in prd.json: "Use the existing auth helper"</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            progress.txt Overwritten
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Lost learnings from previous iterations</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use "APPEND" in CAPS in prompt.md - the capitalization matters</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> Prevention</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="browser-verify">Browser Verification (for UI changes)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Start the browser server</span>
+~/.config/amp/skills/dev-browser/server.sh &
+
+<span class="comment"># Write scripts using heredocs</span>
+cd ~/.config/amp/skills/dev-browser && npx tsx &lt;&lt;'EOF'
+import { connect, waitForPageLoad } from "@/client.js";
+
+const client = await connect();
+const page = await client.page("test");
+await page.setViewportSize({ width: 1280, height: 900 });
+const port = process.env.PORT || "3000";
+await page.goto(`http://localhost:${port}/your-page`);
+await waitForPageLoad(page);
+await page.screenshot({ path: "tmp/screenshot.png" });
+await client.disconnect();
+EOF</pre>
+        </div>
+
+        <p class="text-sm text-text-muted mt-4">
+          <strong>The rule:</strong> Not complete until verified with screenshot. Tests pass != looks right.
+        </p>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Story Sizing Art
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Too big = context overflow. Too small = overhead dominates.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> "One context window" rule. If description > code change, you've decomposed too far.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Explicit Criteria
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Easy to be vague because humans understand implicit requirements.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Write like test assertions. "Renders login button" not "login works".</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Learning vs Speed
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Documenting learnings takes time each iteration.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Pays off by iteration 10. Early investment = compound returns.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Review Burden
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> 13+ commits to check in the morning.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Trust CI, check progress.txt for anomalies, review via git diff.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            UI Verification
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Tests pass but UI is broken.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> dev-browser skill is mandatory for UI stories. Add screenshot verification to acceptance criteria.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE THIS RALPH WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Feature with clear user stories (verifiable completion)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Overnight development is acceptable</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Well-factored codebase with clean patterns</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Good test coverage (feedback loops work)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Solo developer wanting to scale capacity</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Exploratory work with no defined end</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Major refactors without clear criteria</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Security-critical code (needs human review)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Anything requiring subjective judgment</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Legacy code without tests (add tests first)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="real-results">Real Results</h3>
+
+        <div class="results-box">
+          <div class="results-grid">
+            <div class="result-item">
+              <div class="result-number">13</div>
+              <div class="result-label">User Stories</div>
+            </div>
+            <div class="result-item">
+              <div class="result-number">~15</div>
+              <div class="result-label">Iterations</div>
+            </div>
+            <div class="result-item">
+              <div class="result-number">2-5</div>
+              <div class="result-label">Min / Iteration</div>
+            </div>
+            <div class="result-item">
+              <div class="result-number">~1hr</div>
+              <div class="result-label">Total Time</div>
+            </div>
+          </div>
+        </div>
+
+        <blockquote class="border-l-4 border-accent pl-4 italic text-text-secondary mb-6">
+          "Learnings compound. By story 10, Ralph knew our patterns."
+          <span class="block text-sm mt-2">— Ryan Carson, building an evaluation system</span>
+        </blockquote>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Built on Geoffrey Huntley's Ralph</div>
+        <div class="text-text-secondary text-sm">
+          Ryan's implementation is the production-grade evolution of @GeoffreyHuntley's original Ralph Wiggum concept. Same core loop, but with complete file structure and learnings system.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Incorporates Matt Pocock's Methodology</div>
+        <div class="text-text-secondary text-sm">
+          Ryan's 6 Critical Success Factors align with Matt's 11 Tips. "Small stories" = "Atomic tasks". "Explicit criteria" = "Verifiable completion". Same DNA, different articulation.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">External State Principle</div>
+        <div class="text-text-secondary text-sm">
+          progress.txt + prd.json + git = the memory system. This is the "External State > Internal Memory" principle from the 8 Core Principles made concrete.
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="trending-up" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Learnings Compound</div>
+        <div class="text-text-secondary text-sm">
+          By story 10, Ralph knows patterns from stories 1-9. This is compounding knowledge. Each iteration makes future iterations faster. This is NOT linear - it's exponential within a run.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="trending-up" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">AGENTS.md Accumulates</div>
+        <div class="text-text-secondary text-sm">
+          progress.txt = session memory. AGENTS.md = permanent docs. Over time, AGENTS.md becomes a knowledge base for the codebase that benefits ALL future work, not just Ralph runs.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Kanban Production Line</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Mental model:</strong> Each story is an independent station. Context resets per station. Git is the conveyor belt. Quality gates (tests) between stations.<br><br>
+          <em>If you understand lean manufacturing, you understand Ralph.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="core">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Evaluation System: 13 stories, 1 hour</div>
+        <div class="text-text-secondary text-sm">
+          Ryan built an entire evaluation system overnight. 13 user stories, ~15 iterations, 2-5 min each, ~1 hour total. Proved the compounding effect is real.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Must fit one context" forces everything</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Context window finite (~200K tokens)<br>
+          --> Stories must fit in one window<br>
+          --> Atomic task decomposition<br>
+          --> Explicit acceptance criteria<br>
+          --> Fast feedback loops (tests)<br>
+          --> File-based state persistence
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Agents have no eyes" forces dev-browser</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Claude cannot see rendered UI<br>
+          --> Tests pass != looks right<br>
+          --> Need visual verification<br>
+          --> dev-browser skill mandatory<br>
+          --> "Not complete until screenshot"
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Documentation vs Speed</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Tension:</strong> Writing to progress.txt takes time each iteration<br>
+          <strong>Resolution:</strong> Learnings compound. Investment at iteration 3 pays off by iteration 10. Early cost = late acceleration.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Specificity vs Flexibility</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Tension:</strong> Very specific criteria feel limiting<br>
+          <strong>Resolution:</strong> Agent needs clarity. "Dropdown works" is ambiguous. "Dropdown has 3 options" is verifiable. Specificity = reliability.
+        </div>
+      </div>
+
+      <!-- FILES SECTION (4 items) -->
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph + dev-browser</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> UI verification catches visual bugs that tests miss.<br>
+          <strong>Setup:</strong> 5 min to configure server.sh + heredoc scripts.<br>
+          <strong>Requirement:</strong> Mandatory for any UI-touching stories.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph + Amp</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Production-ready integration via <code>--dangerously-allow-all</code>.<br>
+          <strong>For Claude Code:</strong> Replace with <code>--dangerously-skip-permissions</code>.<br>
+          <strong>Same pattern, different agent.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="files">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">Parallel Ralph (Multiple Worktrees)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Exploration:</strong> Run multiple Ralph instances on different git worktrees, each handling different features in parallel.<br>
+          <strong>Status:</strong> Experimental, not production-proven yet.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="files">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">AI-Generated PRD</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Exploration:</strong> Have Claude generate prd.json from a high-level feature description automatically.<br>
+          <strong>Status:</strong> Works for simple features, struggles with complex decomposition.
+        </div>
+      </div>
+
+      <!-- PATH SECTION (3 items) -->
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How judgment changes with scale</div>
+        <div class="text-text-secondary text-sm">
+          <strong>3-5 stories:</strong> Setup overhead feels high. "Is this worth it?"<br>
+          <strong>10-20 stories:</strong> Sweet spot. Learnings compound. High leverage.<br>
+          <strong>50+ stories:</strong> Consider splitting into separate Ralph runs per feature area.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip feedback loops</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip typecheck/tests in prompt.md<br>
+          <strong>THEN:</strong> Tasks marked "done" without verification<br>
+          <strong>THEN:</strong> Broken code enters git<br>
+          <strong>THEN:</strong> Future iterations inherit broken foundation<br>
+          <strong>FINALLY:</strong> Morning reveals 15 bad commits built on bad commit 3
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip browser verification</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> No dev-browser for UI stories<br>
+          <strong>THEN:</strong> Tests pass but UI broken<br>
+          <strong>THEN:</strong> Ship broken UI to users<br>
+          <strong>FINALLY:</strong> Manual QA catches what automation missed
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if no progress.txt?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd get:</strong> No learning accumulation. Each iteration starts from zero.<br>
+          <strong>Why this fails:</strong> Iteration 20 is as slow as iteration 1.<br>
+          <strong>Hidden constraint:</strong> Fresh context means explicit memory is mandatory.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if no dev-browser?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd get:</strong> UI bugs ship despite passing tests.<br>
+          <strong>Why this fails:</strong> Agents have no eyes. CSS can be catastrophically wrong while tests pass.<br>
+          <strong>Hidden constraint:</strong> Visual verification is the only UI truth.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Large Stories failure mode</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10% degraded:</strong> Occasional context overflow, partial implementations<br>
+          <strong>50% degraded:</strong> Most stories incomplete, requires human intervention<br>
+          <strong>Total failure:</strong> Every story too big, Ralph loops infinitely making no progress
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Vague Criteria failure mode</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10% degraded:</strong> Some stories interpreted differently than expected<br>
+          <strong>50% degraded:</strong> Half the work needs human correction<br>
+          <strong>Total failure:</strong> Agent marks everything "done" without meeting actual requirements
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item expertise" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Task Decomposition Understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> "How small should tasks be?" --> Fit in one context<br>
+          <strong>Intermediate:</strong> "What's too small?" --> When description > code change<br>
+          <strong>Advanced:</strong> "How do I improve?" --> Review progress.txt after runs<br>
+          <strong>Expert:</strong> "Is there a formula?" --> No. Skill, not formula.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="hard">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible Ralph</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Minimal version:</strong> ralph.sh + prompt.md + prd.json<br>
+          <strong>Without progress.txt:</strong> Still works, but learnings don't compound<br>
+          <strong>Core question:</strong> Is the learning system worth the overhead? After ~5 stories: YES.
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="hard">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When does setup justify itself?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>~5 stories:</strong> The inflection point. Below this, manual might be faster.<br>
+          <strong>10+ stories:</strong> Learnings compound, clear ROI.<br>
+          <strong>20+ stories:</strong> Massive leverage, "ship while you sleep" truly realized.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">GitHub Repo Launch</div>
+        <div class="text-text-secondary text-sm">
+          Ryan open-sourced the complete implementation at <a href="https://github.com/snarktank/ralph" class="text-accent">snarktank/ralph</a>. Includes all files, live demo at <a href="https://snarktank.github.io/ralph/" class="text-accent">snarktank.github.io/ralph</a>. Community resource.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (5 items) -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Matt's Thread (012) - Quicker Start</div>
+        <div class="text-text-secondary text-sm">
+          If you want conceptual understanding before implementation, start with Matt Pocock's thread. It explains the WHY before the HOW.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Matt's 11 Tips (013) - Principles Focus</div>
+        <div class="text-text-secondary text-sm">
+          If you want principles without implementation details, use the 11 Tips guide. It's the distilled wisdom without the file structure.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph files = Gas Town components</div>
+        <div class="text-text-secondary text-sm">
+          <strong>YOU</strong> = The Mayor (orchestrator)<br>
+          <strong>prd.json</strong> = The Inbox (work queue)<br>
+          <strong>progress.txt</strong> = The Refinery (persistent memory)<br>
+          <strong>Each Claude iteration</strong> = A Polecat (stateless worker)
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="when">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Live Demo Site</div>
+        <div class="text-text-secondary text-sm">
+          snarktank.github.io/ralph serves as documentation standard. Shows what "production-ready Ralph" looks like in practice. Reference implementation.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="when">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Your Ralph Journey</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> Use provided scripts --> Complete 1 feature<br>
+          <strong>Intermediate:</strong> Customize for codebase --> Add dev-browser<br>
+          <strong>Advanced:</strong> Experiment with parallel worktrees --> Contribute to repo
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

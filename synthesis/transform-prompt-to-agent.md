@@ -1,5 +1,7 @@
 # Transformation: Prompt Engineering to Agent Engineering
 
+> **You Are Here:** This document captures the fundamental mindset shift from crafting individual prompts to designing autonomous systems. If you're still obsessing over the perfect wording or few-shot examples, this transformation shows you the path to system-level thinking. This connects to the evolution from Level 1-2 (prompt-focused) to Level 3-5 (architecture-focused) on the complexity ladder.
+
 ---
 
 ## D-FINAL Integration
@@ -362,3 +364,213 @@ The difference: these concerns now live at the *system* level, not the *prompt* 
 The question is no longer "What should I say?"
 
 The question is now "What should I build?"
+
+---
+
+## Troubleshooting
+
+### Common Issue: Falling Back to Prompt Tweaking
+
+**Symptom:** You spend 30+ minutes rewording a prompt trying to get better output, instead of designing the system around the limitation.
+
+**Cause:** Old habits die hard. Prompt engineering instincts are strong.
+
+**Fix:**
+```
+STOP and ask yourself:
+1. Am I tweaking words or designing systems?
+2. Would a verification step catch this error?
+3. Could I decompose this into smaller tasks?
+4. Would parallelization help here?
+
+If you're on iteration 3+ of prompt tweaks → STOP → design a system instead
+```
+
+**Example shift:**
+```
+BAD:  "How do I phrase this to avoid hallucinations?"
+GOOD: "What verification step catches hallucinations before they matter?"
+```
+
+---
+
+### Common Issue: Agent System Too Complex
+
+**Symptom:** You designed an 8-agent orchestration system for a 30-minute task. Setup time exceeds work time.
+
+**Cause:** Over-engineering. Agent thinking doesn't mean agent everything.
+
+**Fix:**
+```
+Apply the complexity test:
+- Task < 30 min? → Single agent, maybe Ralph
+- Task < 2 hours? → Ralph or simple orchestrator
+- Task multi-domain, multi-day? → Swarm patterns
+
+Complexity should match workload. Simple tasks deserve simple solutions.
+```
+
+---
+
+### Common Issue: Agents Go Off Rails Without Feedback Loops
+
+**Symptom:** You designed an autonomous system but it produces garbage because there's no verification.
+
+**Cause:** Skipped the feedback loop step. Autonomy without verification = chaos.
+
+**Fix:**
+```bash
+# Every agent system needs verification
+# Minimum viable feedback loop:
+
+# 1. Typecheck (catches 80% of errors)
+npm run typecheck
+
+# 2. Tests (catches logic errors)
+npm run test
+
+# 3. Output validation (catches hallucinations)
+# Define what "done" looks like and verify it
+
+# Add to your system design:
+# Input → Process → VERIFY → Output (or retry)
+```
+
+---
+
+### Common Issue: Can't Decompose Task Into Atomic Parts
+
+**Symptom:** Task seems monolithic. "It's all connected, I can't break it apart."
+
+**Cause:** Thinking at the wrong level of abstraction, or task genuinely needs more analysis first.
+
+**Fix:**
+```
+Task decomposition technique:
+
+1. List all OUTPUTS the task produces (files, changes, artifacts)
+2. Each output is a candidate task
+3. Identify dependencies between outputs
+4. Group by domain if multi-domain
+5. Each group is a worker's scope
+
+If still can't decompose:
+- The task needs PLANNING first (run single agent exploration)
+- Then decompose the plan
+```
+
+**Example:**
+```
+"Build user auth" → Feels monolithic
+
+Outputs:
+- users table migration
+- sessions table migration
+- register endpoint
+- login endpoint
+- logout endpoint
+- LoginForm component
+- AuthContext provider
+- tests for each
+
+Now you have 8+ atomic tasks
+```
+
+---
+
+### Common Issue: Orchestrator Starts Doing Work
+
+**Symptom:** Your orchestrator agent is reading files, writing code, running commands - violating the Iron Law.
+
+**Cause:** Prompt didn't enforce boundaries strongly enough, or task seemed "small enough" to do directly.
+
+**Fix:**
+```markdown
+# Add to orchestrator prompt:
+
+## IRON LAW (NON-NEGOTIABLE)
+You do NOT:
+- Write code
+- Run commands
+- Read files (except 1-2 for high-level context)
+- Edit files
+- Run tests
+
+You ONLY:
+- Spawn workers via Task tool
+- Coordinate dependencies
+- Synthesize results
+- Report to human
+
+If a task seems "too small to spawn a worker" → batch it with another task
+Never violate the Iron Law, even for "quick fixes"
+```
+
+---
+
+### Common Issue: Don't Know Which Pattern to Use
+
+**Symptom:** You understand the concepts but freeze when choosing between Ralph, CC Mirror, Gas Town, etc.
+
+**Cause:** Pattern selection paralysis. Too many options, unclear criteria.
+
+**Fix:**
+```
+Quick pattern selector:
+
+Q1: Does task have clear "done" criteria?
+    NO  → Use single session for exploration first
+    YES → Continue
+
+Q2: Can task be done in one context window (<30 min)?
+    YES → Single session, maybe YOLO mode
+    NO  → Continue
+
+Q3: Is task multi-domain (frontend + backend + tests)?
+    NO  → Ralph loop (single domain, iterations)
+    YES → Continue
+
+Q4: Do you need true parallelism?
+    NO  → Ralph with sequential stories
+    YES → CC Mirror or Git Worktrees
+
+Start simple. Graduate to complexity only when needed.
+```
+
+---
+
+### Terminal Output: Verifying Your System Design
+
+When you've designed an agent system, verify the design before running:
+
+```bash
+# Checklist validation (run mentally or via checklist file)
+
+echo "=== Agent System Design Checklist ==="
+
+echo "1. Input defined?"
+# What starts the process? (User story, PRD, task description)
+
+echo "2. Decomposition clear?"
+# Can you list each atomic task?
+
+echo "3. State persistence chosen?"
+# Where does progress live? (prd.json, progress.txt, git)
+
+echo "4. Verification strategy?"
+# What commands prove success? (npm test, typecheck)
+
+echo "5. Failure handling?"
+# What happens when a task fails? (retry, escalate, log)
+
+echo "6. Output defined?"
+# What signals completion? (all stories pass, specific file exists)
+
+echo "=== If all YES, proceed to implementation ==="
+```
+
+---
+
+## Tags
+
+`#transformation` `#prompt-engineering` `#agent-engineering` `#paradigm-shift` `#system-design` `#architecture` `#mental-model` `#evolution`

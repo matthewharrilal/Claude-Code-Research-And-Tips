@@ -1,5 +1,7 @@
 # Community Extensions as Composition Layer
 
+> **You Are Here:** This is your guide to the Claude Code extension ecosystem. Extensions (plugins, MCP servers, community tools) are the building blocks that make advanced patterns possible. Read this to understand what tools are available, how to install them, and how they combine to create powerful workflows.
+
 ---
 ## D-FINAL Integration
 **Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
@@ -411,6 +413,20 @@ rpai  # Run in tmux session
 
 ---
 
+### Checkpoint: Extension Types
+
+**You should now understand:**
+- [ ] The four ecosystem tiers: Official, Marketplace, Standalone, MCP Servers
+- [ ] How to install plugins from each tier
+- [ ] What Claude HUD displays and why it matters for workflow decisions
+- [ ] How Claude-Mem's 3-layer retrieval system works
+- [ ] The difference between Ralph variants and when to use each
+- [ ] What CC Mirror unlocks and how to set it up
+
+**If unclear:** Re-read the specific extension section. For installation issues, check the Quick Reference at the end of this document. For MCP server configuration, see the Tool Extensions section.
+
+---
+
 ## Extensions as Primitives
 
 ### The Primitive Mental Model
@@ -760,6 +776,183 @@ Extensions transform Claude Code from a chat interface into a **composable agent
 | Deploy to production | Claude SDK + Cloudflare |
 
 The power is in **combination**. Stack primitives. Build workflows. Create systems.
+
+---
+
+---
+
+## Troubleshooting
+
+### Common Issue: Plugin Installation Fails
+
+**Symptom:** `/plugin install <name>` returns an error or the plugin doesn't appear in `/plugin list`.
+
+**Cause:** Plugin may not be in local cache, or marketplace add step was skipped.
+
+**Fix:**
+1. For marketplace plugins, always add first:
+```bash
+# Wrong - won't find the plugin
+/plugin install claude-hud
+
+# Right - add from marketplace first
+/plugin marketplace add jarrodwatts/claude-hud
+/plugin install claude-hud
+```
+2. For official plugins, update the plugin list first:
+```bash
+/plugin marketplace update claude-plugins-official
+/plugin install code-simplifier
+```
+3. Verify installation:
+```bash
+/plugin list
+# Should show: claude-hud, code-simplifier, etc.
+```
+
+### Common Issue: Claude-Mem Not Capturing Sessions
+
+**Symptom:** Claude-Mem is installed but `search()` returns no results from past sessions.
+
+**Cause:** The worker service may not be running, or lifecycle hooks aren't installed correctly.
+
+**Fix:**
+1. Check if the worker service is running:
+```bash
+# Should see process on port 37777
+lsof -i :37777
+# Or check Claude-Mem status
+curl http://localhost:37777/health
+```
+2. Restart Claude Code after installation (required for hooks to activate)
+3. Verify hooks are configured:
+```bash
+cat ~/.claude/settings.json | grep -A5 "claude-mem"
+```
+4. Manual capture test:
+```bash
+# Force a memory capture
+curl -X POST http://localhost:37777/capture -d '{"observation": "test"}'
+```
+
+### Common Issue: CC Mirror Orchestration Skill Not Loading
+
+**Symptom:** After running `npx cc-mirror quick`, the orchestration skill doesn't activate or agents don't spawn.
+
+**Cause:** The alias may not be set up correctly, or Claude Code needs the explicit skill load command.
+
+**Fix:**
+1. Verify the alias was created:
+```bash
+which mclaude
+# Should show path to cc-mirror wrapper
+```
+2. Use the full command if alias fails:
+```bash
+npx cc-mirror quick --provider mirror --name mclaude
+# Then start it
+mclaude
+```
+3. Explicitly load the orchestration skill:
+```
+Load the orchestration skill and initiate
+```
+4. Check provider configuration:
+```bash
+cat ~/.cc-mirror/config.json
+# Verify provider settings
+```
+
+### Common Issue: MCP Server Connection Errors
+
+**Symptom:** MCP tools show in `/mcp` but fail when Claude tries to use them with "connection refused" or "timeout" errors.
+
+**Cause:** Server process may have crashed, or configuration has wrong path/command.
+
+**Fix:**
+1. Verify the server is running:
+```bash
+# For npm-based servers
+ps aux | grep "mcp-server"
+```
+2. Test the server manually:
+```bash
+# Run the command from settings.json directly
+npx -y @modelcontextprotocol/server-github
+# Should start without errors
+```
+3. Check environment variables are set:
+```bash
+# Verify required tokens exist
+echo $GITHUB_PERSONAL_ACCESS_TOKEN
+```
+4. Review settings.json for typos:
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "your-token-here" }
+    }
+  }
+}
+```
+
+### Common Issue: Claude HUD Not Updating
+
+**Symptom:** HUD is installed but shows stale data or doesn't update during the session.
+
+**Cause:** HUD runs as a separate process and may lose sync with the active Claude session.
+
+**Fix:**
+1. Run the setup command again:
+```bash
+/claude-hud:setup
+```
+2. Restart the HUD process:
+```bash
+# Find and kill existing HUD process
+pkill -f "claude-hud"
+# Restart via plugin
+/claude-hud:start
+```
+3. Check terminal compatibility - HUD requires a terminal that supports ANSI codes
+4. Try the minimal layout if full layout has issues:
+```json
+{
+  "layout": "minimal",
+  "display": {
+    "showContextBar": true,
+    "showTools": true
+  }
+}
+```
+
+### Common Issue: Conflicting Hooks from Multiple Extensions
+
+**Symptom:** Hooks fire multiple times, or one extension's hooks block another's.
+
+**Cause:** Multiple extensions may have registered hooks for the same events.
+
+**Fix:**
+1. List all active hooks:
+```bash
+cat ~/.claude/settings.json | jq '.hooks'
+```
+2. Check for duplicate matchers (e.g., two PostToolUse hooks for "Edit")
+3. Order hooks intentionally - they execute in array order:
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      { "matcher": "Edit", "hooks": [{"command": "format.sh"}] },
+      { "matcher": "Edit", "hooks": [{"command": "lint.sh"}] }
+    ]
+  }
+}
+```
+4. Consider consolidating into a single script that calls multiple tools
 
 ---
 

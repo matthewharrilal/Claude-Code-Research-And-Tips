@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CC Mirror Native Orchestration | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer - Draggable divider between Main Panel and Activity Zone */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    /* Prevent text selection during resize */
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    /* Hide resizer when Activity Zone is hidden (responsive) */
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+    .code-block .status-done { color: #10b981; }
+    .code-block .status-blocked { color: #f59e0b; }
+    .code-block .status-wait { color: #6b7280; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Comparison Table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .comparison-table th {
+      background: #fafafa;
+      font-weight: 600;
+      color: #3f3f46;
+    }
+
+    .comparison-table td {
+      color: #3f3f46;
+    }
+
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Source Attribution */
+    .source-attribution {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 32px;
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .source-attribution a {
+      color: #0D9373;
+      text-decoration: none;
+    }
+
+    .source-attribution a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Source Attribution -->
+      <div class="source-attribution">
+        <strong>Source:</strong> <a href="https://x.com/nummanali/status/2007768692659015877" target="_blank">@nummanali</a> (Numman Ali) - Creator of CC Mirror, CTO UK FinTech<br>
+        <strong>Engagement:</strong> 791 likes, 107K views, 1K bookmarks<br>
+        <strong>Reliability:</strong> HIGH - Pattern creator, authoritative source
+      </div>
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Hidden beta feature unlocked: dependency-tracked parallel agents with built-in monitoring. Zero custom code required.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"It is so simple, yet powerful and IMO beats every orchestration I've seen. There's no point building your own."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'TaskCreate, TaskList, TaskGet, TaskUpdate')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>TaskCreate, TaskList, TaskGet, TaskUpdate</code>
+          </div>
+
+          <div class="core-anchor">Four tools. Native to Claude Code. Covers 80% of orchestration use cases.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          CC Mirror enables a disabled beta feature in Claude Code: native Task management. Instead of building your own orchestration layer with days or weeks of effort, you get dependency-tracked, persistent, multi-agent coordination out of the box.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">Task Management Tools</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># The 4 Task Management Tools</span>
+
+<span class="variable">TaskCreate</span>  <span class="comment">→ Create with subject, description, acceptance criteria</span>
+<span class="variable">TaskList</span>    <span class="comment">→ Filter: status='open', no owner, not blocked</span>
+<span class="variable">TaskGet</span>     <span class="comment">→ Full context: description, comments, dependencies</span>
+<span class="variable">TaskUpdate</span>  <span class="comment">→ Claim (set owner), add comments, resolve, link references</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Dependency Management</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Dependency Tools</span>
+
+<span class="variable">addBlocks</span>     <span class="comment">→ This task blocks another (must complete first)</span>
+<span class="variable">addBlockedBy</span>  <span class="comment">→ This task is blocked by another (wait for it)</span></pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The philosophy is simple: why spend weeks building custom orchestration when four native tools solve 80% of use cases? Save your engineering effort for the remaining 20% that genuinely requires custom solutions.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-native" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY NATIVE (NOT CUSTOM)?</div>
+          <div class="decision-reasoning">
+            Custom orchestrators require days or weeks of development. Native Task tools are already built, tested, and integrated. Zero setup effort means you ship today, not next month.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Start with native. Only build custom when you hit the 20% edge cases. Most developers never need to graduate beyond native Task tools.
+            </div>
+          </div>
+        </div>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Native Task API</th>
+              <th>Custom Build</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Setup</td>
+              <td>Zero effort</td>
+              <td>Days/weeks</td>
+            </tr>
+            <tr>
+              <td>Dependencies</td>
+              <td>Automatic</td>
+              <td>Manual wiring</td>
+            </tr>
+            <tr>
+              <td>Persistence</td>
+              <td>Built-in</td>
+              <td>Build yourself</td>
+            </tr>
+            <tr>
+              <td>Visual tracking</td>
+              <td>CLI included</td>
+              <td>Build yourself</td>
+            </tr>
+            <tr>
+              <td>Recovery</td>
+              <td>Native</td>
+              <td>Build yourself</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="decision-box" id="why-dependencies">
+          <div class="decision-why">WHY DEPENDENCY TRACKING?</div>
+          <div class="decision-reasoning">
+            Tasks naturally have prerequisites. Building an API before defining the data model produces broken code. <code>blockedBy</code> automatically gates execution so tasks run in valid order.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Think in terms of task graphs, not task lists. Every task that depends on another should have explicit <code>addBlockedBy</code>. The system handles execution order automatically.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-persistent">
+          <div class="decision-why">WHY PERSISTENT (NOT EPHEMERAL)?</div>
+          <div class="decision-reasoning">
+            Unlike TodoWrite, Tasks survive across sessions. If your machine crashes mid-orchestration, you pick up where you left off. No lost progress.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use Tasks for anything that spans sessions. Use TodoWrite for single-session personal tracking. Different tools for different persistence needs.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          File Structure
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          CC Mirror's native Task tools require minimal setup. Here's the complete project structure for implementing dependency-tracked orchestration:
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">Project Structure</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Project structure for CC Mirror native orchestration</span>
+
+my-project/
+├── .cc-mirror/                <span class="comment"># CC Mirror state (auto-created)</span>
+│   ├── tasks.json             <span class="comment"># Persistent task storage</span>
+│   ├── agents.json            <span class="comment"># Active agent registry</span>
+│   └── logs/                  <span class="comment"># Agent output logs</span>
+│
+├── CLAUDE.md                  <span class="comment"># Agent instructions (CRITICAL)</span>
+├── TASKS.md                   <span class="comment"># Human-readable task overview</span>
+│
+├── .claude/
+│   └── settings.local.json    <span class="comment"># CC Mirror config</span>
+│
+├── src/                       <span class="comment"># Your source code</span>
+│   ├── api/
+│   ├── models/
+│   └── services/
+│
+├── docs/
+│   ├── ARCHITECTURE.md        <span class="comment"># System architecture</span>
+│   └── API_ENDPOINTS.md       <span class="comment"># API documentation</span>
+│
+└── tests/                     <span class="comment"># Test suite</span>
+    ├── integration/
+    └── unit/</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">CLAUDE.md for Task Orchestration</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># CLAUDE.md - Instructions for CC Mirror orchestrated agents</span>
+
+<span class="keyword"># Project Overview</span>
+[Your project description here]
+
+<span class="keyword"># Task Management Protocol</span>
+This project uses native Task tools for orchestration.
+
+<span class="keyword">## When Starting Work</span>
+1. Run <span class="variable">TaskList</span> to see available tasks
+2. Claim a task: filter by status='open', no owner, not blocked
+3. Use <span class="variable">TaskUpdate</span> to set owner to your agent ID
+
+<span class="keyword">## Task Workflow</span>
+<span class="variable">TaskList</span>    <span class="comment">→ Find available work</span>
+<span class="variable">TaskGet</span>     <span class="comment">→ Get full task details</span>
+<span class="variable">TaskUpdate</span>  <span class="comment">→ Claim, update status, add comments</span>
+<span class="variable">TaskCreate</span>  <span class="comment">→ Only if decomposing larger work</span>
+
+<span class="keyword">## Dependency Rules</span>
+- NEVER start a task that has <span class="variable">blockedBy</span> items still open
+- When completing a task, check if it unblocks others
+- Add clear resolution comments
+
+<span class="keyword"># Build Commands</span>
+<span class="variable">npm install</span>    <span class="comment"># Install dependencies</span>
+<span class="variable">npm run dev</span>    <span class="comment"># Start development server</span>
+<span class="variable">npm test</span>       <span class="comment"># Run test suite</span>
+<span class="variable">npm run build</span>  <span class="comment"># Production build</span>
+
+<span class="keyword"># Code Standards</span>
+- TypeScript strict mode
+- All functions must have JSDoc
+- Tests required for new features</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">TASKS.md Template</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># TASKS.md - Human-readable task overview</span>
+<span class="comment"># Auto-generated from TaskList, or maintain manually</span>
+
+<span class="keyword"># Active Tasks</span>
+
+<span class="keyword">## Phase 1: Foundation</span>
+- [x] #1 Design API architecture (DONE)
+- [x] #2 Create project structure (DONE)
+- [ ] #3 Implement data models (IN PROGRESS - bob)
+
+<span class="keyword">## Phase 2: Implementation</span>
+- [ ] #4 Implement REST API endpoints (BLOCKED by #3)
+- [ ] #5 Write integration tests (BLOCKED by #4)
+- [ ] #6 Create API documentation (BLOCKED by #4)
+
+<span class="keyword"># Dependency Graph</span>
+<span class="comment"># Visual representation of task flow</span>
+
+#1 Design Architecture
+  └── #2 Create Structure
+       └── #3 Data Models
+            ├── #4 API Endpoints
+            │    ├── #5 Integration Tests
+            │    └── #6 API Docs
+            └── (parallel work possible after #3)</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">CC Mirror Configuration</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">// .claude/settings.local.json</span>
+<span class="comment">// CC Mirror configuration for Task tools</span>
+{
+  <span class="string">"cc-mirror"</span>: {
+    <span class="string">"features"</span>: {
+      <span class="string">"taskTools"</span>: true,
+      <span class="string">"agentMonitor"</span>: true,
+      <span class="string">"skillLayer"</span>: true
+    },
+    <span class="string">"taskDefaults"</span>: {
+      <span class="string">"autoAssign"</span>: false,
+      <span class="string">"requireAcceptanceCriteria"</span>: true,
+      <span class="string">"persistAcrossSessions"</span>: true
+    },
+    <span class="string">"agentMonitor"</span>: {
+      <span class="string">"pollInterval"</span>: 5000,
+      <span class="string">"showCompletedCount"</span>: 10
+    }
+  }
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Task Creation Script</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Example: Creating a dependency-tracked task graph</span>
+<span class="comment"># Run these in sequence in Claude Code</span>
+
+<span class="comment"># Step 1: Create root task (no dependencies)</span>
+TaskCreate:
+  subject: <span class="string">"Design API architecture"</span>
+  description: <span class="string">"Analyze requirements, choose framework, document decisions"</span>
+  acceptanceCriteria:
+    - <span class="string">"Framework selected and justified"</span>
+    - <span class="string">"Architecture diagram in docs/"</span>
+    - <span class="string">"ARCHITECTURE.md updated"</span>
+
+<span class="comment"># Step 2: Create dependent task</span>
+TaskCreate:
+  subject: <span class="string">"Implement data models"</span>
+  description: <span class="string">"Create SQLAlchemy models based on architecture"</span>
+  acceptanceCriteria:
+    - <span class="string">"All models created in src/models/"</span>
+    - <span class="string">"Migrations generated"</span>
+    - <span class="string">"Tests pass"</span>
+
+TaskUpdate:
+  taskId: <span class="string">"#2"</span>
+  addBlockedBy: [<span class="string">"#1"</span>]
+
+<span class="comment"># Step 3: Create parallel tasks (both blocked by #2)</span>
+TaskCreate:
+  subject: <span class="string">"Implement REST API endpoints"</span>
+  description: <span class="string">"Create FastAPI routes for all models"</span>
+
+TaskUpdate:
+  taskId: <span class="string">"#3"</span>
+  addBlockedBy: [<span class="string">"#2"</span>]
+
+TaskCreate:
+  subject: <span class="string">"Write integration tests"</span>
+  description: <span class="string">"pytest tests for all endpoints"</span>
+
+TaskUpdate:
+  taskId: <span class="string">"#4"</span>
+  addBlockedBy: [<span class="string">"#3"</span>]</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Agent Spawning Script</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># spawn-agents.sh - Launch parallel agents for ready tasks</span>
+<span class="comment">#!/bin/bash</span>
+
+<span class="comment"># Check for ready tasks (open, no owner, not blocked)</span>
+echo <span class="string">"Checking for available tasks..."</span>
+
+<span class="comment"># Launch agents in separate terminal tabs/tmux panes</span>
+<span class="comment"># Each agent will claim and work on one task</span>
+
+<span class="comment"># Agent 1</span>
+claude-code --prompt <span class="string">"TaskList to find available work, then claim and complete one task"</span> &
+
+<span class="comment"># Agent 2 (wait 5s to avoid race condition)</span>
+sleep 5
+claude-code --prompt <span class="string">"TaskList to find available work, then claim and complete one task"</span> &
+
+<span class="comment"># Agent 3</span>
+sleep 5
+claude-code --prompt <span class="string">"TaskList to find available work, then claim and complete one task"</span> &
+
+echo <span class="string">"Agents launched. Monitor with /agents or Ctrl+Shift+A"</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 5: TASK DATA MODEL -->
+      <section id="task-structure" data-activity="task-data">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Task Data Model
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">Task Data Structure</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Task Data Structure</span>
+
+Task {
+  <span class="variable">id</span>: #1
+  <span class="variable">subject</span>: <span class="string">"Design API architecture"</span>
+  <span class="variable">description</span>: <span class="string">"Analyze requirements and choose framework"</span>
+  <span class="variable">status</span>: open | in_progress | done
+  <span class="variable">owner</span>: &lt;agent_id&gt; | null
+  <span class="variable">acceptanceCriteria</span>: [
+    <span class="string">"Framework chosen"</span>,
+    <span class="string">"Architecture documented"</span>
+  ]
+  <span class="variable">dependencies</span>: {
+    <span class="variable">blocks</span>: [#2, #3]      <span class="comment">// This task blocks these</span>
+    <span class="variable">blockedBy</span>: []        <span class="comment">// This task waits for these</span>
+  }
+  <span class="variable">comments</span>: [
+    { <span class="variable">agent</span>: <span class="string">"agent_1"</span>, <span class="variable">text</span>: <span class="string">"Chose FastAPI"</span> }
+  ]
+  <span class="variable">references</span>: [
+    <span class="string">"docs/ARCHITECTURE.md"</span>
+  ]
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="dependency-patterns">Dependency Patterns</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Linear Dependency (API must come before tests)</span>
+
+TaskCreate: #1 Design architecture
+TaskCreate: #2 Build API          <span class="keyword">addBlockedBy</span>: #1
+TaskCreate: #3 Write tests        <span class="keyword">addBlockedBy</span>: #2
+
+<span class="comment"># Result: #1 → #2 → #3 (sequential)</span></pre>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Parallel with Shared Dependency</span>
+
+TaskCreate: #1 Design architecture
+TaskCreate: #2 Build frontend     <span class="keyword">addBlockedBy</span>: #1
+TaskCreate: #3 Build backend      <span class="keyword">addBlockedBy</span>: #1
+TaskCreate: #4 Integration tests  <span class="keyword">addBlockedBy</span>: #2, #3
+
+<span class="comment"># Result: #1 → (#2 || #3) → #4 (parallel middle layer)</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Agent Monitoring View</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Press /agents or Ctrl+Shift+A</span>
+
+Background Tasks: 1 active
+
+Async agents (6):
+&gt; Implement data models              [running]  45s
+  Create API documentation           [completed] 23s
+  Write integration tests            [completed] 67s
+  Implement REST API endpoints       [completed] 89s
+  Create project structure           [completed] 12s
+  Design API architecture            [completed] 34s
+
+<span class="comment"># Controls:</span>
+<span class="comment"># ↑/↓  Select agent</span>
+<span class="comment"># Enter View details</span>
+<span class="comment"># k    Kill selected agent</span>
+<span class="comment"># Esc  Exit view</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 6: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a task graph through the dependency cascade to see how native orchestration works:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">Request: <code>"Build user authentication"</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Create task graph with dependencies:<br>
+              <code>#1 Design auth</code> (ready) → <code>#2 User model</code> → <code>#3 Password hashing</code> → <code>#4 JWT service</code> → <code>#5 Endpoints</code> → <code>#6 Tests</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">System scans for: <code>status='open', no owner, not blocked</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Found: <code>#1</code> (only one ready). Agent claims it.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Agent #1 completes: <code>TaskUpdate #1: status=done, resolution="Chose FastAPI"</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>DEPENDENCY CASCADE:</strong> <code>#2</code> unblocks automatically!</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Agent claims <code>#2</code>, completes it. <code>#3</code> unblocks.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Continues through graph... Each completion triggers the next unblock.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content"><strong>T+5min:</strong> <code>TaskList: 6/6 done</code>. FastAPI API with auth complete.</div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Demo Output</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>Agent #1 completed! It chose FastAPI (Python)
+
+Tasks:
+<span class="status-done">&#9745;</span> #1 Design API architecture
+<span class="status-done">&#9745;</span> #2 Create project structure
+<span class="status-done">&#9745;</span> #3 Implement data models
+<span class="status-blocked">&#128992;</span> #4 Implement REST API endpoints (blocked by #3)
+<span class="status-blocked">&#128992;</span> #5 Write integration tests (blocked by #4)
+<span class="status-blocked">&#128992;</span> #6 Create API documentation (blocked by #4)
+
+<span class="comment"># Built in one session:</span>
+<span class="comment"># - FastAPI REST API with 12 endpoints</span>
+<span class="comment"># - SQLite database with SQLAlchemy ORM</span>
+<span class="comment"># - 17 integration tests with pytest</span>
+<span class="comment"># - Complete docs (README.md, API_ENDPOINTS.md, ARCHITECTURE.md)</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 7: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit with native Task orchestration, with specific fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #1: Beta/disabled feature
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Behavior may change between CC Mirror versions</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> This is a disabled beta feature in Claude Code</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Monitor CC Mirror releases. Keep CC Mirror updated.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #2: Relies on minified JS editing
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Task tools disappear after Claude Code update</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> CC Mirror patches Claude Code's minified JavaScript</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Re-run CC Mirror setup after Claude Code updates.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #3: Generic limits for production
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Need state control, business logic, custom observability</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Native is general purpose, not domain-specific</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Graduate to Gas Town for the 20% that needs custom. (@nelsonpadil_)</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #4: Agent autonomy risks
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agents take uncontrolled actions</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Less control than custom orchestrators</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Watch agent monitoring view. Use clear acceptance criteria.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #5: Task order matters
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Tasks execute in wrong order</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Missing or incorrect <code>addBlockedBy</code></div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Double-check dependency graph before spawning agents.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #6: No automatic parallelization
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Only one agent working despite multiple ready tasks</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Must manually spawn multiple agents</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Launch agents in parallel explicitly.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #7: Forgotten tasks accumulate
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Old tasks from previous projects pollute TaskList</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Tasks persist across sessions</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Clean up with TaskUpdate: mark as done or cancelled.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #8: Circular dependencies
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Tasks block each other forever, nothing progresses</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> #A blocks #B, #B blocks #A</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check graph for cycles before spawning. No automated detection.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #9: Agent doesn't claim tasks
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Spawned agent sits idle</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Task not open, already owned, or blocked</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check <code>TaskList</code> filter: status='open', no owner, not blocked.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #10: Results not visible
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Task marked done but can't see what happened</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Didn't check TaskGet for full context</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use <code>TaskGet</code> for comments, references, resolution details.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            The 80% Solution
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Native covers 80% of use cases, but some genuinely need full orchestration with custom roles, state machines, and observability.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Hitting limits feels like hitting a wall. No gradual degradation.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Know when you're in the 20%. Graduate to Gas Town for factory-scale orchestration. Don't try to force native beyond its design.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Generic vs. Specific
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Native is general purpose. Domain-specific orchestration needs custom logic.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Wanting tasks to understand your business rules, not just dependency ordering.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Put domain logic in acceptance criteria and agent prompts. The Task layer handles coordination; you handle semantics.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Beta Feature Risk
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> This is a disabled feature enabled via patches. Could change or break.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Anxiety about depending on unofficial features.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Have a fallback. Track CC Mirror releases. Accept the trade-off: zero-effort orchestration vs. stability guarantees.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Agent Autonomy
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Less control than custom orchestrators. Agents make decisions you might not approve.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Tasks marked complete but implementation differs from expectations.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Write explicit acceptance criteria. Monitor agent view closely. Use comments for mid-task guidance.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Production Limits
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Production needs state control, business logic integration, custom observability, and evals.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "This works for demos but not for real systems."</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Native is for development velocity, not production infrastructure. Build custom for production. (@nelsonpadil_)</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Dependency Graph Complexity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Complex graphs are manual to construct. No visualization, no cycle detection.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Large projects become hard to reason about.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Keep graphs simple (< 10 tasks). For complex projects, use Gas Town or manual decomposition into smaller graphs.</div>
+        </div>
+      </section>
+
+      <!-- Section 9: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">9</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE NATIVE CC MIRROR (The 80%)
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Want to ship today, not next month (zero setup)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Linear or simple parallel orchestration</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Stage 4-5 developer learning multi-agent patterns</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Limited budget (lower overhead than Gas Town)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need tasks to persist across sessions</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Basic CLI monitoring is sufficient</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              GRADUATE TO GAS TOWN (The 20%)
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Factory scale needed (10+ persistent agents)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Custom roles required (specialized workers)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Full observability (production monitoring)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Complex state beyond task graph</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Maximum throughput (Steve Yegge numbers)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Enterprise requirements</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">vs TodoWrite</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>TaskCreate</th>
+              <th>TodoWrite</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Persistence</td>
+              <td>Survives sessions</td>
+              <td>Ephemeral</td>
+            </tr>
+            <tr>
+              <td>Owners</td>
+              <td>Agent IDs</td>
+              <td>None</td>
+            </tr>
+            <tr>
+              <td>Dependencies</td>
+              <td>blocks/blockedBy</td>
+              <td>None</td>
+            </tr>
+            <tr>
+              <td>Team visibility</td>
+              <td>Yes</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Use for</td>
+              <td>Multi-agent orchestration</td>
+              <td>Personal session tracking</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if no dependency tracking?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Tasks execute in any order, agents grab whatever's available.<br>
+          <strong>Why this fails:</strong> Build endpoints before data models? Broken code cascades.<br>
+          <strong>Hidden constraint revealed:</strong> Dependencies ARE load-bearing. The orchestration IS the constraint.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible core</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">TaskCreate + addBlockedBy</code><br>
+          <strong>Essential:</strong> Create tasks, define order.<br>
+          <strong>Everything else:</strong> Convenience for monitoring and control.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">FastAPI Demo: 12 endpoints, 17 tests</div>
+        <div class="text-text-secondary text-sm">
+          Built in one session. FastAPI REST API with SQLite, SQLAlchemy ORM, 17 integration tests, complete docs. Proof that "zero effort" claim is real.
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Ralph: External State</div>
+        <div class="text-text-secondary text-sm">
+          Tasks persist state outside agent memory. Same principle as prd.json in Ralph.<br>
+          <strong>Core invariant:</strong> External state &gt; internal memory.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Gas Town: Dependency Graphs</div>
+        <div class="text-text-secondary text-sm">
+          <code>blockedBy</code> mirrors Gas Town's Beads task dependencies. Same pattern, different scale.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Native Tasks = Kanban Board</div>
+        <div class="text-text-secondary text-sm">
+          Tasks move through columns: open → claimed → done<br>
+          <code>blockedBy</code> = swimlane dependencies<br>
+          <code>owner</code> = card assignment<br><br>
+          <em>If you've used Trello, you understand this system.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Dependency Discipline</div>
+        <div class="text-text-secondary text-sm">
+          Writing <code>blockedBy</code> forces you to think about prerequisites.<br>
+          <strong>The side effect:</strong> Better task decomposition. Clearer architecture. Fewer surprises.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint → FOUR decisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Custom orchestration takes weeks<br>
+          → Use native tools (zero setup)<br>
+          → Accept 80% coverage (not 100%)<br>
+          → Graduate to Gas Town for edge cases<br>
+          → Keep dependency graphs simple
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Simplicity vs Power</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Native is simple (ship today)<br>
+          <strong>Pull B:</strong> Custom is powerful (full control)<br><br>
+          <strong>Resolution:</strong> Use native until you hit the 80% limit. Don't pre-optimize.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Zero Effort vs Control</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Fast setup (zero configuration)<br>
+          <strong>Pull B:</strong> Full control (custom everything)<br><br>
+          <strong>Resolution:</strong> Accept less control for speed. Control comes from acceptance criteria, not infrastructure.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you build custom for the 80%</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Build custom orchestration for simple use cases<br>
+          <strong>THEN:</strong> Weeks of development instead of hours<br>
+          <strong>THEN:</strong> Competitors ship while you're wiring<br>
+          <strong>FINALLY:</strong> Wasted effort on solved problems<br><br>
+          <em>The fix: "Zero effort" IS the feature.</em>
+        </div>
+      </div>
+
+      <!-- FILES SECTION (4 items) -->
+      <div class="activity-item expertise" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> "What tools exist?" → 4 Task tools<br>
+          <strong>Intermediate:</strong> "How do dependencies work?" → blockedBy chains<br>
+          <strong>Advanced:</strong> "When do I hit limits?" → 80% boundary<br>
+          <strong>Staff:</strong> "What's beyond?" → Gas Town for 20%<br>
+          <strong>Expert:</strong> "Cross-pattern?" → Task API = Ralph's prd.json
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="files">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Natural Parallelization</div>
+        <div class="text-text-secondary text-sm">
+          Clear dependencies reveal parallel opportunities.<br>
+          If #2 and #3 both depend only on #1, they can run simultaneously.<br>
+          <strong>The insight:</strong> Good dependency graphs ARE parallelization specs.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Native + CC Mirror Skill Layer</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Task API for coordination + CC Mirror Skill for model selection and domain guides.<br>
+          <strong>Why:</strong> Complementary. Task tools handle WHEN, skills handle HOW.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Anti-Composition
+        </div>
+        <div class="font-medium text-text-primary mb-2">Native + Custom Orchestrator</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Fails:</strong> Redundant, contradictory patterns.<br>
+          <strong>Why:</strong> Both trying to own task coordination. Pick one.
+        </div>
+      </div>
+
+      <!-- PATH SECTION (4 items) -->
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When is native right?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Single task:</strong> Maybe overkill (TodoWrite might suffice)<br>
+          <strong>3-6 task project:</strong> Yes (sweet spot)<br>
+          <strong>10+ task system:</strong> Depends (may need Gas Town)<br>
+          <strong>Ongoing development:</strong> Start native, graduate if needed
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip dependencies</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Don't set <code>addBlockedBy</code><br>
+          <strong>THEN:</strong> Tasks execute in any order<br>
+          <strong>THEN:</strong> Build endpoints before models<br>
+          <strong>THEN:</strong> Broken code enters git<br>
+          <strong>FINALLY:</strong> Manual cleanup, lost time<br><br>
+          <em>Dependencies ARE the orchestration.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="path">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How dependency errors degrade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10% wrong:</strong> Occasional task order issues<br>
+          <strong>50% wrong:</strong> Frequent blocks, confused agents<br>
+          <strong>90% wrong:</strong> Circular dependencies, nothing runs<br>
+          <strong>Total failure:</strong> System stuck, manual intervention<br><br>
+          <em>Dependency errors compound. Check graph BEFORE spawning.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@LLMJunky: Parallel Task Executor</div>
+        <div class="text-text-secondary text-sm">
+          Created custom slash command for parallel task execution. Parses plan file, extracts tasks, launches subagents. Community extension on top of native.
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When task count flips from help to hurt</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-3 tasks:</strong> Probably overkill (use TodoWrite)<br>
+          <strong>4-8 tasks:</strong> Sweet spot (native shines)<br>
+          <strong>9-15 tasks:</strong> Getting complex (be careful)<br>
+          <strong>15+ tasks:</strong> Consider Gas Town<br><br>
+          <strong>THE INFLECTION:</strong> ~10 tasks. Beyond that, graph complexity dominates.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if tasks were ephemeral?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Recreate task graph every session.<br>
+          <strong>Why this fails:</strong> Lose progress. Repeat setup. No resume.<br>
+          <strong>Hidden constraint revealed:</strong> Persistence is essential for multi-session work.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Visual Task Graph</div>
+        <div class="text-text-secondary text-sm">
+          CLI only, no visualization. You can't see the dependency graph.<br>
+          <strong>Who's working on it:</strong> Community. No official solution yet.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Automatic Agent Scaling</div>
+        <div class="text-text-secondary text-sm">
+          Must manually spawn agents in parallel. No auto-scaling based on ready tasks.<br>
+          <strong>Current state:</strong> Feature request, not implemented.
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item gradient" data-section="hard">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How agent autonomy degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10% unexpected:</strong> Minor implementation differences<br>
+          <strong>50% unexpected:</strong> Wrong approaches, confusion<br>
+          <strong>90% unexpected:</strong> Data corruption, broken state<br>
+          <strong>Total failure:</strong> Need manual recovery<br><br>
+          <em>Monitor the agent view. Kill stuck agents with k.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@nelsonpadil_: Production Reality</div>
+        <div class="text-text-secondary text-sm">
+          "Fine for demos/generic... Production needs: state control, business logic, custom observability, evals."<br>
+          <strong>Key insight:</strong> Clarified the 80% boundary. Native is for velocity, not production infrastructure.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="hard">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Gas Town: For the 20%</div>
+        <div class="text-text-secondary text-sm">
+          When native isn't enough: 10+ persistent agents, custom roles, full observability, complex state.<br>
+          <strong>Link:</strong> mastery-gastown-complete.md
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="hard">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with CC Mirror Skill: Tool Separation</div>
+        <div class="text-text-secondary text-sm">
+          Task tools handle coordination. Skill tools handle execution. Same separation pattern.<br>
+          <strong>Link:</strong> 008-cc-mirror-skill-deepdive-nummanali.md
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (4 items) -->
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you used native for the 20%?</div>
+        <div class="text-text-secondary text-sm">
+          • Hit limits → frustration<br>
+          • Workarounds → complexity<br>
+          • "Why doesn't this work?" → wrong tool<br><br>
+          <strong>Why this fails:</strong> 80% solution is not 100% solution.<br>
+          <em>Know the boundary. Graduate when you cross it.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Native vs Gas Town = SQLite vs PostgreSQL</div>
+        <div class="text-text-secondary text-sm">
+          <strong>SQLite:</strong> Zero setup, file-based, great for most projects<br>
+          <strong>PostgreSQL:</strong> Full features, complex, for scale<br><br>
+          <strong>Native:</strong> Zero setup, 80% coverage<br>
+          <strong>Gas Town:</strong> Full orchestration, for enterprise
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph: Simpler Alternative</div>
+        <div class="text-text-secondary text-sm">
+          If you don't need parallel agents, Ralph's loop pattern might be simpler.<br>
+          <strong>Link:</strong> mastery-ralph-complete.md
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror Skill: Add Orchestration Layer</div>
+        <div class="text-text-secondary text-sm">
+          Native Task API + CC Mirror Skill = model selection, domain guides, execution control.<br>
+          <strong>Link:</strong> 008-cc-mirror-skill-deepdive-nummanali.md
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Track which sections are in view
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

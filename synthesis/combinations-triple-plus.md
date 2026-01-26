@@ -1,5 +1,7 @@
 # Higher-Order Combinations: Triple+ Pattern Stacks
 
+> **You Are Here:** This is advanced territory - stacks of 3+ patterns working together. These are the configurations used by Claude Code power users shipping production code at 5-10x normal velocity. Only read this after mastering individual patterns and pairwise combinations. Prerequisites: familiarity with Ralph, Hooks, Subagents, and CC Mirror.
+
 ---
 ## D-FINAL Integration
 **Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
@@ -294,6 +296,19 @@ After each successful run, extract insights:
 
 ---
 
+### Checkpoint: Core Triple+ Stacks
+
+**You should now understand:**
+- [ ] The 6 components of the "Unhobbled" stack and their synergies
+- [ ] Boris Cherny's workflow: 5-10 parallel sessions with shared CLAUDE.md
+- [ ] How the Production Multi-Agent Stack uses tiered model selection for cost control
+- [ ] The file structure for the Compounding Learning Stack (prd.json, progress.txt, archive/)
+- [ ] The difference between additive (1+1=2) and multiplicative (1+1=5) synergies
+
+**If unclear:** Re-read the specific stack section you're unclear on. For the Unhobbled stack, focus on the implementation order. For the Creator Stack, focus on the CLAUDE.md structure for parallel sessions.
+
+---
+
 ## Triple+ Combination Matrix
 
 | Combo Name | Components | Unlocks | Complexity | Cost | Audience |
@@ -451,6 +466,188 @@ More automation (hooks)
 | Bugs in production | 5/sprint | 1/sprint | 80% reduction |
 | Code review feedback | 10 comments | 2 comments | 80% reduction |
 | Refactor frequency | Monthly | Rarely | 90% reduction |
+
+---
+
+---
+
+## Troubleshooting
+
+### Common Issue: Parallel Sessions Stepping on Each Other
+
+**Symptom:** Running 5 parallel sessions as Boris Cherny recommends, but agents are making conflicting changes to the same files.
+
+**Cause:** Sessions share the codebase but aren't assigned to isolated branches/worktrees.
+
+**Fix:**
+1. Always assign each session to its own branch:
+```markdown
+# CLAUDE.md Session Assignment
+- Session 1: Feature A (branch: feat/a)
+- Session 2: Feature B (branch: feat/b)
+```
+2. Use git worktrees for true isolation:
+```bash
+git worktree add ../session-1 -b feat/a
+git worktree add ../session-2 -b feat/b
+# Run each Claude session in its own worktree directory
+```
+3. Add file-path guards to each session's instructions:
+```markdown
+Session 1: ONLY modify files under src/auth/
+Session 2: ONLY modify files under src/payments/
+```
+
+### Common Issue: Unhobbled Stack Overwhelming Beginners
+
+**Symptom:** Tried to set up the full Unhobbled stack and now nothing works - hooks conflict, subagents fail, Ralph doesn't iterate.
+
+**Cause:** Implementing all components at once without understanding each one individually.
+
+**Fix:**
+Follow the implementation order strictly:
+```
+Week 1: Just Hooks (formatting, notifications)
+Week 2: Add subagent delegation
+Week 3: Add adversarial validation
+Week 4: Configure Ralph loops
+Week 5: Add voice (optional)
+Week 6: LSP integration
+```
+
+If stuck, strip back to basics:
+```bash
+# Remove all advanced configuration
+rm ~/.claude/settings.json
+rm -rf ~/.claude/hooks/
+# Start fresh with just one component
+```
+
+### Common Issue: Compounding Learning Stack Not Compounding
+
+**Symptom:** Running Ralph loops with archives, but learnings from previous runs aren't being applied to new iterations.
+
+**Cause:** The prompt doesn't instruct Claude to check archives, or learnings.md is empty/outdated.
+
+**Fix:**
+1. Verify the archive check is in your prompt:
+```bash
+# ralph.sh should include:
+claude "Review plans/prd.json and plans/progress.txt.
+  Check plans/archive/learnings.md for previous insights.
+  ..."
+```
+2. After each run, extract learnings (human-in-loop):
+```bash
+# Manually or with Claude
+claude "Review plans/archive/run-*-progress.txt and extract 3-5 key learnings.
+  Append to plans/archive/learnings.md"
+```
+3. Check that learnings.md has content:
+```bash
+cat plans/archive/learnings.md
+# Should show patterns, not be empty
+```
+
+### Common Issue: Cost Explosion with Production Multi-Agent
+
+**Symptom:** Multi-agent setup is working but costs $200+/day, making it unsustainable.
+
+**Cause:** Opus is being used for everything, or agents are doing unnecessary work.
+
+**Fix:**
+1. Implement strict tiered model selection:
+```json
+{
+  "model_selection": {
+    "research_tasks": "haiku",
+    "simple_edits": "haiku",
+    "implementation": "sonnet",
+    "architecture_decisions": "opus"
+  }
+}
+```
+2. Add task filtering - not everything needs an agent:
+```markdown
+# Before spawning an agent, ask:
+- Is this task >10 minutes for a human? → Agent
+- Is this <5 lines of code? → Direct edit, no agent
+```
+3. Set daily budget caps:
+```bash
+# Track spending
+echo "$(date): $DAILY_SPEND" >> ~/.claude/cost-log.txt
+# Alert at threshold
+if [ "$DAILY_SPEND" -gt 50 ]; then
+  curl -d "Budget alert: $DAILY_SPEND" ntfy.sh/my-alerts
+fi
+```
+
+### Common Issue: Adversarial Validation Blocking All Progress
+
+**Symptom:** Added adversarial review agents but they keep rejecting implementations, and nothing gets merged.
+
+**Cause:** Adversarial agent is too strict, or there's no escalation path for disagreements.
+
+**Fix:**
+1. Calibrate the adversarial agent's threshold:
+```markdown
+# In adversarial agent prompt
+Reject ONLY for:
+- Security vulnerabilities
+- Breaking existing tests
+- Clear logic errors
+
+Do NOT reject for:
+- Style preferences
+- "Could be cleaner"
+- Minor performance concerns
+```
+2. Add escalation for disagreements:
+```markdown
+If you reject 3 implementations in a row for the same task:
+1. Summarize the core disagreement
+2. Ask orchestrator to involve human
+3. Do not block further iterations
+```
+3. Use "soft" rejection (suggestion) vs "hard" rejection (block):
+```markdown
+Output "SUGGESTION: ..." for style issues (implementation continues)
+Output "BLOCKED: ..." for critical issues (implementation stops)
+```
+
+### Common Issue: Voice Interface Misinterpreting Prompts
+
+**Symptom:** Using STT/TTS for mobile development but Claude frequently misunderstands dictated instructions.
+
+**Cause:** Speech recognition errors compound into confusing prompts, especially with technical terms.
+
+**Fix:**
+1. Use code words for common technical terms:
+```markdown
+# Train yourself to say:
+"open paren" → (
+"close curly" → }
+"snake case" → _
+"camel case" → uppercase next letter
+```
+2. Confirm before executing:
+```markdown
+# Configure Claude to repeat back understanding
+Always restate my request before executing:
+"I understood: [paraphrase]. Is this correct?"
+```
+3. Keep dictated prompts high-level:
+```markdown
+# Good (voice): "Add error handling to the auth module"
+# Bad (voice): "Add try catch with error dot message logging"
+```
+4. Use voice for direction, keyboard for precision:
+```markdown
+# Voice: "Find the auth bug"
+# Claude shows options
+# Keyboard: "Fix option 2, use bcrypt"
+```
 
 ---
 

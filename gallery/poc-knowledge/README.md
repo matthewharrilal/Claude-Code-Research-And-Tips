@@ -8,9 +8,12 @@
 
 | Need | Go To |
 |------|-------|
-| **WHY the three-panel layout** | [decisions/WHY-THREE-PANELS.md](decisions/WHY-THREE-PANELS.md) ← START HERE |
+| **WHY the three-panel layout** | [decisions/WHY-THREE-PANELS.md](decisions/WHY-THREE-PANELS.md) |
+| **HOW to apply this to other patterns** | [methodology/METHODOLOGY-TRANSFORMATION.md](methodology/METHODOLOGY-TRANSFORMATION.md) ← NEW |
+| Understand the philosophy | [methodology/METHODOLOGY-PHILOSOPHY.md](methodology/METHODOLOGY-PHILOSOPHY.md) |
+| See all 24 content types | [methodology/METHODOLOGY-CONTENT-TYPES.md](methodology/METHODOLOGY-CONTENT-TYPES.md) |
+| Copy-paste Activity Zone templates | [methodology/TEMPLATES-ACTIVITY-ZONE.md](methodology/TEMPLATES-ACTIVITY-ZONE.md) |
 | Understand the vision | [decisions/CONTEXT-RECOVERY.md](decisions/CONTEXT-RECOVERY.md) |
-| See layout reasoning | [decisions/STRUCTURE-DECISION.md](decisions/STRUCTURE-DECISION.md) |
 | Full technical spec | [specs/GALLERY-ARCHITECTURE.md](specs/GALLERY-ARCHITECTURE.md) |
 | Current POC design | [specs/RALPH-MINTLIFY-REDESIGN.md](specs/RALPH-MINTLIFY-REDESIGN.md) |
 | What went wrong & fixes | [audits/CSS-LAYOUT-AUDIT.md](audits/CSS-LAYOUT-AUDIT.md) |
@@ -51,7 +54,7 @@ From research, we made key structural decisions.
 │             │                         │              │
 │ Left Nav    │     Main Content        │  Activity    │
 │ (240px)     │     (flexible)          │  Zone        │
-│             │                         │  (280px)     │
+│             │                         │  (480px)     │
 │ Navigation  │  Documentation body     │ Quotes,      │
 │ hierarchy   │  with procedures,       │ connections, │
 │             │  examples, checkpoints  │ case studies │
@@ -144,15 +147,52 @@ From our research, documentation needs:
 
 ### Activity Zone Content Types
 
-The right sidebar has 5 content types:
+The right sidebar (480px, resizable 280-900px) has 6 content types:
 
 | Type | Color | Purpose |
 |------|-------|---------|
-| Quote | Green | Wisdom from practitioners |
-| Connection | Blue | Links to related patterns |
-| Case Study | Purple | Real-world examples |
-| Question | Amber | Open problems to explore |
-| Insight | Green | Key takeaways |
+| **Invariant Connection** | Blue | Cross-pattern DNA |
+| **Second-Order Effect** | Amber | System properties at scale |
+| **Composition Case** | Purple | What combines, what doesn't |
+| **Research Frontier** | Red | What's unsolved |
+| **War Story** | Green | Real production experiences |
+| **Alternative Path** | Gray | Navigation to other options |
+
+---
+
+## Methodology: Applying to Other Patterns
+
+The `methodology/` folder contains the **complete backbone documentation** for applying this POC approach to any pattern in the knowledge base.
+
+### The 8 Methodology Documents
+
+| Document | Purpose |
+|----------|---------|
+| `METHODOLOGY-PHILOSOPHY.md` | The WHY - ideology, worldview, research backing |
+| `METHODOLOGY-THREE-PANELS.md` | The ARCHITECTURE - panel structure and interaction |
+| `METHODOLOGY-CONTENT-TYPES.md` | The WHAT - all 24 content types fully specified |
+| `METHODOLOGY-GENERATION-QUESTIONS.md` | The 8 questions that generate Activity Zone content |
+| `METHODOLOGY-QUALITY-RUBRICS.md` | Measurable 0-3 scoring criteria |
+| `METHODOLOGY-TRANSFORMATION.md` | Step-by-step process (markdown → POC format) |
+| `METHODOLOGY-PATTERN-ADAPTATION.md` | How to adapt for different pattern types |
+| `TEMPLATES-ACTIVITY-ZONE.md` | Copy-paste templates for all 16 Activity Zone types |
+
+### Reading Order
+
+1. **Start with Philosophy** - Understand the WHY
+2. **Read Three-Panels** - Understand the architecture
+3. **Reference Content-Types** - Know what each type requires
+4. **Use Transformation** - Follow the step-by-step process
+5. **Apply Generation-Questions** - Create Activity Zone content
+6. **Validate with Quality-Rubrics** - Score before publishing
+
+### The Relationship
+
+```
+specs/CONTENT-STRUCTURE.md    = Technical specification (raw definitions)
+decisions/WHY-THREE-PANELS.md = Decision record (reasoning behind layout)
+methodology/*                 = How to APPLY the spec (operational guidance)
+```
 
 ---
 
@@ -200,6 +240,16 @@ Automated validation that pages have:
 poc-knowledge/
 ├── README.md              ← You are here
 │
+├── methodology/           # HOW TO APPLY the POC approach (NEW)
+│   ├── METHODOLOGY-PHILOSOPHY.md       # The WHY - ideology & worldview
+│   ├── METHODOLOGY-THREE-PANELS.md     # The ARCHITECTURE - panel structure
+│   ├── METHODOLOGY-CONTENT-TYPES.md    # The WHAT - all 24 content types
+│   ├── METHODOLOGY-GENERATION-QUESTIONS.md # The 8 questions for Activity Zone
+│   ├── METHODOLOGY-QUALITY-RUBRICS.md  # Measurable validation criteria
+│   ├── METHODOLOGY-TRANSFORMATION.md   # Step-by-step process (markdown → POC)
+│   ├── METHODOLOGY-PATTERN-ADAPTATION.md # Reusability for other patterns
+│   └── TEMPLATES-ACTIVITY-ZONE.md      # Copy-paste templates (16 types)
+│
 ├── research/              # What we learned from analyzing others
 │   ├── docs-premium.md        # Mintlify, Stripe, Linear analysis
 │   ├── component-specimens.md # UI patterns that work
@@ -209,9 +259,11 @@ poc-knowledge/
 │
 ├── decisions/             # Why we chose what we chose
 │   ├── CONTEXT-RECOVERY.md    # Project direction & alternatives
-│   └── STRUCTURE-DECISION.md  # Three-column rationale
+│   ├── STRUCTURE-DECISION.md  # Three-column rationale
+│   └── WHY-THREE-PANELS.md    # Complete reasoning behind layout
 │
-├── specs/                 # How to build it
+├── specs/                 # How to build it (technical specs)
+│   ├── CONTENT-STRUCTURE.md       # Content types & formats
 │   ├── GALLERY-ARCHITECTURE.md    # Production spec (Astro)
 │   ├── RALPH-MINTLIFY-REDESIGN.md # POC design spec
 │   └── LIVING-DOC-PIPELINE.md     # Automation vision

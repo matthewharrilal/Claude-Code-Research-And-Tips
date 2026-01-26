@@ -1,0 +1,2335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error Taxonomy and Recovery Patterns | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* Error Box (Critical) */
+    .error-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .error-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .error-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    .error-detail strong {
+      color: #991b1b;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #10b981;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .info-title {
+      font-weight: 600;
+      color: #166534;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-detail {
+      font-size: 14px;
+      color: #14532d;
+      margin-bottom: 8px;
+    }
+
+    /* Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Error Category Table */
+    .error-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .error-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #3f3f46;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .error-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .error-table tr:hover {
+      background: #fafafa;
+    }
+
+    .severity-critical {
+      color: #dc2626;
+      font-weight: 600;
+    }
+
+    .severity-high {
+      color: #ea580c;
+      font-weight: 600;
+    }
+
+    .severity-medium {
+      color: #ca8a04;
+      font-weight: 600;
+    }
+
+    .severity-low {
+      color: #65a30d;
+      font-weight: 600;
+    }
+
+    /* Decision Tree */
+    .decision-tree {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Error Taxonomy</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Taxonomy -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>Core Taxonomy</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">9 Error Categories</a>
+          <a href="#context-errors" class="nav-item">Context Errors</a>
+          <a href="#validation-errors" class="nav-item">Validation Errors</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Key Distinctions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#deterministic" class="nav-item">Deterministic vs Non</a>
+          <a href="#severity-levels" class="nav-item">Severity Levels</a>
+        </div>
+      </div>
+
+      <!-- Recovery Patterns -->
+      <div class="nav-section" data-section="recovery">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          <span>Recovery Patterns</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#recovery" class="nav-item">6 Recovery Strategies</a>
+          <a href="#circuit-breaker" class="nav-item">Circuit Breaker</a>
+        </div>
+      </div>
+
+      <!-- Decision Tree -->
+      <div class="nav-section" data-section="decision-tree">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Decision Tree</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#decision-tree" class="nav-item">Error to Recovery</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Critical Errors</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">The Horror Stories</a>
+        </div>
+      </div>
+
+      <!-- Mental Models -->
+      <div class="nav-section" data-section="mental-models">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="brain" class="w-4 h-4"></i>
+          <span>Mental Models</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#mental-models" class="nav-item">4 Frameworks</a>
+        </div>
+      </div>
+
+      <!-- Prevention -->
+      <div class="nav-section" data-section="prevention">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="shield" class="w-4 h-4"></i>
+          <span>Prevention</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#prevention" class="nav-item">Golden Rules</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Errors are either deterministic (fix once) or non-deterministic (layer defenses). Prevention beats recovery.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE TAXONOMY -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The 9 Error Categories
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Errors cluster into 9 families. Know the family, know the recovery."</div>
+
+          <table class="error-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Examples</th>
+                <th>Severity</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Context Window</strong></td>
+                <td>Overflow, rot, pollution, compaction loss</td>
+                <td class="severity-high">HIGH</td>
+              </tr>
+              <tr>
+                <td><strong>Merge/Version</strong></td>
+                <td>Parallel agent conflicts, destructive git ops</td>
+                <td class="severity-high">HIGH</td>
+              </tr>
+              <tr>
+                <td><strong>Validation</strong></td>
+                <td>False positives, features marked complete incorrectly</td>
+                <td class="severity-high">HIGH</td>
+              </tr>
+              <tr>
+                <td><strong>Rate Limit/API</strong></td>
+                <td>Rate limits, auth failures</td>
+                <td class="severity-medium">MEDIUM</td>
+              </tr>
+              <tr>
+                <td><strong>Infinite Loops</strong></td>
+                <td>Verification loops, exploration loops, Ralph runaway</td>
+                <td class="severity-critical">CRITICAL</td>
+              </tr>
+              <tr>
+                <td><strong>Cost/Resource</strong></td>
+                <td>Cost runaway ($47K incident), tool overhead</td>
+                <td class="severity-critical">CRITICAL</td>
+              </tr>
+              <tr>
+                <td><strong>Security</strong></td>
+                <td>File deletion, credentials exposure, path traversal</td>
+                <td class="severity-critical">CRITICAL</td>
+              </tr>
+              <tr>
+                <td><strong>Orchestration</strong></td>
+                <td>Recursive explosion, agent deadlock, error amplification</td>
+                <td class="severity-high">HIGH</td>
+              </tr>
+              <tr>
+                <td><strong>File System</strong></td>
+                <td>Partial write corruption, disk exhaustion</td>
+                <td class="severity-medium">MEDIUM</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="core-anchor">Each category has distinct symptoms, causes, and recovery patterns.</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="context-errors">Context Window Errors (Most Common)</h3>
+
+        <p class="text-text-secondary mb-6">
+          Context errors account for the majority of quality degradation. The 200K token window seems large, but quality degrades starting at 60-70% capacity.
+        </p>
+
+        <div class="error-box">
+          <div class="error-title">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+            Context Overflow (API Error 400)
+          </div>
+          <div class="error-detail"><strong>Symptom:</strong> API Error 400, truncated outputs, CLAUDE.md ignored</div>
+          <div class="error-detail"><strong>Threshold:</strong> 85-95% context = significant degradation, 95%+ = unrecoverable</div>
+          <div class="error-detail"><strong>Recovery:</strong> Session cannot continue. Save state, exit, start fresh.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Context Rot (Silent Quality Degradation)
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Responses become generic, errors compound, claims vs reality diverge</div>
+          <div class="gotcha-detail"><strong>Quote:</strong> "Beyond three turns, AI becomes unreliable without proper memory, summarization, and state handling."</div>
+          <div class="gotcha-detail"><strong>Recovery:</strong> /compact or fresh session. External memory (progress.txt) prevents recurrence.</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="validation-errors">Validation Errors (Most Dangerous)</h3>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="x-circle" class="w-4 h-4"></i>
+            Features Marked Complete Without Testing
+          </div>
+          <div class="hard-detail"><strong>Symptom:</strong> Tasks marked "done" without verification. No test output in logs. Features fail in production.</div>
+          <div class="hard-detail"><strong>Quote from Anthropic:</strong> "Claude's tendency to mark features complete without proper testing... did much better once explicitly prompted to use browser automation."</div>
+          <div class="hard-detail"><strong>Prevention:</strong> Always include exit code verification. Add Playwright for visual verification.</div>
+        </div>
+      </section>
+
+      <!-- Section 3: DETERMINISTIC VS NON-DETERMINISTIC -->
+      <section id="deterministic" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Deterministic vs Non-Deterministic
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">DETERMINISTIC FAILURES</div>
+          <div class="decision-reasoning">
+            Given the same inputs, these failures will occur every time. The cause is identifiable and reproducible.
+            Examples: Context overflow, rate limits, file deletion, merge conflicts, permission denied.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">Recovery Strategy</div>
+            <div class="text-text-secondary text-sm">
+              1. Identify exact trigger condition<br>
+              2. Fix root cause (not symptoms)<br>
+              3. Add prevention mechanism<br>
+              4. Verify fix by reproducing scenario
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">NON-DETERMINISTIC FAILURES</div>
+          <div class="decision-reasoning">
+            These failures may or may not occur given the same inputs. They depend on model state, timing, or accumulated context.
+            Examples: Quality degradation, false test passes, verification loops, memory injection.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">Recovery Strategy</div>
+            <div class="text-text-secondary text-sm">
+              1. Add multiple checkpoints<br>
+              2. Implement verification layers<br>
+              3. Use fresh context when possible<br>
+              4. Design for graceful degradation<br>
+              5. Accept some failure rate, plan for retry
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="severity-levels">Severity Levels and Response Times</h3>
+
+        <table class="error-table">
+          <thead>
+            <tr>
+              <th>Severity</th>
+              <th>Examples</th>
+              <th>Response Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="severity-critical">CRITICAL</td>
+              <td>Data loss, security breach, runaway costs ($47K loop)</td>
+              <td>IMMEDIATE - stop everything</td>
+            </tr>
+            <tr>
+              <td class="severity-high">HIGH</td>
+              <td>Context overflow, verification failures, infinite loops</td>
+              <td>Within minutes</td>
+            </tr>
+            <tr>
+              <td class="severity-medium">MEDIUM</td>
+              <td>Rate limits, config errors, quality degradation</td>
+              <td>Within session</td>
+            </tr>
+            <tr>
+              <td class="severity-low">LOW</td>
+              <td>Cosmetic warnings, minor performance issues</td>
+              <td>When convenient</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 4: RECOVERY PATTERNS -->
+      <section id="recovery" data-activity="recovery">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          6 Recovery Patterns
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Each pattern addresses a specific failure mode. Master these and you can recover from anything.
+        </p>
+
+        <div class="info-box">
+          <div class="info-title">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            Pattern 1: Restart with Fresh Context
+          </div>
+          <div class="info-detail"><strong>When:</strong> Context rot, quality degradation, API 400 errors</div>
+          <div class="info-detail"><strong>Key:</strong> Save state to files first. <code>git stash</code>, then exit, then restart.</div>
+          <div class="info-detail"><strong>Insight:</strong> "Fresh context beats accumulated context. When in doubt, start over."</div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            Pattern 2: Resume from External State
+          </div>
+          <div class="info-detail"><strong>When:</strong> Session interrupted, progress lost between iterations</div>
+          <div class="info-detail"><strong>Key:</strong> State lives in prd.json, progress.txt, git. Not in conversation.</div>
+          <div class="info-detail"><strong>Command:</strong> <code>cat prd.json | jq '.userStories[] | select(.passes == false)'</code></div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">
+            <i data-lucide="arrow-up" class="w-4 h-4"></i>
+            Pattern 3: Escalate to Simpler Model
+          </div>
+          <div class="info-detail"><strong>When:</strong> Complex task failing repeatedly, budget constraints</div>
+          <div class="info-detail"><strong>Key:</strong> Haiku fails -> Sonnet. Sonnet fails -> Opus. Opus fails -> Human.</div>
+          <div class="info-detail"><strong>Cost:</strong> Haiku $0.25/1M, Sonnet $3/1M, Opus $15/1M</div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">
+            <i data-lucide="scissors" class="w-4 h-4"></i>
+            Pattern 4: Decompose Further
+          </div>
+          <div class="info-detail"><strong>When:</strong> Task too complex, stuck loop (no commits for 3+ iterations)</div>
+          <div class="info-detail"><strong>Rule:</strong> If you can't describe it in 2-3 sentences, split it.</div>
+          <div class="info-detail"><strong>Size:</strong> 100-500 lines of code change per task. 1-3 files modified.</div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">
+            <i data-lucide="undo" class="w-4 h-4"></i>
+            Pattern 5: Rollback and Retry
+          </div>
+          <div class="info-detail"><strong>When:</strong> File corruption, wrong approach taken</div>
+          <div class="info-detail"><strong>Single file:</strong> <code>git checkout -- path/to/file.ts</code></div>
+          <div class="info-detail"><strong>Nuclear:</strong> <code>git reset --hard HEAD && git clean -fd</code></div>
+        </div>
+
+        <div id="circuit-breaker" class="info-box">
+          <div class="info-title">
+            <i data-lucide="power" class="w-4 h-4"></i>
+            Pattern 6: Circuit Breaker
+          </div>
+          <div class="info-detail"><strong>When:</strong> Preventing infinite loops, cost containment</div>
+          <div class="info-detail"><strong>Thresholds:</strong> Phase attempts: 3-5. Consecutive failures: 5. Error signature repeat: 3.</div>
+          <div class="info-detail"><strong>From Marathon Ralph:</strong> STOP_HOOK_ITERATIONS=25, CONSECUTIVE_FAILURES=5</div>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Circuit breaker implementation</span>
+STUCK_THRESHOLD=3
+<span class="keyword">if</span> [ "$CURRENT_COMMIT" = "$LAST_COMMIT" ]; <span class="keyword">then</span>
+  STUCK_COUNT=$((STUCK_COUNT + 1))
+  <span class="keyword">if</span> [ $STUCK_COUNT -ge $STUCK_THRESHOLD ]; <span class="keyword">then</span>
+    <span class="keyword">echo</span> <span class="string">"Circuit breaker triggered"</span>
+    <span class="keyword">exit</span> 1
+  <span class="keyword">fi</span>
+<span class="keyword">fi</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 5: DECISION TREE -->
+      <section id="decision-tree" data-activity="decision-tree">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Error to Recovery Mapping
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          This error, what do I do? Find your symptom, get your recovery.
+        </p>
+
+        <div class="decision-tree">ERROR ENCOUNTERED
+       |
+       v
+Is this an emergency? (data loss, runaway costs, security breach)
+       |                    |
+      YES                  NO
+       |                    |
+       v                    v
+EMERGENCY STOP         Identify error category
+pkill -f claude             |
+Check damage                v
+                   Is the error deterministic?
+                          |           |
+                         YES         NO
+                          |           |
+                          v           v
+                    Fix root     Add defense
+                    cause        layers
+                          |           |
+                          +-----+-----+
+                                |
+                                v
+                   Can you continue this session?
+                          |           |
+                         YES         NO
+                          |           |
+                          v           v
+                    Apply fix,   Save state,
+                    continue     fresh session</div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Quick Reference: Symptom to Recovery</h3>
+
+        <table class="error-table">
+          <thead>
+            <tr>
+              <th>Symptom</th>
+              <th>Category</th>
+              <th>Recovery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>"API Error 400"</td>
+              <td>Context Overflow</td>
+              <td>Restart fresh</td>
+            </tr>
+            <tr>
+              <td>Quality degrading</td>
+              <td>Context Rot</td>
+              <td>/compact or fresh</td>
+            </tr>
+            <tr>
+              <td>Same file edited 5+ times</td>
+              <td>Verification Loop</td>
+              <td>Decompose further</td>
+            </tr>
+            <tr>
+              <td>Tests pass but shouldn't</td>
+              <td>Validation</td>
+              <td>Add exit code check</td>
+            </tr>
+            <tr>
+              <td>$500+ bill unexpected</td>
+              <td>Cost Runaway</td>
+              <td>Circuit breaker, kill</td>
+            </tr>
+            <tr>
+              <td>rate_limit errors</td>
+              <td>Rate Limit</td>
+              <td>Exponential backoff</td>
+            </tr>
+            <tr>
+              <td>Files deleted</td>
+              <td>Security</td>
+              <td>git restore, add blocklist</td>
+            </tr>
+            <tr>
+              <td>Credentials visible</td>
+              <td>Security</td>
+              <td>ROTATE IMMEDIATELY</td>
+            </tr>
+            <tr>
+              <td>Agents spawning agents</td>
+              <td>Orchestration</td>
+              <td>Add worker preamble</td>
+            </tr>
+            <tr>
+              <td>Merge conflicts</td>
+              <td>Multi-Agent</td>
+              <td>Use git worktrees</td>
+            </tr>
+            <tr>
+              <td>No commits for 3+ iterations</td>
+              <td>Stuck Loop</td>
+              <td>Decompose or skip</td>
+            </tr>
+            <tr>
+              <td>Claude references non-existent files</td>
+              <td>Hallucination</td>
+              <td>Reset immediately</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 6: CRITICAL ERRORS (GOTCHAS) -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          The Horror Stories
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These actually happened. Learn from others' expensive mistakes.
+        </p>
+
+        <div class="error-box">
+          <div class="error-title">
+            <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+            The $47,000 Recursive Loop
+          </div>
+          <div class="error-detail"><strong>What happened:</strong> Multi-agent research tool slipped into recursive loop. Ran for 11 days before anyone noticed.</div>
+          <div class="error-detail"><strong>Total cost:</strong> $47,000 in API charges</div>
+          <div class="error-detail"><strong>Prevention:</strong> MAX_ITERATIONS always set. <code>timeout 3600 ./ralph.sh 50</code>. Cost monitoring dashboards.</div>
+        </div>
+
+        <div class="error-box">
+          <div class="error-title">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            Home Directory Deletion
+          </div>
+          <div class="error-detail"><strong>What happened:</strong> Claude executed <code>rm -rf tests/ patches/ plan/ ~/</code> - deleted user's entire home folder.</div>
+          <div class="error-detail"><strong>GitHub Issue:</strong> #17164</div>
+          <div class="error-detail"><strong>Prevention:</strong> Never use --dangerously-skip-permissions without blocklist. Add <code>rm -rf</code> to blocked patterns.</div>
+        </div>
+
+        <div class="error-box">
+          <div class="error-title">
+            <i data-lucide="database" class="w-4 h-4"></i>
+            Production Database Deletion
+          </div>
+          <div class="error-detail"><strong>What happened:</strong> Replit deleted production database containing 1,200+ executives' data.</div>
+          <div class="error-detail"><strong>Root cause:</strong> AI agent given too much access without proper safeguards.</div>
+          <div class="error-detail"><strong>Prevention:</strong> Never give production database credentials to AI agents. Use read-only replicas.</div>
+        </div>
+
+        <div class="error-box">
+          <div class="error-title">
+            <i data-lucide="hard-drive" class="w-4 h-4"></i>
+            Drive Deletion (Google Antigravity)
+          </div>
+          <div class="error-detail"><strong>What happened:</strong> <code>rmdir /s /q d:\</code> - Deleted entire D: drive.</div>
+          <div class="error-detail"><strong>Context:</strong> Internal Google test of code-generating AI.</div>
+          <div class="error-detail"><strong>Lesson:</strong> Sandbox all destructive operations. Never trust generated commands.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="key" class="w-4 h-4"></i>
+            Credentials in Context
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> API keys visible in conversation, .env contents displayed</div>
+          <div class="gotcha-detail"><strong>Root cause:</strong> No .claudeignore file. Sensitive files readable.</div>
+          <div class="gotcha-detail"><strong>Recovery:</strong> ROTATE ALL EXPOSED CREDENTIALS IMMEDIATELY. Add .claudeignore.</div>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># .claudeignore - REQUIRED for every project</span>
+.env*
+*.pem
+*.key
+credentials.json
+secrets/
+.aws/
+.ssh/
+*.keychain</pre>
+        </div>
+      </section>
+
+      <!-- Section 7: MENTAL MODELS -->
+      <section id="mental-models" data-activity="mental-models">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          Mental Models for Error Handling
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">THE CHECKPOINT CLIMBER</div>
+          <div class="decision-reasoning">
+            Mountain climbing with fixed checkpoints. Each checkpoint is a git commit. If you fall (error), you only fall back to the last checkpoint, not to the base.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">Application</div>
+            <div class="text-text-secondary text-sm">
+              Commit early and often. Each working state is a checkpoint. Rollback is cheap and fast.
+              Never climb too far without a checkpoint. "If something works, save it with a git commit."
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">THE CIRCUIT BREAKER</div>
+          <div class="decision-reasoning">
+            Electrical circuit breakers prevent house fires by cutting power when current exceeds safe levels.
+            Claude Code circuit breakers prevent cost fires by stopping execution when failures exceed safe levels.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">Application</div>
+            <div class="text-text-secondary text-sm">
+              CLOSED (normal) -> failures counted -> OPEN (protection) -> cooling period -> HALF-OPEN (testing) -> success? CLOSED.
+              Set failure thresholds before starting. When exceeded, stop immediately.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">THE IMMUNE SYSTEM</div>
+          <div class="decision-reasoning">
+            Your body has multiple layers of defense: skin, immune cells, antibodies, fever response.
+            Claude Code error handling should have multiple layers too.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">Defense in Depth</div>
+            <div class="text-text-secondary text-sm">
+              Layer 1: Prevention (.claudeignore, blocklist, CLAUDE.md)<br>
+              Layer 2: Detection (Claude HUD, stuck detection, cost monitoring)<br>
+              Layer 3: Response (circuit breakers, rollback, fresh context)<br>
+              Layer 4: Recovery (state restoration, resume capability)
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">THE ASSEMBLY LINE INSPECTOR</div>
+          <div class="decision-reasoning">
+            Factory assembly lines have quality inspectors at each station. They catch defects early before they compound.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">Application</div>
+            <div class="text-text-secondary text-sm">
+              Verify at each stage, not just at the end. Plan -> typecheck -> test -> integration -> deploy.
+              RULE: Never proceed to next stage with verification failure.
+              Small defects caught early = cheap. Large defects caught late = expensive.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 8: PREVENTION -->
+      <section id="prevention" data-activity="prevention">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          The 8 Golden Rules
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              DO THIS
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Rule 1:</strong> Fresh context beats extended sessions</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Rule 2:</strong> External state beats internal memory</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Rule 3:</strong> Verification is non-negotiable</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Rule 4:</strong> Iteration limits are insurance</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              NEVER DO THIS
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Whitelist <code>rm -rf</code></span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Whitelist <code>sudo *</code></span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Whitelist <code>git push --force</code></span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Run without MAX_ITERATIONS</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            Rule 5: Model Matching Saves Money
+          </div>
+          <div class="info-detail">"Haiku for lookups, Sonnet for code, Opus for architecture."</div>
+          <div class="info-detail">Using Opus for file searches is 60x more expensive than Haiku.</div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">
+            <i data-lucide="git-branch" class="w-4 h-4"></i>
+            Rule 6: Isolation Prevents Chaos
+          </div>
+          <div class="info-detail">"Worktrees for parallel agents."</div>
+          <div class="info-detail">Multiple agents on same files = merge conflict hell.</div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+            Rule 7: Permissions Prevent Disasters
+          </div>
+          <div class="info-detail">"Blocklist destructive commands."</div>
+          <div class="info-detail">Never whitelist rm -rf, sudo, or git push --force.</div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">
+            <i data-lucide="archive" class="w-4 h-4"></i>
+            Rule 8: Backups Save Careers
+          </div>
+          <div class="info-detail">"Git commit often. Stash before experiments."</div>
+          <div class="info-detail">Every checkpoint is a potential recovery point.</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Pre-Session Checklist</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">Git working directory clean or stashed? <code>git status</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">On dedicated branch (not main/master)?</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><code>.claudeignore</code> excludes sensitive files?</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><code>CLAUDE.md</code> updated with current context?</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Dangerous commands blocked in permissions?</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">MAX_ITERATIONS set for automation?</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Correct model selected for task complexity?</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Cost monitoring dashboard accessible?</div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible error handling core</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Essential:</strong> Know if deterministic or not. Know severity.<br>
+          <strong>Deterministic:</strong> Fix root cause once.<br>
+          <strong>Non-deterministic:</strong> Layer defenses.<br>
+          Everything else is refinement.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">All error handling shares INV-003</div>
+        <div class="text-text-secondary text-sm">
+          INV-003: External state > internal memory.<br>
+          <strong>Why this matters:</strong> Errors erase context. External state survives errors. progress.txt, prd.json, git all exist because of this invariant.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">$47,000 over 11 days</div>
+        <div class="text-text-secondary text-sm">
+          Multi-agent research tool. Recursive loop. No iteration limits. No cost monitoring. "Before anyone noticed."<br>
+          <strong>Lesson:</strong> MAX_ITERATIONS is not optional.
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How context degrades invisibly</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-50%:</strong> Full capability<br>
+          <strong>50-70%:</strong> Slight degradation possible<br>
+          <strong>70-85%:</strong> Noticeable quality loss<br>
+          <strong>85-95%:</strong> Significant degradation<br>
+          <strong>95%+:</strong> Unrecoverable<br><br>
+          <em>The gradient is invisible until the cliff.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="core">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your error taxonomy understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What errors exist?" -> 9 categories<br>
+          <strong>Intermediate:</strong> "Deterministic?" -> Recovery strategy<br>
+          <strong>Advanced:</strong> "How do they compound?" -> Multi-layer defense<br>
+          <strong>Staff:</strong> "Cross-pattern errors?" -> Orchestration-specific<br>
+          <strong>Expert:</strong> "Error economics?" -> Cost per error type
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Error Categories = HTTP Status Codes</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Context errors</strong> -> 5xx (server errors)<br>
+          <strong>Validation errors</strong> -> 4xx (client errors)<br>
+          <strong>Rate limits</strong> -> 429 Too Many Requests<br>
+          <strong>Security</strong> -> 401/403 (auth failures)<br><br>
+          <em>If you know HTTP, you know error families.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Error amplification at scale</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Independent agents:</strong> 17.2x error amplification<br>
+          <strong>Centralized coordination:</strong> 4.4x error amplification<br><br>
+          <em>Hub-and-spoke (CC Mirror) contains errors better than mesh.</em>
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Deterministic/Non-deterministic -> Recovery Strategy</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Error type determines recovery approach<br>
+          -> Deterministic: Same input, same failure<br>
+          -> Fix root cause once, add guardrails<br>
+          -> Non-deterministic: Probabilistic failures<br>
+          -> Layer defenses, accept some failure rate<br>
+          -> Recovery strategy flows from classification
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if all errors were deterministic?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Single fix per error. No defense layers. No monitoring.<br>
+          <strong>Why this fails:</strong> LLM outputs are probabilistic. Context state is invisible.<br>
+          <strong>Hidden constraint:</strong> Non-determinism requires defense-in-depth.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Speed vs Safety</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Fast:</strong> --dangerously-skip-permissions. High throughput. High risk.<br>
+          <strong>Safe:</strong> Every command verified. Low throughput. Low risk.<br>
+          <strong>Balanced:</strong> Blocklist dangerous, whitelist common.<br><br>
+          <em>Match safety level to consequence severity.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="decisions">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How severity perception changes</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Session 1:</strong> "Context overflow is annoying"<br>
+          <strong>Session 10:</strong> "Context management is critical"<br>
+          <strong>Session 50:</strong> "Fresh context is default, extended is exception"<br>
+          <strong>Production:</strong> "Cost runaway is existential threat"
+        </div>
+      </div>
+
+      <!-- RECOVERY SECTION -->
+      <div class="activity-item violation" data-section="recovery">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip verification...</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip exit code check<br>
+          <strong>THEN:</strong> False positives go undetected<br>
+          <strong>THEN:</strong> Broken code marked complete<br>
+          <strong>THEN:</strong> Future iterations inherit broken foundation<br>
+          <strong>FINALLY:</strong> 20 bad commits by morning<br><br>
+          <em>One unverified task poisons all future iterations.</em>
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="recovery">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Circuit Breaker + Ralph</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Prevents $47K runaway scenarios.<br>
+          <strong>Implementation:</strong> MAX_ITERATIONS, STUCK_THRESHOLD, timeout.<br>
+          <strong>Danger:</strong> Thresholds too tight = premature stops. Too loose = too late.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="recovery">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Recovery pattern understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What patterns exist?" -> 6 patterns<br>
+          <strong>Intermediate:</strong> "Which for my error?" -> Match by symptom<br>
+          <strong>Advanced:</strong> "Can I combine?" -> Circuit breaker + decompose<br>
+          <strong>Staff:</strong> "When to escalate?" -> Model escalation ladder<br>
+          <strong>Expert:</strong> "Recovery economics?" -> Cost per pattern
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="recovery">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Marathon Ralph circuit breakers</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Thresholds:</strong> VERIFY=3, PLAN=3, CODE=3, TEST=5, QA=5<br>
+          <strong>Global:</strong> CONSECUTIVE_FAILURES=5, STOP_HOOK=25<br>
+          <strong>Result:</strong> Autonomous overnight runs without runaway.
+        </div>
+      </div>
+
+      <!-- DECISION TREE SECTION -->
+      <div class="activity-item analogy" data-section="decision-tree">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Decision Tree = Triage Protocol</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Emergency?</strong> -> STOP (like ER triage)<br>
+          <strong>Deterministic?</strong> -> Fix root cause (like diagnosis)<br>
+          <strong>Recoverable?</strong> -> Continue/restart (like treatment plan)<br><br>
+          <em>Medical triage thinking applies to error handling.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="decision-tree">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">All recoveries share state preservation</div>
+        <div class="text-text-secondary text-sm">
+          Every recovery pattern starts with: "Save state."<br>
+          <code>git stash</code>, <code>progress.txt</code>, <code>prd.json</code>.<br>
+          <strong>Why:</strong> INV-003 (external state > internal memory) enables all recovery.
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="decision-tree">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When to stop vs continue</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-2 failures:</strong> Retry with different approach<br>
+          <strong>3 failures:</strong> Decompose the task<br>
+          <strong>5 failures:</strong> Circuit breaker triggers<br>
+          <strong>5+ consecutive:</strong> Stop entire run<br><br>
+          <strong>THE INFLECTION:</strong> 3 failures = change approach, not retry
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="decision-tree">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal circuit breaker thresholds</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> What's the optimal STUCK_THRESHOLD per task type?<br>
+          <strong>Why hard:</strong> Task complexity varies. Codebase familiarity varies.<br>
+          <strong>Current:</strong> 3-5 for most phases. Manual tuning per project.
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item violation" data-section="gotchas">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you use --dangerously-skip-permissions without blocklist...</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> No blocklist for destructive commands<br>
+          <strong>THEN:</strong> rm -rf can execute<br>
+          <strong>THEN:</strong> One bad prompt = home directory gone<br>
+          <strong>THEN:</strong> No recovery possible without backups<br>
+          <strong>FINALLY:</strong> GitHub Issue #17164
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">3.2 million tokens on circular revisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Context:</strong> Claude editing same files repeatedly<br>
+          <strong>Root cause:</strong> Verification loop without circuit breaker<br>
+          <strong>Cost:</strong> Significant, discovered after hours<br>
+          <strong>Prevention:</strong> Track error signatures. Stop on repeat.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if Claude had no file system access?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> All outputs via API responses. No destructive operations possible.<br>
+          <strong>Why this fails:</strong> Can't actually develop software without file access.<br>
+          <strong>Hidden constraint:</strong> Power requires guardrails. Blocklists are the tradeoff.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Security incidents at scale</div>
+        <div class="text-text-secondary text-sm">
+          <strong>35%</strong> of security incidents from simple prompts<br>
+          <strong>87%</strong> of downstream decisions poisoned by single compromised agent (in 4 hours)<br><br>
+          <em>One breach propagates fast through multi-agent systems.</em>
+        </div>
+      </div>
+
+      <!-- MENTAL MODELS SECTION -->
+      <div class="activity-item analogy" data-section="mental-models">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Mental Models = Thinking Tools</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Checkpoint Climber:</strong> Git as safety rope<br>
+          <strong>Circuit Breaker:</strong> Electrical safety for code<br>
+          <strong>Immune System:</strong> Layered defense<br>
+          <strong>Assembly Line:</strong> Verify at each stage<br><br>
+          <em>Physical world metaphors map to digital error handling.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="mental-models">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Defense in depth constraint cascade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Single point of failure = system failure<br>
+          -> Layer 1: Prevention must exist<br>
+          -> Layer 2: Detection must exist<br>
+          -> Layer 3: Response must exist<br>
+          -> Layer 4: Recovery must exist<br>
+          -> Each layer catches what previous missed
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="mental-models">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How mental model value changes</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "These are just metaphors"<br>
+          <strong>Week 1:</strong> "Checkpoint climber saved my work"<br>
+          <strong>Month 1:</strong> "Circuit breaker saved $1000"<br>
+          <strong>Quarter 1:</strong> "Defense in depth is how I think about everything"
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="mental-models">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Immune System + Circuit Breaker</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Immune system provides layers. Circuit breaker provides thresholds.<br>
+          <strong>Together:</strong> Each layer has its own circuit breaker. Threshold per defense level.
+        </div>
+      </div>
+
+      <!-- PREVENTION SECTION -->
+      <div class="activity-item minimal" data-section="prevention">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">Minimum viable prevention</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Essential:</strong> .claudeignore (security), blocklist (safety), CLAUDE.md (context)<br>
+          <strong>Everything else:</strong> Refinement for reliability.<br>
+          These three prevent 80% of catastrophic errors.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="prevention">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">8 Golden Rules share one root</div>
+        <div class="text-text-secondary text-sm">
+          All 8 rules derive from: "Prevention beats recovery."<br>
+          <strong>Cost of prevention:</strong> Minutes to configure.<br>
+          <strong>Cost of recovery:</strong> Hours to days. Sometimes impossible.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="prevention">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If prevention fails</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Context overflow?</strong> -> Fresh context pattern<br>
+          <strong>Security breach?</strong> -> Rotate, restore, add blocklist<br>
+          <strong>Cost runaway?</strong> -> Kill, budget cap, review thresholds<br>
+          <strong>Data loss?</strong> -> git restore (if committed)
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="prevention">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Paranoia vs Productivity</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Max paranoia:</strong> Verify everything. Slow. Expensive. Safe.<br>
+          <strong>Max productivity:</strong> Skip verification. Fast. Cheap. Risky.<br>
+          <strong>Balance:</strong> Verify critical paths. Trust verified patterns.<br><br>
+          <em>Match verification depth to consequence severity.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="prevention">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Prevention maturity levels</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What should I configure?" -> .claudeignore, blocklist<br>
+          <strong>Intermediate:</strong> "What's my checklist?" -> 8-point pre-session<br>
+          <strong>Advanced:</strong> "How do I automate?" -> Pre-commit hooks<br>
+          <strong>Staff:</strong> "Team-wide prevention?" -> Shared configs<br>
+          <strong>Expert:</strong> "Organization-wide?" -> Policy as code
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Track which sections are in view
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

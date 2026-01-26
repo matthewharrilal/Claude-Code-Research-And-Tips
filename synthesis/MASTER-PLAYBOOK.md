@@ -6,6 +6,10 @@
 
 ---
 
+> **You Are Here:** This is the **master entry point** for learning Claude Code orchestration. If you're overwhelmed by options, context problems, or don't know which pattern to use - start here. This playbook provides the complete progression from single sessions (Level 0) to factory-scale autonomous development (Level 7), with clear milestones at each stage.
+
+---
+
 ## D-FINAL Integration
 
 **Relationship:** This playbook serves as the **user journey entry point** - a guided progression through Claude Code mastery. D-FINAL serves as the **production reference manual** - comprehensive technical documentation for implementation and operations.
@@ -229,6 +233,19 @@ git commit
 - Structured task definitions (JSON)
 - Clear acceptance criteria
 - Hooks for notifications
+
+---
+
+### Checkpoint: Core Principles
+
+**You should now understand:**
+- [ ] Why context is THE primary constraint (Principle 1)
+- [ ] Why external state beats internal memory (Principle 2)
+- [ ] Why fresh context beats extended sessions (Principle 3)
+- [ ] The Iron Law of orchestrator/worker separation (Principle 4)
+- [ ] Why atomic, verifiable tasks matter (Principles 5-6)
+
+**If unclear:** Re-read Principles 1-4 above, or see [architecture-complexity-ladder.md](./architecture-complexity-ladder.md) for visual diagrams.
 
 ---
 
@@ -999,6 +1016,20 @@ Gas Town Factory
 
 ---
 
+### Checkpoint: Your Progression Level
+
+**Identify your current level:**
+- [ ] Level 0-1: You manually babysit sessions, re-explain context each time
+- [ ] Level 2-3: You use CLAUDE.md and have tried subagents or basic loops
+- [ ] Level 4-5: You use PRDs with verification, experimenting with multi-agent
+- [ ] Level 6-7: You run parallel worktrees, considering factory-scale
+
+**Your next step:** Focus on the level JUST above where you are now. Don't skip levels.
+
+**If unclear:** See [architecture-complexity-ladder.md](./architecture-complexity-ladder.md) for detailed level descriptions.
+
+---
+
 # Part 3: Deep Pattern Mastery
 
 *Go deep on the patterns that matter most.*
@@ -1135,6 +1166,43 @@ echo "Max iterations reached"
 | **HOTL Ralph** | Human review between | Security-sensitive |
 | **Compounding Ralph** | Archives past runs | Long-term projects |
 | **Parallel Ralph** | Git worktrees | Multi-feature overnight |
+
+### Terminal Output: Successful Ralph Run
+
+```
+$ ./ralph.sh 25
+=== Iteration 1 ===
+Reading prd.json...
+Task: US-001 - Create login form
+Running typecheck... PASS
+Running tests... PASS
+Committing: feat(auth): Add login form component
+=== Iteration 2 ===
+Reading prd.json...
+Task: US-002 - Add Zod validation
+Running typecheck... PASS
+Running tests... PASS
+Committing: feat(auth): Add Zod email validation
+=== Iteration 3 ===
+Reading prd.json...
+All tasks complete!
+<promise>COMPLETE</promise>
+Done!
+$
+```
+
+---
+
+### Checkpoint: Ralph Pattern Mastery
+
+**You should now understand:**
+- [ ] The core Ralph loop (`while :; do cat PROMPT.md | claude ; done`)
+- [ ] Why fresh context per iteration beats long sessions
+- [ ] How prd.json, progress.txt, and prompt.md work together
+- [ ] The 2-3 sentence rule for task sizing
+- [ ] Which Ralph variant to use for which situation
+
+**If unclear:** See [mastery-ralph-complete.md](./mastery-ralph-complete.md) for deep dive.
 
 ---
 
@@ -1714,6 +1782,156 @@ done
 ║  An agent that ORCHESTRATES must NEVER directly EXECUTE.  ║
 ║  An agent that EXECUTES must NEVER directly ORCHESTRATE.  ║
 ╚═══════════════════════════════════════════════════════════╝
+```
+
+---
+
+---
+
+## Troubleshooting
+
+### Common Issue: Ralph Loop Stuck (Same Commit Repeated)
+
+**Symptom:** Loop runs but same task repeats, no progress, iteration counter increases without new commits.
+
+**Cause:** Usually one of:
+1. Task acceptance criteria can't be met
+2. prd.json not being updated after pass
+3. Prompt doesn't instruct to mark `passes: true`
+
+**Fix:**
+```bash
+# Check the prd.json - is passes still false after commits?
+cat scripts/ralph/prd.json | jq '.userStories[] | {id, passes}'
+
+# Check progress.txt - is it growing?
+wc -l scripts/ralph/progress.txt
+
+# If stuck, manually mark the task as passed and restart
+```
+
+**Terminal output when stuck:**
+```
+=== Iteration 5 ===
+Task: US-001 - Create login form   # <-- Same task as iteration 4!
+Running typecheck... PASS
+Running tests... PASS
+Committing: feat(auth): Add login form component  # Duplicate commit
+=== Iteration 6 ===
+Task: US-001 - Create login form   # <-- Still stuck!
+```
+
+---
+
+### Common Issue: Context Degradation Mid-Session
+
+**Symptom:** Claude "forgets" earlier decisions, contradicts itself, quality drops noticeably.
+
+**Cause:** Context window filling (usually 60-70%+ usage). Long sessions accumulate noise.
+
+**Fix:**
+1. Check context usage: Look for "context" warnings in Claude's output
+2. Use `/clear` to reset context in interactive sessions
+3. Switch to Ralph pattern (fresh context per iteration)
+4. Move learnings to external files (progress.txt, CLAUDE.md)
+
+**Prevention:**
+```bash
+# In settings.json, enable context warnings:
+{
+  "contextWarnings": true
+}
+```
+
+---
+
+### Common Issue: Subagent Inherits Polluted Context
+
+**Symptom:** Subagent starts confused, makes errors based on earlier (irrelevant) context.
+
+**Cause:** Default subagent spawning inherits parent context.
+
+**Fix:** Use git worktrees for true isolation:
+```bash
+# Create isolated worktree for subagent work
+git worktree add ../feature-worktree feature-branch
+
+# Run subagent in isolated directory
+cd ../feature-worktree && claude "Your task..."
+```
+
+---
+
+### Common Issue: Tests Pass Locally but Agent Claims Failure
+
+**Symptom:** You run `npm test` manually and it passes, but Ralph marks task as failed.
+
+**Cause:** Usually environment differences - agent runs in different working directory or missing env vars.
+
+**Fix:**
+```bash
+# Check working directory in ralph.sh
+echo "Running from: $(pwd)"
+
+# Ensure npm commands run from project root
+cd "$SCRIPT_DIR/../.." && npm run typecheck
+```
+
+---
+
+### Common Issue: Progress.txt Gets Overwritten (Learnings Lost)
+
+**Symptom:** progress.txt has same content each iteration, historical learnings missing.
+
+**Cause:** Prompt says "write" instead of "append" to progress.txt.
+
+**Fix:** Use explicit language in prompt.md:
+```markdown
+APPEND to progress.txt (NEVER overwrite or replace existing content):
+## [Date] - [Task ID]
+- What was implemented
+- What was learned
+```
+
+---
+
+### Common Issue: Runaway Costs ($47,000 Problem)
+
+**Symptom:** Agent keeps running, costs escalating, no completion in sight.
+
+**Cause:** Missing iteration limits, recursive loops, or missing stop conditions.
+
+**Fix:**
+1. Always set MAX_ITERATIONS in ralph.sh
+2. Add cost monitoring hooks
+3. Set up ntfy/push notifications for long runs
+
+```bash
+# Add cost cap check to ralph.sh
+if [ "$COST" -gt "$MAX_COST" ]; then
+    echo "Cost cap exceeded!"
+    curl -d "Ralph cost cap exceeded: $COST" ntfy.sh/your-topic
+    exit 1
+fi
+```
+
+---
+
+### Common Issue: Multi-Agent Coordination Failures
+
+**Symptom:** Orchestrator and workers get out of sync, tasks done twice or not at all.
+
+**Cause:** Unclear task ownership, missing status updates, no single source of truth.
+
+**Fix:**
+1. Use centralized task tracking (prd.json or Beads)
+2. Orchestrator owns all task state changes
+3. Workers report completion, don't mark their own tasks done
+
+**Architecture check:**
+```
+Orchestrator: Creates tasks, updates status
+Workers: Execute tasks, REPORT results (don't update prd.json)
 ```
 
 ---

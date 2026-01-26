@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Context Management: Complete Mastery Guide
 
+> **You Are Here:** This is a DEPRECATED document - the content has been moved to D-FINAL synthesis. For current context management guidance, see `synthesis/technical-context-management-advanced.md` or the D-FINAL documents. This file is preserved for reference only.
+
 **Status:** Definitive Reference
 **Synthesized:** 2026-01-09
 **Sources:** 40+ research extractions from Claude Code power users, Anthropic documentation, and community patterns

@@ -83,8 +83,8 @@ The Main Panel should weave these together, not separate them into "theory" and 
 ```
 ┌──────────┬─────────────────────────────────────────┬────────────────────────────────┐
 │ LEFT NAV │           MAIN PANEL                    │      ACTIVITY ZONE             │
-│  240px   │           (flexible, largest)           │        (~400-450px)            │
-│          │                                         │   (larger than nav)            │
+│  240px   │           (flexible, largest)           │    480px (resizable 280-900px) │
+│  fixed   │           margin-based                  │   fixed, user-resizable        │
 │  "Where  │     "What is this? (DEEP)"              │   "Operational intelligence"   │
 │   am I?" │                                         │                                │
 │  STABLE  │     Philosophy + Implementation         │   Cross-pattern reasoning      │
@@ -92,7 +92,7 @@ The Main Panel should weave these together, not separate them into "theory" and 
 └──────────┴─────────────────────────────────────────┴────────────────────────────────┘
 ```
 
-**Key change:** Activity Zone is now ~400-450px (was 280px) to accommodate deeper operational content. Still smaller than Main Panel to maintain focus hierarchy.
+**Key change:** Activity Zone is now 480px default (was 280px), resizable 280-900px to accommodate deeper operational content. Still smaller than Main Panel to maintain focus hierarchy. User resize preference persists to localStorage.
 
 ---
 

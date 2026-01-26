@@ -1,0 +1,2086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debugging Agent Failures | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Case Study Box */
+    .case-study-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .case-study-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .case-study-detail {
+      font-size: 14px;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    /* Decision Tree Box */
+    .decision-tree {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #3f3f46;
+      overflow-x: auto;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Category Table */
+    .category-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .category-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .category-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .category-table tr:hover td {
+      background: #fafafa;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Debugging Agent Failures</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>OHIV Framework</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">Observe-Hypothesize-Isolate-Verify</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Five Failure Categories</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#category-context" class="nav-item">Context Failures</a>
+          <a href="#category-state" class="nav-item">State Failures</a>
+          <a href="#category-coordination" class="nav-item">Coordination Failures</a>
+          <a href="#category-verification" class="nav-item">Verification Failures</a>
+          <a href="#category-resource" class="nav-item">Resource Failures</a>
+        </div>
+      </div>
+
+      <!-- Tool Selection -->
+      <div class="nav-section" data-section="tools">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="wrench" class="w-4 h-4"></i>
+          <span>Tool Selection</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#tools" class="nav-item">Tool Matrix</a>
+        </div>
+      </div>
+
+      <!-- Decision Trees -->
+      <div class="nav-section" data-section="decision-trees">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Decision Trees</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#decision-trees" class="nav-item">Quick Diagnosis</a>
+        </div>
+      </div>
+
+      <!-- Case Studies -->
+      <div class="nav-section" data-section="case-studies">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+          <span>Case Studies</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#case-studies" class="nav-item">Production Failures</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Debug -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Debug</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Debug vs. Restart</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Agent failures are systematic, not random. OHIV framework: Observe, Hypothesize, Isolate, Verify.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The OHIV Framework
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Every failure follows a pattern. Understanding the pattern allows you to predict, diagnose, and prevent failures."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'OBSERVE → HYPOTHESIZE → ISOLATE → VERIFY')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>OBSERVE → HYPOTHESIZE → ISOLATE → VERIFY</code>
+          </div>
+
+          <div class="core-anchor">That's the debugging workflow. Everything else is application.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          <strong>OBSERVE:</strong> Gather all available evidence before making assumptions. What did you expect? What actually happened? When did behavior change?
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          <strong>HYPOTHESIZE:</strong> Form a specific, testable hypothesis. Good hypotheses are specific ("context exceeded 80%"), testable (verify with one check), and actionable (if true, you know what to do).
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          <strong>ISOLATE:</strong> Narrow down to the specific failure point. Use binary search (divide timeline), component isolation (test each part), or minimal reproduction (smallest failing case).
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          <strong>VERIFY:</strong> Confirm the fix actually resolves the issue. Tests pass, types check, behavior correct, no regressions. Only mark resolved when ALL verification passes.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Quick Diagnosis Checklist</span>
+git status                              <span class="comment"># Check git state</span>
+git log --oneline -5                    <span class="comment"># Recent changes</span>
+git diff HEAD~1                         <span class="comment"># What changed</span>
+
+npm test 2>&1 | tail -20                <span class="comment"># Run verification</span>
+<span class="keyword">echo</span> <span class="string">"Exit code: $?"</span>
+
+cat progress.txt | tail -30             <span class="comment"># Check progress state</span>
+cat prd.json | jq '.userStories[] | {id, passes}'
+
+grep -i <span class="string">"error\|failed\|exception"</span> output.txt | tail -20</pre>
+        </div>
+      </section>
+
+      <!-- Section 3: THE FIVE FAILURE CATEGORIES -->
+      <section id="category-context" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          The Five Failure Categories
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          80% of failures come from three sources: context exhaustion, missing verification, and vague instructions. The remaining 20% involves multi-agent coordination, platform bugs, and edge cases.
+        </p>
+
+        <div class="decision-box">
+          <div class="decision-why">1. CONTEXT FAILURES</div>
+          <div class="decision-reasoning">
+            Token exhaustion, quality degradation, instruction amnesia, hallucination under pressure. This is the #1 category. Context window (~200K tokens) is the primary constraint.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Monitor context usage. At 60-70%, compact proactively. At 85%+, reset. Quality degrades BEFORE you hit the limit. Use Claude HUD or watch for symptoms: repetition, amnesia, hallucination.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="category-state">
+          <div class="decision-why">2. STATE FAILURES</div>
+          <div class="decision-reasoning">
+            Memory not persisting, state divergence, progress overwriting, stale context injection. If it's not in a file, it doesn't exist. Each iteration has fresh context - external state IS memory.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use progress.txt (append-only), prd.json (task tracking), and git commits as external memory. Never rely on "Claude remembering" something from earlier in the session.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="category-coordination">
+          <div class="decision-why">3. COORDINATION FAILURES</div>
+          <div class="decision-reasoning">
+            Role confusion (orchestrator writes code), recursive explosion (workers spawn workers), deadlock between agents, error amplification. Research shows independent agents amplify errors 17.2x vs 4.4x with centralized coordination.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use worker preambles: "You are a WORKER agent. Do NOT spawn sub-agents." Use hub-and-spoke (CC Mirror) over fully independent. Verify at every handoff point.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="category-verification">
+          <div class="decision-why">4. VERIFICATION FAILURES</div>
+          <div class="decision-reasoning">
+            False positive test results, optimistic completion marking, missing integration tests, visual verification gaps. Claude tends to mark features complete without proper testing.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Require explicit verification in acceptance criteria: "npm run typecheck passes", "npm test passes with exit code 0", "Verify at localhost:3000 using browser". Never trust "done" without evidence.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="category-resource">
+          <div class="decision-why">5. RESOURCE FAILURES</div>
+          <div class="decision-reasoning">
+            Cost runaway, rate limiting, infinite loops, destructive operations. A multi-agent research tool ran for 11 days without notice, accumulating $47,000 in costs.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Always set MAX_ITERATIONS and timeouts. Block destructive commands (rm -rf, git push --force). Set budget limits in Anthropic console. Monitor costs in real-time.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: TOOL SELECTION -->
+      <section id="tools" data-activity="tools">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Tool Selection Matrix
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Different failure types require different tools. Match the tool to the symptom for fastest resolution.
+        </p>
+
+        <table class="category-table">
+          <thead>
+            <tr>
+              <th>Failure Type</th>
+              <th>Primary Tool</th>
+              <th>When to Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Context overflow</td>
+              <td><code>/compact</code>, <code>/reset</code></td>
+              <td>Quality degradation, amnesia</td>
+            </tr>
+            <tr>
+              <td>Runaway costs</td>
+              <td>Anthropic Dashboard, <code>pkill -f claude</code></td>
+              <td>Unexpected bills, long runs</td>
+            </tr>
+            <tr>
+              <td>Test failures</td>
+              <td><code>npm test</code>, exit codes</td>
+              <td>Code not working</td>
+            </tr>
+            <tr>
+              <td>Type errors</td>
+              <td><code>npm run typecheck</code></td>
+              <td>Type mismatches</td>
+            </tr>
+            <tr>
+              <td>File corruption</td>
+              <td><code>git checkout</code>, <code>git stash</code></td>
+              <td>Unexpected changes</td>
+            </tr>
+            <tr>
+              <td>Loop detection</td>
+              <td>progress.txt, git log</td>
+              <td>No progress for 3+ iterations</td>
+            </tr>
+            <tr>
+              <td>Multi-agent conflicts</td>
+              <td><code>git worktree</code></td>
+              <td>Parallel agent conflicts</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Context Management Tools</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Context monitoring thresholds</span>
+<span class="comment"># 60-70%: Yellow warning - consider compacting</span>
+<span class="comment"># 70-85%: Orange warning - compact recommended</span>
+<span class="comment"># 85-95%: Red warning - compact required</span>
+<span class="comment"># 95%+:   Critical - session degraded</span>
+
+/compact                <span class="comment"># Reduce context without reset</span>
+/reset                  <span class="comment"># Full context clear</span>
+
+<span class="comment"># Kill runaway processes</span>
+pkill -f claude         <span class="comment"># Graceful</span>
+pkill -9 -f claude      <span class="comment"># Force</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Git Recovery Tools</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Check current state</span>
+git status
+git diff HEAD
+
+<span class="comment"># Discard all unstaged changes</span>
+git checkout -- .
+
+<span class="comment"># Discard specific file</span>
+git checkout -- path/to/file.ts
+
+<span class="comment"># Save current state for later</span>
+git stash push -m <span class="string">"description"</span>
+
+<span class="comment"># Restore saved state</span>
+git stash pop
+
+<span class="comment"># Find which commit broke something</span>
+git bisect start
+git bisect bad              <span class="comment"># Current is broken</span>
+git bisect good HEAD~10     <span class="comment"># This was working</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 5: DECISION TREES -->
+      <section id="decision-trees" data-activity="decision-trees">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Decision Trees for Quick Diagnosis
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          When something breaks, use these decision trees to quickly identify the root cause and appropriate fix.
+        </p>
+
+        <div class="decision-tree">
+What's the symptom?
+|
++-- Quality degradation, amnesia, hallucinations
+|   +-- TOOL: Context management (/compact, /reset, Claude HUD)
+|
++-- Unexpected costs, long-running processes
+|   +-- TOOL: Cost monitoring (Dashboard, pkill)
+|
++-- Tests failing, code broken
+|   +-- TOOL: Git tools (diff, checkout, stash)
+|
++-- Agent stuck, no progress
+|   +-- TOOL: Loop detection (progress.txt, git log)
+|
++-- Permission errors, blocked operations
+|   +-- TOOL: Permission management (/permissions)
+|
++-- Multiple agents conflicting
+    +-- TOOL: Git worktree, merge tools
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Quick Reference: Symptom to Fix</h3>
+
+        <table class="category-table">
+          <thead>
+            <tr>
+              <th>Error Symptom</th>
+              <th>Most Likely Cause</th>
+              <th>Quick Fix</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Quality degrading</td>
+              <td>Context exhaustion</td>
+              <td><code>/compact</code> or <code>/reset</code></td>
+            </tr>
+            <tr>
+              <td>Instructions ignored</td>
+              <td>Context pressure</td>
+              <td>Restart session</td>
+            </tr>
+            <tr>
+              <td>Files hallucinated</td>
+              <td>Context overflow</td>
+              <td>Reset session</td>
+            </tr>
+            <tr>
+              <td>Tasks never complete</td>
+              <td>No completion criteria</td>
+              <td>Add <code>passes</code> tracking</td>
+            </tr>
+            <tr>
+              <td>Same error 3+ times</td>
+              <td>Task too complex</td>
+              <td>Split into smaller tasks</td>
+            </tr>
+            <tr>
+              <td>Costs spiking</td>
+              <td>Runaway loop</td>
+              <td><code>pkill -f claude</code></td>
+            </tr>
+            <tr>
+              <td>Workers spawning workers</td>
+              <td>Missing preamble</td>
+              <td>Add worker restrictions</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 6: CASE STUDIES -->
+      <section id="case-studies" data-activity="case-studies">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Case Studies from Production
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real failures from production systems. Learn from others' mistakes.
+        </p>
+
+        <div class="case-study-box">
+          <div class="case-study-title">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500"></i>
+            Case Study: The $47,000 Recursive Loop
+          </div>
+          <div class="case-study-detail">
+            <strong>What happened:</strong> A multi-agent research tool slipped into a recursive loop that ran for 11 days before anyone noticed, accumulating $47,000 in API costs.
+          </div>
+          <div class="case-study-detail">
+            <strong>Root cause:</strong> Agents misinterpreted uncertainty as failure, triggering correction attempts that created new uncertainties, forming a self-reinforcing loop with no exit condition.
+          </div>
+          <div class="case-study-detail">
+            <strong>Prevention:</strong> Always set MAX_ITERATIONS=25, budget limits in console, daily cost alerts, stuck detection (exit if no commit for 3+ iterations), and timeouts.
+          </div>
+        </div>
+
+        <div class="case-study-box">
+          <div class="case-study-title">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500"></i>
+            Case Study: The Home Directory Deletion
+          </div>
+          <div class="case-study-detail">
+            <strong>What happened:</strong> Claude executed <code>rm -rf tests/ patches/ plan/ ~/</code> - that trailing <code>~/</code> deleted the user's entire home folder.
+          </div>
+          <div class="case-study-detail">
+            <strong>Root cause:</strong> User had --dangerously-skip-permissions enabled with no blocklist for rm -rf patterns.
+          </div>
+          <div class="case-study-detail">
+            <strong>Prevention:</strong> Block destructive commands: rm -rf, rm -r, find . -delete, sudo rm, git push --force, git reset --hard.
+          </div>
+        </div>
+
+        <div class="case-study-box">
+          <div class="case-study-title">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500"></i>
+            Case Study: The 3.2 Million Token Circular Revision
+          </div>
+          <div class="case-study-detail">
+            <strong>What happened:</strong> Nine engineers debugged the same auth module for 72 hours. Their Claude agents rewrote the OAuth flow 17 times, each iteration drifting further from the original architecture.
+          </div>
+          <div class="case-study-detail">
+            <strong>Root cause:</strong> Extended session (72 hours) without context reset. Context degradation after ~30 minutes. Later iterations working against earlier iterations.
+          </div>
+          <div class="case-study-detail">
+            <strong>Prevention:</strong> Fresh context each iteration (Ralph pattern). External state that persists correct decisions. Never work >30 minutes without context refresh.
+          </div>
+        </div>
+
+        <div class="case-study-box">
+          <div class="case-study-title">
+            <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+            Case Study: Ralph Production - 14 Iterations for 6 Stories
+          </div>
+          <div class="case-study-detail">
+            <strong>What happened:</strong> Ryan Carson ran Ralph with 6 well-defined user stories, max 25 iterations. Completed in 14 iterations, feature complete with minor edge cases.
+          </div>
+          <div class="case-study-detail">
+            <strong>Key learning:</strong> 14 iterations / 6 stories = 2.3 iterations per story average. Don't expect 1:1 story:iteration ratio. Learnings compounded - later stories implemented faster.
+          </div>
+          <div class="case-study-detail">
+            <strong>Quote:</strong> "The bottleneck isn't coding - it's the upfront spec quality: PRD clarity, atomic stories, and verifiable criteria."
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions in debugging agent systems, not bugs to fix.
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            The Invisible Gradient
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Context degrades gradually, then fails suddenly. You won't notice the gradient until you hit the cliff.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> 100% to 90% (40-60K) = subtle drift you won't notice. 90% to 70% = repetition, compression. 70% to 50% = instructions forgotten. 50% to CLIFF = hallucinations, amnesia.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Monitor context proactively. Compact at 60-70%, not at 95%. Don't wait for symptoms - they arrive too late.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            The Error Cascade
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Each unaddressed error creates 3 new problems. Errors don't stay constant - they multiply.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Iteration 1: 1 error. Iteration 2: 3 errors. Iteration 3: 9 errors. Iteration 5: 81 errors. Cost of fix at iteration 1: 1 unit. At iteration 5: 121 units.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Stop as soon as you detect an issue. NEVER continue iterating with known problems. Verify after EVERY iteration, not just at the end.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Multi-Agent Coordination Tax
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Multi-agent systems introduce exponentially more failure modes. Specification problems: 41.77%. Coordination failures: 36.94%. Error amplification in independent agents: 17.2x vs 4.4x with centralized coordination.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "It worked amazingly up to about 200k LOC, and now they've begun savagely overwriting each other's work rather than try to deal with merge conflicts." - Steve Yegge on Gas Town</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use hub-and-spoke over fully independent. Git worktrees for file isolation. Directory ownership for domain isolation. Merge only at integration points.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO DEBUG VS RESTART -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Debug vs. Restart
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="search" class="w-5 h-5"></i>
+              DEBUG WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Error is deterministic (same inputs = same failure)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Root cause is identifiable from symptoms</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Context is still healthy (<70%)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Fix once = fixed forever (configuration, permissions)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Learning from this failure will prevent future ones</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+              RESTART WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Context >85% (quality already degraded)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Hallucinations or amnesia symptoms</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Same error 3+ times with different approaches</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Circular revisions (add, remove, add back)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Debugging time exceeds restart + redo time</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            The Fresh Context Bias
+          </div>
+          <div class="gotcha-detail"><strong>Pattern:</strong> Developers under-restart. They try to "push through" problems when a fresh start would be faster.</div>
+          <div class="gotcha-detail"><strong>Heuristic:</strong> If you've spent 10 minutes debugging with no progress, a restart is likely faster. Fresh context beats accumulated context.</div>
+        </div>
+
+        <div class="path-container">
+          <p class="font-semibold mb-4">Recovery Checklist Before Restart:</p>
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">Save current state: <code>git stash push -m "pre-restart-backup"</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Document what you were working on: <code>echo "Task: [description]" > /tmp/recovery-notes.txt</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Try compaction first (may salvage session): <code>/compact</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">If quality doesn't improve, reset: <code>/reset</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">If still bad, exit completely and start fresh: <code>exit</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">Start new session, restore context from files: <code>git stash pop</code></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if errors were random, not systematic?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> No debugging framework - just retry until it works.<br>
+          <strong>Why this fails:</strong> Retrying without understanding just compounds errors. Same root cause produces same failure.<br>
+          <strong>Hidden constraint revealed:</strong> OHIV works because agent failures ARE predictable.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible debugging flow</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">git status && git diff HEAD~1 && npm test</code><br>
+          <strong>Essential:</strong> Know state. Know changes. Know tests.<br>
+          <strong>Everything else:</strong> Refinement for specific failure types.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">80% of failures, 3 causes</div>
+        <div class="text-text-secondary text-sm">
+          Research across 4,677+ GitHub issues: context exhaustion, missing verification, vague instructions. If you fix these three, you've addressed 80% of failure surface.
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How context degrades (invisibly)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% to 90%</strong> (40-60K): Subtle drift, you won't notice<br>
+          <strong>90% to 70%</strong> (60-80K): Repetition, compression<br>
+          <strong>70% to 50%</strong> (80-100K): Instructions forgotten<br>
+          <strong>50% to CLIFF</strong> (100K+): Hallucinations, amnesia<br><br>
+          <em>Critical: The gradient is invisible until the cliff.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">OHIV = Scientific Method</div>
+        <div class="text-text-secondary text-sm">
+          Observe → Gather evidence<br>
+          Hypothesize → Form testable theory<br>
+          Isolate → Controlled experiment<br>
+          Verify → Confirm results<br><br>
+          <em>If you've debugged code before, you already know this method.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint, five downstream implications</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Errors compound exponentially if unaddressed<br>
+          → Must verify after EVERY iteration<br>
+          → Must stop at first detected issue<br>
+          → Must have checkpoints to return to<br>
+          → Must use external state for recovery<br>
+          → Must prefer restart over extended debugging
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item invariant" data-section="decisions">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-001: Context degrades with tokens</div>
+        <div class="text-text-secondary text-sm">
+          Ralph, Gas Town, CC Mirror, and debugging ALL share this constraint. Every pattern must account for context as a depletable resource. Fresh context beats extended context.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Error amplification at scale</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Research finding:</strong> Independent agents amplify errors 17.2x. Centralized coordination contains this to 4.4x.<br><br>
+          <strong>Implication:</strong> Hub-and-spoke architectures are essential for multi-agent debugging.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip verification after each iteration</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> You continue with known problems<br>
+          <strong>THEN:</strong> Error creates 3 new problems<br>
+          <strong>THEN:</strong> 9 problems at iteration 3<br>
+          <strong>THEN:</strong> 81 problems at iteration 5<br>
+          <strong>FINALLY:</strong> Recovery cost exceeds original task<br><br>
+          <em>The fix: Stop at first failure. Never push through.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Debug depth vs. restart speed</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Deep debugging:</strong> Learn root cause, prevent future failures, but expensive<br>
+          <strong>Quick restart:</strong> Fast recovery, but might hit same issue again<br>
+          <strong>Heuristic:</strong> If >10 min debugging with no progress, restart is faster
+        </div>
+      </div>
+
+      <!-- TOOLS SECTION -->
+      <div class="activity-item expertise" data-section="tools">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your debugging?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What tool do I use?" → Match symptom to tool table<br>
+          <strong>Intermediate:</strong> "When to use each?" → Context vs. state vs. verification<br>
+          <strong>Advanced:</strong> "Can I prevent this?" → Pre-session checklist<br>
+          <strong>Staff:</strong> "What's the pattern?" → 5 failure categories<br>
+          <strong>Expert:</strong> "How do tools compose?" → Claude HUD + Ralph + circuit breakers
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="tools">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude HUD + Ralph Loop</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Real-time context monitoring prevents degradation.<br>
+          <strong>Danger:</strong> HUD can't prevent all failures - still need circuit breakers.<br>
+          <strong>Recommendation:</strong> Use HUD for monitoring, circuit breakers for automatic stopping.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="tools">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How tool value changes over session length</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-30 min:</strong> "Git tools seem unnecessary"<br>
+          <strong>30-60 min:</strong> "Glad I can checkout previous state"<br>
+          <strong>60+ min:</strong> "Git stash has saved me multiple times"<br>
+          <strong>Multi-day:</strong> "External state IS the memory"<br><br>
+          <em>Don't judge tool value by short sessions.</em>
+        </div>
+      </div>
+
+      <!-- DECISION TREES SECTION -->
+      <div class="activity-item inversion" data-section="decision-trees">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you diagnosed by guessing?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd do:</strong> Try random fixes until something works.<br>
+          <strong>Why this fails:</strong> Most "fixes" compound the problem. Wrong hypothesis → wrong action → more errors.<br>
+          <strong>Hidden constraint revealed:</strong> Systematic diagnosis is faster than guessing.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="decision-trees">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">The 72-hour OAuth debugging</div>
+        <div class="text-text-secondary text-sm">
+          9 engineers, 72 hours, 17 rewrites, 3.2M tokens. Code worse than when they started. Root cause: no decision tree, no systematic diagnosis, just "keep trying fixes."
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="decision-trees">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When to stop debugging, start restarting</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-5 min:</strong> Debug - likely quick fix<br>
+          <strong>5-10 min:</strong> Debug with caution<br>
+          <strong>10-15 min:</strong> Consider restart<br>
+          <strong>15+ min:</strong> Restart almost certainly faster<br><br>
+          <strong>THE INFLECTION:</strong> ~10 min<br>
+          <strong>Detection:</strong> No progress in hypothesis-test cycles? Time to restart.
+        </div>
+      </div>
+
+      <!-- CASE STUDIES SECTION -->
+      <div class="activity-item warstory" data-section="case-studies">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">$47,000 recursive loop - 11 days unnoticed</div>
+        <div class="text-text-secondary text-sm">
+          No iteration limits. No budget caps. No human monitoring. No stuck detection. "The gap between demos and production is enormous."
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="case-studies">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Home directory deletion - GitHub #17164</div>
+        <div class="text-text-secondary text-sm">
+          <code>rm -rf tests/ patches/ plan/ ~/</code> - trailing ~/ deleted entire home folder. --dangerously-skip-permissions with no blocklist.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="case-studies">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Gas Town merge wall at 200k LOC</div>
+        <div class="text-text-secondary text-sm">
+          "It worked amazingly up to about 200k LOC, and now they've begun savagely overwriting each other's work." - Steve Yegge
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="case-studies">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ryan Carson: 14 iterations for 6 stories</div>
+        <div class="text-text-secondary text-sm">
+          2.3 iterations per story average. "The bottleneck isn't coding - it's the upfront spec quality: PRD clarity, atomic stories, and verifiable criteria."
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="case-studies">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal circuit breaker thresholds</div>
+        <div class="text-text-secondary text-sm">
+          How many iterations before stopping? How many errors before alerting? Optimal varies by project. Marathon Ralph uses 3-5 per phase, but no universal formula exists.
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item gradient" data-section="hard">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">The cascade amplifier</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Iteration 1:</strong> 1 error<br>
+          <strong>Iteration 2:</strong> 3 errors (1 × 3)<br>
+          <strong>Iteration 3:</strong> 9 errors (3 × 3)<br>
+          <strong>Iteration 5:</strong> 81 errors<br><br>
+          <em>Cost at iteration 1: 1 unit. Cost at iteration 5: 121 units total.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Parallel speed vs. coordination overhead</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Independent agents:</strong> Fast parallel work, but 17.2x error amplification<br>
+          <strong>Centralized coordination:</strong> Slower, but only 4.4x error amplification<br>
+          <strong>Heuristic:</strong> As codebase grows, favor coordination over independence
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Merge wall emergence at scale</div>
+        <div class="text-text-secondary text-sm">
+          At small scale: parallel agents work beautifully.<br>
+          At ~150k LOC: occasional conflicts, manageable.<br>
+          At ~200k LOC: "merge wall" - conflicts constant.<br><br>
+          <em>"Works at 50k LOC" doesn't mean "works at 200k LOC"</em>
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Debug vs. Restart = Repair vs. Rebuild</div>
+        <div class="text-text-secondary text-sm">
+          Repair (debug): Fix what's broken, keep the rest<br>
+          Rebuild (restart): Start fresh with clean foundation<br>
+          Hardware rule: If repair cost > 50% of replace, replace<br>
+          Agent rule: If debug time > restart + redo time, restart
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If OHIV isn't working</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Context collapsed?</strong> → Skip to restart, don't debug<br>
+          <strong>Multi-agent chaos?</strong> → Kill all, use worktrees, restart isolated<br>
+          <strong>Same error 3+ times?</strong> → Task too complex, split it<br>
+          <strong>Costs spiking?</strong> → pkill first, debug later
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="when">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you push through with degraded context</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Context at 90% but "almost done"<br>
+          <strong>THEN:</strong> Quality degradation unnoticed<br>
+          <strong>THEN:</strong> Errors introduced in "final" changes<br>
+          <strong>THEN:</strong> "Done" code actually broken<br>
+          <strong>FINALLY:</strong> More work than starting fresh would have been<br><br>
+          <em>The fix: Restart at 85%+. "Almost done" is a trap.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="when">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Debug vs. restart judgment</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Should I debug or restart?" → Use 10-min rule<br>
+          <strong>Intermediate:</strong> "What signals indicate which?" → Context %, error count<br>
+          <strong>Advanced:</strong> "Can I prevent needing either?" → Pre-session checklist<br>
+          <strong>Staff:</strong> "When is debugging worth the investment?" → When it prevents future issues<br>
+          <strong>Expert:</strong> "How do I make this decision automatic?" → Circuit breakers
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

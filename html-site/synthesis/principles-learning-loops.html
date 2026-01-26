@@ -1,0 +1,2286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning & Feedback Loop Engineering | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer - Draggable divider between Main Panel and Activity Zone */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    /* Prevent text selection during resize */
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    /* Hide resizer when Activity Zone is hidden (responsive) */
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Loop Level Cards */
+    .loop-level {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .loop-level-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .loop-level-number {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #0D9373 0%, #10b981 100%);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loop-level-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .loop-level-mechanism {
+      font-size: 12px;
+      font-weight: 500;
+      color: #0D9373;
+      background: #ecfdf5;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-left: auto;
+    }
+
+    /* Diagram Box */
+    .diagram-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* Table Styles */
+    .content-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+
+    .content-table th {
+      text-align: left;
+      padding: 12px 16px;
+      background: #f4f4f5;
+      border-bottom: 2px solid #e4e4e7;
+      font-weight: 600;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .content-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .content-table tr:hover {
+      background: #fafafa;
+    }
+
+    /* Metric Card */
+    .metric-card {
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0D9373;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: #166534;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Commandment List */
+    .commandment-list {
+      counter-reset: commandment;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .commandment-item {
+      counter-increment: commandment;
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding: 16px;
+      background: #fafafa;
+      border-radius: 8px;
+      border-left: 3px solid #0D9373;
+    }
+
+    .commandment-item::before {
+      content: counter(commandment);
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Learning Loops</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">Compounding Pattern</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-archive" class="nav-item">Why Archive Everything?</a>
+          <a href="#why-reference" class="nav-item">Why Reference Prior Runs?</a>
+          <a href="#why-promote" class="nav-item">Why Promote Patterns?</a>
+        </div>
+      </div>
+
+      <!-- Feedback Loop Types -->
+      <div class="nav-section" data-section="loops">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="repeat" class="w-4 h-4"></i>
+          <span>Feedback Loop Types</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#loops" class="nav-item">The 4 Levels</a>
+          <a href="#within-session" class="nav-item">Within-Session</a>
+          <a href="#cross-session" class="nav-item">Cross-Session</a>
+          <a href="#cross-run" class="nav-item">Cross-Run</a>
+          <a href="#cross-project" class="nav-item">Cross-Project</a>
+        </div>
+      </div>
+
+      <!-- Implementation -->
+      <div class="nav-section" data-section="implementation">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="folder" class="w-4 h-4"></i>
+          <span>Implementation</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#implementation" class="nav-item">The File Patterns</a>
+          <a href="#progress-txt" class="nav-item">progress.txt</a>
+          <a href="#archive-pattern" class="nav-item">Archive Script</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Anti-Patterns</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Systems that learn from previous runs outperform systems that start fresh every time.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Compounding Pattern
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"What's amazing is I can ask it to look at previous runs to learn what worked or didn't work. So every time I run Ralph, it gets better and better." — Ryan Carson</div>
+
+          <div class="diagram-box">Run 1: Initial attempt
+  -> Archive prd.json, learnings
+
+Run 2: References Run 1 archives
+  -> Better prompts, fewer failures
+  -> Archive this run too
+
+Run 3: References Runs 1+2
+  -> Even better performance
+  -> Continues compounding...</div>
+
+          <div class="core-anchor">Each run benefits from all previous runs. This is the compounding advantage.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Traditional workflows start fresh each session. Compounding adds three crucial layers: <strong>archived PRDs</strong> from previous runs, <strong>archived learnings</strong> (what worked, what broke), and <strong>agent references</strong> to past successes AND failures.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          This is counterintuitive. Why archive when you can just start over? Because Run 10 without compounding is no better than Run 1. Run 10 WITH compounding benefits from 9 runs of accumulated wisdom. The agent knows your patterns, your gotchas, your project's quirks.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-archive" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY ARCHIVE EVERYTHING?</div>
+          <div class="decision-reasoning">
+            Runs that disappear teach nothing. If your learnings exist only in context (which gets wiped), you're rebuilding knowledge from scratch every time. Archives persist the KNOWLEDGE separately from the SESSION.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              After every significant run, archive: prd.json (what was attempted), progress.txt (what was learned), and optionally a synthesized learnings.md. Store in <code>archives/run-YYYY-MM-DD/</code>. Make archiving a habit, not an afterthought.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-reference">
+          <div class="decision-why">WHY REFERENCE PRIOR RUNS?</div>
+          <div class="decision-reasoning">
+            Knowledge unused is knowledge wasted. Archives sitting in a folder help nobody. The agent must be INSTRUCTED to read archives before starting. This explicit instruction is what makes compounding work.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              In your prompt.md, add: "Before starting, review archives/ folder. Read learnings.md from most recent 2-3 runs. Note patterns that worked AND failed. Apply these insights." Without this instruction, archives are dead weight.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-promote">
+          <div class="decision-why">WHY PROMOTE PATTERNS?</div>
+          <div class="decision-reasoning">
+            Session learnings (progress.txt) are transient. Permanent learnings (CLAUDE.md) persist across all future sessions. Promoting patterns from session to permanent knowledge prevents re-learning the same lessons.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              After each feature completes, review progress.txt. Patterns that apply to all future work (not just this task) get promoted to CLAUDE.md. This is curation, not duplication. Keep CLAUDE.md under 500 tokens.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FEEDBACK LOOP TYPES -->
+      <section id="loops" data-activity="loops">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The Four Feedback Loops
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Learning happens at four levels. Master level 1-3 before attempting level 4.
+        </p>
+
+        <div class="loop-level" id="within-session">
+          <div class="loop-level-header">
+            <div class="loop-level-number">1</div>
+            <div class="loop-level-title">Within-Session Learning</div>
+            <div class="loop-level-mechanism">progress.txt</div>
+          </div>
+          <p class="text-text-secondary text-sm mb-4">
+            Each iteration within a Ralph loop builds on the previous. progress.txt accumulates with a <strong>Codebase Patterns</strong> section at the TOP that the agent reads FIRST.
+          </p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Progress Log - Append Only (NEVER UPDATE)</span>
+
+<span class="comment">## Codebase Patterns</span>
+<span class="comment">- [Accumulated patterns here - grows over time]</span>
+- Migrations: IF NOT EXISTS
+- React: useRef&lt;Timeout | null&gt;(null)
+- Zod: .optional() for nullable fields
+
+<span class="comment">## 2026-01-09 - US-001</span>
+- <span class="keyword">What:</span> Created tool skeleton with Zod schema
+- <span class="keyword">Files:</span> src/tools/upsert.ts
+- <span class="keyword">Learnings:</span> Use orange for visibility on dark backgrounds</pre>
+          </div>
+        </div>
+
+        <div class="loop-level" id="cross-session">
+          <div class="loop-level-header">
+            <div class="loop-level-number">2</div>
+            <div class="loop-level-title">Cross-Session Learning</div>
+            <div class="loop-level-mechanism">CLAUDE.md, AGENTS.md, git</div>
+          </div>
+          <p class="text-text-secondary text-sm mb-4">
+            Knowledge that persists beyond a single Ralph loop. CLAUDE.md for project-level patterns, AGENTS.md for agent-specific documentation, git history as the ultimate persistent memory.
+          </p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># CLAUDE.md - Project-Level Knowledge</span>
+
+<span class="keyword">## Tech Stack</span>
+- Next.js 14, TypeScript, Prisma, PostgreSQL
+
+<span class="keyword">## Commands</span>
+- <span class="string">`npm run dev`</span> - Dev server (port 3000)
+- <span class="string">`npm test`</span> - Run Jest tests
+
+<span class="keyword">## Known Gotchas</span>
+- Migrations need DEFAULT for existing data
+- Use .optional() for nullable Zod fields</pre>
+          </div>
+        </div>
+
+        <div class="loop-level" id="cross-run">
+          <div class="loop-level-header">
+            <div class="loop-level-number">3</div>
+            <div class="loop-level-title">Cross-Run Learning (Compounding Ralph)</div>
+            <div class="loop-level-mechanism">archives/</div>
+          </div>
+          <p class="text-text-secondary text-sm mb-4">
+            The pattern that makes each run better than the last. Archive PRDs, progress logs, and synthesized learnings after each run. Instruct the agent to reference archives before starting new runs.
+          </p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre>archives/
+<span class="comment">├── run-2026-01-05/</span>
+│   ├── prd.json
+│   ├── progress.txt
+│   └── learnings.md
+<span class="comment">├── run-2026-01-06/</span>
+│   ├── prd.json
+│   ├── progress.txt
+│   └── learnings.md
+└── run-2026-01-08/
+    └── ...</pre>
+          </div>
+        </div>
+
+        <div class="loop-level" id="cross-project">
+          <div class="loop-level-header">
+            <div class="loop-level-number">4</div>
+            <div class="loop-level-title">Cross-Project Learning</div>
+            <div class="loop-level-mechanism">Claude-Mem</div>
+          </div>
+          <p class="text-text-secondary text-sm mb-4">
+            Knowledge that spans multiple projects. Claude-Mem captures session events, compresses them into semantic summaries, and auto-injects relevant context into new sessions.
+          </p>
+          <div class="diagram-box">┌─────────────────────────────────────────────┐
+│  Claude Code Session                        │
+│  └─ Lifecycle Hooks                         │
+│       └─ Capture events                     │
+└─────────────────────────────────────────────┘
+              │
+              v
+┌─────────────────────────────────────────────┐
+│  Worker Service                             │
+│  ├─ SQLite DB (raw data)                    │
+│  ├─ Chroma Vector DB (embeddings)           │
+│  └─ Claude Agent SDK (compression)          │
+└─────────────────────────────────────────────┘
+              │
+              v
+┌─────────────────────────────────────────────┐
+│  Future Session                             │
+│  └─ Auto-inject relevant context            │
+└─────────────────────────────────────────────┘</div>
+        </div>
+      </section>
+
+      <!-- Section 5: IMPLEMENTATION -->
+      <section id="implementation" data-activity="implementation">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Implementation Patterns
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Three copy-paste patterns that make compounding work.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4" id="progress-txt">The progress.txt Pattern</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Progress Log - Append Only (NEVER UPDATE)</span>
+
+<span class="keyword">## Codebase Patterns</span>
+<span class="comment">- [Accumulated patterns here - grows over time]</span>
+- Migrations: IF NOT EXISTS
+- React: useRef&lt;Timeout | null&gt;(null)
+- Zod: .optional() for nullable fields
+
+<span class="keyword">## Key Files</span>
+- db/schema.ts
+- app/auth/actions.ts
+
+---
+
+<span class="keyword">## 2026-01-09 - US-001</span>
+- <span class="variable">What:</span> Created tool skeleton with Zod schema
+- <span class="variable">Files:</span> src/tools/upsert.ts
+- <span class="variable">Learnings:</span>
+  - Use orange for visibility on dark backgrounds
+  - Pattern: Validate inputs before database operations
+
+---
+
+<span class="keyword">## 2026-01-09 - US-002</span>
+- <span class="variable">What:</span> Added category mapping
+- <span class="variable">Files:</span> src/tools/categories.ts, src/types/index.ts
+- <span class="variable">Issue:</span> Zod schema needed adjustment for optional fields
+- <span class="variable">Pattern:</span> Added ".optional() for nullable" to Codebase Patterns</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="archive-pattern">The Archive Script</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">#!/bin/bash</span>
+<span class="comment"># archive-run.sh - Run after Ralph completes</span>
+
+<span class="variable">DATE</span>=$(date +%Y-%m-%d)
+<span class="variable">RUN_ID</span>=$(date +%H%M%S)
+<span class="variable">ARCHIVE_DIR</span>="archives/run-$DATE-$RUN_ID"
+
+mkdir -p "$ARCHIVE_DIR"
+
+<span class="comment"># Copy artifacts</span>
+cp plans/prd.json "$ARCHIVE_DIR/"
+cp plans/progress.txt "$ARCHIVE_DIR/"
+
+<span class="comment"># Generate learnings summary</span>
+<span class="keyword">echo</span> <span class="string">"# Learnings from Run $DATE-$RUN_ID"</span> > "$ARCHIVE_DIR/learnings.md"
+<span class="keyword">echo</span> <span class="string">""</span> >> "$ARCHIVE_DIR/learnings.md"
+<span class="keyword">echo</span> <span class="string">"## Patterns Discovered"</span> >> "$ARCHIVE_DIR/learnings.md"
+head -20 plans/progress.txt | grep -A 100 "## Codebase Patterns" >> "$ARCHIVE_DIR/learnings.md"
+
+<span class="comment"># Git log for this run</span>
+git log --oneline --since="$(date -v-1d +%Y-%m-%d)" >> "$ARCHIVE_DIR/commits.log"
+
+<span class="keyword">echo</span> <span class="string">"Archived to $ARCHIVE_DIR"</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">The Reference Pattern</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># prompt.md - Instructions for Ralph</span>
+
+<span class="keyword">## Before You Start</span>
+
+1. Review <span class="string">`archives/`</span> folder for recent runs
+2. Look at <span class="string">`learnings.md`</span> for patterns that worked
+3. Check what failed and why
+4. Apply these learnings to current work
+
+<span class="keyword">## Archive Analysis Checklist</span>
+- What database patterns were used?
+- What validation approaches worked?
+- Were there any repeated failures?
+- What gotchas were discovered?
+
+<span class="keyword">## Current Task</span>
+[Your PRD here]</pre>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Anti-Patterns in Learning
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Six ways learning loops break, with fixes.
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Not Archiving
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Every run starts from zero. Same mistakes repeated across runs.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Archives seem like overhead until you need them.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Archive after every significant run: <code>./archive-run.sh</code>. Make it automatic.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Not Referencing Prior Work
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent doesn't read archives. Knowledge exists but isn't used.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Prompt doesn't explicitly instruct archive review.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add explicit instruction: "Before implementing, read: archives/*/learnings.md"</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Over-relying on Session Memory
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Using context compaction instead of external files. Detail lost.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Trusting LLM memory over file persistence.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Externalize everything: progress.txt for learnings, prd.json for state, git for code.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Bloated CLAUDE.md
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> CLAUDE.md exceeds 500 tokens. Context budget consumed.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Promoting everything without pruning.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> CLAUDE.md is for permanent, project-wide patterns ONLY. Prune quarterly.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            progress.txt Editing
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Editing previous entries. History lost. Can't trace what happened when.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Treating progress.txt like a document instead of a log.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> APPEND ONLY. Never modify. The log is the log.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            No Verification Loop
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent marks tasks complete without testing. False completion compounds.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Missing verification in acceptance criteria.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Always include: "npm run typecheck passes" and "npm run test passes" in acceptance criteria.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions that have no perfect solutions.
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Context Rot vs. Memory Loss
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Fresh context avoids rot but loses learnings. progress.txt helps but grows unbounded. No perfect solution exists.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Quality drops in late iterations (rot), OR early iterations repeat mistakes from archived runs (memory loss).</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Keep progress.txt under 20KB. Start fresh runs from AGENTS.md (permanent), not progress.txt (session). Accept that some re-learning is the cost of fresh context.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Archive Retrieval Quality
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More archives = more wisdom, but also more noise. The agent may read irrelevant old patterns.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Agent applies patterns from a different project type. Learnings from Run 1 conflict with learnings from Run 15.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Reference only most recent 2-3 runs. Synthesize learnings.md to filter signal from noise. Delete archives older than 30 days.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Verification Dependency
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Compounding only works if learnings are TRUE. Without verification, false completions pollute archives.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Bad patterns get archived. Future runs learn from failures, not successes.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Never archive without verification passing. Review archives periodically for corrupted learnings.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE LEARNING LOOPS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Running multiple Ralph loops over days/weeks (pattern accumulation pays off)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Working on a codebase with consistent patterns (learnings transfer)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Team shares archives (multiplied learning across people)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You have verification in place (only true learnings get archived)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You want iteration 20 to be dramatically better than iteration 1</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE LEARNING LOOPS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>One-off tasks (archiving overhead exceeds benefit)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Highly varied work (learnings don't transfer across domains)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>No verification layer (bad learnings compound)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Exploratory work with no repeatable patterns</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Already using Claude-Mem (redundant with semantic memory)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">The Learning Commandments</h3>
+
+        <ol class="commandment-list">
+          <li class="commandment-item">
+            <span><strong>Archive everything.</strong> Runs that disappear teach nothing.</span>
+          </li>
+          <li class="commandment-item">
+            <span><strong>Reference archives.</strong> Knowledge unused is knowledge wasted.</span>
+          </li>
+          <li class="commandment-item">
+            <span><strong>Append, never edit.</strong> progress.txt is sacred history.</span>
+          </li>
+          <li class="commandment-item">
+            <span><strong>Verify before logging.</strong> False completions corrupt learning.</span>
+          </li>
+          <li class="commandment-item">
+            <span><strong>Promote patterns.</strong> Session learnings become permanent knowledge.</span>
+          </li>
+          <li class="commandment-item">
+            <span><strong>Prune regularly.</strong> Context is finite; keep only what matters.</span>
+          </li>
+          <li class="commandment-item">
+            <span><strong>Measure improvement.</strong> If you can't track it, you can't improve it.</span>
+          </li>
+          <li class="commandment-item">
+            <span><strong>Compound daily.</strong> Each run should benefit from all previous runs.</span>
+          </li>
+          <li class="commandment-item">
+            <span><strong>External over internal.</strong> Files outlast context windows.</span>
+          </li>
+          <li class="commandment-item">
+            <span><strong>The agent is stateless.</strong> Memory is architecture, not magic.</span>
+          </li>
+        </ol>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Metrics That Matter</h3>
+
+        <table class="content-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>How to Measure</th>
+              <th>Good Signal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Iterations per task</td>
+              <td>Count Ralph loops</td>
+              <td>Decreasing over time</td>
+            </tr>
+            <tr>
+              <td>First-attempt success rate</td>
+              <td>Tasks passing first try</td>
+              <td>Increasing</td>
+            </tr>
+            <tr>
+              <td>Time to completion</td>
+              <td>Wall clock time</td>
+              <td>Decreasing</td>
+            </tr>
+            <tr>
+              <td>Pattern reuse</td>
+              <td>References to Codebase Patterns</td>
+              <td>Increasing</td>
+            </tr>
+            <tr>
+              <td>Failure repetition</td>
+              <td>Same error appearing</td>
+              <td>Decreasing</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you DIDN'T archive?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Start fresh every time. No files. Pure context.<br>
+          <strong>Why this fails:</strong> Run 10 is identical to Run 1. No velocity increase.<br>
+          <strong>Hidden constraint revealed:</strong> Agents are stateless. Memory must be external.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible core of learning loops</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Minimum viable:</strong> Archive prd.json + progress.txt after each run.<br>
+          <strong>Essential:</strong> Instruct agent to READ archives before starting.<br>
+          <strong>Everything else:</strong> Refinement for reliability (learnings.md, Claude-Mem, etc).
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ryan Carson: "Every run gets better"</div>
+        <div class="text-text-secondary text-sm">
+          "I archive each PRD and user story JSON. So every time I run Ralph, it gets better and better." By story 10, Ralph knew all the project patterns without being told.
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Fresh context as root constraint</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Each iteration spawns fresh Claude (no memory)<br>
+          → State must persist externally<br>
+          → Files become the memory system<br>
+          → Archives enable cross-run learning<br>
+          → Compounding requires explicit reference<br>
+          → Verification ensures learning quality
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Learning Loops = Compound Interest</div>
+        <div class="text-text-secondary text-sm">
+          Principal → Initial capability<br>
+          Interest → Each run's learnings<br>
+          Compounding → Archives feeding future runs<br>
+          Time → Number of runs<br><br>
+          <em>If you understand compound interest, you understand learning loops.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-003: External state > internal memory</div>
+        <div class="text-text-secondary text-sm">
+          Learning Loops, Ralph, Gas Town all share this: files persist, context doesn't. Understanding this invariant unlocks all three patterns.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Compounding accelerates over time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Run 1-5:</strong> Linear improvement (each run adds ~1 pattern)<br>
+          <strong>Run 6-15:</strong> Acceleration (patterns combine into shortcuts)<br>
+          <strong>Run 16+:</strong> Exponential (agent "knows" the codebase)<br><br>
+          <em>The benefit curve is not linear. Patience pays.</em>
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (4 items) -->
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip archiving</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> You skip archiving "just this once"<br>
+          <strong>THEN:</strong> That run's learnings are lost<br>
+          <strong>THEN:</strong> Next run repeats those mistakes<br>
+          <strong>THEN:</strong> No velocity increase over time<br>
+          <strong>FINALLY:</strong> Run 20 is no better than Run 1<br><br>
+          <em>The fix: Archive is mandatory. No exceptions.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Archive Depth Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Shallow:</strong> Quick to archive, but misses nuance<br>
+          <strong>Medium:</strong> Balanced, but requires judgment<br>
+          <strong>Deep:</strong> Complete, but overhead dominates<br><br>
+          <em>Heuristic: Archive prd.json + progress.txt always. learnings.md for significant runs only.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your learning loop understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Why archive?" → Agents are stateless<br>
+          <strong>Intermediate:</strong> "What to archive?" → prd.json + progress.txt<br>
+          <strong>Advanced:</strong> "How to reference?" → Explicit prompt instructions<br>
+          <strong>Staff:</strong> "When to prune?" → 20KB threshold, 30-day retention<br>
+          <strong>Expert:</strong> "Cross-project?" → Claude-Mem semantic memory
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if archives were auto-referenced?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Agent automatically reads all archives.<br>
+          <strong>Why this fails:</strong> 50 archives = context overflow. Noise > signal.<br>
+          <strong>Hidden constraint revealed:</strong> Explicit reference forces curation.
+        </div>
+      </div>
+
+      <!-- LOOPS SECTION (5 items) -->
+      <div class="activity-item gradient" data-section="loops">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How progress.txt degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-10KB:</strong> Pure benefit (learnings compound)<br>
+          <strong>10-20KB:</strong> Diminishing returns (more to read)<br>
+          <strong>20-30KB:</strong> Neutral (reading cost = thinking benefit)<br>
+          <strong>30KB+:</strong> Net negative (context wasted on history)<br><br>
+          <em>Critical: The cliff is at ~20KB. Truncate before you hit it.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="loops">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When progress.txt flips from help to hurt</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE INFLECTION:</strong> ~20KB or ~50 iterations<br><br>
+          <strong>BEFORE:</strong> "Always append. Never delete."<br>
+          <strong>AFTER:</strong> "Promote to CLAUDE.md. Start fresh progress.txt."<br><br>
+          <em>Detection: Late iterations worse than early ones? Check file size.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="loops">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How judgment evolves with runs</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Run 2:</strong> "Archiving feels like overhead"<br>
+          <strong>Run 5:</strong> "Wait, the agent is repeating mistakes"<br>
+          <strong>Run 10:</strong> "Archives are why later runs are faster"<br>
+          <strong>Run 20:</strong> "This is institutional memory"<br><br>
+          <em>Don't judge learning loops by run 2.</em>
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="loops">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Learning Loops + Claude-Mem</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works?</strong> Yes, but with overlap.<br>
+          <strong>The benefit:</strong> Claude-Mem handles cross-project; archives handle cross-run.<br>
+          <strong>The danger:</strong> Redundant storage if both capture same patterns.<br>
+          <strong>Recommendation:</strong> Use Claude-Mem for cross-project, archives for project-specific.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="loops">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">The 4 Loops = Memory Hierarchy</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Within-session</strong> = CPU cache (fast, ephemeral)<br>
+          <strong>Cross-session</strong> = RAM (persistent while running)<br>
+          <strong>Cross-run</strong> = Disk (survives restart)<br>
+          <strong>Cross-project</strong> = Network storage (shared across machines)<br><br>
+          <em>If you understand computer memory hierarchy, you understand learning loops.</em>
+        </div>
+      </div>
+
+      <!-- IMPLEMENTATION SECTION (4 items) -->
+      <div class="activity-item warstory" data-section="implementation">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Boris Cherny: Verification = 2-3x quality</div>
+        <div class="text-text-secondary text-sm">
+          Claude Code creator's insight: "Verification feedback loop yields 2-3x quality improvement." Without verification, learnings are unreliable. With it, each archive is trustworthy.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="implementation">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you edit progress.txt (instead of append)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> You edit previous entries to "clean up"<br>
+          <strong>THEN:</strong> History is lost<br>
+          <strong>THEN:</strong> Can't trace what happened when<br>
+          <strong>THEN:</strong> Debugging becomes impossible<br>
+          <strong>FINALLY:</strong> You lose the "why" behind patterns<br><br>
+          <em>The fix: APPEND ONLY. The log is sacred.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="implementation">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why Codebase Patterns lives at TOP</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Agents read files top-to-bottom<br>
+          → Most important content first<br>
+          → Patterns at top = read first<br>
+          → Session details at bottom = read if relevant<br>
+          → Structure encodes priority<br>
+          → No explicit "read this first" instruction needed
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="implementation">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal archive retention</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> How many archives to keep? 10? 30? All?<br>
+          <strong>Why it's hard:</strong> Old patterns may resurface. But old archives add noise.<br>
+          <strong>Current best practice:</strong> Keep 30 days, synthesize monthly, delete old runs.
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why CAPS for "APPEND"?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What if "update" meant "append"?</strong><br>
+          Then you wouldn't need CAPS. But models interpret "update" as "replace" by default.<br><br>
+          <strong>Why CAPS matters:</strong> Formatting emphasis changes model behavior. "append" gets ignored. "APPEND" gets followed.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">CLAUDE.md Size Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Too small:</strong> Patterns missing. Agent re-learns.<br>
+          <strong>Just right:</strong> 300-500 tokens. Core patterns only.<br>
+          <strong>Too large:</strong> Context wasted. Irrelevant patterns dilute signal.<br><br>
+          <em>Heuristic: If CLAUDE.md is longer than this page, it's too long.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How false completions corrupt learning</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1 false completion:</strong> Minor pollution, barely noticeable<br>
+          <strong>5 false completions:</strong> Patterns include bad practices<br>
+          <strong>15 false completions:</strong> Archives are more wrong than right<br>
+          <strong>50+ false completions:</strong> Compounding works AGAINST you<br><br>
+          <em>Critical: Verification is not optional. It's the foundation.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Session memory substitution at scale</div>
+        <div class="text-text-secondary text-sm">
+          <strong>At run 1:</strong> Session memory seems fine<br>
+          <strong>At run 5:</strong> "Wait, it forgot what we did yesterday"<br>
+          <strong>At run 10:</strong> Repeated context setup costs hours<br><br>
+          <em>Threshold: If you're explaining the same thing twice, externalize it.</em>
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Context Rot vs. Memory Loss</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE DILEMMA:</strong><br>
+          - Extended session: Rich context, but quality degrades<br>
+          - Fresh context: Peak quality, but must reconstruct state<br>
+          - Compounding: Best of both, but requires discipline<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> progress.txt is lossy. You choose what to write.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="hard">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">The discipline investment curve</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "Archiving is overhead"<br>
+          <strong>Week 1:</strong> "The pattern is paying off"<br>
+          <strong>Month 1:</strong> "I can't imagine working without it"<br>
+          <strong>Month 3:</strong> "This IS how I work"<br><br>
+          <em>The habit takes ~2 weeks to feel natural.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Archive retrieval mastery</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Just read all archives" → Context overflow<br>
+          <strong>Intermediate:</strong> "Read most recent 3" → Better<br>
+          <strong>Advanced:</strong> "Read learnings.md only" → Synthesized signal<br>
+          <strong>Staff:</strong> "Semantic search archives" → Claude-Mem<br>
+          <strong>Expert:</strong> "Tiered retrieval" → Recent full, old summarized
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Matt Pocock: Context rot awareness</div>
+        <div class="text-text-secondary text-sm">
+          "There's a point where the AI starts producing worse output. It's not obvious when it happens." Fresh context + compounding archives = the solution to context rot without losing history.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (5 items) -->
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you used this for one-off tasks?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Archive even single-use work.<br>
+          <strong>Why this fails:</strong> Archive overhead exceeds benefit. No second run to compound.<br>
+          <strong>Hidden constraint revealed:</strong> Compounding requires REPETITION to pay off.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Learning Loops = Unit Tests</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Write once, benefit forever</strong> = Archive once, reference forever<br>
+          <strong>Catches regressions</strong> = Prevents repeated mistakes<br>
+          <strong>Overhead upfront</strong> = Archiving takes time<br>
+          <strong>Pays off at scale</strong> = Compounding kicks in at run 5+<br><br>
+          <em>If you understand why unit tests matter, you understand learning loops.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If learning loops aren't right</div>
+        <div class="text-text-secondary text-sm">
+          <strong>One-off tasks?</strong> → Skip archiving, use single session<br>
+          <strong>Highly varied work?</strong> → Claude-Mem for semantic cross-domain<br>
+          <strong>No verification?</strong> → Add tests first, then compounding<br>
+          <strong>Already using Claude-Mem?</strong> → May be redundant
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="when">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-007: Verification before persistence</div>
+        <div class="text-text-secondary text-sm">
+          Learning Loops, Ralph verification, CI/CD all share this: only persist what's verified. False positives compound negatively. This invariant is why verification gates exist at every level.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Learning Loops + Team Sharing</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works?</strong> Yes, with multiplied benefit.<br>
+          <strong>The benefit:</strong> One person's learnings benefit entire team.<br>
+          <strong>The danger:</strong> Conflicting patterns from different team members.<br>
+          <strong>Recommendation:</strong> Weekly archive review meeting. Curate shared CLAUDE.md.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        // Elements
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        // Bind methods
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Track which sections are in view
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

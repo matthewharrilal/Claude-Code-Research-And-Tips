@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta data-pagefind-meta="section" content="Synthesis">
+  <meta data-pagefind-meta="category" content="Tooling">
+  <title>Tooling Observability Guide - Claude Code Knowledge Base</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/sidebar.css">
+  <link rel="stylesheet" href="../css/search.css">
+</head>
+<body>
+  <!-- Search Modal -->
+  <div class="search-modal" id="searchModal" aria-hidden="true">
+    <div class="search-overlay" onclick="closeSearch()"></div>
+    <div class="search-content">
+      <div class="search-header">
+        <div class="search-input-wrapper">
+          <span class="search-icon-input">&#128269;</span>
+          <input type="text" id="searchInput" placeholder="Search documentation..." autocomplete="off" />
+          <kbd class="search-kbd">ESC</kbd>
+        </div>
+      </div>
+      <div class="search-filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="synthesis">Synthesis</button>
+        <button class="filter-btn" data-filter="extractions">Extractions</button>
+      </div>
+      <div class="search-results" id="searchResults">
+        <div class="search-empty"><p>Start typing to search... (Press Cmd+K anytime)</p></div>
+      </div>
+      <div class="search-footer">
+        <span>Up/Down Navigate</span><span>Enter Select</span><span>ESC Close</span>
+      </div>
+    </div>
+  </div>
+
+  <button class="search-trigger" onclick="openSearch()" aria-label="Search" style="float: right; margin-bottom: 1rem;">
+    <span class="search-icon">Cmd+K</span>
+    <span class="search-text">Search</span>
+  </button>
+
+  <div class="wide-container">
+    <!-- Breadcrumb Navigation -->
+    <nav class="nav-breadcrumb">
+      <a href="../index.html">Home</a>
+      <span>/</span>
+      <a href="synthesis-index.html">Synthesis</a>
+      <span>/</span>
+      <span>Tooling</span>
+      <span>/</span>
+      <span>Observability Guide</span>
+    </nav>
+
+    <!-- You Are Here Context Box -->
+    <div class="you-are-here" style="background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%); border-left: 4px solid #2a7d7d; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+      <h3 style="color: #2a7d7d; margin-top: 0; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px;">You Are Here</h3>
+      <p style="margin-bottom: 0;">You are exploring the <strong>observability layer</strong> for Claude Code workflows. This layer makes visible the hidden state that determines whether your agents succeed or fail. Covers <strong>Claude HUD</strong> (terminal statusline), <strong>Gas Town GUI</strong> (RTS-style browser interface), visibility patterns, and debugging multi-agent failures.</p>
+    </div>
+
+    <h1><span style="font-weight: 700;">Too</span>ling Observability Guide: Real-Time Monitoring</h1>
+
+    <p class="conversational-lead">
+      <span style="font-weight: 700;">"Fin</span>ally a HUD to tell if Claude's actually working... or just staring into the void." -- @is_lu_is
+    </p>
+
+    <!-- Table of Contents -->
+    <div class="toc">
+      <div class="toc-title">Contents</div>
+      <ul>
+        <li><a href="#claude-hud">Claude HUD Real-Time Monitoring</a> - Terminal-based session visibility</li>
+        <li><a href="#gas-town-gui">Gas Town GUI as RTS Interface</a> - Browser-based factory management</li>
+        <li><a href="#visibility-patterns">Multi-Agent Visibility Patterns</a> - Hub-and-spoke, grid, factory</li>
+        <li><a href="#visual-vs-terminal">When Visual Beats Terminal</a> - Decision matrix and cognitive load</li>
+        <li><a href="#debugging">Debugging Multi-Agent Failures</a> - Stuck, explosion, coordination, silent</li>
+        <li><a href="#mental-models">Mental Models</a> - Control room, war room, ant farm</li>
+        <li><a href="#checkpoints">Checkpoints</a> - Verify your setup</li>
+        <li><a href="#troubleshooting">Troubleshooting</a> - Common issues and fixes</li>
+      </ul>
+    </div>
+
+    <hr class="section-divider divider-context">
+
+    <!-- Claude HUD Section -->
+    <section id="claude-hud">
+      <h2><span style="font-weight: 700;">Cla</span>ude HUD Real-Time Monitoring</h2>
+
+      <h3>What Claude HUD Is</h3>
+      <p><strong>Claude HUD</strong> is a terminal-based plugin that displays real-time session information in your statusline. It transforms the invisible control plane of Claude Code into visible, actionable data.</p>
+
+      <h3>The Problem It Solves</h3>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Without HUD</th><th>With HUD</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Sessions are a black box</td><td>Real-time context percentage with color coding</td></tr>
+          <tr><td>Context limits hit unexpectedly</td><td>Visual warning as you approach limits</td></tr>
+          <tr><td>No visibility into tool execution</td><td>Active tool execution visible with spinners</td></tr>
+          <tr><td>Subagent activity invisible</td><td>Subagent tracking with elapsed time</td></tr>
+          <tr><td>Todo progress hidden</td><td>Todo progress counter</td></tr>
+          <tr><td>Rate limits applied silently</td><td>Usage limits for rate-limited plans</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Architecture Overview</h3>
+      <div class="ascii-diagram">
++---------------------------------------------------------------+
+|                    Claude Code Runtime                         |
+|  Session State | Transcript JSONL | Tool Execution State       |
++---------------------------------------------------------------+
+                              |
+                        stdin (JSON) ~every 300ms
+                              |
+                    +---------v----------+
+                    |     Claude HUD     |
+                    |       Plugin       |
+                    +--------------------+
+                              |
+         +--------------------+--------------------+
+         |                    |                    |
+   Config Reader       Transcript Parser      Git Status
+         |                    |                    |
+         +--------------------+--------------------+
+                              |
+                    +---------v----------+
+                    |    Render Engine   |
+                    +--------------------+
+                              |
+                    +---------v----------+
+                    |  stdout (statusline)|
+                    +--------------------+
+      </div>
+
+      <h3>Key Features</h3>
+
+      <h4>1. Context Window Meter</h4>
+      <div class="ascii-diagram">
++-- GREEN (0-69%):   Safe zone, plenty of capacity
++-- YELLOW (70-84%): Caution, monitor closely
++-- RED (85-100%):   Critical, consider compacting
+      </div>
+      <p>When context hits 85%+, a token breakdown appears showing input vs cache.</p>
+
+      <h4>2. Tool Activity Tracking</h4>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <pre style="margin: 0; overflow-x: auto;"><code># Running Tools (yellow spinner):
+* Read: src/auth/middleware.ts
+* Bash: npm run typecheck
+
+# Completed Tools (green checkmark with count):
+OK Read x3 | OK Edit x2 | OK Glob x1</code></pre>
+      </div>
+
+      <h4>3. Agent Status Monitoring</h4>
+      <p>Tracks subagents spawned by the Task tool:</p>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <pre style="margin: 0; overflow-x: auto;"><code>Agents:
+  * research-auth [Opus 4.5]: "Analyzing authentication patterns" (23s)
+  * write-tests [Sonnet 4]: "Generating unit tests" (8s)
+  OK explore-db (completed in 12s)</code></pre>
+      </div>
+
+      <h4>4. HUD Display Example</h4>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <pre style="margin: 0; overflow-x: auto;"><code>+-------------------------------------------------------------------------+
+| [Opus 4.5] ||||||||-- 35% | myapp | git:(main*) | 1 MCP | 5m            |
+| OK Read x2 | OK Edit x1 | * Bash: npm run build                         |
+| > Implementing auth middleware | 1/4 complete                           |
++-------------------------------------------------------------------------+</code></pre>
+      </div>
+
+      <h3>Configuration</h3>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; position: relative; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <button class="copy-btn" onclick="copyCode(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #2a7d7d; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer;">Copy</button>
+        <pre style="margin: 0; overflow-x: auto;"><code>// ~/.claude/plugins/claude-hud/config.json
+{
+  "lineLayout": "expanded",      // "expanded" | "compact"
+  "gitStatus": {
+    "enabled": true,
+    "showDirty": true,
+    "showAheadBehind": false
+  },
+  "display": {
+    "showModel": true,
+    "showContextBar": true,
+    "showDuration": true,
+    "showTools": true,
+    "showAgents": true,
+    "showTodos": true
+  }
+}</code></pre>
+      </div>
+    </section>
+
+    <hr class="section-divider divider-procedure">
+
+    <!-- Gas Town GUI Section -->
+    <section id="gas-town-gui">
+      <h2><span style="font-weight: 700;">Gas</span> Town GUI as RTS Interface</h2>
+
+      <h3>What Gas Town GUI Is</h3>
+      <p><strong>gtgui</strong> is a browser-based graphical user interface that transforms Gas Town's multi-agent orchestration into an interactive <strong>Real-Time Strategy (RTS) game experience</strong>. Built with Phaser 3, it renders your agent factory as an isometric map.</p>
+
+      <blockquote style="border-left: 3px solid #2a7d7d; padding-left: 1rem; margin: 1.5rem 0; font-style: italic; color: #5c4b3a;">
+        "Gas Town feels like Claude Code in 'limitless mode' but there's really too much going on for you to reasonably comprehend."
+        <cite style="display: block; margin-top: 0.5rem; font-size: 0.9em;">-- Tim Sehn, DoltHub</cite>
+      </blockquote>
+
+      <p><strong>gtgui</strong> addresses the fundamental challenge of parallel agent orchestration: <strong>cognitive overload</strong>.</p>
+
+      <h3>The RTS Metaphor</h3>
+      <p>Real-Time Strategy games solved a similar problem decades ago: managing many units across a complex battlefield. Players learn to:</p>
+      <ul>
+        <li>Scan the minimap for activity hotspots</li>
+        <li>Use color coding to instantly identify unit states</li>
+        <li>Issue commands through spatial selection</li>
+        <li>Trust the abstraction layer rather than micromanaging</li>
+      </ul>
+
+      <h3>Unit Status Visualization</h3>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Color</th><th>Status</th><th>Meaning</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Blue</strong></td><td>Idle</td><td>Waiting for assignment</td><td>Assign work</td></tr>
+          <tr><td><strong>Green</strong></td><td>Active/Working</td><td>Processing a task</td><td>Monitor</td></tr>
+          <tr><td><strong>Red</strong></td><td>Error/Stuck</td><td>Needs attention</td><td>Investigate</td></tr>
+          <tr><td><strong>Gold</strong></td><td>Mayor</td><td>The orchestrator</td><td>Strategic role</td></tr>
+          <tr><td><strong>Purple</strong></td><td>Deacon</td><td>Central pulse daemon</td><td>System health</td></tr>
+          <tr><td><strong>Orange</strong></td><td>Refinery</td><td>Merge queue manager</td><td>Queue status</td></tr>
+        </tbody>
+      </table>
+
+      <h3>GUI Layout (ASCII Mockup)</h3>
+      <div class="ascii-diagram">
++----------------------------------------------------------------------------+
+| Tokens: 45,234 | Issues: 12 | Convoys: 3 | MY GAS TOWN            [-][x] |
++----------------------------------------------------------------------------+
+|                                                                            |
+|                    [Town Hall]                                             |
+|                                                                            |
+|        [Green]      [Green]      [Red]        <- Units (polecats)         |
+|       [Alice]       [Bob]      [Carol]                                     |
+|                                                                            |
+|   [Refinery]                        [Oil Rig]                              |
+|                                                                            |
+|                 [Green]        [Blue]                                      |
+|                [Dave]        [Eve]                                         |
+|                              (idle)                                        |
+|                                                                            |
++----------------------------------------------------------------------------+
+| Selected: Carol (Polecat)                      +-----------+ +----------+ |
+| Status: ERROR - TypeScript check failed        | . .   .   | | [Assign] | |
+| Task: US-007 Implement checkout flow           |   . X .   | | [Logs]   | |
+| Time: 23m 45s                                  | .     . . | | [Stop]   | |
+|                                                |   +-+     | | [Mail]   | |
+|                                                |   +-+     | +----------+ |
++----------------------------------------------------------------------------+
+      </div>
+
+      <h3>Camera Controls</h3>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Input</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>WASD / Arrow Keys</td><td>Pan camera</td></tr>
+          <tr><td>Mouse Wheel</td><td>Zoom in/out</td></tr>
+          <tr><td>Right-Drag</td><td>Drag camera</td></tr>
+          <tr><td>Left-Click</td><td>Select unit</td></tr>
+          <tr><td>Left-Drag</td><td>Box selection</td></tr>
+          <tr><td>Right-Click</td><td>Issue command</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <hr class="section-divider divider-procedure">
+
+    <!-- Visibility Patterns Section -->
+    <section id="visibility-patterns">
+      <h2><span style="font-weight: 700;">Mul</span>ti-Agent Visibility Patterns</h2>
+
+      <h3>Pattern 1: Hub-and-Spoke Dashboard</h3>
+      <p><strong>Use Case:</strong> CC-Mirror orchestration with central coordinator</p>
+      <div class="ascii-diagram">
+                ORCHESTRATOR HUD
+                  ||||||||-- 52%
+                  Coordinating
+                       |
+       +---------------+---------------+
+       |               |               |
+   WORKER 1        WORKER 2        WORKER 3
+   ||-- 28%        ||||-- 45%      ||||||-- 73%
+   [Active]        [Active]        [Warning]
+      </div>
+      <p>Each worker has Claude HUD running. Orchestrator dashboard summarizes all workers. Color coding propagates: any red worker = red overall.</p>
+
+      <h3>Pattern 2: Grid Monitor</h3>
+      <p><strong>Use Case:</strong> Parallel Ralph loops across git worktrees</p>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; position: relative; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <button class="copy-btn" onclick="copyCode(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #2a7d7d; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer;">Copy</button>
+        <pre style="margin: 0; overflow-x: auto;"><code>#!/bin/bash
+# parallel-monitor.sh
+
+tmux new-session -d -s monitor
+
+# Create 3-pane layout
+tmux split-window -h
+tmux split-window -v -t 0
+
+# Run HUD-enabled Ralph in each pane
+tmux send-keys -t 0 "cd ../wt-auth && ./ralph.sh 20" Enter
+tmux send-keys -t 1 "cd ../wt-pay && ./ralph.sh 20" Enter
+tmux send-keys -t 2 "cd ../wt-notify && ./ralph.sh 20" Enter
+
+# Attach
+tmux attach -t monitor</code></pre>
+      </div>
+
+      <h3>Pattern 3: Factory Floor View (Gas Town)</h3>
+      <p><strong>Use Case:</strong> Full Gas Town deployment with 10+ agents</p>
+      <div class="ascii-diagram">
++-----------------------------------------------------------------------+
+|                      GAS TOWN FACTORY FLOOR                            |
+|                                                                       |
+|  HEADQUARTERS                         METRICS                         |
+|  Mayor: [Opus 4.5]                   Active Agents: 12                |
+|  Status: Coordinating                Completed Tasks: 47              |
+|  Deacon: [Sonnet 4] Health checks OK Avg Task Time: 8.5m              |
+|                                      Error Rate: 4.2%                 |
+|                                                                       |
+|  RIG: frontend                       RIG: backend                     |
+|  [Green] Alice - components          [Green] Dave - API               |
+|  [Green] Bob - styling               [Red] Eve - DB                   |
+|  [Blue] Carol (idle)                 [Green] Frank - tests            |
+|  Tasks: 12/18                        Tasks: 8/15                      |
++-----------------------------------------------------------------------+
+      </div>
+
+      <h3>Pattern 4: Alert-Based Monitoring</h3>
+      <p><strong>Use Case:</strong> "Set and forget" overnight runs with notifications</p>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; position: relative; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <button class="copy-btn" onclick="copyCode(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #2a7d7d; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer;">Copy</button>
+        <pre style="margin: 0; overflow-x: auto;"><code>// ~/.claude/settings.json
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": "~/.claude/hooks/check-alerts.sh"
+      }]
+    }]
+  }
+}</code></pre>
+      </div>
+
+      <p><strong>Alert Levels:</strong></p>
+      <ul>
+        <li><strong>CRITICAL (immediate notification):</strong> Any agent stuck for &gt;3 iterations, Context &gt;95%, Test failure after previous pass</li>
+        <li><strong>WARNING (hourly digest):</strong> Context &gt;80%, Task taking &gt;2x average time, Cost exceeding budget</li>
+        <li><strong>INFO (morning summary):</strong> All tasks completed, Iteration counts, Total cost breakdown</li>
+      </ul>
+    </section>
+
+    <hr class="section-divider divider-procedure">
+
+    <!-- Visual vs Terminal Section -->
+    <section id="visual-vs-terminal">
+      <h2><span style="font-weight: 700;">Whe</span>n Visual Oversight Beats Terminal Logs</h2>
+
+      <h3>Decision Matrix</h3>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Scenario</th><th>Terminal Logs</th><th>Claude HUD</th><th>Gas Town GUI</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Single session, focused work</td><td>Best</td><td>Good</td><td>Overkill</td></tr>
+          <tr><td>Single session, need context awareness</td><td>OK</td><td>Best</td><td>Overkill</td></tr>
+          <tr><td>2-3 parallel agents</td><td>OK</td><td>Best</td><td>OK</td></tr>
+          <tr><td>5-10 parallel agents</td><td>Difficult</td><td>OK</td><td>Best</td></tr>
+          <tr><td>10+ parallel agents (factory)</td><td>Impossible</td><td>Limited</td><td>Best</td></tr>
+          <tr><td>Overnight unattended</td><td>Need logging</td><td>Need logging</td><td>Best + alerts</td></tr>
+          <tr><td>Debugging specific failure</td><td>Best</td><td>Helpful</td><td>Context only</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Cognitive Load Analysis</h3>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Tool</th><th>Advantages</th><th>Disadvantages</th><th>Cognitive Ceiling</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Terminal Logs</strong></td><td>Full detail, searchable, scriptable</td><td>Sequential, no spatial memory, overwhelming at scale</td><td>~3 agents</td></tr>
+          <tr><td><strong>Claude HUD</strong></td><td>Glanceable, color-coded, integrated</td><td>Per-session only, no cross-agent view</td><td>~5 agents (multiple terminals)</td></tr>
+          <tr><td><strong>Gas Town GUI</strong></td><td>Spatial reasoning, pattern recognition, intuitive</td><td>Setup overhead, browser requirement</td><td>~30+ agents</td></tr>
+        </tbody>
+      </table>
+
+      <h3>The Glanceability Spectrum</h3>
+      <div class="ascii-diagram">
+HIGH DETAIL                                              HIGH GLANCEABILITY
+LOW GLANCE                                               LOW DETAIL
+     |                                                         |
+     v                                                         v
+Terminal ------> Claude HUD ------> gtgui Minimap ------> Unit Colors
+ Logs            StatusLine           Overview             Status
+
+ "Read                "||||--           "4 red dots           "Red = Bad"
+  /foo/bar             45%"             bottom right"
+  at line 47..."
+      </div>
+
+      <p><strong>Guidance:</strong></p>
+      <ol>
+        <li>Start with Claude HUD for single sessions</li>
+        <li>Add tmux splits for 2-3 parallel agents</li>
+        <li>Move to Gas Town GUI when you exceed 5 agents</li>
+        <li>Keep terminal logs for post-mortem debugging</li>
+      </ol>
+    </section>
+
+    <hr class="section-divider divider-warning">
+
+    <!-- Debugging Section -->
+    <section id="debugging">
+      <h2><span style="font-weight: 700;">Deb</span>ugging Multi-Agent Failures</h2>
+
+      <h3>Failure Pattern 1: Stuck Agent</h3>
+      <p><strong>Symptoms:</strong> One unit red in GUI, same task attempted 3+ times, no commits for extended period</p>
+      <div class="ascii-diagram">
+STUCK AGENT DIAGNOSIS
+
+1. IDENTIFY (gtgui or HUD)
+   > Which agent? How long stuck?
+
+2. ISOLATE (terminal logs)
+   > gt logs AGENT_NAME | tail -100
+   > What error repeats?
+
+3. DIAGNOSE
+   > Task too large? Split it
+   > Impossible criteria? Revise them
+   > Environment issue? Reset state
+   > Model limitation? Add context or use better model
+
+4. INTERVENE
+   > gt stop AGENT_NAME
+   > Edit prd.json with notes
+   > gt sling AGENT_NAME REVISED_TASK
+   > Resume monitoring
+      </div>
+
+      <h3>Failure Pattern 2: Context Explosion</h3>
+      <p><strong>Symptoms:</strong> Context bar red (&gt;85%), quality degrading, agent forgetting earlier instructions</p>
+      <div class="ascii-diagram">
+CONTEXT EXPLOSION DIAGNOSIS
+
+1. CHECK HUD
+   > What's the actual percentage?
+   > Token breakdown: input vs. cache?
+
+2. IDENTIFY CAUSE
+   > Too many file reads? Use Glob more selectively
+   > Large file contents? Read specific lines only
+   > Long conversation? Start fresh iteration
+   > Subagent outputs? Summarize before returning
+
+3. INTERVENE
+   > If Ralph: Let it complete, next iter fresh
+   > If interactive: /compact or start new session
+   > If Gas Town: Stop agent, reassign with smaller task
+   > Future: Split task smaller in PRD
+      </div>
+
+      <h3>Failure Pattern 3: Coordination Failure</h3>
+      <p><strong>Symptoms:</strong> Multiple agents working on same file, merge conflicts accumulating, Refinery queue growing</p>
+      <p><strong>Diagnose:</strong> Check task assignments for overlapping file scope. Are workers spawning sub-agents? Is parallelism too high?</p>
+      <p><strong>Fix:</strong> Pause conflicting agents, resolve conflicts manually, reassign with clearer boundaries, consider git worktrees for true isolation.</p>
+
+      <h3>Failure Pattern 4: Silent Failure</h3>
+      <p><strong>Symptoms:</strong> Agent appears green (working), no errors visible, no actual progress</p>
+      <p><strong>Common Causes:</strong></p>
+      <ul>
+        <li>Infinite planning loop (analysis paralysis)</li>
+        <li>Waiting for external dependency</li>
+        <li>Model API timeout (check network)</li>
+        <li>Prompt ambiguity causing indecision</li>
+      </ul>
+      <p><strong>Fix:</strong> Stop and restart with clearer prompt, add explicit "do this first" instruction, reduce task scope, use more decisive model (Opus for ambiguity).</p>
+    </section>
+
+    <hr class="section-divider divider-context">
+
+    <!-- Mental Models Section -->
+    <section id="mental-models">
+      <h2><span style="font-weight: 700;">Men</span>tal Models</h2>
+
+      <h3>Mental Model 1: The Control Room</h3>
+      <blockquote style="border-left: 3px solid #2a7d7d; padding-left: 1rem; margin: 1.5rem 0; font-style: italic; color: #5c4b3a;">
+        "Think of observability tools as the control room of a power plant. The indicators exist because you cannot be everywhere at once."
+      </blockquote>
+      <p><strong>Implications:</strong></p>
+      <ul>
+        <li>You don't watch every gauge constantly</li>
+        <li>Color coding draws attention to problems</li>
+        <li>Trends matter more than absolute values</li>
+        <li>Alarms exist so you can look away</li>
+      </ul>
+
+      <h3>Mental Model 2: The War Room</h3>
+      <blockquote style="border-left: 3px solid #2a7d7d; padding-left: 1rem; margin: 1.5rem 0; font-style: italic; color: #5c4b3a;">
+        "gtgui is a military command center. The map shows your forces. Colors show readiness. You issue orders and watch outcomes."
+      </blockquote>
+      <p>You don't micromanage every soldier. You issue strategic orders. You respond to color changes (red = problem).</p>
+
+      <h3>Mental Model 3: The Ant Farm</h3>
+      <blockquote style="border-left: 3px solid #2a7d7d; padding-left: 1rem; margin: 1.5rem 0; font-style: italic; color: #5c4b3a;">
+        "Claude Code is the world's biggest fuckin' ant." -- Steve Yegge
+      </blockquote>
+      <p>Agents work autonomously (that's the point). You observe patterns emerge. You occasionally tap the glass (intervene). The glass wall IS the observability layer.</p>
+
+      <h3>Mental Model 4: Polling vs. Events</h3>
+      <p>Claude HUD polls every 300ms. gtgui polls every 3 seconds. This is not real-time - it's <strong>near-real-time</strong>.</p>
+      <p><strong>What This Means:</strong></p>
+      <ul>
+        <li>Don't expect instant updates</li>
+        <li>Overall trends matter more than microsecond accuracy</li>
+        <li>If something looks wrong, wait one update cycle before panicking</li>
+      </ul>
+    </section>
+
+    <hr class="section-divider divider-checkpoint">
+
+    <!-- Checkpoints Section -->
+    <section id="checkpoints">
+      <h2><span style="font-weight: 700;">Che</span>ckpoints</h2>
+
+      <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+        <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Checkpoint 1: Claude HUD Installation</div>
+        <p><strong>Verify:</strong></p>
+        <div class="code-block" style="background: #fefcf3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+          <pre style="margin: 0;"><code># Check plugin is installed
+ls ~/.claude/plugins/claude-hud/
+
+# You should see:
+config.json        # Configuration file
+dist/              # Compiled plugin
+package.json       # Dependencies</code></pre>
+        </div>
+        <p><strong>If not:</strong> Ensure Node.js 18+, Claude Code 1.0.80+, and run <code>/plugin install claude-hud</code></p>
+      </div>
+
+      <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+        <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Checkpoint 2: HUD Displaying Correctly</div>
+        <p><strong>Verify:</strong></p>
+        <ol>
+          <li>Start a new Claude Code session</li>
+          <li>Send any prompt</li>
+          <li>Look for statusline at top of output</li>
+        </ol>
+        <p><strong>You should see:</strong></p>
+        <div class="code-block" style="background: #fefcf3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+          <pre style="margin: 0;"><code>[Opus 4.5] ||||-- 15% | yourproject | git:(main) | 1m</code></pre>
+        </div>
+      </div>
+
+      <div class="checkpoint" style="background: #f0ebe3; border-left: 4px solid #6b9b7a; border-radius: 8px; padding: 1.5rem; margin: 2rem 0;">
+        <div class="checkpoint-header" style="color: #6b9b7a; font-weight: 600;">Checkpoint 3: Gas Town GUI Running</div>
+        <p><strong>Verify:</strong></p>
+        <div class="code-block" style="background: #fefcf3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+          <pre style="margin: 0;"><code># Check server is running
+curl http://localhost:3000
+
+# Check Gas Town connection
+curl http://localhost:8080/api/status</code></pre>
+        </div>
+        <p>Browser at localhost:3000 should show isometric map with no JavaScript console errors.</p>
+      </div>
+
+      <!-- Milestone -->
+      <div class="milestone" style="background: linear-gradient(90deg, #6b9b7a 0%, #2a7d7d 100%); color: white; padding: 1rem 1.5rem; border-radius: 8px; text-align: center; margin: 2rem 0;">
+        You can now see inside the invisible control plane of your Claude Code sessions.
+      </div>
+    </section>
+
+    <hr class="section-divider divider-warning">
+
+    <!-- Troubleshooting Section -->
+    <section id="troubleshooting">
+      <h2><span style="font-weight: 700;">Tro</span>ubleshooting</h2>
+
+      <details class="troubleshoot" style="border: 1px solid #c97065; border-radius: 8px; margin: 1rem 0;">
+        <summary style="background: #fef6f5; padding: 1rem; cursor: pointer; color: #c97065; font-weight: 600;">HUD not appearing</summary>
+        <div style="padding: 1rem;">
+          <p><strong>Cause:</strong> Plugin not loaded or display disabled</p>
+          <p><strong>Fix:</strong></p>
+          <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+            <pre style="margin: 0;"><code># Re-run setup
+/claude-hud:setup
+
+# Or reset config
+rm ~/.claude/plugins/claude-hud/config.json
+/claude-hud:configure
+
+# Verify plugin active
+/plugin list</code></pre>
+          </div>
+        </div>
+      </details>
+
+      <details class="troubleshoot" style="border: 1px solid #c97065; border-radius: 8px; margin: 1rem 0;">
+        <summary style="background: #fef6f5; padding: 1rem; cursor: pointer; color: #c97065; font-weight: 600;">Colors not showing</summary>
+        <div style="padding: 1rem;">
+          <p><strong>Cause:</strong> Terminal doesn't support ANSI colors</p>
+          <p><strong>Fix:</strong></p>
+          <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+            <pre style="margin: 0;"><code># Test terminal color support
+echo -e "\e[32mGreen\e[0m \e[33mYellow\e[0m \e[31mRed\e[0m"
+
+# For tmux, enable 256 colors
+echo 'set -g default-terminal "xterm-256color"' >> ~/.tmux.conf
+
+# Use modern terminal (iTerm2, Kitty, Alacritty)</code></pre>
+          </div>
+        </div>
+      </details>
+
+      <details class="troubleshoot" style="border: 1px solid #c97065; border-radius: 8px; margin: 1rem 0;">
+        <summary style="background: #fef6f5; padding: 1rem; cursor: pointer; color: #c97065; font-weight: 600;">Cannot connect to Gas Town</summary>
+        <div style="padding: 1rem;">
+          <p><strong>Cause:</strong> Gas Town backend not running or misconfigured</p>
+          <p><strong>Fix:</strong></p>
+          <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+            <pre style="margin: 0;"><code># Verify Gas Town running
+gt status
+
+# Check environment variables
+echo $GT_PATH
+echo $TOWN_ROOT
+
+# Restart with correct env
+PORT=3000 GT_PATH=$(which gt) TOWN_ROOT=~/gt npm run server</code></pre>
+          </div>
+        </div>
+      </details>
+
+      <details class="troubleshoot" style="border: 1px solid #c97065; border-radius: 8px; margin: 1rem 0;">
+        <summary style="background: #fef6f5; padding: 1rem; cursor: pointer; color: #c97065; font-weight: 600;">Units not updating</summary>
+        <div style="padding: 1rem;">
+          <p><strong>Cause:</strong> Polling failing or state sync broken</p>
+          <p><strong>Fix:</strong></p>
+          <ol>
+            <li>Check browser console for errors (F12 -> Console tab)</li>
+            <li>Network tab should show /api/status calls every 3 seconds</li>
+            <li>Hard refresh: Cmd+Shift+R (Mac) / Ctrl+Shift+R (Windows)</li>
+            <li>Check Gas Town logs: <code>gt logs | tail -50</code></li>
+          </ol>
+        </div>
+      </details>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Quick Reference Section -->
+    <section>
+      <h2><span style="font-weight: 700;">Qui</span>ck Reference</h2>
+
+      <h3>Essential Commands</h3>
+      <div class="code-block" style="background: #f0ebe3; border-radius: 6px; padding: 1rem; position: relative; font-family: 'SF Mono', Monaco, monospace; margin: 1rem 0;">
+        <button class="copy-btn" onclick="copyCode(this)" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #2a7d7d; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer;">Copy</button>
+        <pre style="margin: 0; overflow-x: auto;"><code># Claude HUD
+/plugin marketplace add jarrodwatts/claude-hud
+/plugin install claude-hud
+/claude-hud:setup
+/claude-hud:configure
+
+# Gas Town GUI
+cd gtgui && npm install
+npm run dev                    # Development with hot reload
+npm run build && npm run server # Production
+
+# Gas Town CLI (backend)
+gt status                      # Town health
+gt polecats                    # List agents
+gt logs AGENT_NAME             # Agent logs
+gt stop AGENT_NAME             # Stop agent
+gt sling AGENT ISSUE           # Assign work</code></pre>
+      </div>
+
+      <h3>Color Quick Reference</h3>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Color</th><th>HUD Meaning</th><th>gtgui Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Green</strong></td><td>Context safe (0-69%)</td><td>Agent working normally</td></tr>
+          <tr><td><strong>Yellow</strong></td><td>Context warning (70-84%)</td><td>Caution/monitoring</td></tr>
+          <tr><td><strong>Red</strong></td><td>Context critical (85%+)</td><td>Agent stuck/errored</td></tr>
+          <tr><td><strong>Blue</strong></td><td>N/A</td><td>Agent idle</td></tr>
+          <tr><td><strong>Gold</strong></td><td>N/A</td><td>Mayor role</td></tr>
+          <tr><td><strong>Purple</strong></td><td>N/A</td><td>Deacon role</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Integration Matrix</h3>
+      <table class="comparison-table">
+        <thead>
+          <tr><th>Integration</th><th>Setup Time</th><th>Best For</th><th>Complexity Level</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>HUD alone</td><td>5 min</td><td>Single sessions, basic awareness</td><td>Level 1-3</td></tr>
+          <tr><td>HUD + tmux</td><td>10 min</td><td>2-5 parallel agents</td><td>Level 3-4</td></tr>
+          <tr><td>gtgui alone</td><td>30 min</td><td>Gas Town visual management</td><td>Level 6-7</td></tr>
+          <tr><td>HUD + gtgui</td><td>35 min</td><td>Gas Town + detail on demand</td><td>Level 6-7</td></tr>
+          <tr><td>Full stack</td><td>1 hour</td><td>Maximum visibility, overnight runs</td><td>Level 6-7</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Related Pages -->
+    <div class="related-pages" style="margin-top: 2rem; padding: 1rem; background: #f9f6f0; border-radius: 8px;">
+      <h4 style="margin-top: 0;">Related Documents</h4>
+      <ul>
+        <li><a href="mastery-ralph-complete.html">Ralph Complete</a> - HUD integration with Ralph loops</li>
+        <li><a href="mastery-gastown-complete.html">Gas Town Complete</a> - Factory-scale orchestration</li>
+        <li><a href="technical-subagent-spawning-best-practices.html">Subagent Spawning</a> - Multi-agent coordination</li>
+      </ul>
+      <h4>Key Sources</h4>
+      <ul>
+        <li>Jarrod Watts (@jarrodwatts) - Claude HUD creator</li>
+        <li>Steve Yegge - Gas Town and gtgui philosophy</li>
+        <li>Tim Sehn (DoltHub) - Gas Town experience report</li>
+      </ul>
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="footer-nav" style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e0d5c5;">
+      <a href="technical-subagent-spawning-best-practices.html">Prev: Subagent Spawning</a>
+      <a href="compare-observability.html">Next: Observability Comparison</a>
+    </div>
+
+  </div>
+
+  <nav class="left-nav" id="leftNav">
+    <div class="px-4 mb-4">
+      <a href="../index.html" class="text-xs font-semibold text-accent hover:text-accent-light uppercase tracking-wider">Claude Code KB</a>
+    </div>
+    <div class="nav-content"></div>
+  </nav>
+
+  <script src="../js/copy-code.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/global-nav.js"></script>
+  <script>
+    function copyCode(button) {
+      const codeBlock = button.parentElement.querySelector('code');
+      navigator.clipboard.writeText(codeBlock.textContent);
+      button.textContent = 'Copied!';
+      setTimeout(() => button.textContent = 'Copy', 2000);
+    }
+  </script>
+</body>
+</html>

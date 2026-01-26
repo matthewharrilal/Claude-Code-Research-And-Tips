@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Anti-Pattern Analysis for Claude Code Workflows
 
+> **You Are Here:** This is the "what NOT to do" guide - a comprehensive catalog of failure modes organized by category. Read this when something goes wrong to diagnose the issue, or before starting a complex project to avoid known pitfalls. Companion to `principles-core.md` (the WHY) - this doc shows the consequences of violating those principles.
+
 **Synthesis Date:** 2026-01-09
 **Source:** Comprehensive extraction analysis from 30+ community sources, GitHub issues, and production experiences
 **Purpose:** Identify what does not work and why, enabling practitioners to avoid common pitfalls
@@ -130,6 +132,15 @@ coverage/
 
 **Source:** Configuration best practices
 
+### Checkpoint: Context Anti-Patterns
+**You should now understand:**
+- [ ] The 4 major context anti-patterns and their symptoms
+- [ ] Why compaction should be proactive (60-70%) not reactive (95%)
+- [ ] The importance of .claudeignore for build outputs
+- [ ] When to use subagents vs. targeted file reads
+
+**If unclear:** See `principles-core.md` Principle 1 (Context Is Primary Constraint) for the theory.
+
 ---
 
 ## Orchestration Anti-Patterns
@@ -222,6 +233,15 @@ Or use testable completion criteria:
 - Identify task dependencies; parallelize where no dependencies exist
 
 **Source:** @mollycantillon (Panopticon), @0xSero (Orchestra)
+
+### Checkpoint: Orchestration Anti-Patterns
+**You should now understand:**
+- [ ] Why workers must NEVER spawn subagents (prevents recursion)
+- [ ] Why orchestrators must NOT use implementation tools
+- [ ] The completion promise pattern for loop termination
+- [ ] When to parallelize vs. serialize tasks
+
+**If unclear:** See `architecture-composition-rules.md` for valid orchestration patterns.
 
 ---
 
@@ -321,6 +341,15 @@ Or use testable completion criteria:
 - Or use handoff files between sequential tasks
 
 **Source:** @nummanali (CC Mirror task management)
+
+### Checkpoint: Task Design Anti-Patterns
+**You should now understand:**
+- [ ] The ~100-500 LOC / 1-3 files / 30-60 min sizing heuristics
+- [ ] Why acceptance criteria must be testable, not vague
+- [ ] When task overhead exceeds value (tasks too small)
+- [ ] How to use blockedBy for dependent tasks
+
+**If unclear:** See `mastery-ralph-complete.md` for PRD and task design best practices.
 
 ---
 

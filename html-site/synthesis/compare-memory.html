@@ -1,0 +1,2444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Approaches Compared | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Grand Navigation -->
+  <script src="../js/grand-nav.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Comparison Table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .comparison-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #18181b;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .comparison-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .comparison-table tr:hover td {
+      background: #fafafa;
+    }
+
+    /* Memory Layer Box */
+    .layer-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .layer-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .layer-number {
+      width: 32px;
+      height: 32px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .layer-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .layer-purpose {
+      font-size: 14px;
+      color: #71717a;
+      margin-left: 44px;
+    }
+
+    .layer-questions {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0 0 44px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #3f3f46;
+    }
+
+    /* Approach Card */
+    .approach-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .approach-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .approach-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .approach-section {
+      margin-bottom: 20px;
+    }
+
+    .approach-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .approach-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .approach-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .approach-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 0;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .approach-list li::before {
+      content: "";
+      display: block;
+      width: 4px;
+      height: 4px;
+      background: #71717a;
+      border-radius: 50%;
+      margin-top: 8px;
+      flex-shrink: 0;
+    }
+
+    .pros-list li::before {
+      background: #10b981;
+    }
+
+    .cons-list li::before {
+      background: #ef4444;
+    }
+
+    /* Migration Flow Diagram */
+    .migration-flow {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .flow-step {
+      display: inline-block;
+      padding: 12px 20px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #3f3f46;
+      margin: 8px;
+    }
+
+    .flow-arrow {
+      display: inline-block;
+      color: #0D9373;
+      font-size: 20px;
+      margin: 0 8px;
+    }
+
+    .flow-decision {
+      display: inline-block;
+      padding: 12px 20px;
+      background: #ecfdf5;
+      border: 1px solid #10b981;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #166534;
+      margin: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="database" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Memory Approaches</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">Philosophy + Code</a>
+        </div>
+      </div>
+
+      <!-- The Four Approaches -->
+      <div class="nav-section expanded" data-section="approaches">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>Four Approaches</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#progress-txt" class="nav-item">progress.txt</a>
+          <a href="#git-history" class="nav-item">Git History</a>
+          <a href="#agents-md" class="nav-item">AGENTS.md</a>
+          <a href="#claude-mem" class="nav-item">Claude-Mem</a>
+        </div>
+      </div>
+
+      <!-- Layered Strategy -->
+      <div class="nav-section" data-section="layered">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Layered Strategy</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#layered" class="nav-item">The Flow</a>
+          <a href="#migration" class="nav-item">Migration Path</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Practical Problems</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+
+      <!-- Anti-Patterns -->
+      <div class="nav-section" data-section="antipatterns">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="x-circle" class="w-4 h-4"></i>
+          <span>Anti-Patterns</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#antipatterns" class="nav-item">What to Avoid</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Memory is layers: session, episodic, semantic, long-term. Use the right layer for the right knowledge.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Claude starts fresh each conversation. Without memory, every session is groundhog day."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Session -> progress.txt -> AGENTS.md -> Claude-Mem')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Session -> progress.txt -> AGENTS.md -> Claude-Mem</code>
+          </div>
+
+          <div class="core-anchor">That's the migration path. Knowledge graduates upward as it proves valuable.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Every memory approach aims to solve the same fundamental problem: <strong>persist knowledge across sessions</strong>. But different knowledge has different retention needs. Session discoveries need temporary storage. Proven patterns need permanent homes. Cross-project learnings need searchable databases.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          The insight: don't choose ONE memory approach. Use ALL of them, each for its strength. This is layered memory - like CPU caches, each layer serves a different access pattern.
+        </p>
+
+        <!-- Comparison Matrix -->
+        <h3 class="font-semibold text-lg mb-4 mt-8">Comparison Matrix</h3>
+
+        <div class="overflow-x-auto mb-8">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Factor</th>
+                <th>progress.txt</th>
+                <th>Git History</th>
+                <th>AGENTS.md</th>
+                <th>Claude-Mem</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Setup</strong></td>
+                <td>None</td>
+                <td>None</td>
+                <td>Low</td>
+                <td>Medium-High</td>
+              </tr>
+              <tr>
+                <td><strong>Persistence</strong></td>
+                <td>Session</td>
+                <td>Forever</td>
+                <td>Forever</td>
+                <td>Forever</td>
+              </tr>
+              <tr>
+                <td><strong>Query</strong></td>
+                <td>Manual/grep</td>
+                <td>Hard</td>
+                <td>Manual/grep</td>
+                <td>Semantic</td>
+              </tr>
+              <tr>
+                <td><strong>Scale</strong></td>
+                <td>Medium</td>
+                <td>Good</td>
+                <td>Limited</td>
+                <td>Excellent</td>
+              </tr>
+              <tr>
+                <td><strong>Structure</strong></td>
+                <td>Freeform</td>
+                <td>Rigid</td>
+                <td>Curated</td>
+                <td>Flexible</td>
+              </tr>
+              <tr>
+                <td><strong>Maintenance</strong></td>
+                <td>Prune needed</td>
+                <td>Automatic</td>
+                <td>Curation</td>
+                <td>Automatic</td>
+              </tr>
+              <tr>
+                <td><strong>Transparency</strong></td>
+                <td>Full</td>
+                <td>Full</td>
+                <td>Full</td>
+                <td>Variable</td>
+              </tr>
+              <tr>
+                <td><strong>Human readable</strong></td>
+                <td>Yes</td>
+                <td>Partial</td>
+                <td>Yes</td>
+                <td>Depends</td>
+              </tr>
+              <tr>
+                <td><strong>Cross-project</strong></td>
+                <td>No</td>
+                <td>No</td>
+                <td>No</td>
+                <td>Possible</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 3: THE FOUR APPROACHES -->
+      <section id="approaches" data-activity="approaches">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          The Four Approaches
+        </h2>
+
+        <!-- Approach 1: progress.txt -->
+        <div class="approach-card" id="progress-txt">
+          <div class="approach-header">
+            <i data-lucide="file-text" class="w-6 h-6 text-accent"></i>
+            <div class="approach-title">Approach 1: progress.txt</div>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">How it works</div>
+            <p class="text-text-secondary text-sm">
+              Append-only text file in project root. Often includes "Codebase Patterns" or "Session Learnings" sections. Dated entries track what was discovered and when. Agent appends before ending session.
+            </p>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">Pros</div>
+            <ul class="approach-list pros-list">
+              <li>Zero setup required</li>
+              <li>Human readable and editable</li>
+              <li>Easy to update with simple append</li>
+              <li>Visible in file tree</li>
+              <li>Works with any tooling</li>
+            </ul>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">Cons</div>
+            <ul class="approach-list cons-list">
+              <li>Can grow large over time</li>
+              <li>No inherent structure or schema</li>
+              <li>Manual pruning needed periodically</li>
+              <li>No semantic search capability</li>
+              <li>Duplicates accumulate</li>
+            </ul>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">Best For</div>
+            <p class="text-text-secondary text-sm">
+              Session memory and short-term learnings. Scratchpad for current work. Quick handoff between sessions. Projects without complex memory needs.
+            </p>
+          </div>
+        </div>
+
+        <!-- Approach 2: Git History -->
+        <div class="approach-card" id="git-history">
+          <div class="approach-header">
+            <i data-lucide="git-commit" class="w-6 h-6 text-accent"></i>
+            <div class="approach-title">Approach 2: Git History</div>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">How it works</div>
+            <p class="text-text-secondary text-sm">
+              Commit messages encode decisions and context. Branch state shows work in progress. Diff history reveals code evolution. PR descriptions capture rationale.
+            </p>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">Pros</div>
+            <ul class="approach-list pros-list">
+              <li>Already exists in every project</li>
+              <li>Structured timeline built-in</li>
+              <li>No extra files to maintain</li>
+              <li>Immutable record</li>
+              <li>Standard tooling support</li>
+            </ul>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">Cons</div>
+            <ul class="approach-list cons-list">
+              <li>Hard to query semantically</li>
+              <li>Knowledge is implicit, not explicit</li>
+              <li>Requires discipline in commit messages</li>
+              <li>Can't store non-code learnings</li>
+              <li>git log archaeology is tedious</li>
+            </ul>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">Best For</div>
+            <p class="text-text-secondary text-sm">
+              Code evolution tracking. Decision history ("why was this changed?"). Rollback scenarios. Audit trails.
+            </p>
+          </div>
+        </div>
+
+        <!-- Approach 3: AGENTS.md -->
+        <div class="approach-card" id="agents-md">
+          <div class="approach-header">
+            <i data-lucide="book-open" class="w-6 h-6 text-accent"></i>
+            <div class="approach-title">Approach 3: AGENTS.md</div>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">How it works</div>
+            <p class="text-text-secondary text-sm">
+              Permanent learnings document in project root. Captures patterns, gotchas, and conventions. Updated by agents when significant learning occurs. Lives alongside CLAUDE.md (instructions) as knowledge base.
+            </p>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">Pros</div>
+            <ul class="approach-list pros-list">
+              <li>Long-term knowledge survives all sessions</li>
+              <li>Both human and agent readable</li>
+              <li>Curated signal, not noise</li>
+              <li>Version controlled with project</li>
+              <li>Natural place for "project wisdom"</li>
+            </ul>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">Cons</div>
+            <ul class="approach-list cons-list">
+              <li>Requires manual curation</li>
+              <li>Can become stale if not maintained</li>
+              <li>Single file limits organization</li>
+              <li>No automatic updates</li>
+              <li>Subjective what belongs</li>
+            </ul>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">Best For</div>
+            <p class="text-text-secondary text-sm">
+              Permanent project knowledge. Team onboarding context. Architectural decisions. "Things we learned the hard way."
+            </p>
+          </div>
+        </div>
+
+        <!-- Approach 4: Claude-Mem -->
+        <div class="approach-card" id="claude-mem">
+          <div class="approach-header">
+            <i data-lucide="database" class="w-6 h-6 text-accent"></i>
+            <div class="approach-title">Approach 4: Claude-Mem / External Database</div>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">How it works</div>
+            <p class="text-text-secondary text-sm">
+              Semantic memory store (vector DB, structured DB, or hybrid). Compressed summaries of learnings. Cross-session persistence with retrieval. Often uses embeddings for similarity search.
+            </p>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">Pros</div>
+            <ul class="approach-list pros-list">
+              <li>Automatic memory formation</li>
+              <li>Semantic search ("find related learnings")</li>
+              <li>Scales to massive knowledge bases</li>
+              <li>Cross-project knowledge possible</li>
+              <li>Handles unstructured data well</li>
+            </ul>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">Cons</div>
+            <ul class="approach-list cons-list">
+              <li>Requires setup and infrastructure</li>
+              <li>External dependency to maintain</li>
+              <li>Less transparent (black box feeling)</li>
+              <li>Cost and complexity overhead</li>
+              <li>Potential latency in retrieval</li>
+            </ul>
+          </div>
+
+          <div class="approach-section">
+            <div class="approach-section-title">Best For</div>
+            <p class="text-text-secondary text-sm">
+              Long-running AI systems. Large teams or organizations. Cross-project knowledge sharing. Systems requiring semantic retrieval.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: LAYERED MEMORY STRATEGY -->
+      <section id="layered" data-activity="layered">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Layered Memory Strategy
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          <strong>The insight: Use ALL of them, each for its strength.</strong> Memory is not one thing. It's layers, like a CPU cache hierarchy.
+        </p>
+
+        <!-- Layer 1 -->
+        <div class="layer-box">
+          <div class="layer-header">
+            <div class="layer-number">1</div>
+            <div class="layer-title">progress.txt (Session Memory)</div>
+          </div>
+          <div class="layer-purpose">What am I working on RIGHT NOW?</div>
+          <div class="layer-questions">
+What am I working on RIGHT NOW?
+What did I just discover?
+What should I pick up next session?</div>
+          <p class="text-text-secondary text-sm mt-4 ml-11">
+            Append during work. Review at session start. Prune after incorporating learnings elsewhere.
+          </p>
+        </div>
+
+        <!-- Layer 2 -->
+        <div class="layer-box">
+          <div class="layer-header">
+            <div class="layer-number">2</div>
+            <div class="layer-title">Git History (Code Memory)</div>
+          </div>
+          <div class="layer-purpose">What happened when and why?</div>
+          <div class="layer-questions">
+What changed and why?
+What was the state before?
+Who/what made this decision?</div>
+          <p class="text-text-secondary text-sm mt-4 ml-11">
+            Good commit messages are an investment. PR descriptions capture context. Tags mark significant states.
+          </p>
+        </div>
+
+        <!-- Layer 3 -->
+        <div class="layer-box">
+          <div class="layer-header">
+            <div class="layer-number">3</div>
+            <div class="layer-title">AGENTS.md (Project Memory)</div>
+          </div>
+          <div class="layer-purpose">What does this codebase NEED to know forever?</div>
+          <div class="layer-questions">
+What does this codebase NEED to know forever?
+What gotchas will bite future agents?
+What patterns define this project?</div>
+          <p class="text-text-secondary text-sm mt-4 ml-11">
+            Graduate from progress.txt when proven valuable. Curate ruthlessly. Review quarterly.
+          </p>
+        </div>
+
+        <!-- Layer 4 -->
+        <div class="layer-box">
+          <div class="layer-header">
+            <div class="layer-number">4</div>
+            <div class="layer-title">Claude-Mem/DB (System Memory)</div>
+          </div>
+          <div class="layer-purpose">What have we learned across ALL projects?</div>
+          <div class="layer-questions">
+What have we learned across ALL projects?
+What patterns recur?
+What can be retrieved semantically?</div>
+          <p class="text-text-secondary text-sm mt-4 ml-11">
+            For sophisticated setups. Organizational knowledge. Long-term AI assistant memory.
+          </p>
+        </div>
+
+        <!-- Core Insight Table -->
+        <h3 class="font-semibold text-lg mb-4 mt-8">The Core Insight</h3>
+
+        <div class="overflow-x-auto mb-8">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Layer</th>
+                <th>Analogy</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>progress.txt</td>
+                <td>Working memory</td>
+                <td>What's active now</td>
+              </tr>
+              <tr>
+                <td>Git</td>
+                <td>Episodic memory</td>
+                <td>What happened when</td>
+              </tr>
+              <tr>
+                <td>AGENTS.md</td>
+                <td>Semantic memory</td>
+                <td>What we know</td>
+              </tr>
+              <tr>
+                <td>Claude-Mem</td>
+                <td>Long-term store</td>
+                <td>Everything, searchable</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 5: MIGRATION PATH -->
+      <section id="migration" data-activity="migration">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Migration Path
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Knowledge flows upward through the layers as it proves valuable. The question at each transition: "Is this worth keeping?"
+        </p>
+
+        <div class="migration-flow">
+          <div class="flow-step">Session Discovery</div>
+          <span class="flow-arrow">&#8595;</span>
+          <br>
+          <div class="flow-step">progress.txt</div>
+          <span class="text-text-muted mx-4">(temporary hold)</span>
+          <br>
+          <span class="flow-arrow">&#8595;</span>
+          <br>
+          <div class="flow-decision">Proven valuable?</div>
+          <span class="flow-arrow">&#8594;</span>
+          <div class="flow-step">AGENTS.md</div>
+          <span class="text-text-muted mx-4">(permanent)</span>
+          <br>
+          <span class="flow-arrow">&#8595;</span>
+          <br>
+          <div class="flow-decision">Cross-project relevance?</div>
+          <span class="flow-arrow">&#8594;</span>
+          <div class="flow-step">Claude-Mem</div>
+          <span class="text-text-muted mx-4">(semantic store)</span>
+        </div>
+
+        <p class="text-text-secondary mb-6 text-center italic">
+          Git captures code decisions throughout
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Weekly memory audit script</span>
+<span class="keyword">echo</span> <span class="string">"=== Memory Audit $(date) ==="</span>
+<span class="keyword">echo</span> <span class="string">"progress.txt lines: $(wc -l < scripts/ralph/progress.txt)"</span>
+<span class="keyword">echo</span> <span class="string">"AGENTS.md lines: $(wc -l < AGENTS.md)"</span>
+<span class="keyword">echo</span> <span class="string">"Recent patterns in progress.txt:"</span>
+<span class="variable">grep</span> -i <span class="string">"pattern\|learned"</span> scripts/ralph/progress.txt | <span class="variable">tail</span> -10</pre>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit, with concrete fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            progress.txt Becomes Unmanageable
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> File is thousands of lines; agent references outdated information; search returns too many results.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Never pruned; everything accumulated without curation.</div>
+          <div class="gotcha-detail"><strong>Threshold:</strong> >20KB progress.txt starts degrading quality</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Archive old content to a dated backup, then prune to recent sessions only. Graduate valuable patterns to AGENTS.md.</div>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Check progress.txt size</span>
+<span class="variable">wc</span> -l scripts/ralph/progress.txt
+
+<span class="comment"># Archive and reset</span>
+<span class="variable">mv</span> scripts/ralph/progress.txt scripts/ralph/progress-archive-$(date +%Y%m%d).txt
+<span class="keyword">echo</span> <span class="string">"# Session Progress"</span> > scripts/ralph/progress.txt</pre>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Agent Keeps Rediscovering Same Patterns
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Same "Learned:" entries appearing in progress.txt across sessions; agent makes same mistakes repeatedly.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Knowledge not graduating from progress.txt to AGENTS.md; agent not reading AGENTS.md.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Create AGENTS.md with proven patterns. Ensure CLAUDE.md instructs agent to read AGENTS.md at session start.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Git History Hard to Search
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Know something was changed but can't find when or why.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Poor commit messages; no semantic tagging; relying on implicit knowledge.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Improve commit message discipline. Use conventional commits. Consider adding [DECISION] or [PATTERN] tags.</div>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Search commit messages</span>
+<span class="variable">git</span> log --all --oneline --grep=<span class="string">"auth"</span>
+
+<span class="comment"># Search code changes</span>
+<span class="variable">git</span> log -p -S <span class="string">"functionName"</span>
+
+<span class="comment"># Find commits by date range</span>
+<span class="variable">git</span> log --since=<span class="string">"2026-01-01"</span> --until=<span class="string">"2026-01-15"</span> --oneline</pre>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Claude-Mem Retrieval Returns Irrelevant Results
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Semantic search returns tangentially related content; misses obviously relevant entries.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Poor embedding quality for your domain; retrieval threshold too loose/strict.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Tune similarity thresholds. Consider domain-specific embeddings. Fall back to keyword search for precision needs.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Memory Layers Out of Sync
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> progress.txt says one thing, AGENTS.md says another, code comments say a third.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> No graduation process; multiple sources of truth evolving independently.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Establish weekly memory maintenance: prune progress.txt, review AGENTS.md, archive stale content.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Signal vs. Noise Curation
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> What's valuable is subjective. Different developers want different things in AGENTS.md. Too much curation loses patterns; too little loses signal.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> AGENTS.md either grows unbounded (no curation) or stays empty (too strict curation).</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Establish curation criteria: "If this pattern appears 3+ times in progress.txt, it graduates." Don't try to be perfect.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Stale Knowledge Accumulation
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> What was true 6 months ago may not be true now. Codebase evolves. Libraries update. But removing knowledge is scary.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> AGENTS.md contains outdated patterns that mislead the agent. progress.txt references deleted files.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Quarterly review of AGENTS.md. Date entries. Remove anything that no longer applies. Accept that maintenance is ongoing.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cross-Project Knowledge Transfer
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Learnings from Project A might apply to Project B. But context differs. What worked in one place may not work in another.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Agent applies pattern from wrong context. Claude-Mem retrieves irrelevant cross-project data.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Tag learnings with context. "This applies when: [conditions]." Don't blindly share everything.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE / ANTI-PATTERNS -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use Each Approach
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">Recommended Defaults</h3>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="user" class="w-5 h-5"></i>
+              SOLO DEVELOPER, SMALL PROJECT
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>progress.txt + good git messages</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple, zero overhead</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Scales to medium complexity</span>
+            </div>
+          </div>
+
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="users" class="w-5 h-5"></i>
+              TEAM PROJECT, MEDIUM COMPLEXITY
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>progress.txt + AGENTS.md + disciplined git</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Permanent knowledge survives team changes</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Low maintenance overhead</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="building" class="w-5 h-5"></i>
+              LONG-RUNNING AI SYSTEM, ORGANIZATION
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>All four layers, with automation</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Semantic search enables cross-project learning</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Worth the infrastructure investment</span>
+            </div>
+          </div>
+
+          <div class="when-not" id="antipatterns">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              ANTI-PATTERNS
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Everything in progress.txt</strong> - becomes unreadable</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Nothing in AGENTS.md</strong> - keeps rediscovering</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Over-engineering Claude-Mem</strong> for simple project</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Ignoring git messages</strong> - losing free memory</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Never pruning</strong> - noise overwhelms signal</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if Claude had perfect memory?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> No files at all. Claude remembers everything across sessions.<br>
+          <strong>Why this fails:</strong> Context windows are finite. Sessions end. Models update.<br>
+          <strong>Hidden constraint revealed:</strong> External state is not a workaround - it's the architecture.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="essence">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Memory Layers = CPU Cache Hierarchy</div>
+        <div class="text-text-secondary text-sm">
+          <strong>L1 Cache</strong> = progress.txt (fast, small, session-local)<br>
+          <strong>L2 Cache</strong> = Git (medium, structured, code-focused)<br>
+          <strong>L3 Cache</strong> = AGENTS.md (slower, larger, curated)<br>
+          <strong>RAM</strong> = Claude-Mem (semantic, vast, external)<br><br>
+          <em>If you've tuned cache hierarchies, you understand memory layers.</em>
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">Minimal viable memory system</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">echo "Learned: X" >> progress.txt</code><br><br>
+          <strong>Essential:</strong> Something persists across sessions.<br>
+          <strong>Everything else:</strong> Refinement for scale and curation.
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-003: External state > internal memory</div>
+        <div class="text-text-secondary text-sm">
+          Ralph, Gas Town, Memory Layers all share this invariant. Files are the memory. Context windows are temporary. The same principle forces the same architectural choice across all patterns.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint drives the architecture</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Sessions end. Memory is lost.<br>
+          &#8594; State must persist externally<br>
+          &#8594; Different knowledge needs different persistence<br>
+          &#8594; Multiple layers serve different access patterns<br>
+          &#8594; Graduation path moves valuable knowledge upward<br>
+          &#8594; Curation prevents noise accumulation
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How single-layer memory degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% useful</strong> (0-5KB): All signal, easy to find<br>
+          <strong>90% useful</strong> (5-15KB): Some noise, still searchable<br>
+          <strong>70% useful</strong> (15-30KB): Noise competes with signal<br>
+          <strong>50% useful</strong> (30KB+): Search returns too many results<br>
+          <strong>CLIFF</strong> (100KB+): Agent ignores file entirely<br><br>
+          <em>The gradient is invisible until search stops working.</em>
+        </div>
+      </div>
+
+      <!-- APPROACHES SECTION -->
+      <div class="activity-item expertise" data-section="approaches">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">progress.txt depth of understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Where do I put learnings?" &#8594; progress.txt<br>
+          <strong>Intermediate:</strong> "How often to prune?" &#8594; When >20KB or weekly<br>
+          <strong>Advanced:</strong> "What graduates?" &#8594; Patterns appearing 3+ times<br>
+          <strong>Staff:</strong> "How to automate?" &#8594; Lint rules + graduation scripts<br>
+          <strong>Expert:</strong> "Integration with other layers?" &#8594; Auto-populate AGENTS.md
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="approaches">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Git: Discipline vs. Accessibility</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Good commit messages:</strong> Valuable history, but requires discipline<br>
+          <strong>Quick commits:</strong> Easy, but history becomes archaeology<br>
+          <strong>Squash merges:</strong> Clean history, but loses detail<br><br>
+          <em>Heuristic: Conventional commits balance effort/value. "[DECISION]" tags enable search.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="approaches">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Team onboarding with AGENTS.md</div>
+        <div class="text-text-secondary text-sm">
+          New dev joins team. Reads AGENTS.md. Immediately knows: "Don't use feature X in testing" and "API returns 204 not 200 for deletes." Days of discovery compressed to 10 minutes. <em>That's the value of curated knowledge.</em>
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="approaches">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">AGENTS.md + CLAUDE.md</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> CLAUDE.md = instructions, AGENTS.md = knowledge.<br>
+          <strong>Danger:</strong> Overlap confuses both human and agent. Keep distinct: HOW vs. WHAT.<br>
+          <strong>Recommendation:</strong> CLAUDE.md says "read AGENTS.md at session start."
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="approaches">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal embedding model for code</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE QUESTION:</strong> Which embedding model best captures code semantics for retrieval?<br>
+          <strong>WHY IT'S HARD:</strong> Code has structure that prose embeddings miss. Comments vs. code vs. error messages need different treatment.<br>
+          <strong>CURRENT BEST:</strong> Domain-specific fine-tuning, but expensive.
+        </div>
+      </div>
+
+      <!-- LAYERED SECTION -->
+      <div class="activity-item horizon" data-section="layered">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How judgment on AGENTS.md evolves</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Week 1:</strong> "AGENTS.md feels like busywork"<br>
+          <strong>Week 4:</strong> "Oh, I forgot that gotcha from last month"<br>
+          <strong>Week 12:</strong> "AGENTS.md is why I'm not repeating mistakes"<br>
+          <strong>Month 6:</strong> "New hires productive in days because of AGENTS.md"<br><br>
+          <em>Don't judge permanent memory by short-term overhead.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="layered">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Memory Layers = Human Memory</div>
+        <div class="text-text-secondary text-sm">
+          <strong>progress.txt</strong> = Working memory (seconds to hours)<br>
+          <strong>Git</strong> = Episodic memory (events in time)<br>
+          <strong>AGENTS.md</strong> = Semantic memory (facts and concepts)<br>
+          <strong>Claude-Mem</strong> = External brain (notes and databases)<br><br>
+          <em>You already know this. You just call it "taking notes" vs "remembering."</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="layered">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Compounding at organizational scale</div>
+        <div class="text-text-secondary text-sm">
+          <strong>At 1 dev:</strong> Memory helps that developer<br>
+          <strong>At 5 devs:</strong> Memory helps onboarding and handoffs<br>
+          <strong>At 20 devs:</strong> Memory IS the institutional knowledge<br>
+          <strong>At 100 devs:</strong> Without memory, every team rediscovers everything<br><br>
+          <em>The value scales superlinearly with team size.</em>
+        </div>
+      </div>
+
+      <!-- MIGRATION SECTION -->
+      <div class="activity-item violation" data-section="migration">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip the graduation step</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> You never move patterns from progress.txt to AGENTS.md<br>
+          <strong>THEN:</strong> progress.txt grows unbounded<br>
+          <strong>THEN:</strong> You archive/prune to manage size<br>
+          <strong>THEN:</strong> Valuable patterns are lost in archives<br>
+          <strong>FINALLY:</strong> Agent keeps rediscovering the same patterns<br><br>
+          <em>The fix: "If it appears 3+ times, it graduates."</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="migration">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Graduation process understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What moves up?" &#8594; Patterns proven 3+ times<br>
+          <strong>Intermediate:</strong> "How often?" &#8594; Weekly review<br>
+          <strong>Advanced:</strong> "What stays behind?" &#8594; Session-specific context<br>
+          <strong>Staff:</strong> "How to automate?" &#8594; Scripts counting pattern occurrences<br>
+          <strong>Expert:</strong> "What about staleness?" &#8594; Quarterly prune of AGENTS.md
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="migration">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When Claude-Mem becomes worth it</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-3 projects:</strong> Overkill. AGENTS.md per project is fine.<br>
+          <strong>4-10 projects:</strong> Emerging value. Cross-project patterns appear.<br>
+          <strong>10+ projects:</strong> Clear ROI. Semantic search saves hours.<br><br>
+          <strong>THE INFLECTION:</strong> ~8 active projects<br>
+          <em>Detection: "I've solved this before somewhere" - if frequent, you need Claude-Mem.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if progress.txt never grew?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> No pruning needed. Everything accumulates forever.<br>
+          <strong>Why this fails:</strong> Context windows are finite. 200KB file = wasted tokens.<br>
+          <strong>Hidden constraint:</strong> The pruning requirement IS the signal that layers are needed.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="gotchas">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you ignore git message discipline</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> All commits are "fix" or "update"<br>
+          <strong>THEN:</strong> Git log becomes unusable for archaeology<br>
+          <strong>THEN:</strong> "Why was this changed?" becomes unanswerable<br>
+          <strong>THEN:</strong> Debugging requires reading all diffs manually<br>
+          <strong>FINALLY:</strong> You've lost free memory capacity<br><br>
+          <em>The fix: Commit messages are documentation. Invest once, read forever.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Sync frequency vs. staleness</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Sync often:</strong> Always current, but high maintenance overhead<br>
+          <strong>Sync rarely:</strong> Low effort, but layers diverge<br>
+          <strong>Never sync:</strong> Zero effort, but contradictions accumulate<br><br>
+          <em>Heuristic: Weekly sync is the sweet spot. Monthly is minimum viable.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">The 500KB progress.txt disaster</div>
+        <div class="text-text-secondary text-sm">
+          Developer ran Ralph for 3 months without pruning. progress.txt hit 500KB. Agent spent 40% of context window just reading history. Quality crashed. Fix: archived to dated file, started fresh. <em>"Never again. Weekly pruning is non-negotiable."</em>
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The curation paradox</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE DILEMMA:</strong><br>
+          - Curate too strictly: Miss valuable patterns<br>
+          - Curate too loosely: Noise drowns signal<br>
+          - No curation: Everything is equally unhelpful<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> Value is subjective and context-dependent.<br>
+          <em>Heuristic: "Would a new team member benefit from this?" If yes, keep it.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="hard">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How AGENTS.md goes stale</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Month 1:</strong> 100% accurate, everything fresh<br>
+          <strong>Month 3:</strong> 90% accurate, minor drift<br>
+          <strong>Month 6:</strong> 75% accurate, some patterns outdated<br>
+          <strong>Month 12:</strong> 50% accurate, major sections misleading<br>
+          <strong>Month 24:</strong> Actively harmful - wrong patterns applied<br><br>
+          <em>Critical: Quarterly review prevents the cliff.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Automatic staleness detection</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE QUESTION:</strong> Can we detect when AGENTS.md contradicts the current codebase?<br>
+          <strong>WHY IT'S HARD:</strong> Semantic understanding of both code and prose required. Context matters.<br>
+          <strong>CURRENT BEST:</strong> Manual quarterly review. No good automation.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When overhead feels worth it</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "Why am I maintaining 4 memory systems?"<br>
+          <strong>Week 2:</strong> "progress.txt saved me from repeating yesterday's mistake"<br>
+          <strong>Month 2:</strong> "AGENTS.md is why this codebase is navigable"<br>
+          <strong>Month 6:</strong> "Cross-project patterns from Claude-Mem saved a week"<br><br>
+          <em>Match time horizon to project duration.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If layered memory isn't right</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Very short project?</strong> &#8594; Just progress.txt, no curation<br>
+          <strong>Solo disposable code?</strong> &#8594; Good git messages only<br>
+          <strong>Highly structured domain?</strong> &#8594; Schema-based memory, not files<br>
+          <strong>Real-time system?</strong> &#8594; In-memory cache, not files
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Memory Layers + Ralph Pattern</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> progress.txt is essential to Ralph. Each iteration reads/writes it.<br>
+          <strong>Enhancement:</strong> AGENTS.md pre-loads project knowledge. Claude-Mem provides cross-run patterns.<br>
+          <strong>The synergy:</strong> Layered memory makes Ralph iterations compound instead of repeating.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="when">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-007: Different retention for different knowledge</div>
+        <div class="text-text-secondary text-sm">
+          Memory Layers, Database Design, Cache Strategy all share this invariant. Hot data needs fast access. Cold data can be slow. The same principle forces hierarchical storage everywhere.
+        </div>
+      </div>
+
+      <!-- ANTI-PATTERNS SECTION -->
+      <div class="activity-item violation" data-section="antipatterns">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Everything in progress.txt" cascade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> You dump everything into progress.txt<br>
+          <strong>THEN:</strong> File becomes unreadable<br>
+          <strong>THEN:</strong> Agent can't find relevant information<br>
+          <strong>THEN:</strong> Agent ignores the file entirely<br>
+          <strong>FINALLY:</strong> You have no memory system at all<br><br>
+          <em>The fix: Layers exist for a reason. Use them.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="antipatterns">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you used Claude-Mem for a weekend project?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd build:</strong> Vector DB, embeddings, retrieval pipeline.<br>
+          <strong>Why this fails:</strong> Setup takes longer than the project. Maintenance > value.<br>
+          <strong>Hidden constraint:</strong> Infrastructure complexity must scale with project complexity.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="antipatterns">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">The "never prune" accumulation</div>
+        <div class="text-text-secondary text-sm">
+          <strong>At 10KB:</strong> All signal, fast retrieval<br>
+          <strong>At 50KB:</strong> Some noise, still useful<br>
+          <strong>At 200KB:</strong> More noise than signal<br>
+          <strong>At 1MB:</strong> Context window saturated<br><br>
+          <em>Threshold: Prune before 30KB or suffer exponential degradation.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="antipatterns">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">The empty AGENTS.md regret</div>
+        <div class="text-text-secondary text-sm">
+          Team spent 6 months building feature. progress.txt got pruned weekly. AGENTS.md stayed empty ("we'll fill it later"). New dev joins. Spends 2 weeks rediscovering patterns that were in archived progress.txt files. <em>"We thought we were saving time by not curating. We paid 10x later."</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Track which sections are in view
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

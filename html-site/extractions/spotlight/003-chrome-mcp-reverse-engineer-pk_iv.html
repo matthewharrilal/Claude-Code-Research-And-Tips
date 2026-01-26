@@ -1,0 +1,2002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chrome MCP Reverse Engineering | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* Critical Security Box */
+    .critical-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #dc2626;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .critical-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .critical-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Architecture Diagram */
+    .architecture-box {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .architecture-title {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Local Chrome automation via MCP is risky. Intercept protocol, translate to CDP, execute in cloud browsers instead.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"I spent all of Christmas reverse engineering Claude Chrome so it would work with remote browsers."</div>
+
+          <div class="core-anchor">- @pk_iv (Paul Klein IV), Founder of Browserbase</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Claude Code has undocumented browser automation capabilities through a Chrome extension. The extension acts as an MCP server, exposing 19 tools (navigate, screenshot, click, get_text, etc.) that Claude can use to control your local browser.
+        </p>
+
+        <div class="architecture-box">
+          <div class="architecture-title">
+            <i data-lucide="box" class="w-5 h-5 text-accent"></i>
+            Local Architecture
+          </div>
+          <div class="code-block" style="margin-bottom: 0;">
+            <pre>Claude Code (MCP Client)
+        |
+    Binary Protocol
+    (4-byte LE + JSON)
+        |
+Chrome Extension (MCP Server)
+        |
+    Local Browser
+    (YOUR cookies, sessions, history)</pre>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">The Protocol Format</h3>
+
+        <p class="text-text-secondary mb-4">
+          Communication uses a binary protocol over Chrome's native messaging:
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">// Message format:</span>
+[4 bytes: message length (little-endian)]
+[JSON payload with tool call]
+
+<span class="comment">// Example tool call:</span>
+{
+  <span class="string">"tool"</span>: <span class="string">"mcp__claude-in-chrome__navigate"</span>,
+  <span class="string">"params"</span>: {
+    <span class="string">"url"</span>: <span class="string">"https://status.github.com"</span>
+  }
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">The 19 Available Tools</h3>
+
+        <p class="text-text-secondary mb-4">
+          All tools use the <code>mcp__claude-in-chrome__*</code> prefix:
+        </p>
+
+        <ul class="list-disc list-inside text-text-secondary mb-6 space-y-1">
+          <li><code>navigate</code> - Go to URL</li>
+          <li><code>screenshot</code> - Capture visible page</li>
+          <li><code>click</code> - Click element</li>
+          <li><code>get_text</code> - Extract page text</li>
+          <li><code>fill</code> - Fill form fields</li>
+          <li><code>submit</code> - Submit forms</li>
+          <li>...and more for scrolling, waiting, tab management</li>
+        </ul>
+
+        <div class="architecture-box">
+          <div class="architecture-title">
+            <i data-lucide="cloud" class="w-5 h-5 text-accent"></i>
+            Cloud Architecture (The Solution)
+          </div>
+          <div class="code-block" style="margin-bottom: 0;">
+            <pre>Claude Code (MCP Client)
+        |
+    Binary Protocol
+        |
+Intercepting Server (MCP -> CDP Translation)
+        |
+Browserbase Cloud Browsers
+(Isolated, no personal data)</pre>
+          </div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The intercepting server translates MCP tool calls to Chrome DevTools Protocol (CDP) commands. Claude believes it's using local Chrome - the same 19 tools work seamlessly - but actual execution happens in isolated cloud browser sessions.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-binary-protocol" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY BINARY PROTOCOL (NOT PURE JSON)?</div>
+          <div class="decision-reasoning">
+            Chrome's native messaging requires a specific format: 4-byte little-endian length prefix followed by the payload. This is Chrome's constraint, not Anthropic's choice.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              You can't just send JSON over a pipe. The intercepting proxy must handle the binary framing correctly. This is low-level protocol work.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-local-dangerous">
+          <div class="decision-why">WHY LOCAL CHROME IS DANGEROUS?</div>
+          <div class="decision-reasoning">
+            "Only local Chrome; dangerous due to prompt injection -> potential data leak from personal browser." Your cookies, sessions, and history are exposed to whatever content Claude processes. If Claude navigates to a malicious page, prompt injection could exfiltrate your data.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              NEVER use local Chrome MCP for untrusted sites or production automation. Your banking cookies, email sessions, and personal accounts are all at risk. This is a security emergency waiting to happen.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-cloud-migration">
+          <div class="decision-why">WHY MCP -> CDP TRANSLATION?</div>
+          <div class="decision-reasoning">
+            CDP (Chrome DevTools Protocol) is the standard for browser automation (Puppeteer, Playwright). By translating MCP to CDP, you get protocol compatibility with any CDP-speaking service - including cloud browsers like Browserbase.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              The translation layer is where security happens. Claude's MCP calls are intercepted, translated, and executed remotely. Your local browser is never touched.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY THIS IS UNOFFICIAL?</div>
+          <div class="decision-reasoning">
+            Paul reverse-engineered this over Christmas. Anthropic hasn't documented or officially supported these capabilities. The protocol could change with any Claude Code update.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Pin your Claude Code version if you rely on this. Have a fallback plan. Monitor Claude Code releases for breaking changes.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Setup Guide
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4" id="local-setup">Local Chrome Setup (NOT RECOMMENDED)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Prerequisites</span>
+Chrome Browser installed
+Claude for Chrome extension installed
+
+<span class="comment"># The extension automatically installs:</span>
+Native Messaging Host
+  -> Enables stdin/stdout communication
+  -> Binary protocol handler
+
+<span class="comment"># Claude Code launch flag:</span>
+claude --chrome-native-host</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="cloud-setup">Browserbase Cloud Setup (RECOMMENDED)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># In Claude Code</span>
+/plugin marketplace add browserbase/claude-code-plugin
+/plugin install browserbase@browserbase-cloud
+
+<span class="comment"># Then run the setup script (configures intercepting proxy)</span>
+<span class="comment"># This creates a local server that:</span>
+<span class="comment"># 1. Receives MCP tool calls from Claude</span>
+<span class="comment"># 2. Translates to CDP commands</span>
+<span class="comment"># 3. Executes in Browserbase cloud browsers</span>
+
+<span class="comment"># Requires Browserbase account + API credentials</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Protocol Message Format</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">// Binary framing (Chrome native messaging requirement)</span>
++----------------------------------------+
+| [4 bytes: length (little-endian)]      |
+| [JSON payload]                         |
++----------------------------------------+
+
+<span class="comment">// Example: Navigate tool call</span>
+{
+  <span class="string">"tool"</span>: <span class="string">"mcp__claude-in-chrome__navigate"</span>,
+  <span class="string">"params"</span>: { <span class="string">"url"</span>: <span class="string">"https://status.github.com"</span> }
+}
+
+<span class="comment">// Example: Screenshot tool call</span>
+{
+  <span class="string">"tool"</span>: <span class="string">"mcp__claude-in-chrome__screenshot"</span>,
+  <span class="string">"params"</span>: {}
+}</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Trace "Check GitHub status and screenshot it" through both local and cloud execution paths:
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4" id="path-local">Local Path (RISKY)</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>[T+0ms]</strong> Claude Code receives request "Check GitHub status"</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>[T+10ms]</strong> MCP tool call generated: <code>mcp__claude-in-chrome__navigate</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>[T+20ms]</strong> Binary protocol encoding: 4-byte LE length + JSON payload</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>[T+50ms]</strong> Chrome extension receives via native messaging host</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>[T+500ms]</strong> Page loads in YOUR browser (YOUR cookies, sessions active)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>[T+550ms]</strong> Screenshot tool called: <code>mcp__claude-in-chrome__screenshot</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content"><strong>[T+650ms]</strong> Claude analyzes screenshot: "GitHub status: All systems operational"</div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="path-cloud">Cloud Path (SAFE)</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>[T+0ms]</strong> Claude Code receives same request</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>[T+10ms]</strong> Same MCP tool call generated (Claude doesn't know the difference)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>[T+20ms]</strong> Intercepting proxy receives MCP call</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>[T+100ms]</strong> Proxy translates MCP -> CDP commands</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>[T+200ms]</strong> Browserbase cloud browser receives CDP</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>[T+600ms]</strong> Page loads in ISOLATED cloud browser (NO personal data)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content"><strong>[T+700ms]</strong> Screenshot captured via CDP</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content"><strong>[T+750ms]</strong> Claude analyzes: Same result, but ISOLATED execution</div>
+          </div>
+        </div>
+
+        <p class="text-text-secondary mt-4">
+          <strong>Latency difference:</strong> ~100ms extra for cloud path. Worth it for security.
+        </p>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Security-focused warnings and practical problems:
+        </p>
+
+        <div class="critical-box">
+          <div class="critical-title">
+            <i data-lucide="shield-alert" class="w-4 h-4"></i>
+            #1 CRITICAL: PROMPT INJECTION
+          </div>
+          <div class="critical-detail"><strong>Symptom:</strong> AI tricked by malicious page content into exfiltrating your data</div>
+          <div class="critical-detail"><strong>Risk:</strong> Local browser = your cookies, sessions, banking, email all exposed</div>
+          <div class="critical-detail"><strong>Fix:</strong> NEVER use local Chrome for untrusted content. Cloud browsers ONLY for anything external.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #2 Extension Required
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Browser mode doesn't activate</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Install "Claude for Chrome" extension. Run once manually first to complete OAuth flow.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #3 Anti-Bot Measures
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Captchas, blocks on cloud browsers</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Sites detect headless/cloud browser fingerprints</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use residential proxies through Browserbase, or accept limitation for those sites.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #4 Local Proxy Still Required
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Cloud setup still needs local component running</div>
+          <div class="gotcha-detail"><strong>Why:</strong> MCP -> CDP translation happens locally before sending to cloud</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Run the proxy script before using browser features.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #5 Verbose Screenshots
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Claude takes screenshots instead of extracting text</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Model prefers visual verification</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Request specific data format: "Extract the text, don't screenshot"</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #6 Unofficial / Could Break
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Protocol changes with Claude Code updates</div>
+          <div class="gotcha-detail"><strong>Risk:</strong> Reverse-engineered, not documented by Anthropic</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Pin Claude Code version. Monitor releases. Have fallback plan.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #7 Session State Isolation
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Local browser actions persist (logged in, cookies set)</div>
+          <div class="gotcha-detail"><strong>Risk:</strong> Each task affects your actual browser state</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Cloud browsers have fresh sessions. No state leakage.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #8 Cost of Cloud Browsers
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Browserbase usage costs money</div>
+          <div class="gotcha-detail"><strong>Mitigation:</strong> Monitor usage, set budgets, batch operations where possible.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Local Browser = Your Identity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Local Chrome is convenient (instant, no setup), but it's YOUR browser with YOUR identity.</div>
+          <div class="hard-detail"><strong>Why no perfect solution:</strong> You can't have "local convenience" AND "identity isolation" simultaneously. Physics.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Accept the tradeoff. Cloud browsers for anything external. Local only for trusted, self-controlled sites (if ever).</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Prompt Injection is Fundamental
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> AI must process web content to understand it. Web content can contain malicious instructions.</div>
+          <div class="hard-detail"><strong>Why unsolved:</strong> This is an open research problem in AI safety. No production solution exists for trusting arbitrary web content.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Isolation. Never let AI process untrusted content in a context that has access to sensitive data.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Unofficial Protocol Status
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> This works because it was reverse-engineered. Anthropic hasn't blessed it.</div>
+          <div class="hard-detail"><strong>Why risky:</strong> Any Claude Code update could change the protocol. No deprecation warnings.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Pin versions. Monitor releases. Have non-browser fallbacks for critical workflows.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Anti-Bot vs. Automation
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Websites actively fight against automated browsers. Cloud browsers often get flagged.</div>
+          <div class="hard-detail"><strong>Why hard:</strong> Cat-and-mouse game. Detection evolves. Evasion evolves. Repeat.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Accept some sites won't work. Use residential proxies. Don't rely on browser automation for critical paths.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">Local Chrome (EXTREME CAUTION)</h3>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              MAYBE OK FOR
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>YOUR OWN sites you fully control</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quick local testing (minutes, not production)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Development environment only</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              NEVER USE FOR
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Any external/untrusted sites</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Production automation</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Sites with forms/login</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Any site that could contain user-generated content</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Browserbase Cloud (RECOMMENDED)</h3>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              RECOMMENDED FOR
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Status page monitoring (read-only, safe)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Parallel browser sessions at scale</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Production automation</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Scraping external/untrusted sites</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Any workflow where security matters</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              LIMITATIONS
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>~100ms latency overhead</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Usage costs money</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Some sites block cloud browsers</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Alternatives</h3>
+
+        <div class="decision-box">
+          <div class="decision-why">PLAYWRIGHT MCP</div>
+          <div class="decision-reasoning">Direct Playwright control. No Chrome extension needed. More control, less Claude-native.</div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">STAGEHAND (BROWSERBASE)</div>
+          <div class="decision-reasoning">Browserbase's open-source agent framework. Higher-level abstractions for browser agents.</div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">ANTHROPIC COMPUTER USE</div>
+          <div class="decision-reasoning">Official, supported. Different interface (full desktop, not just browser). More general capability.</div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">MANUAL BROWSING</div>
+          <div class="decision-reasoning">When security is critical, just do it yourself. No automation risk.</div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if local browser was perfectly safe?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Local Chrome for everything. No cloud overhead. Instant.<br>
+          <strong>Why this fails:</strong> Your browser IS your identity. Cookies, sessions, history. Can't isolate without... isolating.<br>
+          <strong>Hidden constraint revealed:</strong> Cloud browsers exist BECAUSE local safety is impossible.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible architecture</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Essential:</strong> MCP Client -> Intercepting Proxy -> CDP -> Cloud Browser<br>
+          <strong>Why essential:</strong> Translation layer IS the security boundary.<br>
+          <strong>What you can remove:</strong> Nothing. Each component serves isolation.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Paul Klein IV: Christmas Reverse Engineering</div>
+        <div class="text-text-secondary text-sm">
+          Spent the holidays decoding Claude Chrome's protocol. Published the findings. Created the Browserbase plugin. "Here's how Anthropic taught Claude to browse the web."
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with MCP: Protocol Standardization</div>
+        <div class="text-text-secondary text-sm">
+          MCP is the emerging standard for AI <-> tool communication. Chrome MCP uses the same protocol patterns you'll find in every MCP integration. Learn one, understand all.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Computer Use: Browser Control</div>
+        <div class="text-text-secondary text-sm">
+          Claude's Computer Use and Chrome MCP both enable browser control. Same capability, different interfaces. Computer Use = full desktop. Chrome MCP = browser-specific, tighter integration.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Chrome extension requires native host"</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Chrome extension isolation model<br>
+          -> Native messaging host required<br>
+          -> Binary protocol (4-byte LE)<br>
+          -> Can't use simple HTTP<br>
+          -> Implementation complexity<br>
+          -> Why translation proxy needed
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">VPN for AI Browsing</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What you know:</strong> VPN hides your IP but traffic still visible to VPN provider.<br>
+          <strong>How it applies:</strong> Cloud browser = VPN but for AI execution. Complete isolation. Claude never touches your actual browser.<br>
+          <em>If you understand VPNs, you understand this pattern.</em>
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you use local Chrome for untrusted sites</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Navigate to untrusted site with local Chrome<br>
+          <strong>THEN:</strong> AI processes page content (including malicious)<br>
+          <strong>THEN:</strong> Prompt injection possible<br>
+          <strong>THEN:</strong> AI exfiltrates your cookies/sessions<br>
+          <strong>FINALLY:</strong> Account compromise, data breach<br><br>
+          <em>This is not theoretical. This is how it works.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Convenience vs. Security</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Local is fast, no setup, no cost<br>
+          <strong>Pull B:</strong> Local exposes your identity<br><br>
+          <strong>Resolution:</strong> Pay the ~100ms latency and cost. Security > convenience.<br>
+          <em>There is no version where local is safe for external sites.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Protocol Compatibility vs. Official Support</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Reverse-engineered works NOW<br>
+          <strong>Pull B:</strong> Could break with ANY update<br><br>
+          <strong>Resolution:</strong> Use it, but have fallbacks. Pin versions. Monitor changes.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="decisions">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with All: Security as First Principle</div>
+        <div class="text-text-secondary text-sm">
+          External execution = external risk. Isolation required. This isn't Chrome MCP specific - it's true for EVERY AI tool that touches external systems. The principle transfers.
+        </div>
+      </div>
+
+      <!-- FILES SECTION -->
+      <div class="activity-item expertise" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> Install Browserbase plugin, basic browsing<br>
+          <strong>Intermediate:</strong> Configure proxy, understand security risks<br>
+          <strong>Advanced:</strong> Custom MCP tools, CDP integration<br>
+          <strong>Expert:</strong> Protocol development, contribute alternatives
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Chrome MCP + Stagehand</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Use Browserbase's agent framework with Claude<br>
+          <strong>Why:</strong> Stagehand provides higher-level abstractions. "Go to X, find Y, click Z" instead of raw CDP.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Anti-Composition
+        </div>
+        <div class="font-medium text-text-primary mb-2">Local Chrome + Production Use</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Why it fails:</strong> Security risk unacceptable. Your cookies are production data.<br>
+          <strong>Never combine:</strong> "Fast local testing" and "production automation"
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item gradient" data-section="path">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Security Breach Progression</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10% Degraded:</strong> Minor data exposure (non-sensitive)<br>
+          <strong>50% Degraded:</strong> Session hijack risk<br>
+          <strong>90% Degraded:</strong> Credentials leaked<br>
+          <strong>Total Failure:</strong> Full account compromise<br><br>
+          <em>The gradient is invisible until the breach.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="path">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Anti-Bot Blocking Progression</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10%:</strong> Occasional captchas<br>
+          <strong>50%:</strong> Many sites blocked<br>
+          <strong>90%:</strong> Most sites unusable<br>
+          <strong>100%:</strong> Can't browse anything useful<br><br>
+          <em>Cloud browsers face this more than local.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Is local Chrome OK at different timescales?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Quick test (minutes):</strong> Maybe - limited exposure<br>
+          <strong>Regular use (hours):</strong> No - accumulating risk<br>
+          <strong>Production (days+):</strong> NEVER - unacceptable security<br><br>
+          <em>The longer the exposure, the worse the risk.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">Trust Level Flip Point</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Below threshold:</strong> Trusted content (your own sites) = local maybe OK<br>
+          <strong>Above threshold:</strong> ANY user-generated or external content<br>
+          <strong>THE FLIP:</strong> Any content you don't 100% control<br><br>
+          <em>If you didn't write it, it's untrusted.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Official Anthropic Browser API</div>
+        <div class="text-text-secondary text-sm">
+          Currently undocumented, reverse-engineered. Anthropic presumably working on official support. May become official API. Watch for announcements.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Anti-Bot Bypass</div>
+        <div class="text-text-secondary text-sm">
+          Cloud browsers often blocked. Browserbase, competitors actively working on this. Ongoing cat-and-mouse. No permanent solution exists.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Parallel Status Checking Demo</div>
+        <div class="text-text-secondary text-sm">
+          Demo video in original thread: Claude compiling real-time outage status table. Checking GitHub, Cloudflare, AWS in parallel. All via MCP protocol to cloud browsers. Proves the pattern works at scale.
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item inversion" data-section="hard">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if prompt injection was solved?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> AI processes any content safely. No isolation needed.<br>
+          <strong>Why this fails:</strong> This is an OPEN RESEARCH PROBLEM. No one has solved it.<br>
+          <strong>Hidden constraint revealed:</strong> Cloud browsers exist because prompt injection is unsolved.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="hard">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"AI processes untrusted web content"</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> AI must read pages to understand them<br>
+          -> Pages can contain malicious instructions<br>
+          -> Prompt injection risk<br>
+          -> Need execution isolation<br>
+          -> Cloud browsers<br>
+          -> Latency + cost tradeoff
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Community Security Concerns</div>
+        <div class="text-text-secondary text-sm">
+          When this was first shared, community immediately raised security issues. "What about prompt injection?" Led directly to the cloud browser recommendation. The community found the risk before it was exploited.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If Chrome MCP isn't right for you</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need direct control?</strong> -> Playwright MCP<br>
+          <strong>Need official support?</strong> -> Anthropic Computer Use<br>
+          <strong>Need agent framework?</strong> -> Stagehand<br>
+          <strong>Security critical?</strong> -> Manual browsing
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">Manual Browsing</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Security-critical operations<br>
+          <strong>When worse:</strong> Everything else<br>
+          <strong>Reality:</strong> Sometimes the right answer is "just do it yourself"
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Browser-as-Infrastructure Emergence</div>
+        <div class="text-text-secondary text-sm">
+          MCP becoming de-facto standard for AI <-> browser. Browserbase, competitors growing. "Browser as a service" is the new pattern. This is how AI browser automation will work going forward.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cloud Browser Market Growth</div>
+        <div class="text-text-secondary text-sm">
+          Browserbase and similar services growing because local execution is risky. Market validation: if local was safe, these services wouldn't exist. They exist because the risk is real.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="when">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">MCP Protocol Standardization</div>
+        <div class="text-text-secondary text-sm">
+          Still evolving. Anthropic + community developing the spec. Future versions may have official browser support. Watch the MCP repository for protocol changes.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

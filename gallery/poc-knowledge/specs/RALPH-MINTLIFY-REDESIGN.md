@@ -60,7 +60,7 @@
 │  "Where     │         "What is this?"            │  "What's          │
 │   am I?"    │                                    │   happening?"     │
 │             │                                    │                   │
-│  ~240px     │         flex-grow                  │  ~280px           │
+│  ~240px     │         flex-grow                  │  ~480px           │
 │  sticky     │         scrolls                    │  sticky           │
 │  solid      │                                    │  dashed border    │
 │  border     │                                    │  (living content) │
@@ -178,7 +178,7 @@
 
 ---
 
-### RIGHT PANEL: Activity Zone (~280px)
+### RIGHT PANEL: Activity Zone (~480px, resizable 280-900px)
 
 **Header:** "Activity" or "Living Context"
 
@@ -232,9 +232,10 @@
 
 | Breakpoint | Layout |
 |------------|--------|
-| Desktop (1280px+) | All three panels visible |
-| Tablet (1024px) | Hide Activity Zone, show as modal |
-| Mobile (768px) | Collapse nav to hamburger, full-width content |
+| Desktop (1400px+) | All three panels visible, Activity Zone resizable |
+| Tablet (901-1400px) | Hide Activity Zone, 2-panel layout |
+| Tablet narrow (769-900px) | 2-panel, grids stack |
+| Mobile (<768px) | Collapse nav to hamburger, full-width content |
 
 ---
 

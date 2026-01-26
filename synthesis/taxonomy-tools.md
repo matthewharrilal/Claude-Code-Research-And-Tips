@@ -4,8 +4,10 @@
 ## D-FINAL Integration
 **Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
 **Journey link:** journey-architecture.md, journey-implementation.md
-**Last updated:** 2026-01-18 (Phase 2B)
+**Last updated:** 2026-01-19 (Wave-3)
 ---
+
+> **You Are Here:** This is the **master tool reference** for Claude Code extensions. If you're looking to extend Claude Code with hooks, MCP servers, plugins, skills, or sub-agents, this document catalogs every known integration pattern with installation commands and configuration examples. Start here to find the right tool for your use case.
 
 A comprehensive taxonomy of all tools, integrations, and patterns for extending Claude Code's capabilities. This document catalogs every known integration pattern from hooks to MCP servers to plugins and infrastructure.
 
@@ -154,6 +156,17 @@ jq -nc --arg ts "$(date -Iseconds)" --arg tool "$TOOL_NAME" '{ts:$ts,tool:$tool}
 
 ---
 
+### Checkpoint: Hooks System
+**You should now understand:**
+- [ ] The 5 hook event types and when each triggers
+- [ ] How to configure hooks in `~/.claude/settings.json`
+- [ ] The difference between PreToolUse and PostToolUse
+- [ ] How to use environment variables like `$EVENT_DATA` and `$TOOL_NAME`
+
+**If unclear:** Re-read the Hook Configuration Format section above or see `extractions/techniques/research-hooks-expanded.md`
+
+---
+
 ## MCP (Model Context Protocol) Servers
 
 MCP is an open protocol (like "USB-C for AI") enabling Claude to connect to external data sources and tools via JSON-RPC 2.0.
@@ -258,6 +271,24 @@ MCP is an open protocol (like "USB-C for AI") enabling Claude to connect to exte
 ```bash
 # MCP Inspector - interactive testing tool
 npx @modelcontextprotocol/inspector npx @modelcontextprotocol/server-filesystem /path
+```
+
+---
+
+### Checkpoint: MCP Servers
+**You should now understand:**
+- [ ] The 3 MCP primitives: Tools, Resources, and Prompts
+- [ ] How to configure MCP servers in `~/.claude/settings.json`
+- [ ] The difference between official reference servers and community servers
+- [ ] How to debug MCP servers using the Inspector
+
+**If unclear:** Re-read the MCP Configuration Format section or see the MCP specification at modelcontextprotocol.io
+
+**Terminal verification:**
+```bash
+# Test MCP server is working
+npx @modelcontextprotocol/inspector npx @modelcontextprotocol/server-filesystem /path
+# You should see: MCP Inspector running at http://localhost:5173
 ```
 
 ---
@@ -429,6 +460,24 @@ my-plugin/
     "file": "hooks/hooks.json"
   }
 }
+```
+
+---
+
+### Checkpoint: Plugins
+**You should now understand:**
+- [ ] How to install plugins from marketplaces
+- [ ] The key official Anthropic plugins and their purposes
+- [ ] The plugin directory structure and manifest format
+- [ ] The difference between commands, skills, and hooks within plugins
+
+**If unclear:** Re-read the Plugin Manifest section or explore the official plugins at github.com/anthropics/claude-code/tree/main/plugins
+
+**Terminal verification:**
+```bash
+# List installed plugins
+/plugin list
+# You should see: a list of installed plugins with their versions
 ```
 
 ---
@@ -902,6 +951,156 @@ npx cc-mirror quick --provider mirror --name mclaude
 
 ---
 
+## Troubleshooting
+
+### Common Issue: Hook Not Triggering
+**Symptom:** Your hook command doesn't execute when expected
+**Cause:** Incorrect matcher name, wrong file path, or missing execution permissions
+**Fix:**
+```bash
+# 1. Verify hook configuration
+cat ~/.claude/settings.json | jq '.hooks'
+
+# 2. Ensure script is executable
+chmod +x ~/.claude/hooks/your-script.sh
+
+# 3. Test script manually
+TOOL_NAME="Bash" EVENT_DATA='{"test":true}' ~/.claude/hooks/your-script.sh
+# You should see: expected output from your script
+
+# 4. Check matcher names (case-sensitive)
+# Valid: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion, Task, WebFetch, WebSearch
+```
+
+### Common Issue: MCP Server Connection Failed
+**Symptom:** `Error: Failed to connect to MCP server`
+**Cause:** Server not installed, wrong command path, or missing environment variables
+**Fix:**
+```bash
+# 1. Verify server is installed
+npx -y @modelcontextprotocol/server-filesystem --help
+# You should see: usage information
+
+# 2. Check configuration in settings.json
+cat ~/.claude/settings.json | jq '.mcpServers'
+
+# 3. Test server directly
+npx @modelcontextprotocol/inspector npx @modelcontextprotocol/server-filesystem /tmp
+# You should see: Inspector UI at localhost:5173
+
+# 4. Check for required environment variables
+echo $YOUR_API_KEY  # Should not be empty
+```
+
+### Common Issue: Plugin Installation Fails
+**Symptom:** `/plugin install` returns error or plugin doesn't work
+**Cause:** Marketplace not added, version incompatibility, or network issues
+**Fix:**
+```bash
+# 1. Verify marketplace is added
+/plugin marketplace list
+# You should see: list of configured marketplaces
+
+# 2. Add marketplace if missing
+/plugin marketplace add author/repo
+
+# 3. Clear plugin cache and retry
+rm -rf ~/.claude/plugins/.cache
+/plugin install plugin-name
+
+# 4. Check Claude Code version compatibility
+claude --version
+# Ensure version >= minimum required by plugin
+```
+
+### Common Issue: Skill Not Loading
+**Symptom:** Skill doesn't auto-trigger or manual load fails
+**Cause:** Wrong file location, invalid frontmatter, or conflicting triggers
+**Fix:**
+```bash
+# 1. Verify skill file location
+ls -la .claude/skills/
+# or
+ls -la ~/.claude/skills/
+
+# 2. Check SKILL.md frontmatter syntax
+head -20 .claude/skills/my-skill/SKILL.md
+# Frontmatter should be valid YAML between --- markers
+
+# 3. Try explicit skill load
+"Load the my-skill skill and initiate"
+# or
+/skill my-skill
+
+# 4. Check for syntax errors in skill content
+# Ensure markdown is valid and instructions are clear
+```
+
+### Common Issue: Sub-Agent Spawns But Doesn't Return
+**Symptom:** Task tool hangs or agent doesn't complete
+**Cause:** Task too large, context exhaustion, or missing completion criteria
+**Fix:**
+```bash
+# 1. Check task complexity - should be single, focused task
+# BAD: "Implement entire feature"
+# GOOD: "Create login function in src/auth.ts"
+
+# 2. Add explicit completion instructions to worker prompt
+# Include: "Report your results with absolute file paths when done"
+
+# 3. Use run_in_background: false for debugging
+# This keeps output visible
+
+# 4. Check if model is appropriate
+# Haiku for simple lookups, Sonnet for implementation, Opus for complex reasoning
+```
+
+### Common Issue: Claude-Mem Not Persisting
+**Symptom:** Memory not being stored or retrieved between sessions
+**Cause:** Worker service not running, port conflict, or database corruption
+**Fix:**
+```bash
+# 1. Check if worker service is running
+curl http://localhost:37777/health
+# You should see: {"status":"ok"}
+
+# 2. Check for port conflicts
+lsof -i :37777
+# Should show claude-mem process
+
+# 3. Restart worker service
+pkill -f claude-mem
+/plugin install claude-mem  # Reinstalls and restarts
+
+# 4. Check database integrity
+ls -la ~/.claude-mem/
+# Should contain sqlite and chroma directories
+```
+
+### Common Issue: Browser Automation Not Working
+**Symptom:** Playwright MCP or Chrome extension tools fail
+**Cause:** Browser not installed, MCP not configured, or permission denied
+**Fix:**
+```bash
+# For Playwright MCP:
+# 1. Install browsers
+npx playwright install
+
+# 2. Verify MCP server config in settings.json
+cat ~/.claude/settings.json | jq '.mcpServers.playwright'
+
+# For Claude for Chrome:
+# 1. Verify extension is installed and enabled
+# 2. Check native messaging host is configured
+# 3. Restart Chrome completely
+
+# Test browser automation
+# In Claude: "Navigate to https://example.com and take a screenshot"
+# You should see: navigation success and screenshot saved
+```
+
+---
+
 ## Sources
 
 - Official Anthropic documentation and plugins
@@ -912,5 +1111,5 @@ npx cc-mirror quick --provider mirror --name mclaude
 
 ---
 
-*Compiled: January 2026*
+*Compiled: January 2026 | Wave-3 Enhanced: 2026-01-19*
 *Claude Code Version: 2.1.x*

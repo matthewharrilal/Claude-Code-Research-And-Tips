@@ -1,0 +1,2485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pairwise Combination Analysis | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Combination Card */
+    .combo-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .combo-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .combo-pattern {
+      background: #ecfdf5;
+      color: #0D9373;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .combo-plus {
+      color: #71717a;
+      font-weight: 600;
+    }
+
+    .combo-roi {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .combo-roi.very-high {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .combo-roi.high {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .combo-roi.medium {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+
+    .combo-enables {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .combo-enables strong {
+      color: #18181b;
+    }
+
+    /* Matrix Table */
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .matrix-table th {
+      background: #f4f4f5;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .matrix-table td {
+      padding: 12px;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .matrix-table tr:hover {
+      background: #fafafa;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Architecture Diagram */
+    .arch-diagram {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    /* Synergy Category */
+    .synergy-category {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .synergy-category.additive {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    .synergy-category.enabling {
+      background: #fef3c7;
+      border-color: #fde68a;
+    }
+
+    .synergy-title {
+      font-weight: 600;
+      color: #166534;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .synergy-category.additive .synergy-title {
+      color: #1e40af;
+    }
+
+    .synergy-category.enabling .synergy-title {
+      color: #92400e;
+    }
+
+    .synergy-desc {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 12px;
+    }
+
+    .synergy-items {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .synergy-items li {
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Pairwise Combinations</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">Philosophy + Code</a>
+        </div>
+      </div>
+
+      <!-- Loop + Tool -->
+      <div class="nav-section" data-section="loop-tool">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="repeat" class="w-4 h-4"></i>
+          <span>Loop + Tool</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#ralph-playwright" class="nav-item">Ralph + Playwright</a>
+          <a href="#ralph-mcp" class="nav-item">Ralph + MCP</a>
+          <a href="#ralph-claude-mem" class="nav-item">Ralph + Claude-Mem</a>
+          <a href="#ralph-hud" class="nav-item">Ralph + HUD</a>
+        </div>
+      </div>
+
+      <!-- Orchestration + Verification -->
+      <div class="nav-section" data-section="orch-verify">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Orchestration + Verification</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#ccmirror-hooks" class="nav-item">CC Mirror + Hooks</a>
+          <a href="#subagents-worktrees" class="nav-item">Subagents + Worktrees</a>
+          <a href="#gastown-beads" class="nav-item">Gas Town + Beads</a>
+        </div>
+      </div>
+
+      <!-- Memory + Learning -->
+      <div class="nav-section" data-section="memory-learning">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="brain" class="w-4 h-4"></i>
+          <span>Memory + Learning</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#progress-agents" class="nav-item">progress.txt + AGENTS.md</a>
+          <a href="#git-claude-mem" class="nav-item">Git + Claude-Mem</a>
+        </div>
+      </div>
+
+      <!-- Synergy Matrix -->
+      <div class="nav-section" data-section="synergies">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="grid-3x3" class="w-4 h-4"></i>
+          <span>Synergy Matrix</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#synergy-categories" class="nav-item">Categories</a>
+          <a href="#high-impact" class="nav-item">High-Impact Pairings</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Practical Problems</a>
+        </div>
+      </div>
+
+      <!-- Anti-Patterns -->
+      <div class="nav-section" data-section="anti-patterns">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>Anti-Patterns</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#anti-patterns" class="nav-item">Combinations That Fail</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Combine</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Two patterns combined unlock capabilities neither provides alone. LEGO blocks, not silver bullets.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Patterns are LEGO blocks. Each is useful alone, but the real power comes from combining them into systems greater than their parts."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Pattern A + Pattern B = Emergent Capability C')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Pattern A + Pattern B = Emergent Capability C</code>
+          </div>
+
+          <div class="core-anchor">This document explains HOW and WHY combinations unlock new capabilities.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          While <code>combinations-matrix.md</code> tells you WHAT works together, this document goes deep on the mechanics. Why does Ralph + Playwright catch bugs that unit tests miss? Why do Subagents + Worktrees enable true parallel development?
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          The insight: combinations create <strong>emergent capabilities</strong> that neither pattern provides alone. Ralph gives you iteration. Playwright gives you screenshots. Together they give you <em>verified UI development</em> - something fundamentally different from either component.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          Use this when planning your first multi-pattern workflow. Start with combinations that match your pain points, not the most impressive-sounding ones.
+        </p>
+      </section>
+
+      <!-- Section 3: LOOP + TOOL COMBINATIONS -->
+      <section id="loop-tool" data-activity="loop-tool">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Loop + Tool Combinations
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Loop patterns (Ralph, continuous iteration) gain new powers when combined with specific tools. The loop provides persistence; the tool provides capability.
+        </p>
+
+        <!-- Ralph + Playwright -->
+        <div class="combo-card" id="ralph-playwright">
+          <div class="combo-header">
+            <span class="combo-pattern">Ralph</span>
+            <span class="combo-plus">+</span>
+            <span class="combo-pattern">Playwright</span>
+            <span class="combo-roi very-high">Very High ROI</span>
+          </div>
+          <div class="combo-enables">
+            <strong>What It Enables:</strong> Visual verification in iterative loops. UI changes confirmed via screenshot, not just tests. Real-world feedback prevents "feature complete but broken" syndrome.
+          </div>
+
+          <p class="text-text-secondary mb-4">
+            <strong>Source:</strong> @weswinder - "opus 4.5 with ralph wiggum and playwright is agi"
+          </p>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment">// In prd.json acceptance criteria</span>
+<span class="string">"acceptanceCriteria"</span>: [
+  <span class="string">"Button renders correctly"</span>,
+  <span class="string">"npm run typecheck passes"</span>,
+  <span class="string">"Playwright screenshot shows button at expected position"</span>
+]</pre>
+          </div>
+
+          <div class="arch-diagram">Ralph Loop (Main Agent)
+    |
+    +-- Pick story
+    +-- Implement
+    +-- Run typecheck/tests
+    |
+    +-- Spawn Playwright Subagent --> Take screenshot
+                                      Return verification
+    |
+    +-- If verified: commit, mark passes: true</div>
+
+          <p class="text-text-secondary">
+            <strong>Critical Optimization (@TendiesOfWisdom):</strong> "Put costly tools like browser control in subagents to protect your main context window tokens."
+          </p>
+        </div>
+
+        <!-- Ralph + MCP -->
+        <div class="combo-card" id="ralph-mcp">
+          <div class="combo-header">
+            <span class="combo-pattern">Ralph</span>
+            <span class="combo-plus">+</span>
+            <span class="combo-pattern">MCP Tools</span>
+            <span class="combo-roi high">High ROI</span>
+          </div>
+          <div class="combo-enables">
+            <strong>What It Enables:</strong> Database operations verified per iteration. API integrations tested automatically. Each story can verify end-to-end functionality.
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment">// prd.json with MCP verification</span>
+{
+  <span class="string">"id"</span>: <span class="string">"US-003"</span>,
+  <span class="string">"title"</span>: <span class="string">"Add user to database"</span>,
+  <span class="string">"acceptanceCriteria"</span>: [
+    <span class="string">"User created in PostgreSQL"</span>,
+    <span class="string">"MCP verify: SELECT * FROM users WHERE email = 'test@test.com' returns 1 row"</span>,
+    <span class="string">"npm run typecheck passes"</span>
+  ],
+  <span class="string">"passes"</span>: <span class="keyword">false</span>
+}</pre>
+          </div>
+
+          <div class="arch-diagram">Ralph Iteration
+    |
+    +-- Implement database change
+    +-- Run migration
+    |
+    +-- MCP SQLite/Postgres --> Verify data state
+    |
+    +-- Tests pass --> Commit</div>
+        </div>
+
+        <!-- Ralph + Claude-Mem -->
+        <div class="combo-card" id="ralph-claude-mem">
+          <div class="combo-header">
+            <span class="combo-pattern">Ralph</span>
+            <span class="combo-plus">+</span>
+            <span class="combo-pattern">Claude-Mem</span>
+            <span class="combo-roi high">High ROI</span>
+          </div>
+          <div class="combo-enables">
+            <strong>What It Enables:</strong> Semantic memory augments file-based memory. Avoid repeating mistakes from previous sessions (not just iterations). Pattern recognition across projects.
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Before each Ralph iteration, inject relevant memories</span>
+claude <span class="string">"Load relevant context from memory for authentication patterns, then: $(cat prompt.md)"</span></pre>
+          </div>
+
+          <div class="arch-diagram">Claude-Mem (Background Service)
+    |
+    +-- Captures: All tool calls, decisions, patterns
+    +-- Stores: SQLite + Chroma Vector DB
+           |
+           v
+Ralph Loop (Iteration N)
+    |
+    +-- Query: "Authentication patterns from last week"
+    +-- Inject: Relevant memories into context
+    +-- Execute: Current story with enriched context
+    +-- Log: New learnings back to Claude-Mem</div>
+
+          <p class="text-text-secondary">
+            <strong>Avoids Dead Ends:</strong> Memory surfaces "Last time this approach failed because..." - reducing iteration count by learning from past sessions.
+          </p>
+        </div>
+
+        <!-- Ralph + HUD -->
+        <div class="combo-card" id="ralph-hud">
+          <div class="combo-header">
+            <span class="combo-pattern">Ralph</span>
+            <span class="combo-plus">+</span>
+            <span class="combo-pattern">Claude HUD</span>
+            <span class="combo-roi high">Medium-High ROI</span>
+          </div>
+          <div class="combo-enables">
+            <strong>What It Enables:</strong> Real-time visibility into Ralph's progress. Context usage tracking prevents overflow mid-story. Early warning when iteration is going wrong.
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Terminal 1: Run Ralph</span>
+./ralph.sh 25
+
+<span class="comment"># Terminal 2 (visible): HUD shows</span>
+[Opus 4.5] ████████░░ 35% | 1 MCPs | 5m
+✓ Read x4 | ✓ Edit x2 | ⟳ Bash (npm test)
+Todo: 3/7 complete</pre>
+          </div>
+
+          <p class="text-text-secondary">
+            <strong>Key Insight:</strong> If context hits 80%+ before story complete, the story is too big - split it.
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 4: ORCHESTRATION + VERIFICATION -->
+      <section id="orch-verify" data-activity="orch-verify">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Orchestration + Verification Combinations
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Multi-agent orchestration patterns need verification and isolation mechanisms to prevent chaos.
+        </p>
+
+        <!-- CC Mirror + Hooks -->
+        <div class="combo-card" id="ccmirror-hooks">
+          <div class="combo-header">
+            <span class="combo-pattern">CC Mirror</span>
+            <span class="combo-plus">+</span>
+            <span class="combo-pattern">Hooks</span>
+            <span class="combo-roi high">High ROI</span>
+          </div>
+          <div class="combo-enables">
+            <strong>What It Enables:</strong> PostToolUse hooks enforce formatting on ALL agent outputs. PreToolUse hooks can block dangerous operations. Multi-agent work stays consistent.
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment">// ~/.claude/settings.json</span>
+{
+  <span class="string">"hooks"</span>: {
+    <span class="string">"PostToolUse"</span>: [
+      {
+        <span class="string">"matcher"</span>: <span class="string">"Edit"</span>,
+        <span class="string">"hooks"</span>: [{ <span class="string">"type"</span>: <span class="string">"command"</span>, <span class="string">"command"</span>: <span class="string">"prettier --write $FILE"</span> }]
+      }
+    ],
+    <span class="string">"PreToolUse"</span>: [
+      {
+        <span class="string">"matcher"</span>: <span class="string">"Bash"</span>,
+        <span class="string">"hooks"</span>: [{ <span class="string">"type"</span>: <span class="string">"command"</span>, <span class="string">"command"</span>: <span class="string">"~/.claude/hooks/security-gate.sh"</span> }]
+      }
+    ]
+  }
+}</pre>
+          </div>
+
+          <div class="arch-diagram">CC Mirror Orchestrator
+    |
+    +-- Spawns Worker Agent 1 --> Edits file.ts
+    |                              |
+    |                              +-- PostToolUse Hook: prettier --write
+    |
+    +-- Spawns Worker Agent 2 --> Edits file.py
+    |                              |
+    |                              +-- PostToolUse Hook: black --quiet
+    |
+    +-- All outputs consistently formatted</div>
+        </div>
+
+        <!-- Subagents + Worktrees -->
+        <div class="combo-card" id="subagents-worktrees">
+          <div class="combo-header">
+            <span class="combo-pattern">Subagents</span>
+            <span class="combo-plus">+</span>
+            <span class="combo-pattern">Git Worktrees</span>
+            <span class="combo-roi very-high">Very High ROI</span>
+          </div>
+          <div class="combo-enables">
+            <strong>What It Enables:</strong> True isolation: Each agent works in separate worktree. No file conflicts between parallel agents. Git-based coordination (shared history, separate working copies).
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Spawn isolated agent in worktree</span>
+spawn_isolated_agent() {
+  <span class="keyword">local</span> task_id=$1
+  <span class="keyword">local</span> branch=<span class="string">"agent-$task_id"</span>
+
+  git worktree add ../worktrees/$branch -b $branch
+  (cd ../worktrees/$branch && claude <span class="string">"Implement feature X"</span>) &
+}
+
+<span class="comment"># Merge results</span>
+merge_agent_work() {
+  <span class="keyword">local</span> branch=$1
+  git merge ../worktrees/$branch
+  git worktree remove ../worktrees/$branch
+}</pre>
+          </div>
+
+          <div class="arch-diagram">Main Repo (.git/)
+    |
+    +-- Worktree A (/auth-agent/)
+    |   +-- Agent 1: Implements auth
+    |
+    +-- Worktree B (/payment-agent/)
+    |   +-- Agent 2: Implements payments
+    |
+    +-- Worktree C (/ui-agent/)
+        +-- Agent 3: Implements UI
+
+All share git history, no conflicts during work.
+Human merges at end.</div>
+        </div>
+
+        <!-- Gas Town + Beads -->
+        <div class="combo-card" id="gastown-beads">
+          <div class="combo-header">
+            <span class="combo-pattern">Gas Town</span>
+            <span class="combo-plus">+</span>
+            <span class="combo-pattern">Beads</span>
+            <span class="combo-roi very-high">Very High ROI (at scale)</span>
+          </div>
+          <div class="combo-enables">
+            <strong>What It Enables:</strong> Git-backed data storage for all agents. Universal context management across many agents. No external database needed - everything in git.
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Gas Town uses Beads for storage</span>
+gt init  <span class="comment"># Creates ~/.gt with Beads integration</span>
+gt rig add /path/to/project
+
+<span class="comment"># Agents access shared context via Beads</span>
+<span class="comment"># All state persisted in git</span></pre>
+          </div>
+
+          <div class="arch-diagram">Gas Town (Orchestrator)
+    |
+    +-- Mayor (coordination)
+    +-- Deacon (monitoring)
+    +-- Refinery (task decomposition)
+    |
+    +-- All backed by Beads --> Git-based data plane
+                               ~225K lines of Go
+                               Universal context</div>
+        </div>
+      </section>
+
+      <!-- Section 5: MEMORY + LEARNING -->
+      <section id="memory-learning" data-activity="memory-learning">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Memory + Learning Combinations
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Memory patterns compound when combined properly. Short-term + long-term. Structured + semantic.
+        </p>
+
+        <!-- progress.txt + AGENTS.md -->
+        <div class="combo-card" id="progress-agents">
+          <div class="combo-header">
+            <span class="combo-pattern">progress.txt</span>
+            <span class="combo-plus">+</span>
+            <span class="combo-pattern">AGENTS.md</span>
+            <span class="combo-roi very-high">Very High ROI</span>
+          </div>
+          <div class="combo-enables">
+            <strong>What It Enables:</strong> Short-term memory (progress.txt) informs current session. Long-term memory (AGENTS.md) compounds across all sessions. Patterns discovered in iteration 3 help iteration 13.
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># progress.txt (ephemeral, session-scoped)</span>
+## Codebase Patterns
+- Migrations: Use IF NOT EXISTS
+- React: useRef&lt;Timeout | null&gt;(null)
+
+## 2026-01-09 - US-003
+- Implemented auth middleware
+- Learned: Always check token expiry
+
+<span class="comment">---</span>
+
+<span class="comment"># AGENTS.md (permanent, in repo)</span>
+## Authentication Module
+When modifying auth:
+- Tokens expire after 24h
+- Refresh tokens in separate table
+- Always hash with bcrypt, never SHA</pre>
+          </div>
+
+          <div class="arch-diagram">Compounding Effect:
+
+Iteration 1: Learns migration pattern
+  --> Appends to progress.txt
+
+Iteration 5: Reads pattern, avoids mistake
+  --> Updates AGENTS.md with key insight
+
+Future Session: Agent reads AGENTS.md
+  --> Applies learning immediately</div>
+        </div>
+
+        <!-- Git + Claude-Mem -->
+        <div class="combo-card" id="git-claude-mem">
+          <div class="combo-header">
+            <span class="combo-pattern">Git History</span>
+            <span class="combo-plus">+</span>
+            <span class="combo-pattern">Claude-Mem</span>
+            <span class="combo-roi high">High ROI</span>
+          </div>
+          <div class="combo-enables">
+            <strong>What It Enables:</strong> Structured memory (git) + semantic memory (Claude-Mem). "Why did we change this file?" becomes queryable. Debug by asking "What happened to auth last week?"
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Git provides structured history</span>
+git log --oneline --since=<span class="string">"1 week ago"</span> -- src/auth/
+
+<span class="comment"># Claude-Mem provides semantic recall</span>
+claude <span class="string">"Search memory for: authentication changes reasoning"</span></pre>
+          </div>
+
+          <div class="arch-diagram">Git History
+    |
+    +-- Commit: "feat: add JWT refresh"
+    +-- Commit: "fix: token expiry bug"
+    +-- Structured, exact, searchable
+           |
+           v
+Claude-Mem Vector DB
+    |
+    +-- Observation: "Refresh tokens needed because..."
+    +-- Pattern: "Always verify token in middleware"
+    +-- Semantic, fuzzy, contextual</div>
+        </div>
+      </section>
+
+      <!-- Section 6: SYNERGY MATRIX -->
+      <section id="synergies" data-activity="synergies">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Synergy Categories
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Not all combinations are equal. Understanding synergy type helps you prioritize.
+        </p>
+
+        <div class="synergy-category" id="synergy-categories">
+          <div class="synergy-title">Multiplicative Synergies (1+1 = 5)</div>
+          <div class="synergy-desc">These combinations create capabilities neither pattern has alone:</div>
+          <ul class="synergy-items list-disc pl-5">
+            <li><strong>Ralph + Playwright</strong> - Verification impossible without browser, persistence impossible without Ralph</li>
+            <li><strong>Worktrees + Subagents</strong> - Isolation impossible without worktrees, parallelism impossible without subagents</li>
+            <li><strong>progress.txt + AGENTS.md</strong> - Short-term learning useless without long-term, long-term empty without short-term</li>
+          </ul>
+        </div>
+
+        <div class="synergy-category additive">
+          <div class="synergy-title">Additive Synergies (1+1 = 2)</div>
+          <div class="synergy-desc">These combinations improve both patterns but don't create new capabilities:</div>
+          <ul class="synergy-items list-disc pl-5">
+            <li><strong>Claude HUD + Ralph</strong> - Both work alone, together they're better</li>
+            <li><strong>Hooks + CC Mirror</strong> - Hooks work anywhere, CC Mirror works without hooks</li>
+            <li><strong>Mobile + Poke</strong> - Both solve problems independently, together they're seamless</li>
+          </ul>
+        </div>
+
+        <div class="synergy-category enabling">
+          <div class="synergy-title">Enabling Synergies (1+0 = 1)</div>
+          <div class="synergy-desc">One pattern enables the other to function:</div>
+          <ul class="synergy-items list-disc pl-5">
+            <li><strong>tmux + rpai</strong> - rpai requires tmux to function</li>
+            <li><strong>Git + Claude-Mem</strong> - Both need history, but can work independently</li>
+            <li><strong>MCP + Any Workflow</strong> - MCP enables tool access, workflows use it</li>
+          </ul>
+        </div>
+
+        <!-- High Impact Table -->
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="high-impact">High-Impact Pairings</h3>
+
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Pattern A</th>
+              <th>Pattern B</th>
+              <th>Combined Result</th>
+              <th>ROI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Ralph</td>
+              <td>Playwright</td>
+              <td>Verified UI loops</td>
+              <td><span class="combo-roi very-high">Very High</span></td>
+            </tr>
+            <tr>
+              <td>Ralph</td>
+              <td>Claude-Mem</td>
+              <td>Cross-session learning</td>
+              <td><span class="combo-roi high">High</span></td>
+            </tr>
+            <tr>
+              <td>CC Mirror</td>
+              <td>Hooks</td>
+              <td>Quality gates for all agents</td>
+              <td><span class="combo-roi high">High</span></td>
+            </tr>
+            <tr>
+              <td>Subagents</td>
+              <td>Worktrees</td>
+              <td>True parallel isolation</td>
+              <td><span class="combo-roi very-high">Very High</span></td>
+            </tr>
+            <tr>
+              <td>progress.txt</td>
+              <td>AGENTS.md</td>
+              <td>Short + long-term memory</td>
+              <td><span class="combo-roi very-high">Very High</span></td>
+            </tr>
+            <tr>
+              <td>Mobile</td>
+              <td>Poke Hooks</td>
+              <td>Async development</td>
+              <td><span class="combo-roi very-high">Very High</span></td>
+            </tr>
+            <tr>
+              <td>Panopticon</td>
+              <td>Cron</td>
+              <td>Continuous automation</td>
+              <td><span class="combo-roi very-high">Very High</span></td>
+            </tr>
+            <tr>
+              <td>Planning</td>
+              <td>Model Selection</td>
+              <td>Cost-optimized quality</td>
+              <td><span class="combo-roi very-high">Very High</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 7: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems with pattern combinations, with concrete fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Ralph + Playwright Screenshots Not Verifying
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Ralph loop claims UI verification passed, but screenshots show broken layouts.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Playwright taking screenshots before page fully renders, or verification prompt not specific enough.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add explicit wait conditions before screenshots. Make acceptance criteria more specific: "Screenshot shows button with text 'Submit' at y < 500px"</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Claude-Mem Injecting Irrelevant Context
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Ralph iterations receive memories from unrelated past sessions, wasting context tokens.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Claude-Mem's semantic search matching on general terms, not specific story/task.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Query with story ID explicitly: <code>search(query="US-003 authentication", type="pattern")</code>. Tag memories with project identifiers during capture.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Worktree Subagents Diverging Too Far
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> When merging worktree branches back to main, conflicts are massive because agents made incompatible architectural decisions.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Agents worked in isolation without shared architectural constraints.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Create shared AGENTS.md with architectural rules all worktrees read. Use periodic "sync points" where agents check in before major decisions.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            progress.txt + AGENTS.md Getting Out of Sync
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Learnings in progress.txt contradict guidance in AGENTS.md, causing inconsistent agent behavior.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> progress.txt is append-only and may contain outdated patterns that were later refined.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Periodically distill progress.txt into AGENTS.md (human-in-loop). Use clear sections in AGENTS.md that override progress.txt.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: ANTI-PATTERNS -->
+      <section id="anti-patterns" data-activity="anti-patterns">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          Anti-Patterns to Avoid
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These combinations look reasonable but conflict fundamentally:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Ralph (fresh context) + Large shared context
+          </div>
+          <div class="hard-detail"><strong>Why It Fails:</strong> Ralph's power IS the fresh context. Loading large shared context defeats the entire purpose. You're paying the cost of restarts without the benefit of fresh context.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Parallel agents + Single branch
+          </div>
+          <div class="hard-detail"><strong>Why It Fails:</strong> Merge conflicts are inevitable. Agents overwrite each other's work. What looks like progress becomes regression. Use worktrees for true isolation.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Heavy MCP tools + Main context
+          </div>
+          <div class="hard-detail"><strong>Why It Fails:</strong> Token explosion. Browser context, database queries, API responses all consume tokens. Put heavy tools in subagents to protect main context.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Many Opus subagents + Cost constraints
+          </div>
+          <div class="hard-detail"><strong>Why It Fails:</strong> Budget blown in minutes. Opus is powerful but expensive. Use Sonnet for implementation, Opus only for planning. Use model selection deliberately.</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Overhead Traps</h3>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Too Many Monitoring Tools
+          </div>
+          <div class="gotcha-detail">rpai + HUD + custom logging = more monitoring than work. Pick ONE primary visibility tool.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Over-Orchestration
+          </div>
+          <div class="gotcha-detail">CC Mirror + Gas Town + custom coordinator = chaos. Don't stack orchestration patterns. Pick the one that matches your scale.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Memory Overload
+          </div>
+          <div class="gotcha-detail">Claude-Mem + progress.txt + AGENTS.md + git notes = context bloat. Memory systems should complement, not compete.</div>
+        </div>
+      </section>
+
+      <!-- Section 9: WHEN TO COMBINE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">9</span>
+          When to Combine / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              COMBINE PATTERNS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Each pattern solves a different problem (no overlap)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Combined capability is genuinely needed (not hypothetical)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You understand both patterns individually first</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>The combination unlocks multiplicative value (not just additive)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You have verified the basic pattern works in your environment</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T COMBINE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You haven't mastered the base patterns yet</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Patterns have conflicting philosophies (fresh vs. extended context)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Overhead of combination exceeds benefit</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're optimizing for hypothetical future scale</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>A single pattern would solve your actual problem</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Implementation Priority</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>Start Here (Quick Wins):</strong> Hooks + Auto-Formatting (5 minutes), Claude HUD (5 minutes), Sub-Agents Directory (browse and copy)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>Build Foundation:</strong> Ralph + progress.txt + AGENTS.md, Mobile + Poke Hooks, Worktrees + Basic Subagents</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>Scale Up:</strong> CC Mirror Full Orchestration, Panopticon Architecture, Gas Town (when you need factory-scale)</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible combination insight</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">Pattern A + Pattern B = Capability C</code><br><br>
+          The capability C should not be achievable with either pattern alone.<br>
+          If it is, you're adding overhead without adding value.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if patterns shouldn't combine?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Monolithic super-patterns that do everything.<br>
+          <strong>Why this fails:</strong> Requirements vary. Codebases vary. One size never fits all.<br>
+          <strong>Hidden insight:</strong> Combinability IS the feature. LEGO philosophy wins.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@weswinder: "opus 4.5 with ralph wiggum and playwright is agi"</div>
+        <div class="text-text-secondary text-sm">
+          The combination that sparked this analysis. Visual verification + autonomous iteration = capability neither provides alone.
+        </div>
+      </div>
+
+      <!-- CORE SECTION (3 items) -->
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why combinations create emergent capabilities</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Each pattern solves ONE problem well<br>
+          --> Patterns are constrained (single purpose)<br>
+          --> Real workflows have MULTIPLE problems<br>
+          --> Combining patterns addresses multiple constraints<br>
+          --> Emergent capabilities arise at intersections<br>
+          --> Combinations > sum of parts
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Pattern Combinations = Unix Philosophy</div>
+        <div class="text-text-secondary text-sm">
+          <code>grep</code> --> finds text<br>
+          <code>sort</code> --> orders text<br>
+          <code>uniq</code> --> deduplicates text<br>
+          <code>grep | sort | uniq</code> --> unique sorted matches<br><br>
+          <em>If you understand Unix pipes, you understand pattern combinations.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Simplicity vs. Capability</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Single pattern:</strong> Simple, but limited capability<br>
+          <strong>Two patterns:</strong> More complex, but emergent value<br>
+          <strong>Many patterns:</strong> Maximum capability, but overhead dominates<br><br>
+          <em>Heuristic: If overhead of combination exceeds 20% of task time, you've over-combined.</em>
+        </div>
+      </div>
+
+      <!-- LOOP + TOOL SECTION (5 items) -->
+      <div class="activity-item composition" data-section="loop-tool">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph + Playwright: The Visual Verification Unlock</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works?</strong> Yes, with caveats<br>
+          <strong>Why it works:</strong> Screenshots catch what unit tests miss<br>
+          <strong>The danger:</strong> Browser context consumes tokens<br>
+          <strong>Recommendation:</strong> Put Playwright in subagents
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="loop-tool">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you put Playwright in main context</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Playwright runs in main Ralph context<br>
+          <strong>THEN:</strong> Browser DOM consumes thousands of tokens<br>
+          <strong>THEN:</strong> Context fills before story completes<br>
+          <strong>THEN:</strong> Quality degrades, instructions forgotten<br>
+          <strong>FINALLY:</strong> Visual verification defeats its own purpose<br><br>
+          <em>The fix: Subagent isolation for heavy tools.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="loop-tool">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude-Mem + Ralph: Cross-session learning emergence</div>
+        <div class="text-text-secondary text-sm">
+          <strong>At session 1:</strong> No memories, no benefit<br>
+          <strong>At session 5:</strong> Some patterns, some speedup<br>
+          <strong>At session 20:</strong> Rich memory, significant acceleration<br>
+          <strong>At session 50:</strong> Institutional knowledge, dramatic speedup<br><br>
+          <em>Threshold: ~5 sessions before Claude-Mem investment pays off</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="loop-tool">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Understanding Ralph + HUD combination</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Why do I need HUD with Ralph?"<br>
+          --> Visibility into progress<br>
+          <strong>Intermediate:</strong> "What should I watch?"<br>
+          --> Context %, tool calls, todo count<br>
+          <strong>Advanced:</strong> "When does HUD warn me?"<br>
+          --> 80%+ context = story too big<br>
+          <strong>Staff:</strong> "How do I automate HUD insights?"<br>
+          --> Exit script when context threshold hit
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="loop-tool">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph + MCP judgment evolution</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "MCP setup is overhead"<br>
+          <strong>Day 7:</strong> "Database verification caught 3 bugs"<br>
+          <strong>Day 30:</strong> "MCP is essential for data-intensive features"<br>
+          <strong>Day 90:</strong> "I can't imagine Ralph without MCP"<br><br>
+          <em>Don't judge MCP ROI after one session.</em>
+        </div>
+      </div>
+
+      <!-- ORCHESTRATION SECTION (4 items) -->
+      <div class="activity-item invariant" data-section="orch-verify">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-003: External state > internal memory</div>
+        <div class="text-text-secondary text-sm">
+          CC Mirror + Hooks, Subagents + Worktrees, Gas Town + Beads all share this invariant.<br><br>
+          <strong>Why this matters:</strong> The same principle (externalize state) forces the same architectural choice (file/git-based coordination) across all orchestration patterns.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="orch-verify">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Subagents + Worktrees: True isolation unlock</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works?</strong> Yes, powerfully<br>
+          <strong>Why it works:</strong> Git worktrees = filesystem isolation, Subagents = process isolation<br>
+          <strong>The benefit:</strong> No file conflicts during parallel work<br>
+          <strong>Human merges at end:</strong> Architectural review built in
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="orch-verify">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror without hooks</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% quality</strong>: Manual formatting after each agent<br>
+          <strong>90% quality</strong>: Inconsistent style across agents<br>
+          <strong>70% quality</strong>: Style conflicts in merges<br>
+          <strong>50% quality</strong>: Tech debt compounds<br>
+          <strong>CLIFF</strong>: Codebase becomes unreadable<br><br>
+          <em>Hooks prevent the invisible degradation.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="orch-verify">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Gas Town + Beads: 225K lines of Go</div>
+        <div class="text-text-secondary text-sm">
+          Steve Yegge's production system. Git-backed data plane means all agent state is version-controlled, auditable, recoverable. Universal context without external databases.
+        </div>
+      </div>
+
+      <!-- MEMORY SECTION (4 items) -->
+      <div class="activity-item inflection" data-section="memory-learning">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">progress.txt + AGENTS.md compounding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-5 sessions:</strong> progress.txt dominates (short-term)<br>
+          <strong>5-10 sessions:</strong> AGENTS.md starts catching up<br>
+          <strong>10-20 sessions:</strong> Equal value<br>
+          <strong>20+ sessions:</strong> AGENTS.md dominates (long-term)<br><br>
+          <strong>THE INFLECTION:</strong> ~10 sessions<br>
+          <em>Before: Invest in progress.txt discipline. After: Invest in AGENTS.md curation.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="memory-learning">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-004: Fresh context > extended sessions</div>
+        <div class="text-text-secondary text-sm">
+          progress.txt + AGENTS.md, Git + Claude-Mem both implement this invariant differently.<br><br>
+          <strong>The shared principle:</strong> State persists in files, not context. This enables fresh context while preserving learnings.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="memory-learning">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Memory combinations = Human learning systems</div>
+        <div class="text-text-secondary text-sm">
+          <strong>progress.txt</strong> = Working memory (what you're thinking about now)<br>
+          <strong>AGENTS.md</strong> = Long-term memory (what you've learned)<br>
+          <strong>Git history</strong> = Episodic memory (what happened when)<br>
+          <strong>Claude-Mem</strong> = Semantic memory (what things mean)<br><br>
+          <em>Humans use all four. So should your agents.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="memory-learning">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Automatic memory consolidation</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> When should progress.txt learnings automatically flow to AGENTS.md?<br>
+          <strong>Why it's hard:</strong> Not all learnings are permanent. Human judgment still needed.<br>
+          <strong>Current best practice:</strong> Periodic human curation. No automation yet.
+        </div>
+      </div>
+
+      <!-- SYNERGIES SECTION (4 items) -->
+      <div class="activity-item expertise" data-section="synergies">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Understanding synergy categories</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What's a synergy?"<br>
+          --> Combined value > sum of parts<br>
+          <strong>Intermediate:</strong> "Why categorize synergies?"<br>
+          --> Different investment strategies<br>
+          <strong>Advanced:</strong> "How do I identify multiplicative?"<br>
+          --> Ask: "Does this create NEW capability?"<br>
+          <strong>Staff:</strong> "How do I prioritize combinations?"<br>
+          --> Multiplicative first, then additive, then enabling
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="synergies">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Effort vs. Impact quadrant</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Low effort, high impact:</strong> Ralph + Playwright, progress.txt + AGENTS.md<br>
+          <strong>High effort, high impact:</strong> Worktrees + Subagents, Gas Town + Beads<br>
+          <strong>Low effort, low impact:</strong> HUD + Ralph, Hooks + Formatting<br>
+          <strong>High effort, low impact:</strong> Avoid these combinations<br><br>
+          <em>Start in top-left quadrant. Move to top-right as you scale.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="synergies">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if we had no synergy matrix?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Trial-and-error combinations, wasted effort on incompatible pairs<br>
+          <strong>Why this fails:</strong> Some combinations actively conflict (fresh context + large shared context)<br>
+          <strong>Hidden insight:</strong> The matrix IS the expertise - knowing what NOT to combine
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="synergies">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@TendiesOfWisdom: Subagent isolation discovery</div>
+        <div class="text-text-secondary text-sm">
+          "Put costly tools like browser control in subagents to protect your main context window tokens." This single insight transformed Ralph + Playwright from problematic to Very High ROI.
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (3 items) -->
+      <div class="activity-item violation" data-section="gotchas">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If worktree agents don't share AGENTS.md</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Each worktree agent has no shared architectural constraints<br>
+          <strong>THEN:</strong> Agents make independent design decisions<br>
+          <strong>THEN:</strong> Designs diverge significantly<br>
+          <strong>THEN:</strong> Merge conflicts are architectural, not just textual<br>
+          <strong>FINALLY:</strong> "Merge" becomes "rewrite"<br><br>
+          <em>The fix: Shared AGENTS.md with architectural rules.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="gotchas">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">progress.txt + AGENTS.md sync perception</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Week 1:</strong> "Why maintain both? Overhead!"<br>
+          <strong>Week 4:</strong> "progress.txt has conflicting learnings..."<br>
+          <strong>Week 8:</strong> "Periodic curation takes time but prevents confusion"<br>
+          <strong>Week 16:</strong> "The curation rhythm IS the value"<br><br>
+          <em>The sync overhead is an investment, not a cost.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude-Mem semantic drift at scale</div>
+        <div class="text-text-secondary text-sm">
+          <strong>At 100 memories:</strong> Search is precise<br>
+          <strong>At 1000 memories:</strong> Some irrelevant results<br>
+          <strong>At 10000 memories:</strong> Signal-to-noise degrades<br><br>
+          <em>Threshold: ~1000 memories before you need explicit project tagging</em>
+        </div>
+      </div>
+
+      <!-- ANTI-PATTERNS SECTION (3 items) -->
+      <div class="activity-item gradient" data-section="anti-patterns">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Parallel agents on single branch</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100%</strong>: First agent commits cleanly<br>
+          <strong>80%</strong>: Second agent hits merge conflict<br>
+          <strong>60%</strong>: Conflicts compound with each agent<br>
+          <strong>40%</strong>: Agents overwrite each other<br>
+          <strong>CLIFF</strong>: Progress becomes regression<br><br>
+          <em>Use worktrees. There is no alternative.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="anti-patterns">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why heavy tools in main context fails</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Context window is finite (200K tokens)<br>
+          --> Heavy tool output consumes tokens<br>
+          --> Less room for actual task<br>
+          --> Quality degrades earlier<br>
+          --> Iteration fails before completion<br>
+          --> "Verified" becomes "broken"
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="anti-patterns">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you're hitting anti-patterns</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Context bloat?</strong> --> Subagent isolation<br>
+          <strong>Merge conflicts?</strong> --> Git worktrees<br>
+          <strong>Budget blown?</strong> --> Model selection (Sonnet for implementation)<br>
+          <strong>Monitoring overhead?</strong> --> Pick ONE visibility tool
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (3 items) -->
+      <div class="activity-item expertise" data-section="when">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">When to combine patterns</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Should I combine patterns?"<br>
+          --> Master single patterns first<br>
+          <strong>Intermediate:</strong> "Which combinations?"<br>
+          --> Start with Quick Wins (low effort, high impact)<br>
+          <strong>Advanced:</strong> "How many patterns?"<br>
+          --> 2-3 max for most workflows<br>
+          <strong>Staff:</strong> "When do I add more?"<br>
+          --> Only when you hit a wall with current setup
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you always combined patterns?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Maximum capability from day one<br>
+          <strong>Why this fails:</strong> Overhead dominates. Debugging nightmare. Can't isolate problems.<br>
+          <strong>Hidden insight:</strong> Start simple. Add combinations when you feel specific pain.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If pairwise isn't enough</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need more combinations?</strong> --> combinations-triple-plus.md<br>
+          <strong>Need the full matrix?</strong> --> combinations-matrix.md<br>
+          <strong>Need unexplored territory?</strong> --> combinations-unexplored.md<br>
+          <strong>Need extension patterns?</strong> --> combinations-extensions.md
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

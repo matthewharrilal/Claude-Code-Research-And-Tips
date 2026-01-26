@@ -1,0 +1,2590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deriving Patterns from First Principles | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Principle Card */
+    .principle-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .principle-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #0D9373 0%, #10b981 100%);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .principle-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 12px;
+    }
+
+    .principle-quote {
+      font-style: italic;
+      color: #71717a;
+      font-size: 14px;
+      border-left: 3px solid #0D9373;
+      padding-left: 16px;
+      margin-bottom: 12px;
+    }
+
+    .principle-implication {
+      background: #ecfdf5;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: #065f46;
+    }
+
+    /* Primitive Table */
+    .primitive-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+
+    .primitive-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: #3f3f46;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .primitive-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .primitive-table td code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+    }
+
+    /* Worked Example Box */
+    .worked-example {
+      background: #ffffff;
+      border: 2px solid #0D9373;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .worked-example-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .worked-step {
+      margin-bottom: 20px;
+    }
+
+    .worked-step-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Practice Problem Box */
+    .practice-problem {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .practice-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0369a1;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .practice-constraint {
+      font-size: 14px;
+      color: #0c4a6e;
+      margin-bottom: 16px;
+    }
+
+    .practice-hints {
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    /* Checklist */
+    .checklist {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .checklist-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 16px;
+    }
+
+    .checklist-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .checklist-box {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #e4e4e7;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Diagram Box */
+    .diagram-box {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.4;
+      white-space: pre;
+      overflow-x: auto;
+      color: #3f3f46;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Pattern Derivation</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">The Derivation Process</a>
+        </div>
+      </div>
+
+      <!-- Core Principles -->
+      <div class="nav-section expanded" data-section="principles">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="key" class="w-4 h-4"></i>
+          <span>7 Core Principles</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#principles" class="nav-item">Foundation Truths</a>
+          <a href="#principle-1" class="nav-item">Context Is Primary</a>
+          <a href="#principle-7" class="nav-item">Isolation Enables</a>
+        </div>
+      </div>
+
+      <!-- Primitives Catalog -->
+      <div class="nav-section" data-section="primitives">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="puzzle" class="w-4 h-4"></i>
+          <span>Primitives Catalog</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#primitives" class="nav-item">Building Blocks</a>
+          <a href="#execution-primitives" class="nav-item">Execution</a>
+          <a href="#state-primitives" class="nav-item">State</a>
+        </div>
+      </div>
+
+      <!-- Worked Examples -->
+      <div class="nav-section" data-section="examples">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Worked Examples</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#examples" class="nav-item">Deriving Ralph</a>
+          <a href="#example-cc-mirror" class="nav-item">Deriving CC Mirror</a>
+          <a href="#example-worktree" class="nav-item">Git Worktree</a>
+        </div>
+      </div>
+
+      <!-- Practice Problems -->
+      <div class="nav-section" data-section="practice">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          <span>Practice Problems</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#practice" class="nav-item">DIY Derivation</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Troubleshooting</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Common Issues</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Derive</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Constraint + Principles + Primitives = Pattern. Learn to fish, not just eat fish.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          <strong>You Are Here:</strong> This is the "teach a person to fish" guide. Read this after mastering <code>principles-core.md</code> and several existing patterns. This transforms you from a pattern consumer into a pattern creator.
+        </p>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Derivation Process
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Patterns are crystalized solutions to specific constraints. Change the constraint, derive a new pattern."</div>
+
+          <div class="diagram-box">
+  Step 1: IDENTIFY THE CONSTRAINT
+          What limitation are you solving for?
+              |
+              v
+  Step 2: APPLY RELEVANT PRINCIPLES
+          Which core principles address this?
+              |
+              v
+  Step 3: COMPOSE PRIMITIVES
+          What building blocks implement?
+              |
+              v
+  Step 4: VALIDATE COMPOSITION
+          Does it actually work?</div>
+
+          <div class="core-anchor">This four-step process produces every major Claude Code pattern.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Every Ralph, CC Mirror, Gas Town, and worktree pattern emerged from someone applying a few core principles to a specific constraint. The derivation skill matters more than pattern memorization.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          <strong>The progression:</strong><br>
+          1. Learn existing patterns - Immediate productivity<br>
+          2. Understand the principles - Know when patterns apply<br>
+          3. Master derivation - Create patterns for novel constraints<br><br>
+          You are learning step 3.
+        </p>
+      </section>
+
+      <!-- Section 3: THE 7 CORE PRINCIPLES -->
+      <section id="principles" data-activity="principles">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          The 7 Core Principles
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Before deriving any pattern, internalize these foundational truths. Every principle has a direct implication for pattern design.
+        </p>
+
+        <div class="principle-card" id="principle-1">
+          <div class="principle-number">1</div>
+          <div class="principle-title">Context Is the Primary Constraint</div>
+          <div class="principle-quote">
+            "Context rot: LLMs get stupider with more tokens" - @mattpocockuk
+          </div>
+          <p class="text-text-secondary text-sm mb-3">
+            The ~200K token context window (effective ~100K for quality work) is a <strong>hard ceiling</strong> that shapes every architectural decision.
+          </p>
+          <div class="principle-implication">
+            <strong>Implication:</strong> Any pattern that doesn't respect context limits will eventually fail.
+          </div>
+        </div>
+
+        <div class="principle-card">
+          <div class="principle-number">2</div>
+          <div class="principle-title">External State > Internal Memory</div>
+          <div class="principle-quote">
+            "Each iteration spawns a NEW instance with NO memory. Continuity comes from: Git history, prd.json, progress.txt" - Ryan Carson
+          </div>
+          <p class="text-text-secondary text-sm mb-3">
+            The agent is stateless. All durable state must exist in the filesystem or version control.
+          </p>
+          <div class="principle-implication">
+            <strong>Implication:</strong> Memory is files. Not conversation. Not summaries. Files.
+          </div>
+        </div>
+
+        <div class="principle-card">
+          <div class="principle-number">3</div>
+          <div class="principle-title">Verification Is Non-Negotiable</div>
+          <p class="text-text-secondary text-sm mb-3">
+            Tests, type checks, and quality gates prevent error propagation. A task isn't complete until it's verified.
+          </p>
+          <div class="principle-implication">
+            <strong>Implication:</strong> Any autonomous pattern must include verification steps, or errors compound.
+          </div>
+        </div>
+
+        <div class="principle-card">
+          <div class="principle-number">4</div>
+          <div class="principle-title">Separation of Concerns</div>
+          <div class="principle-quote">
+            "YOU DO NOT WRITE CODE. YOU DO NOT RUN COMMANDS. You are the CONDUCTOR." - CC Mirror philosophy
+          </div>
+          <p class="text-text-secondary text-sm mb-3">
+            Planning and execution are fundamentally different modes. Mixing them causes context pollution, scope creep, and verification bypass.
+          </p>
+          <div class="principle-implication">
+            <strong>Implication:</strong> Orchestrators orchestrate. Workers execute. Never mix.
+          </div>
+        </div>
+
+        <div class="principle-card">
+          <div class="principle-number">5</div>
+          <div class="principle-title">Structured Data Beats Natural Language</div>
+          <div class="principle-quote">
+            "You're a few .md files from outperforming 99% of people" - @gregisenberg
+          </div>
+          <p class="text-text-secondary text-sm mb-3">
+            JSON parses deterministically. Markdown has conventions. Natural language is ambiguous.
+          </p>
+          <div class="principle-implication">
+            <strong>Implication:</strong> Store state in structured formats (JSON, YAML) for machine consumption, Markdown for human context.
+          </div>
+        </div>
+
+        <div class="principle-card">
+          <div class="principle-number">6</div>
+          <div class="principle-title">Fresh Context Beats Extended Sessions</div>
+          <p class="text-text-secondary text-sm mb-3">
+            New agent instances with external state beat long conversations with internal memory. Compaction is lossy; files are not.
+          </p>
+          <div class="principle-implication">
+            <strong>Implication:</strong> Prefer iteration loops over single long sessions.
+          </div>
+        </div>
+
+        <div class="principle-card" id="principle-7">
+          <div class="principle-number">7</div>
+          <div class="principle-title">Isolation Enables Parallelism</div>
+          <p class="text-text-secondary text-sm mb-3">
+            Agents that share state conflict. Agents in isolated environments (branches, worktrees, containers) can work in parallel.
+          </p>
+          <div class="principle-implication">
+            <strong>Implication:</strong> Design for isolation first, coordination second.
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: PRIMITIVES CATALOG -->
+      <section id="primitives" data-activity="primitives">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The Primitives Catalog
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are the building blocks you compose into patterns. Every pattern is a specific combination of primitives selected to address a constraint.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4" id="execution-primitives">Execution Primitives</h3>
+
+        <table class="primitive-table">
+          <thead>
+            <tr>
+              <th>Primitive</th>
+              <th>What It Does</th>
+              <th>When To Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>claude "..."</code></td>
+              <td>Single Claude invocation</td>
+              <td>Atomic task execution</td>
+            </tr>
+            <tr>
+              <td><code>for</code> loop</td>
+              <td>Repeated invocations</td>
+              <td>Sequential iteration</td>
+            </tr>
+            <tr>
+              <td><code>&</code> (background)</td>
+              <td>Parallel execution</td>
+              <td>Independent tasks</td>
+            </tr>
+            <tr>
+              <td><code>Task()</code> tool</td>
+              <td>Spawn subagent</td>
+              <td>Delegated work</td>
+            </tr>
+            <tr>
+              <td>Git worktree</td>
+              <td>Isolated directory</td>
+              <td>Parallel branches</td>
+            </tr>
+            <tr>
+              <td>Docker container</td>
+              <td>Isolated environment</td>
+              <td>Maximum isolation</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="state-primitives">State Primitives</h3>
+
+        <table class="primitive-table">
+          <thead>
+            <tr>
+              <th>Primitive</th>
+              <th>What It Does</th>
+              <th>When To Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>progress.txt</code></td>
+              <td>Append-only log</td>
+              <td>Cross-iteration memory</td>
+            </tr>
+            <tr>
+              <td><code>prd.json</code></td>
+              <td>Task state tracking</td>
+              <td>Pass/fail status</td>
+            </tr>
+            <tr>
+              <td><code>CLAUDE.md</code></td>
+              <td>Project context</td>
+              <td>Onboarding/constraints</td>
+            </tr>
+            <tr>
+              <td>Git commit</td>
+              <td>Checkpoint</td>
+              <td>State preservation</td>
+            </tr>
+            <tr>
+              <td>Handoff JSON</td>
+              <td>Agent communication</td>
+              <td>Multi-agent coordination</td>
+            </tr>
+            <tr>
+              <td><code>status.json</code></td>
+              <td>Current state</td>
+              <td>Live monitoring</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Control Primitives</h3>
+
+        <table class="primitive-table">
+          <thead>
+            <tr>
+              <th>Primitive</th>
+              <th>What It Does</th>
+              <th>When To Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Completion signal</td>
+              <td><code>&lt;promise&gt;COMPLETE&lt;/promise&gt;</code></td>
+              <td>Loop termination</td>
+            </tr>
+            <tr>
+              <td>Hooks</td>
+              <td>Lifecycle automation</td>
+              <td>Notifications, formatting</td>
+            </tr>
+            <tr>
+              <td>Quality gates</td>
+              <td>Tests/types before commit</td>
+              <td>Verification enforcement</td>
+            </tr>
+            <tr>
+              <td>Timeout</td>
+              <td>Max iterations</td>
+              <td>Safety limits</td>
+            </tr>
+            <tr>
+              <td>Worker preamble</td>
+              <td>Role enforcement</td>
+              <td>Orchestrator/worker separation</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 5: WORKED EXAMPLES -->
+      <section id="examples" data-activity="examples">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Worked Examples
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Watch the derivation process in action. Each example shows the four steps applied to a real constraint.
+        </p>
+
+        <div class="worked-example">
+          <div class="worked-example-title">
+            <i data-lucide="git-branch" class="w-5 h-5"></i>
+            Example 1: Deriving Ralph Wiggum from Principles
+          </div>
+
+          <div class="worked-step">
+            <div class="worked-step-label">Step 1: Identify the Constraint</div>
+            <p class="text-text-secondary text-sm">
+              "I need autonomous execution without quality degradation over time."<br>
+              The constraint is: <strong>long-running autonomous work that doesn't get stupider.</strong>
+            </p>
+          </div>
+
+          <div class="worked-step">
+            <div class="worked-step-label">Step 2: Apply Relevant Principles</div>
+            <ul class="text-text-secondary text-sm list-disc list-inside">
+              <li><strong>P1: Context Is Primary</strong> - Quality degrades with context usage</li>
+              <li><strong>P6: Fresh Context > Extended</strong> - New instances don't accumulate pollution</li>
+              <li><strong>P2: External State > Internal</strong> - State must persist outside conversation</li>
+              <li><strong>P3: Verification Is Non-Negotiable</strong> - Each iteration must verify its work</li>
+            </ul>
+          </div>
+
+          <div class="worked-step">
+            <div class="worked-step-label">Step 3: Compose Primitives</div>
+            <table class="primitive-table">
+              <thead>
+                <tr>
+                  <th>Principle</th>
+                  <th>Primitive Implementation</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Fresh context</td>
+                  <td>Bash loop spawning new Claude instances</td>
+                </tr>
+                <tr>
+                  <td>External memory</td>
+                  <td><code>progress.txt</code> (append-only), <code>prd.json</code> (task state)</td>
+                </tr>
+                <tr>
+                  <td>Verification</td>
+                  <td>Tests + types must pass before marking complete</td>
+                </tr>
+                <tr>
+                  <td>Termination</td>
+                  <td><code>&lt;promise&gt;COMPLETE&lt;/promise&gt;</code> signal for loop exit</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="worked-step">
+            <div class="worked-step-label">Step 4: Validate Composition</div>
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCodeBlock(this)">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                Copy
+              </button>
+              <pre><span class="keyword">for</span> (( i=1; i<=$MAX_ITERATIONS; i++ )); <span class="keyword">do</span>
+  claude <span class="string">"Review prd.json. Pick ONE task with passes: false.
+          Implement it. Run tests.
+          If passing, mark passes: true, commit.
+          Append learnings to progress.txt.
+          If ALL complete, output: &lt;promise&gt;COMPLETE&lt;/promise&gt;"</span>
+
+  <span class="keyword">if</span> grep -q <span class="string">"&lt;promise&gt;COMPLETE&lt;/promise&gt;"</span> output.txt; <span class="keyword">then</span>
+    <span class="keyword">break</span>
+  <span class="keyword">fi</span>
+<span class="keyword">done</span></pre>
+            </div>
+            <p class="text-text-secondary text-sm">
+              <strong>Validation:</strong> Context limits respected? Yes. State recoverable? Yes. Verification steps? Yes. Human can intervene? Yes.
+            </p>
+          </div>
+        </div>
+
+        <div class="worked-example" id="example-cc-mirror">
+          <div class="worked-example-title">
+            <i data-lucide="git-merge" class="w-5 h-5"></i>
+            Example 2: Deriving CC Mirror from Principles
+          </div>
+
+          <div class="worked-step">
+            <div class="worked-step-label">Step 1: Identify the Constraint</div>
+            <p class="text-text-secondary text-sm">
+              "I need multiple agents working in parallel without chaos."<br>
+              The constraint is: <strong>parallelism without coordination failures.</strong>
+            </p>
+          </div>
+
+          <div class="worked-step">
+            <div class="worked-step-label">Step 2: Apply Relevant Principles</div>
+            <ul class="text-text-secondary text-sm list-disc list-inside">
+              <li><strong>P4: Separation of Concerns</strong> - Planning and execution must be separate</li>
+              <li><strong>P7: Isolation Enables Parallelism</strong> - Workers need isolated contexts</li>
+              <li><strong>P2: External State > Internal</strong> - Coordination via files/APIs</li>
+              <li><strong>P3: Verification Is Non-Negotiable</strong> - Each worker's output must be checked</li>
+            </ul>
+          </div>
+
+          <div class="worked-step">
+            <div class="worked-step-label">Step 3: Compose Primitives</div>
+            <table class="primitive-table">
+              <thead>
+                <tr>
+                  <th>Principle</th>
+                  <th>Primitive Implementation</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Separation</td>
+                  <td>Orchestrator (Opus) + Workers (Sonnet/Haiku)</td>
+                </tr>
+                <tr>
+                  <td>Isolation</td>
+                  <td>Task tool spawns isolated subagents</td>
+                </tr>
+                <tr>
+                  <td>External state</td>
+                  <td>TaskCreate/TaskUpdate API for coordination</td>
+                </tr>
+                <tr>
+                  <td>Verification</td>
+                  <td>Acceptance criteria in task definitions</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="worked-step">
+            <div class="worked-step-label">Step 4: Validate - Worker Preamble</div>
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCodeBlock(this)">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                Copy
+              </button>
+              <pre><span class="comment">CONTEXT: You are a WORKER agent, not an orchestrator.</span>
+<span class="comment">RULES:</span>
+<span class="comment">  - Complete ONLY the task described below</span>
+<span class="comment">  - Do NOT spawn sub-agents</span>
+<span class="comment">  - Do NOT call TaskCreate or TaskUpdate</span>
+<span class="comment">TASK: [specific work]</span></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="worked-example" id="example-worktree">
+          <div class="worked-example-title">
+            <i data-lucide="git-fork" class="w-5 h-5"></i>
+            Example 3: Deriving Git Worktree Parallelism
+          </div>
+
+          <div class="worked-step">
+            <div class="worked-step-label">Step 1: Identify the Constraint</div>
+            <p class="text-text-secondary text-sm">
+              "I need multiple features developed simultaneously without file conflicts."<br>
+              The constraint is: <strong>parallel work on shared codebase without conflicts.</strong>
+            </p>
+          </div>
+
+          <div class="worked-step">
+            <div class="worked-step-label">Step 2: Apply Relevant Principles</div>
+            <ul class="text-text-secondary text-sm list-disc list-inside">
+              <li><strong>P7: Isolation Enables Parallelism</strong> - Each agent needs its own directory</li>
+              <li><strong>P2: External State > Internal</strong> - Git history is shared, files are isolated</li>
+              <li><strong>P6: Fresh Context > Extended</strong> - Each worktree gets fresh agent instances</li>
+            </ul>
+          </div>
+
+          <div class="worked-step">
+            <div class="worked-step-label">Step 4: The Resulting Pattern</div>
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCodeBlock(this)">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                Copy
+              </button>
+              <pre><span class="comment"># Create isolated worktrees</span>
+git worktree add ../wt-feature-auth feature-auth
+git worktree add ../wt-feature-payments feature-payments
+
+<span class="comment"># Run parallel agents</span>
+(cd ../wt-feature-auth && claude <span class="string">"Implement auth"</span>) &
+(cd ../wt-feature-payments && claude <span class="string">"Implement payments"</span>) &
+wait
+
+<span class="comment"># Human merges</span>
+git checkout main
+git merge feature-auth
+git merge feature-payments</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: PRACTICE PROBLEMS -->
+      <section id="practice" data-activity="practice">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Practice Problems
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Apply the derivation process yourself. Use the DIY worksheet for each problem.
+        </p>
+
+        <div class="practice-problem">
+          <div class="practice-title">
+            <i data-lucide="file-text" class="w-5 h-5"></i>
+            Problem 1: The Documentation Gap
+          </div>
+          <div class="practice-constraint">
+            <strong>Constraint:</strong> You need to generate comprehensive documentation for a large codebase, but reading the entire codebase would exhaust context.
+          </div>
+          <div class="practice-hints">
+            <strong>Hints:</strong><br>
+            - What principle addresses context exhaustion?<br>
+            - How can you process the codebase in chunks?<br>
+            - How should documentation state accumulate?
+          </div>
+        </div>
+
+        <div class="practice-problem">
+          <div class="practice-title">
+            <i data-lucide="shield" class="w-5 h-5"></i>
+            Problem 2: The Security Audit
+          </div>
+          <div class="practice-constraint">
+            <strong>Constraint:</strong> You need multiple security perspectives reviewing code (OWASP, crypto, injection, etc.) but a single agent can't hold all expertise.
+          </div>
+          <div class="practice-hints">
+            <strong>Hints:</strong><br>
+            - What principle addresses multiple perspectives?<br>
+            - How do specialists work without conflicting?<br>
+            - How are findings aggregated?
+          </div>
+        </div>
+
+        <div class="practice-problem">
+          <div class="practice-title">
+            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+            Problem 3: The Living Specification
+          </div>
+          <div class="practice-constraint">
+            <strong>Constraint:</strong> Requirements change during development. How do you prevent the PRD from becoming stale?
+          </div>
+          <div class="practice-hints">
+            <strong>Hints:</strong><br>
+            - What principle addresses state management?<br>
+            - When should the spec update?<br>
+            - How do you prevent drift between spec and code?
+          </div>
+        </div>
+
+        <div class="practice-problem">
+          <div class="practice-title">
+            <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+            Problem 4: The Cost Optimizer
+          </div>
+          <div class="practice-constraint">
+            <strong>Constraint:</strong> You're running expensive Opus calls but many tasks don't need that capability. How do you minimize cost while maintaining quality?
+          </div>
+          <div class="practice-hints">
+            <strong>Hints:</strong><br>
+            - What principle addresses separation?<br>
+            - How do you classify task complexity?<br>
+            - What triggers model escalation?
+          </div>
+        </div>
+
+        <div class="practice-problem">
+          <div class="practice-title">
+            <i data-lucide="moon" class="w-5 h-5"></i>
+            Problem 5: The Overnight Orchestrator
+          </div>
+          <div class="practice-constraint">
+            <strong>Constraint:</strong> You want to run CC Mirror-style multi-agent work overnight, but need to handle failures gracefully and notify you of critical issues.
+          </div>
+          <div class="practice-hints">
+            <strong>Hints:</strong><br>
+            - Combine which existing patterns?<br>
+            - What triggers human notification?<br>
+            - How does work resume after failure?
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 7: TROUBLESHOOTING / GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          Troubleshooting
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Common issues when deriving patterns, with fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Derived Pattern Fails in Practice
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Pattern looks correct on paper but fails when executed</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Usually a missed validation question or incomplete primitive selection</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Re-run the validation checklist rigorously. Check for missing primitives (often: external memory, termination condition). Test with a trivial example before scaling.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Can't Identify the Right Principles
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Constraint is clear but unsure which principles apply</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Incomplete understanding of principle implications</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use this mapping:<br>
+            - Long-running work? P1 (Context), P6 (Fresh), P2 (External)<br>
+            - Quality degradation? P6 (Fresh), P3 (Verification)<br>
+            - Parallel work? P7 (Isolation), P4 (Separation)<br>
+            - Coordination needed? P4 (Separation), P2 (External)
+          </div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Primitives Don't Compose Cleanly
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Primitives work individually but conflict when combined</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Incompatible primitives or missing "glue" primitive</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check the compatibility matrix in <code>architecture-composition-rules.md</code>. Add handoff mechanisms between incompatible primitives.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Pattern Too Complex
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Derived pattern has 10+ primitives; hard to understand</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Over-engineering; trying to solve too many constraints at once</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Decompose into smaller patterns that compose. Start with minimal viable pattern, add primitives incrementally. Ask: "What's the simplest pattern that addresses the primary constraint?"</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Reinventing Existing Patterns
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Spend time deriving a pattern that already exists</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Not checking existing pattern catalog first</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Before deriving, search existing patterns. Ask: "Is my constraint similar to one that led to Ralph/CC Mirror/etc.?" Consider adapting an existing pattern.</div>
+        </div>
+
+        <div class="checklist">
+          <div class="checklist-title">Validation Checklist (Before Deploying Any Derived Pattern)</div>
+          <div class="checklist-item">
+            <div class="checklist-box"></div>
+            <span>Maximum context usage estimated and acceptable</span>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-box"></div>
+            <span>All state persisted to filesystem or git</span>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-box"></div>
+            <span>Can resume from any checkpoint</span>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-box"></div>
+            <span>Failures detected, logged, with retry strategy</span>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-box"></div>
+            <span>Quality gates (tests/types) in workflow</span>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-box"></div>
+            <span>Can pause at any point; state is inspectable</span>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-box"></div>
+            <span>Clear completion criteria; max iterations defined</span>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-box"></div>
+            <span>Graceful shutdown preserves state</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE / WHEN NOT -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Derive / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              DERIVE A NEW PATTERN WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Your constraint genuinely differs from existing patterns</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Existing patterns fail your validation checklist</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You understand why existing patterns don't fit</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You can articulate the specific constraint</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You've mastered principles-core.md first</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T DERIVE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Existing pattern fits with minor adaptation</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You haven't tried existing patterns first</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You can't articulate the specific constraint</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Derivation feels like "fun" rather than "necessary"</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're still learning the 7 principles</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Quick Reference: Principle to Pattern Mapping</h3>
+
+        <table class="primitive-table">
+          <thead>
+            <tr>
+              <th>When You Need</th>
+              <th>Apply Principle</th>
+              <th>Consider Pattern</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Long-running autonomy</td>
+              <td>Fresh context + External state</td>
+              <td>Ralph Loop</td>
+            </tr>
+            <tr>
+              <td>Parallel work</td>
+              <td>Isolation + Separation</td>
+              <td>CC Mirror, Worktrees</td>
+            </tr>
+            <tr>
+              <td>Quality consistency</td>
+              <td>Verification</td>
+              <td>CI Green Enforcement</td>
+            </tr>
+            <tr>
+              <td>Multi-perspective</td>
+              <td>Separation + Isolation</td>
+              <td>Adversarial Speccing</td>
+            </tr>
+            <tr>
+              <td>Persistent memory</td>
+              <td>External state</td>
+              <td>progress.txt, Claude-Mem</td>
+            </tr>
+            <tr>
+              <td>Human oversight</td>
+              <td>External state + Hooks</td>
+              <td>Notification patterns</td>
+            </tr>
+            <tr>
+              <td>Cost optimization</td>
+              <td>Separation</td>
+              <td>Model selection matrix</td>
+            </tr>
+            <tr>
+              <td>Recovery</td>
+              <td>External state + Verification</td>
+              <td>Checkpointing</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you just memorized patterns?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> A lookup table - constraint in, pattern out.<br>
+          <strong>Why this fails:</strong> Your real constraint never matches the catalog exactly. Novel situations have no entry.<br>
+          <strong>Hidden insight:</strong> Derivation skill > pattern memorization because constraints evolve faster than catalogs.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible core of derivation</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Step 1:</strong> What's forcing my hand? (Constraint)<br>
+          <strong>Step 2:</strong> What's true about LLMs? (Principles)<br>
+          <strong>Step 3:</strong> What tools exist? (Primitives)<br>
+          <strong>Minimal derivation:</strong> Constraint + one principle + one primitive = simplest possible pattern.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Matt Pocock: Why "context rot" stuck</div>
+        <div class="text-text-secondary text-sm">
+          The phrase "context rot" spread because it names the constraint precisely. Before: "it gets weird after a while." After: a derivable principle (P1) that implies fresh context (P6).<br><br>
+          <em>Naming constraints enables derivation.</em>
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">The 4 steps cascade logically</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Every pattern exists to solve a constraint<br>
+          - If no constraint, no pattern needed<br>
+          - Constraint defines scope of solution<br>
+          - Principles narrow the solution space<br>
+          - Primitives are the only building materials<br>
+          - Validation ensures the composition actually works<br><br>
+          <em>Skip any step and the pattern fails.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Derivation = Engineering Design Process</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Requirements</strong> - Constraint identification<br>
+          <strong>Physics laws</strong> - Core principles (immutable)<br>
+          <strong>Materials library</strong> - Primitives catalog<br>
+          <strong>Testing</strong> - Validation checklist<br><br>
+          If you've done engineering design, you already know how to derive patterns.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Every major pattern shares the same derivation structure</div>
+        <div class="text-text-secondary text-sm">
+          Ralph, CC Mirror, Gas Town, Worktree parallelism - all were derived the same way. Different constraints, same process.<br><br>
+          <em>The method is invariant even when outputs differ.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="core">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Derivation skill compounds over time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Month 1:</strong> "I just need to learn Ralph"<br>
+          <strong>Month 3:</strong> "Ralph doesn't fit my use case"<br>
+          <strong>Month 6:</strong> "I derived a pattern that actually fits"<br>
+          <strong>Month 12:</strong> "I derive patterns faster than I can read docs"<br><br>
+          <em>Pattern knowledge depreciates. Derivation skill appreciates.</em>
+        </div>
+      </div>
+
+      <!-- PRINCIPLES SECTION (5 items) -->
+      <div class="activity-item expertise" data-section="principles">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deeply do you understand the 7 principles?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What are the 7 principles?"<br>
+          - Can list them<br>
+          <strong>Intermediate:</strong> "Why these 7?"<br>
+          - Understands they're derived from LLM physics<br>
+          <strong>Advanced:</strong> "Which principles conflict?"<br>
+          - Fresh context vs. external state (memory loss)<br>
+          <strong>Staff:</strong> "When do I violate a principle?"<br>
+          - When the constraint overrides it explicitly<br>
+          <strong>Expert:</strong> "What's the 8th principle?"<br>
+          - The ones not yet discovered
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="principles">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How principle violations compound</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Violate P1 (Context):</strong> Quality degrades gradually, then cliff<br>
+          <strong>Violate P2 (External):</strong> Works until restart, then amnesia<br>
+          <strong>Violate P3 (Verification):</strong> Looks good, accumulates hidden debt<br>
+          <strong>Violate P4 (Separation):</strong> Works small, chaos at scale<br><br>
+          <em>Each violation is invisible until it's catastrophic.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="principles">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Fresh Context vs. Memory Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>P6 says:</strong> Fresh context beats extended sessions<br>
+          <strong>P2 says:</strong> External state persists memory<br>
+          <strong>The tension:</strong> Fresh context = lose context. External state = limited bandwidth.<br><br>
+          <strong>Resolution:</strong> progress.txt as "compressed memory" - lossy but bounded.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="principles">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you ignore P3 (Verification)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip verification in autonomous pattern<br>
+          <strong>THEN:</strong> Errors enter the codebase undetected<br>
+          <strong>THEN:</strong> Next iteration builds on broken foundation<br>
+          <strong>THEN:</strong> Errors compound exponentially<br>
+          <strong>FINALLY:</strong> 50 iterations of garbage<br><br>
+          <em>P3 is the firewall against compounding failure.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="principles">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if context windows were unlimited?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Single session per project. No files needed. No restarts.<br>
+          <strong>Why this fails:</strong> P1 would cease to exist. P6 would be unnecessary.<br>
+          <strong>Hidden insight:</strong> Most principles exist because context is finite. If that changes, patterns must be re-derived.
+        </div>
+      </div>
+
+      <!-- PRIMITIVES SECTION (4 items) -->
+      <div class="activity-item composition" data-section="primitives">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Loop + Task() + Worktree = Factory</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Ralph loop as outer iteration, Task() for parallel workers, worktrees for isolation.<br>
+          <strong>Danger:</strong> Coordination complexity. Each primitive adds surface area.<br>
+          <strong>When to combine:</strong> Only when constraint demands all three. Start minimal.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="primitives">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Primitives = Standard Library Functions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>for loop</strong> - iteration<br>
+          <strong>prd.json</strong> - data structure<br>
+          <strong>Task()</strong> - thread spawn<br>
+          <strong>Git worktree</strong> - process isolation<br><br>
+          If you've programmed, you already know the primitives - just different syntax.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="primitives">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Primitive discovery</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> How do we discover new primitives?<br>
+          <strong>Why it's hard:</strong> Primitives emerge from constraints we haven't seen yet.<br>
+          <strong>Current best:</strong> Community experimentation, pattern mining from production.
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="primitives">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When primitives flip from help to hurt</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-3 primitives:</strong> Clean, understandable<br>
+          <strong>4-6 primitives:</strong> Manageable with documentation<br>
+          <strong>7-9 primitives:</strong> Coordination overhead dominates<br>
+          <strong>10+ primitives:</strong> Pattern too complex to maintain<br><br>
+          <strong>THE INFLECTION:</strong> ~6 primitives<br>
+          <em>Detection: If you can't hold the pattern in your head, it's too complex.</em>
+        </div>
+      </div>
+
+      <!-- EXAMPLES SECTION (5 items) -->
+      <div class="activity-item warstory" data-section="examples">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ryan Carson's Ralph derivation moment</div>
+        <div class="text-text-secondary text-sm">
+          "I kept extending sessions and Claude got dumber. Then I realized: what if I just... restart? And write everything to files? It was so obvious in hindsight."<br><br>
+          <em>Most derivations feel obvious after the fact.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="examples">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror's constraint cascade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Need parallelism without chaos<br>
+          - Workers can't share state (conflict)<br>
+          - Need coordination (orchestrator)<br>
+          - Orchestrator can't execute (context pollution)<br>
+          - Workers need isolation (Task tool)<br>
+          - Workers need constraints (preambles)<br><br>
+          <em>One constraint, five architectural decisions.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="examples">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Derivation creates teachable artifacts</div>
+        <div class="text-text-secondary text-sm">
+          When you derive a pattern explicitly, you get documentation for free: the constraint, the principles applied, the primitives chosen, the validation.<br><br>
+          <em>Patterns derived explicitly spread faster than patterns discovered intuitively.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="examples">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Worktree Isolation Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Full isolation (worktree):</strong> No conflicts, but merge hell later<br>
+          <strong>Partial isolation (branches):</strong> Easier merge, but race conditions<br>
+          <strong>No isolation (same dir):</strong> Simple, but agents step on each other<br><br>
+          <strong>Heuristic:</strong> Match isolation level to dependency between tasks.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="examples">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How derivation examples age</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "These examples are cookbook recipes"<br>
+          <strong>Week 2:</strong> "I see the pattern in the examples"<br>
+          <strong>Month 1:</strong> "I can apply the process to new constraints"<br>
+          <strong>Month 3:</strong> "I don't need examples anymore"<br><br>
+          <em>Examples are scaffolding. Remove them when you can derive independently.</em>
+        </div>
+      </div>
+
+      <!-- PRACTICE SECTION (4 items) -->
+      <div class="activity-item expertise" data-section="practice">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Practice problem difficulty levels</div>
+        <div class="text-text-secondary text-sm">
+          <strong>P1 (Documentation):</strong> Single principle (P1), straightforward<br>
+          <strong>P2 (Security Audit):</strong> Parallelism + separation (P4, P7)<br>
+          <strong>P3 (Living Spec):</strong> State management tension (P2, P3)<br>
+          <strong>P4 (Cost Optimizer):</strong> Model hierarchy, requires judgment<br>
+          <strong>P5 (Overnight):</strong> Multi-pattern composition, hardest<br><br>
+          <em>Do them in order. Each builds on the last.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="practice">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you skip practice problems?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd think:</strong> "I understand the theory, I'll derive when needed."<br>
+          <strong>Why this fails:</strong> Derivation is a skill, not knowledge. Skills require practice.<br>
+          <strong>Hidden insight:</strong> Reading about derivation != being able to derive. The gap is practice.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="practice">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip the hints</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Jump straight to implementation<br>
+          <strong>THEN:</strong> Miss the principle identification step<br>
+          <strong>THEN:</strong> Select wrong primitives<br>
+          <strong>THEN:</strong> Pattern fails validation<br>
+          <strong>FINALLY:</strong> Blame the process instead of the execution<br><br>
+          <em>The hints are the derivation. Don't skip them.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="practice">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If practice problems aren't enough</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Want more examples?</strong> - Read mastery-ralph-complete.md, mastery-multi-agent.md<br>
+          <strong>Want composition rules?</strong> - architecture-composition-rules.md<br>
+          <strong>Want to see failures?</strong> - principles-anti-patterns.md<br>
+          <strong>Want the theory?</strong> - principles-core.md
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How derivation attempts degrade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Clean derivation:</strong> Constraint clear, principles identified, primitives minimal<br>
+          <strong>Muddy derivation:</strong> Constraint vague, too many principles "might apply"<br>
+          <strong>Failed derivation:</strong> Can't articulate constraint, pattern feels "clever"<br>
+          <strong>Inverted derivation:</strong> Started with primitives, backfilled constraint<br><br>
+          <em>If you start with primitives, you're not deriving - you're retrofitting.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Over-engineering: The 15-primitive pattern</div>
+        <div class="text-text-secondary text-sm">
+          "I derived a pattern with loop + Task + worktree + docker + 3 state files + 4 hooks + health checks. It worked! For a week. Then nobody could debug it."<br><br>
+          <em>Derivation success != production success. Simplicity wins long-term.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When "just use existing pattern" flips</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Adaptation < 20%:</strong> Use existing pattern, tweak<br>
+          <strong>Adaptation 20-50%:</strong> Consider forking pattern<br>
+          <strong>Adaptation 50-70%:</strong> Derive from scratch may be cleaner<br>
+          <strong>Adaptation > 70%:</strong> Definitely derive from scratch<br><br>
+          <strong>THE INFLECTION:</strong> ~50% adaptation<br>
+          <em>Beyond 50%, you're fighting the original pattern more than using it.</em>
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="gotchas">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Derivation + Existing Pattern</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Derive extension to existing pattern. Ralph + new state file.<br>
+          <strong>Danger:</strong> Loses the "why" of original pattern. May break invariants.<br>
+          <strong>Recommendation:</strong> Understand original derivation before extending.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (5 items) -->
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you always derived from scratch?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Custom pattern for every project.<br>
+          <strong>Why this fails:</strong> Existing patterns encode community learning. Reinventing wastes that.<br>
+          <strong>Hidden insight:</strong> Derivation is for genuinely novel constraints, not "I want to be clever."
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Learn vs. Ship Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Learn (derive):</strong> Deeper understanding, but slower<br>
+          <strong>Ship (use existing):</strong> Faster now, but hit walls later<br>
+          <strong>Balanced:</strong> Use existing first, derive when walls hit<br><br>
+          <strong>Heuristic:</strong> If you're blocked for >2 hours adapting, start deriving.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Derivation = Writing vs. Using Libraries</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Use library:</strong> Existing pattern (Ralph, CC Mirror)<br>
+          <strong>Fork library:</strong> Adapt pattern significantly<br>
+          <strong>Write library:</strong> Derive from scratch<br><br>
+          <em>You don't write stdlib for every project. But you need to know how when stdlib fails.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="when">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">All patterns share: Constraint + Principles + Primitives</div>
+        <div class="text-text-secondary text-sm">
+          Whether you use Ralph, CC Mirror, Gas Town, or derive something new - the structure is invariant. Constraint identifies the problem. Principles narrow solutions. Primitives implement.<br><br>
+          <em>Understanding this structure is more valuable than knowing any single pattern.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If derivation guide isn't what you need</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need ready patterns?</strong> - mastery-ralph-complete.md, mastery-multi-agent.md<br>
+          <strong>Need decision support?</strong> - JUDGMENT-GUIDE.md<br>
+          <strong>Need anti-patterns?</strong> - principles-anti-patterns.md<br>
+          <strong>Need complexity ladder?</strong> - architecture-complexity-ladder.md
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

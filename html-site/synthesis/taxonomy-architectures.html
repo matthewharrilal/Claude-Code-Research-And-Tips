@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Architecture Taxonomy | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Architecture Table */
+    .arch-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .arch-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .arch-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .arch-table tr:hover {
+      background: #fafafa;
+    }
+
+    /* Architecture Diagram */
+    .arch-diagram {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* Level Badge */
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+
+    .level-0 { background: #dbeafe; color: #1e40af; }
+    .level-1 { background: #dcfce7; color: #166534; }
+    .level-2 { background: #fef9c3; color: #854d0e; }
+    .level-3 { background: #fed7aa; color: #9a3412; }
+    .level-4 { background: #fecaca; color: #991b1b; }
+    .level-5 { background: #e9d5ff; color: #6b21a8; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Architecture Taxonomy</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The Classification</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">The Iron Law</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-separation" class="nav-item">Why Orchestrator/Worker?</a>
+          <a href="#why-external-state" class="nav-item">Why External State?</a>
+          <a href="#why-flat-hierarchy" class="nav-item">Why Flat Hierarchy?</a>
+        </div>
+      </div>
+
+      <!-- Architecture Patterns -->
+      <div class="nav-section" data-section="patterns">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>The Patterns</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#single-agent" class="nav-item">Single Agent (4)</a>
+          <a href="#multi-agent" class="nav-item">Multi-Agent (5)</a>
+          <a href="#swarm" class="nav-item">Swarm (4)</a>
+        </div>
+      </div>
+
+      <!-- Selection Path -->
+      <div class="nav-section" data-section="path">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Selection Path</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#path" class="nav-item">Decision Tree</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Architecture Mistakes</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Pattern Selection</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Every agent architecture exists on one axis: orchestration separation. Master this, master all patterns.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"An agent that orchestrates must NEVER directly execute. An agent that executes must NEVER directly orchestrate."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Orchestrator: Task*, Read (minimal) | Worker: Read, Write, Edit, Bash')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Orchestrator: Task*, Read (minimal) | Worker: Read, Write, Edit, Bash</code>
+          </div>
+
+          <div class="core-anchor">This is the Iron Law. Every architecture in this taxonomy obeys it or fails.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The taxonomy organizes 13 architecture patterns across three complexity tiers. But every pattern is a variation on ONE theme: how strictly do you separate orchestration from execution? The strictest separation (CC Mirror) scales best. The loosest (single interactive session) is simplest. Everything else falls on this spectrum.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          This isn't philosophy - it's physics. When an orchestrator writes code, it fills context with implementation details, losing strategic perspective. When a worker spawns sub-workers, coordination explodes exponentially. Mixing roles leads to context pollution, scope creep, verification bypass, and uncontrolled recursion.
+        </p>
+
+        <div class="arch-diagram">
+SINGLE AGENT                    MULTI-AGENT                      SWARM
+     │                              │                              │
+     ▼                              ▼                              ▼
+┌─────────┐               ┌─────────────────┐           ┌─────────────────┐
+│ Human   │               │   Orchestrator  │           │  Task Queue /   │
+│   ↓     │               │   (Opus 4.5)    │           │  Container Pool │
+│ Claude  │               │        ↓        │           │        ↓        │
+│   ↓     │               │ ┌─────┼─────┐   │           │  Dynamic Spawn  │
+│Codebase │               │ ▼     ▼     ▼   │           │  & Scale        │
+└─────────┘               │Worker Worker Worker         └─────────────────┘
+                          │(Sonnet)(Sonnet)(Haiku)
+                          └─────────────────┘
+
+Complexity:  LOW ──────────────── MEDIUM ──────────────── HIGH
+Parallelism: NONE ─────────────── HIGH ────────────────── VERY HIGH
+Cost:        LOW ──────────────── MEDIUM ──────────────── HIGH
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-separation" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY ORCHESTRATOR/WORKER SEPARATION?</div>
+          <div class="decision-reasoning">
+            When an orchestrator writes code directly, its context fills with implementation details. It loses the strategic overview needed to coordinate multiple workers. This is called "context pollution" - the orchestrator becomes a worker with extra responsibilities it can't fulfill.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Define roles BEFORE starting. If you're the orchestrator: use only Task*, Read (1-2 files), AskUserQuestion. If you're a worker: use Read, Write, Edit, Bash, but NEVER Task*, NEVER spawn sub-agents. Tool ownership is non-negotiable.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-external-state">
+          <div class="decision-why">WHY EXTERNAL STATE ACROSS ALL PATTERNS?</div>
+          <div class="decision-reasoning">
+            Every pattern in this taxonomy uses external state (files, git, task boards) rather than relying on agent memory. This isn't a Ralph-specific decision - it's universal. INV-003 (External state > internal memory) appears in Ralph, Gas Town, CC Mirror, and Panopticon because it's physics, not preference.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Whatever architecture you choose, design your persistence layer FIRST. For Ralph: prd.json + progress.txt. For CC Mirror: TaskCreate/TaskUpdate. For Gas Town: ~/.gt/. For Panopticon: domain directories. The agent can forget - the filesystem cannot.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-flat-hierarchy">
+          <div class="decision-why">WHY FLAT HIERARCHY (2 LEVELS MAX)?</div>
+          <div class="decision-reasoning">
+            Deep nesting (>2 levels) is an anti-pattern across ALL architectures. Each additional level compounds: context passing becomes lossy, coordination overhead multiplies, debugging becomes exponentially harder, and latency compounds. Even Gas Town's 3-level appearance is really 2 levels with role specialization.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              If you're reaching for a third level, you've mis-decomposed. Workers that need to delegate should report back and let the orchestrator spawn. Never Orchestrator → Worker → SubWorker. Always Orchestrator → Worker A, Orchestrator → Worker B (flat).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: THE PATTERNS -->
+      <section id="patterns" data-activity="patterns">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The Architecture Patterns
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="single-agent">Single Agent Patterns (4)</h3>
+
+        <table class="arch-table">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Description</th>
+              <th>Complexity</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Interactive Session</strong></td>
+              <td>Human <-> Claude conversation loop. Baseline pattern.</td>
+              <td><span class="level-badge level-0">L0</span></td>
+              <td>Exploration, debugging, learning</td>
+            </tr>
+            <tr>
+              <td><strong>Ralph Loop</strong></td>
+              <td><code>while :; do cat PROMPT.md | claude; done</code> Fresh context per iteration, external state.</td>
+              <td><span class="level-badge level-1">L1-2</span></td>
+              <td>Overnight autonomous development</td>
+            </tr>
+            <tr>
+              <td><strong>Subagent Spawning</strong></td>
+              <td>Parent spawns ephemeral children for isolated tasks. Results absorbed back.</td>
+              <td><span class="level-badge level-2">L2</span></td>
+              <td>Research, validation, parallel exploration</td>
+            </tr>
+            <tr>
+              <td><strong>Cron-Scheduled</strong></td>
+              <td>Scheduled Claude invocations (Panopticon pattern). No human intervention.</td>
+              <td><span class="level-badge level-2">L2-3</span></td>
+              <td>Automated reports, morning briefs</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Ralph Loop - The gateway to autonomous work</span>
+<span class="keyword">while</span> :; <span class="keyword">do</span>
+  cat PROMPT.md | claude --dangerously-skip-permissions
+  sleep 2
+<span class="keyword">done</span>
+
+<span class="comment"># Cron-Scheduled - The Panopticon foundation</span>
+<span class="comment"># crontab entry:</span>
+0 6 * * * cd ~/trades && claude <span class="string">"Generate morning brief"</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="multi-agent">Multi-Agent Patterns (5)</h3>
+
+        <table class="arch-table">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Description</th>
+              <th>Complexity</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hub-and-Spoke (CC Mirror)</strong></td>
+              <td>Central orchestrator (Opus) delegates to specialized workers (Sonnet/Haiku). Strictest separation.</td>
+              <td><span class="level-badge level-3">L3-4</span></td>
+              <td>Team projects, parallel features</td>
+            </tr>
+            <tr>
+              <td><strong>Factory (Gas Town)</strong></td>
+              <td>Full "town" with Mayor, Deacon, Dogs, Refinery, Polecats, Crew. Agent factory.</td>
+              <td><span class="level-badge level-5">L5-7</span></td>
+              <td>Enterprise scale, 10+ agents</td>
+            </tr>
+            <tr>
+              <td><strong>Kanban Loop</strong></td>
+              <td>Single agent operates against task board. Pick → Work → Complete → Next.</td>
+              <td><span class="level-badge level-2">L2</span></td>
+              <td>Task-based workflow, CI/CD</td>
+            </tr>
+            <tr>
+              <td><strong>Parallel Branch</strong></td>
+              <td>Multiple agents on separate git branches. Human merges.</td>
+              <td><span class="level-badge level-2">L2-3</span></td>
+              <td>Independent feature development</td>
+            </tr>
+            <tr>
+              <td><strong>Panopticon</strong></td>
+              <td>8 parallel Claude instances, each owning a life domain. Self-legibility through automation.</td>
+              <td><span class="level-badge level-4">L4-5</span></td>
+              <td>Personal automation, comprehensive life management</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="arch-diagram">
+<span class="comment"># Hub-and-Spoke (CC Mirror)</span>
+         ┌─────────────────┐
+         │   ORCHESTRATOR  │ ← "YOU DO NOT WRITE CODE."
+         │   (Opus 4.5)    │
+         └────────┬────────┘
+                  │ Task(description=..., run_in_background=True)
+    ┌─────────────┼─────────────┐
+    ▼             ▼             ▼
+┌───────┐   ┌───────┐   ┌───────┐
+│ Coder │   │ Tester│   │ Docs  │
+│(Sonnet)│   │(Sonnet)│   │(Haiku)│
+└───────┘   └───────┘   └───────┘
+
+<span class="comment"># Gas Town Factory</span>
+Gas Town (~/.gt)
+├── HQ (town-level management)
+├── Rigs (project repos)
+│   └── Witness (per-rig observer)
+└── Workers
+    ├── Mayor (town coordination)
+    ├── Deacon (monitoring/handshakes)
+    ├── Dogs (quality gates)
+    ├── Refinery (task decomposition)
+    ├── Polecat (persistent workers)
+    └── Crew (ephemeral workers)
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="swarm">Swarm Architectures (4)</h3>
+
+        <table class="arch-table">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Description</th>
+              <th>Complexity</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Infinite Orchestra</strong></td>
+              <td>Self-improving orchestrator in Docker. Specialized worker profiles. 24/7 operation.</td>
+              <td><span class="level-badge level-4">L4-5</span></td>
+              <td>Self-improving systems</td>
+            </tr>
+            <tr>
+              <td><strong>Container-Isolated (AI-Maestro)</strong></td>
+              <td>Claude instances in Docker containers. Shared volumes for communication.</td>
+              <td><span class="level-badge level-4">L4</span></td>
+              <td>CI/CD integration, isolation</td>
+            </tr>
+            <tr>
+              <td><strong>Git Worktree Swarm</strong></td>
+              <td>Git worktrees create isolated directories. Parallel agents share history.</td>
+              <td><span class="level-badge level-3">L3</span></td>
+              <td>Parallel feature development</td>
+            </tr>
+            <tr>
+              <td><strong>Task Queue Swarm</strong></td>
+              <td>Agents claim from shared queue. Dynamic scaling, load balancing.</td>
+              <td><span class="level-badge level-4">L4-5</span></td>
+              <td>Variable workload, auto-scaling</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Git Worktree Swarm - Parallel Ralph loops</span>
+<span class="keyword">for</span> feature <span class="keyword">in</span> auth payments notifications; <span class="keyword">do</span>
+  git worktree add ../wt-$feature $feature-branch
+  (cd ../wt-$feature && ./ralph.sh 20) &
+<span class="keyword">done</span>
+wait
+
+<span class="comment"># Container-Isolated - docker-compose.yml</span>
+services:
+  agent-1:
+    build: ./agent
+    volumes:
+      - ./project:/workspace
+      - agent-1-data:/data
+  agent-2:
+    build: ./agent
+    volumes:
+      - ./project:/workspace
+      - agent-2-data:/data</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: SELECTION PATH -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Selection Path
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Use this decision tree to select your architecture. Start at the top, follow the branches.
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>Single task, one session?</strong> YES -> <code>Interactive Session</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>Multiple sequential tasks, overnight?</strong> YES -> <code>Ralph Loop</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>Need parallel work?</strong> Same repo? -> <code>Git Worktrees</code> | Different domains? -> <code>Panopticon</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>Complex decomposition, 2-5 workers?</strong> YES -> <code>Hub-and-Spoke (CC Mirror)</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>Need specialized roles (7+ types)?</strong> YES -> <code>Gas Town Factory</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>Massive scale (10+ agents)?</strong> YES -> <code>Gas Town</code> or <code>Task Queue Swarm</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content"><strong>CI/CD integration?</strong> YES -> <code>Container-Isolated Parallel</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content"><strong>Self-improving system?</strong> YES -> <code>Infinite Orchestra</code></div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Comparison Matrix</h3>
+
+        <table class="arch-table">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Complexity</th>
+              <th>Parallelism</th>
+              <th>Context Isolation</th>
+              <th>Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Interactive Session</td>
+              <td>Low</td>
+              <td>None</td>
+              <td>N/A</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>Ralph Loop</td>
+              <td>Low-Medium</td>
+              <td>Sequential</td>
+              <td>Per-iteration</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td>Subagent Spawning</td>
+              <td>Medium</td>
+              <td>Limited</td>
+              <td>Per-subagent</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td>Hub-and-Spoke</td>
+              <td>Medium-High</td>
+              <td>High</td>
+              <td>Per-worker</td>
+              <td>Medium-High</td>
+            </tr>
+            <tr>
+              <td>Factory (Gas Town)</td>
+              <td>Very High</td>
+              <td>Very High</td>
+              <td>Per-worker</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td>Panopticon</td>
+              <td>High</td>
+              <td>High</td>
+              <td>Per-domain</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td>Worktree Swarm</td>
+              <td>Medium</td>
+              <td>High</td>
+              <td>Per-worktree</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td>Container Swarm</td>
+              <td>High</td>
+              <td>Very High</td>
+              <td>Per-container</td>
+              <td>High</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Architecture mistakes that compound. Learn from others' failures.
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Orchestrator writing code directly
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Main agent context fills up, loses strategic view, quality degrades</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Violating Iron Law - orchestrator took on worker role</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add explicit worker preamble: "You are a WORKER. Do NOT spawn sub-agents."</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Worker spawning sub-workers
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Exponential context explosion, coordination nightmare, lost tasks</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Worker trying to orchestrate instead of execute</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Workers NEVER spawn. They report back, orchestrator spawns next worker. Flat hierarchy only.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Wrong model for task type
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> High costs on simple tasks, or poor quality on complex ones</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Not matching model to task complexity</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Haiku for lookups/errands. Sonnet for implementation. Opus for architecture/ambiguity.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Starting too complex
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Spending more time debugging orchestration than building features</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Jumped to Gas Town when Ralph would suffice</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Start simple, add complexity only when you hit limits. Ralph -> CC Mirror -> Gas Town.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions that don't go away. Manage them, don't solve them.
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Coordination Overhead vs. Parallelism
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More agents = more parallelism, but also more coordination. At some point, coordination cost exceeds parallelism benefit.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Agents waiting for each other. Merge conflicts. Duplicated work.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Strict domain isolation. Each agent owns specific directories/files. Use worktrees or containers for physical isolation. Accept sequential when domains overlap.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Observability vs. Simplicity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Multi-agent systems need monitoring, but monitoring infrastructure adds complexity. You can't debug what you can't see.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "What is agent 5 doing?" unanswerable. Silent failures. Morning reveals chaos.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start with rpai or Claude HUD. Add Gas Town's Witness pattern for audit trails. Accept that full observability has cost.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Architecture Selection Regret
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> You can't know the right architecture until you've tried it. But switching architectures mid-project is expensive.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "We should have used X" realizations at 60% completion.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start one level simpler than you think you need. Migrate when you hit concrete limits, not anticipated ones. Preserve external state formats across migrations.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use This Taxonomy
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE THIS TAXONOMY WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Starting a new AI-assisted project (architecture selection)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Current architecture hitting limits (migration planning)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Explaining agent architectures to team (shared vocabulary)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Evaluating new tools/patterns (where do they fit?)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Debugging architecture problems (anti-pattern identification)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE THIS TAXONOMY WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>One-off scripts or experiments (just use interactive session)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Looking for implementation details (see pattern-specific docs)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need specific tool setup (see tooling docs instead)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Optimizing existing working system (don't fix what works)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Quick Selection by Scenario</h3>
+
+        <table class="arch-table">
+          <thead>
+            <tr>
+              <th>Your Scenario</th>
+              <th>Recommended Pattern</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Single feature, overnight</td>
+              <td>Ralph Loop</td>
+              <td>Simplest autonomous pattern</td>
+            </tr>
+            <tr>
+              <td>Multiple life domains</td>
+              <td>Panopticon</td>
+              <td>Isolated directories, domain expertise</td>
+            </tr>
+            <tr>
+              <td>Team project, parallel features</td>
+              <td>Git Worktrees + Branch Discipline</td>
+              <td>Isolated work, shared history</td>
+            </tr>
+            <tr>
+              <td>Complex architecture work</td>
+              <td>Hub-and-Spoke (CC Mirror)</td>
+              <td>Specialized workers, clear separation</td>
+            </tr>
+            <tr>
+              <td>Production app with dependencies</td>
+              <td>CC Mirror native orchestration</td>
+              <td>Task management built-in</td>
+            </tr>
+            <tr>
+              <td>Massive scale (10+ agents)</td>
+              <td>Gas Town Factory</td>
+              <td>Full town infrastructure</td>
+            </tr>
+            <tr>
+              <td>CI/CD integration</td>
+              <td>Container-Isolated Parallel</td>
+              <td>Docker isolation, reproducibility</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if all agents could orchestrate?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Any agent spawns any other. Democratic task distribution.<br>
+          <strong>Why this fails:</strong> No strategic overview. Context pollution everywhere. Coordination O(n^2).<br>
+          <strong>Hidden constraint revealed:</strong> Orchestration is a ROLE, not a capability. The Iron Law is physics.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible taxonomy</div>
+        <div class="text-text-secondary text-sm">
+          Every architecture is a point on ONE axis:<br>
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">Interactive <---> Strict Separation</code><br>
+          <strong>Essential:</strong> Understand the axis.<br>
+          <strong>Everything else:</strong> Implementation details.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Steve Yegge: Gas Town evolution</div>
+        <div class="text-text-secondary text-sm">
+          "Stage 7+ dev evolution. 10+ agents, hand-managed." Gas Town is the result of 6+ months production use. He didn't start there - he evolved through simpler patterns first.
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-001: Fresh context > extended sessions</div>
+        <div class="text-text-secondary text-sm">
+          Ralph, CC Mirror, Gas Town, Panopticon ALL use fresh context per unit of work. This isn't a Ralph thing - it's universal. Context degrades at ~80K tokens. Every architecture handles this.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-003: External state > internal memory</div>
+        <div class="text-text-secondary text-sm">
+          Ralph uses prd.json. CC Mirror uses TaskCreate. Gas Town uses ~/.gt/. Panopticon uses domain directories. All are the SAME invariant in different clothes.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How orchestrator separation degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100%</strong> (strict): Orchestrator only uses Task*. Clean.<br>
+          <strong>80%</strong>: Orchestrator reads a few files "for context". Subtle drift.<br>
+          <strong>60%</strong>: Orchestrator edits "one small thing". Context pollution starts.<br>
+          <strong>40%</strong>: Orchestrator is now a worker with extra responsibilities.<br>
+          <strong>CLIFF</strong>: Orchestrator loses strategic view. Workers unsupervised.<br><br>
+          <em>Critical: The gradient is invisible. You feel productive until the cliff.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Agent Architectures = Team Structures</div>
+        <div class="text-text-secondary text-sm">
+          Interactive Session = Solo developer<br>
+          Ralph Loop = Junior dev with checklist<br>
+          CC Mirror = Tech lead + specialists<br>
+          Gas Town = Engineering organization<br><br>
+          If you've designed teams, you understand agent architectures.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint -> FIVE architectures</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Context finite (200K) + degrades at 80K<br>
+          -> Can't keep everything in one agent<br>
+          -> Must distribute to multiple agents<br>
+          -> Distribution needs coordination<br>
+          -> Coordination needs hierarchy<br>
+          -> Hierarchy must be flat (>2 levels fails)<br><br>
+          One physics constraint, entire taxonomy.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you let workers spawn sub-workers</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Worker A spawns Worker B<br>
+          <strong>THEN:</strong> B spawns C (why not?)<br>
+          <strong>THEN:</strong> Exponential context explosion<br>
+          <strong>THEN:</strong> No one knows who's doing what<br>
+          <strong>FINALLY:</strong> Morning reveals chaos, tasks lost<br><br>
+          <em>The fix: Flat hierarchy ONLY. Workers never spawn.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Model Selection Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>All Opus:</strong> Best quality, but $$$$ and slow<br>
+          <strong>All Sonnet:</strong> Balanced, but orchestration weaker<br>
+          <strong>All Haiku:</strong> Cheap/fast, but complex tasks fail<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> Tasks vary in complexity.<br>
+          <strong>HEURISTIC:</strong> Opus for orchestration + ambiguity. Sonnet for implementation. Haiku for lookups.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Architecture Selection Understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Which pattern should I use?"<br>
+          -> Follow the decision tree<br>
+          <strong>Intermediate:</strong> "Why these specific patterns?"<br>
+          -> They're points on the separation axis<br>
+          <strong>Advanced:</strong> "When do I migrate?"<br>
+          -> When you hit concrete limits<br>
+          <strong>Staff:</strong> "How do patterns compose?"<br>
+          -> Ralph + Worktrees, CC Mirror + Gas Town<br>
+          <strong>Expert:</strong> "What's missing from taxonomy?"<br>
+          -> Cross-organization patterns, global coordination
+        </div>
+      </div>
+
+      <!-- PATTERNS SECTION -->
+      <div class="activity-item composition" data-section="patterns">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph + Git Worktrees</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Parallel Ralph loops in isolated worktrees.<br>
+          <strong>Danger:</strong> Must ensure tasks don't overlap files.<br>
+          <strong>Recommendation:</strong> One feature per worktree. Merge sequentially.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="patterns">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror + Gas Town</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> CC Mirror for within-rig orchestration, Gas Town for town-level.<br>
+          <strong>Danger:</strong> Two coordination systems = potential conflict.<br>
+          <strong>Recommendation:</strong> CC Mirror for implementation, Gas Town for cross-rig only.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="patterns">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Architecture judgment over time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Week 1:</strong> "Ralph is plenty, Gas Town is overkill"<br>
+          <strong>Week 4:</strong> "Hmm, coordination getting harder"<br>
+          <strong>Week 8:</strong> "Maybe CC Mirror would help"<br>
+          <strong>Week 16:</strong> "Gas Town makes sense now"<br><br>
+          <em>Don't judge complexity needs by week 1.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="patterns">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At 10+ agents, emergent behaviors appear</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IMPLICATION:</strong> Agents develop "preferences" for certain task types based on their history. Gas Town's Polecats become specialists not by design, but by experience accumulation.<br>
+          <strong>THRESHOLD:</strong> ~10 agents, ~100 task cycles
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="patterns">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Cross-org coordination</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE QUESTION:</strong> How do Gas Towns from different orgs collaborate?<br>
+          <strong>WHY IT'S HARD:</strong> Different context, different conventions, trust boundaries.<br>
+          <strong>CURRENT:</strong> Human handoffs. No automation yet.
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip the decision tree</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> "Gas Town sounds cool, let's use that"<br>
+          <strong>THEN:</strong> Week of setup for simple feature<br>
+          <strong>THEN:</strong> Debugging orchestration instead of building<br>
+          <strong>THEN:</strong> Revert to simpler pattern anyway<br>
+          <strong>FINALLY:</strong> "We wasted a week on architecture"<br><br>
+          <em>The fix: Start simple. Migrate when you hit limits.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="path">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Selection Path = Database Selection</div>
+        <div class="text-text-secondary text-sm">
+          Interactive = SQLite (simplest, local)<br>
+          Ralph = PostgreSQL (reliable, well-known)<br>
+          CC Mirror = Distributed SQL (coordination built-in)<br>
+          Gas Town = Kubernetes + multi-db (full infrastructure)<br><br>
+          If you've selected databases, you can select architectures.
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="path">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When to migrate architectures</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-3 agents:</strong> Ralph sufficient. Simple coordination.<br>
+          <strong>3-5 agents:</strong> CC Mirror valuable. Formal orchestration helps.<br>
+          <strong>5-10 agents:</strong> Gas Town starts making sense.<br>
+          <strong>10+ agents:</strong> Gas Town essential. Can't hand-manage.<br><br>
+          <strong>THE INFLECTION:</strong> ~5 agents<br>
+          <strong>DETECTION:</strong> Spending >30% time on coordination? Migrate up.
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Molly Cantillon: Panopticon discovery</div>
+        <div class="text-text-secondary text-sm">
+          Built Jmail (18M users) with parallel Claude instances. Key insight: "Each domain needs its own persistent directory." The gotcha she avoided: cross-domain file access. Strict isolation made it work.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if wrong model was harmless?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Use Opus everywhere. Simplest possible.<br>
+          <strong>Why this fails:</strong> $50/day on Opus for lookups that Haiku does for $0.50.<br>
+          <strong>Hidden constraint revealed:</strong> Cost IS a constraint. Model selection IS architecture.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Architecture mistakes compound overnight</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IMPLICATION:</strong> A wrong architecture choice in iteration 1 becomes 20 bad commits by morning. Ralph amplifies both good and bad patterns.<br>
+          <strong>THRESHOLD:</strong> First 3 iterations. If they're wrong, abort and fix architecture.
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Coordination vs. Parallelism</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Maximum parallelism:</strong> All agents work simultaneously<br>
+          <strong>But:</strong> More agents = more coordination overhead<br>
+          <strong>At N agents:</strong> Coordination cost > parallelism benefit<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> N varies by task type, domain isolation, team familiarity.<br>
+          <strong>HEURISTIC:</strong> If agents wait for each other >20% of time, reduce parallelism.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Observability Understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Why do I need monitoring?"<br>
+          -> You can't debug what you can't see<br>
+          <strong>Intermediate:</strong> "What should I monitor?"<br>
+          -> Task status, context usage, error rates<br>
+          <strong>Advanced:</strong> "How do I monitor multi-agent?"<br>
+          -> rpai for tmux, Claude HUD for context<br>
+          <strong>Staff:</strong> "What's the minimal observability?"<br>
+          -> Heartbeat + error log + task completion<br>
+          <strong>Expert:</strong> "Observability anti-patterns?"<br>
+          -> Over-logging fills context. Sample, don't trace everything.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal agent count</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE QUESTION:</strong> For a given project, how many agents is optimal?<br>
+          <strong>WHY IT'S HARD:</strong> Depends on task decomposition, domain isolation, coordination cost.<br>
+          <strong>CURRENT:</strong> Start with 1-3, add when you hit limits. No formula.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="hard">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Architecture selection regret chain</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Can't know right architecture until you try it<br>
+          -> Try simple first<br>
+          -> Hit limits<br>
+          -> Migrate up<br>
+          -> Migration has cost<br>
+          -> Minimize migration by preserving external state formats<br><br>
+          Accept iterative architecture selection. Plan for migration.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If this taxonomy isn't what you need</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need implementation details?</strong><br>
+          -> mastery-ralph-complete.md, mastery-ccmirror-complete.md<br>
+          <strong>Need tool setup?</strong><br>
+          -> taxonomy-tools.md<br>
+          <strong>Need pattern combinations?</strong><br>
+          -> combinations-matrix.md<br>
+          <strong>Need cost analysis?</strong><br>
+          -> compare-cost.md
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you used taxonomy for one-offs?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Analyze patterns for a 10-minute script.<br>
+          <strong>Why this fails:</strong> Overhead exceeds benefit. Just use interactive session.<br>
+          <strong>Hidden constraint:</strong> Architecture selection has threshold. Below threshold, just do it.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Taxonomy value over career</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Month 1:</strong> "This is overwhelming. Just show me Ralph."<br>
+          <strong>Month 3:</strong> "Oh, CC Mirror fits this project better."<br>
+          <strong>Month 6:</strong> "I see how patterns relate now."<br>
+          <strong>Year 1:</strong> "I can design new patterns from first principles."<br><br>
+          <em>Taxonomy is for career, not project.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="when">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ryan Carson: Pattern evolution</div>
+        <div class="text-text-secondary text-sm">
+          Started with interactive sessions. Evolved to Ralph. Now uses CC Mirror for Untangle. "Each project taught me what I needed. The taxonomy makes it faster to learn."
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

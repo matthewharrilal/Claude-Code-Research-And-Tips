@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Engineer Mental Model | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Framework Card */
+    .framework-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .framework-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 8px;
+    }
+
+    .framework-source {
+      font-size: 12px;
+      color: #71717a;
+      margin-bottom: 12px;
+    }
+
+    .framework-insight {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      padding-left: 16px;
+      border-left: 3px solid #e4e4e7;
+      font-style: italic;
+    }
+
+    /* Wave Diagram */
+    .wave-diagram {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .wave-diagram pre {
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .wave-diagram .declining { color: #6b7280; }
+    .wave-diagram .current { color: #10b981; }
+    .wave-diagram .emerging { color: #f59e0b; }
+    .wave-diagram .frontier { color: #ef4444; }
+
+    /* Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Mental Model Card */
+    .model-card {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .model-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .model-card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .model-card-source {
+      font-size: 12px;
+      color: #71717a;
+      background: #e4e4e7;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .model-card-insight {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 12px;
+    }
+
+    .model-card-apply {
+      font-size: 13px;
+      color: #0D9373;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .model-card-antipattern {
+      font-size: 13px;
+      color: #dc2626;
+      background: #fef2f2;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Stats Table */
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+
+    .stats-table th,
+    .stats-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .stats-table th {
+      background: #f4f4f5;
+      font-weight: 600;
+      color: #3f3f46;
+      font-size: 13px;
+    }
+
+    .stats-table td {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .stats-table .stat-value {
+      font-weight: 600;
+      color: #ef4444;
+    }
+
+    /* Principle Box */
+    .principle-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-left: 4px solid #0D9373;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .principle-number {
+      font-size: 12px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 4px;
+    }
+
+    .principle-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 8px;
+    }
+
+    .principle-content {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Checkpoint Box */
+    .checkpoint-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #10b981;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .checkpoint-title {
+      font-weight: 600;
+      color: #166534;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkpoint-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #166534;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="brain" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <a href="../index.html" class="text-xs font-semibold text-accent hover:text-accent-light uppercase tracking-wider">Claude Code KB</a>
+      </div>
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Six waves, eight principles, one paradigm shift. Strategic thinking for agent architecture at scale.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          This is <strong>frontier thinking</strong> for practitioners who've mastered the basics and want to understand where AI-assisted development is heading. If you're comfortable with Ralph loops and exploring multi-agent systems, this document provides the mental models of staff engineers building at the cutting edge.
+        </p>
+
+        <div class="checkpoint-box">
+          <div class="checkpoint-title">
+            <i data-lucide="compass" class="w-4 h-4"></i>
+            You Are Here
+          </div>
+          <p class="text-sm text-green-800 mb-2">
+            <strong>Prerequisite:</strong> If you're still learning basics, start with <a href="master-playbook.html" class="underline">MASTER-PLAYBOOK</a> first.
+          </p>
+          <p class="text-sm text-green-800">
+            <strong>This document:</strong> How staff engineers THINK about agent systems - waves, factories, and the frontier ahead.
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="six-waves" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          Core Frameworks
+        </h2>
+
+        <div class="framework-card">
+          <div class="framework-title">The Six Waves Framework (Steve Yegge)</div>
+          <div class="framework-source">Source: Steve Yegge, 2025</div>
+          <div class="framework-insight">
+            "Each successive modality wave is conservatively about 5x as productive as the previous wave."
+          </div>
+        </div>
+
+        <div class="wave-diagram">
+          <pre>Wave 1: Traditional Coding (2022) <span class="declining">────────────── DECLINING</span>
+Wave 2: Code Completions (2023) <span class="declining">───────────────── DECLINING</span>
+Wave 3: Chat-Based Coding (2024) <span class="declining">──────────────── DECLINING</span>
+Wave 4: Coding Agents (2025 H1) <span class="current">───────────────── CURRENT</span>
+Wave 5: Agent Clusters (2025 H2) <span class="emerging">──────────────── EMERGING</span>
+Wave 6: Agent Fleets (2026) <span class="frontier">────────────────────── FRONTIER</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">The 5x Multiplier Rule</h3>
+        <ul class="list-disc list-inside text-text-secondary mb-6 space-y-2">
+          <li><strong>Chat to Agents:</strong> 5x over chat (25x over manual)</li>
+          <li><strong>Clusters:</strong> 5x over single agents (125x over manual)</li>
+          <li><strong>Fleets:</strong> 5x over clusters (625x over manual)</li>
+        </ul>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Coding agents are like receiving free camels when you've only walked - powerful but demanding."</div>
+          <div class="core-anchor">They require careful task decomposition, supervision, understanding of limitations - not unlimited ambition.</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="gas-town">Gas Town: The Agent Factory Mental Model</h3>
+
+        <p class="text-text-secondary mb-4">
+          Steve Yegge's fourth complete orchestrator. The key insight isn't the tool - it's the architecture pattern for factory-scale operations.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Gas Town Factory Roles</span>
+Gas Town Factory
++-- HQ (Management)
+|  +-- Mayor (high-level coordination)
+|  +-- Deacon (monitoring and health)
+|  +-- Dogs (quality gates)
++-- Refinery (auto-decomposition)
++-- Rigs (projects)
+   +-- Witness (observer agent)
+   +-- Polecats (persistent workers)
+   +-- Crew (ephemeral workers)</pre>
+        </div>
+
+        <div class="framework-card">
+          <div class="framework-insight">
+            "The industry is chasing the 2025 CLI form factor" - Most people are optimizing for single-agent usage while the frontier has moved to multi-agent orchestration.
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="eight-principles">The 8 Staff Engineer Principles</h3>
+
+        <div class="principle-box">
+          <div class="principle-number">PRINCIPLE 1</div>
+          <div class="principle-title">Think in Waves, Not Tools</div>
+          <div class="principle-content">
+            Don't ask "how do I use Claude Code better?" Ask "am I ready for Wave 5 (agent clusters)?" The competitive advantage isn't tool mastery - it's being ahead on the wave progression.
+          </div>
+        </div>
+
+        <div class="principle-box">
+          <div class="principle-number">PRINCIPLE 2</div>
+          <div class="principle-title">Infrastructure Over Wrappers</div>
+          <div class="principle-content">
+            "Almost everyone starts with LangChain or similar frameworks. Almost everyone eventually strips them out." Production is FastAPI and direct API calls. Frameworks are for demos.
+          </div>
+        </div>
+
+        <div class="principle-box">
+          <div class="principle-number">PRINCIPLE 3</div>
+          <div class="principle-title">Agents Are Junior Developers</div>
+          <div class="principle-content">
+            Think of AI coding as having an extremely persistent but context-limited junior developer who never sleeps. They need supervision, clear tasks, verification. They will make mistakes. They don't remember yesterday.
+          </div>
+        </div>
+
+        <div class="principle-box">
+          <div class="principle-number">PRINCIPLE 4</div>
+          <div class="principle-title">The Trust Gradient</div>
+          <div class="principle-content">
+            "Trust is the number one thing keeping the industry from rocketing forward. You can't trust anything - you have to validate and verify." Never trust: file/database operations, deployments. Verify always: code changes, API calls. Trust with monitoring: reads, analysis.
+          </div>
+        </div>
+
+        <div class="principle-box">
+          <div class="principle-number">PRINCIPLE 5</div>
+          <div class="principle-title">Sandbox Everything</div>
+          <div class="principle-content">
+            "Never give an autonomous AI agent access to your primary operating system or critical file storage." Docker containers, git worktrees, budget caps, circuit breakers, timeouts.
+          </div>
+        </div>
+
+        <div class="principle-box">
+          <div class="principle-number">PRINCIPLE 6</div>
+          <div class="principle-title">The Economics of Agents</div>
+          <div class="principle-content">
+            Each agent costs approximately $10-12/hour in tokens. Each agent provides roughly 1 developer of productivity. 5 agents = $50/hour = 5x productivity. Budget accordingly: $50k+/year in LLM spend per developer.
+          </div>
+        </div>
+
+        <div class="principle-box">
+          <div class="principle-number">PRINCIPLE 7</div>
+          <div class="principle-title">Planning is Non-Negotiable</div>
+          <div class="principle-content">
+            From Anthropic and every advanced practitioner: Planning Before Implementation. Explore, Plan, Code, Commit. PRD-driven development. Acceptance criteria before execution.
+          </div>
+        </div>
+
+        <div class="principle-box">
+          <div class="principle-number">PRINCIPLE 8</div>
+          <div class="principle-title">The Orchestrator/Worker Separation (Iron Law)</div>
+          <div class="principle-content">
+            <strong>ORCHESTRATORS COORDINATE. WORKERS EXECUTE. NEVER MIX.</strong> This is the Iron Law. Violate it and your system fails. Centralized orchestration reduces error amplification from 17.2x to 4.4x.
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-waves" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Framework Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY ADOPT THE SIX WAVES FRAMEWORK?</div>
+          <div class="decision-reasoning">
+            AI development productivity is non-linear. Each wave represents a 5x productivity multiplier. Being one wave ahead of mainstream provides competitive advantage that compounds over time. Ignoring waves means optimizing for yesterday's paradigm.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Identify your current wave and the industry mainstream. If you're at Wave 3 while Wave 4 is emerging, you're already behind. Plan transitions deliberately - skipping waves doesn't work because Wave 5 requires Wave 4 mastery.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-iron-law">
+          <div class="decision-why">WHY THE IRON LAW (ORCHESTRATOR/WORKER SEPARATION)?</div>
+          <div class="decision-reasoning">
+            Research shows error amplification in multi-agent systems: independent agents have 17.2x error amplification, while centralized orchestration reduces this to 4.4x. When orchestrators also code, context pollution causes quality degradation across the entire system.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Design your architecture with strict role separation. Orchestrators: coordinate only, never touch code. Workers: execute only, never spawn sub-agents. This isn't bureaucracy - it's error containment.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-economics">
+          <div class="decision-why">WHY THE $10-12/HOUR ECONOMICS MODEL?</div>
+          <div class="decision-reasoning">
+            Without cost awareness, multi-agent systems can spiral out of control. The $47,000 recursive loop incident (11 days unnoticed) demonstrates the risk. Having a mental model for agent economics enables budget planning and prevents surprises.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Budget = agents x hours x $10. For 5 agents running 8 hours, that's $400/day, $100k+/year. This isn't optional - it's the cost of Wave 5+ productivity. Build it into project planning.
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Production Reality: The Failure Statistics</h3>
+
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>AI project failure rate</td>
+              <td class="stat-value">80%+ (2x typical IT projects)</td>
+            </tr>
+            <tr>
+              <td>Multi-agent system failures</td>
+              <td class="stat-value">41-86.7%</td>
+            </tr>
+            <tr>
+              <td>Error amplification (independent agents)</td>
+              <td class="stat-value">17.2x</td>
+            </tr>
+            <tr>
+              <td>Error amplification (centralized)</td>
+              <td class="stat-value">4.4x</td>
+            </tr>
+            <tr>
+              <td>Tool calling failure rate</td>
+              <td class="stat-value">3-15%</td>
+            </tr>
+            <tr>
+              <td>20-step workflow success (95% per step)</td>
+              <td class="stat-value">~36%</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 4: MENTAL MODEL CARDS -->
+      <section id="models" data-activity="models">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Mental Model Cards
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Quick-reference cards for applying each mental model. Each card captures: source, core insight, when to apply, and what NOT to do.
+        </p>
+
+        <div class="model-card">
+          <div class="model-card-header">
+            <div class="model-card-title">Six Waves Framework</div>
+            <div class="model-card-source">Yegge, 2025</div>
+          </div>
+          <div class="model-card-insight">
+            Each AI development wave is 5x more productive than the previous; competitive advantage comes from being 1-2 waves ahead.
+          </div>
+          <div class="model-card-apply">Apply When:</div>
+          <ul class="text-sm text-text-secondary list-disc list-inside mb-2">
+            <li>Making technology investment decisions</li>
+            <li>Evaluating team readiness</li>
+            <li>Planning capability roadmaps</li>
+          </ul>
+          <div class="model-card-antipattern">
+            Anti-Pattern: Skipping waves - Wave 5 requires Wave 4 mastery
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-card-header">
+            <div class="model-card-title">Trust Gradient</div>
+            <div class="model-card-source">Yegge</div>
+          </div>
+          <div class="model-card-insight">
+            Different operations require different trust levels. Never trust: destructive operations. Verify always: code changes. Trust with monitoring: read operations.
+          </div>
+          <div class="model-card-apply">Apply When:</div>
+          <ul class="text-sm text-text-secondary list-disc list-inside mb-2">
+            <li>Designing agent permissions</li>
+            <li>Setting up sandbox environments</li>
+            <li>Deciding what to automate</li>
+          </ul>
+          <div class="model-card-antipattern">
+            Anti-Pattern: All-or-nothing trust - either everything blocked or nothing verified
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-card-header">
+            <div class="model-card-title">Iron Law (Orchestrator/Worker)</div>
+            <div class="model-card-source">Multi-agent research</div>
+          </div>
+          <div class="model-card-insight">
+            Strict role separation reduces error amplification from 17.2x to 4.4x. Orchestrators coordinate. Workers execute. Never mix.
+          </div>
+          <div class="model-card-apply">Apply When:</div>
+          <ul class="text-sm text-text-secondary list-disc list-inside mb-2">
+            <li>Designing multi-agent architectures</li>
+            <li>Debugging coordination failures</li>
+            <li>Preventing context pollution</li>
+          </ul>
+          <div class="model-card-antipattern">
+            Anti-Pattern: Orchestrator that codes - context gets polluted with implementation details
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-card-header">
+            <div class="model-card-title">Agent Economics</div>
+            <div class="model-card-source">Yegge</div>
+          </div>
+          <div class="model-card-insight">
+            Each agent costs approximately $10-12/hour. Budget = agents x hours x $10. Enables cost planning and prevents surprises.
+          </div>
+          <div class="model-card-apply">Apply When:</div>
+          <ul class="text-sm text-text-secondary list-disc list-inside mb-2">
+            <li>Project cost estimation</li>
+            <li>Setting cost caps and alerts</li>
+            <li>Justifying infrastructure investment</li>
+          </ul>
+          <div class="model-card-antipattern">
+            Anti-Pattern: No cost awareness - leads to $47,000 recursive loop lessons
+          </div>
+        </div>
+
+        <div class="model-card">
+          <div class="model-card-header">
+            <div class="model-card-title">Junior Developer Model</div>
+            <div class="model-card-source">Cherny/Yegge</div>
+          </div>
+          <div class="model-card-insight">
+            AI agents are extremely persistent but context-limited junior developers who never sleep. They need supervision, clear tasks, and verification.
+          </div>
+          <div class="model-card-apply">Apply When:</div>
+          <ul class="text-sm text-text-secondary list-disc list-inside mb-2">
+            <li>Setting expectations for agent output</li>
+            <li>Designing verification workflows</li>
+            <li>Explaining agent limitations to stakeholders</li>
+          </ul>
+          <div class="model-card-antipattern">
+            Anti-Pattern: Treating agents as senior engineers - expecting judgment, getting execution
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF APPLYING MODELS -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Applying Models to Decisions
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow this flowchart when making strategic decisions about AI-assisted development:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>Apply Six Waves:</strong> What wave am I at? What wave is mainstream? If behind: focus on catching up. If ahead: leverage advantage.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>Apply Economics Model:</strong> $10-12/hour per agent. How many agents do I need? Budget = agents x hours x $10. Add 20% buffer.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>Apply Trust Gradient:</strong> What operations are involved? Never trust: file ops, deployments. Verify always: code changes. Trust with monitoring: reads, analysis.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>Apply Iron Law:</strong> Design orchestrator/worker separation. Orchestrators: coordinate only. Workers: execute only. No mixing.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>Result:</strong> Scaled architecture with cost awareness, risk mitigation, and error containment built in.</div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Decision Scenarios</h3>
+
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Models to Apply</th>
+              <th>Decision</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Should I adopt multi-agent?</td>
+              <td>Six Waves, Economics</td>
+              <td>If at Wave 4+, budget for $50+/day, yes</td>
+            </tr>
+            <tr>
+              <td>How to prevent agent runaway?</td>
+              <td>Trust Gradient, Iron Law</td>
+              <td>Sandbox, separate orchestrator/worker</td>
+            </tr>
+            <tr>
+              <td>Planning team AI adoption</td>
+              <td>Six Waves, 5x Multiplier</td>
+              <td>Identify team wave, plan 1-wave advancement</td>
+            </tr>
+            <tr>
+              <td>Debugging multi-agent failures</td>
+              <td>Error Amplification, Iron Law</td>
+              <td>Check for orchestrator doing worker work</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Mental Model Traps
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Common mistakes in applying these mental models, with model mapping and recovery strategies:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #1: Skipping Waves
+          </div>
+          <div class="gotcha-detail"><strong>Model Affected:</strong> Six Waves Framework</div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Wave 5 attempts fail without Wave 4 mastery</div>
+          <div class="gotcha-detail"><strong>Recovery:</strong> Build foundation, don't skip. Each wave requires previous wave competency.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #2: Underestimating Costs
+          </div>
+          <div class="gotcha-detail"><strong>Model Affected:</strong> Economics Model</div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Budget exhausted mid-project, $47,000 surprise bills</div>
+          <div class="gotcha-detail"><strong>Recovery:</strong> Use $10-12/hour model, add 20% buffer, set hard caps and alerts.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #3: Trusting Too Much
+          </div>
+          <div class="gotcha-detail"><strong>Model Affected:</strong> Trust Gradient</div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent deletes files, corrupts database, deploys broken code</div>
+          <div class="gotcha-detail"><strong>Recovery:</strong> Apply sandbox principle. Docker containers, git worktrees, budget caps.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #4: Orchestrator Coding
+          </div>
+          <div class="gotcha-detail"><strong>Model Affected:</strong> Iron Law</div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Context pollution, quality degradation across system</div>
+          <div class="gotcha-detail"><strong>Recovery:</strong> Enforce strict role separation. Orchestrators coordinate only.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #5: Linear Thinking
+          </div>
+          <div class="gotcha-detail"><strong>Model Affected:</strong> 5x Multiplier Rule</div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Missing compounding opportunities, underestimating wave transitions</div>
+          <div class="gotcha-detail"><strong>Recovery:</strong> Think exponentially. Each wave is 5x, not +5.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #6: Tool Focus Instead of Wave Focus
+          </div>
+          <div class="gotcha-detail"><strong>Model Affected:</strong> Six Waves Framework</div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Optimizing Wave 3 tools while Wave 5 is emerging</div>
+          <div class="gotcha-detail"><strong>Recovery:</strong> Step back to wave-level view. Ask "which wave?" not "which tool?"</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #7: Ignoring Failure Statistics
+          </div>
+          <div class="gotcha-detail"><strong>Model Affected:</strong> Production Reality</div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> 80% failure rate surprises, insufficient error handling</div>
+          <div class="gotcha-detail"><strong>Recovery:</strong> Plan for iteration, not perfection. Expect failures, build recovery.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #8: Solo Adoption
+          </div>
+          <div class="gotcha-detail"><strong>Model Affected:</strong> Team Dynamics</div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Individual mastery, team confusion and resistance</div>
+          <div class="gotcha-detail"><strong>Recovery:</strong> Build shared vocabulary. Team-wide CLAUDE.md, shared mental models.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #9: All-or-Nothing Trust
+          </div>
+          <div class="gotcha-detail"><strong>Model Affected:</strong> Trust Gradient</div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Either everything blocked (no automation) or nothing verified (chaos)</div>
+          <div class="gotcha-detail"><strong>Recovery:</strong> Apply graduated trust. Different operations, different trust levels.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #10: Treating Agents as Senior Engineers
+          </div>
+          <div class="gotcha-detail"><strong>Model Affected:</strong> Junior Developer Model</div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Expecting judgment, getting execution. Disappointment when agents don't "get it."</div>
+          <div class="gotcha-detail"><strong>Recovery:</strong> Supervise like junior developer. Clear tasks, verification, expect mistakes.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          Paradigm Shift Tensions
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental transitions in how we work, not bugs to fix. From Yegge and Kim's "Vibe Coding": "This is one of the most challenging transitions the industry has ever faced."
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Role Change: Writer to Orchestrator
+          </div>
+          <div class="hard-detail"><strong>From:</strong> Writing code line-by-line</div>
+          <div class="hard-detail"><strong>To:</strong> Orchestrating agents, validating output</div>
+          <div class="hard-detail"><strong>Why It's Hard:</strong> Identity is tied to coding skill. "I'm a developer" becomes "I'm a coordinator."</div>
+          <div class="hard-detail"><strong>Coping:</strong> Embrace new expertise. Orchestration IS the new skill. Architecture matters more than ever.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Accountability Gap
+          </div>
+          <div class="hard-detail"><strong>From:</strong> Write it, own it - direct accountability</div>
+          <div class="hard-detail"><strong>To:</strong> Don't write it, still own it - indirect accountability</div>
+          <div class="hard-detail"><strong>Why It's Hard:</strong> Responsibility without control. You're accountable for code you didn't write.</div>
+          <div class="hard-detail"><strong>Coping:</strong> Build verification systems. Automate trust but verify always. The verification IS your contribution.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Trust Inversion
+          </div>
+          <div class="hard-detail"><strong>From:</strong> Trust verified code (tests pass = done)</div>
+          <div class="hard-detail"><strong>To:</strong> Verify before trusting (tests pass = start verifying)</div>
+          <div class="hard-detail"><strong>Why It's Hard:</strong> Verification is additional work. "It works" isn't enough anymore.</div>
+          <div class="hard-detail"><strong>Coping:</strong> Automate verification. Invest in tooling that makes verification fast enough to be practical.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Speed Paradox
+          </div>
+          <div class="hard-detail"><strong>From:</strong> Faster development = less review needed</div>
+          <div class="hard-detail"><strong>To:</strong> Faster development = same or more review needed</div>
+          <div class="hard-detail"><strong>Why It's Hard:</strong> Review doesn't scale linearly with output. 10x output still needs review.</div>
+          <div class="hard-detail"><strong>Coping:</strong> Prioritize critical paths. Not all code needs same review depth. Build trust incrementally.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Mental Model Shift
+          </div>
+          <div class="hard-detail"><strong>From:</strong> Tool mastery (learn the IDE, learn the framework)</div>
+          <div class="hard-detail"><strong>To:</strong> Wave positioning (understand where development is heading)</div>
+          <div class="hard-detail"><strong>Why It's Hard:</strong> Different skill entirely. Strategic thinking, not tactical execution.</div>
+          <div class="hard-detail"><strong>Coping:</strong> Study this document. Follow frontier practitioners. Read Yegge, watch the research.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Team Dynamics Shift
+          </div>
+          <div class="hard-detail"><strong>From:</strong> Individual skill differentiation</div>
+          <div class="hard-detail"><strong>To:</strong> Team wave-level competency matters more</div>
+          <div class="hard-detail"><strong>Why It's Hard:</strong> One person can't carry a team. Everyone needs shared mental models.</div>
+          <div class="hard-detail"><strong>Coping:</strong> Build shared vocabulary. Team training, shared CLAUDE.md, common frameworks.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE / READINESS -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          Staff-Level Readiness
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              YOU'RE READY FOR STAFF-LEVEL THINKING WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You can explain Six Waves and identify your current wave</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You understand why 17.2x vs 4.4x error amplification matters</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You've experienced context degradation and recovered from it</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You can articulate the Iron Law and explain WHY, not just WHAT</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You understand $10-12/hour/agent economics and can estimate costs</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You have 100+ hours experience with multi-agent systems</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              PREREQUISITES BEFORE STAFF-LEVEL
+            </div>
+            <div class="when-item">
+              <i data-lucide="arrow-right" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Complete MASTER-PLAYBOOK stages 1-6</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="arrow-right" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Run at least one complete Ralph pattern end-to-end</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="arrow-right" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Experience multi-agent orchestration (CC Mirror or similar)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="arrow-right" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Track costs for at least one full project</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="arrow-right" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Practice context management (compaction, fresh sessions)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkpoint-box">
+          <div class="checkpoint-title">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            Self-Assessment
+          </div>
+          <div class="checkpoint-item">
+            <i data-lucide="circle" class="w-4 h-4 flex-shrink-0"></i>
+            <span>Can I explain Six Waves to a colleague? If no: study Yegge sources</span>
+          </div>
+          <div class="checkpoint-item">
+            <i data-lucide="circle" class="w-4 h-4 flex-shrink-0"></i>
+            <span>Do I know why error amplification differs? If no: read the arXiv paper</span>
+          </div>
+          <div class="checkpoint-item">
+            <i data-lucide="circle" class="w-4 h-4 flex-shrink-0"></i>
+            <span>Have I experienced context degradation? If no: run a long session intentionally</span>
+          </div>
+          <div class="checkpoint-item">
+            <i data-lucide="circle" class="w-4 h-4 flex-shrink-0"></i>
+            <span>Can I articulate the Iron Law? If no: study multi-agent patterns</span>
+          </div>
+          <div class="checkpoint-item">
+            <i data-lucide="circle" class="w-4 h-4 flex-shrink-0"></i>
+            <span>Can I estimate costs for a project? If no: track costs for one week</span>
+          </div>
+          <div class="checkpoint-item">
+            <i data-lucide="circle" class="w-4 h-4 flex-shrink-0"></i>
+            <span>Have I orchestrated multiple agents? If no: try CC Mirror</span>
+          </div>
+        </div>
+
+        <p class="text-text-secondary text-sm mt-6">
+          <strong>If fewer than 4 checked:</strong> Focus on <a href="master-playbook.html" class="text-accent underline">MASTER-PLAYBOOK</a> first. Build mastery progressively. Staff-level thinking requires foundation mastery. Attempting without foundation leads to the $47,000 lesson.
+        </p>
+        <p class="text-text-secondary text-sm mt-2">
+          <strong>If 4+ checked:</strong> You're ready for frontier work. Follow the new voices, experiment with swarms, but maintain the fundamentals.
+        </p>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if all waves were equally productive?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Pick any wave, optimize tools within it.<br>
+          <strong>Why this fails:</strong> 5x multipliers compound. Wave 6 = 625x Wave 1. The difference is not incremental.<br>
+          <strong>Hidden constraint revealed:</strong> Strategic positioning matters more than tactical optimization.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible staff mental model</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Just two models:</strong> Six Waves + Iron Law<br>
+          <strong>Everything else:</strong> Refinement for specific situations<br>
+          <strong>Minimum viable staff thinking:</strong> Know your wave, separate orchestrator/worker
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">The $47,000 Recursive Loop</div>
+        <div class="text-text-secondary text-sm">
+          A multi-agent research tool slipped into a recursive loop that ran for 11 days before anyone noticed. $47,000 in costs. Lesson: monitoring and cost caps are non-negotiable.
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint -> Framework cascade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> AI productivity is non-linear (5x per wave)<br>
+          -> Wave positioning matters more than tool mastery<br>
+          -> Strategic thinking required, not just tactical<br>
+          -> Mental models become primary skill<br>
+          -> Staff engineers think differently than seniors
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Gas Town = Kubernetes for Agents</div>
+        <div class="text-text-secondary text-sm">
+          K8s manages container fleets -> Gas Town manages agent fleets<br>
+          Pods -> Polecats/Crew (workers)<br>
+          Control plane -> Mayor/Deacon (orchestration)<br>
+          If you understand K8s architecture, you understand Gas Town.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with ALL multi-agent patterns: Iron Law</div>
+        <div class="text-text-secondary text-sm">
+          The orchestrator/worker separation appears in every production multi-agent system. Ralph: YOU are orchestrator. Gas Town: Mayor coordinates. Claude-Flow: Swarm orchestrator. This is cross-pattern DNA.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="core">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Yegge: ~1M Lines Vibe-Coded</div>
+        <div class="text-text-secondary text-sm">
+          Steve Yegge vibe-coded approximately 1 million lines with Gas Town. Shipped products, some bugs. Proof that Wave 5-6 thinking enables scale previously impossible for individuals.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item gradient" data-section="decisions">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How lack of wave awareness degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10%:</strong> Slightly behind industry, minor inefficiency<br>
+          <strong>50%:</strong> Significantly behind, competitors outpacing<br>
+          <strong>90%:</strong> Obsolete approach, struggling to keep up<br>
+          <strong>CLIFF:</strong> Career/company risk, existential threat<br>
+          <em>The gradient is slow, then sudden.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip the Iron Law</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Orchestrator also writes code<br>
+          <strong>THEN:</strong> Context fills with implementation details<br>
+          <strong>THEN:</strong> Coordination decisions degrade<br>
+          <strong>THEN:</strong> Workers receive confused instructions<br>
+          <strong>FINALLY:</strong> 17.2x error amplification instead of 4.4x
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Strategy vs Execution Time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>More strategy:</strong> Better positioning, but slower delivery<br>
+          <strong>More execution:</strong> Faster delivery, but might be wrong direction<br>
+          <strong>Resolution:</strong> 80/20 rule - 80% execution, 20% strategic review. Check wave position monthly.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="trending-up" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Team Elevation</div>
+        <div class="text-text-secondary text-sm">
+          One staff engineer's mental models elevate the entire team. Shared vocabulary -> faster communication. Shared frameworks -> better decisions. Staff thinking has a multiplier effect on teams.
+        </div>
+      </div>
+
+      <!-- MODELS SECTION -->
+      <div class="activity-item expertise" data-section="models">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deeply do you understand?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> "What frameworks exist?" -> Read this doc<br>
+          <strong>Intermediate:</strong> Apply individual frameworks -> Practice decisions<br>
+          <strong>Advanced:</strong> Combine frameworks, teach others -> Mentor<br>
+          <strong>Expert:</strong> Create new mental models -> Contribute to field
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="models">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Six Waves + Economics = Budget Roadmap</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Wave positioning informs budget allocation. Higher waves = higher costs.<br>
+          <strong>Synergy:</strong> Know your wave, calculate budget automatically.<br>
+          <strong>Example:</strong> Moving from Wave 4 to 5 = ~2x budget (more agents).
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="models">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Iron Law + Trust Gradient = Secure Architecture</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Role separation + graduated trust = defense in depth.<br>
+          <strong>Synergy:</strong> Orchestrators have monitoring-level trust. Workers have verified-execution trust. Different roles, different trust.<br>
+          <strong>Result:</strong> Architecture that's both productive AND safe.
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When is staff-level thinking worth it?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1 feature:</strong> No - overhead not justified<br>
+          <strong>1 project:</strong> Maybe - if multi-agent<br>
+          <strong>Ongoing work:</strong> Yes - strategic advantage compounds<br>
+          <strong>Career:</strong> Absolutely - differentiator for years<br>
+          <em>Invest in thinking early, compound returns forever.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="path">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When does staff-level value flip?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Below threshold:</strong> Single agent focus sufficient<br>
+          <strong>Above threshold:</strong> System-level thinking required<br>
+          <strong>THE FLIP POINT:</strong> 3+ agents coordinating<br>
+          <em>At 3+ agents, individual optimization hits limits. System thinking becomes essential.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="path">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If staff-level isn't right for you now</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Building foundation?</strong> -> MASTER-PLAYBOOK stages 1-6<br>
+          <strong>Learning single-agent?</strong> -> Ralph pattern mastery<br>
+          <strong>Risk-averse org?</strong> -> Wait-and-see, but track waves<br>
+          <strong>Premature optimization?</strong> -> Tactical mastery first
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if agents COULD be trusted fully?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> No verification, no sandbox, full autonomy.<br>
+          <strong>Why this fails:</strong> 80%+ failure rate, 17.2x error amplification are real.<br>
+          <strong>Hidden constraint revealed:</strong> Trust gradient exists because failures are frequent and expensive.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Wave 6 Production Architecture</div>
+        <div class="text-text-secondary text-sm">
+          Wave 6 (Agent Fleets, 2026) is theoretical, not production-proven. Gas Town aims for it. Nobody has deployed at true fleet scale yet. This is frontier research, not established practice.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Self-Improving Agent Swarms</div>
+        <div class="text-text-secondary text-sm">
+          Yegge's vision: "Gas Town will go from a self-propelling slime monster to a shiny, well-run agent factory. All without me having to do a damned thing." This is research phase, not production reality yet.
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Individual Mastery vs Team Adoption</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Individual:</strong> Faster to master alone<br>
+          <strong>Team:</strong> Slower but more impactful<br>
+          <strong>THE DILEMMA:</strong> Individual success doesn't scale. Team confusion blocks progress.<br>
+          <strong>Resolution:</strong> Invest in shared vocabulary. Team-wide adoption > individual heroics.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Team Adoption Failure Pattern</div>
+        <div class="text-text-secondary text-sm">
+          Staff engineer masters Wave 4-5. Team stays at Wave 3. Communication breaks down. Projects fail despite individual skill. Lesson: team wave-level matters more than individual mastery.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="hard">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with D-FINAL: 16 Mental Models</div>
+        <div class="text-text-secondary text-sm">
+          This staff engineer guide complements D-FINAL's 16 validated mental models. Staff Engineer = strategic thinking. D-FINAL = tactical reference. Use together for complete coverage.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item violation" data-section="when">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip foundation and jump to staff-level</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Attempt Wave 5 without Wave 4 mastery<br>
+          <strong>THEN:</strong> Concepts don't connect to experience<br>
+          <strong>THEN:</strong> Mental models float unanchored<br>
+          <strong>THEN:</strong> Decisions feel arbitrary<br>
+          <strong>FINALLY:</strong> $47,000 lessons instead of $100 experiments
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="trending-up" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Strategic Advantage Compounds</div>
+        <div class="text-text-secondary text-sm">
+          Wave-ahead positioning compounds over time. Year 1: 5x advantage. Year 2: 25x (compounding). Year 3: 125x. Early investment in wave-level thinking has exponential returns.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">New voices to follow for frontier thinking</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Reuven Cohen:</strong> Enterprise swarm infrastructure<br>
+          <strong>Numman Ali:</strong> Hidden Anthropic capabilities<br>
+          <strong>Kieran Klaassen:</strong> Compound Engineering paradigm<br>
+          <strong>Seth Hobson:</strong> 99-agent ecosystem<br>
+          <em>Follow these voices for where the field is heading.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="when">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Complexity Ladder: Level 6-7</div>
+        <div class="text-text-secondary text-sm">
+          Staff-level thinking targets Level 6-7 architectures (factory-scale, autonomous fleets). The Complexity Ladder provides the structural framework; Staff Engineer Mental Model provides the thinking framework. Use together.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="gotchas">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When does failure rate surprise vs expectation?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>First project:</strong> 80% failure rate shocks you<br>
+          <strong>Third project:</strong> You plan for iteration<br>
+          <strong>Tenth project:</strong> Failure rate is budgeted cost<br>
+          <strong>Expert:</strong> You optimize WHICH failures to accept<br>
+          <em>Experience transforms surprise into strategy.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="models">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="trending-up" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Mental Model Portability</div>
+        <div class="text-text-secondary text-sm">
+          These mental models apply beyond Claude Code. Trust Gradient works for any AI system. Iron Law applies to any multi-agent architecture. Six Waves describes industry trajectory. The thinking transfers across tools and vendors.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+  <script src="../js/global-nav.js"></script>
+</body>
+</html>

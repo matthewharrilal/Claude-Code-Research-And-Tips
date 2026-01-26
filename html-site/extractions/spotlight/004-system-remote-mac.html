@@ -1,0 +1,2205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SYSTEM: Remote Mac Control | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer - Draggable divider */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    .path-timing {
+      font-size: 12px;
+      color: #71717a;
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Architecture Diagram */
+    .architecture-diagram {
+      background: #18181b;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .architecture-diagram pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #e4e4e7;
+      line-height: 1.4;
+      white-space: pre;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Combination table */
+    .combo-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .combo-table th {
+      background: #f4f4f5;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .combo-table td {
+      padding: 12px;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .combo-table tr:hover {
+      background: #fafafa;
+    }
+
+    /* Capability level list */
+    .capability-level {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #fafafa;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .capability-level-number {
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .capability-level-content {
+      flex: 1;
+    }
+
+    .capability-level-title {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 4px;
+    }
+
+    .capability-level-desc {
+      font-size: 13px;
+      color: #71717a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Brain in cloud, body on Mac: secure tunnel gives Claude persistent, schedulable access to your machine.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"SYSTEM isn't remote desktop for AI - it's giving AI its own hands."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Brain (Cloudflare Worker) -> Tunnel (HTTP Bridge) -> Body (macOS)')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Brain (Cloudflare Worker) -> Tunnel (HTTP Bridge) -> Body (macOS)</code>
+          </div>
+
+          <div class="core-anchor">Three-layer separation: AI reasoning, secure transport, local execution.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Traditional AI agents face a dilemma: local execution is fast and secure but tied to one machine; cloud execution is accessible anywhere but can't touch your local resources. SYSTEM solves this with <strong>Brain/Tunnel/Body</strong> separation.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          The <strong>Brain</strong> (Cloudflare Worker + Durable Objects) handles Claude AI integration, scheduling, and state management. The <strong>Tunnel</strong> (Express.js HTTP server) validates authentication, rate-limits requests, and routes commands. The <strong>Body</strong> (macOS) executes AppleScript, shell commands, and Raycast extensions.
+        </p>
+
+        <div id="architecture" class="architecture-diagram">
+          <pre>
+┌─────────────────────────────────────────────────────────────────┐
+│                         BRAIN                                    │
+│                  (Cloudflare Worker)                            │
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
+│  │   Claude AI  │  │  Scheduling  │  │  State Management    │  │
+│  │  Integration │  │    Engine    │  │  (Durable Objects)   │  │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘  │
+│                                                                  │
+│                        ↓  HTTPS  ↓                              │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ Bearer Token Auth
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        TUNNEL                                    │
+│                    (HTTP Bridge)                                │
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
+│  │   Auth &     │  │    Rate      │  │     Request          │  │
+│  │ Validation   │  │   Limiting   │  │     Routing          │  │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘  │
+│                                                                  │
+│                        ↓  Local  ↓                              │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ Tool Execution
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                         BODY                                     │
+│                    (macOS System)                               │
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
+│  │  AppleScript │  │    Shell     │  │     Raycast          │  │
+│  │   Executor   │  │   Commands   │  │    Extensions        │  │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘  │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Two-Model Strategy</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">// Two-model strategy for efficiency</span>
+<span class="keyword">const</span> <span class="variable">INTENT_CLASSIFIER</span> = <span class="string">"claude-3-5-haiku-20241022"</span>;   <span class="comment">// Fast</span>
+<span class="keyword">const</span> <span class="variable">REASONING_ENGINE</span> = <span class="string">"claude-3-5-sonnet-20241022"</span>;   <span class="comment">// Smart</span>
+
+<span class="comment">// Classification categories</span>
+<span class="keyword">const</span> <span class="variable">INTENT_CATEGORIES</span> = [
+  <span class="string">"messages_read"</span>, <span class="string">"messages_send"</span>, <span class="string">"music"</span>, <span class="string">"system"</span>,
+  <span class="string">"calendar"</span>, <span class="string">"reminders"</span>, <span class="string">"files"</span>, <span class="string">"shortcuts"</span>,
+  <span class="string">"browser"</span>, <span class="string">"raycast"</span>, <span class="string">"notes"</span>, <span class="string">"other"</span>
+];</pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Haiku classifies intent fast (reducing tool set sent to reasoning model). Sonnet handles the actual reasoning. Example: "play some music" → <code>music</code> category → only music tools exposed → faster response.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-brain-body" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY BRAIN/BODY SPLIT?</div>
+          <div class="decision-reasoning">
+            Security Through Separation: The Brain (Claude) never has direct system access. All commands flow through authenticated, rate-limited, allowlisted channels. Brain failure doesn't affect Body operation. Body restart doesn't lose Brain state.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              You can access your Mac from anywhere while maintaining security boundaries. Commands validated at every layer. Replace Brain with different AI providers without touching Body. Add new Body capabilities without Brain changes.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-tunnel">
+          <div class="decision-why">WHY CLOUDFLARE TUNNEL (NOT EXPOSED PORTS)?</div>
+          <div class="decision-reasoning">
+            No exposed ports means no attack surface. The tunnel creates a secure pipe that only your agent can use. No firewall configuration. Zero-trust by design. The Tunnel can buffer during disconnections.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Run <code>cloudflared tunnel --url http://localhost:3456</code> and your Mac is accessible. No port forwarding. No dynamic DNS. No "is my firewall configured right?" debugging.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-two-model">
+          <div class="decision-why">WHY TWO-MODEL STRATEGY?</div>
+          <div class="decision-reasoning">
+            Haiku is cheap and fast for classification (~$0.25/1M tokens). Sonnet is expensive but smart for reasoning (~$3/1M tokens). Routing intent first reduces the tool set, making Sonnet's job easier and cheaper.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Cost optimization without quality sacrifice. Most requests hit Haiku first (fast category), then only the relevant tools go to Sonnet. You can override models via <code>MODEL_FAST</code> and <code>MODEL_SMART</code> env vars.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY SHELL ALLOWLIST?</div>
+          <div class="decision-reasoning">
+            The shell is powerful and dangerous. Rather than trying to block bad commands, SYSTEM only allows explicitly safe ones. Default: <code>['ls', 'pwd', 'date', 'whoami']</code>. You expand it deliberately.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Add only commands you need. Never add: <code>rm</code>, <code>mv</code>, <code>curl</code>, <code>wget</code>, <code>eval</code>. The allowlist lives in <code>bridge.config.json</code>.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY HUMAN-IN-THE-LOOP?</div>
+          <div class="decision-reasoning">
+            Sensitive actions (sending messages, deleting files) require explicit confirmation. Pending actions stored in Durable Objects until user approves. Approval via regex: <code>/^(yes|yeah|yep|sure|ok|do it)/i</code>.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              You stay in control of high-risk actions. Claude can propose "Send message to Bob: Meeting at 3pm?" but won't send until you confirm. Balance between automation and oversight.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY DURABLE OBJECTS?</div>
+          <div class="decision-reasoning">
+            Multi-conversation state, schedules, and preferences need to survive Worker restarts. Durable Objects provide persistent state at the edge. "Remind me in 30 minutes" actually works because the schedule persists.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Conversations don't reset. Schedules survive deployments. Your preferences persist. The cost is Cloudflare Workers pricing (~$5/month for light usage).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>system/
+├── src/
+│   └── bridge/
+│       ├── .env                    <span class="comment"># BRIDGE_AUTH_TOKEN</span>
+│       └── core.ts                 <span class="comment"># AppleScript, shell execution</span>
+├── cloudflare-agent/
+│   ├── .dev.vars                   <span class="comment"># Local secrets</span>
+│   └── src/
+│       └── index.ts                <span class="comment"># Worker logic</span>
+├── bridge.config.json              <span class="comment"># Raycast, shell allowlist</span>
+└── [Desktop App: SYSTEM.app]       <span class="comment"># Alternative to CLI</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="env-vars">Environment Variables</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Bridge (.env for src/bridge)</span>
+<span class="variable">BRIDGE_AUTH_TOKEN</span>=your-secure-token-here
+<span class="variable">HOST</span>=127.0.0.1           <span class="comment"># Bind address (localhost only by default)</span>
+<span class="variable">PORT</span>=3456                <span class="comment"># Server port</span>
+<span class="variable">LOG_LEVEL</span>=info           <span class="comment"># debug, info, warn, error</span>
+
+<span class="comment"># Agent (.dev.vars for cloudflare-agent)</span>
+<span class="variable">ANTHROPIC_API_KEY</span>=sk-ant-...
+<span class="variable">BRIDGE_URL</span>=http://localhost:3456  <span class="comment"># Or cloudflared tunnel URL</span>
+<span class="variable">BRIDGE_AUTH_TOKEN</span>=your-secure-token-here
+<span class="variable">API_SECRET</span>=your-web-ui-password
+
+<span class="comment"># Optional model overrides</span>
+<span class="variable">MODEL_FAST</span>=claude-3-5-haiku-20241022
+<span class="variable">MODEL_SMART</span>=claude-3-5-sonnet-20241022</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="config">Bridge Configuration</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">// bridge.config.json</span>
+{
+  <span class="string">"raycast"</span>: {
+    <span class="string">"extensions"</span>: [
+      {
+        <span class="string">"owner"</span>: <span class="string">"raycast"</span>,
+        <span class="string">"name"</span>: <span class="string">"spotify-player"</span>,
+        <span class="string">"commands"</span>: [
+          {
+            <span class="string">"name"</span>: <span class="string">"play"</span>,
+            <span class="string">"description"</span>: <span class="string">"Play a track on Spotify"</span>,
+            <span class="string">"arguments"</span>: [{ <span class="string">"name"</span>: <span class="string">"query"</span>, <span class="string">"type"</span>: <span class="string">"string"</span> }]
+          }
+        ]
+      }
+    ]
+  },
+  <span class="string">"shell"</span>: {
+    <span class="string">"allowlist"</span>: [<span class="string">"ls"</span>, <span class="string">"pwd"</span>, <span class="string">"date"</span>, <span class="string">"whoami"</span>]
+  }
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">macOS Permissions</h3>
+
+        <p class="text-text-secondary mb-4">
+          SYSTEM requires three permissions:
+        </p>
+
+        <ul class="list-disc list-inside text-text-secondary mb-6 space-y-2">
+          <li><strong>Accessibility:</strong> Keyboard/mouse control, window management</li>
+          <li><strong>Screen Recording:</strong> Screenshot capture for Vision analysis</li>
+          <li><strong>Automation:</strong> Control third-party apps (Finder, Safari, Notes, Calendar)</li>
+        </ul>
+
+        <p class="text-text-secondary">
+          Grant via: System Preferences → Security & Privacy → Privacy → [Category] → Add Terminal/Node/SYSTEM.app
+        </p>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a request through the system: <strong>"Play some jazz music"</strong> from your phone.
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">
+              <code>HTTPS POST</code> to <code>your-agent.workers.dev/chat</code> with Bearer token
+              <div class="path-timing">[T+0ms]</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">
+              <strong>Intent Classification (Haiku - fast)</strong><br>
+              Categories: music, messages, system, etc.<br>
+              Result: <code>"music"</code> category
+              <div class="path-timing">[T+10ms]</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">
+              <strong>Reasoning (Sonnet - smart)</strong><br>
+              Tool selection: <code>music_play</code><br>
+              Args: <code>{ "query": "jazz" }</code>
+              <div class="path-timing">[T+50ms]</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">
+              <strong>Bridge receives (via tunnel)</strong><br>
+              Auth validation (timing-safe comparison)<br>
+              Rate limit check (60/min)
+              <div class="path-timing">[T+100ms]</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">
+              <strong>Tool execution</strong><br>
+              Pattern blocking check<br>
+              AppleScript: <code>tell application "Music" to play...</code>
+              <div class="path-timing">[T+120ms]</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">
+              <strong>Music starts playing</strong>
+              <div class="path-timing">[T+300ms]</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">
+              <strong>Response flows back</strong><br>
+              "Now playing: Jazz Vibes on Apple Music"
+              <div class="path-timing">[T+350ms]</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">
+              <strong>User sees confirmation</strong> on phone
+              <div class="path-timing">[T+400ms]</div>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-text-secondary mt-6">
+          <strong>Failure paths:</strong> If Mac is asleep, commands timeout. If auth fails, 401 returned. If pattern blocked, error with explanation. Each failure is logged in audit trail.
+        </p>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit, with concrete numbers and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Connection refused to Bridge
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> <code>ECONNREFUSED 127.0.0.1:3456</code></div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Bridge not running, wrong port, or HOST bound to different interface</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>cd src/bridge && npm start</code> — verify with <code>lsof -i :3456</code></div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Unauthorized from Bridge
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> <code>{"error": "Unauthorized"}</code></div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Token mismatch, missing "Bearer " prefix, whitespace in token</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>echo $BRIDGE_AUTH_TOKEN | xxd</code> to check for hidden characters</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Script blocked
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Script contains blocked pattern"</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Script contains <code>do shell script</code>, <code>keychain</code>, <code>delete every</code>, or other blocked patterns</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use dedicated tools instead of raw AppleScript. Don't try to escape the sandbox.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> Varies — redesign approach</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Permission denied for Accessibility
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Not authorized to send Apple events"</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> macOS permissions not granted, or wrong app authorized</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> System Preferences → Security & Privacy → Accessibility → Add correct app</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Scheduled actions not firing
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Cron-scheduled tasks don't execute</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Worker sleeping, cron syntax error, Bridge offline when triggered</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check schedules via API, validate cron at crontab.guru, monitor Worker with <code>npx wrangler tail</code></div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 15 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Screenshots returning empty
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Blank images returned</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Screen Recording permission not granted, display sleeping</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Grant Screen Recording permission, use <code>caffeinate -d</code> to keep display awake</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Mac asleep
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Commands timeout, no response</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Mac went to sleep, losing network connectivity</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use <code>caffeinate -d</code> or dedicated Mac Mini that never sleeps</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> Setup decision</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Raycast OAuth extensions fail on first run
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Extension command fails with auth error</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> OAuth flow requires manual first-run authorization in Raycast</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Run extension once manually in Raycast to complete OAuth, then SYSTEM can invoke it</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Exposed Bridge to Internet (SECURITY)
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Bridge accessible from external IPs</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Bound to 0.0.0.0 instead of 127.0.0.1, port forwarded</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> IMMEDIATELY: <code>pkill -f bridge</code>. Rotate tokens. Use Cloudflare Tunnel only.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> Immediate</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Suspicious audit log entries
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Unknown tool calls in logs</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Potential unauthorized access</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>curl -H "Authorization: Bearer TOKEN" http://localhost:3456/logs</code> — review, rotate tokens, check for malicious processes</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 30 min investigation</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Always-On Requirement
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Remote access requires the Mac to be awake and connected 24/7. But Macs sleep, lose network, require updates.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Commands fail at 3am. Scheduled tasks miss their window. "My Mac isn't always online" (@anshnanda).</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Dedicated Mac Mini with UPS. Auto-restart on power failure. Use caffeinate. Accept that 99.9% uptime is achievable, not 100%.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Security vs. Convenience
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More automation capability = more attack surface. Every new tool is a potential vector.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "I want Claude to do X but it's blocked." "Why can't I just enable all commands?"</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Careful allowlisting. Human-in-the-loop for sensitive actions. Accept that some convenience is sacrificed for security. The default is locked-down for a reason.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            macOS Lock-In
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> AppleScript, Raycast, and many integrations are Mac-only. No Windows/Linux support.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "Can I run this on my Linux server?" No.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Accept the limitation. The Mac ecosystem integration is the value proposition. Cross-platform would require rewriting everything.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cloudflare Dependency
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Workers + Durable Objects + Tunnel = single provider dependency. Cloudflare outage = SYSTEM down.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Cloudflare incident → all remote access fails.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Monitor tunnel health. Have SSH backup for emergencies. Accept that edge infrastructure has good uptime (99.99%+ SLA).</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Compromised API Key
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> If your Anthropic API key leaks, attacker gains full access to your Mac via SYSTEM.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Suspicious activity in audit logs. Unexpected tool executions.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Rotate keys regularly. Use Cloudflare Access for Zero Trust. Enable human-in-the-loop for all sensitive actions. Monitor audit logs daily.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Malicious Prompts
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Claude might be tricked into executing harmful actions via prompt injection.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Claude executes unexpected commands. "Why did it delete that file?"</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Pattern blocking catches obvious attacks. Shell allowlist limits damage. Human-in-the-loop for destructive operations. Accept that AI systems have prompt injection risks.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Mental Model Shift
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> "SYSTEM isn't remote desktop for AI - it's giving AI its own hands." This paradigm shift takes time.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Users try to "watch Claude work" instead of trusting autonomous execution. Micromanaging every action.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start with low-risk tasks. Build trust gradually. Review audit logs instead of watching in real-time. Accept that the value is in delegation, not supervision.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE SYSTEM WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You need remote access to your Mac from anywhere</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You want Claude to control Mac apps (Music, Calendar, Notes)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You need scheduled actions ("remind me in 30 minutes")</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You want persistent state across sessions</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You have Raycast and want to expose extensions to AI</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You want to "ship while you sleep" with Remote Ralph</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE SYSTEM WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You need Windows/Linux support → SSH + local tools</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>High-security environments → risk profile too high</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Team collaboration needed → consider Kimaki (Discord)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Lowest latency critical → local Claude Code only</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You can't keep a Mac online 24/7 → unreliable experience</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="combinations">Pattern Combinations</h3>
+
+        <table class="combo-table">
+          <thead>
+            <tr>
+              <th>SYSTEM +</th>
+              <th>Use Case</th>
+              <th>Complexity</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ralph</strong></td>
+              <td>Remote Ralph loops - start Ralph, monitor from phone</td>
+              <td>Medium</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td><strong>Gas Town</strong></td>
+              <td>Distributed agent factory - each Mac is a Department</td>
+              <td>High</td>
+              <td>Very High</td>
+            </tr>
+            <tr>
+              <td><strong>CC-Mirror</strong></td>
+              <td>Multi-provider orchestration - unified execution layer</td>
+              <td>High</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td><strong>Ralph + Gas Town</strong></td>
+              <td>Distributed Ralph at scale - N Macs, coordinated loops</td>
+              <td>Very High</td>
+              <td>Extreme</td>
+            </tr>
+            <tr>
+              <td><strong>All Three</strong></td>
+              <td>Full autonomous factory - multi-model, multi-machine</td>
+              <td>Expert</td>
+              <td>Maximum</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Capability Expansion Levels</h3>
+
+        <div class="capability-level">
+          <div class="capability-level-number">0</div>
+          <div class="capability-level-content">
+            <div class="capability-level-title">Claude alone</div>
+            <div class="capability-level-desc">Can only generate text</div>
+          </div>
+        </div>
+
+        <div class="capability-level">
+          <div class="capability-level-number">1</div>
+          <div class="capability-level-content">
+            <div class="capability-level-title">Claude + Local MCP</div>
+            <div class="capability-level-desc">Can read/write local files, run local commands</div>
+          </div>
+        </div>
+
+        <div class="capability-level">
+          <div class="capability-level-number">2</div>
+          <div class="capability-level-content">
+            <div class="capability-level-title">Claude + SYSTEM</div>
+            <div class="capability-level-desc">Can control Mac remotely, schedule future actions, maintain state</div>
+          </div>
+        </div>
+
+        <div class="capability-level">
+          <div class="capability-level-number">3</div>
+          <div class="capability-level-content">
+            <div class="capability-level-title">Claude + SYSTEM + Multiple Macs</div>
+            <div class="capability-level-desc">Can distribute work, parallelize tasks, specialize machines</div>
+          </div>
+        </div>
+
+        <div class="capability-level">
+          <div class="capability-level-number">4</div>
+          <div class="capability-level-content">
+            <div class="capability-level-title">Claude + SYSTEM + Gas Town + CC-Mirror</div>
+            <div class="capability-level-desc">Multi-model reasoning, factory-scale production, autonomous operation</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item analogy" data-section="essence">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">SSH with an AI Brain</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What you know:</strong> SSH = remote shell access<br>
+          <strong>How SYSTEM differs:</strong> SSH + Claude + scheduling + natural language<br>
+          <strong>Key insight:</strong> You don't type commands, you describe intent. Claude translates.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible core</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">Brain -> Tunnel -> Body</code><br>
+          <strong>Essential:</strong> Three-layer separation. Authentication. AppleScript execution.<br>
+          <strong>Everything else:</strong> Refinement (scheduling, Raycast, multi-model).
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@anshnanda: "My Mac isn't always online"</div>
+        <div class="text-text-secondary text-sm">
+          Common challenge. @burcs solution: "Get a Mac Mini." Dedicated always-on machine solves 90% of reliability issues.
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Gas Town: Control Plane/Worker Split</div>
+        <div class="text-text-secondary text-sm">
+          SYSTEM's <strong>Brain/Tunnel/Body</strong> mirrors Gas Town's <strong>Mayor/Deacon/Dogs</strong>.<br><br>
+          <strong>Brain</strong> = Mayor (orchestration, routing)<br>
+          <strong>Tunnel</strong> = Deacon (dispatch, validation)<br>
+          <strong>Body</strong> = Dogs (stateless execution)
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with All: External State Principle</div>
+        <div class="text-text-secondary text-sm">
+          Durable Objects for state = <strong>external state > internal memory</strong>.<br>
+          Same principle as Ralph's prd.json and progress.txt. State survives restarts.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Agentic-Flow: Cloudflare Infrastructure</div>
+        <div class="text-text-secondary text-sm">
+          Both SYSTEM and Agentic-Flow use Cloudflare Workers + Durable Objects. Same deployment model, same pricing, same edge benefits.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="core">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if Brain ran locally?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd have:</strong> Local Claude instance, no cloud dependency.<br>
+          <strong>Why it fails:</strong> No remote access. Defeats the entire purpose.<br>
+          <strong>Hidden constraint:</strong> Cloud Brain IS the remote access enabler.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (5 items) -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Can't expose ports" → entire architecture</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Can't expose ports (security)<br>
+          → Need tunneling<br>
+          → Cloudflare Tunnel<br>
+          → Workers for Brain<br>
+          → Durable Objects for state<br>
+          → Edge-first architecture
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Must control Mac apps" → platform lock-in</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Must control Mac apps<br>
+          → Need AppleScript<br>
+          → macOS-only<br>
+          → Raycast for extensibility<br>
+          → Platform lock-in is intentional feature
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if we exposed ports directly?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd have:</strong> Simpler setup, no Cloudflare dependency.<br>
+          <strong>Why it fails:</strong> Attack surface. Port scanners. Firewall complexity. Dynamic IP headaches.<br>
+          <strong>Hidden constraint:</strong> Tunnel is load-bearing security infrastructure.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Convenience vs. Security</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> More commands = more useful<br>
+          <strong>Pull B:</strong> More commands = more risky<br>
+          <strong>Resolution:</strong> Careful allowlisting. Start locked-down, expand deliberately.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Remote vs. Latency</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Remote access is valuable<br>
+          <strong>Pull B:</strong> Adds 50-200ms per request<br>
+          <strong>Resolution:</strong> Accept latency for mobility. Local Claude Code for latency-critical work.
+        </div>
+      </div>
+
+      <!-- FILES SECTION (3 items) -->
+      <div class="activity-item expertise" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> Desktop app install, basic commands<br>
+          <strong>Intermediate:</strong> CLI setup, Raycast integration<br>
+          <strong>Advanced:</strong> Multi-Mac routing, CI/CD integration<br>
+          <strong>Expert:</strong> Extend architecture, create variants
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="files">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Capability Expansion Thinking</div>
+        <div class="text-text-secondary text-sm">
+          Once you have SYSTEM, you think: "What else can I remote control?"<br>
+          Second Mac? Home automation? CI/CD triggers?<br>
+          The pattern scales horizontally.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="files">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Remote-First Development</div>
+        <div class="text-text-secondary text-sm">
+          Having remote access changes workflow design toward "control from anywhere."<br>
+          You stop assuming local presence. Async becomes default.
+        </div>
+      </div>
+
+      <!-- PATH SECTION (3 items) -->
+      <div class="activity-item gradient" data-section="path">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How tunnel disconnection degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10% degraded:</strong> Occasional timeouts, retries help<br>
+          <strong>50% degraded:</strong> Frequent reconnects, commands queue<br>
+          <strong>90% degraded:</strong> Most commands fail, frustration<br>
+          <strong>100% failure:</strong> Mac unreachable, switch to SSH
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip the tunnel (expose port)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Expose Bridge port directly<br>
+          <strong>THEN:</strong> Works initially<br>
+          <strong>THEN:</strong> Port scanners discover it<br>
+          <strong>THEN:</strong> Brute force attempts<br>
+          <strong>FINALLY:</strong> Security breach<br><br>
+          <em>The tunnel isn't optional overhead.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When is SYSTEM right?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Quick task:</strong> Yes - perfect for mobile fixes<br>
+          <strong>Daily workflow:</strong> Yes - enables remote work<br>
+          <strong>Long automation:</strong> Yes if always-on Mac<br>
+          <strong>Team infra:</strong> Maybe - consider Kimaki
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (3 items) -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When tool count flips from help to hurt</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-30 tools:</strong> Pure benefit, more capability<br>
+          <strong>30-50 tools:</strong> Diminishing returns, more to classify<br>
+          <strong>50+ tools:</strong> Security audit needed, complexity risk<br><br>
+          <strong>THE INFLECTION:</strong> ~30-50 custom tools<br>
+          <em>After that, audit your allowlist.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How compromised API key degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10% degraded:</strong> Unknown access, you don't notice<br>
+          <strong>50% degraded:</strong> Suspicious activity, audit logs show anomalies<br>
+          <strong>90% degraded:</strong> Full takeover, attacker has Mac access<br>
+          <strong>100% failure:</strong> Security breach, data exfiltration
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="gotchas">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip command allowlist</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Enable all shell commands<br>
+          <strong>THEN:</strong> Full shell access<br>
+          <strong>THEN:</strong> AI makes mistake or is manipulated<br>
+          <strong>THEN:</strong> <code>rm -rf</code> executed<br>
+          <strong>FINALLY:</strong> Data loss<br><br>
+          <em>Allowlist is protection from AI errors, not just attacks.</em>
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Always-On vs. Energy/Wear</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Mac must be on 24/7 for reliability<br>
+          <strong>Pull B:</strong> Continuous operation = electricity, hardware wear<br>
+          <strong>Resolution:</strong> Dedicated Mac Mini. Accept operational cost. The value exceeds the cost.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@__morse: Kimaki as alternative</div>
+        <div class="text-text-secondary text-sm">
+          For team collaboration with voice support, Kimaki (Discord-based) offers different trade-offs. Not better or worse - different use case.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Multi-Mac Setup Evolution</div>
+        <div class="text-text-secondary text-sm">
+          Community experimented with multiple bridges. Led to the multi-Mac section in docs. Each Mac becomes a specialized Department (Dev Mac, Build Mac, Design Mac).
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Cross-Town Communication</div>
+        <div class="text-text-secondary text-sm">
+          Roughneck (multi-Mac coordination) is basic. No true distributed coordination protocol. Community working on better solutions.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (5 items) -->
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">SYSTEM + Ralph = Remote Ralph</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Remote monitoring of Ralph loops. Start Ralph on Build Mac, monitor from phone.<br>
+          <strong>Value:</strong> Keep dev machine free. Multiple Macs run parallel Ralph instances.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">SYSTEM + Gas Town = Distributed Factory</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Each Mac becomes a specialized Department. Dev Mac, Design Mac, Build Mac.<br>
+          <strong>Value:</strong> True distributed computing for complex projects.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Anti-Composition
+        </div>
+        <div class="font-medium text-text-primary mb-2">SYSTEM + High-Security Environments</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Fails:</strong> Remote execution inherently risky. Compliance requirements often prohibit.<br>
+          <strong>Why:</strong> Can't prove AI won't execute harmful actions. Audit trail helps but doesn't eliminate risk.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If SYSTEM isn't right for your use case</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Team collaboration?</strong> → Kimaki (Discord-based)<br>
+          <strong>Cross-platform?</strong> → SSH + Claude Code<br>
+          <strong>Lowest latency?</strong> → Local Claude Code only<br>
+          <strong>Multi-provider?</strong> → CC-Mirror as execution layer
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="when">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Voice Control Integration</div>
+        <div class="text-text-secondary text-sm">
+          Voice input not currently supported in SYSTEM. Would require audio capture, speech-to-text, then routing. Community interest but no implementation yet.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

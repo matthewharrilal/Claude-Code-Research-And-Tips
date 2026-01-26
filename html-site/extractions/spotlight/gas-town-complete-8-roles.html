@@ -1,0 +1,2646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gas Town 8-Role Architecture | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer - Draggable divider between Main Panel and Activity Zone */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    /* Prevent text selection during resize */
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    /* Hide resizer when Activity Zone is hidden (responsive) */
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Role Card */
+    .role-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .role-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 8px;
+    }
+
+    .role-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .role-type {
+      font-size: 12px;
+      color: #71717a;
+      background: #f4f4f5;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: auto;
+    }
+
+    .role-description {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .role-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      background: #fafafa;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+    }
+
+    .role-meta-item {
+      text-align: center;
+    }
+
+    .role-meta-label {
+      color: #71717a;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .role-meta-value {
+      color: #18181b;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-time {
+      flex-shrink: 0;
+      width: 60px;
+      font-size: 12px;
+      color: #71717a;
+      font-family: 'Fira Code', monospace;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    .path-role {
+      display: inline-block;
+      background: #0D9373;
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Role Deployment Matrix */
+    .deploy-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .deploy-table th,
+    .deploy-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .deploy-table th {
+      background: #fafafa;
+      font-weight: 600;
+      color: #3f3f46;
+    }
+
+    .deploy-table td {
+      color: #3f3f46;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Hierarchy Diagram */
+    .hierarchy-diagram {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      overflow-x: auto;
+    }
+
+    .hierarchy-diagram pre {
+      margin: 0;
+      color: #3f3f46;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Eight specialized AI roles create a software factory: Mayor commands, Polecats build, Refinery merges.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Claude Code is the world's biggest ant. Everyone is focused on making their ant run longer... when nature prefers colonies."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'gt town up  # Start the colony')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>gt town up  # Start the colony</code>
+          </div>
+
+          <div class="core-anchor">You're not a programmer anymore. You're the Product Manager of an AI engineering team.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Gas Town transforms the development paradigm. Instead of one Claude instance doing everything, you orchestrate 8 specialized roles. Each role has bounded responsibility, appropriate model selection, and clear interaction patterns.
+        </p>
+
+        <div id="hierarchy" class="hierarchy-diagram">
+          <pre>
+  HUMAN LEVEL
+  +-----------------------------------------------------------+
+  |                      OVERSEER (YOU)                        |
+  |         Product Manager - Decision Maker - Authority       |
+  +-----------------------------------------------------------+
+                               |
+  TOWN LEVEL (One instance each)
+  +----------------+  +----------------+  +----------------+
+  |     MAYOR      |  |     DEACON     |  |      DOGS      |
+  |   Concierge    |  | Daemon Beacon  |  |  Maintenance   |
+  |   Opus 4.5     |  |    Sonnet      |  |    Sonnet      |
+  +----------------+  +----------------+  +----------------+
+          |                    |                   |
+          |                    +--------+----------+
+          |                             |
+          |               +-------------v-----------+
+          |               |         BOOT            |
+          |               |    (Special Dog)        |
+          |               |     Deacon Monitor      |
+          |               +-------------------------+
+          |
+  RIG LEVEL (Per-project, multiple instances)
+  +----------------+  +----------------+  +----------------+
+  |    REFINERY    |  |    WITNESS     |  |    POLECAT     |
+  |  Merge Queue   |  |   Supervisor   |  | Ephemeral PRs  |
+  |   Opus 4.5     |  |     Haiku      |  |    Sonnet      |
+  +----------------+  +----------------+  +----------------+
+                                               |
+                                          (Swarms of 3-30)
+  PERSONAL LEVEL
+  +-----------------------------------------------------------+
+  |                          CREW                              |
+  |    Long-lived personal agents - Direct to Overseer         |
+  +-----------------------------------------------------------+
+          </pre>
+        </div>
+
+        <!-- Role Cards -->
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-badge">1</div>
+            <div class="role-name">Overseer (YOU)</div>
+            <span class="role-type">Human</span>
+          </div>
+          <div class="role-description">
+            The human authority in Gas Town. You define features, approve decisions, handle escalations, and manage budgets. You are the Product Manager, not the programmer.
+          </div>
+          <div class="role-meta">
+            <div class="role-meta-item">
+              <div class="role-meta-label">Scope</div>
+              <div class="role-meta-value">Town-wide</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Instances</div>
+              <div class="role-meta-value">1 (you)</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Autonomy</div>
+              <div class="role-meta-value">Full Control</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-badge">2</div>
+            <div class="role-name">Mayor</div>
+            <span class="role-type">Opus 4.5</span>
+          </div>
+          <div class="role-description">
+            Your concierge and chief-of-staff. Receives high-level directives, analyzes work, creates convoys (task bundles), spawns polecats, and reports status. The minimum viable Gas Town.
+          </div>
+          <div class="role-meta">
+            <div class="role-meta-item">
+              <div class="role-meta-label">Scope</div>
+              <div class="role-meta-value">Town-level</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Instances</div>
+              <div class="role-meta-value">1</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Autonomy</div>
+              <div class="role-meta-value">High</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-badge">3</div>
+            <div class="role-name">Deacon</div>
+            <span class="role-type">Sonnet</span>
+          </div>
+          <div class="role-description">
+            The daemon beacon - Gas Town's central heartbeat. Runs patrol loops every 2 minutes, broadcasts DYFJ ("Do Your Job") signals, manages worker recycling. <strong>Warning:</strong> Skip in v0.3.x due to spree-killing bug.
+          </div>
+          <div class="role-meta">
+            <div class="role-meta-item">
+              <div class="role-meta-label">Scope</div>
+              <div class="role-meta-value">Town-level</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Instances</div>
+              <div class="role-meta-value">1</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Autonomy</div>
+              <div class="role-meta-value">Very High</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-badge">4</div>
+            <div class="role-name">Dogs</div>
+            <span class="role-type">Sonnet</span>
+          </div>
+          <div class="role-description">
+            The Deacon's personal crew - town-level grunts. Handle branch cleanup, handyman tasks, plugin execution. Includes Boot, a special Dog that monitors Deacon health every 5 minutes.
+          </div>
+          <div class="role-meta">
+            <div class="role-meta-item">
+              <div class="role-meta-label">Scope</div>
+              <div class="role-meta-value">Town-level</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Instances</div>
+              <div class="role-meta-value">1-3</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Autonomy</div>
+              <div class="role-meta-value">Moderate</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-badge">5</div>
+            <div class="role-name">Refinery</div>
+            <span class="role-type">Opus 4.5</span>
+          </div>
+          <div class="role-description">
+            The intelligent merge queue manager. Merges polecat PRs sequentially to main, prevents conflicts, handles rebasing, escalates unresolvable conflicts. Prevents the "Merge Wall" failure mode.
+          </div>
+          <div class="role-meta">
+            <div class="role-meta-item">
+              <div class="role-meta-label">Scope</div>
+              <div class="role-meta-value">Per-rig</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Instances</div>
+              <div class="role-meta-value">1 per rig</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Autonomy</div>
+              <div class="role-meta-value">High</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-badge">6</div>
+            <div class="role-name">Witness</div>
+            <span class="role-type">Haiku</span>
+          </div>
+          <div class="role-description">
+            The supervisor and troubleshooter for polecat swarms. Monitors health, unsticks blocked workers, checks merge queue flow, runs rig-level plugins. Essential for 3+ polecats.
+          </div>
+          <div class="role-meta">
+            <div class="role-meta-item">
+              <div class="role-meta-label">Scope</div>
+              <div class="role-meta-value">Per-rig</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Instances</div>
+              <div class="role-meta-value">1 per rig</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Autonomy</div>
+              <div class="role-meta-value">High</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-badge">7</div>
+            <div class="role-name">Polecat</div>
+            <span class="role-type">Sonnet</span>
+          </div>
+          <div class="role-description">
+            Ephemeral workers generating PRs. Complete assigned tasks, produce code, submit to Refinery, then decommission. Your implementation army. Named with human names (alice, bob, carol) for mental model clarity.
+          </div>
+          <div class="role-meta">
+            <div class="role-meta-item">
+              <div class="role-meta-label">Scope</div>
+              <div class="role-meta-value">Per-rig</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Instances</div>
+              <div class="role-meta-value">3-30</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Autonomy</div>
+              <div class="role-meta-value">Moderate</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="role-card">
+          <div class="role-header">
+            <div class="role-badge">8</div>
+            <div class="role-name">Crew</div>
+            <span class="role-type">Sonnet/Opus</span>
+          </div>
+          <div class="role-description">
+            Long-lived personal coding agents. Persistent identities, work directly for Overseer, handle sustained design work. NOT managed by Witness - independent from swarm. Replaces your traditional Claude Code usage.
+          </div>
+          <div class="role-meta">
+            <div class="role-meta-item">
+              <div class="role-meta-label">Scope</div>
+              <div class="role-meta-value">Personal</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Instances</div>
+              <div class="role-meta-value">1-5</div>
+            </div>
+            <div class="role-meta-item">
+              <div class="role-meta-label">Autonomy</div>
+              <div class="role-meta-value">High</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-8-roles" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY SEPARATE OVERSEER FROM MAYOR?</div>
+          <div class="decision-reasoning">
+            Human judgment is irreplaceable for escalations, security reviews, and strategic decisions. The Mayor handles logistics and coordination; you handle decisions that require accountability.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Review your inbox daily. The Mayor will escalate things that need human judgment. Don't try to automate decisions that have real-world consequences.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-model-selection">
+          <div class="decision-why">WHY OPUS FOR MAYOR/REFINERY, HAIKU FOR WITNESS?</div>
+          <div class="decision-reasoning">
+            Model selection follows complexity. Mayor and Refinery need complex reasoning (task decomposition, conflict resolution). Witness just checks "is agent stuck?" - Haiku is cheaper and sufficient.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Don't use Opus everywhere - it's expensive. Match model to task complexity. Monitoring roles (Witness, Boot) work fine with Haiku. Implementation (Polecats) with Sonnet. Coordination (Mayor, Refinery) with Opus.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-polecats-crew">
+          <div class="decision-why">WHY POLECATS VS CREW DISTINCTION?</div>
+          <div class="decision-reasoning">
+            Polecats are ephemeral - spawn, do task, die. Crew are persistent - ongoing collaboration. Polecats optimize for throughput; Crew optimize for sustained design work.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use Polecats for parallelizable implementation. Use Crew for architecture, design, review - work that benefits from context retention and back-and-forth.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY DOES REFINERY EXIST?</div>
+          <div class="decision-reasoning">
+            Parallel work creates merge conflicts. Without Refinery, you hit the "Merge Wall" - all Polecats finish, all PRs conflict, everything blocks. Refinery merges sequentially, resolving conflicts as they appear.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Match Polecat count to Refinery capacity. If 10 Polecats finish faster than Refinery can merge, the queue backs up. Rule of thumb: 1 Refinery can handle 5-7 Polecats.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY WITNESS MONITORS POLECATS?</div>
+          <div class="decision-reasoning">
+            Polecats get stuck - context overflow, infinite loops, waiting on blocked dependencies. You can't monitor 10+ agents manually. Witness watches them all and nudges or restarts as needed.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Deploy Witness when you have 3+ Polecats. Below that, manual monitoring is fine. Above that, Witness pays for itself in unsticking.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY HUMAN NAMES FOR POLECATS?</div>
+          <div class="decision-reasoning">
+            "Polecat-7" tells you nothing. "Alice is stuck on the auth task" creates a mental model. Human names make monitoring intuitive. Max ~30 names before recycling.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use alice, bob, carol, dave, eve... for your Polecats. Over time, you'll notice patterns ("alice always gets the database work"). This is emergent specialization.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          File Structure
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Gas Town requires specific directory structures for the factory to operate. Here's the complete setup for a multi-role orchestration system:
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">Gas Town Project Structure</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Complete Gas Town project structure</span>
+
+~/gas-town/                    <span class="comment"># Gas Town installation root</span>
+├── gt                         <span class="comment"># Main CLI executable</span>
+├── config/
+│   ├── town.yaml              <span class="comment"># Town-wide configuration</span>
+│   ├── models.yaml            <span class="comment"># Model assignments per role</span>
+│   └── secrets.yaml           <span class="comment"># API keys (gitignored)</span>
+│
+├── rigs/                      <span class="comment"># Per-project configurations</span>
+│   ├── my-project/
+│   │   ├── rig.yaml           <span class="comment"># Rig-specific config</span>
+│   │   ├── worktrees/         <span class="comment"># Git worktrees for polecats</span>
+│   │   │   ├── alice/
+│   │   │   ├── bob/
+│   │   │   └── carol/
+│   │   └── beads.json         <span class="comment"># Task state (data plane)</span>
+│   │
+│   └── another-project/
+│       └── ...
+│
+├── roles/
+│   ├── mayor/
+│   │   ├── prompt.md          <span class="comment"># Mayor system prompt</span>
+│   │   └── tools/             <span class="comment"># Mayor-specific tools</span>
+│   ├── deacon/
+│   ├── dogs/
+│   ├── refinery/
+│   ├── witness/
+│   ├── polecat/
+│   └── crew/
+│
+├── plugins/                   <span class="comment"># Custom plugins</span>
+│   ├── quality-check.sh
+│   └── branch-cleanup.sh
+│
+├── logs/                      <span class="comment"># All role logs</span>
+│   ├── mayor.log
+│   ├── deacon.log
+│   └── polecats/
+│       ├── alice.log
+│       └── bob.log
+│
+└── inbox/                     <span class="comment"># Overseer inbox messages</span>
+    ├── pending/
+    ├── approved/
+    └── rejected/</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">town.yaml - Main Configuration</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># config/town.yaml - Town-wide configuration</span>
+
+<span class="keyword">town</span>:
+  <span class="variable">name</span>: <span class="string">"my-factory"</span>
+  <span class="variable">version</span>: <span class="string">"0.3.x"</span>
+
+<span class="keyword">deacon</span>:
+  <span class="variable">enabled</span>: false              <span class="comment"># SKIP until v0.4.0 (murder bug)</span>
+  <span class="variable">patrol_interval</span>: 120        <span class="comment"># seconds</span>
+  <span class="variable">dyfj_broadcast</span>: true
+
+<span class="keyword">mayor</span>:
+  <span class="variable">enabled</span>: true
+  <span class="variable">auto_convoy</span>: true           <span class="comment"># Auto-decompose tasks</span>
+  <span class="variable">escalation_threshold</span>: 3    <span class="comment"># Attempts before escalate</span>
+
+<span class="keyword">dogs</span>:
+  <span class="variable">enabled</span>: true
+  <span class="variable">count</span>: 2
+  <span class="variable">branch_cleanup</span>: true
+  <span class="variable">quality_check</span>: true
+
+<span class="keyword">boot</span>:
+  <span class="variable">enabled</span>: true
+  <span class="variable">health_check_interval</span>: 300  <span class="comment"># 5 minutes</span>
+
+<span class="keyword">inbox</span>:
+  <span class="variable">notification_method</span>: <span class="string">"terminal"</span>  <span class="comment"># or "slack", "email"</span>
+  <span class="variable">auto_archive_days</span>: 7</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">models.yaml - Model Assignments</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># config/models.yaml - Model selection per role</span>
+<span class="comment"># Optimized for cost vs capability balance</span>
+
+<span class="keyword">roles</span>:
+  <span class="comment"># Coordination roles - need complex reasoning</span>
+  <span class="variable">mayor</span>:
+    <span class="variable">model</span>: <span class="string">"claude-opus-4.5"</span>
+    <span class="variable">max_tokens</span>: 4096
+    <span class="variable">temperature</span>: 0.7
+
+  <span class="variable">refinery</span>:
+    <span class="variable">model</span>: <span class="string">"claude-opus-4.5"</span>
+    <span class="variable">max_tokens</span>: 4096
+    <span class="variable">temperature</span>: 0.3  <span class="comment"># Lower for precise merging</span>
+
+  <span class="comment"># Monitoring roles - simple checks, use cheap model</span>
+  <span class="variable">deacon</span>:
+    <span class="variable">model</span>: <span class="string">"claude-sonnet-4"</span>
+    <span class="variable">max_tokens</span>: 2048
+
+  <span class="variable">witness</span>:
+    <span class="variable">model</span>: <span class="string">"claude-haiku"</span>  <span class="comment"># Cheapest for health checks</span>
+    <span class="variable">max_tokens</span>: 1024
+
+  <span class="variable">boot</span>:
+    <span class="variable">model</span>: <span class="string">"claude-haiku"</span>
+    <span class="variable">max_tokens</span>: 512
+
+  <span class="comment"># Worker roles - implementation work</span>
+  <span class="variable">polecat</span>:
+    <span class="variable">model</span>: <span class="string">"claude-sonnet-4"</span>
+    <span class="variable">max_tokens</span>: 8192  <span class="comment"># Large for code generation</span>
+    <span class="variable">temperature</span>: 0.5
+
+  <span class="variable">dogs</span>:
+    <span class="variable">model</span>: <span class="string">"claude-sonnet-4"</span>
+    <span class="variable">max_tokens</span>: 2048
+
+  <span class="variable">crew</span>:
+    <span class="variable">model</span>: <span class="string">"claude-sonnet-4"</span>  <span class="comment"># or opus for design work</span>
+    <span class="variable">max_tokens</span>: 8192</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">rig.yaml - Per-Project Configuration</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># rigs/my-project/rig.yaml - Project-specific config</span>
+
+<span class="keyword">rig</span>:
+  <span class="variable">name</span>: <span class="string">"my-project"</span>
+  <span class="variable">repository</span>: <span class="string">"github.com/user/my-project"</span>
+  <span class="variable">default_branch</span>: <span class="string">"main"</span>
+
+<span class="keyword">polecats</span>:
+  <span class="variable">max_count</span>: 7              <span class="comment"># Match to Refinery capacity</span>
+  <span class="variable">names</span>:                    <span class="comment"># Human names for mental model</span>
+    - alice
+    - bob
+    - carol
+    - dave
+    - eve
+    - frank
+    - grace
+  <span class="variable">auto_decomm</span>: true        <span class="comment"># Kill after task complete</span>
+
+<span class="keyword">refinery</span>:
+  <span class="variable">auto_merge</span>: true
+  <span class="variable">require_tests</span>: true
+  <span class="variable">conflict_strategy</span>: <span class="string">"escalate"</span>  <span class="comment"># or "auto-resolve"</span>
+
+<span class="keyword">witness</span>:
+  <span class="variable">enabled</span>: true             <span class="comment"># Required for 3+ polecats</span>
+  <span class="variable">stuck_threshold</span>: 300     <span class="comment"># 5 min = stuck</span>
+  <span class="variable">auto_restart</span>: true
+
+<span class="keyword">build</span>:
+  <span class="variable">install</span>: <span class="string">"npm install"</span>
+  <span class="variable">test</span>: <span class="string">"npm test"</span>
+  <span class="variable">lint</span>: <span class="string">"npm run lint"</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">beads.json - Task State (Data Plane)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">// rigs/my-project/beads.json - Persistent task state</span>
+<span class="comment">// This is the shared data plane all roles can access</span>
+{
+  <span class="string">"convoy"</span>: {
+    <span class="string">"id"</span>: <span class="string">"conv_abc123"</span>,
+    <span class="string">"created"</span>: <span class="string">"2025-01-26T10:00:00Z"</span>,
+    <span class="string">"request"</span>: <span class="string">"Build user authentication with OAuth2"</span>
+  },
+  <span class="string">"tasks"</span>: [
+    {
+      <span class="string">"id"</span>: <span class="string">"task_001"</span>,
+      <span class="string">"name"</span>: <span class="string">"Design auth architecture"</span>,
+      <span class="string">"status"</span>: <span class="string">"done"</span>,
+      <span class="string">"assignee"</span>: <span class="string">"alice"</span>,
+      <span class="string">"dependencies"</span>: [],
+      <span class="string">"pr"</span>: <span class="string">"#42"</span>,
+      <span class="string">"merged"</span>: true
+    },
+    {
+      <span class="string">"id"</span>: <span class="string">"task_002"</span>,
+      <span class="string">"name"</span>: <span class="string">"Implement user model"</span>,
+      <span class="string">"status"</span>: <span class="string">"in_progress"</span>,
+      <span class="string">"assignee"</span>: <span class="string">"bob"</span>,
+      <span class="string">"dependencies"</span>: [<span class="string">"task_001"</span>],
+      <span class="string">"pr"</span>: null,
+      <span class="string">"started"</span>: <span class="string">"2025-01-26T10:15:00Z"</span>
+    },
+    {
+      <span class="string">"id"</span>: <span class="string">"task_003"</span>,
+      <span class="string">"name"</span>: <span class="string">"Build OAuth2 endpoints"</span>,
+      <span class="string">"status"</span>: <span class="string">"blocked"</span>,
+      <span class="string">"assignee"</span>: null,
+      <span class="string">"dependencies"</span>: [<span class="string">"task_002"</span>],
+      <span class="string">"pr"</span>: null
+    }
+  ],
+  <span class="string">"merge_queue"</span>: [
+    <span class="string">"#43"</span>,
+    <span class="string">"#44"</span>
+  ]
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Mayor Prompt Template</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># roles/mayor/prompt.md - Mayor system prompt</span>
+
+You are the Mayor of Gas Town, the chief-of-staff and concierge.
+
+<span class="keyword"># Your Responsibilities</span>
+1. Receive high-level directives from Overseer (inbox)
+2. Read and understand project context (CLAUDE.md, beads.json)
+3. Decompose work into convoy (task bundles with dependencies)
+4. Assign tasks to available polecats
+5. Monitor progress and report status to Overseer
+6. Escalate blockers and decisions requiring human judgment
+
+<span class="keyword"># Convoy Creation Rules</span>
+- Each task must be completable by ONE polecat
+- Tasks should take 15-30 minutes maximum
+- Dependencies must form a valid DAG (no cycles)
+- Parallel tasks where possible
+- Clear acceptance criteria for each task
+
+<span class="keyword"># Communication Protocol</span>
+- Update beads.json for all task state changes
+- Send inbox messages for escalations
+- Never make decisions requiring human judgment
+- Always provide context in status reports
+
+<span class="keyword"># Available Commands</span>
+- gt polecat up <rig> <name>   # Spawn worker
+- gt polecat assign <name> <task>   # Assign task
+- gt inbox send <rig> <message>   # Message Overseer
+- gt status   # Check town state</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Project CLAUDE.md for Polecats</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># CLAUDE.md - Instructions for Gas Town polecats</span>
+
+<span class="keyword"># You Are a Polecat</span>
+You are an ephemeral worker in Gas Town. Complete your assigned
+task, submit PR, then decommission.
+
+<span class="keyword"># Workflow</span>
+1. Check beads.json for your assigned task
+2. Work in your git worktree (isolated from others)
+3. Make small, focused commits
+4. Run tests before PR
+5. Submit PR with clear description
+6. Update beads.json with PR number
+7. Signal completion to Witness
+
+<span class="keyword"># Rules</span>
+- ONE task per session
+- Do NOT work on blocked tasks
+- Do NOT modify other polecat's worktrees
+- Commit messages: "feat(scope): description"
+
+<span class="keyword"># Build Commands</span>
+npm install
+npm test
+npm run lint
+
+<span class="keyword"># If Stuck</span>
+- Update beads.json status to "stuck"
+- Include clear description of blocker
+- Witness will handle unsticking</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: COMMAND REFERENCE -->
+      <section id="commands" data-activity="commands">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Command Reference
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="town-commands">Town-Wide Commands (Overseer)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Inbox management</span>
+<span class="variable">gt inbox</span>                          <span class="comment"># View your inbox</span>
+<span class="variable">gt inbox respond</span> &lt;id&gt; <span class="keyword">--approve</span>   <span class="comment"># Approve decision</span>
+<span class="variable">gt inbox respond</span> &lt;id&gt; <span class="keyword">--reject</span>    <span class="comment"># Reject decision</span>
+<span class="variable">gt inbox send</span> &lt;rig&gt; <span class="string">"task"</span>        <span class="comment"># File new work</span>
+
+<span class="comment"># Town control</span>
+<span class="variable">gt town up</span>                        <span class="comment"># Start all roles</span>
+<span class="variable">gt town down</span>                      <span class="comment"># Stop all roles</span>
+<span class="variable">gt status</span>                         <span class="comment"># Town-wide status</span>
+<span class="variable">gt pause --all</span>                    <span class="comment"># Emergency stop</span>
+<span class="variable">gt resume --all</span>                   <span class="comment"># Resume work</span>
+
+<span class="comment"># Direct work</span>
+<span class="variable">gt sling</span> &lt;issue&gt; &lt;rig&gt;            <span class="comment"># Direct sling work to rig</span>
+<span class="variable">gt handoff</span>                        <span class="comment"># Graceful session end</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="role-commands">Per-Role Commands</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Mayor</span>
+<span class="variable">gt mayor up</span>                       <span class="comment"># Start Mayor</span>
+<span class="variable">gt mayor attach</span>                   <span class="comment"># Interactive mode</span>
+<span class="variable">gt mayor status</span>                   <span class="comment"># Check status</span>
+<span class="variable">gt mayor down</span>                     <span class="comment"># Stop Mayor</span>
+
+<span class="comment"># Deacon</span>
+<span class="variable">gt deacon up</span>                      <span class="comment"># Start Deacon</span>
+<span class="variable">gt deacon status</span>                  <span class="comment"># Check status</span>
+<span class="variable">gt deacon log</span>                     <span class="comment"># View patrol log</span>
+<span class="variable">gt deacon down</span>                    <span class="comment"># Stop Deacon</span>
+
+<span class="comment"># Dogs</span>
+<span class="variable">gt dogs up</span>                        <span class="comment"># Start Dogs</span>
+<span class="variable">gt dogs status</span>                    <span class="comment"># Check status</span>
+<span class="variable">gt dogs bark</span>                      <span class="comment"># Trigger quality check</span>
+<span class="variable">gt dogs report</span>                    <span class="comment"># View report</span>
+<span class="variable">gt dogs clean-branches</span> &lt;rig&gt;     <span class="comment"># Force branch cleanup</span>
+
+<span class="comment"># Refinery</span>
+<span class="variable">gt refinery up</span> &lt;rig&gt;              <span class="comment"># Start for rig</span>
+<span class="variable">gt refinery status</span> &lt;rig&gt;          <span class="comment"># Check status</span>
+<span class="variable">gt refinery process</span> &lt;rig&gt;         <span class="comment"># Force process queue</span>
+<span class="variable">gt refinery resolve</span> &lt;rig&gt;         <span class="comment"># Resolve stuck merge</span>
+<span class="variable">gt refinery down</span> &lt;rig&gt;            <span class="comment"># Stop Refinery</span>
+
+<span class="comment"># Witness</span>
+<span class="variable">gt witness up</span> &lt;rig&gt;               <span class="comment"># Start for rig</span>
+<span class="variable">gt witness status</span> &lt;rig&gt;           <span class="comment"># Check status</span>
+<span class="variable">gt witness report</span> &lt;rig&gt;           <span class="comment"># Get state report</span>
+<span class="variable">gt witness check</span> &lt;rig&gt;            <span class="comment"># Force health check</span>
+<span class="variable">gt witness down</span> &lt;rig&gt;             <span class="comment"># Stop Witness</span>
+
+<span class="comment"># Polecat</span>
+<span class="variable">gt polecat up</span> &lt;rig&gt; &lt;name&gt;        <span class="comment"># Start named polecat</span>
+<span class="variable">gt polecat list</span> &lt;rig&gt;             <span class="comment"># List polecats</span>
+<span class="variable">gt polecat assign</span> &lt;name&gt; &lt;task&gt;   <span class="comment"># Assign task</span>
+<span class="variable">gt polecat status</span> &lt;rig&gt; &lt;name&gt;    <span class="comment"># Check status</span>
+<span class="variable">gt polecat down</span> &lt;rig&gt; &lt;name&gt;      <span class="comment"># Stop polecat</span>
+
+<span class="comment"># Crew</span>
+<span class="variable">gt crew add</span> &lt;rig&gt; <span class="keyword">--name</span> <span class="string">"name"</span>   <span class="comment"># Add crew member</span>
+<span class="variable">gt crew spawn</span> &lt;rig&gt; <span class="keyword">--task</span> <span class="string">"..."</span>  <span class="comment"># Spawn with task</span>
+<span class="variable">gt crew count</span> &lt;rig&gt;               <span class="comment"># Count active crew</span>
+<span class="variable">gt crew purge</span> &lt;rig&gt;               <span class="comment"># Purge all crew</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 6: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a feature ("Build user authentication with OAuth2") through all 8 roles:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-time">T+0:00</div>
+            <div class="path-content"><span class="path-role">OVERSEER</span> files request via <code>gt inbox send my-project "Build user authentication with OAuth2"</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-time">T+0:01</div>
+            <div class="path-content"><span class="path-role">MAYOR</span> receives, reads CLAUDE.md, analyzes, creates convoy with 6 tasks, sets dependencies: db-schema -> api-routes -> frontend</div>
+          </div>
+          <div class="path-step">
+            <div class="path-time">T+0:02</div>
+            <div class="path-content"><span class="path-role">MAYOR</span> spawns Polecats: <code>gt polecat up my-project alice</code>, <code>gt polecat up my-project bob</code>, <code>gt polecat up my-project carol</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-time">T+0:03</div>
+            <div class="path-content"><span class="path-role">POLECAT alice</span> assigned db-schema (no blockers), works in her git worktree, creates migration and model files</div>
+          </div>
+          <div class="path-step">
+            <div class="path-time">T+0:15</div>
+            <div class="path-content"><span class="path-role">POLECAT alice</span> completes, commits, submits PR. Status updated in Beads. api-routes task unblocks.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-time">T+0:16</div>
+            <div class="path-content"><span class="path-role">REFINERY</span> processes alice's PR: rebases on main, runs tests, merges</div>
+          </div>
+          <div class="path-step">
+            <div class="path-time">T+0:17</div>
+            <div class="path-content"><span class="path-role">POLECAT bob</span> assigned api-routes (now unblocked), reads alice's schema work, implements endpoints</div>
+          </div>
+          <div class="path-step">
+            <div class="path-time">T+0:20</div>
+            <div class="path-content"><span class="path-role">WITNESS</span> patrol checks all Polecats: alice (idle, completed), bob (working, healthy), carol (waiting, healthy)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-time">T+0:25</div>
+            <div class="path-content"><span class="path-role">DEACON</span> broadcasts DYFJ ("Do Your Job"). All agents acknowledge. Work continues.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-time">T+0:30</div>
+            <div class="path-content"><span class="path-role">DOGS</span> run quality check via <code>gt dogs bark</code>. Reviews recent commits. Flags any issues.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-time">T+0:45</div>
+            <div class="path-content"><span class="path-role">POLECAT bob</span> and <span class="path-role">POLECAT carol</span> complete: api-routes done, frontend done</div>
+          </div>
+          <div class="path-step">
+            <div class="path-time">T+0:50</div>
+            <div class="path-content"><span class="path-role">REFINERY</span> merges final PRs. Sequential merge, no conflicts. Main branch updated.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-time">T+0:55</div>
+            <div class="path-content"><span class="path-role">MAYOR</span> summarizes to Overseer. Feature complete notification appears in <code>gt inbox</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-time">T+1:00</div>
+            <div class="path-content"><span class="path-role">OVERSEER</span> reviews via <code>gt inbox</code>. Sees completion summary. Approves or requests changes.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 7: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Role-specific problems with concrete fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #1: Deacon spree-killing workers (v0.3.x)
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agents mysteriously die during patrol</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Deacon bug in v0.3.x got too aggressive</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>gt deacon down</code> - skip Deacon until v0.4.0</div>
+          <div class="gotcha-detail"><strong>Time:</strong> 1 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #2: Mayor deadlock
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> No work being assigned</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Pending inbox items waiting for your response</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check <code>gt inbox</code>, respond to pending decisions</div>
+          <div class="gotcha-detail"><strong>Time:</strong> 2 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #3: Refinery merge wall
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Merge queue stuck, all PRs conflicting</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Too many Polecats finishing simultaneously</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>gt refinery resolve &lt;rig&gt;</code> - manual conflict resolution</div>
+          <div class="gotcha-detail"><strong>Time:</strong> 10-30 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #4: Polecat context overflow
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Polecat stuck, producing nonsensical output</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Task too large for context window</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Kill and respawn fresh: <code>gt polecat down &lt;rig&gt; &lt;name&gt;</code> then <code>gt polecat up &lt;rig&gt; &lt;name&gt;</code></div>
+          <div class="gotcha-detail"><strong>Time:</strong> 3 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #5: GUPP not triggering
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent starts but sits idle, doesn't begin work</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Claude is "miserably polite" - waits for explicit instruction</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>gt nudge &lt;agent&gt;</code> 30-60 seconds after start</div>
+          <div class="gotcha-detail"><strong>Time:</strong> 1 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #6: Cost explosion
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> $500+ daily spend</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Too many agents, wrong model selections</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>gt pause --all</code> immediately. Review <code>gt crew count</code>. Use Haiku for monitoring, Sonnet for workers.</div>
+          <div class="gotcha-detail"><strong>Time:</strong> Immediate</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions in multi-role orchestration:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Role Coordination Overhead
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> 8 roles = 8 potential failure points. Each role adds value but also adds complexity.</div>
+          <div class="hard-detail"><strong>Why it persists:</strong> No way to get the benefits without the coordination cost.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Start minimal (Mayor only), add roles incrementally as needed. Don't deploy full 8-role until you've mastered 3-role.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            tmux Proficiency Required
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> No GUI. All monitoring is tmux windows. If you don't know tmux, Gas Town is inaccessible.</div>
+          <div class="hard-detail"><strong>Why it persists:</strong> No alternative UI currently. Steve optimized for power users.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Practice tmux with smaller setups first. Learn C-b n/p, C-b s, C-b [. Master before scaling.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Model Cost Distribution
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Opus is expensive ($15-20/hr) but needed for Mayor/Refinery. Haiku is cheap but insufficient for complex reasoning.</div>
+          <div class="hard-detail"><strong>Why it persists:</strong> Model capabilities are what they are. No way to get Opus reasoning at Haiku prices.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Use Haiku for monitoring (Witness, Boot). Use Sonnet for workers (Polecats, Dogs). Reserve Opus for coordination (Mayor, Refinery). Budget $100-300/day for full town.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Debug Visibility Across Roles
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Distributed system = hard to trace errors. "Why did that task fail?" might involve Mayor, Polecat, Refinery, Witness.</div>
+          <div class="hard-detail"><strong>Why it persists:</strong> Distributed systems are inherently harder to debug than monoliths.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Good logging. <code>gt witness report &lt;rig&gt;</code> for rig-level state. <code>gt deacon log</code> for town-level. Build mental model of role interactions.</div>
+        </div>
+      </section>
+
+      <!-- Section 9: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">9</span>
+          When to Use / Role Deployment
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              DEPLOY FULL 8-ROLE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Stage 7+ on Yegge's evolution (100+ hours multi-agent)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Budget: $300-500/day acceptable</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multi-project, ongoing development</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>tmux proficiency established</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You want to "build software factories, not write code"</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE FULL 8-ROLE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Learning Gas Town (use Mayor-only first)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple project with single focus</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Budget-constrained ($50-100/day max)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>80% of use cases (CC Mirror is simpler)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Deacon in v0.3.x (wait for v0.4.0)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Role Deployment Matrix</h3>
+
+        <table class="deploy-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Roles Needed</th>
+              <th>Budget</th>
+              <th>Experience</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Learning Gas Town</td>
+              <td>Mayor only</td>
+              <td>$50-100/day</td>
+              <td>Stage 6+</td>
+            </tr>
+            <tr>
+              <td>Simple project</td>
+              <td>Mayor + 3 Polecats</td>
+              <td>$100-150/day</td>
+              <td>Stage 6-7</td>
+            </tr>
+            <tr>
+              <td>Active development</td>
+              <td>Mayor + Refinery + Polecats + Witness</td>
+              <td>$150-250/day</td>
+              <td>Stage 7</td>
+            </tr>
+            <tr>
+              <td>Full production</td>
+              <td>All 8 roles</td>
+              <td>$300-500/day</td>
+              <td>Stage 7+</td>
+            </tr>
+            <tr>
+              <td>Multi-rig factory</td>
+              <td>All 8 + Roughneck</td>
+              <td>$500+/day</td>
+              <td>Stage 8</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4">When to Skip Each Role</h3>
+
+        <table class="deploy-table">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Skip When...</th>
+              <th>Alternative</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Deacon</td>
+              <td>v0.3.x (buggy), &lt;5 agents</td>
+              <td>Manual monitoring</td>
+            </tr>
+            <tr>
+              <td>Dogs</td>
+              <td>No branch cleanup needs</td>
+              <td>Manual cleanup</td>
+            </tr>
+            <tr>
+              <td>Witness</td>
+              <td>&lt;3 polecats</td>
+              <td>Manual unsticking</td>
+            </tr>
+            <tr>
+              <td>Refinery</td>
+              <td>Sequential workflow only</td>
+              <td>Direct commits</td>
+            </tr>
+            <tr>
+              <td>Crew</td>
+              <td>No sustained design work</td>
+              <td>More polecats</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone - 29+ items across 16 types -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if Overseer was automated?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> AI making all decisions, no human in loop.<br>
+          <strong>Why this fails:</strong> No accountability for security reviews, no judgment for escalations, no one to say "wait, that's a bad idea."<br>
+          <strong>Hidden constraint revealed:</strong> Overseer role is IRREPLACEABLE for decisions requiring human judgment.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Starter Town" - irreducible core</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">gt mayor up && gt polecat up my-project alice</code><br>
+          <strong>Essential:</strong> Mayor + 1 Polecat. That's it.<br>
+          <strong>Everything else:</strong> Scale mechanisms.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Steve Yegge: 30-agent town running</div>
+        <div class="text-text-secondary text-sm">
+          ~30 agents across multiple rigs. Validated scaling thesis. "My projected token burn rate triples my account needs weekly."
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Kubernetes: Control Plane Pattern</div>
+        <div class="text-text-secondary text-sm">
+          Mayor/Deacon/Dogs form a control plane just like k8s master nodes. Coordination separated from execution. Same pattern, different domain.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Ralph: External State Principle</div>
+        <div class="text-text-secondary text-sm">
+          Polecats use git worktrees for state just like Ralph uses progress.txt. External state over internal memory. Same core constraint.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Gas Town = Restaurant Kitchen Brigade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Head Chef</strong> = Overseer (strategic decisions)<br>
+          <strong>Sous Chef</strong> = Mayor (orchestration)<br>
+          <strong>Line Cooks</strong> = Polecats (parallel execution)<br>
+          <strong>Expeditor</strong> = Refinery (quality gate, merge point)<br><br>
+          <em>Role specialization enables scale while maintaining quality.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Deacon as Heartbeat Creates Rhythm</div>
+        <div class="text-text-secondary text-sm">
+          The 2-minute DYFJ broadcast creates a predictable cadence. All roles synchronize to this pulse. Emergent system rhythm from a simple timer.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Agent Isolation → 3 Coordination Roles</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Polecats can't see each other<br>
+          → Need shared context (Beads data plane)<br>
+          → Need observer role (Witness)<br>
+          → Need health broadcasts (Deacon)<br>
+          → Need merge coordination (Refinery)<br><br>
+          <em>Agent isolation drives existence of 3 coordination roles.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Parallel Work → Refinery Existence</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Parallel work creates merge conflicts<br>
+          → Need merge queue (Refinery)<br>
+          → Need sequential processing<br>
+          → Need priority ordering<br>
+          → Need conflict resolution<br><br>
+          <em>Parallelization constraint drives Refinery architecture.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if we merged Mayor and Refinery?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd have:</strong> Single coordination point doing both task assignment AND merge management.<br>
+          <strong>Why this fails:</strong> Coordination overload. Single point of failure. Can't scale.<br>
+          <strong>Hidden constraint revealed:</strong> Role separation enables parallel operation.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Deacon Stability vs Automation</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Deacon automates health monitoring<br>
+          <strong>Pull B:</strong> v0.3.x Deacon kills workers<br><br>
+          <strong>Resolution:</strong> Disable until v0.4.0. Manual monitoring is better than automated destruction.
+        </div>
+      </div>
+
+      <!-- FILES/COMMANDS SECTION (3 items) -->
+      <div class="activity-item expertise" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your Gas Town understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> Run Mayor only for 1 week<br>
+          <strong>Intermediate:</strong> Add Refinery + Polecats<br>
+          <strong>Advanced:</strong> Full 8 roles, optimize model selection<br>
+          <strong>Expert:</strong> Build custom roles, extend architecture<br><br>
+          <em>Next step: Study role interactions before adding more roles.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="files">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Cross-Pattern Equivalence
+        </div>
+        <div class="font-medium text-text-primary mb-2">Gas Town commands = Ralph files</div>
+        <div class="text-text-secondary text-sm">
+          <strong>gt inbox</strong> = prd.json (work queue)<br>
+          <strong>Beads</strong> = progress.txt (persistent memory)<br>
+          <strong>Polecats</strong> = Each Claude iteration (stateless worker)<br>
+          <strong>Refinery</strong> = Git (merge coordination)
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Mayor + Refinery synergy</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Mayor's convoy decomposition + Refinery's merge queue create smooth feature flow.<br>
+          <strong>Key insight:</strong> Convoy dependencies match merge order. Design together.
+        </div>
+      </div>
+
+      <!-- PATH SECTION (3 items) -->
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When does full 8-role become right?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1 feature (hours):</strong> No - Mayor only suffices<br>
+          <strong>1 project (days):</strong> Maybe - if complex enough<br>
+          <strong>Ongoing development (months):</strong> Yes - infrastructure pays off<br>
+          <strong>Multi-project (years):</strong> Definitely - factory amortizes setup
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip Refinery</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip Refinery role<br>
+          <strong>THEN:</strong> PRs pile up unmerged<br>
+          <strong>THEN:</strong> Conflicts accumulate<br>
+          <strong>THEN:</strong> "Merge wall" - everything blocked<br>
+          <strong>FINALLY:</strong> All parallel work advantage lost<br><br>
+          <em>Refinery prevents cascade failure.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip Witness</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip Witness role with 5+ Polecats<br>
+          <strong>THEN:</strong> Stuck polecats go unnoticed<br>
+          <strong>THEN:</strong> Work stalls silently<br>
+          <strong>THEN:</strong> Apparent progress but no actual output<br>
+          <strong>FINALLY:</strong> Morning reveals 0 commits despite 8 hours
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (3 items) -->
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Steve Yegge: Deacon Murder Spree</div>
+        <div class="text-text-secondary text-sm">
+          "Apologies to everyone using Gas Town who is being bitten by the murderous rampaging Deacon who is spree-killing all the other workers."<br><br>
+          v0.3.x Deacon bug. Steve disabled Deacon, issued public apology. Skip until v0.4.0.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Refinery Merge Wall</div>
+        <div class="text-text-secondary text-sm">
+          Early testers had all polecats finish simultaneously. Refinery overwhelmed. 10 PRs, all conflicting.<br><br>
+          <strong>Lesson:</strong> Match polecat count to Refinery throughput. 5-7 polecats per Refinery max.
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When to add Witness</div>
+        <div class="text-text-secondary text-sm">
+          <strong>&lt;3 polecats:</strong> Manual unsticking is fine<br>
+          <strong>=3 polecats:</strong> THE INFLECTION POINT<br>
+          <strong>&gt;3 polecats:</strong> Can't monitor all manually<br><br>
+          <strong>Detection:</strong> If you're spending &gt;10 min/hour unsticking agents, add Witness.
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Polecat Count vs Refinery Capacity</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> More polecats = faster implementation<br>
+          <strong>Pull B:</strong> More polecats = merge bottleneck<br><br>
+          <strong>Resolution:</strong> Match polecat count to Refinery throughput. 5-7 is the sweet spot. Above that, add second rig.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="hard">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How Mayor fails progressively</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% → 90%:</strong> Slow decomposition, slightly wrong task sizing<br>
+          <strong>90% → 70%:</strong> Wrong task assignment, dependencies missed<br>
+          <strong>70% → 50%:</strong> Stops responding, requires restart<br>
+          <strong>50% → 0%:</strong> No work coordination at all<br><br>
+          <em>Watch for slow decomposition as early warning.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="hard">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How Refinery fails progressively</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% → 90%:</strong> Slow merges, queue grows<br>
+          <strong>90% → 70%:</strong> Merge conflicts pile up<br>
+          <strong>70% → 50%:</strong> Queue overflow, escalations ignored<br>
+          <strong>50% → 0%:</strong> "Merge wall" - all work blocked<br><br>
+          <em>Watch queue length as early warning.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Self-healing role recovery</div>
+        <div class="text-text-secondary text-sm">
+          When roles die, manual restart is required. No automatic recovery mechanism yet. Steve is working on it.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (5 items) -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If Gas Town isn't right for you</div>
+        <div class="text-text-secondary text-sm">
+          <strong>80% of use cases:</strong> CC Mirror (simpler)<br>
+          <strong>Sequential workflow:</strong> Ralph (fresh context loops)<br>
+          <strong>Learning multi-agent:</strong> Mayor-only starter<br>
+          <strong>Exploratory work:</strong> Single Claude session
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror vs Gas Town</div>
+        <div class="text-text-secondary text-sm">
+          <strong>CC Mirror:</strong> Simpler setup, hidden orchestration, 80% of use cases<br>
+          <strong>Gas Town:</strong> Maximum throughput, factory scale, explicit role architecture<br><br>
+          <em>Start with CC Mirror. Graduate to Gas Town when you hit limits.</em>
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Anti-Composition
+        </div>
+        <div class="font-medium text-text-primary mb-2">Deacon v0.3.x + Everything</div>
+        <div class="text-text-secondary text-sm">
+          <strong>DO NOT combine:</strong> Deacon v0.3.x with other workers<br>
+          <strong>Why:</strong> Deacon bug kills workers during patrol<br>
+          <strong>Resolution:</strong> Skip Deacon until v0.4.0
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Witness + Dogs complementary</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Witness handles agent health. Dogs handle branch cleanup. No overlap.<br>
+          <strong>Pattern:</strong> Clear responsibility separation enables both to run without conflict.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="when">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Cross-town role coordination</div>
+        <div class="text-text-secondary text-sm">
+          Roughneck exists for multi-factory orchestration but is basic. No true distributed control plane yet. Community is exploring.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

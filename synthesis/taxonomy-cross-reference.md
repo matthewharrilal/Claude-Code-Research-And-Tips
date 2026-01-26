@@ -4,8 +4,10 @@
 ## D-FINAL Integration
 **Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
 **Journey link:** journey-architecture.md, journey-implementation.md
-**Last updated:** 2026-01-18 (Phase 2B)
+**Last updated:** 2026-01-19 (Wave-3)
 ---
+
+> **You Are Here:** This is the **navigation hub** for the entire knowledge base. If you're trying to understand how different patterns relate to each other, find which authors specialize in which topics, or trace connections between extraction files, start here. This document maps the 10 major themes, pattern dependencies, and terminology overlaps across 55+ source documents.
 
 **Generated:** 2026-01-09
 **Source Files Analyzed:** 55 extraction documents
@@ -34,6 +36,16 @@ The single most universal theme across all documentation. Context window managem
 - **Ralph:** Fresh context per iteration
 - **CC Mirror:** Orchestrator/worker separation
 - **Claude-Mem:** Semantic compression to summaries
+
+---
+
+### Checkpoint: Context Theme
+**You should now understand:**
+- [ ] Why context management is the foundational constraint
+- [ ] The 4 different approaches: Panopticon (isolation), Ralph (fresh), CC Mirror (separation), Claude-Mem (compression)
+- [ ] Which sources document each approach
+
+**If unclear:** Re-read theme 1 above or jump to `taxonomy-context-memory.md` for deep dive
 
 ---
 
@@ -231,6 +243,17 @@ Markdown files that extend Claude Code capabilities.
 .claude/commands/           # Slash commands (simpler)
 .claude/agents/             # Subagent definitions
 ```
+
+---
+
+### Checkpoint: Core Themes
+**You should now understand:**
+- [ ] The 10 major cross-cutting themes in the knowledge base
+- [ ] Key files that document each theme
+- [ ] The verification hierarchy (typecheck -> unit -> integration -> E2E -> browser -> human)
+- [ ] The model selection strategy (Haiku/Sonnet/Opus)
+
+**If unclear:** Review the theme summaries above or see the specific extraction files listed
 
 ---
 
@@ -557,10 +580,68 @@ Based on trajectory analysis:
 
 ---
 
+---
+
+## Troubleshooting
+
+### Common Issue: Can't Find Relevant Documentation
+**Symptom:** You know what you want to do but can't find the right file
+**Cause:** Terminology mismatch or pattern spread across multiple files
+**Fix:**
+1. Check the Overlapping Concepts section for terminology mapping
+2. Use the Quick Reference: Pattern Selection Guide at the bottom
+3. Check the Author Expertise Map for who documented what
+4. Try the taxonomy files for comprehensive coverage:
+   - Tools/extensions: `taxonomy-tools.md`
+   - Architectures: `taxonomy-architectures.md` (or D-FINAL-architecture.md)
+   - Workflows: `taxonomy-workflows.md` (or D-FINAL-implementation.md)
+   - Memory: `taxonomy-context-memory.md` (or D-FINAL-implementation.md)
+
+### Common Issue: Pattern Conflicts
+**Symptom:** Two patterns seem incompatible
+**Cause:** Some patterns have fundamentally different philosophies
+**Fix:**
+1. Check the Pattern Conflicts table in this document
+2. Key conflicts:
+   - Long context vs Ralph fresh-context: Pick one approach
+   - Manual vs CC Mirror orchestration: Don't mix
+   - Worker recursion: Workers must NOT spawn sub-agents
+3. If unsure, start with simpler pattern and evolve
+
+### Common Issue: Documentation Gaps
+**Symptom:** Pattern mentioned but not fully explained
+**Cause:** Community documentation is evolving
+**Fix:**
+1. Check the Documentation Gaps section for known incomplete areas
+2. Go to primary source (GitHub repo, Twitter thread)
+3. Check if pattern is deprecated and replaced by D-FINAL content
+4. Known gaps include:
+   - Cron job specifics
+   - Checkpoint texting services
+   - Windows/WSL configurations
+   - Enterprise SSO patterns
+
+### Common Issue: Outdated Information
+**Symptom:** Instructions don't match current Claude Code version
+**Cause:** Rapid evolution of Claude Code features
+**Fix:**
+1. Check file's "Last updated" date in header
+2. Files marked DEPRECATED should redirect to D-FINAL versions
+3. Verify against official Claude Code docs at docs.anthropic.com
+4. Check Claude Code CHANGELOG for recent changes:
+```bash
+# View recent changes
+claude --version
+# Compare with documented version requirements
+```
+
+---
+
 ## Changelog
 
 | Date | Update |
 |------|--------|
+| 2026-01-19 | Wave-3 enhancement: Added You Are Here, Checkpoints, Troubleshooting |
 | 2026-01-09 | Initial comprehensive cross-reference synthesis |
 | | 55 extraction files analyzed |
 | | 10 major themes identified |
@@ -572,3 +653,4 @@ Based on trajectory analysis:
 ---
 
 *This document serves as the master index for the Claude Code research taxonomy. All patterns, authors, and concepts are cross-referenced for easy navigation and synthesis.*
+*Wave-3 Enhanced: 2026-01-19*

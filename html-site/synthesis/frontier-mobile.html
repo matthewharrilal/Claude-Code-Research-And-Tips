@@ -1,0 +1,2182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile-First & Cross-Device Orchestration | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed (proportional to main, less than main) */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer - Draggable divider between Main Panel and Activity Zone */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    /* Prevent text selection during resize */
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    /* Hide resizer when Activity Zone is hidden (responsive) */
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Comparison Table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .comparison-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #3f3f46;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .comparison-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .comparison-table tr:hover {
+      background: #fafafa;
+    }
+
+    /* Diagram Box */
+    .diagram-box {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      white-space: pre;
+      overflow-x: auto;
+      line-height: 1.5;
+      color: #3f3f46;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="smartphone" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Mobile-First Workflows</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">The Paradigm Shift</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-persistent-sessions" class="nav-item">Why Persistent Sessions?</a>
+          <a href="#why-push-notifications" class="nav-item">Why Push Notifications?</a>
+          <a href="#why-external-infrastructure" class="nav-item">Why Cloud/Home VM?</a>
+        </div>
+      </div>
+
+      <!-- Infrastructure Setup -->
+      <div class="nav-section" data-section="infrastructure">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="server" class="w-4 h-4"></i>
+          <span>Infrastructure Setup</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#infrastructure" class="nav-item">SSH + tmux</a>
+          <a href="#replit" class="nav-item">Replit Mobile</a>
+          <a href="#tailscale" class="nav-item">Tailscale VPN</a>
+        </div>
+      </div>
+
+      <!-- Workflow Patterns -->
+      <div class="nav-section" data-section="workflows">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Workflow Patterns</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#quick-check" class="nav-item">Quick Check Pattern</a>
+          <a href="#full-mobile" class="nav-item">Full Mobile Dev</a>
+          <a href="#device-handoff" class="nav-item">Device Handoff</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Mobile Limitations</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Your phone becomes an AI command center for orchestrating agents, not a replacement for deep work.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Development can fit into the gaps of your day." - @dabit3</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Phone -> SSH -> tmux -> Claude Code -> Work happens')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Phone -> SSH -> tmux -> Claude Code -> Work happens</code>
+          </div>
+
+          <div class="core-anchor">That's the architecture. Everything else is reliability engineering.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The paradigm shift: Software development transforms from a synchronous, focused activity requiring dedicated hardware into an asynchronous, agent-orchestrated process that interleaves with life.
+        </p>
+
+        <div class="diagram-box">Traditional Development:
+[Open laptop] -> [Focus 2-4 hours] -> [Close laptop]
+
+Mobile-First Development:
+[Start agents] -> [Go about day] -> [Phone buzzes] ->
+[Quick response] -> [Agents continue] -> [Review later]</div>
+
+        <p class="text-text-secondary mb-6">
+          This is not about typing code on your phone. That's painful and slow. This is about orchestrating AI agents that do the work while you supervise from anywhere. The phone is a command center, not a coding environment.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-persistent-sessions" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY PERSISTENT SESSIONS (TMUX)?</div>
+          <div class="decision-reasoning">
+            Mobile connections are unreliable. WiFi to cellular handoffs drop TCP connections. Screen locks kill processes. Without persistence, every network blip means starting over.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Never run Claude Code directly over SSH. Always wrap it in tmux. Detach anywhere, attach from anywhere. Your agent keeps working when your connection drops.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-push-notifications">
+          <div class="decision-why">WHY PUSH NOTIFICATIONS?</div>
+          <div class="decision-reasoning">
+            Without notifications, you must poll your agent. Polling is manual, easy to forget, and interrupts flow. Push inverts this: Claude comes to YOU when it needs input.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Set up hooks to send notifications on AskUserQuestion events. Now you can forget about your agent until your phone buzzes. This enables true async development.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-external-infrastructure">
+          <div class="decision-why">WHY CLOUD/HOME VM (NOT LOCAL PHONE)?</div>
+          <div class="decision-reasoning">
+            Phones have limited resources, battery constraints, and app restrictions. A VM or Mac provides stable compute, persistent storage, and the full Claude Code environment without compromise.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Your phone is a thin client to real compute elsewhere. Zero cost (home Mac) to ~$13/month (cloud VM). The investment is in remote infrastructure, not mobile tooling.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: INFRASTRUCTURE SETUP -->
+      <section id="infrastructure" data-activity="infrastructure">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Infrastructure Setup
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">SSH + tmux (The Foundation)</h3>
+
+        <p class="text-text-secondary mb-4">
+          The battle-tested approach: persistent terminal sessions that survive network changes, device switches, and interruptions.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># ~/.zshrc - Auto-attach to tmux on login</span>
+<span class="keyword">if</span> [[ -z <span class="string">"$TMUX"</span> ]] && [[ -n <span class="string">"$SSH_CONNECTION"</span> ]]; <span class="keyword">then</span>
+  tmux attach -t main 2>/dev/null || tmux new -s main
+<span class="keyword">fi</span></pre>
+        </div>
+
+        <h4 class="font-medium mb-4">SSH Clients by Platform</h4>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Platform</th>
+              <th>App</th>
+              <th>Strengths</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>iOS</td>
+              <td>Termius</td>
+              <td>Beautiful UI, snippet sync, mosh support</td>
+            </tr>
+            <tr>
+              <td>iOS</td>
+              <td>Blink Shell</td>
+              <td>Native mosh, Files app integration, $20 one-time</td>
+            </tr>
+            <tr>
+              <td>Android</td>
+              <td>Termux</td>
+              <td>Full Linux environment, can run Claude Code locally</td>
+            </tr>
+            <tr>
+              <td>Android</td>
+              <td>JuiceSSH</td>
+              <td>Snippet library, session logging</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="replit">Replit Mobile (Zero Infrastructure)</h3>
+
+        <p class="text-text-secondary mb-4">
+          Web-based IDE with full Claude Code integration. The easiest path to mobile development.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Setup (5 minutes)</span>
+1. Install Replit mobile app
+2. Create new project
+3. Open terminal
+4. npm install -g @anthropic/claude-code-cli
+5. Authenticate with API key
+6. Run <span class="string">`claude`</span></pre>
+        </div>
+
+        <p class="text-text-secondary mb-4">
+          <strong>Benefits:</strong> Full IDE in your pocket. Instant preview of changes. No VM management. Claude Code usage does not consume Replit credits.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="tailscale">Tailscale (Zero-Config VPN)</h3>
+
+        <p class="text-text-secondary mb-4">
+          Tailscale creates a private network between your devices without exposed ports or complex configuration.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># On your Mac/VM</span>
+brew install tailscale  <span class="comment"># or curl installer</span>
+tailscale up
+
+<span class="comment"># Note the Tailscale IP (100.x.x.x)</span>
+<span class="comment"># Install Tailscale app on phone, sign in</span>
+<span class="comment"># SSH from phone to Tailscale IP</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Push Notification Setup</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># ~/.claude/settings.json</span>
+{
+  <span class="string">"hooks"</span>: {
+    <span class="string">"PreToolUse"</span>: [{
+      <span class="string">"matcher"</span>: <span class="string">"AskUserQuestion"</span>,
+      <span class="string">"hooks"</span>: [{
+        <span class="string">"type"</span>: <span class="string">"command"</span>,
+        <span class="string">"command"</span>: <span class="string">"~/.claude/hooks/notify-mobile.sh"</span>
+      }]
+    }]
+  }
+}</pre>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">#!/bin/bash</span>
+<span class="comment"># ~/.claude/hooks/notify-mobile.sh</span>
+
+<span class="variable">QUESTION</span>=$(echo <span class="string">"$CLAUDE_HOOK_EVENT_DATA"</span> | jq -r '.tool_input.questions[0].question // "Input needed"')
+<span class="variable">PROJECT</span>=$(basename <span class="string">"$PWD"</span>)
+
+<span class="comment"># Option 1: Pushover ($5 one-time)</span>
+curl -s \
+  --form-string <span class="string">"token=$PUSHOVER_APP_TOKEN"</span> \
+  --form-string <span class="string">"user=$PUSHOVER_USER_KEY"</span> \
+  --form-string <span class="string">"title=Claude: $PROJECT"</span> \
+  --form-string <span class="string">"message=$QUESTION"</span> \
+  --form-string <span class="string">"priority=1"</span> \
+  https://api.pushover.net/1/messages.json
+
+<span class="comment"># Option 2: ntfy (free, self-hostable)</span>
+<span class="comment"># curl -d "$PROJECT: $QUESTION" ntfy.sh/your-topic</span></pre>
+        </div>
+
+        <h4 class="font-medium mb-4 mt-6">Notification Services Compared</h4>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Platform</th>
+              <th>Cost</th>
+              <th>Self-Host</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Poke</td>
+              <td>iOS</td>
+              <td>Free</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>Pushover</td>
+              <td>All</td>
+              <td>$5 one-time</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>ntfy</td>
+              <td>All</td>
+              <td>Free</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <td>Telegram</td>
+              <td>All</td>
+              <td>Free</td>
+              <td>No</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 5: WORKFLOW PATTERNS -->
+      <section id="quick-check" data-activity="workflows">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Workflow Patterns
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">Quick Check Pattern (5-minute windows)</h3>
+
+        <p class="text-text-secondary mb-4">
+          For brief windows between meetings or activities. Time: 2-5 minutes.
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">SSH into VM from phone (Termius/Blink)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Auto-attach to tmux session</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Review agent progress (scroll up)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Answer any pending questions</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Disconnect (agent keeps working)</div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Check agent status</span>
+tmux list-panes -a -F '#{session_name}: #{pane_current_command}' | grep claude
+
+<span class="comment"># Capture recent output</span>
+tmux capture-pane -t work -p | tail -50</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="full-mobile">Full Mobile Dev Pattern (Extended Sessions)</h3>
+
+        <p class="text-text-secondary mb-4">
+          For commute, travel, or waiting rooms. Setup includes external keyboard (recommended) and voice dictation for long prompts.
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">Open Replit or SSH client with good connectivity</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Review overnight/previous agent work</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Use voice dictation for complex prompts</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Preview changes in browser/Replit webview</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Iterate with quick text corrections</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">Deploy when satisfied</div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="device-handoff">Device Handoff Pattern</h3>
+
+        <p class="text-text-secondary mb-4">
+          Start work on one device, seamlessly continue on another.
+        </p>
+
+        <div class="diagram-box">Desktop to Mobile:
+1. Start Claude agents on desktop
+2. /teleport to get web URL OR leave tmux session running
+3. Continue on mobile via URL or SSH
+4. Review, adjust, approve
+
+Mobile to Desktop:
+1. Start task on mobile (quick prompt)
+2. Agents work autonomously
+3. Return to desktop for deep review
+4. Merge, refine, deploy</div>
+
+        <p class="text-text-secondary mb-4">
+          <strong>Native Claude Code Teleportation:</strong> Use <code>/teleport</code> or <code>--teleport</code> in terminal Claude session to get a URL like <code>https://claude.ai/code/session/abc123</code>. Open on any device to continue.
+        </p>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real mobile limitations and concrete workarounds:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            SSH connection drops constantly
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Connection terminates when switching networks (WiFi to cellular) or after screen lock</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Standard SSH uses TCP which doesn't handle network transitions well</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use mosh instead of SSH. <code>mosh user@server</code> survives network changes and has local echo for responsiveness.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Typing long prompts is painful
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Typos, slow input, frustration with mobile keyboard</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Mobile keyboards aren't designed for code-heavy input</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> 1) Voice dictation (iOS built-in or Superwhisper), 2) Pre-written prompts in notes app, 3) Termius snippets, 4) External Bluetooth keyboard ($40 Logitech K380)</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Notifications not arriving
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Claude asks questions but no push notification on phone</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Hook not configured correctly or notification service issue</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Test service directly: <code>curl -d "Test" ntfy.sh/your-topic</code>. Check hook is executable: <code>chmod +x ~/.claude/hooks/notify-mobile.sh</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            tmux session not attaching
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Connect to server but don't see your Claude Code session</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Auto-attach not configured or session was killed</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check sessions: <code>tmux list-sessions</code>. Attach manually: <code>tmux attach -t main</code>. Configure auto-attach in ~/.zshrc.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions in mobile development:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Control vs. Convenience Tradeoff
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More convenience (Replit) means less control (no custom hooks, limited VM access). More control (cloud VM) means more setup and maintenance.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Frustration when Replit can't do something you need, or when your VM needs updates while you're traveling.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start with Replit for simplicity. Graduate to home Mac or cloud VM when you hit limits. Accept that trade-offs exist.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Connectivity Reliability
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Mobile connectivity is fundamentally unreliable (tunnels, airplane mode, spotty cellular). No amount of tooling fully solves this.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Agent stalls waiting for input you couldn't provide. Lost work due to disconnection at wrong moment.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use mosh, enable auto-reconnect, design workflows that tolerate disconnection. Accept that you won't have desktop-grade reliability.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Context Switching Overhead
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Quick mobile checks feel efficient but constantly context-switching between life and code carries cognitive overhead invisible at the moment.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Feeling scattered. Making errors because you didn't read carefully. Frustration with "simple" tasks taking longer than expected.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Reserve mobile for supervision and questions, not deep review. Trust agents for routine work, save judgment calls for desktop.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE MOBILE WORKFLOWS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Away from desk but want agents working (conference, travel, errands)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quick supervision and question-answering (5-minute windows)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Overnight or long-running agent monitoring</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Device handoff between locations</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Async development that interleaves with life</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE MOBILE WORKFLOWS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Deep code review required (use desktop for scrolling/reading)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Complex debugging needed (limited screen real estate)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Exploratory work with undefined scope (requires focused thinking)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Network-unreliable environments (airplane, rural areas)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Security-critical decisions (need full context, careful review)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Cost Calculator</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Monthly Cost</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Home Mac</td>
+              <td>$0</td>
+              <td>Electricity only, must stay on</td>
+            </tr>
+            <tr>
+              <td>Cloud VM (Hetzner)</td>
+              <td>$13</td>
+              <td>Always on, best value</td>
+            </tr>
+            <tr>
+              <td>Cloud VM (Vultr hourly)</td>
+              <td>$0-210</td>
+              <td>~$7/day when running</td>
+            </tr>
+            <tr>
+              <td>Tailscale</td>
+              <td>$0</td>
+              <td>Free tier sufficient</td>
+            </tr>
+            <tr>
+              <td>Termius</td>
+              <td>$0-10</td>
+              <td>Free tier works fine</td>
+            </tr>
+            <tr>
+              <td>Pushover</td>
+              <td>$5 one-time</td>
+              <td>Per platform</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="text-text-secondary mt-4">
+          <strong>Budget Setup:</strong> Home Mac + Tailscale + Termius + ntfy = $0/month<br>
+          <strong>Power Setup:</strong> Hetzner VM + Tailscale + Termius + Pushover = $13/month + $5 one-time
+        </p>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you could code directly on mobile?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Full IDE on phone, touch-optimized coding interface.<br>
+          <strong>Why this fails:</strong> Typing code on glass is fundamentally slow and error-prone. No keyboard can fix this.<br>
+          <strong>Hidden constraint revealed:</strong> Mobile's value is orchestration, not execution.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible mobile setup</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">ssh user@tailscale-ip + tmux attach</code><br>
+          <strong>Essential:</strong> Remote compute + persistent sessions.<br>
+          <strong>Everything else:</strong> Refinement for convenience and reliability.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@dabit3: Conference Week Development</div>
+        <div class="text-text-secondary text-sm">
+          Week-long conference, hotel WiFi only. Pattern: 7 AM review, 10 AM quick check, 12 PM lunch kickoff, 6 PM merge. Result: Features shipped with 2-3 hours total hands-on time across 5 days.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="essence">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Mobile Dev = Executive Dashboard</div>
+        <div class="text-text-secondary text-sm">
+          CEOs don't do the work, they approve and direct.<br>
+          Phone = executive oversight interface<br>
+          Claude = the team doing actual work<br>
+          Notifications = reports requiring decisions<br><br>
+          <em>If you've managed people, you understand mobile orchestration.</em>
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint leads to FIVE decisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Mobile connectivity is unreliable<br>
+          -> Sessions must persist across disconnects (tmux)<br>
+          -> Compute must live elsewhere (VM/home Mac)<br>
+          -> Work must continue without you (agents)<br>
+          -> You must be notified, not poll (push notifications)<br>
+          -> Design for async, not sync (orchestration mindset)
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How SSH degrades with mobility</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% → 90%</strong>: Stable WiFi, feels like desktop<br>
+          <strong>90% → 70%</strong>: WiFi to cellular handoff, brief drops<br>
+          <strong>70% → 50%</strong>: Tunnel/elevator, 30s+ drops, reconnect needed<br>
+          <strong>50% → CLIFF</strong>: Airplane mode, total disconnect<br><br>
+          <em>mosh survives to 70%. SSH dies at 90%.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Mobile + Ralph share the same invariant</div>
+        <div class="text-text-secondary text-sm">
+          <strong>INV-003:</strong> External state > internal memory<br>
+          Mobile: tmux session persists; your connection doesn't matter.<br>
+          Ralph: Files persist; Claude's memory doesn't matter.<br><br>
+          <em>Same principle: Decouple work from presence.</em>
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Infrastructure Dilemma</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Home Mac:</strong> Free, always on, but you maintain it<br>
+          <strong>Cloud VM:</strong> Reliable, professional, but ~$13/mo<br>
+          <strong>Replit:</strong> Zero setup, but limited control<br><br>
+          <em>Heuristic: Start with Replit. Graduate when you hit limits.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip push notifications</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> No push notifications<br>
+          <strong>THEN:</strong> Must manually check agent status<br>
+          <strong>THEN:</strong> Forget to check, agent stalls waiting for input<br>
+          <strong>THEN:</strong> 6 hours wasted on a 2-second answer<br>
+          <strong>FINALLY:</strong> Overnight run accomplishes nothing<br><br>
+          <em>Push notifications invert the polling problem.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Can I code on my phone?" -> No. Orchestrate.<br>
+          <strong>Intermediate:</strong> "What setup do I need?" -> SSH + tmux + Tailscale<br>
+          <strong>Advanced:</strong> "How do I minimize interaction?" -> Push notifications<br>
+          <strong>Staff:</strong> "What's the right abstraction?" -> Phone as command center<br>
+          <strong>Expert:</strong> "What's coming next?" -> Voice-first, kanban interfaces
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if agents needed constant supervision?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Real-time video feed of agent activity, constant monitoring.<br>
+          <strong>Why this fails:</strong> Defeats the purpose of agents. You'd be working harder than coding yourself.<br>
+          <strong>Hidden constraint revealed:</strong> Agents must be trustworthy for async to work. Invest in verification, not monitoring.
+        </div>
+      </div>
+
+      <!-- INFRASTRUCTURE SECTION -->
+      <div class="activity-item composition" data-section="infrastructure">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">tmux + mosh</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works?</strong> Yes, synergistically.<br>
+          <strong>Why:</strong> tmux = session persistence. mosh = connection resilience. Together: bulletproof remote sessions.<br>
+          <strong>The catch:</strong> mosh doesn't support SSH agent forwarding. Use SSH inside tmux for git operations.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="infrastructure">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Mobile + Multi-Agent (Ralph)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works?</strong> Yes, this is the target architecture.<br>
+          <strong>Why:</strong> Ralph loops work autonomously; mobile is perfect for supervision.<br>
+          <strong>Setup:</strong> 6 tmux windows, 6 Claude agents on different branches, push notifications for questions.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="infrastructure">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@dabit3's Multi-Agent Mobile Setup</div>
+        <div class="text-text-secondary text-sm">
+          Vultr VM (vhf-8c-32gb, ~$7/day), 6 parallel Claude agents in tmux, git worktrees for branch isolation, Poke for push notifications. Result: Ship features with 2-3 hours supervision across 5 days.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="infrastructure">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">At 6+ parallel agents, monitoring becomes work</div>
+        <div class="text-text-secondary text-sm">
+          Single agent: glance at phone occasionally.<br>
+          3 agents: check each briefly.<br>
+          6 agents: need dashboard to track status.<br><br>
+          <em>Threshold: ~6 agents. Beyond this, use rpai or similar TUI dashboards.</em>
+        </div>
+      </div>
+
+      <!-- WORKFLOWS SECTION -->
+      <div class="activity-item horizon" data-section="workflows">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How mobile feels over time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "This is clunky, why bother?"<br>
+          <strong>Week 1:</strong> "Okay, I answered one question and it saved 4 hours"<br>
+          <strong>Month 1:</strong> "I shipped a feature during my kid's soccer practice"<br>
+          <strong>Month 6:</strong> "I can't imagine not having mobile access"<br><br>
+          <em>Don't judge mobile by the first awkward SSH session.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="workflows">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Quick Check = Triage, not Surgery</div>
+        <div class="text-text-secondary text-sm">
+          Doctor analogy: You can triage from a phone, but you can't operate.<br>
+          Quick Check: Is the patient stable? (agent running?)<br>
+          Phone: Give quick instruction (answer question)<br>
+          Desktop: Full procedure (deep review, complex debugging)<br><br>
+          <em>Match the tool to the task.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="workflows">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Commuter Developer Pattern</div>
+        <div class="text-text-secondary text-sm">
+          1-hour train commute, spotty cellular with tunnels. Setup: iPhone + mosh. Train departing: start mosh, review, kick off tasks. Tunnel: mosh buffers locally. Exiting tunnel: mosh reconnects, commands execute. Key insight: mosh + tmux = never losing context.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="workflows">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Parent with Young Kids Pattern</div>
+        <div class="text-text-secondary text-sm">
+          Unpredictable 5-minute windows throughout day. Pattern: 6 AM start agents (20 min), 9 AM quick response (while kids play), 11 AM naptime deep work (optional), 3 PM TV time review (15 min), 8 PM plan tomorrow (30 min). Key insight: "I'm looking for 5-minute windows, not continuous hours."
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="workflows">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you do deep review on mobile</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Review 500-line diff on phone<br>
+          <strong>THEN:</strong> Miss critical issues (can't see enough context)<br>
+          <strong>THEN:</strong> Approve broken code<br>
+          <strong>THEN:</strong> Bug ships to production<br>
+          <strong>FINALLY:</strong> Spend more time fixing than reviewing properly would have taken<br><br>
+          <em>Mobile is for triage. Desktop is for surgery.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When mosh flips from overkill to essential</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Desk + WiFi:</strong> SSH fine, mosh is overhead<br>
+          <strong>Mobile + stable:</strong> SSH mostly fine, mosh nice-to-have<br>
+          <strong>Mobile + transitions:</strong> SSH breaks constantly, mosh essential<br>
+          <strong>Commute/travel:</strong> SSH unusable, mosh mandatory<br><br>
+          <strong>THE INFLECTION:</strong> First network transition<br>
+          <em>Detection: If SSH ever drops, switch to mosh permanently.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">mosh vs SSH</div>
+        <div class="text-text-secondary text-sm">
+          <strong>mosh:</strong> Survives network changes, local echo (feels faster), but no SSH agent forwarding<br>
+          <strong>SSH:</strong> Full feature support, but dies on network transition<br><br>
+          <em>Heuristic: Use mosh for connection, SSH inside tmux for git operations that need keys.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Optimal notification filtering</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> Which agent questions warrant immediate notification? Which can wait?<br>
+          <strong>Why hard:</strong> Urgency varies by project phase, personal schedule, question type.<br>
+          <strong>Current practice:</strong> Manual filtering in hook script. No smart automation yet.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="gotchas">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Screen size forces workflow changes</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Phone screen is 6" vs 27" desktop<br>
+          -> Can't see enough context for review<br>
+          -> Must trust agent more (less verification)<br>
+          -> Must have better acceptance criteria<br>
+          -> Must design for verifiable completion<br>
+          -> Mobile + Ralph/verification is safer than Mobile + ad-hoc
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Control vs. Convenience (Fundamental)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>THE DILEMMA:</strong><br>
+          - Maximum convenience (Replit): Instant setup, limited customization<br>
+          - Maximum control (Cloud VM): Full power, maintenance burden<br>
+          - Middle ground (Home Mac): Free, but single point of failure<br><br>
+          <strong>WHY NO PERFECT ANSWER:</strong> You can't have everything. More control = more responsibility.<br><br>
+          <em>Match infrastructure to your willingness to maintain it.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="hard">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if connectivity were perfect?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Direct SSH to everywhere, no tmux needed, instant reconnect.<br>
+          <strong>Why this fails:</strong> Physics. Radio waves, cell towers, tunnels, airplane mode. Connectivity will never be perfect.<br>
+          <strong>Hidden constraint revealed:</strong> Mobile workflows must be designed for disconnection, not despite it.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Context Switching Understanding</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Quick checks are free" -> No, they have cognitive cost<br>
+          <strong>Intermediate:</strong> "I feel scattered" -> Limit check frequency<br>
+          <strong>Advanced:</strong> "When should I check?" -> Batch: morning, lunch, evening<br>
+          <strong>Staff:</strong> "What's the real cost?" -> Attention residue from each switch<br>
+          <strong>Expert:</strong> "How to minimize?" -> Push notifications eliminate polling overhead
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Async development changes your relationship to work</div>
+        <div class="text-text-secondary text-sm">
+          At first: "This is weird, I'm not in flow."<br>
+          After a month: "I'm more productive than before."<br>
+          After 6 months: "Work fits into life, not the other way around."<br><br>
+          <em>The effect isn't just productivity. It's lifestyle.</em>
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If mobile isn't right for your use case</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need deep code review?</strong> -> Wait for desktop<br>
+          <strong>Need real-time collaboration?</strong> -> Screen share, not mobile<br>
+          <strong>No remote infrastructure?</strong> -> Replit (zero setup)<br>
+          <strong>Security-critical decisions?</strong> -> Desktop with full context
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Future of Mobile Development</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Now:</strong> SSH + tmux, text-based<br>
+          <strong>2026:</strong> Native mobile Claude apps, voice-native interface<br>
+          <strong>2027:</strong> Kanban-style visual coding, drag-and-drop task boards<br>
+          <strong>2028:</strong> Wearable integration, Apple Watch for quick approvals<br><br>
+          <em>"Mobile code interfaces are going to become a large area of VC interest" - @ryohhno</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="when">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">Emerging tools to watch</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Superconductor:</strong> Native iOS agent orchestration (Beta)<br>
+          <strong>AI Maestro:</strong> Dashboard for distributed agents (Active)<br>
+          <strong>Vibetunnel:</strong> Easy tunnel to local dev (Active)<br>
+          <strong>rpai:</strong> TUI dashboard for all running agents (cargo install rpai)
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cost = Risk Alignment</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Free (Home Mac):</strong> Single point of failure, your responsibility<br>
+          <strong>$13/mo (Hetzner):</strong> Professional reliability, their responsibility<br>
+          <strong>$7/day (Vultr hourly):</strong> Maximum flexibility, variable cost<br><br>
+          <em>Match infrastructure cost to how much downtime hurts you.</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

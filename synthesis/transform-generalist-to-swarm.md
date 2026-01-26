@@ -1,5 +1,7 @@
 # Transformation: Generalist Agent to Specialized Swarm
 
+> **You Are Here:** This document shows how to evolve from a single agent doing everything (poorly) to specialized workers doing their domains excellently. If your full-stack features have inconsistent quality or take forever due to context dilution, the swarm pattern solves this. This connects to Level 5-6 (CC Mirror Hub-and-Spoke) on the complexity ladder and enables true parallel execution with domain expertise.
+
 **The paradigm shift from single-context everything to orchestrated domain specialists**
 
 ---
@@ -793,6 +795,268 @@ Start simple. Use the generalist for learning and planning. Graduate to swarms w
 - [Orchestration Pattern Taxonomy](/synthesis/taxonomy-orchestration.md)
 - [The Iron Law of Worker Separation](/synthesis/taxonomy-architectures.md#7-the-iron-law-of-worker-separation)
 - [Domain Isolation Strategies](/synthesis/architecture-domain-isolation.md)
+
+---
+
+## Troubleshooting
+
+### Common Issue: Workers Interfere With Each Other's Files
+
+**Symptom:** Merge conflicts when combining worker output. One worker overwrites another's changes.
+
+**Cause:** Workers are operating on overlapping file scopes without isolation.
+
+**Fix:**
+```bash
+# Option 1: Git worktrees (filesystem isolation)
+git worktree add ../backend-work feature/backend
+git worktree add ../frontend-work feature/frontend
+
+# Run workers in separate worktrees
+(cd ../backend-work && claude "Backend worker task...") &
+(cd ../frontend-work && claude "Frontend worker task...") &
+wait
+
+# Merge back
+git merge feature/backend
+git merge feature/frontend
+
+# Option 2: Clear scope boundaries in prompts
+# Each worker prompt must include explicit file scope:
+# "SCOPE: Only modify files in /src/api/** - do NOT touch /src/components/**"
+```
+
+---
+
+### Common Issue: Orchestrator Waits Too Long (No Parallelism)
+
+**Symptom:** Workers run sequentially when they could run in parallel. Total time = sum of all workers.
+
+**Cause:** Dependencies defined too conservatively, or `run_in_background: true` not used.
+
+**Fix:**
+```bash
+# Check which workers have no dependencies
+# These can run in parallel
+
+# In orchestrator prompt, explicitly mark parallel-safe tasks:
+# Task 1: Backend DB schema (no dependencies) → run_in_background: true
+# Task 2: Frontend static components (no dependencies) → run_in_background: true
+# Task 3: Integration tests (depends on 1+2) → wait for both, then run
+
+# Manual parallel launch:
+claude "Backend task..." &
+claude "Frontend task..." &
+wait  # Wait for both to complete
+claude "Test task..."  # Sequential after parallel
+```
+
+---
+
+### Common Issue: Worker Spawns Sub-Workers (Nesting)
+
+**Symptom:** Backend worker spawns "DB worker" and "API worker". Deep hierarchy, hard to track.
+
+**Cause:** Worker prompt didn't prohibit Task tool usage, or task was too large for single worker.
+
+**Fix:**
+```markdown
+# Add to EVERY worker preamble:
+
+## WORKER RULES (NON-NEGOTIABLE)
+- Do NOT spawn sub-agents
+- Do NOT call Task, TaskCreate, or TaskList
+- Complete the ENTIRE task yourself
+- If task is too large, report back to orchestrator
+
+# If tasks genuinely need splitting, do it at orchestrator level:
+# BAD:  Orchestrator → Backend Worker → DB Worker + API Worker
+# GOOD: Orchestrator → DB Worker + API Worker (flat)
+```
+
+---
+
+### Common Issue: Worker Reports Complete But Verification Fails
+
+**Symptom:** Worker says "Done!" but tests fail when orchestrator checks.
+
+**Cause:** Worker prompt didn't require verification before reporting, or verification command is wrong.
+
+**Fix:**
+```markdown
+# Add to worker preamble:
+
+## VERIFICATION REQUIREMENTS
+Before reporting complete, you MUST:
+1. Run: npm run typecheck
+2. Run: npm run test:[domain]
+3. Include test results in your report
+
+If any verification fails:
+- Fix the issue
+- Re-run verification
+- Only report complete when ALL pass
+
+## REPORT FORMAT
+Files modified:
+- /path/to/file.ts (what changed)
+
+Verification:
+- typecheck: PASS (0 errors)
+- tests: PASS (12/12)
+
+# Orchestrator should verify claims independently
+```
+
+---
+
+### Common Issue: Swarm Cost Is Too High
+
+**Symptom:** Multiple workers + orchestrator = 3-5x the token cost of a generalist approach.
+
+**Cause:** Swarm pattern has overhead. Not all tasks benefit from it.
+
+**Fix:**
+```
+Cost-benefit analysis before swarm:
+
+Generalist cost: ~50K tokens × 1 agent = 50K tokens
+Swarm cost: ~30K tokens × 4 agents = 120K tokens
+
+BUT:
+Generalist time: 4 hours sequential
+Swarm time: 90 minutes parallel
+
+When to accept higher cost:
+- Time savings justify cost (billing rate > token cost)
+- Quality improvement justifies cost (fewer bugs to fix later)
+- Parallelism is required (deadline)
+
+When to use generalist:
+- Task < 30 minutes
+- Single domain (no parallelism benefit)
+- Exploration/learning (context sharing valuable)
+- Budget constrained
+```
+
+---
+
+### Common Issue: Can't Monitor Swarm Progress
+
+**Symptom:** Multiple workers running, no idea what's happening, anxiety increases.
+
+**Cause:** No monitoring infrastructure set up.
+
+**Fix:**
+```bash
+# Option 1: Log files per worker
+(cd ../backend && claude "..." > backend.log 2>&1) &
+(cd ../frontend && claude "..." > frontend.log 2>&1) &
+
+# Monitor in separate terminals
+tail -f backend.log
+tail -f frontend.log
+
+# Option 2: tmux session with panes
+tmux new-session -d -s swarm
+tmux split-window -h -t swarm
+tmux send-keys -t swarm:0.0 'tail -f backend.log' Enter
+tmux send-keys -t swarm:0.1 'tail -f frontend.log' Enter
+tmux attach -t swarm
+
+# Option 3: Simple status check
+watch -n 5 'echo "Backend:"; tail -3 backend.log; echo "Frontend:"; tail -3 frontend.log'
+```
+
+---
+
+### Common Issue: Merge Conflicts After Worker Completion
+
+**Symptom:** Workers complete successfully in worktrees, but `git merge` fails with conflicts.
+
+**Cause:** Workers modified the same file (boundary violation) or shared dependencies changed.
+
+**Fix:**
+```bash
+# Before merging, check for conflicts
+git merge --no-commit --no-ff feature/backend
+git diff --name-only --diff-filter=U  # List conflicted files
+
+# If conflicts exist:
+# Option 1: Resolve manually
+git checkout --conflict=merge <file>
+# Edit file to resolve
+git add <file>
+git commit
+
+# Option 2: Sequential merge with human review
+git merge feature/backend
+# Review changes
+git merge feature/frontend
+# Resolve any conflicts interactively
+
+# Prevention: Ensure worker scopes don't overlap
+# Backend: /src/api/**, /db/**
+# Frontend: /src/components/**, /src/hooks/**
+# Tests: /tests/**
+# No overlap = no conflicts
+```
+
+---
+
+### Terminal Output: Successful Swarm Run
+
+Here's what a healthy swarm execution looks like:
+
+```bash
+$ ./run-swarm.sh
+
+=== Swarm Orchestrator Starting ===
+Task: User Authentication System
+Workers: 3 (backend, frontend, test)
+
+[00:00] Spawning Backend Worker (parallel)
+        Scope: /src/api/auth/**, /db/migrations/**
+        Background PID: 12345
+
+[00:00] Spawning Frontend Worker (parallel)
+        Scope: /src/components/auth/**, /src/context/**
+        Background PID: 12346
+
+[00:02] Backend Worker progress: Creating migrations...
+[00:05] Frontend Worker progress: Building LoginForm...
+[00:15] Backend Worker progress: Implementing endpoints...
+[00:20] Frontend Worker progress: Creating AuthContext...
+
+[00:35] Backend Worker COMPLETE
+        Files: 8 modified
+        Tests: 12/12 passed
+        Branch: feature/auth-backend
+
+[00:40] Frontend Worker COMPLETE
+        Files: 6 modified
+        Tests: 8/8 passed
+        Branch: feature/auth-frontend
+
+[00:41] Spawning Test Worker (sequential, depends on backend+frontend)
+        Scope: /tests/integration/**, /tests/e2e/**
+
+[00:55] Test Worker COMPLETE
+        Files: 2 created
+        Integration: 6/6 passed
+        E2E: 4/4 passed
+
+[00:56] Merging branches...
+        feature/auth-backend → main: SUCCESS
+        feature/auth-frontend → main: SUCCESS (no conflicts)
+        feature/auth-tests → main: SUCCESS
+
+=== Swarm Complete ===
+Total time: 56 minutes
+Files changed: 16
+Tests passed: 30/30
+Ready for human review.
+```
 
 ---
 

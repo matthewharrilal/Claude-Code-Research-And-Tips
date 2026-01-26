@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Orchestration Pattern Taxonomy
 
+> **You Are Here:** This is the **exhaustive pattern catalog** for agent orchestration. If you need to understand every variation of Ralph loops, multi-agent coordination, isolation strategies, communication patterns, or failure recovery, this document has the complete classification. **Note:** This file is DEPRECATED - for current content, see `D-FINAL-architecture.md` Section 2.
+
 A comprehensive taxonomy of AI agent orchestration patterns, extracted from community innovations, production implementations, and research documentation.
 
 ---
@@ -143,6 +145,24 @@ Pick task → Complete task → Back to board → All done? → Exit/Loop
 ```
 
 **Key Insight:** Focus on WHAT it should do at the end, not HOW to get there.
+
+---
+
+### Checkpoint: Loop-Based Patterns
+**You should now understand:**
+- [ ] The core Ralph Wiggum pattern and its 6 variants
+- [ ] The key files: ralph.sh, prompt.md, prd.json, progress.txt
+- [ ] Fresh context per iteration principle
+- [ ] The Kanban loop mental model
+
+**If unclear:** Re-read Section 1 or see `mastery-ralph-complete.md` for comprehensive Ralph coverage
+
+**Terminal verification:**
+```bash
+# Test Ralph loop is set up correctly
+cat plans/prd.json | jq '.userStories[] | select(.passes == false) | .id'
+# You should see: list of incomplete story IDs
+```
 
 ---
 
@@ -408,6 +428,17 @@ Model multi-agent workflows as state machines with explicit transitions.
                │  DONE   │
                └─────────┘
 ```
+
+---
+
+### Checkpoint: Multi-Agent Patterns
+**You should now understand:**
+- [ ] The 10 multi-agent patterns documented (Panopticon through LangGraph)
+- [ ] CC Mirror's TaskCreate/TaskUpdate/TaskList/TaskGet workflow
+- [ ] Gas Town's 7 specialized roles (Mayor, Deacon, Dogs, etc.)
+- [ ] When to use Adversarial Speccing pattern
+
+**If unclear:** Re-read Section 2 or see `extractions/orchestration/` for pattern-specific files
 
 ---
 
@@ -1239,6 +1270,81 @@ go install github.com/steveyegge/gastown/cmd/gt@latest
 
 ---
 
+## Troubleshooting
+
+### Common Issue: Ralph Loop Never Completes
+**Symptom:** Loop runs to max iterations without outputting "PROMISE COMPLETE"
+**Cause:** Tasks too large, missing completion condition, or stuck on failing tests
+**Fix:**
+```bash
+# 1. Check PRD status
+cat plans/prd.json | jq '.userStories[] | select(.passes == false) | {id, title}'
+# You should see: remaining incomplete tasks
+
+# 2. Check progress.txt for blockers
+tail -50 plans/progress.txt
+# Look for: repeated failure patterns
+
+# 3. Verify tests actually pass
+npm run typecheck && npm test
+# If failing: fix tests before continuing loop
+
+# 4. Check task size - split if too large
+# Good: "Add login endpoint"
+# Bad: "Build entire auth system"
+```
+
+### Common Issue: Orchestrator Context Exhaustion
+**Symptom:** CC Mirror orchestrator loses track of tasks, quality degrades
+**Cause:** Orchestrator doing too much, not delegating properly
+**Fix:**
+1. Ensure auto-compact is enabled for CC Mirror
+2. Orchestrator should only use: Read (1-2 files), Task*, AskUserQuestion
+3. Never have orchestrator write code or run commands
+4. Delegate all implementation to worker subagents
+
+### Common Issue: Git Worktree Conflicts
+**Symptom:** Cannot create worktree, or worktrees have stale branches
+**Cause:** Branch already checked out, or worktree cleanup incomplete
+**Fix:**
+```bash
+# 1. List existing worktrees
+git worktree list
+
+# 2. Remove stale worktrees
+git worktree prune
+
+# 3. Remove specific worktree
+git worktree remove ../wt-feature-name
+
+# 4. If branch is checked out elsewhere, create new branch
+git worktree add ../wt-new-name -b new-branch-name
+```
+
+### Common Issue: Handoff Files Not Being Read
+**Symptom:** Agent doesn't see context from other agents
+**Cause:** Wrong file path, timing issue, or file format error
+**Fix:**
+1. Verify handoff file location: `ls ~/shared/handoff-*.json`
+2. Check file contains valid JSON: `cat handoff.json | jq .`
+3. Add explicit read instruction in prompt: "Read ~/shared/handoff-agent1-to-agent2.json first"
+4. Consider file watching or polling for async handoffs
+
+### Common Issue: Anomaly Detection False Positives
+**Symptom:** System flags normal behavior as anomalous
+**Cause:** Thresholds too aggressive, or normal patterns not baselined
+**Fix:**
+1. Adjust context threshold from 90% to 95% for complex tasks
+2. Increase "circular edit" detection window
+3. Baseline normal token consumption for your project type
+4. Add task-specific exemptions for known verbose operations
+
+---
+
 ## Tags Index
 
 `#ralph-wiggum` `#cc-mirror` `#gas-town` `#panopticon` `#infinite-orchestra` `#hub-and-spoke` `#peer-to-peer` `#factory-pattern` `#git-worktrees` `#file-handoffs` `#mcp-agent-mail` `#event-driven` `#consensus` `#hierarchical-memory` `#ci-green` `#playwright` `#claude-hud` `#rpai` `#distributed-tracing` `#anomaly-detection` `#checkpointing` `#circuit-breaker` `#dead-letter-queue` `#autoscaling` `#model-selection` `#token-tracking`
+
+---
+
+*Wave-3 Enhanced: 2026-01-19*

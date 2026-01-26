@@ -1,5 +1,7 @@
 # Plugin & Extension Grammar
 
+> **You Are Here:** This document explains **how plugins extend the Claude Code vocabulary**. Plugins are pre-packaged capabilities (commands, skills, hooks, agents) that add new "words" and "phrases" to your pattern language. Use this when evaluating which plugins to install, understanding how plugins compose with existing patterns, or building your own plugins. Prerequisite reading: `grammar-vocabulary.md` for core terms.
+
 ---
 ## D-FINAL Integration
 **Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
@@ -195,6 +197,16 @@ style-plugin := hook(SessionStart) -> inject(personality)
 
 ---
 
+### Checkpoint: Plugin Types
+**You should now understand:**
+- [ ] Six plugin categories: Visualization, Memory, Workflow, Tool (MCP), Security, Output Style
+- [ ] How each type hooks into Claude Code (passive hooks vs user commands)
+- [ ] Key examples: Claude HUD (visualization), Claude-Mem (memory), Ralph Wiggum (workflow)
+
+**If unclear:** Re-read the "Grammar Pattern" for each plugin type to see the hook/command structure.
+
+---
+
 ## Plugin Syntax
 
 ### Installation Grammar
@@ -275,6 +287,25 @@ claude plugin install [plugin-name]
     }
   }
 }
+```
+
+---
+
+### Checkpoint: Plugin Syntax
+**You should now understand:**
+- [ ] Installation: `/plugin marketplace add`, `/plugin install`
+- [ ] Invocation: `/plugin-name:command args`
+- [ ] Configuration: `~/.claude/settings.json` with `plugins` key
+
+**If unclear:** Try running `/plugin list` to see installed plugins.
+
+**Terminal verification:**
+```bash
+# List installed plugins
+claude plugin list
+
+# Check plugin configuration
+cat ~/.claude/settings.json | jq '.plugins'
 ```
 
 ---
@@ -452,6 +483,18 @@ skill-plugin := on(query-match) { load(skill) -> execute(with-guidance) }
 
 ---
 
+### Checkpoint: Plugin Composition Rules
+**You should now understand:**
+- [ ] Plugin + Loop: Plugins can run within Ralph iterations
+- [ ] Plugin + Hook: Plugins can be triggered by lifecycle events
+- [ ] Plugin + Worker: Plugins provide agents for orchestrator delegation
+- [ ] Plugin + Plugin: Plugins can chain together via output/input
+- [ ] Plugin + MCP: Plugins can leverage external MCP server tools
+
+**If unclear:** Study the "Example" for each rule to see concrete composition.
+
+---
+
 ## Extension Points
 
 ### Where Plugins Hook In
@@ -561,6 +604,18 @@ Stop -> check(prd.json:all-complete) ->
     if(complete): exit
     else: restart-with-prompt
 ```
+
+---
+
+### Checkpoint: Extension Points
+**You should now understand:**
+- [ ] PreToolUse: Intercept before tool execution (security gates, validation)
+- [ ] PostToolUse: React after tool execution (formatting, metrics)
+- [ ] SessionStart: Initialize context and state
+- [ ] SessionEnd: Persist state and cleanup
+- [ ] Stop: Intercept exit attempts (loop continuation)
+
+**If unclear:** Study the "Available Data" for each hook to understand what information is accessible.
 
 ---
 
@@ -723,6 +778,17 @@ my-plugin/
   }
 }
 ```
+
+---
+
+### Checkpoint: Plugin Anatomy
+**You should now understand:**
+- [ ] Directory structure: `.claude-plugin/plugin.json` as manifest, plus commands/, skills/, agents/, hooks/
+- [ ] Manifest grammar: name, version, commands[], skills[], agents[], hooks
+- [ ] Skill definition pattern: Purpose, Mental Model, Instructions, Tool Ownership
+- [ ] Agent definition pattern: name, description, model, context
+
+**If unclear:** Look at an existing plugin's directory structure (e.g., Claude HUD on GitHub).
 
 ---
 
@@ -955,6 +1021,198 @@ setting ::= key ":" value
     }
   }
 }
+```
+
+---
+
+## Troubleshooting
+
+### Common Issue: Plugin Not Found After Installation
+
+**Symptom:** `/plugin-name:command` returns "command not found" or similar error
+
+**Cause:** Plugin not properly installed, or marketplace not added
+
+**Fix:**
+```bash
+# 1. Check if marketplace is added
+/plugin marketplace list
+
+# 2. Add the marketplace if missing
+/plugin marketplace add jarrodwatts/claude-hud
+
+# 3. Update marketplace index
+/plugin marketplace update claude-hud
+
+# 4. Reinstall the plugin
+/plugin install claude-hud
+
+# 5. Verify installation
+/plugin list
+```
+
+---
+
+### Common Issue: Hook Not Firing
+
+**Symptom:** PostToolUse or PreToolUse hook configured but never executes
+
+**Cause:** Matcher misconfigured, or hook file not found
+
+**Fix:**
+1. Verify hook configuration in `~/.claude/settings.json`:
+```json
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Edit",
+      "hooks": [{
+        "type": "command",
+        "command": "echo 'Hook fired for $FILE'"
+      }]
+    }]
+  }
+}
+```
+
+2. Test with a simple echo command first
+3. Check that matcher matches the exact tool name: `Edit`, `Write`, `Bash`, `Read`
+4. For catch-all, use `*` as matcher
+
+**Terminal debugging:**
+```bash
+# Test if hook script is executable
+chmod +x ~/.claude/hooks/my-hook.sh
+
+# Test script directly
+~/.claude/hooks/my-hook.sh test-file.js
+```
+
+---
+
+### Common Issue: MCP Server Won't Start
+
+**Symptom:** MCP tools not appearing, or "server not found" errors
+
+**Cause:** Missing dependencies, wrong command path, or env vars not set
+
+**Fix:**
+```bash
+# 1. Verify the server package is installed
+npx -y @modelcontextprotocol/server-github --version
+
+# 2. Check environment variables
+echo $GITHUB_PERSONAL_ACCESS_TOKEN
+
+# 3. Test server manually
+npx -y @modelcontextprotocol/server-github
+
+# 4. Verify settings.json configuration
+cat ~/.claude/settings.json | jq '.mcpServers'
+```
+
+Expected configuration:
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_xxx"
+      }
+    }
+  }
+}
+```
+
+---
+
+### Common Issue: Plugin Conflicts
+
+**Symptom:** Two plugins trying to handle the same hook, unexpected behavior
+
+**Cause:** Multiple plugins registered for same lifecycle event without coordination
+
+**Fix:**
+1. Check which plugins use the conflicting hook:
+```bash
+# Search for PostToolUse hooks across plugins
+grep -r "PostToolUse" ~/.claude/plugins/
+```
+
+2. Disable one plugin:
+```json
+{
+  "plugins": {
+    "conflicting-plugin": {
+      "enabled": false
+    }
+  }
+}
+```
+
+3. Or sequence the hooks intentionally:
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {"matcher": "Edit", "hooks": [{"type": "command", "command": "plugin-a $FILE"}]},
+      {"matcher": "Edit", "hooks": [{"type": "command", "command": "plugin-b $FILE"}]}
+    ]
+  }
+}
+```
+
+---
+
+### Common Issue: Skill Not Auto-Loading
+
+**Symptom:** Plugin skill exists but doesn't activate on relevant queries
+
+**Cause:** Trigger keywords not matching, or skill file missing
+
+**Fix:**
+1. Verify skill has triggers in plugin.json:
+```json
+{
+  "skills": [{
+    "name": "my-skill",
+    "file": "skills/my-skill.md",
+    "triggers": ["keyword1", "keyword2", "phrase to match"]
+  }]
+}
+```
+
+2. Check skill file exists at specified path
+3. Test with explicit load:
+```
+Load the my-skill skill and apply it to this task
+```
+
+4. Add more trigger variations in plugin.json
+
+---
+
+### Common Issue: Plugin Commands Not Working in Session
+
+**Symptom:** Plugin installed but `/plugin-name:command` doesn't work
+
+**Cause:** Plugin needs setup or session restart
+
+**Fix:**
+```bash
+# 1. Run plugin setup if it has one
+/plugin-name:setup
+
+# 2. Check plugin status
+/plugin-name:status
+
+# 3. Restart Claude Code session
+# (exit and start new session)
+
+# 4. Verify plugin is enabled in settings
+cat ~/.claude/settings.json | jq '.plugins["plugin-name"]'
 ```
 
 ---

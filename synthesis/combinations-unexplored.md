@@ -1,5 +1,7 @@
 # Unexplored Territory Map
 
+> **You Are Here:** This is the frontier - pattern combinations that COULD exist but haven't been documented yet. These are theoretical explorations synthesized from analyzing all extraction files. Use this for inspiration when you've mastered existing patterns and want to innovate. Treat ideas here as experiments, not proven approaches.
+
 ---
 ## D-FINAL Integration
 **Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
@@ -688,6 +690,19 @@ Orchestration:
 
 ---
 
+### Checkpoint: High-Potential Combinations
+
+**You should now understand:**
+- [ ] What "Ralph Colonies" would enable (parallel Ralph loops with CC Mirror coordination)
+- [ ] How Claude-Mem + Panopticon could create cross-domain pattern detection
+- [ ] The concept of a "Specification Validation Swarm" for pre-coding critique
+- [ ] Why "Learned Skills" from Claude-Mem patterns would be powerful but risky
+- [ ] How Memory-Augmented Ralph maintains fresh context while injecting targeted learnings
+
+**If unclear:** Re-read the specific combination's Implementation Sketch section. Each includes an architecture diagram and detailed explanation of how the components would interact.
+
+---
+
 ## Theoretical Frontiers
 
 ### Self-Modifying Orchestration
@@ -870,6 +885,186 @@ This analysis synthesizes patterns from:
 - Hooks Research (community)
 - Task Decomposition Research (compilation)
 - Skills Research (community)
+
+---
+
+---
+
+## Troubleshooting Experimental Implementations
+
+### Common Issue: Prototype Fails Silently
+
+**Symptom:** You implemented one of these unexplored combinations but nothing happens - no errors, no output, just silence.
+
+**Cause:** Experimental combinations often fail at integration points between systems that were never designed to work together.
+
+**Fix:**
+1. Add verbose logging at every integration point:
+```bash
+#!/bin/bash
+# prototype.sh with logging
+set -x  # Enable bash debug mode
+exec 2>&1 | tee -a prototype.log  # Log everything
+
+# Your experimental code here
+echo "Step 1: Starting Claude-Mem query..."
+result=$(claude-mem search --query "test")
+echo "Step 1 result: $result"
+
+echo "Step 2: Passing to Panopticon..."
+```
+2. Test each component in isolation first:
+```bash
+# Test Claude-Mem alone
+claude-mem search --query "test"
+
+# Test Panopticon alone
+ls ~/trades/*.md
+
+# Only then combine
+```
+3. Use a minimal reproduction:
+```bash
+# Start with the simplest possible version
+# Add complexity only after base case works
+```
+
+### Common Issue: Unexpected Interactions Between Systems
+
+**Symptom:** Your combination works sometimes but fails unpredictably - race conditions, state corruption, or conflicting outputs.
+
+**Cause:** Two systems may be competing for the same resource (files, context, network ports) without proper coordination.
+
+**Fix:**
+1. Identify shared resources:
+```bash
+# What files do both systems touch?
+lsof +D ~/.claude/ | grep -E "claude-mem|panopticon"
+
+# What ports do they use?
+lsof -i -P | grep -E "37777|other-port"
+```
+2. Add explicit coordination:
+```bash
+# Use lock files
+LOCKFILE=/tmp/my-combination.lock
+if [ -f "$LOCKFILE" ]; then
+  echo "Another instance running"
+  exit 1
+fi
+touch "$LOCKFILE"
+trap "rm -f $LOCKFILE" EXIT
+```
+3. Sequence rather than parallelize for debugging:
+```bash
+# Instead of:
+# system-a & system-b &
+# Use:
+system-a && echo "A done" && system-b && echo "B done"
+```
+
+### Common Issue: Scope Creep During Experimentation
+
+**Symptom:** Started with a simple prototype of one combination, now have a complex mess that doesn't work and you've forgotten what you were trying to test.
+
+**Cause:** Experimental implementations naturally expand as you discover "just one more thing" to add.
+
+**Fix:**
+1. Write your hypothesis BEFORE coding:
+```markdown
+# Experiment: Ralph Colonies v0.1
+## Hypothesis
+Parallel Ralph loops coordinated by CC Mirror will 3x throughput
+
+## Success Criteria
+- 3 Ralph loops run simultaneously without conflicts
+- CC Mirror correctly tracks completion of each
+
+## Out of Scope
+- Cross-colony communication
+- Dynamic colony spawning
+- Anything not in success criteria
+```
+2. Time-box the experiment:
+```bash
+# Set a deadline
+echo "DEADLINE: 2 hours from now" | at now + 2 hours
+
+# After deadline, assess what works, not what's missing
+```
+3. Keep the "safe to try" vs "experimental" boundary clear:
+```
+Safe (from Risk Assessment table):
+- Live Context Orchestration
+- Memory-Augmented Ralph
+
+Experimental:
+- Ralph Colonies
+- Self-Scaling Ralph
+```
+
+### Common Issue: Pattern Mining Encodes Bad Habits
+
+**Symptom:** Implemented "Learned Skills" from Claude-Mem and now Claude is reproducing mistakes from past sessions.
+
+**Cause:** Claude-Mem captures EVERYTHING - including approaches that failed, were abandoned, or were wrong.
+
+**Fix:**
+1. Add success filtering to pattern mining:
+```bash
+# Only extract patterns from successful runs
+claude-mem search --query "pattern" --filter "outcome=success"
+```
+2. Require human review before promoting to skill:
+```markdown
+# workflow for learned skills
+1. Pattern miner generates CANDIDATE skill
+2. Candidate goes to review queue (not active)
+3. Human reviews, edits, approves
+4. Only then moves to ~/.claude/skills/learned/
+```
+3. Include "anti-patterns" in skills:
+```markdown
+# learned-pattern-auth.md
+
+## Do This
+- Use bcrypt for password hashing
+
+## Don't Do This (learned from failures)
+- Never use MD5 or SHA1 for passwords
+- Don't store plain text refresh tokens
+```
+
+### Common Issue: Overwhelming Complexity
+
+**Symptom:** You understand each component of the unexplored combination but can't hold the whole system in your head.
+
+**Cause:** These are frontier patterns - no one has fully figured them out yet, including the document authors.
+
+**Fix:**
+1. Build a visual map:
+```
+Draw the architecture by hand:
+[Component A] --message--> [Component B]
+                              |
+                              v
+                          [Component C]
+```
+2. Start with proven patterns and add ONE unexplored element:
+```
+Week 1: Basic Ralph (proven)
+Week 2: Ralph + Hooks (proven combination)
+Week 3: Ralph + Hooks + ONE unexplored idea (e.g., live context injection)
+```
+3. Accept that experimentation includes failure:
+```markdown
+## Experiment Log Entry
+Date: 2026-01-XX
+Tried: Specification Validation Swarm
+Result: Critics disagreed infinitely, deadlock
+Learning: Need referee agent to break ties
+Next: Try with 3 critics max + human escalation
+```
 
 ---
 

@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Agent Architecture Taxonomy
 
+> **You Are Here:** This is the **architecture reference** for agent patterns. If you're deciding how to structure your Claude Code setup (single agent, multi-agent, hub-and-spoke, factory), this document classifies every known architecture with comparison matrices. **Note:** This file is DEPRECATED - for current content, see `D-FINAL-architecture.md` Sections 1-2.
+
 **A Comprehensive Classification of Agent Patterns for Claude Code and AI-Assisted Development**
 
 **Generated:** 2026-01-09
@@ -222,6 +224,17 @@ done
 - `caffeinate -i` to keep system awake
 - Output capture to files
 - Error handling for failed runs
+
+---
+
+### Checkpoint: Single Agent Patterns
+**You should now understand:**
+- [ ] The 4 single-agent patterns: Interactive, Loop-Based (Ralph), Subagent-Spawning, Cron-Scheduled
+- [ ] When to use each pattern
+- [ ] The Ralph Wiggum loop structure and its variants (Marathon, Dr. Ralph, Lisa)
+- [ ] The difference between subagents and standalone sessions
+
+**If unclear:** Re-read sections 1.1-1.4 or see `mastery-ralph-complete.md` for deep Ralph coverage
 
 ---
 
@@ -472,6 +485,17 @@ claude "Implement payment processing"
 - Product: Cron pulls Amplitude, cross-refs GitHub, surfaces what needs building
 
 **Actionability:** Deep Dive - Comprehensive life automation
+
+---
+
+### Checkpoint: Multi-Agent Patterns
+**You should now understand:**
+- [ ] The 5 multi-agent patterns: Hub-and-Spoke, Factory (Gas Town), Kanban Loop, Parallel Branch, Panopticon
+- [ ] Tool ownership differences between orchestrator and worker roles
+- [ ] The CC Mirror installation process: `npx cc-mirror quick --provider mirror --name mclaude`
+- [ ] Requirements for Gas Town (Stage 7+ dev, tmux proficiency, significant budget)
+
+**If unclear:** Re-read sections 2.1-2.5 or see `extractions/orchestration/` for detailed extraction files
 
 ---
 
@@ -1224,6 +1248,71 @@ START: "I need to automate development work"
 
 ---
 
+---
+
+## Troubleshooting
+
+### Common Issue: Orchestrator Writing Code Directly
+**Symptom:** Main agent context fills up with implementation details, loses strategic view
+**Cause:** Violating the Iron Law of Worker Separation
+**Fix:**
+1. Review Section 7 (Iron Law) - orchestrators must NEVER write code
+2. Add explicit worker preamble to subagent prompts:
+   ```
+   CONTEXT: You are a WORKER agent, not an orchestrator.
+   RULES:
+   - Complete ONLY the task described below
+   - Do NOT spawn sub-agents
+   ```
+3. Use CC Mirror orchestration skill which enforces this pattern
+
+### Common Issue: Worker Spawning Sub-Workers
+**Symptom:** Exponential context explosion, coordination nightmare
+**Cause:** Worker trying to orchestrate instead of execute
+**Fix:**
+1. Workers must NEVER spawn sub-agents (flat hierarchy only)
+2. Add explicit instruction: "Do NOT call TaskCreate or TaskUpdate"
+3. All workers report directly to single orchestrator
+4. If worker needs to delegate, it should report back and let orchestrator spawn
+
+### Common Issue: Wrong Model for Task Type
+**Symptom:** High costs for simple tasks, or poor quality on complex ones
+**Cause:** Not matching model capability to task requirements
+**Fix:**
+Model selection guide:
+| Model | Use Case |
+|-------|----------|
+| **Haiku** | File lookups, simple grep, errand running (spawn 5-10 parallel) |
+| **Sonnet** | Implementation, patterns, tests |
+| **Opus** | Architecture, complex reasoning, ambiguous tasks |
+
+### Common Issue: File Conflicts in Parallel Agents
+**Symptom:** Merge conflicts, overwritten changes, inconsistent state
+**Cause:** Multiple agents editing same files
+**Fix:**
+1. Use Git worktrees for isolation:
+   ```bash
+   git worktree add ../feature-branch feature-branch
+   ```
+2. Or use directory ownership pattern (each agent owns specific dirs)
+3. Or use task dependencies to serialize conflicting work
+4. See Section 9 (Isolation Strategies) for full options
+
+### Common Issue: Context Collapse in Long Sessions
+**Symptom:** Agent forgets early context, quality degrades
+**Cause:** Context window exhaustion
+**Fix:**
+1. Use Ralph pattern (fresh context per iteration)
+2. Enable auto-compact if using CC Mirror
+3. Put expensive operations in subagents
+4. See Section 3.4 for model selection to manage context efficiently
+
+---
+
 ## Tags
 
 `#architecture` `#taxonomy` `#multi-agent` `#orchestration` `#swarm` `#hierarchy` `#patterns` `#ralph-loop` `#gas-town` `#cc-mirror` `#panopticon` `#hub-and-spoke` `#factory` `#worker-separation` `#iron-law`
+
+---
+
+*Wave-3 Enhanced: 2026-01-19*

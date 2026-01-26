@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beads: Git-Backed Data Plane | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Three-layer diagram */
+    .layer-diagram {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+
+    .layer-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .layer-box:last-child {
+      margin-bottom: 0;
+    }
+
+    .layer-title {
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 8px;
+    }
+
+    .layer-desc {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    /* Quote box */
+    .quote-box {
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      border-left: 4px solid #0D9373;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+
+    .quote-text {
+      font-size: 16px;
+      font-style: italic;
+      color: #166534;
+      margin-bottom: 8px;
+    }
+
+    .quote-author {
+      font-size: 14px;
+      color: #15803d;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="database" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Git-backed issue tracker as agent memory: JSONL truth, SQLite speed, three-way merge.</div>
+        </div>
+
+        <div class="quote-box">
+          <div class="quote-text">"It is a magical 4-dimensional graph-based git-backed fairy-dusted issue-tracker database, designed to let coding agents track all your work and never get lost again."</div>
+          <div class="quote-author">- Steve Yegge, announcing Beads</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Agents forget between sessions. Files persist. Git merges."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'bd create \"Implement login\" -p 0 && bd sync')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>bd create "Implement login" -p 0 && bd sync</code>
+          </div>
+
+          <div class="core-anchor">That's the core pattern: structured issues in git, synced between agents.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Beads is the memory layer for AI agents. When Agent A creates an issue and syncs, Agent B can pick up that work seamlessly. No shared database server, no infrastructure - just git.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">The Three-Layer Model</h3>
+
+        <div class="layer-diagram">
+          <div class="layer-box">
+            <div class="layer-title">Layer 1: SQLite Database</div>
+            <div class="layer-desc">Fast queries, complex joins, dependency graphs. File: <code>.beads/beads.db</code> (gitignored). Latency: milliseconds. This is the performance layer.</div>
+          </div>
+          <div class="layer-box">
+            <div class="layer-title">Layer 2: JSONL Files</div>
+            <div class="layer-desc">Git-tracked source of truth. File: <code>.beads/issues.jsonl</code>. One JSON object per line. Human-readable diffs, merge-friendly format. This is the durability layer.</div>
+          </div>
+          <div class="layer-box">
+            <div class="layer-title">Layer 3: Git Remote</div>
+            <div class="layer-desc">Multi-agent/multi-machine collaboration. Standard git operations: push, pull, merge. This is the collaboration layer.</div>
+          </div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          <strong>Why three layers?</strong> JSONL is git-mergeable but slow to query. SQLite is fast but not mergeable. The three-layer model gives you both: SQLite for speed, JSONL for git, remote for collaboration.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="sync-strategy">Three-Way Merge Strategy</h3>
+
+        <p class="text-text-secondary mb-6">
+          When multiple agents edit the same issues, Beads uses three-way merge:
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Three-way merge components:</span>
+BASE:   sync_base.jsonl   <span class="comment"># Last sync point</span>
+LOCAL:  Current SQLite    <span class="comment"># Your changes</span>
+REMOTE: Pulled JSONL      <span class="comment"># Their changes</span>
+
+<span class="comment"># Field-specific merge strategies:</span>
+Scalars (title, status):  Last-Write-Wins
+Collections (labels):     Union merge
+Comments:                 Append + dedupe</pre>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-git" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY GIT-BACKED VS POSTGRESQL?</div>
+          <div class="decision-reasoning">
+            Traditional databases require server infrastructure, network connectivity, backup complexity. Git provides natural branching (feature branches have their own issues), merge capabilities (git's core competency), offline-first operation, and complete history built-in.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              No database server to maintain. Works anywhere git works. Backup = git push. Rollback = git revert. Your issues live in the same repo as your code.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-jsonl">
+          <div class="decision-why">WHY JSONL FORMAT (NOT JSON)?</div>
+          <div class="decision-reasoning">
+            A single JSON file creates large diffs on any change, merge conflicts on every edit, and requires full file read/write. JSONL (one JSON per line) means small diffs (one line per change), independent line merges, and incremental read/write.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Git merge works naturally. When Agent A and Agent B create different issues, git can merge the JSONL files automatically. No merge conflicts except for editing the same issue.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-sqlite">
+          <div class="decision-why">WHY SQLITE CACHE LAYER?</div>
+          <div class="decision-reasoning">
+            Direct JSONL queries are O(n) for any search, with no indexing and no joins possible. SQLite provides O(log n) indexed queries, complex joins for dependency graphs, and full-text search. The 25x speedup (752ms to 29ms for 10K issues) is from the blocked issues cache alone.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              <code>bd ready</code> returns instantly even with thousands of issues. Dependency tree traversal is fast. The cache rebuilds automatically from JSONL in under 50ms for 10K issues.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-daemon">
+          <div class="decision-why">WHY DAEMON ARCHITECTURE?</div>
+          <div class="decision-reasoning">
+            Without a daemon, each CLI command opens a database connection, executes, and closes. The daemon provides persistent connections, batch operations (5-second debounce), background sync, and connection pooling. Result: 60% CPU reduction.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              The daemon runs in the background, automatically syncing changes. You can disable it with <code>BEADS_NO_DAEMON=1</code> or <code>bd --no-daemon</code> for worktree operations.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>.beads/
+<span class="comment">├── issues.jsonl         # Git-tracked source of truth</span>
+<span class="comment">│                        # One JSON object per line</span>
+<span class="comment">│</span>
+<span class="comment">├── deletions.jsonl      # Deletion manifest (prevents resurrection)</span>
+<span class="comment">│                        # Records deleted issue IDs + timestamps</span>
+<span class="comment">│</span>
+<span class="comment">├── beads.db             # SQLite cache (gitignored)</span>
+<span class="comment">│                        # Fast queries, complex joins</span>
+<span class="comment">│</span>
+<span class="comment">├── sync_base.jsonl      # Last-synced snapshot (gitignored)</span>
+<span class="comment">│                        # Used for three-way merge</span>
+<span class="comment">│</span>
+<span class="comment">├── bd.sock              # Daemon Unix socket (gitignored)</span>
+<span class="comment">│</span>
+<span class="comment">├── config.yaml          # Local configuration</span>
+<span class="comment">│</span>
+<span class="comment">└── metadata.json        # Database metadata</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">JSONL Issue Schema</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Each line is a complete issue:</span>
+{<span class="string">"id"</span>:<span class="string">"bd-a3f8"</span>,<span class="string">"title"</span>:<span class="string">"Implement login"</span>,<span class="string">"status"</span>:<span class="string">"open"</span>,<span class="string">"priority"</span>:0,<span class="string">"type"</span>:<span class="string">"task"</span>,<span class="string">"dependencies"</span>:[]}
+{<span class="string">"id"</span>:<span class="string">"bd-b2c4"</span>,<span class="string">"title"</span>:<span class="string">"Add validation"</span>,<span class="string">"status"</span>:<span class="string">"open"</span>,<span class="string">"priority"</span>:1,<span class="string">"dependencies"</span>:[{<span class="string">"type"</span>:<span class="string">"blocks"</span>,<span class="string">"id"</span>:<span class="string">"bd-a3f8"</span>}]}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="cli-reference">Essential CLI Commands</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># INITIALIZATION</span>
+bd init                              <span class="comment"># Initialize beads in repo</span>
+bd init --stealth                    <span class="comment"># Initialize without git tracking</span>
+
+<span class="comment"># ISSUE MANAGEMENT</span>
+bd create <span class="string">"Title"</span> -p 0               <span class="comment"># Create high-priority issue</span>
+bd create <span class="string">"Title"</span> --type bug         <span class="comment"># Create bug</span>
+bd create <span class="string">"Title"</span> --deps blocks:bd-xxxx  <span class="comment"># Create with dependency</span>
+bd show bd-xxxx                      <span class="comment"># Show issue details</span>
+bd show bd-xxxx --json               <span class="comment"># Show as JSON (for scripting)</span>
+bd update bd-xxxx --status in_progress   <span class="comment"># Update status</span>
+bd close bd-xxxx --reason <span class="string">"Done"</span>     <span class="comment"># Close issue</span>
+
+<span class="comment"># QUERIES</span>
+bd list                              <span class="comment"># List all open issues</span>
+bd ready                             <span class="comment"># Show work with no blockers</span>
+bd stale --days 7                    <span class="comment"># Find stale issues</span>
+bd dep tree bd-xxxx                  <span class="comment"># Show dependency tree</span>
+
+<span class="comment"># SYNC</span>
+bd sync                              <span class="comment"># Full sync (pull -> merge -> push)</span>
+bd sync --force                      <span class="comment"># Force reimport from JSONL</span>
+
+<span class="comment"># DAEMON</span>
+bd daemons list                      <span class="comment"># List running daemons</span>
+bd daemons stop                      <span class="comment"># Stop current daemon</span>
+
+<span class="comment"># MAINTENANCE</span>
+bd doctor                            <span class="comment"># Check health</span>
+bd doctor --fix                      <span class="comment"># Auto-fix issues</span>
+bd compact --older-than 30d          <span class="comment"># Compact old issues</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">config.yaml Template</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># .beads/config.yaml</span>
+prefix: bd                    <span class="comment"># Issue ID prefix (max 8 chars)</span>
+remote-sync-interval: <span class="string">"30s"</span>   <span class="comment"># Sync frequency (min: 5s)</span>
+daemon-mode: <span class="string">"events"</span>         <span class="comment"># "poll" or "events"</span>
+auto-start: <span class="keyword">true</span>              <span class="comment"># Auto-start daemon on CLI use</span>
+auto-compact: <span class="keyword">true</span>            <span class="comment"># Auto-compact old issues</span>
+compact-after-days: 30        <span class="comment"># Compaction threshold</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow an issue through the complete lifecycle, from creation by Agent A to pickup by Agent B:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">Agent A creates issue: <code>bd create "Implement login" -p 0</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Write to SQLite (instant, &lt;1ms). Database marked as "dirty". Returns: <code>bd-a3f8</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">5-second debounce window accumulates changes. Agent updates: <code>bd update bd-a3f8 --status in_progress</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Debounce expires. Daemon exports changed issues to <code>issues.jsonl</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Agent A completes work: <code>bd close bd-a3f8 --reason "Implemented"</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">Agent A syncs before ending: <code>bd sync</code> (pull -> merge -> export -> commit -> push)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Agent B starts on different machine: <code>bd sync</code> (or daemon auto-sync)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">JSONL newer than local SQLite detected. Parse line by line, compare content hashes.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">Rebuild blocked cache (&lt;50ms for 10K issues)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">Agent B queries: <code>bd ready</code> - Returns issues with no open blockers (sub-ms)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">11</div>
+            <div class="path-content">Agent B sees <code>bd-a3f8</code> is closed, picks next available task</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">12</div>
+            <div class="path-content"><strong>"The plane has landed"</strong> - Full context transferred, no data loss, audit trail in git</div>
+          </div>
+        </div>
+
+        <div class="quote-box">
+          <div class="quote-text">"The plane has NOT landed until git push completes successfully."</div>
+          <div class="quote-author">- Beads documentation on session end protocol</div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you will hit, with concrete fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #1: bd: command not found
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> CLI not in PATH after installation</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add <code>~/.local/bin</code> to PATH. Check with <code>which bd</code>. Time: 5 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #2: No beads repository found
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Commands fail with "not initialized"</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Run <code>bd init</code> in git repo root. Time: 1 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #3: Database locked
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Multiple processes trying to access SQLite</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Stop daemon: <code>bd daemons stop</code>, retry. Time: 1 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #4: Zombie resurrection
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Deleted issue keeps reappearing after sync</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Missing <code>deletions.jsonl</code> or another clone restored it</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check <code>deletions.jsonl</code> exists, re-delete issue. Time: 5 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #5: Worktree daemon conflict
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Daemon issues in git worktrees (shared .git directory)</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Disable daemon: <code>BEADS_NO_DAEMON=1</code> or <code>bd --no-daemon</code>. Time: 1 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #6: Slow queries
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> List commands taking seconds instead of milliseconds</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Rebuild cache: <code>bd admin rebuild-cache</code>. Time: 2 min</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #7: Agent can't use bd edit
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> <code>bd edit</code> launches interactive editor, agent hangs</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use <code>bd update --field "value"</code> instead. Add <code>--json</code> for scriptable output. Time: 0 min</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Git vs Real Database
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Git is not designed for structured queries. SQLite cache provides most query power, but you cannot do arbitrary SQL joins across issues and external data.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Accept limited query expressiveness. For complex analytics, export to real database. Beads is for agent memory, not business intelligence.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Merge Conflicts Are Possible
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Git three-way merge has limits. When two agents edit the same issue field, conflict is possible. Field-level strategies (last-write-wins for scalars) help but don't eliminate conflicts.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Use <code>bd conflicts resolve bd-xxxx --ours/--theirs</code>. Design workflows to minimize same-issue edits. Accept that some manual resolution is the cost of distributed operation.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Scale Limits
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Beads is designed for 10K+ issues, not millions. Enterprise scale requires PostgreSQL or similar. Large JSONL files slow git operations.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Use compaction: <code>bd compact --older-than 60d</code>. Fine for agent workflows. If you need enterprise scale, Beads is not your tool.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            No Semantic Search
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Beads is structured, not vector-based. Full-text search exists, but semantic similarity search does not. Use Claude-mem if semantic search is your primary need.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Use Beads for structured queries (dependencies, status). Use Claude-mem for semantic memory. They complement, not compete.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE BEADS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multiple agents need shared context</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Work spans multiple sessions</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Dependency tracking matters (blockers, graphs)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Using Gas Town orchestration (Beads is the data plane)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Git-native workflow preferred (no external infrastructure)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE BEADS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Single-session task (session memory sufficient)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple TODO list (progress.txt / AGENTS.md simpler)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>No git repository (Beads requires git)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Semantic search priority (use Claude-mem)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Millions of issues (use PostgreSQL + custom)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Graduation Path</h3>
+
+        <div class="code-block">
+          <pre>Complexity Level  ->  Memory Solution
+----------------------------------------------
+Level 0-2             Session memory only
+Level 3-4             progress.txt + AGENTS.md (Ralph)
+Level 5               Beads for dependency tracking
+Level 6               Beads + multi-agent (CC Mirror)
+Level 7+              Beads + Gas Town (factory scale)</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Alternatives Comparison</h3>
+
+        <div class="code-block">
+          <pre>Feature          | Beads     | progress.txt | Claude-mem | PostgreSQL
+----------------------------------------------------------------------
+Multi-agent      | Yes       | Manual       | No         | Yes
+Dependencies     | Yes       | No           | No         | Custom
+Git-native       | Yes       | Yes          | No         | No
+Infrastructure   | None      | None         | Local      | Server
+Query power      | Medium    | grep         | Vector     | Full SQL
+Scale            | 10K+      | Small        | Session    | Millions</pre>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Ralph: External State</div>
+        <div class="text-text-secondary text-sm">
+          Beads is structured external state, like progress.txt but richer. Both embody "external memory > internal memory." Ralph uses files, Beads uses git-backed issues. Same philosophy, different implementation.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Gas Town: Memory Foundation</div>
+        <div class="text-text-secondary text-sm">
+          Gas Town runs ON TOP of Beads. Beads is the memory substrate, Gas Town is the coordination layer. You cannot run Gas Town without Beads - it is the data plane.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Steve Yegge: 1M Lines Vibe-Coded</div>
+        <div class="text-text-secondary text-sm">
+          Steve vibe-coded ~1M lines in 2025 using Beads to track all work. Beads itself is 225K lines of Go, 11K+ GitHub stars. "Go is just... good. It's boring. You can always understand it!"
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item inversion" data-section="core">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if Beads used PostgreSQL?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Traditional database, server infrastructure, manual backup.<br>
+          <strong>Why this fails:</strong> Lose git branching, merge, history. Need server infrastructure. Can't work offline.<br>
+          <strong>Hidden constraint:</strong> Git-backing IS the value proposition. No infrastructure = can run anywhere.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="core">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if issues were single JSON file?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd get:</strong> Large diffs on any change, merge conflicts on every edit.<br>
+          <strong>Why JSONL:</strong> One JSON per line = small diffs, independent line merges.<br>
+          <strong>The insight:</strong> JSONL format is load-bearing for git mergeability.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Git as Database</div>
+        <div class="text-text-secondary text-sm">
+          Git stores code with history, branches, merges.<br>
+          Beads stores issues the same way: full history, branches for features, three-way merge for collaboration.<br><br>
+          <em>If you understand git, you understand Beads persistence.</em>
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Agents forget" -> FIVE decisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Agents forget between sessions<br>
+          -> Need persistent state<br>
+          -> File-based for git<br>
+          -> Git-tracked for merge<br>
+          -> JSONL for line diffs<br>
+          -> SQLite for speed<br><br>
+          <em>Session ephemerality drives entire Beads architecture.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Multiple agents edit" -> Sync complexity</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Multiple agents edit simultaneously<br>
+          -> Need merge strategy<br>
+          -> Three-way merge<br>
+          -> Need base state (sync_base.jsonl)<br>
+          -> Field strategies<br>
+          -> Union for collections<br><br>
+          <em>Concurrency requirement drives sync complexity.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Query Speed vs Git Native</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> SQLite = fast queries, complex joins<br>
+          <strong>Pull B:</strong> Git = portable, mergeable, history<br>
+          <strong>Resolution:</strong> Two-layer: SQLite cache + JSONL truth<br><br>
+          <em>You can have both. The cache is ephemeral, JSONL is durable.</em>
+        </div>
+      </div>
+
+      <!-- FILES SECTION -->
+      <div class="activity-item minimal" data-section="files">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible Beads</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">bd init && bd create "Task" && bd sync</code><br><br>
+          <strong>Essential:</strong> init, create, close, list, sync<br>
+          <strong>Everything else:</strong> Molecules, daemon, complex queries are refinements.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> bd init, create, close, list<br>
+          <strong>Intermediate:</strong> Full CLI, sync, dependencies, daemon<br>
+          <strong>Advanced:</strong> Molecules, daemon management, multi-agent<br>
+          <strong>Expert:</strong> Contribute to Beads, build alternatives<br><br>
+          <strong>Next step from each level:</strong> Complete 10 issues through full lifecycle.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Beads + Gas Town</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Gas Town uses Beads for all persistent state. Required integration.<br>
+          <strong>Pattern:</strong> Beads is memory, Gas Town is coordination. Together = multi-agent colony.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Beads + MCP Agent Mail</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> "Beads gives agents shared memory, and MCP Agent Mail gives them messaging... and that's all they need." - Jeffrey Emanuel<br>
+          <strong>Pattern:</strong> Memory + messaging = complete agent colony infrastructure.
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip bd sync at session end</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip <code>bd sync</code> before ending session<br>
+          <strong>THEN:</strong> Remote doesn't have your changes<br>
+          <strong>THEN:</strong> Next agent has stale state<br>
+          <strong>THEN:</strong> Work duplicated or lost<br>
+          <strong>FINALLY:</strong> Agent A's machine unavailable = lost work<br><br>
+          <em>"The plane has NOT landed until git push completes."</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Zombie Issue</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What happened:</strong> Deleted issue kept resurrecting on cross-clone sync.<br>
+          <strong>Outcome:</strong> Added <code>deletions.jsonl</code> manifest to prevent resurrection.<br>
+          <strong>The insight:</strong> Deletion is harder than creation in distributed systems.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">The 10K Issue Benchmark</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What happened:</strong> Tested at scale, found recursive CTE queries taking 752ms.<br>
+          <strong>Outcome:</strong> Added blocked cache for 25x speedup (29ms).<br>
+          <strong>The insight:</strong> Materialized views beat recursive queries at scale.
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When Beads overhead pays off</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-5 issues:</strong> Overhead visible, setup cost not recovered<br>
+          <strong>5-20 issues:</strong> Breaking even, organization starting to help<br>
+          <strong>20+ issues:</strong> Organization value exceeds overhead<br><br>
+          <strong>THE INFLECTION:</strong> ~20 issues<br>
+          <em>For simple TODO lists, use progress.txt.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How sync failures degrade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10% degraded:</strong> Occasional stale reads, may self-correct<br>
+          <strong>50% degraded:</strong> Frequent conflicts, run <code>bd sync --force</code><br>
+          <strong>90% degraded:</strong> Data loss risk, <code>rm beads.db && bd sync</code><br>
+          <strong>Total failure:</strong> <code>git checkout origin/main -- .beads/issues.jsonl</code>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cross-Repository Beads</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Current state:</strong> Beads is single-repo only.<br>
+          <strong>Unsolved:</strong> How to sync issues across multiple repos?<br>
+          <strong>Potential:</strong> Multi-repo agent orchestration.
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Simplicity vs Features</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> progress.txt is simple - no learning curve<br>
+          <strong>Pull B:</strong> Beads has dependencies, queries, multi-agent<br><br>
+          <strong>Resolution:</strong> Choose based on complexity needs. progress.txt for Level 0-4, Beads for Level 5+.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Issue History as Documentation</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The emergence:</strong> Over time, closed issues become project history.<br>
+          <strong>What you get:</strong> Why decisions were made survives in git. Future agents can understand past context.<br>
+          <strong>The insight:</strong> Beads is not just task tracking - it is institutional memory.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Dependency Graphs Reveal Architecture</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The emergence:</strong> Over time, issue dependencies reveal actual system architecture.<br>
+          <strong>What you see:</strong> Which components block others. Where coupling is high.<br>
+          <strong>The insight:</strong> Your issue graph IS your architecture diagram.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">At what scale is Beads right?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Single session:</strong> No - session memory sufficient<br>
+          <strong>Multi-session (hours):</strong> Maybe - if dependencies matter<br>
+          <strong>Project duration (days-weeks):</strong> Yes - persistence value, history<br>
+          <strong>Long-term (months+):</strong> Yes - documentation, audit trail<br><br>
+          <em>Beads shines when work spans sessions and history matters.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If Beads isn't right for your use case</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Simple tasks?</strong> -> progress.txt / AGENTS.md (Ralph)<br>
+          <strong>Semantic search?</strong> -> Claude-mem<br>
+          <strong>Enterprise scale?</strong> -> PostgreSQL + custom<br>
+          <strong>No git repo?</strong> -> SQLite directly or session memory
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude-mem vs Beads</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Claude-mem:</strong> Semantic search, vector-based, single instance<br>
+          <strong>Beads:</strong> Structured queries, git-backed, multi-agent<br><br>
+          <em>They complement, not compete. Use Claude-mem for "find similar", Beads for "show blockers".</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="when">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Unix Philosophy Applied</div>
+        <div class="text-text-secondary text-sm">
+          Issues as files. Git as database. Composable CLI commands.<br>
+          Beads embodies Unix philosophy for AI agents: do one thing well, make text files, compose via pipes.<br><br>
+          <em>If you know Unix, you already understand Beads design principles.</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

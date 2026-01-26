@@ -1,5 +1,7 @@
 # Mobile-First & Cross-Device Orchestration
 
+> **You Are Here:** This document covers mobile-first development patterns for Claude Code - how to run agents from your phone, tablet, or any device. If you need to work while away from your desk or want to orchestrate overnight runs remotely, start here. For core orchestration patterns, see `synthesis/mastery-multi-agent.md`. For Ralph loops, see `synthesis/ralph-ecosystem-complete.md`.
+
 A synthesis of mobile development patterns, cloud infrastructure configurations, and asynchronous workflows for running Claude Code from anywhere.
 
 ---
@@ -590,6 +592,17 @@ tmux send-keys -t work C-c
 
 ---
 
+### Checkpoint: Mobile Infrastructure
+**You should now understand:**
+- [ ] The difference between SSH/tmux vs Replit approaches
+- [ ] How teleportation (/teleport) enables device handoff
+- [ ] When to use quick check vs full mobile dev patterns
+- [ ] How push notifications enable async development
+
+**If unclear:** Re-read the "Current Mobile Approaches" and "Mobile Workflow Patterns" sections above.
+
+---
+
 ## 30-Minute Quick Start
 
 ### Minimal Mobile Setup
@@ -647,6 +660,100 @@ tmux send-keys -t work C-c
 
 **Budget Setup:** Home Mac + Tailscale + Termius + ntfy = $0/month
 **Power Setup:** Hetzner VM + Tailscale + Termius + Pushover = $13/month + $5 one-time
+
+---
+
+## Troubleshooting
+
+### Problem: "SSH connection drops constantly"
+
+**Symptom:** Connection terminates when switching networks (WiFi to cellular) or after screen lock.
+
+**Cause:** Standard SSH uses TCP which doesn't handle network transitions well.
+
+**Fix:**
+```bash
+# Use mosh instead of SSH
+mosh user@server
+
+# If mosh not available, configure SSH keepalives
+# In ~/.ssh/config:
+Host *
+  ServerAliveInterval 60
+  ServerAliveCountMax 3
+```
+
+---
+
+### Problem: "tmux session not attaching on connect"
+
+**Symptom:** Connect to server but don't see your Claude Code session.
+
+**Cause:** Auto-attach not configured or session was killed.
+
+**Fix:**
+```bash
+# Check if session exists
+tmux list-sessions
+
+# If exists, attach manually
+tmux attach -t main
+
+# If not exists, start new
+tmux new -s main
+
+# Configure auto-attach in ~/.zshrc:
+if [[ -z "$TMUX" ]] && [[ -n "$SSH_CONNECTION" ]]; then
+  tmux attach -t main 2>/dev/null || tmux new -s main
+fi
+```
+
+---
+
+### Problem: "Notifications not arriving"
+
+**Symptom:** Claude asks questions but no push notification on phone.
+
+**Cause:** Hook not configured correctly or notification service issue.
+
+**Fix:**
+```bash
+# Test notification service directly
+curl -d "Test message" ntfy.sh/your-topic
+
+# Check hook is executable
+chmod +x ~/.claude/hooks/notify-mobile.sh
+
+# Verify hook is configured in settings.json
+cat ~/.claude/settings.json | grep -A5 PreToolUse
+
+# Test hook manually
+echo '{"tool_input":{"questions":[{"question":"Test"}]}}' | \
+  CLAUDE_HOOK_EVENT_DATA=$(cat) ~/.claude/hooks/notify-mobile.sh
+```
+
+---
+
+### Problem: "Tailscale connection refused"
+
+**Symptom:** Can't reach home Mac or cloud VM via Tailscale IP.
+
+**Cause:** Tailscale not running on target machine, or firewall blocking.
+
+**Fix:**
+```bash
+# On target machine, check Tailscale status
+tailscale status
+
+# Restart if needed
+sudo tailscale down && sudo tailscale up
+
+# On Mac, check if SSH enabled
+# System Preferences → Sharing → Remote Login
+
+# Test connection
+ping 100.x.x.x  # Your Tailscale IP
+```
 
 ---
 

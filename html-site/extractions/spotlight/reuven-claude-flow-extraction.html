@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude-Flow Pattern | Enterprise Swarm Orchestration</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Architecture diagram */
+    .architecture-diagram {
+      background: #18181b;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .architecture-diagram pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #e4e4e7;
+      line-height: 1.5;
+    }
+
+    /* Quote box */
+    .quote-box {
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+      border-left: 4px solid #0D9373;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+
+    .quote-box blockquote {
+      font-style: italic;
+      color: #3f3f46;
+      margin: 0 0 8px 0;
+    }
+
+    .quote-box cite {
+      font-size: 13px;
+      color: #71717a;
+      font-style: normal;
+    }
+
+    /* Stats box */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 600px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stat-box {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0D9373;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #71717a;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="hexagon" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude-Flow</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="https://github.com/ruvnet/claude-flow" target="_blank" class="text-sm text-text-muted hover:text-text-primary transition-colors flex items-center gap-1">
+        <i data-lucide="github" class="w-4 h-4"></i>
+        GitHub
+      </a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Enterprise swarm orchestration: Queen coordinates workers, SQLite stores state, vectors enable semantic memory.</div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-value">11.3K</div>
+            <div class="stat-label">GitHub Stars</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value">100+</div>
+            <div class="stat-label">MCP Tools</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value">25</div>
+            <div class="stat-label">Claude Skills</div>
+          </div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Created by <strong>Reuven Cohen (@ruvnet)</strong>, Claude-Flow brings enterprise-grade swarm intelligence to Claude Code. Where Gas Town is an experimental factory and CC Mirror is a quick multi-agent hack, Claude-Flow is built for Fortune 500 production deployments at billion+ token scale.
+        </p>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="quote-box">
+          <blockquote>"A swarm uses independently operating agents that operate with a common direction via an orchestrator. Each agent is autonomous--they can make their own determination how to solve problems."</blockquote>
+          <cite>- Reuven Cohen</cite>
+        </div>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Simple infrastructure, complex behavior"</div>
+          <p class="text-text-secondary text-sm mb-4">
+            The infrastructure should be simple and reliable. Complexity emerges from agent behavior, not from the coordination layer. This is why Claude-Flow uses SQLite instead of complex graph databases.
+          </p>
+        </div>
+
+        <div class="architecture-diagram">
+          <pre>
+            +-----------------------------+
+            |      QUEEN AGENT            |
+            |   (Central Coordinator)     |
+            |                             |
+            |  - Task distribution        |
+            |  - Resource allocation      |
+            |  - Swarm health monitoring  |
+            +-------------+---------------+
+                          |
+        +-----------------+------------------+
+        |                 |                  |
+        v                 v                  v
++---------------+ +---------------+ +---------------+
+|  WORKER AGENT | |  WORKER AGENT | |  WORKER AGENT |
+|   (Planner)   | |   (Coder)     | |   (Critic)    |
++-------+-------+ +-------+-------+ +-------+-------+
+        |                 |                  |
+        v                 v                  v
++-----------------------------------------------+
+|              SHARED MEMORY LAYER              |
+|                                               |
+|   +--------+    +---------------+             |
+|   | AgentDB|    | ReasoningBank |             |
+|   | (SQLite|    | (Vector Search)|            |
+|   | State) |    | (96-164x fast)|             |
+|   +--------+    +---------------+             |
++-----------------------------------------------+
+          </pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="memory-systems">Memory Systems</h3>
+
+        <p class="text-text-secondary mb-4">
+          Claude-Flow uses a hybrid memory approach that separates <strong>coordination state</strong> (who is doing what) from <strong>semantic memory</strong> (how we solved similar problems):
+        </p>
+
+        <div class="quote-box">
+          <blockquote>"For swarm memory, you don't need complex vector similarity searches. What you really need is a common simple SQLite storage environment that allows all agents to save their current state and access previous states."</blockquote>
+          <cite>- Reuven Cohen</cite>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">-- AgentDB: Coordination Layer (SQLite)</span>
+
+<span class="keyword">CREATE TABLE</span> agent_state (
+    agent_id <span class="variable">TEXT PRIMARY KEY</span>,
+    agent_type <span class="variable">TEXT NOT NULL</span>,
+    current_task <span class="variable">TEXT</span>,
+    status <span class="variable">TEXT</span>,
+    last_updated <span class="variable">TIMESTAMP</span>
+);
+
+<span class="keyword">CREATE TABLE</span> task_history (
+    task_id <span class="variable">TEXT PRIMARY KEY</span>,
+    agent_id <span class="variable">TEXT REFERENCES agent_state</span>,
+    task_description <span class="variable">TEXT</span>,
+    result <span class="variable">TEXT</span>,
+    completed_at <span class="variable">TIMESTAMP</span>
+);
+
+<span class="keyword">CREATE TABLE</span> agent_messages (
+    message_id <span class="variable">TEXT PRIMARY KEY</span>,
+    from_agent <span class="variable">TEXT</span>,
+    to_agent <span class="variable">TEXT</span>,
+    content <span class="variable">TEXT</span>,
+    acknowledged <span class="variable">BOOLEAN DEFAULT FALSE</span>
+);</pre>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-sqlite" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY SQLite FOR COORDINATION?</div>
+          <div class="decision-reasoning">
+            Complex vector databases add failure modes without solving the coordination problem. State queries ("who is doing what?") need exact matches, not semantic similarity. SQLite gives you ACID transactions, zero infrastructure, and easy backup/restore.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Your swarm state is a single file (<code>agents.db</code>). You can inspect it with any SQLite client. Backup is <code>cp</code>. Recovery is overwrite. No Redis, no PostgreSQL, no container orchestration for state.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-queen">
+          <div class="decision-why">WHY QUEEN/WORKER HIERARCHY?</div>
+          <div class="decision-reasoning">
+            Peer-to-peer agent networks create chaos. Without a coordinator, workers duplicate work, conflict on resources, and have no clear task allocation. The Queen provides clear coordination while workers retain autonomy within their domains.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              One point of control (Queen) for assignment and health. Workers decide HOW to solve, not WHAT to solve. This mirrors human teams: Tech Lead assigns, specialists implement.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-hybrid-memory">
+          <div class="decision-why">WHY HYBRID MEMORY (SQLite + VECTORS)?</div>
+          <div class="decision-reasoning">
+            State (who/what) needs exact match. Semantics (how/why) needs similarity search. Using vectors for everything is overkill; using SQLite for everything loses semantic retrieval. The hybrid approach uses the right tool for each job.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              AgentDB answers "What's the status of worker-01?" (exact). ReasoningBank answers "How did we solve JWT auth before?" (semantic). Both live in <code>./data/</code> with different query patterns.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-dynamic">
+          <div class="decision-why">WHY DYNAMIC SPECIALIZATION?</div>
+          <div class="decision-reasoning">
+            Fixed roles (like Gas Town's Mayor/Deacon/Dogs) waste capacity when tasks don't match roles. Dynamic spawning lets the Queen create specialists on demand: database agent for migrations, security agent for reviews, performance agent for benchmarks.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Define skills in <code>./skills/</code>, Queen loads them as needed. The 4 default roles (planner, coder, critic, integrator) are starting points, not limits.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>claude-flow/
+<span class="comment">├── package.json                 # Node.js dependencies</span>
+├── .env                         <span class="comment"># API keys (gitignored)</span>
+│   └── ANTHROPIC_API_KEY=sk-ant-xxx
+│
+├── claude-flow.json             <span class="comment"># Main configuration</span>
+│
+├── data/                        <span class="comment"># Persistent storage</span>
+│   ├── agents.db                <span class="comment"># AgentDB (SQLite)</span>
+│   │   ├── agent_state          <span class="comment"># Who is doing what</span>
+│   │   ├── task_history         <span class="comment"># What was done</span>
+│   │   └── agent_messages       <span class="comment"># Inter-agent communication</span>
+│   └── vectors/                 <span class="comment"># ReasoningBank</span>
+│       └── embeddings/          <span class="comment"># Semantic memory</span>
+│
+├── skills/                      <span class="comment"># Skill definitions</span>
+│   ├── planner.md               <span class="comment"># Architecture, planning</span>
+│   ├── coder.md                 <span class="comment"># Implementation</span>
+│   ├── critic.md                <span class="comment"># Code review, security</span>
+│   └── integrator.md            <span class="comment"># Merge and validate</span>
+│
+├── logs/                        <span class="comment"># Runtime logs</span>
+│   ├── queen.log
+│   └── worker-*.log
+│
+└── src/                         <span class="comment"># Source code</span>
+    ├── queen/
+    ├── workers/
+    └── memory/</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="config-file">Configuration</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">// claude-flow.json</span>
+{
+  <span class="string">"queen"</span>: {
+    <span class="string">"model"</span>: <span class="string">"claude-3-opus"</span>,
+    <span class="string">"maxWorkers"</span>: <span class="variable">10</span>
+  },
+  <span class="string">"workers"</span>: {
+    <span class="string">"defaultModel"</span>: <span class="string">"claude-3-sonnet"</span>,
+    <span class="string">"specializations"</span>: [<span class="string">"planner"</span>, <span class="string">"coder"</span>, <span class="string">"critic"</span>, <span class="string">"integrator"</span>]
+  },
+  <span class="string">"memory"</span>: {
+    <span class="string">"agentDb"</span>: <span class="string">"./data/agents.db"</span>,
+    <span class="string">"reasoningBank"</span>: {
+      <span class="string">"enabled"</span>: <span class="keyword">true</span>,
+      <span class="string">"vectorStore"</span>: <span class="string">"embedded"</span>
+    }
+  }
+}</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a JWT authentication task through the swarm to see how components interact:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">You submit: <code>task "Implement user authentication with JWT tokens"</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>Queen analyzes:</strong> Complexity MEDIUM, needs 3 agents, skills: auth, security</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>Queen spawns workers:</strong> planner-01, coder-01, critic-01 with relevant skills loaded</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>Planner breaks down:</strong> JWT structure, token generation, validation, middleware, refresh mechanism</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>Coder implements:</strong> Creates <code>src/auth/jwt-config.js</code>, updates AgentDB status</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>Critic reviews:</strong> Security check PASSED (token expiry set, RS256 algorithm)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content"><strong>Loop continues:</strong> Steps 5-6 repeat for each sub-task (5 total)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content"><strong>Task complete:</strong> 6 files created, 12 tests passing, 0 security issues</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content"><strong>ReasoningBank learns:</strong> Saves "JWT implementation pattern for Node.js"</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content"><strong>Workers deallocated:</strong> Queen awaits next task</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems with concrete fixes. Times are estimates for debugging.
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Queen won't start (2 min fix)
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Command hangs, no output, or immediate exit</div>
+          <div class="gotcha-detail"><strong>Check:</strong> <code>echo $ANTHROPIC_API_KEY</code> - if empty, that's your problem</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify <code>.env</code> file exists and run <code>npm run verify-api</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Workers not spawning (5 min fix)
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> <code>npm run status</code> shows 0 active workers</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Memory exhaustion or AgentDB lock</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>npm run workers:reset</code> then try single worker: <code>npm run start:worker -- --type=coder --verbose</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            SQLITE_BUSY errors (5 min fix)
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "database is locked" at 20+ workers</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> SQLite concurrent write contention</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>sqlite3 ./data/agents.db "PRAGMA journal_mode=WAL;"</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            ReasoningBank returns empty (10 min fix)
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Semantic queries return no results</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Index not built or corrupted</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>npm run reasoningbank:rebuild</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Task stuck in PROCESSING (2 min fix)
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Progress frozen, workers show BUSY with no output</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Worker crashed silently or deadlock</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>npm run task:force-complete -- --task-id=&lt;ID&gt;</code></div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs. Understanding them prevents frustration.
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Queen as Single Point of Failure
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Central coordination gives you clarity but creates a SPOF. If Queen crashes, the entire swarm halts.</div>
+          <div class="hard-detail"><strong>Why no fix:</strong> Distributed consensus adds complexity that defeats "simple infrastructure" principle.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Accept restarts. Monitor Queen health. Keep Queen logic minimal.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            SQLite Scaling Ceiling
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> SQLite is simple but bottlenecks at 50+ concurrent workers.</div>
+          <div class="hard-detail"><strong>Why no fix:</strong> Moving to PostgreSQL/Redis adds infrastructure. That's what Claude-Flow avoids.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> WAL mode helps. For scale beyond 50, consider sharding or multiple swarms.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            ReasoningBank Cold Start
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Empty index returns poor results. Needs training data to be useful.</div>
+          <div class="hard-detail"><strong>Why no fix:</strong> Semantic search requires examples. No examples = no patterns to match.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Seed with initial data. First few tasks train the bank. Quality improves over time.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost at Scale
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Many workers = many tokens = real money. A 10-worker swarm running for hours adds up.</div>
+          <div class="hard-detail"><strong>Why no fix:</strong> Multi-agent coordination inherently multiplies token usage.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Use Haiku for workers when possible. Budget carefully. Monitor token usage per task.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE CLAUDE-FLOW WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Enterprise environment with compliance requirements</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need 10-50 coordinated workers (sweet spot)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Want human-team-like structure (planner/coder/critic)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Medium budget tolerance ($$ per hour)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Production reliability matters more than experimental features</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE CLAUDE-FLOW WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quick experiment (5 min) - use CC Mirror instead</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Solo developer - enterprise features are overkill</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need rich graph queries - Gas Town + Beads is more powerful</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Very tight budget - multi-agent burns tokens fast</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Maximum flexibility - Queen hierarchy adds constraints</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Alternative Patterns</h3>
+
+        <div class="architecture-diagram">
+          <pre>
+Claude-Flow appropriate?
+     |
+     +-- Quick experiment (5 min setup)?
+     |       --> CC Mirror (hidden multi-agent in Claude Code)
+     |
+     +-- Solo developer, simple needs?
+     |       --> Ralph loop or vanilla Claude Code
+     |
+     +-- Maximum power, Stage 7+ developer?
+     |       --> Gas Town (factory model, Beads memory)
+     |
+     +-- Enterprise, production, team-like structure?
+             --> Claude-Flow (THIS pattern)
+          </pre>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Gas Town: External State</div>
+        <div class="text-text-secondary text-sm">
+          Both Claude-Flow and Gas Town persist state externally (AgentDB vs Beads). Neither relies on agent memory. This is the same principle as Ralph's prd.json. <strong>External state > internal memory.</strong>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Reuven: ~10M lines AI-assisted code</div>
+        <div class="text-text-secondary text-sm">
+          "Close to 10 million lines of AI-assisted code in a year." Production operations at billion+ token scale. Fortune 500 consulting experience validates enterprise approach.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible Claude-Flow</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Essential:</strong> Queen + 1 Worker + AgentDB<br>
+          <strong>Optional:</strong> ReasoningBank, multiple workers, MCP tools<br>
+          <strong>When minimal:</strong> Learning, debugging, cost control
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item inversion" data-section="core">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if complex vector DB for coordination?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd get:</strong> Semantic state queries ("find workers similar to...")<br>
+          <strong>Why fails:</strong> State queries need exact match ("who owns task X?"). Similarity is overkill. Adds failure modes without solving the problem.<br>
+          <strong>Hidden constraint:</strong> Coordination = exact. Semantics = fuzzy. Different tools.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude-Flow = Software Team</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Queen</strong> = Tech Lead (assigns, monitors, resolves conflicts)<br>
+          <strong>Planner</strong> = Architect (breaks down requirements)<br>
+          <strong>Coder</strong> = Senior Developer (implements)<br>
+          <strong>Critic</strong> = Code Reviewer (quality, security)<br>
+          <strong>Integrator</strong> = Release Engineer (merge, validate)<br><br>
+          <em>If you've managed teams, you already understand Claude-Flow.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">ReasoningBank accumulates institutional memory</div>
+        <div class="text-text-secondary text-sm">
+          Completed tasks train the semantic index. By task 50, the swarm "remembers" how similar problems were solved. Future tasks benefit from past learnings without explicit programming.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with CC Mirror: Task Coordination</div>
+        <div class="text-text-secondary text-sm">
+          Both coordinate tasks across workers. CC Mirror uses native Claude Code Task tool. Claude-Flow uses Queen + AgentDB. Same principle: <strong>one coordinator, many workers.</strong>
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Workers need coordination" --> entire architecture</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Workers need coordination<br>
+          --> Need a coordinator (Queen)<br>
+          --> Queen needs state visibility (AgentDB)<br>
+          --> Workers need to persist status (SQLite)<br>
+          --> Need worker lifecycle management<br>
+          --> Need health monitoring
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Simple vs Rich: SQLite vs Graph</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A (Simple):</strong> SQLite = zero dependencies, easy backup, fast exact queries<br>
+          <strong>Pull B (Rich):</strong> Graph DB = rich relationships, complex queries, better scaling<br>
+          <strong>Resolution:</strong> Accept SQLite limits. Complexity emerges from agents, not infrastructure.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if no Queen (peer-to-peer)?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd get:</strong> No single point of failure<br>
+          <strong>Why fails:</strong> Workers duplicate work. No clear task assignment. Conflicts on resources. Chaos.<br>
+          <strong>Reveals:</strong> Central coordination is the price of coherent swarm behavior.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Need semantic queries" --> ReasoningBank</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> "How did we solve X before?"<br>
+          --> Need semantic similarity<br>
+          --> Need vector embeddings<br>
+          --> Need vector store<br>
+          --> ReasoningBank architecture
+        </div>
+      </div>
+
+      <!-- FILES SECTION (3 items) -->
+      <div class="activity-item expertise" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Understanding depth</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What files do I need?" --> Clone, npm install, .env<br>
+          <strong>Intermediate:</strong> "What's AgentDB?" --> SQLite state store<br>
+          <strong>Advanced:</strong> "When to modify skills?" --> Custom specialists<br>
+          <strong>Staff:</strong> "Cross-swarm patterns?" --> Multiple Claude-Flows coordinating
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude-Flow + MCP Ecosystem</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> 100+ MCP tools integrate natively. File ops, git, APIs, databases, browser automation.<br>
+          <strong>Why:</strong> Claude-Flow is built on MCP protocol. Standard tools just work.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Anti-Composition
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude-Flow + Real-time Systems</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Fails:</strong> Queen coordination adds latency. Worker spawning is not instant.<br>
+          <strong>Why:</strong> Swarm architecture trades latency for coordination. Not suitable for sub-second response requirements.
+        </div>
+      </div>
+
+      <!-- PATH SECTION (3 items) -->
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip AgentDB updates</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Workers don't update AgentDB<br>
+          <strong>THEN:</strong> Queen has stale state<br>
+          <strong>THEN:</strong> Work gets duplicated<br>
+          <strong>THEN:</strong> Conflicts on resources<br>
+          <strong>FINALLY:</strong> Swarm chaos
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When Claude-Flow investment pays off</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Single task:</strong> Maybe (if complex enough)<br>
+          <strong>Project (weeks):</strong> Yes - infrastructure pays off<br>
+          <strong>Ongoing (months):</strong> Yes - ReasoningBank accumulates, workers get "smarter"
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Fortune 500 Deployment</div>
+        <div class="text-text-secondary text-sm">
+          Reuven's enterprise consulting experience. Production at billion+ token scale. Validates that Claude-Flow works for real enterprise requirements, not just demos.
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (3 items) -->
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How Queen failure degrades the swarm</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10%:</strong> Slow responses, task assignment delays<br>
+          <strong>50%:</strong> New tasks stuck, active workers continue<br>
+          <strong>90%:</strong> No new task starts, workers finish then idle<br>
+          <strong>100%:</strong> Complete halt - restart required
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How AgentDB corruption propagates</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10%:</strong> Stale status for some workers<br>
+          <strong>50%:</strong> Task assignment conflicts<br>
+          <strong>90%:</strong> Wrong workers assigned wrong tasks<br>
+          <strong>100%:</strong> Complete state chaos - reinitialize required
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When more workers hurts</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-20:</strong> More workers = faster completion<br>
+          <strong>20-50:</strong> Coordination overhead increases<br>
+          <strong>50+:</strong> SQLite contention, coordination > work<br><br>
+          <strong>THE INFLECTION:</strong> ~50 workers<br>
+          <em>Beyond this, add swarms, not workers.</em>
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Autonomy vs Control</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A (Autonomy):</strong> Workers decide everything - adaptive, emergent<br>
+          <strong>Pull B (Control):</strong> Queen decides everything - predictable, auditable<br>
+          <strong>Resolution:</strong> Workers decide HOW (autonomy), Queen decides WHAT (control). Balance via constraints.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Distributed Claude-Flow</div>
+        <div class="text-text-secondary text-sm">
+          Single machine currently. Distributed deployment requires manual orchestration. Reuven exploring, but no production solution yet.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Auto Worker Selection</div>
+        <div class="text-text-secondary text-sm">
+          Queen chooses workers based on skills declared in <code>./skills/</code>. Could be optimized with ML-based selection. Research area.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="hard">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Human Team Pattern (cross-domain)</div>
+        <div class="text-text-secondary text-sm">
+          Planner/Coder/Critic/Integrator mirrors Architect/Developer/Reviewer/Release Engineer. This isn't unique to Claude-Flow - it's how effective software teams work. The pattern is transferable.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (4 items) -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you need Gas Town instead</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Maximum power, Stage 7+ developer, need rich graph queries<br>
+          <strong>When worse:</strong> More complex, higher cost, experimental ("100% vibe-coded")<br>
+          <strong>Navigate:</strong> <code>synthesis/mastery-gastown-complete.md</code>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you need CC Mirror instead</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Quick setup (5 min), native Claude Code, simple needs<br>
+          <strong>When worse:</strong> Less enterprise-ready, session-only memory<br>
+          <strong>Navigate:</strong> <code>synthesis/mastery-ccmirror-complete.md</code>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Worker Specialization Drift</div>
+        <div class="text-text-secondary text-sm">
+          Dynamic spawning leads to certain workers being "preferred" for task types. The swarm develops preferences based on success history. Emergent optimization.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Swarm vs Factory: Nature vs Industry</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Factory (Gas Town):</strong> Fixed roles, explicit coordination, predictable<br>
+          <strong>Swarm (Claude-Flow):</strong> Dynamic roles, emergent coordination, adaptive<br><br>
+          <em>Prefer Factory for auditability. Prefer Swarm for adaptability.</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

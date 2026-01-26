@@ -1,0 +1,2310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Extensions as Composition Layer | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Tier Grid */
+    .tier-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 1200px) {
+      .tier-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .tier-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .tier-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .tier-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 8px;
+    }
+
+    .tier-card-desc {
+      font-size: 13px;
+      color: #71717a;
+      margin-bottom: 12px;
+    }
+
+    .tier-card-examples {
+      font-size: 12px;
+      color: #0D9373;
+    }
+
+    /* Extension Cards */
+    .extension-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .extension-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .extension-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .extension-card-author {
+      font-size: 13px;
+      color: #71717a;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Table Styles */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .data-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #18181b;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+      color: #3f3f46;
+    }
+
+    .data-table tr:hover {
+      background: #fafafa;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Primitive Grid */
+    .primitive-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .primitive-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .primitive-name {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 4px;
+    }
+
+    .primitive-capability {
+      font-size: 13px;
+      color: #0D9373;
+    }
+
+    /* Combo Box */
+    .combo-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .combo-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #166534;
+      margin-bottom: 12px;
+    }
+
+    .combo-stack {
+      margin-bottom: 16px;
+    }
+
+    .combo-why {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Extensions</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">Primitives Philosophy</a>
+        </div>
+      </div>
+
+      <!-- Ecosystem Tiers -->
+      <div class="nav-section expanded" data-section="tiers">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>Ecosystem Tiers</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#ecosystem-tiers" class="nav-item">Four Tiers</a>
+          <a href="#installation" class="nav-item">Installation Patterns</a>
+        </div>
+      </div>
+
+      <!-- Key Extensions -->
+      <div class="nav-section" data-section="extensions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="puzzle" class="w-4 h-4"></i>
+          <span>Key Extensions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#claude-hud" class="nav-item">Claude HUD</a>
+          <a href="#claude-mem" class="nav-item">Claude-Mem</a>
+          <a href="#code-simplifier" class="nav-item">Code-Simplifier</a>
+          <a href="#cc-mirror" class="nav-item">CC Mirror</a>
+        </div>
+      </div>
+
+      <!-- Composition Patterns -->
+      <div class="nav-section" data-section="composition">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Composition Patterns</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#composition" class="nav-item">Four Patterns</a>
+          <a href="#proven-combos" class="nav-item">Proven Combinations</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Common Issues</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Extensions are composable primitives. Stack them to build workflows. Power is in combination.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Think of extensions as LEGO blocks. Each provides one capability. Power comes from combination."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Single Extension = Capability | Multiple Extensions = Workflow | Coordinated Extensions = System')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Single Extension = Capability | Multiple Extensions = Workflow | Coordinated Extensions = System</code>
+          </div>
+
+          <div class="core-anchor">Extensions transform Claude Code from a chat interface into a composable agentic platform.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Extensions are not monolithic features - they are <strong>composable primitives</strong> that stack. Each extension provides exactly ONE capability. Claude HUD provides observability. Claude-Mem provides persistence. Ralph provides iteration. Code-Simplifier provides polish.
+        </p>
+
+        <div class="primitive-grid">
+          <div class="primitive-card">
+            <div class="primitive-name">Claude HUD</div>
+            <div class="primitive-capability">Observability</div>
+          </div>
+          <div class="primitive-card">
+            <div class="primitive-name">Claude-Mem</div>
+            <div class="primitive-capability">Persistence</div>
+          </div>
+          <div class="primitive-card">
+            <div class="primitive-name">Code-Simplifier</div>
+            <div class="primitive-capability">Polish</div>
+          </div>
+          <div class="primitive-card">
+            <div class="primitive-name">Ralph</div>
+            <div class="primitive-capability">Iteration</div>
+          </div>
+          <div class="primitive-card">
+            <div class="primitive-name">CC Mirror</div>
+            <div class="primitive-capability">Coordination</div>
+          </div>
+          <div class="primitive-card">
+            <div class="primitive-name">MCP Servers</div>
+            <div class="primitive-capability">External Integration</div>
+          </div>
+          <div class="primitive-card">
+            <div class="primitive-name">Hooks</div>
+            <div class="primitive-capability">Event Automation</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: ECOSYSTEM TIERS -->
+      <section id="ecosystem-tiers" data-activity="tiers">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Ecosystem Tiers
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          The extension ecosystem operates in four tiers, each with different installation patterns, maintenance guarantees, and trust levels.
+        </p>
+
+        <div class="tier-grid">
+          <div class="tier-card">
+            <div class="tier-card-title">Official Anthropic</div>
+            <div class="tier-card-desc">Maintained by Claude Code team</div>
+            <div class="tier-card-examples">code-simplifier, ralph-wiggum</div>
+          </div>
+          <div class="tier-card">
+            <div class="tier-card-title">Community Marketplace</div>
+            <div class="tier-card-desc">Installable via /plugin marketplace</div>
+            <div class="tier-card-examples">claude-mem, claude-hud</div>
+          </div>
+          <div class="tier-card">
+            <div class="tier-card-title">Standalone Tools</div>
+            <div class="tier-card-desc">External utilities</div>
+            <div class="tier-card-examples">rpai, CC Mirror, Infinite Orchestra</div>
+          </div>
+          <div class="tier-card">
+            <div class="tier-card-title">MCP Servers</div>
+            <div class="tier-card-desc">Protocol-compliant integrations</div>
+            <div class="tier-card-examples">filesystem, github, memory, fetch</div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="installation">Installation Patterns</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Official plugins</span>
+/plugin install code-simplifier
+
+<span class="comment"># Marketplace plugins (two-step process)</span>
+/plugin marketplace add jarrodwatts/claude-hud
+/plugin install claude-hud
+
+<span class="comment"># MCP servers (in settings.json)</span>
+{
+  <span class="string">"mcpServers"</span>: {
+    <span class="string">"github"</span>: {
+      <span class="string">"command"</span>: <span class="string">"npx"</span>,
+      <span class="string">"args"</span>: [<span class="string">"-y"</span>, <span class="string">"@modelcontextprotocol/server-github"</span>],
+      <span class="string">"env"</span>: { <span class="string">"GITHUB_PERSONAL_ACCESS_TOKEN"</span>: <span class="string">"..."</span> }
+    }
+  }
+}</pre>
+        </div>
+
+        <h4 class="font-semibold mb-4">Plugin Discovery Resources</h4>
+        <ul class="list-disc list-inside text-text-secondary mb-6 space-y-2">
+          <li><strong>Sub-Agents Directory:</strong> sub-agents.directory (200+ prompts)</li>
+          <li><strong>MCP Server Registry:</strong> mcp.so, smithery.ai</li>
+          <li><strong>VoltAgent Collection:</strong> github.com/VoltAgent/awesome-claude-code-subagents</li>
+        </ul>
+      </section>
+
+      <!-- Section 4: KEY EXTENSIONS -->
+      <section id="extensions" data-activity="extensions">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Key Extensions
+        </h2>
+
+        <!-- Claude HUD -->
+        <div class="extension-card" id="claude-hud">
+          <div class="extension-card-header">
+            <i data-lucide="monitor" class="w-6 h-6 text-accent"></i>
+            <div>
+              <div class="extension-card-title">Claude HUD</div>
+              <div class="extension-card-author">@jarrodwatts - 1.8K stars</div>
+            </div>
+          </div>
+
+          <p class="text-text-secondary mb-4">Real-time visibility into Claude Code sessions. Shows context percentage, model, session duration, tool activity, subagent status, and todo progress.</p>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Installation</span>
+/plugin marketplace add jarrodwatts/claude-hud
+/plugin install claude-hud
+/claude-hud:setup
+
+<span class="comment"># Sample output</span>
+[Opus 4.5] ########-- 35% | 1 MCPs | timer 1m
+check Read x2 | check WebFetch x1 | check Edit x1</pre>
+          </div>
+
+          <p class="text-text-muted text-sm"><strong>Use in Compositions:</strong> Monitor Ralph loops for context exhaustion, debug multi-agent workflows, track token budget during long sessions.</p>
+        </div>
+
+        <!-- Claude-Mem -->
+        <div class="extension-card" id="claude-mem">
+          <div class="extension-card-header">
+            <i data-lucide="brain" class="w-6 h-6 text-accent"></i>
+            <div>
+              <div class="extension-card-title">Claude-Mem</div>
+              <div class="extension-card-author">@thedotmack</div>
+            </div>
+          </div>
+
+          <p class="text-text-secondary mb-4">Persistent memory across sessions via semantic compression. Up to 95% fewer tokens per session, ~20x more tool calls before limit.</p>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Improvement</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Token usage</td>
+                <td>Up to 95% fewer per session</td>
+              </tr>
+              <tr>
+                <td>Tool calls before limit</td>
+                <td>~20x more</td>
+              </tr>
+              <tr>
+                <td>Storage</td>
+                <td>Local SQLite + Chroma vector DB</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># 3-Layer Retrieval System</span>
+
+<span class="comment">// Layer 1: Compact search</span>
+search(query=<span class="string">"authentication bug"</span>, type=<span class="string">"bugfix"</span>, limit=10)
+
+<span class="comment">// Layer 2: Chronological snippets</span>
+timeline()
+
+<span class="comment">// Layer 3: Full details (always batch!)</span>
+get_observations(ids=[123, 456])</pre>
+          </div>
+        </div>
+
+        <!-- Code-Simplifier -->
+        <div class="extension-card" id="code-simplifier">
+          <div class="extension-card-header">
+            <i data-lucide="sparkles" class="w-6 h-6 text-accent"></i>
+            <div>
+              <div class="extension-card-title">Code-Simplifier</div>
+              <div class="extension-card-author">@bcherny - Official Anthropic</div>
+            </div>
+          </div>
+
+          <p class="text-text-secondary mb-4">The actual tool the Claude Code team uses internally for code polish. Simplifies structure, reduces complexity, eliminates redundant code, improves names.</p>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Installation</span>
+/plugin marketplace update claude-plugins-official
+/plugin install code-simplifier
+
+<span class="comment"># Usage</span>
+Use the code simplifier agent to clean up this code
+Use code-simplifier on this PR</pre>
+          </div>
+
+          <p class="text-text-muted text-sm"><strong>Key Rule:</strong> Clarity + explicitness > brevity + cleverness. Avoid nested ternaries - use switch/if-else.</p>
+        </div>
+
+        <!-- CC Mirror -->
+        <div class="extension-card" id="cc-mirror">
+          <div class="extension-card-header">
+            <i data-lucide="git-merge" class="w-6 h-6 text-accent"></i>
+            <div>
+              <div class="extension-card-title">CC Mirror</div>
+              <div class="extension-card-author">@nummanali</div>
+            </div>
+          </div>
+
+          <p class="text-text-secondary mb-4">Unlocks Claude Code's disabled multi-agent orchestration feature. Agents break down tasks, track dependencies/blockers, collaborate on implementation.</p>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Setup (3 commands)</span>
+npx cc-mirror quick --provider mirror --name mclaude
+mclaude
+<span class="string">"Load the orchestration skill and initiate"</span>
+
+<span class="comment"># Sample Output</span>
+Agent #1 completed! It chose FastAPI (Python)
+
+Task List:
+[x] #1 Design API architecture
+[ ] #2 Create project structure
+[ ] #3 Implement data models
+[blocked] #4 Implement REST API endpoints (blocked by #3)</pre>
+          </div>
+        </div>
+
+        <!-- Ralph Variants Table -->
+        <h3 class="font-semibold text-lg mb-4 mt-8">Ralph Variants</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Variant</th>
+              <th>Author</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Marathon Ralph</strong></td>
+              <td>@gruckion</td>
+              <td>Full SDLC with E2E tests</td>
+            </tr>
+            <tr>
+              <td><strong>Dr. Ralph</strong></td>
+              <td>@MikeEndale</td>
+              <td>Confidence thresholds (80%+ to advance)</td>
+            </tr>
+            <tr>
+              <td><strong>Lisa</strong></td>
+              <td>@Arakiss</td>
+              <td>Enhanced logging + progress tracking</td>
+            </tr>
+            <tr>
+              <td><strong>Ralph Marketer</strong></td>
+              <td>@koylanai</td>
+              <td>Self-critiquing content loop</td>
+            </tr>
+            <tr>
+              <td><strong>Ralph Orchestrator</strong></td>
+              <td>@mikeyobrien</td>
+              <td>Multi-agent coordination</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 5: COMPOSITION PATTERNS -->
+      <section id="composition" data-activity="composition">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Composition Patterns
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Extensions combine in four fundamental patterns. Understanding these patterns lets you architect custom workflows.
+        </p>
+
+        <div class="decision-box">
+          <div class="decision-why">PATTERN 1: CHAIN (A -> B -> C)</div>
+          <div class="decision-reasoning">
+            Sequential processing. Ralph iterates on feature, then triggers code-simplifier, then commits.
+          </div>
+          <div class="code-block">
+            <pre>/ralph-loop "Build user auth. When done, use code-simplifier agent. Output &lt;promise&gt;COMPLETE&lt;/promise&gt; after polish."</pre>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">PATTERN 2: PARALLEL</div>
+          <div class="decision-reasoning">
+            Multiple extensions running simultaneously in different terminals.
+          </div>
+          <div class="code-block">
+            <pre><span class="comment"># Terminal 1</span>
+tmux new-session -d -s backend "cd ~/project/backend && ./ralph.sh 20"
+
+<span class="comment"># Terminal 2</span>
+tmux new-session -d -s frontend "cd ~/project/frontend && ./ralph.sh 20"
+
+<span class="comment"># Terminal 3</span>
+rpai  <span class="comment"># Monitor all</span></pre>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">PATTERN 3: CONDITIONAL</div>
+          <div class="decision-reasoning">
+            Extensions triggered based on conditions (via HUD observation or hooks).
+          </div>
+          <div class="code-block">
+            <pre>IF context > 80% (via HUD observation)
+THEN trigger new Ralph iteration (fresh context)
+ELSE continue current session</pre>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">PATTERN 4: STACKED PERSISTENCE</div>
+          <div class="decision-reasoning">
+            Multiple persistence layers with different granularities.
+          </div>
+          <div class="code-block">
+            <pre>Claude-Mem: Long-term semantic memory
+     |
+Ralph prd.json: Task state tracking
+     |
+progress.txt: Append-only session learnings
+     |
+Git: Code change history</pre>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="proven-combos">Proven Combinations</h3>
+
+        <div class="combo-box">
+          <div class="combo-title">AGI Stack (Opus 4.5 + Ralph + Playwright)</div>
+          <div class="combo-stack">
+            <strong>Source:</strong> @weswinder
+          </div>
+          <div class="combo-why">
+            <p><strong>Why It Works:</strong> Ralph feeds same prompt repeatedly until success. Playwright enables real-world UI verification. Opus 4.5 reduces iterations needed.</p>
+            <p class="mt-2"><strong>Critical Optimization:</strong> "Put costly tools like browser control in subagents to protect your main context window tokens" - @TendiesOfWisdom</p>
+          </div>
+        </div>
+
+        <div class="combo-box">
+          <div class="combo-title">Long-Session Development</div>
+          <div class="combo-stack">
+            Claude-Mem + Claude HUD + Code-Simplifier + Auto-formatting hooks
+          </div>
+          <div class="combo-why">
+            <p>Claude-Mem loads relevant context from past sessions. HUD shows real-time context usage. At 85%, HUD token breakdown appears. Every N edits, trigger code-simplifier. PostToolUse hooks auto-format files.</p>
+          </div>
+        </div>
+
+        <div class="combo-box">
+          <div class="combo-title">Overnight Autonomous Development</div>
+          <div class="combo-stack">
+            Ralph loop + Mobile notifications + CC Mirror + Git worktrees
+          </div>
+          <div class="combo-why">
+            <div class="code-block">
+              <pre><span class="comment"># Create worktrees for parallel work</span>
+git worktree add ../wt-auth auth-branch
+git worktree add ../wt-api api-branch
+
+<span class="comment"># Run Ralph in each (separate terminals)</span>
+(cd ../wt-auth && ./ralph.sh 25) &
+(cd ../wt-api && ./ralph.sh 25) &</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit when installing and using extensions:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Plugin installation fails
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> <code>/plugin install &lt;name&gt;</code> returns error or plugin doesn't appear in <code>/plugin list</code></div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Plugin not in local cache, or marketplace add step was skipped</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> For marketplace plugins, always add first: <code>/plugin marketplace add author/plugin-name</code> THEN <code>/plugin install plugin-name</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Claude-Mem not capturing sessions
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> <code>search()</code> returns no results from past sessions</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Worker service not running, or lifecycle hooks not installed correctly</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check <code>lsof -i :37777</code> for worker process. Restart Claude Code after installation. Verify hooks in settings.json.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            CC Mirror orchestration skill not loading
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> After <code>npx cc-mirror quick</code>, orchestration skill doesn't activate</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Alias not set up correctly, or skill load command not sent</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify alias with <code>which mclaude</code>. Explicitly load: "Load the orchestration skill and initiate"</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            MCP server connection errors
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> MCP tools show in <code>/mcp</code> but fail with "connection refused" or "timeout"</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Server process crashed, or configuration has wrong path/command</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Test server manually: <code>npx -y @modelcontextprotocol/server-github</code>. Check environment variables are set.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Conflicting hooks from multiple extensions
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Hooks fire multiple times, or one extension's hooks block another's</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Multiple extensions registered hooks for same events</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> List hooks: <code>cat ~/.claude/settings.json | jq '.hooks'</code>. Order intentionally - hooks execute in array order.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental ecosystem gaps and tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Extension Dependency Resolution
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Extensions have no dependency management. If plugin A requires plugin B, you must know to install B first.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Cryptic errors when extension expects another extension. Order-dependent installation failures.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Read extension docs carefully. Install in recommended order. Restart Claude Code between installations.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Hook Conflict Resolution
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Multiple extensions can register for the same hook events. No built-in priority or conflict resolution.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> One extension's hook blocks another. Unexpected behavior when combining extensions.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Manual hook ordering in settings.json. Consolidate into single wrapper scripts. Test combinations in isolation.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Missing Ecosystem Infrastructure
+          </div>
+          <div class="hard-detail"><strong>The gap:</strong> No visual diff viewer, no cost tracker, no session recording, no team collaboration, no rollback manager.</div>
+          <div class="hard-detail"><strong>Current workarounds:</strong> Manual estimation for cost. Git reset for rollback. External DB for team sharing.</div>
+          <div class="hard-detail"><strong>Status:</strong> Active community development. Windows support improving. Plugin marketplace UI requested.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              ADD EXTENSIONS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You need capabilities Claude Code lacks natively (observability, memory)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Your workflow has repeatable patterns (automation candidates)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're building for overnight/autonomous execution</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>External integrations are required (GitHub, databases, browsers)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Token efficiency matters (Claude-Mem provides 95% reduction)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              STAY VANILLA WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple one-off tasks (complexity overhead not worth it)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Exploratory work with unclear end state</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Security-sensitive environments (verify extension sources)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Learning Claude Code (understand base before extending)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Debugging extension conflicts (simplify first)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Quick Reference: Installation Commands</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># HUD - Visibility</span>
+/plugin marketplace add jarrodwatts/claude-hud && /plugin install claude-hud
+
+<span class="comment"># Memory - Persistence</span>
+/plugin marketplace add thedotmack/claude-mem && /plugin install claude-mem
+
+<span class="comment"># Code-Simplifier - Polish</span>
+/plugin install code-simplifier
+
+<span class="comment"># CC Mirror - Multi-Agent</span>
+npx cc-mirror quick --provider mirror --name mclaude
+
+<span class="comment"># rpai - Monitoring</span>
+cargo install rpai</pre>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible extension</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Minimal viable extension:</strong> One capability.<br>
+          <strong>Minimal viable combination:</strong> Two extensions that amplify each other.<br>
+          <strong>Everything else:</strong> Refinement for specific workflows.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if extensions were monolithic?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> One mega-plugin that does everything.<br>
+          <strong>Why this fails:</strong> Different workflows need different combinations. One-size-fits-all bloats context.<br>
+          <strong>Hidden constraint revealed:</strong> Composability beats completeness.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="essence">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Extensions = Unix Philosophy</div>
+        <div class="text-text-secondary text-sm">
+          Do one thing well → Each extension provides one capability<br>
+          Compose via pipes → Stack extensions for workflows<br>
+          Text as interface → Files and hooks as glue<br><br>
+          <em>If you understand Unix, you understand extension composition.</em>
+        </div>
+      </div>
+
+      <!-- CORE SECTION (3 items) -->
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint -> FIVE decisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Claude Code is a single-agent chat interface<br>
+          -> Need observability? Add Claude HUD<br>
+          -> Need memory? Add Claude-Mem<br>
+          -> Need iteration? Add Ralph<br>
+          -> Need coordination? Add CC Mirror<br>
+          -> Need external tools? Add MCP servers
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-001: Single Responsibility</div>
+        <div class="text-text-secondary text-sm">
+          Claude HUD, Claude-Mem, Code-Simplifier, Ralph all share: one extension = one capability.<br><br>
+          <strong>WHY THIS MATTERS:</strong> Combination flexibility requires atomic primitives. Monoliths prevent custom stacks.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="core">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Which extensions should I install?"<br>
+          <strong>Intermediate:</strong> "How do I combine them?"<br>
+          <strong>Advanced:</strong> "Which pattern (chain/parallel/conditional)?"<br>
+          <strong>Staff:</strong> "When is vanilla better?"<br>
+          <strong>Expert:</strong> "How do I build custom extensions?"
+        </div>
+      </div>
+
+      <!-- TIERS SECTION (4 items) -->
+      <div class="activity-item tradeoff" data-section="tiers">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Official vs Community Extensions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Official:</strong> Guaranteed support, slower innovation<br>
+          <strong>Community:</strong> Faster innovation, variable quality<br>
+          <strong>Standalone:</strong> Maximum flexibility, maintenance burden<br><br>
+          <em>Heuristic: Start official, add community when official lacks.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="tiers">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip marketplace add step</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Run <code>/plugin install claude-hud</code> directly<br>
+          <strong>THEN:</strong> Plugin not found (not in local cache)<br>
+          <strong>THEN:</strong> Install fails silently<br>
+          <strong>THEN:</strong> You think the plugin doesn't exist<br><br>
+          <em>THE FIX:</em> Always <code>/plugin marketplace add</code> THEN <code>/plugin install</code>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="tiers">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Extension maturity over time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Week 1:</strong> "Community plugins seem risky"<br>
+          <strong>Month 1:</strong> "This community plugin is essential"<br>
+          <strong>Month 3:</strong> "The ecosystem is what makes Claude Code powerful"<br>
+          <strong>Month 6:</strong> "I'm building my own extensions"
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="tiers">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Sub-Agents Directory: 200+ prompts</div>
+        <div class="text-text-secondary text-sm">
+          Community-curated directory of agent prompts. Started as informal sharing, now essential resource. Proof that community curation exceeds individual discovery.
+        </div>
+      </div>
+
+      <!-- EXTENSIONS SECTION (6 items) -->
+      <div class="activity-item effect" data-section="extensions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude-Mem: 95% token reduction compounds</div>
+        <div class="text-text-secondary text-sm">
+          <strong>At iteration 1:</strong> 5% tokens saved seems minor<br>
+          <strong>At iteration 50:</strong> 95% cumulative savings = 20x more tool calls<br>
+          <strong>THRESHOLD:</strong> Benefit visible after ~10 sessions with shared context
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="extensions">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How Claude HUD awareness degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Green (0-50%):</strong> Plenty of context, work freely<br>
+          <strong>Yellow (50-80%):</strong> Start being selective about what you add<br>
+          <strong>Red (80-95%):</strong> Complete current task, don't start new ones<br>
+          <strong>CLIFF (95%+):</strong> Context exhausted, restart required<br><br>
+          <em>The HUD makes invisible degradation visible.</em>
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="extensions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude-Mem + Ralph</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Claude-Mem provides cross-session memory. Ralph provides iteration.<br>
+          <strong>Danger:</strong> Claude-Mem reads can consume context. Batch get_observations() calls.<br>
+          <strong>Recommendation:</strong> Use search() first (compact), get_observations() only for details.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="extensions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Code-Simplifier + Ralph Chain</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Ralph builds feature, code-simplifier polishes before commit.<br>
+          <strong>Why it works:</strong> Separation of concerns. Ralph focuses on correctness, simplifier focuses on clarity.<br>
+          <strong>Pattern:</strong> Feature Agent -> Test Agent -> Code-Simplifier -> Commit
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="extensions">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">CC Mirror = Kubernetes for Agents</div>
+        <div class="text-text-secondary text-sm">
+          Orchestrator = Control plane<br>
+          Agents = Pods<br>
+          Task dependencies = Service mesh<br>
+          Blocked tasks = Pending pods<br><br>
+          <em>If you understand container orchestration, you understand CC Mirror.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="extensions">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Multi-model routing</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> How to route tasks to optimal model (Opus for reasoning, Sonnet for speed)?<br>
+          <strong>Why it's hard:</strong> Need to predict task requirements before execution.<br>
+          <strong>Current practice:</strong> Manual model selection. CC Mirror has partial support.
+        </div>
+      </div>
+
+      <!-- COMPOSITION SECTION (5 items) -->
+      <div class="activity-item warstory" data-section="composition">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@weswinder: AGI Stack overnight</div>
+        <div class="text-text-secondary text-sm">
+          Opus 4.5 + Ralph + Playwright. "The combo reduced my iterations by 3x compared to Sonnet alone. Visual verification caught bugs unit tests missed."
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="composition">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">@TendiesOfWisdom: Context protection</div>
+        <div class="text-text-secondary text-sm">
+          "Put costly tools like browser control in subagents to protect your main context window tokens." Critical insight for Playwright + Ralph combos.
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="composition">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When extension count flips benefit to burden</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-3 extensions:</strong> Pure benefit (each adds capability)<br>
+          <strong>4-6 extensions:</strong> Diminishing returns (complexity rising)<br>
+          <strong>7+ extensions:</strong> Maintenance burden exceeds value<br><br>
+          <strong>THE INFLECTION:</strong> ~5 extensions<br>
+          <em>Detection:</em> Spending more time debugging extensions than using them.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="composition">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-003: External state > internal memory</div>
+        <div class="text-text-secondary text-sm">
+          Claude-Mem, Ralph prd.json, progress.txt, Git all share: persistence via files, not LLM memory.<br><br>
+          <strong>WHY THIS MATTERS:</strong> Fresh context requires external state. All composition patterns rely on this invariant.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="composition">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Chain vs Parallel Composition</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Chain:</strong> Simple, debuggable, slower<br>
+          <strong>Parallel:</strong> Faster, complex coordination, race conditions<br><br>
+          <em>Heuristic:</em> Chain for dependent tasks. Parallel only for truly independent work.
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item violation" data-section="gotchas">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you don't restart after Claude-Mem install</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Install Claude-Mem without restarting Claude Code<br>
+          <strong>THEN:</strong> Lifecycle hooks don't activate<br>
+          <strong>THEN:</strong> Worker service not capturing sessions<br>
+          <strong>THEN:</strong> search() returns nothing<br>
+          <strong>FINALLY:</strong> You think Claude-Mem is broken<br><br>
+          <em>THE FIX:</em> Always restart Claude Code after extension installation.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if MCP servers auto-started?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd expect:</strong> Configure once, always works.<br>
+          <strong>Why this fails:</strong> Servers crash, env vars change, ports conflict.<br>
+          <strong>Hidden constraint:</strong> Manual verification is the reliable path. The "connection refused" error is telling you the truth.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Hook debugging depth</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Hooks aren't firing" -> Check settings.json syntax<br>
+          <strong>Intermediate:</strong> "Hooks fire twice" -> Multiple extensions registered<br>
+          <strong>Advanced:</strong> "Hook order matters" -> Array order = execution order<br>
+          <strong>Staff:</strong> "Hooks block each other" -> Consolidate into wrapper script<br>
+          <strong>Expert:</strong> "Hook architecture limits" -> Build custom event system
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="gotchas">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">If extension conflicts are unsolvable</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Can't resolve hook conflicts?</strong> -> Remove one extension, use its features manually<br>
+          <strong>MCP server keeps crashing?</strong> -> Use REST API directly via WebFetch<br>
+          <strong>Too many extensions?</strong> -> Return to vanilla, add back one at a time
+        </div>
+      </div>
+
+      <!-- HARD SECTION (3 items) -->
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Extension dependency graph</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> How should extensions declare and resolve dependencies?<br>
+          <strong>Why it's hard:</strong> Extensions are independent projects. No central registry with version constraints.<br>
+          <strong>Current practice:</strong> README instructions. Manual installation order.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="hard">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How ecosystem gaps affect productivity</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% (no gaps):</strong> Theoretical maximum productivity<br>
+          <strong>90% (missing cost tracker):</strong> Occasional budget surprises<br>
+          <strong>80% (no rollback):</strong> Git reset as workaround<br>
+          <strong>70% (no team collab):</strong> Manual knowledge sharing<br>
+          <strong>60% (Windows issues):</strong> Platform-specific workarounds<br><br>
+          <em>Most teams operate at 70-80% with workarounds.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="hard">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ecosystem maturity perception</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "This ecosystem is immature"<br>
+          <strong>Week 2:</strong> "Actually, the gaps have workarounds"<br>
+          <strong>Month 1:</strong> "The community is filling gaps faster than I expected"<br>
+          <strong>Month 6:</strong> "I'm contributing to the ecosystem now"
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (4 items) -->
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you extended everything?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd install:</strong> Every recommended extension immediately.<br>
+          <strong>Why this fails:</strong> Configuration overhead. Hook conflicts. Context bloat.<br>
+          <strong>Hidden constraint:</strong> Vanilla competence precedes extension mastery. Add one at a time.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Extension adoption = IDE plugin adoption</div>
+        <div class="text-text-secondary text-sm">
+          New IDE user -> Use built-ins first<br>
+          Intermediate -> Add productivity plugins<br>
+          Advanced -> Curate minimal essential set<br>
+          Expert -> Build custom extensions<br><br>
+          <em>Same progression applies to Claude Code extensions.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If extensions aren't for you</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need simpler workflow?</strong> -> Vanilla Claude Code + good prompts<br>
+          <strong>Need observability without plugins?</strong> -> Manual token counting + git log<br>
+          <strong>Need memory without Claude-Mem?</strong> -> CLAUDE.md + manual updates<br>
+          <strong>Need iteration without Ralph?</strong> -> Manual bash loops
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="when">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Extension mastery compounds</div>
+        <div class="text-text-secondary text-sm">
+          <strong>At 1 extension:</strong> Incremental benefit<br>
+          <strong>At 3 extensions:</strong> Workflow automation emerging<br>
+          <strong>At 5 extensions:</strong> Custom development environment<br>
+          <strong>At custom extension:</strong> You're now part of the ecosystem<br><br>
+          <em>Each mastered extension unlocks new combination possibilities.</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Pattern Composition Rules
 
+> **You Are Here:** This document shows how atomic primitives (loops, state files, hooks) combine into complete orchestration patterns like Ralph, CC Mirror, and Gas Town. Read this after understanding individual primitives (see `architecture-primitives.md`) and before attempting to build custom patterns.
+
 > **Purpose:** Document how primitives COMPOSE into complex orchestration patterns for Claude Code.
 > **Compiled from:** 50+ extraction files documenting real-world orchestration patterns.
 
@@ -103,6 +105,15 @@ Ralph = while(!complete) {
 
 **Why it works:** External memory (files, git) compensates for context reset. Each iteration benefits from accumulated learnings without context rot.
 
+### Checkpoint: Ralph Composition
+**You should now understand:**
+- [ ] The five core components: loop, JSON tasks, file state, git memory, completion signal
+- [ ] Why fresh context per iteration prevents rot
+- [ ] How progress.txt accumulates learnings
+- [ ] The role of git commits as durability checkpoints
+
+**If unclear:** See `mastery-ralph-complete.md` for step-by-step implementation.
+
 ---
 
 ### CC Mirror = Orchestrator + Workers + Task API
@@ -130,6 +141,15 @@ CC_Mirror = Orchestrator(TaskAPI) {
 ```
 
 **Why it works:** Clear separation between coordination (orchestrator) and execution (workers). Workers can't spawn, preventing recursion. Task dependencies auto-schedule work.
+
+### Checkpoint: CC Mirror Composition
+**You should now understand:**
+- [ ] The orchestrator-worker separation principle
+- [ ] Why workers cannot spawn subagents (prevents recursion)
+- [ ] How TaskCreate/TaskUpdate provide coordination
+- [ ] The role of blockedBy in dependency management
+
+**If unclear:** Re-read the "Orchestrator uses" vs "Workers use" tool lists above.
 
 ---
 
@@ -910,6 +930,65 @@ START: What are you building?
 | **Orchestra** | `Docker { while(true) { if(idle) improve() else work() } }` |
 | **Ralph+Play** | `Ralph { Subagent(Playwright.verify()) }` |
 | **Parallel Ralph** | `Worktrees[] { Ralph(worktree) } + Merge` |
+
+---
+
+---
+
+## Troubleshooting
+
+### Common Issue: Ralph Loop Doesn't Learn Across Iterations
+**Symptom:** Each iteration makes the same mistakes; no improvement over time
+**Cause:** Agent not reading progress.txt or patterns not being accumulated
+**Fix:**
+1. Ensure prompt explicitly instructs: "Read progress.txt Codebase Patterns section FIRST"
+2. Verify agent appends learnings after each iteration
+3. Check that progress.txt is not being overwritten (must be append-only)
+
+### Common Issue: CC Mirror Workers Go Rogue
+**Symptom:** Workers attempt orchestration, spawn subagents, or ignore task boundaries
+**Cause:** Missing or incomplete worker preamble
+**Fix:** Always include this preamble at the start of every worker task:
+```markdown
+CONTEXT: You are a WORKER agent, not an orchestrator.
+RULES:
+- Complete ONLY the task described below
+- Use tools directly (Read, Write, Edit, Bash)
+- Do NOT spawn sub-agents
+- Do NOT call TaskCreate or TaskUpdate
+TASK: [specific task]
+```
+
+### Common Issue: Parallel Compositions Create File Conflicts
+**Symptom:** Multiple agents overwrite each other's work; corrupted state
+**Cause:** Using parallel without proper isolation
+**Fix:**
+1. Use git worktrees for true filesystem isolation
+2. Assign explicit directory ownership per agent
+3. Use file-based handoffs instead of shared files:
+```json
+// handoff-agent1-to-agent2.json
+{"from": "agent1", "to": "agent2", "context": {...}}
+```
+
+### Common Issue: Composition Termination Fails
+**Symptom:** Pattern runs indefinitely even when tasks complete
+**Cause:** Completion signal mismatch or missing termination condition
+**Fix:**
+1. For Ralph: Verify `<promise>COMPLETE</promise>` appears in output
+2. For CC Mirror: Check all TaskUpdate statuses are "completed"
+3. Add a timeout/max-iterations as safety:
+```bash
+timeout 3600 ./your-composition.sh  # 1 hour max
+```
+
+### Common Issue: Too Much Context Used by Composition
+**Symptom:** Quality degrades during composition execution
+**Cause:** Orchestrator context filling with execution details
+**Fix:**
+1. Ensure orchestrator delegates ALL implementation to workers
+2. Workers should return summaries, not full outputs
+3. Use subagent isolation for expensive operations (like Playwright)
 
 ---
 

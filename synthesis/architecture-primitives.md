@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Agent Pattern Primitives
 
+> **You Are Here:** This is the atomic building block catalog - the LEGO bricks that compose all orchestration patterns. Read this first to understand the individual pieces, then see `architecture-composition-rules.md` for how they combine into complete patterns like Ralph and CC Mirror.
+
 A comprehensive catalog of the atomic building blocks that compose complex AI agent orchestration patterns. These primitives are the smallest reusable units extracted from Ralph, Gas Town, CC Mirror, Panopticon, and other production agent architectures.
 
 ---
@@ -140,6 +142,22 @@ done
 - Goal-directed rather than task-directed
 
 **Source:** 0xSero's Orchestra
+
+### Checkpoint: Loop Primitives
+**You should now understand:**
+- [ ] The difference between infinite (`while :;`) and bounded loops
+- [ ] How jq can drive conditional loop termination
+- [ ] When to use self-improvement loops (experimental/advanced)
+- [ ] The importance of fresh context per iteration
+
+**Terminal verification:**
+```bash
+# Test basic loop syntax:
+for i in 1 2 3; do echo "Iteration $i"; done
+# Expected output: Iteration 1, Iteration 2, Iteration 3
+```
+
+**If unclear:** Start with the "Basic While Loop" and "Iteration-Limited Loop" before exploring advanced patterns.
 
 ---
 
@@ -291,6 +309,15 @@ jq '.userStories[] | select(.id == "US-001") | .passes = true' prd.json > tmp &&
 - Saves git state reference
 - Tracks failed attempts
 - Enables resume from last known good state
+
+### Checkpoint: State Primitives
+**You should now understand:**
+- [ ] progress.txt format: append-only log with Codebase Patterns section
+- [ ] prd.json format: userStories array with passes, acceptanceCriteria, priority
+- [ ] Why checkpoint state enables crash recovery
+- [ ] The difference between session state (progress.txt) and task state (prd.json)
+
+**If unclear:** Create a sample prd.json with 2-3 user stories and verify it parses correctly with `jq . prd.json`.
 
 ---
 
@@ -1053,6 +1080,81 @@ alias c='claude'
 
 **For cross-iteration learning:**
 - progress.txt (append-only) + AGENTS.md (permanent) + Archive structure
+
+---
+
+---
+
+## Troubleshooting
+
+### Common Issue: progress.txt Gets Overwritten Instead of Appended
+**Symptom:** Previous iteration learnings disappear; file contains only latest entry
+**Cause:** Using `>` (overwrite) instead of `>>` (append) in shell commands
+**Fix:**
+```bash
+# WRONG - overwrites:
+echo "New learning" > progress.txt
+
+# CORRECT - appends:
+echo "New learning" >> progress.txt
+```
+
+### Common Issue: prd.json Becomes Invalid JSON
+**Symptom:** jq fails to parse; agent can't read task state
+**Cause:** Manual editing introduced syntax errors, or agent output malformed JSON
+**Fix:**
+1. Validate JSON syntax: `jq . prd.json` (will show error location)
+2. Keep a backup before each iteration: `cp prd.json prd.json.bak`
+3. Use jq for updates instead of manual editing:
+```bash
+jq '.userStories[0].passes = true' prd.json > tmp.json && mv tmp.json prd.json
+```
+
+### Common Issue: Hook Doesn't Fire
+**Symptom:** Expected automation doesn't run; no notification sent
+**Cause:** Hook configuration in wrong location or incorrect event name
+**Fix:**
+1. Verify hook is in correct settings file (`~/.claude/settings.json` for global)
+2. Check event name matches exactly: `PreToolUse`, `PostToolUse`, `SessionStart`, `SessionEnd`
+3. Test hook script independently: `bash ~/.claude/hooks/your-hook.sh`
+4. Check script has execute permissions: `chmod +x ~/.claude/hooks/your-hook.sh`
+
+### Common Issue: Completion Signal Not Detected
+**Symptom:** Loop runs indefinitely even though agent outputs completion signal
+**Cause:** Signal format mismatch or grep not searching correct file
+**Fix:**
+1. Verify exact signal format matches between prompt and grep:
+```bash
+# In prompt: "Output: <promise>COMPLETE</promise>"
+# In loop:
+if grep -q "<promise>COMPLETE</promise>" output.txt; then
+  break
+fi
+```
+2. Ensure output is captured to the file grep is searching
+3. Test manually: `echo "<promise>COMPLETE</promise>" | grep -q "COMPLETE" && echo "Found"`
+
+### Common Issue: Worker Preamble Ignored
+**Symptom:** Worker behaves like orchestrator; spawns subagents; uses wrong tools
+**Cause:** Preamble placed after task description or too weak
+**Fix:**
+1. Place preamble at the VERY START of worker prompt
+2. Use explicit prohibition language:
+```markdown
+CONTEXT: You are a WORKER agent, not an orchestrator.
+ABSOLUTE RULES - NO EXCEPTIONS:
+- You CANNOT spawn sub-agents
+- You CANNOT call TaskCreate or TaskUpdate
+- You MUST complete only the single task below
+```
+
+### Common Issue: Model Selection Causing Cost Overruns
+**Symptom:** API bills 5-10x higher than expected
+**Cause:** Using Opus for tasks that Haiku/Sonnet could handle
+**Fix:** Apply model selection matrix:
+- **Haiku:** File lookups, simple grep, transforms (spawn 5-10 parallel)
+- **Sonnet:** Implementation, test writing, following patterns (main workhorse)
+- **Opus:** Architecture decisions, ambiguous tasks (reserve for complex)
 
 ---
 

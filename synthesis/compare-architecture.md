@@ -13,6 +13,8 @@ This content has been superseded by D-FINAL synthesis.
 
 **A Decision Framework for Choosing the Right Multi-Agent Pattern**
 
+> **You Are Here:** This document helps you choose between four agent architectures (Single, Subagents, Swarm, Hierarchical) based on your project's scale, complexity, and budget. Use this when you know you need AI agents but are unsure which pattern fits your situation.
+
 ---
 
 ## The Same Goal
@@ -392,6 +394,17 @@ START: "I need agents to complete complex work"
 
 ---
 
+### Checkpoint: Architecture Selection
+**You should now understand:**
+- [ ] The four main architectures and their characteristics
+- [ ] When to use each architecture based on project needs
+- [ ] The Iron Law of orchestration (orchestrate vs execute)
+- [ ] Tool ownership rules for orchestrators vs workers
+
+**If unclear:** Re-read the "Best For" sections under each architecture or use the Decision Tree below.
+
+---
+
 ## Migration Path
 
 ```
@@ -417,6 +430,35 @@ Most users should start at Single, graduate to Subagents, and only move to Swarm
 | **Subagents** | Research + implement | `Task(subagent_type="researcher")` |
 | **Swarm** | Feature development | CC Mirror orchestrator pattern |
 | **Hierarchical** | Production ops | Gas Town with full role cast |
+
+---
+
+## Troubleshooting
+
+### Common Issue: Context Window Exhaustion (Single Agent)
+**Symptom:** Claude starts forgetting instructions, repeating itself, or producing lower-quality output mid-session.
+**Cause:** Single agent has accumulated too much context (typically > 150K tokens).
+**Fix:** Either use `/compact` to summarize context, start a fresh session, or migrate to subagents to isolate work.
+
+### Common Issue: Subagent Spawn Overhead
+**Symptom:** Tasks take much longer than expected; lots of "starting subagent" messages.
+**Cause:** Too many subagents being spawned for small tasks (each spawn has initialization cost).
+**Fix:** Batch small tasks together or complete them in the main agent. Reserve subagents for substantial work (> 5-10 minute tasks).
+
+### Common Issue: Worker Conflicts in Swarm
+**Symptom:** Multiple workers editing the same files; merge conflicts; inconsistent code state.
+**Cause:** Parallel workers assigned overlapping file domains without coordination.
+**Fix:** Ensure orchestrator assigns non-overlapping file boundaries to each worker. Use git worktrees for full isolation if needed.
+
+### Common Issue: Gas Town Runaway Costs
+**Symptom:** API costs spike dramatically; many agents running but little progress.
+**Cause:** Workers spawning sub-workers (violates Iron Law), or inefficient task decomposition.
+**Fix:** Audit worker preambles to ensure "DO NOT spawn sub-agents" rule. Check Refinery task sizing. Consider starting with minimal Gas Town before scaling.
+
+### Common Issue: Architecture Over-Engineering
+**Symptom:** Spending more time configuring multi-agent systems than doing actual work.
+**Cause:** Chose hierarchical architecture for a task that only needed single agent or subagents.
+**Fix:** Start simple. Only upgrade architecture when the simpler approach demonstrably fails. Most tasks can be done with single agent or basic subagents.
 
 ---
 

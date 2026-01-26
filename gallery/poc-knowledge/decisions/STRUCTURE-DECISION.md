@@ -9,10 +9,11 @@
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│  SIDEBAR          │  MAIN CONTENT              │  ACTIVITY ZONE          │
+│  LEFT NAV         │  MAIN CONTENT              │  ACTIVITY ZONE          │
 │  (Navigation)     │  (Documentation)           │  (Living Context)       │
-│  ~200px           │  ~600-700px                │  ~280-320px             │
-│  sticky           │  scrolls                   │  sticky or anchored     │
+│  240px fixed      │  flexible (margins)        │  480px fixed            │
+│  sticky           │  scrolls                   │  scroll-synced          │
+│                   │                            │  resizable 280-900px    │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -36,41 +37,45 @@
 
 ---
 
-## Behavior Options
+## Behavior Implementation
 
-### Activity Zone Behavior (TBD)
+### Activity Zone Behavior (DECIDED: Option B - Scroll-Synced)
 
-**Option A: Sticky**
-- Same content visible regardless of scroll
-- "What's hot" summary approach
+**Implemented:** Activity Zone content highlights based on which main content section is visible.
 
-**Option B: Anchored/Synced**
-- Activity changes based on which main content section is visible
-- Contextually relevant
-
-**Option C: Hybrid**
-- Top portion sticky (recent/important)
-- Bottom portion syncs with content
+- GSAP ScrollTrigger detects visible section (40% viewport threshold)
+- Activity items have `data-section` attributes matching main content `data-activity`
+- Items fade in/out (opacity: 1 → 0.5) based on relevance
+- Brushing interaction: hover activity item → highlight related main section
+- User can resize Activity Zone (280-900px range, persists to localStorage)
 
 ---
 
-## Content Organization (To Be Fleshed Out)
+## Content Organization (IMPLEMENTED)
 
-### Main Content Structure
-- Pattern title + maturity badge
-- Essence (the one-liner, copy button)
-- The Shape (architecture, flow)
-- When to Use / When Not
-- Variants (tabbed)
-- Common Failures
-- Connections
+### Main Panel: 8 Sections (Research-Backed)
 
-### Activity Zone Structure
-- Recent quotes (attributed, timestamped)
-- Case studies (real numbers)
-- Connections discovered
-- Open questions
-- (Possibly section-anchored)
+1. **Essence** - 15-word summary (Rust docs rule)
+2. **Core Abstraction + Implementation** - Philosophy and code woven together
+3. **Design Decisions** - Why [X]? + What this means for you
+4. **File Structure** - Complete, copy-paste ready code
+5. **Path of a Task** - PostgreSQL-style flow through system
+6. **Gotchas** - Concrete problems with numbers and fixes
+7. **What's Hard** - Honest about fundamental tensions
+8. **When to Use / When Not** - Decision criteria with alternatives
+
+### Activity Zone: 6 Content Types
+
+| Type | Color | Purpose |
+|------|-------|---------|
+| **Invariant Connection** | Blue | Cross-pattern DNA |
+| **Second-Order Effect** | Amber | System properties at scale |
+| **Composition Case** | Purple | What combines, what doesn't |
+| **Research Frontier** | Red | What's unsolved |
+| **War Story** | Green | Real production experiences |
+| **Alternative Path** | Gray | Navigation to other options |
+
+See `specs/CONTENT-STRUCTURE.md` for full specifications.
 
 ---
 
@@ -84,9 +89,12 @@
 
 ---
 
-## Next Steps
+## Implementation Status
 
-1. Flesh out content organization within each column
-2. Decide Activity Zone behavior (sticky vs anchored)
-3. Define visual treatment for each content type
-4. Build prototype with this structure
+All decisions have been implemented in `ralph-mintlify-poc.html`:
+- ✅ Three-panel layout with correct sizing
+- ✅ Scroll-sync behavior via GSAP ScrollTrigger
+- ✅ Brushing interaction (hover activity → highlight main)
+- ✅ 8-section main content structure
+- ✅ 6 activity zone content types with color coding
+- ✅ Resizable Activity Zone with localStorage persistence

@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Memory Approaches Compared
 
+> **You Are Here:** This document compares four memory strategies (progress.txt, Git History, AGENTS.md, Claude-Mem) for persisting knowledge across Claude Code sessions. Use this when your agent keeps "forgetting" context between sessions or when you need to decide how to store learnings.
+
 ## The Same Goal
 
 Every approach aims to solve the same fundamental problem: **persist knowledge across sessions**. Claude starts fresh each conversation. Without memory, every session is groundhog day.
@@ -153,6 +155,16 @@ Every approach aims to solve the same fundamental problem: **persist knowledge a
 
 ---
 
+### Checkpoint: Memory Approaches
+**You should now understand:**
+- [ ] The four memory approaches and their tradeoffs
+- [ ] Which approach fits which persistence need
+- [ ] How to query/search each memory type
+
+**If unclear:** Re-read the Comparison Matrix or "Best for" sections above.
+
+---
+
 ## Layered Memory Strategy
 
 **The insight: Use ALL of them, each for its strength.**
@@ -250,3 +262,69 @@ Memory is not one thing. It's layers:
 | Claude-Mem | Long-term store | Everything, searchable |
 
 Each layer has different retention, access patterns, and maintenance needs. Use the right layer for the right knowledge.
+
+---
+
+## Troubleshooting
+
+### Common Issue: progress.txt Becomes Unmanageable
+**Symptom:** File is thousands of lines; agent references outdated information; search returns too many results.
+**Cause:** Never pruned; everything accumulated without curation.
+**Fix:** Archive old content to a dated backup, then prune to recent sessions only. Graduate valuable patterns to AGENTS.md.
+
+```bash
+# Check progress.txt size
+wc -l scripts/ralph/progress.txt
+
+# Archive and reset
+mv scripts/ralph/progress.txt scripts/ralph/progress-archive-$(date +%Y%m%d).txt
+echo "# Session Progress" > scripts/ralph/progress.txt
+```
+
+### Common Issue: Agent Keeps Rediscovering Same Patterns
+**Symptom:** Same "Learned:" entries appearing in progress.txt across sessions; agent makes same mistakes repeatedly.
+**Cause:** Knowledge not graduating from progress.txt to AGENTS.md; agent not reading AGENTS.md.
+**Fix:** Create AGENTS.md with proven patterns. Ensure CLAUDE.md instructs agent to read AGENTS.md at session start.
+
+```bash
+# Create AGENTS.md if it doesn't exist
+touch AGENTS.md
+
+# Add to CLAUDE.md:
+# "At session start, read AGENTS.md for permanent project knowledge."
+```
+
+### Common Issue: Git History Hard to Search
+**Symptom:** Know something was changed but can't find when or why.
+**Cause:** Poor commit messages; no semantic tagging; relying on implicit knowledge.
+**Fix:** Improve commit message discipline. Use conventional commits. Consider adding `[DECISION]` or `[PATTERN]` tags.
+
+```bash
+# Search commit messages
+git log --all --oneline --grep="auth"
+
+# Search code changes
+git log -p -S "functionName"
+
+# Find commits by date range
+git log --since="2026-01-01" --until="2026-01-15" --oneline
+```
+
+### Common Issue: Claude-Mem Retrieval Returns Irrelevant Results
+**Symptom:** Semantic search returns tangentially related content; misses obviously relevant entries.
+**Cause:** Poor embedding quality for your domain; retrieval threshold too loose/strict.
+**Fix:** Tune similarity thresholds. Consider domain-specific embeddings. Fall back to keyword search for precision needs.
+
+### Common Issue: Memory Layers Out of Sync
+**Symptom:** progress.txt says one thing, AGENTS.md says another, code comments say a third.
+**Cause:** No graduation process; multiple sources of truth evolving independently.
+**Fix:** Establish weekly memory maintenance: prune progress.txt, review AGENTS.md, archive stale content.
+
+```bash
+# Weekly memory audit script
+echo "=== Memory Audit $(date) ==="
+echo "progress.txt lines: $(wc -l < scripts/ralph/progress.txt)"
+echo "AGENTS.md lines: $(wc -l < AGENTS.md)"
+echo "Recent patterns in progress.txt:"
+grep -i "pattern\|learned" scripts/ralph/progress.txt | tail -10
+```

@@ -1,0 +1,2064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ralph Plugin (Arvid Kahl) | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Source Attribution Box */
+    .source-box {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 32px;
+    }
+
+    .source-box-title {
+      font-weight: 600;
+      color: #0369a1;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .source-meta {
+      font-size: 14px;
+      color: #0c4a6e;
+    }
+
+    .source-meta a {
+      color: #0284c7;
+      text-decoration: underline;
+    }
+
+    /* Quote Box */
+    .quote-box {
+      background: linear-gradient(135deg, #fafafa 0%, #f4f4f5 100%);
+      border-left: 4px solid #0D9373;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+
+    .quote-text {
+      font-size: 16px;
+      font-style: italic;
+      color: #3f3f46;
+      margin-bottom: 12px;
+    }
+
+    .quote-author {
+      font-size: 14px;
+      color: #71717a;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Extension Card */
+    .extension-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .extension-title {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .extension-author {
+      font-size: 12px;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    .extension-desc {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 12px;
+    }
+
+    .extension-link {
+      font-size: 13px;
+      color: #0D9373;
+      font-family: 'Fira Code', monospace;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Goal-conditioned loops that retry until verifiable completion - learning from failure, not avoiding it.</div>
+        </div>
+
+        <!-- Source Attribution -->
+        <div class="source-box">
+          <div class="source-box-title">
+            <i data-lucide="user" class="w-4 h-4"></i>
+            Source
+          </div>
+          <div class="source-meta">
+            <strong>Author:</strong> @arvidkahl (Arvid Kahl) - Bootstrapped founder, sold FeedbackPanda<br>
+            <strong>Date:</strong> 2026-01-05<br>
+            <strong>Engagement:</strong> 1.6K likes, 128K views, 2.3K bookmarks<br>
+            <strong>URL:</strong> <a href="https://x.com/arvidkahl/status/2008202699372626091" target="_blank">x.com/arvidkahl/status/2008202699372626091</a>
+          </div>
+        </div>
+
+        <div class="quote-box">
+          <div class="quote-text">"It's a 'we learn from failure'-centric approach. You define your goal condition and let the agent loop over and over until it has verifiably reached that promised goal."</div>
+          <div class="quote-author">- Arvid Kahl</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          Core Abstraction: Learn from Failure
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"It might take 2 minutes or a day. But the loop continues to experiment and look at prior work to ultimately get you there."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, '/plugin install ralph-wiggum@claude-plugins-official')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>/plugin install ralph-wiggum@claude-plugins-official</code>
+          </div>
+
+          <div class="core-anchor">One command. The stop hook intercepts exits and re-injects the prompt with updated context.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The Ralph plugin installs a <strong>stop hook</strong> that intercepts when Claude finishes. Instead of ending the session, it:
+        </p>
+
+        <ol class="list-decimal list-inside text-text-secondary mb-6 space-y-2">
+          <li>Checks if the <strong>completion promise</strong> was emitted</li>
+          <li>If not, <strong>re-injects</strong> the original prompt with updated context</li>
+          <li>The agent sees <strong>file changes + git history</strong> from prior iterations</li>
+          <li>Loop continues until completion promise found OR max iterations reached</li>
+        </ol>
+
+        <div class="quote-box">
+          <div class="quote-text">"Goal-conditioned loops with memory, evaluation & retry baked in. Once agents can persist, reflect, and verify outcomes autonomously, time becomes the main variable - not human attention."</div>
+          <div class="quote-author">- Arvid Kahl</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          This is fundamentally different from extended sessions. Each iteration is a <strong>fresh Claude instance</strong>. Git history and progress files provide memory. The agent learns from what the <em>previous instance wrote</em>, not from accumulated context.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-plugin" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY PLUGIN (NOT CUSTOM SCRIPT)?</div>
+          <div class="decision-reasoning">
+            The official Ralph plugin is maintained, receives updates, and has a one-command install. Custom bash scripts work but require manual maintenance and miss bug fixes the community pushes.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Start with the plugin. Type <code>/plugin</code>, search "ralph", install. Community fixes bugs for you. Only build custom when you need behavior the plugin doesn't support.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-goal-conditioned">
+          <div class="decision-why">WHY GOAL-CONDITIONED (NOT TIME-BASED)?</div>
+          <div class="decision-reasoning">
+            Time-based loops are arbitrary. "Run for 2 hours" has no connection to task completion. Goal-conditioned means the agent defines when it's done by emitting a completion promise. The loop ends when the goal is verifiably reached.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              You must define clear, verifiable success criteria <em>before</em> starting. "Migrate Jest to Vitest" becomes "MIGRATION COMPLETE when all tests pass with Vitest". Vague goals = infinite loops.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-completion-promise">
+          <div class="decision-why">WHY COMPLETION PROMISE PATTERN?</div>
+          <div class="decision-reasoning">
+            The agent must emit a specific, parseable string to signal completion. This is more reliable than inferring "done" from behavior. The stop hook does a simple grep for the exact promise text.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Include the exact completion promise text in your prompt: <code>--completion-promise "MIGRATION COMPLETE"</code>. The agent must emit this exact string. No fuzzy matching.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY LOOP WITH FRESH CONTEXT?</div>
+          <div class="decision-reasoning">
+            Each iteration spawns a new Claude instance. No memory of previous runs except what's written to files. This avoids context rot (quality degradation after ~80K tokens) and ensures each iteration is independent.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Each iteration is a clean slate. Errors don't cascade. If iteration 5 produces bad code, iteration 6 can recover by reading the git diff and trying a different approach.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY GIT AS MEMORY?</div>
+          <div class="decision-reasoning">
+            Git commits are durable, diffable, and agent-readable. The stop hook shows the agent what files changed since last iteration. Git history becomes the agent's "memory" of what previous iterations accomplished.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Your project must be a git repository. Run <code>git init</code> before using Ralph. The agent reads <code>git log</code> and <code>git diff</code> to understand what previous iterations did.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY MAX ITERATIONS (NOT INFINITE)?</div>
+          <div class="decision-reasoning">
+            Unbounded loops are dangerous. Each iteration costs ~$2-3. 50 iterations = $50-100+. Max iterations is a safety backstop that prevents runaway costs when tasks can't converge.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Always set <code>--max-iterations</code>. Choose based on budget and expected complexity. Simple tasks: 10-20. Complex migrations: 30-50. Never run unbounded.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          File Structure
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">Plugin Installation</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># In Claude Code, open plugin manager</span>
+/plugin
+
+<span class="comment"># Search for "ralph" and install</span>
+<span class="comment"># Or use full command:</span>
+/plugin install ralph-wiggum@claude-plugins-official</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Plugin Location</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>~/.claude/                           <span class="comment"># Claude Code config home</span>
+├── plugins/                         <span class="comment"># Installed plugins</span>
+│   └── ralph-wiggum/               <span class="comment"># The Ralph plugin</span>
+│       ├── commands/               <span class="comment"># CLI commands</span>
+│       ├── hooks/                  <span class="comment"># Lifecycle hooks</span>
+│       │   └── stop-hook.sh        <span class="comment"># The magic: intercepts exits</span>
+│       └── README.md               <span class="comment"># Plugin documentation</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="project-setup">Project Setup</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>project/                            <span class="comment"># Your project directory</span>
+├── PROMPT.md                       <span class="comment"># Task definition (optional)</span>
+├── prd.json                        <span class="comment"># PRD-style task tracking</span>
+├── progress.txt                    <span class="comment"># Append-only memory log</span>
+└── .git/                           <span class="comment"># Git repository (REQUIRED)</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Running a Ralph Loop</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Basic usage</span>
+/ralph-loop "<span class="string">Migrate all Jest tests to Vitest</span>" \
+  --completion-promise "<span class="string">MIGRATION COMPLETE</span>" \
+  --max-iterations <span class="variable">50</span>
+
+<span class="comment"># With PRD file</span>
+/ralph-loop --prd prd.json \
+  --completion-promise "<span class="string">ALL STORIES COMPLETE</span>" \
+  --max-iterations <span class="variable">30</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Path of a Task: Jest to Vitest Migration
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a real task through the Ralph loop to see how the pieces connect:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>[T+0min]</strong> You start the loop: <code>/ralph-loop "Migrate Jest to Vitest" --completion-promise "MIGRATION COMPLETE" --max-iterations 50</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>[T+0.5min]</strong> Iteration 1: Fresh context window loads. Plugin injects prompt + completion promise requirement. Agent analyzes codebase, finds 47 Jest test files.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Agent creates migration plan, installs Vitest. Files touched: 2 (package.json, vitest.config.ts)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>[T+2min]</strong> Iteration 1 ends. Stop hook intercepts exit. No completion promise found. Re-injects prompt with updated file state.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>Iteration 2:</strong> Agent sees git history: "Previous work installed Vitest". Migrates first test file: <code>tests/auth.test.ts</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>[T+4min]</strong> Iteration 2 ends. Tests migrated: 1/47. Test run: 12 tests passed.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content"><strong>[Iterations 3-22]</strong> Each iteration: 30-90 seconds. Agent learns from git log what was done. Migrates roughly one file per iteration (conservative).</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content"><strong>[T+18min]</strong> Iteration 23: Last file migrated: <code>tests/utils/helpers.test.ts</code>. Full test run: 312 tests passed.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">Agent removes Jest dependencies, updates package.json. Outputs: <strong>"MIGRATION COMPLETE"</strong></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content"><strong>[T+18min]</strong> Loop terminates. Completion promise detected. Output: "Ralph finished! Iterations used: 23 of 50"</div>
+          </div>
+        </div>
+
+        <div class="quote-box">
+          <div class="quote-text">"I've been seeing solid results with that. Takes some massaging and setting things up right (mostly for there not to be any interruptions), but when it works, it WORKS."</div>
+          <div class="quote-author">- Arvid Kahl</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Timing Expectations</h3>
+
+        <ul class="list-disc list-inside text-text-secondary mb-6 space-y-2">
+          <li>Migration/refactor tasks: 15-50 iterations</li>
+          <li>Each iteration: 30-90 seconds</li>
+          <li>Full codebase migration: 15-45 minutes</li>
+          <li>Complex multi-file refactors: 30-60 minutes</li>
+        </ul>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Critical warnings from the community - real problems with real fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            1. Plugin not found
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> <code>/plugin ralph</code> shows no results</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> The plugin may have been renamed. Try searching "wiggum" or check the official plugins list. Plugin was broken ~10 hours ago and fixed.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            2. Windows compatibility issues
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Script fails on Windows</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Bash scripts assume Unix environment</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use WSL2 or install jq manually. The stop hook relies on bash.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 15 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            3. Runaway costs
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> $100+ bill unexpectedly</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Running without max-iterations or task that never converges</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> ALWAYS set <code>--max-iterations</code>. Budget: $2-3 per iteration. 50 iterations = $50-100+.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> Prevention only</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            4. No verification layer
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent claims "done" but code is broken</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Completion criteria don't include tests</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add explicit tests in completion criteria: "MIGRATION COMPLETE when npm test passes"</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 10 minutes setup</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            5. Completion promise not detected
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Loop runs to max despite agent saying "done"</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Exact match required. Agent said "Migration complete!" not "MIGRATION COMPLETE"</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Include the exact promise text in your prompt. The stop hook greps for exact match.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            6. Git not initialized
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent can't track history, each iteration repeats work</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Ralph needs git for memory</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Run <code>git init</code> first. Ralph reads git log/diff to understand prior iterations.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 1 minute</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            7. Poor planning upfront
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent wanders, doesn't converge</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Vague goal definition</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Define clear goal condition BEFORE starting. "Make it better" = infinite loop. "All tests pass" = convergence.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 15 minutes planning</div>
+        </div>
+
+        <div class="quote-box">
+          <div class="quote-text">"A word of warning that it doesn't take the place of good planning and context engineering phases... why burn tokens on brute force"</div>
+          <div class="quote-author">- @seltzergenius</div>
+        </div>
+
+        <div class="quote-box">
+          <div class="quote-text">"My concern: loops without review. Works until it builds something broken in ways you don't notice. What's your verification layer?"</div>
+          <div class="quote-author">- @f_butz</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost vs Thoroughness
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More iterations = better results = more cost. There's no free lunch.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Set budget upfront, choose iteration limit accordingly. Accept that some tasks need 30+ iterations and that's a real cost.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Autonomy vs Verification
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> True AFK means trusting without checking. But agents make mistakes that compound across iterations.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Build robust test suite BEFORE using Ralph. Your tests are your verification layer. Without them, you're flying blind.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Task Scope vs Context Limits
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Big tasks need many iterations, but each iteration is constrained by context window. You can't plan across iterations from within an iteration.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Break into small verifiable chunks. Use prd.json to track dependencies. Let the PRD be the cross-iteration memory.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Brute Force vs Planning
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Ralph enables "just try it" but planning is still better. Brute force costs tokens; planning costs human time.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Ralph doesn't replace upfront design. Invest 15 minutes planning to save $50+ in iterations. The loop is for execution, not discovery.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Goal Definition
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Vague goals = vague results. But defining precise goals requires knowing the solution in advance.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Invest time in clear, verifiable completion criteria. If you can't write a test for "done", the task isn't Ralph-suitable.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Learning Curve
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Looks simple (it's just a loop!) but has many failure modes. You'll waste iterations learning what works.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Start with small, low-stakes tasks. Learn the failure modes on cheap problems. Graduate to overnight runs after you've calibrated.</div>
+        </div>
+
+        <div class="quote-box">
+          <div class="quote-text">"Curious what type of task that would be useful for... those without well defined completion criteria aren't good candidates"</div>
+          <div class="quote-author">- @Killian_Kirk</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE RALPH WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Well-defined goals with verifiable completion</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Mechanical, repetitive tasks</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Migrations (Jest to Vitest, etc.)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Architecture implementation from spec</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Budget: $20-100+ per task</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Good existing test coverage</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE RALPH WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Ambiguous/subjective tasks ("make it pretty")</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Security-sensitive code</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Tasks without clear success criteria</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Budget-constrained situations</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need parallel execution (use CC Mirror)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Below Stage 3 developer (build foundation first)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="extensions">Extensions & Alternatives</h3>
+
+        <div class="extension-card">
+          <div class="extension-title">
+            <i data-lucide="rocket" class="w-4 h-4 text-accent"></i>
+            Marathon Ralph
+          </div>
+          <div class="extension-author">by @stephen_rayner</div>
+          <div class="extension-desc">"Build entire apps with unit and E2E tests following SDLC"</div>
+          <div class="extension-link">github.com/gruckion/marathon-ralph</div>
+        </div>
+
+        <div class="extension-card">
+          <div class="extension-title">
+            <i data-lucide="stethoscope" class="w-4 h-4 text-accent"></i>
+            Dr. Ralph
+          </div>
+          <div class="extension-author">by @MikeEndale</div>
+          <div class="extension-desc">Multi-phase version with confidence thresholds (80%+ before advancing)</div>
+        </div>
+
+        <div class="extension-card">
+          <div class="extension-title">
+            <i data-lucide="file-text" class="w-4 h-4 text-accent"></i>
+            Lisa
+          </div>
+          <div class="extension-author">by @petruarakiss</div>
+          <div class="extension-desc">Fork with logging + progress tracking</div>
+          <div class="extension-link">github.com/Arakiss/lisa</div>
+        </div>
+
+        <div class="extension-card">
+          <div class="extension-title">
+            <i data-lucide="zap" class="w-4 h-4 text-accent"></i>
+            Zeroshot
+          </div>
+          <div class="extension-author">by @Eivind1384955</div>
+          <div class="extension-desc">"Next gen version" - experimental</div>
+          <div class="extension-link">github.com/covibes/zeroshot</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Graduation Path</h3>
+
+        <div class="code-block">
+          <pre>Level 2: Manual Claude Code sessions
+Level 3: Simple bash loops → <span class="string">Ralph plugin</span> ← YOU ARE HERE
+Level 4: PRD-based Ralph → <span class="string">Marathon Ralph</span>
+Level 5: Multi-agent → <span class="string">CC Mirror</span>
+Level 6: Parallel swarms → <span class="string">CC Mirror + worktrees</span>
+Level 7+: Factory scale → <span class="string">Gas Town</span></pre>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (4 items) -->
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with ALL patterns: External State</div>
+        <div class="text-text-secondary text-sm">
+          Ralph uses git + progress.txt as external memory - same principle as CC Mirror's Beads and Gas Town's Refinery. "If it's not in a file, it doesn't exist."
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible core</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">while :; do cat PROMPT.md | claude; done</code><br><br>
+          That's it. Everything else (plugin, prd.json, progress.txt) is reliability scaffolding around this core loop.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Arvid's Migration Success</div>
+        <div class="text-text-secondary text-sm">
+          Used Ralph for Jest to Vitest migration. "When it works, it WORKS." Completed migration autonomously while he did other work.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="essence">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Git History as Teaching Corpus</div>
+        <div class="text-text-secondary text-sm">
+          After many Ralph runs, your repo becomes a training set showing how tasks were solved. Future agents learn from patterns in git history.
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item inversion" data-section="core">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if we never reset context?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> One long session per feature, accumulated context, no restarts.<br>
+          <strong>Why this fails:</strong> Context rot at ~80K tokens. Quality degrades. Model forgets early instructions.<br>
+          <strong>Hidden constraint:</strong> Fresh context beats accumulated context. Ralph IS the solution to transformer attention limits.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph = CI/CD for Features</div>
+        <div class="text-text-secondary text-sm">
+          CI/CD runs tests repeatedly until green.<br>
+          Ralph = CI for feature development: loop until "tests" (completion promise) pass.<br><br>
+          <em>If you've used CI, you already understand goal-conditioned loops.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How context degrades (invisibly)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% to 90%</strong> (40-60K): Subtle drift<br>
+          <strong>90% to 70%</strong> (60-80K): Repetition begins<br>
+          <strong>70% to 50%</strong> (80-100K): Instructions forgotten<br>
+          <strong>50% to CLIFF</strong>: Hallucinations<br><br>
+          <em>The gradient is invisible until the cliff. Ralph avoids the cliff entirely.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with CC Mirror: Loop Until Done</div>
+        <div class="text-text-secondary text-sm">
+          Both patterns iterate until success criteria met. Ralph via bash loop, CC Mirror via task graph. The completion promise IS the success criterion.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint drives everything</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Claude sessions end<br>
+          → Need to restart → Need external memory (git)<br>
+          → Need completion promise to know when done<br>
+          → Need max iterations for safety<br><br>
+          <em>Session limits drive the entire loop architecture.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip max-iterations</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> No max-iterations set<br>
+          <strong>THEN:</strong> Loop runs indefinitely<br>
+          <strong>THEN:</strong> Costs accumulate ($2-3/iteration)<br>
+          <strong>FINALLY:</strong> $500+ bill, account suspended<br><br>
+          <em>Max-iterations is non-negotiable safety.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Brute Force vs Planning</div>
+        <div class="text-text-secondary text-sm">
+          <strong>More iterations:</strong> Eventually succeeds<br>
+          <strong>Good planning:</strong> Fewer iterations needed<br><br>
+          <strong>Resolution:</strong> Invest 15 min planning to save $50+ in iterations. The loop is for execution, not discovery.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Understanding depth</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> "What's a completion promise?"<br>
+          <strong>Intermediate:</strong> "Why exact match?"<br>
+          <strong>Advanced:</strong> "When to use custom vs plugin?"<br>
+          <strong>Expert:</strong> "How does this connect to Gas Town's inbox pattern?"
+        </div>
+      </div>
+
+      <!-- FILES SECTION (3 items) -->
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph + Playwright MCP</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Browser automation for UI verification. Ralph handles loop, Playwright verifies visual state.<br>
+          <strong>Danger:</strong> Browser context consumes tokens. Put Playwright in subagents.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Anti-Composition
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph + Parallel Execution</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Does NOT work:</strong> Ralph is single-threaded by design. Parallel causes merge conflicts. Use CC Mirror for parallelism.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="files">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Cross-Pattern Equivalence
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph files = Gas Town components</div>
+        <div class="text-text-secondary text-sm">
+          <strong>YOU</strong> = The Mayor (orchestrator)<br>
+          <strong>prd.json</strong> = The Inbox (work queue)<br>
+          <strong>progress.txt</strong> = The Refinery (persistent memory)<br>
+          <strong>Each Claude</strong> = A Polecat (stateless worker)
+        </div>
+      </div>
+
+      <!-- PATH SECTION (3 items) -->
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When is Ralph the right choice?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Single fix (minutes):</strong> No - overhead not worth it<br>
+          <strong>Single feature (hours):</strong> Maybe - if well-defined<br>
+          <strong>Migration (hours-day):</strong> YES - perfect use case<br>
+          <strong>Full project (days):</strong> No - need multi-agent (CC Mirror)
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">The $100 Day</div>
+        <div class="text-text-secondary text-sm">
+          Community member ran unbounded loop overnight, woke to massive bill. Led to max-iterations becoming a default recommendation. Always set limits.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip tests (step 7)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> No test verification<br>
+          <strong>THEN:</strong> Claude marks tasks done incorrectly<br>
+          <strong>THEN:</strong> Broken code enters git<br>
+          <strong>THEN:</strong> Future iterations inherit broken foundation<br>
+          <strong>FINALLY:</strong> Morning reveals 20 bad commits
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When iterations flip from help to hurt</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Below ~20:</strong> More iterations = higher completion rate<br>
+          <strong>Above ~30:</strong> Diminishing returns, cost explosion<br><br>
+          <strong>THE FLIP:</strong> ~20-30 iterations. If not done, task is poorly scoped.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if no max iterations?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Let it run until done, trust convergence.<br>
+          <strong>Why this fails:</strong> Some tasks never converge. Costs are unbounded. No safety backstop.<br>
+          <strong>Hidden constraint:</strong> Iteration limits are non-negotiable safety.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Self-Adjusting Limits</div>
+        <div class="text-text-secondary text-sm">
+          Currently max-iterations is manual. Could AI estimate optimal iterations based on task complexity? No automation yet. Dr. Ralph explores this with confidence thresholds.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cost Visibility Effect</div>
+        <div class="text-text-secondary text-sm">
+          Running Ralph makes token spend visible per-task. Changes how you scope work. $50 migration forces you to think: "Is this worth $50?" Makes costs concrete.
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Autonomy vs Oversight</div>
+        <div class="text-text-secondary text-sm">
+          <strong>AFK:</strong> Maximum leverage<br>
+          <strong>Oversight:</strong> Catch errors early<br><br>
+          <strong>Resolution:</strong> Use HOTL (Human On The Loop) for learning. Graduate to AFK once confident. Match automation to risk.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="hard">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">LLM token limits cascade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> LLMs have token limits<br>
+          → Can't hold infinite context<br>
+          → Must reset each iteration<br>
+          → Must keep tasks small enough to complete in one context window<br>
+          → Task sizing becomes a core skill
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Task decomposition skill</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> "How small should tasks be?"<br>
+          <strong>Intermediate:</strong> "What's too small?" - When description > code change<br>
+          <strong>Advanced:</strong> "How improve?" - Review progress.txt after runs<br>
+          <strong>Expert:</strong> "It's a skill, not a formula"
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="hard">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Cross-Task Learning</div>
+        <div class="text-text-secondary text-sm">
+          Ralph forgets between runs. Could learnings persist across projects? Dr. Ralph and Lisa explore this. No solution yet for true cross-task memory.
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (4 items) -->
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you used Ralph for "make it pretty"?</div>
+        <div class="text-text-secondary text-sm">
+          No acceptance criteria → no verification → false "done"<br>
+          Claude claims complete → you disagree → frustration<br>
+          Overnight produces 10 "improvements" you hate<br><br>
+          <strong>Why fails:</strong> "Pretty" isn't verifiable. "Lighthouse score 90" is.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If Ralph isn't right</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Need parallelism?</strong> → CC Mirror<br>
+          <strong>Need human gates?</strong> → HOTL Ralph<br>
+          <strong>Need full SDLC?</strong> → Marathon Ralph<br>
+          <strong>Need confidence thresholds?</strong> → Dr. Ralph<br>
+          <strong>Need logging?</strong> → Lisa
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="when">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Automation Level = Risk Level</div>
+        <div class="text-text-secondary text-sm">
+          <strong>HOTL Ralph:</strong> Pair programming (human reviews each step)<br>
+          <strong>Semi-Auto:</strong> Code review (human reviews every N steps)<br>
+          <strong>AFK Ralph:</strong> CI/CD pipeline (fully automated with tests)<br><br>
+          <em>Match automation level to risk tolerance.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="when">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Plugin Broken 10 Hours</div>
+        <div class="text-text-secondary text-sm">
+          Plugin had bug, users couldn't install. Community fixed quickly (~10 hour turnaround). Shows both fragility and community responsiveness.
+        </div>
+      </div>
+
+      <!-- ADDITIONAL ITEMS TO REACH 29+ -->
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="dna" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Clean Room Testing Pattern</div>
+        <div class="text-text-secondary text-sm">
+          Like TDD red-green-refactor, Ralph loops through fail-learn-retry. Each iteration is a clean room: no accumulated state, just files and git history.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

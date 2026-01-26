@@ -1,5 +1,7 @@
 # Transformation: Single Session to Persistent Autonomous
 
+> **You Are Here:** This document shows the most important paradigm shift in Claude Code mastery: moving from single interactive sessions to autonomous overnight development. If you're tired of babysitting Claude and watching quality degrade after an hour, this transformation is for you. This connects to Level 2 (Ralph Wiggum Loop) on the complexity ladder and unlocks the ability to ship features while you sleep.
+
 **The Paradigm Shift:** From "human babysitting AI" to "AI working while human sleeps"
 
 ---
@@ -868,6 +870,135 @@ Human bottleneck         →      Autonomous scaling
 **This connects to:** You've completed the transformation → you now understand the Ralph pattern → next step is combining with other patterns (Compounding, Parallel, CC Mirror) → Level 4+ on the complexity ladder
 
 **Congratulations. You've shipped while you slept.**
+
+---
+
+## Troubleshooting
+
+### Common Issue: Ralph Exits After First Iteration
+
+**Symptom:** Script runs once, then stops. Terminal shows completion but only 1 commit in git log.
+
+**Cause:** The `<promise>COMPLETE</promise>` signal was emitted incorrectly, or all stories were marked `passes: true` when they shouldn't be.
+
+**Fix:**
+```bash
+# Check prd.json for premature completion
+jq '.userStories | map(select(.passes==true)) | length' scripts/ralph/prd.json
+
+# If all marked true but shouldn't be, reset:
+jq '.userStories |= map(.passes = false)' scripts/ralph/prd.json > tmp.json && mv tmp.json scripts/ralph/prd.json
+
+# Rerun with verbose output
+./scripts/ralph/ralph.sh 5 2>&1 | tee ralph-debug.log
+```
+
+---
+
+### Common Issue: Claude Gets Stuck in Retry Loop
+
+**Symptom:** Same story keeps failing, iteration count climbing without progress.
+
+**Cause:** Story has acceptance criteria that can't pass (missing dependency, impossible test, wrong assumption).
+
+**Fix:**
+```bash
+# Check which story is stuck
+jq '.userStories | map(select(.passes==false)) | .[0]' scripts/ralph/prd.json
+
+# Check progress.txt for error patterns
+grep -A5 "Blockers:" scripts/ralph/progress.txt | tail -20
+
+# If story is truly blocked, split it or add missing dependency:
+# 1. Edit prd.json to split large story into smaller parts
+# 2. Or add new story for the missing prerequisite
+# 3. Reset iteration count: ./scripts/ralph/ralph.sh 25
+```
+
+---
+
+### Common Issue: Tests Pass Locally But Story Marked Failed
+
+**Symptom:** `npm test` shows green but prd.json still has `passes: false`.
+
+**Cause:** Claude didn't update prd.json after verification passed (incomplete prompt following).
+
+**Fix:**
+```bash
+# Manually verify tests pass
+npm run typecheck && npm run test
+
+# If passing, manually update prd.json
+jq '.userStories |= map(if .id == "US-XXX" then .passes = true else . end)' scripts/ralph/prd.json > tmp.json && mv tmp.json scripts/ralph/prd.json
+
+# Continue from next story
+./scripts/ralph/ralph.sh 25
+```
+
+---
+
+### Common Issue: Permission Denied Errors
+
+**Symptom:** Script fails with "permission denied" or Claude can't write files.
+
+**Cause:** Missing `--dangerously-skip-permissions` flag or script not executable.
+
+**Fix:**
+```bash
+# Make script executable
+chmod +x scripts/ralph/ralph.sh
+
+# Verify the flag is in the script
+grep "dangerously-skip-permissions" scripts/ralph/ralph.sh
+
+# If missing, add to the claude invocation:
+# claude --dangerously-skip-permissions <<'PROMPT'
+```
+
+---
+
+### Common Issue: Context Too Large for Single Story
+
+**Symptom:** Iteration completes but work is incomplete. Output mentions "running out of space" or changes seem truncated.
+
+**Cause:** User story is too large for one context window. Single iteration should be ~5-10 minutes of work.
+
+**Fix:**
+```bash
+# Check story size (acceptance criteria count)
+jq '.userStories[] | {id, criteria_count: (.acceptanceCriteria | length)}' scripts/ralph/prd.json
+
+# If any story has >5 acceptance criteria, split it:
+# US-002 (8 criteria) → US-002a (4 criteria) + US-002b (4 criteria)
+
+# Add dependencies: US-002b depends on US-002a
+```
+
+---
+
+### Common Issue: Git Commits Not Appearing
+
+**Symptom:** Work is done in progress.txt but `git log` shows no new commits.
+
+**Cause:** Claude didn't commit, or commits are on wrong branch.
+
+**Fix:**
+```bash
+# Check current branch
+git branch --show-current
+
+# Check if on the expected feature branch
+git branch -a | grep $(jq -r '.branchName' scripts/ralph/prd.json)
+
+# If work exists but not committed:
+git status
+git add -A && git commit -m "feat: manual catchup commit"
+
+# If on wrong branch, stash and move:
+git stash
+git checkout $(jq -r '.branchName' scripts/ralph/prd.json)
+git stash pop
+```
 
 ---
 

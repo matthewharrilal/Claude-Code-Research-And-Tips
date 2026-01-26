@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vincent Quigley Mental Model | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Mental Model Box */
+    .mental-model-box {
+      background: #fafafa;
+      border: 2px solid #0D9373;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .model-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .model-quote {
+      font-size: 18px;
+      font-style: italic;
+      color: #18181b;
+      margin-bottom: 16px;
+      border-left: 3px solid #0D9373;
+      padding-left: 16px;
+    }
+
+    .model-explanation {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    /* Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Process Box */
+    .process-box {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .process-header {
+      font-size: 16px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .process-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 12px;
+      padding: 12px;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #e4e4e7;
+    }
+
+    .process-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .step-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-label {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 4px;
+    }
+
+    .step-detail {
+      font-size: 13px;
+      color: #71717a;
+    }
+
+    /* Path Container */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Quote highlight */
+    .quote-highlight {
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+      border-left: 4px solid #0D9373;
+      padding: 16px 20px;
+      margin: 24px 0;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      color: #3f3f46;
+    }
+
+    /* Comparison table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .comparison-table th {
+      background: #f4f4f5;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #e4e4e7;
+    }
+
+    .comparison-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .check-mark { color: #10b981; }
+    .cross-mark { color: #ef4444; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Treat AI like a junior developer who resets each morning. Review everything. Budget three attempts.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          <strong>Vincent Quigley</strong> is a Staff Software Engineer at Sanity. After 18 months with Cursor and 6 weeks with Claude Code, he developed a mental model that cuts through the hype: AI is a junior developer who never learns between sessions.
+        </p>
+
+        <div class="quote-highlight">
+          "First attempt will be 95% garbage."
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="mental-model-box">
+          <div class="model-label">The Mental Model</div>
+          <div class="model-quote">"Treating AI like a 'junior developer who doesn't learn' became my mental model for success."</div>
+          <div class="model-explanation">
+            This framing provides realistic expectations, appropriate workflow, and sustainable approach. It transforms frustration into patience.
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">What a Junior Developer Does</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Behavior</th>
+              <th>Junior Dev</th>
+              <th>AI Agent</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Needs clear instructions</td>
+              <td class="check-mark"><i data-lucide="check" class="w-4 h-4 inline"></i></td>
+              <td class="check-mark"><i data-lucide="check" class="w-4 h-4 inline"></i></td>
+            </tr>
+            <tr>
+              <td>Makes mistakes regularly</td>
+              <td class="check-mark"><i data-lucide="check" class="w-4 h-4 inline"></i></td>
+              <td class="check-mark"><i data-lucide="check" class="w-4 h-4 inline"></i></td>
+            </tr>
+            <tr>
+              <td>Requires code review</td>
+              <td class="check-mark"><i data-lucide="check" class="w-4 h-4 inline"></i></td>
+              <td class="check-mark"><i data-lucide="check" class="w-4 h-4 inline"></i></td>
+            </tr>
+            <tr>
+              <td>Learns from feedback (in session)</td>
+              <td class="check-mark"><i data-lucide="check" class="w-4 h-4 inline"></i></td>
+              <td class="check-mark"><i data-lucide="check" class="w-4 h-4 inline"></i></td>
+            </tr>
+            <tr>
+              <td>Learns between sessions</td>
+              <td class="check-mark"><i data-lucide="check" class="w-4 h-4 inline"></i></td>
+              <td class="cross-mark"><i data-lucide="x" class="w-4 h-4 inline"></i> NEVER</td>
+            </tr>
+            <tr>
+              <td>Is eager and fast</td>
+              <td class="check-mark"><i data-lucide="check" class="w-4 h-4 inline"></i></td>
+              <td class="check-mark"><i data-lucide="check" class="w-4 h-4 inline"></i></td>
+            </tr>
+            <tr>
+              <td>Can be surprisingly good</td>
+              <td class="check-mark"><i data-lucide="check" class="w-4 h-4 inline"></i></td>
+              <td class="check-mark"><i data-lucide="check" class="w-4 h-4 inline"></i></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="text-text-secondary mb-6">
+          <strong>The key difference:</strong> The "doesn't learn" part. Every session starts fresh. Every correction must be re-taught. The cost of context loss is permanent.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="three-attempt">The Three-Attempt Reality</h3>
+
+        <div class="quote-highlight">
+          "Expecting perfection on attempt one is like expecting a junior developer to nail a complex feature without context."
+        </div>
+
+        <div class="process-box">
+          <div class="process-header">
+            <i data-lucide="repeat" class="w-5 h-5 text-accent"></i>
+            Expected Output Quality by Attempt
+          </div>
+          <div class="process-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <div class="step-label">Attempt 1: 95% Garbage</div>
+              <div class="step-detail">Purpose: Claude builds context; you identify challenges. Don't expect usable code. Value: You now understand what's hard about this problem.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <div class="step-label">Attempt 2: 50% Garbage</div>
+              <div class="step-detail">Purpose: AI understands nuances from Attempt 1. Core logic is taking shape. Half is still unusable, but the foundation is forming.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <div class="step-label">Attempt 3: Workable (~80% useful)</div>
+              <div class="step-detail">Purpose: Produce an iterable foundation. Not a final product, but a starting point you can refine productively.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-junior" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY "JUNIOR DEVELOPER" FRAMING?</div>
+          <div class="decision-reasoning">
+            The framing sets expectations correctly. You wouldn't rage-quit when a junior makes mistakes. You'd guide them, review their work, and expect iteration. The same patience applies to AI.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Treat AI output like a junior's work: review thoroughly, expect to iterate, don't expect architectural insights. YOUR job is architecture and judgment. AI's job is implementation velocity.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-three">
+          <div class="decision-why">WHY THREE ATTEMPTS, NOT ONE?</div>
+          <div class="decision-reasoning">
+            First attempts reveal the problem, not solve it. The AI's initial output shows you what's hard about this task. Attempt 2 incorporates your clarifications. Attempt 3 reaches workable.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Budget time for iteration, not perfection. If you expect one-shot success, you'll be frustrated. If you expect three attempts, you'll be pleasantly surprised when it works faster.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-not-ten">
+          <div class="decision-why">WHY "2-3x NOT 10x" PRODUCTIVITY?</div>
+          <div class="decision-reasoning">
+            Anti-hype calibration prevents disappointment. Social media amplifies success stories and ignores iteration costs. Real productivity is 2-3x faster, which is still transformative.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Set realistic expectations. Measure accurately. 2-3x faster at $1,000-1,500/month still has excellent ROI. The hype of "10x" leads to disappointment; the reality of "2-3x" leads to sustainable adoption.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY THREE-STEP REVIEW?</div>
+          <div class="decision-reasoning">
+            AI review catches mechanical issues. Engineer review catches architectural issues. Team review maintains quality bar. Each layer catches different problems.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Never skip the engineer review step. AI can't judge architectural fit or business requirements. "AI reviewed it" is not enough. You must review it. Then your team must review it.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY MARK HUMAN EDITS?</div>
+          <div class="decision-reasoning">
+            AI will overwrite your manual changes without hesitation. It doesn't know which code is "yours" vs "generated." Explicit markers protect manual work.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use comments like <code>// HUMAN EDIT - do not modify</code> to protect critical manual work. Without markers, expect your careful changes to be silently overwritten.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          File Structure
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          A sample project setup implementing Vincent's "junior developer" mental model. This structure
+          supports the three-attempt process, three-step review, and the critical external memory
+          that the "junior who doesn't learn" needs.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Vincent Quigley Methodology: Junior Developer Project Structure</span>
+<span class="comment"># Key insight: AI doesn't learn between sessions. Files ARE the memory.</span>
+
+my-feature-project/
+<span class="variable">├── CLAUDE.md</span>                      <span class="comment"># Project learnings (the "memory")</span>
+<span class="variable">├── .claude/</span>
+<span class="variable">│   └── settings.json</span>              <span class="comment"># Hook configuration for reviews</span>
+<span class="variable">├── docs/</span>
+<span class="variable">│   ├── REVIEW-CHECKLIST.md</span>        <span class="comment"># Three-step review criteria</span>
+<span class="variable">│   ├── HUMAN-EDITS.md</span>             <span class="comment"># Track protected code sections</span>
+<span class="variable">│   └── LEARNINGS.md</span>               <span class="comment"># Session-to-session knowledge</span>
+<span class="variable">├── attempts/</span>                       <span class="comment"># Track the 3-attempt process</span>
+<span class="variable">│   ├── attempt-1/</span>                  <span class="comment"># Context building (95% garbage)</span>
+<span class="variable">│   │   ├── output/</span>
+<span class="variable">│   │   └── NOTES.md</span>               <span class="comment"># What we learned</span>
+<span class="variable">│   ├── attempt-2/</span>                  <span class="comment"># Core logic (50% garbage)</span>
+<span class="variable">│   │   ├── output/</span>
+<span class="variable">│   │   └── NOTES.md</span>
+<span class="variable">│   └── attempt-3/</span>                  <span class="comment"># Workable foundation (~80% useful)</span>
+<span class="variable">│       ├── output/</span>
+<span class="variable">│       └── NOTES.md</span>
+<span class="variable">├── reviews/</span>                        <span class="comment"># Three-step review artifacts</span>
+<span class="variable">│   ├── step-1-ai-review.md</span>        <span class="comment"># Claude auto-review output</span>
+<span class="variable">│   ├── step-2-engineer-review.md</span>  <span class="comment"># Your review notes</span>
+<span class="variable">│   └── step-3-team-review.md</span>      <span class="comment"># PR feedback</span>
+<span class="variable">├── src/</span>                            <span class="comment"># Final implementation</span>
+<span class="variable">│   └── ...</span>
+<span class="variable">└── tests/</span>
+    <span class="variable">└── ...</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="key-files">Key Files Explained</h3>
+
+        <h4 class="font-medium text-md mb-3 mt-6">CLAUDE.md - The External Memory</h4>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># CLAUDE.md - Vincent Quigley Style</span>
+<span class="comment"># This file IS the memory that the "junior" lacks</span>
+
+<span class="keyword">## Project Context</span>
+
+<span class="string">Feature: User profile page with avatar upload
+Status: Attempt 3 complete, in review
+
+Tech stack:
+- React + TypeScript
+- ImageUpload component (use this for file uploads!)
+- Toast component for errors
+- Design tokens: use theme.colors.*, never hardcode</span>
+
+<span class="keyword">## Learnings (CRITICAL - AI reads this every session)</span>
+
+<span class="string">From attempt 1:
+- [ ] Use ImageUpload component, not raw file input
+- [ ] Check accessibility guide before any UI work
+
+From attempt 2:
+- [ ] Toast component for all user-facing errors
+- [ ] Loading states required on all async operations
+
+From team review:
+- [ ] Rate limit avatar uploads (add to TODO)</span>
+
+<span class="keyword">## Human Edits (DO NOT MODIFY)</span>
+
+<span class="string">The following code sections are human-maintained:
+- src/config/rateLimit.ts - Manual rate limit config
+- src/utils/validation.ts lines 45-67 - Custom validation
+
+Mark any manual work with: // HUMAN EDIT - do not modify</span>
+
+<span class="keyword">## Review Status</span>
+
+<span class="string">- [x] Step 1: Claude auto-review (2 bugs found)
+- [x] Step 2: Engineer review (architecture OK)
+- [ ] Step 3: Team review (PR #234 pending)</span></pre>
+        </div>
+
+        <h4 class="font-medium text-md mb-3 mt-6">docs/REVIEW-CHECKLIST.md - Three-Step Enforcement</h4>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Three-Step Review Checklist</span>
+<span class="comment"># NEVER skip steps. "AI reviewed it" is only Step 1.</span>
+
+<span class="keyword">## Step 1: Claude Auto-Review</span>
+
+<span class="string">Prompt to use:
+"Review this code for bugs, test gaps, and style"
+
+Catches:
+- [ ] Test coverage gaps
+- [ ] Obvious bugs
+- [ ] Style violations
+- [ ] Missing error handling
+
+Save output to: reviews/step-1-ai-review.md</span>
+
+<span class="keyword">## Step 2: Engineer Review (YOU)</span>
+
+<span class="string">Questions to answer:
+- [ ] Is the architecture appropriate for this feature?
+- [ ] Is the business logic correct?
+- [ ] Will this be maintainable in 6 months?
+- [ ] Are edge cases handled?
+- [ ] Did AI miss any domain-specific requirements?
+
+Critical: AI CAN'T judge architectural fit. Only you can.
+
+Save notes to: reviews/step-2-engineer-review.md</span>
+
+<span class="keyword">## Step 3: Team Review</span>
+
+<span class="string">Standard PR process:
+- [ ] Open PR with description
+- [ ] Request reviews from team
+- [ ] Address feedback
+- [ ] Merge when approved
+
+AI-generated code gets SAME scrutiny as human code.
+
+Track in: reviews/step-3-team-review.md</span></pre>
+        </div>
+
+        <h4 class="font-medium text-md mb-3 mt-6">attempts/attempt-1/NOTES.md - Learning Capture</h4>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Attempt 1 Notes - Context Building</span>
+<span class="comment"># Purpose: Learn what's hard. NOT to get usable code.</span>
+
+<span class="keyword">## Task Given</span>
+
+<span class="string">"Add a user profile page with avatar upload, display name,
+and email settings"</span>
+
+<span class="keyword">## What Claude Produced</span>
+
+<span class="string">- Basic component structure (GOOD)
+- Avatar upload using deprecated API (BAD)
+- Settings form missing validation (BAD)
+- Styling doesn't match design system (BAD)
+
+Overall: ~5% useful, as expected.</span>
+
+<span class="keyword">## What We Learned (CRITICAL)</span>
+
+<span class="string">1. Need to specify: Use ImageUpload component
+2. Need to reference: Accessibility guide
+3. Need to require: Form validation
+4. Need to enforce: Design tokens usage
+
+These go into CLAUDE.md for next attempt.</span>
+
+<span class="keyword">## Time Spent</span>
+
+<span class="string">~25 minutes. Expected. This was context building.</span></pre>
+        </div>
+
+        <h4 class="font-medium text-md mb-3 mt-6">Protecting Human Edits</h4>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">// Example: Protected human edit in code</span>
+<span class="comment">// src/config/rateLimit.ts</span>
+
+<span class="comment">// HUMAN EDIT - do not modify - START</span>
+<span class="keyword">export const</span> <span class="variable">AVATAR_RATE_LIMIT</span> = {
+  <span class="variable">maxUploads</span>: 5,
+  <span class="variable">windowMs</span>: 60 * 60 * 1000, <span class="comment">// 1 hour</span>
+  <span class="variable">message</span>: <span class="string">'Too many uploads. Try again later.'</span>
+};
+<span class="comment">// HUMAN EDIT - do not modify - END</span>
+
+<span class="comment">// AI can modify below this line</span>
+<span class="keyword">export function</span> <span class="variable">checkRateLimit</span>(userId: string): boolean {
+  <span class="comment">// ...</span>
+}</pre>
+        </div>
+
+        <p class="text-text-secondary mt-6 mb-4">
+          <strong>Why this matters:</strong> AI will overwrite your manual changes without hesitation.
+          The marker comments and docs/HUMAN-EDITS.md together protect your work from being silently replaced.
+        </p>
+      </section>
+
+      <!-- Section 5: THE PROCESS -->
+      <section id="three-attempt-process" data-activity="process">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Process
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">The Three-Attempt Process</h3>
+
+        <div class="process-box">
+          <div class="process-header">
+            <i data-lucide="target" class="w-5 h-5 text-accent"></i>
+            Attempt 1: Context Building (expect 95% garbage)
+          </div>
+          <div class="process-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <div class="step-label">Give task to Claude</div>
+              <div class="step-detail">Describe what you want. Don't over-specify.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <div class="step-label">Let it work through initial approach</div>
+              <div class="step-detail">Watch what it does. Note what it gets wrong.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <div class="step-label">DON'T expect usable code</div>
+              <div class="step-detail">This attempt is for learning, not shipping.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <div class="step-label">DO note what's hard about this problem</div>
+              <div class="step-detail">Output: Understanding of problem, not solution. Time: ~15-30 minutes.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="process-box">
+          <div class="process-header">
+            <i data-lucide="layers" class="w-5 h-5 text-accent"></i>
+            Attempt 2: Core Logic (expect 50% garbage)
+          </div>
+          <div class="process-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <div class="step-label">Provide feedback from Attempt 1</div>
+              <div class="step-detail">Specify what was wrong. Clarify requirements that emerged.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <div class="step-label">Let Claude iterate</div>
+              <div class="step-detail">Core logic should be taking shape. Output: Core structure, still needs work. Time: ~30-45 minutes.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="process-box">
+          <div class="process-header">
+            <i data-lucide="check-circle" class="w-5 h-5 text-accent"></i>
+            Attempt 3: Workable Foundation
+          </div>
+          <div class="process-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <div class="step-label">Incorporate learnings from Attempts 1 and 2</div>
+              <div class="step-detail">Focus on getting to "good enough to refine."</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <div class="step-label">Accept ~80% useful, ~20% to fix</div>
+              <div class="step-detail">Move to review phase. Output: Not final product, but solid starting point. Time: ~20-30 minutes.</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="three-step-review">The Three-Step Review Process</h3>
+
+        <div class="process-box">
+          <div class="process-header">
+            <i data-lucide="shield-check" class="w-5 h-5 text-accent"></i>
+            Step 1: Claude Auto-Review
+          </div>
+          <p class="text-text-secondary text-sm mb-4">Prompt: "Review this code for bugs, test gaps, and style"</p>
+          <ul class="text-sm text-text-secondary space-y-2">
+            <li><i data-lucide="check" class="w-4 h-4 inline text-accent"></i> Test coverage gaps</li>
+            <li><i data-lucide="check" class="w-4 h-4 inline text-accent"></i> Obvious bugs</li>
+            <li><i data-lucide="check" class="w-4 h-4 inline text-accent"></i> Style violations</li>
+            <li><i data-lucide="check" class="w-4 h-4 inline text-accent"></i> Missing error handling</li>
+          </ul>
+          <p class="text-xs text-text-muted mt-4">Why: Catches mechanical issues cheaply.</p>
+        </div>
+
+        <div class="process-box">
+          <div class="process-header">
+            <i data-lucide="user" class="w-5 h-5 text-accent"></i>
+            Step 2: Engineer Review (YOU)
+          </div>
+          <ul class="text-sm text-text-secondary space-y-2">
+            <li><i data-lucide="check" class="w-4 h-4 inline text-accent"></i> Architecture appropriateness</li>
+            <li><i data-lucide="check" class="w-4 h-4 inline text-accent"></i> Business logic correctness</li>
+            <li><i data-lucide="check" class="w-4 h-4 inline text-accent"></i> Maintainability</li>
+            <li><i data-lucide="check" class="w-4 h-4 inline text-accent"></i> Edge case handling</li>
+          </ul>
+          <p class="text-xs text-text-muted mt-4">Why: AI can't judge architectural fit or business requirements.</p>
+        </div>
+
+        <div class="process-box">
+          <div class="process-header">
+            <i data-lucide="users" class="w-5 h-5 text-accent"></i>
+            Step 3: Normal Team Review
+          </div>
+          <ul class="text-sm text-text-secondary space-y-2">
+            <li><i data-lucide="check" class="w-4 h-4 inline text-accent"></i> Standard code review process</li>
+            <li><i data-lucide="check" class="w-4 h-4 inline text-accent"></i> Quality bar unchanged from pre-AI</li>
+            <li><i data-lucide="check" class="w-4 h-4 inline text-accent"></i> Same as any other PR</li>
+          </ul>
+          <p class="text-xs text-text-muted mt-4">Why: AI-generated code gets same scrutiny as human code.</p>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="parallel-management">Parallel Instance Management</h3>
+
+        <div class="quote-highlight">
+          "Like managing a small team of developers who reset their memory each morning."
+        </div>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Do</th>
+              <th>Don't</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="check-mark">Different problem spaces per instance</td>
+              <td class="cross-mark">Same problem in multiple instances</td>
+            </tr>
+            <tr>
+              <td class="check-mark">Track progress in external tools (Linear, Notion)</td>
+              <td class="cross-mark">Rely on AI memory between sessions</td>
+            </tr>
+            <tr>
+              <td class="check-mark">Mark human edits explicitly</td>
+              <td class="cross-mark">Let AI overwrite manual changes</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 6: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          <strong>Task:</strong> "Add user profile feature" - traced through Vincent's mental model.
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>BEFORE:</strong> Set expectations. "This is like assigning to a junior. First attempt will be mostly garbage. I'll need 3 attempts to get something workable."</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>9:00 AM - Attempt 1:</strong> Prompt: "Add a user profile page with avatar upload, display name, and email settings"</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>Claude produces:</strong> Basic component structure (good), avatar upload using deprecated API (bad), settings form missing validation (bad), styling doesn't match design system (bad)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>Assessment:</strong> "Mostly garbage, as expected." <strong>Learned:</strong> Need to specify image upload API, clarify design system constraints, form validation requirements.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>9:30 AM - Attempt 2:</strong> Feedback to Claude specifying ImageUpload component, design tokens, validation rules.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>Claude produces:</strong> Correct component used (good), design tokens applied (good), validation added (good), accessibility missing (bad), error handling incomplete (bad)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content"><strong>10:10 AM - Attempt 3:</strong> Feedback on accessibility guide, Toast component for errors, loading states.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content"><strong>Claude produces:</strong> All previous fixes maintained, ~80% production-ready. Known gap: Large image handling not addressed.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content"><strong>10:40 AM - Review Step 1:</strong> Claude auto-review catches 2 minor bugs, suggests 3 test cases.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content"><strong>10:50 AM - Review Step 2:</strong> Engineer review (you). Architecture: appropriate. Add handling for large image resize, rate limiting note.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">11</div>
+            <div class="path-content"><strong>11:15 AM - Review Step 3:</strong> PR submitted, standard team review, 2 small comments, merged same day.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">12</div>
+            <div class="path-content"><strong>OUTCOME:</strong> Total time: ~2.5 hours. Without AI: ~6-8 hours estimated. Productivity gain: ~2.5x. Quality: Same as non-AI work after review.</div>
+          </div>
+        </div>
+
+        <div class="process-box">
+          <div class="process-header">
+            <i data-lucide="book-open" class="w-5 h-5 text-accent"></i>
+            Learnings Captured in CLAUDE.md
+          </div>
+          <ul class="text-sm text-text-secondary space-y-2">
+            <li><i data-lucide="plus" class="w-4 h-4 inline text-accent"></i> "Use ImageUpload component for any file uploads"</li>
+            <li><i data-lucide="plus" class="w-4 h-4 inline text-accent"></i> "Always check accessibility guide before UI work"</li>
+            <li><i data-lucide="plus" class="w-4 h-4 inline text-accent"></i> "Toast component for all user-facing errors"</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Section 7: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          10 common pitfalls when applying the junior developer mental model:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            1. Expecting 10x productivity
+          </div>
+          <div class="gotcha-detail"><strong>Warning sign:</strong> Frustrated when AI feels "slow"</div>
+          <div class="gotcha-detail"><strong>Calibration:</strong> Reality is 2-3x, still valuable. Adjust expectations, not the tool.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            2. First attempt disappointment
+          </div>
+          <div class="gotcha-detail"><strong>Warning sign:</strong> "This is terrible" reaction to Attempt 1</div>
+          <div class="gotcha-detail"><strong>Calibration:</strong> Expected - it's context building. The value is learning what's hard.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            3. No learning between sessions
+          </div>
+          <div class="gotcha-detail"><strong>Warning sign:</strong> Same mistake twice in different sessions</div>
+          <div class="gotcha-detail"><strong>Calibration:</strong> Capture learnings in CLAUDE.md. The filesystem IS the memory.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            4. Confident but wrong code
+          </div>
+          <div class="gotcha-detail"><strong>Warning sign:</strong> "Looks right" leads to bugs in production</div>
+          <div class="gotcha-detail"><strong>Calibration:</strong> Always verify, never trust. Three-step review is non-negotiable.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            5. Skipping review steps
+          </div>
+          <div class="gotcha-detail"><strong>Warning sign:</strong> "AI reviewed it" as justification</div>
+          <div class="gotcha-detail"><strong>Calibration:</strong> Three-step is three-step. AI review is Step 1, not the whole process.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            6. Same problem in parallel instances
+          </div>
+          <div class="gotcha-detail"><strong>Warning sign:</strong> Conflicting outputs from multiple Claude sessions</div>
+          <div class="gotcha-detail"><strong>Calibration:</strong> Different problem spaces only. Track externally.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            7. AI overwrites human edits
+          </div>
+          <div class="gotcha-detail"><strong>Warning sign:</strong> Your careful changes disappear</div>
+          <div class="gotcha-detail"><strong>Calibration:</strong> Mark with <code>// HUMAN EDIT - do not modify</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            8. Context window overflow
+          </div>
+          <div class="gotcha-detail"><strong>Warning sign:</strong> Degrading output quality in long sessions</div>
+          <div class="gotcha-detail"><strong>Calibration:</strong> Break into smaller chunks. Fresh context beats extended sessions.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            9. Cost surprise
+          </div>
+          <div class="gotcha-detail"><strong>Warning sign:</strong> $1,500+ unexpected bill</div>
+          <div class="gotcha-detail"><strong>Calibration:</strong> Budget $1,000-1,500/month for heavy use. Monitor and adjust.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            10. Treating AI as senior
+          </div>
+          <div class="gotcha-detail"><strong>Warning sign:</strong> Expecting architectural decisions from AI</div>
+          <div class="gotcha-detail"><strong>Calibration:</strong> YOU make architecture calls. AI implements. That's the division of labor.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Memory Doesn't Persist
+          </div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Architecture limitation. Context resets between sessions. There's no "learning" in the traditional sense.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> External state (CLAUDE.md, MCP integrations). The filesystem IS the memory. Treat CLAUDE.md as institutional knowledge.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Confident but Wrong
+          </div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> AI has no built-in self-doubt. It produces code with equal confidence whether correct or broken.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Always verify. Never trust without checking. Human review is essential, not optional.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Can't See Quality
+          </div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> AI doesn't know good from bad in context. It can't judge architectural fit or maintainability.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Human review at Step 2 is where quality is enforced. AI can check syntax; you must check sense.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost is Real
+          </div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Heavy use = $1,000-1,500/month. This is real money that requires ROI calculation.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Budget, monitor, and do the math. 2-3x productivity at this cost is still excellent ROI for most teams.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Hype vs Reality Gap
+          </div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Social media amplifies success stories and ignores iteration costs. The gap between hype and reality causes disappointment.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Calibrate to 2-3x, not 10x. Honest assessment beats inflated expectations.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Learning Curve
+          </div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> It takes time to work with AI effectively. The "messy first months" are real.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Budget for learning. Start with small features. Expect iteration. Get better over time.</div>
+        </div>
+
+        <div class="quote-highlight">
+          "AI can't retain learning between sessions (unless you spend the time manually giving it the 'memories')."
+        </div>
+      </section>
+
+      <!-- Section 9: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">9</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE THIS MENTAL MODEL WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>New to AI coding tools (sets correct expectations)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>High expectations currently (calibrates to reality)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Willing to review thoroughly (model requires it)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>$1,000+/month budget acceptable (cost is real)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Patient with multiple attempts (process requires it)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE THIS MODEL WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Already calibrated (use your own model)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Very simple tasks (overkill - just ask directly)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>No review time available (model requires review)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Zero budget (cost reality won't match)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Self-Assessment</h3>
+
+        <div class="process-box">
+          <div class="process-step">
+            <div class="step-number">?</div>
+            <div class="step-content">
+              <div class="step-label">Have you been disappointed by AI coding tools?</div>
+              <div class="step-detail">YES: This model will help calibrate expectations. NO: May still be useful for new situations.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="step-number">?</div>
+            <div class="step-content">
+              <div class="step-label">Are you willing to budget 3 attempts per task?</div>
+              <div class="step-detail">YES: Model will work for you. NO: Consider simpler expectations.</div>
+            </div>
+          </div>
+          <div class="process-step">
+            <div class="step-number">?</div>
+            <div class="step-content">
+              <div class="step-label">Are you comfortable with 2-3x (not 10x) productivity?</div>
+              <div class="step-detail">YES: Realistic match. NO: Adjust expectations first.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (4 items) -->
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Boris: Verification Loops</div>
+        <div class="text-text-secondary text-sm">
+          Both Vincent and Boris Cherny (Claude Code creator) emphasize verification discipline. Different framing (junior dev vs. vanilla workflow), same core insight: <strong>never trust AI output without checking</strong>.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Jaana: Calibration</div>
+        <div class="text-text-secondary text-sm">
+          Both Vincent and Jaana Dogan provide anti-hype perspectives. Different domains (AI coding vs. distributed systems), same calibration: <strong>set realistic expectations to avoid disappointment</strong>.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Vincent's Career Pivot</div>
+        <div class="text-text-secondary text-sm">
+          5 pivots in 17+ years: Books/docs (5 years), Google search (12 years), Cursor (18 months), Claude Code (6 weeks). Each changed HOW code gets written but didn't eliminate the need for understanding, review, and judgment.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">The Anti-Hype Stance</div>
+        <div class="text-text-secondary text-sm">
+          Vincent rejected "10x" claims, provided honest 2-3x assessment. Result: Credibility in the community. "The code isn't precious; the problems we solve are."
+        </div>
+      </div>
+
+      <!-- CORE SECTION (5 items) -->
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">You've Managed Juniors Before</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What you know:</strong> How to mentor a junior developer - clear instructions, patient iteration, thorough review, expect mistakes.<br><br>
+          <strong>How it applies:</strong> AI = eager junior needing guidance. Same patience, same rigor, same expectations. The framing leverages your existing management skills.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="core">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if AI DID learn between sessions?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Single long-running relationship, no CLAUDE.md needed, no external state.<br>
+          <strong>Why this fails:</strong> Context windows have limits. Memory reset is architectural, not a bug.<br>
+          <strong>Hidden constraint:</strong> The "doesn't learn" part drives the entire workflow design.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How output quality degrades by attempt</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Attempt 1:</strong> 5% useful (95% garbage) - context building<br>
+          <strong>Attempt 2:</strong> 50% useful - core logic emerges<br>
+          <strong>Attempt 3:</strong> 80% useful - workable foundation<br><br>
+          Total "waste": 2.5 attempts worth. But: Traditional approach takes 3x longer. The math works.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Trust Calibration</div>
+        <div class="text-text-secondary text-sm">
+          After internalizing the mental model, appropriate trust level becomes automatic. You stop being surprised by garbage first attempts. You stop being disappointed by iteration needs. The model creates sustainable practice.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Review Habit Formation</div>
+        <div class="text-text-secondary text-sm">
+          Three-step review becomes automatic. You don't think about whether to review - you just do. The habit persists even as AI quality improves, providing safety margin.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (5 items) -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Memory doesn't persist" forces everything</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Context resets between sessions<br>
+          &rarr; Need external state (CLAUDE.md)<br>
+          &rarr; Need maintenance discipline<br>
+          &rarr; Need to capture learnings explicitly<br>
+          &rarr; Need MCP for tool context<br>
+          &rarr; Need to treat filesystem as memory
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"AI is confident" forces verification</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> AI has no self-doubt<br>
+          &rarr; Need verification discipline<br>
+          &rarr; Need review steps<br>
+          &rarr; Need human judgment layer<br>
+          &rarr; Need team review unchanged
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Speed vs. Quality</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> AI is fast - generates code quickly<br>
+          <strong>Pull B:</strong> AI makes mistakes - needs review<br>
+          <strong>Resolution:</strong> Review ensures quality. Speed without quality is rework. Accept the tension.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Hype vs. Reality</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Exciting "10x" claims motivate adoption<br>
+          <strong>Pull B:</strong> Honest "2-3x" assessment sets sustainable expectations<br>
+          <strong>Resolution:</strong> Choose reality. Disappointment kills adoption faster than conservative estimates.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="decisions">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with CLAUDE.md: External State</div>
+        <div class="text-text-secondary text-sm">
+          Both Vincent's approach and the core principle of CLAUDE.md recognize: memory doesn't persist. External state (files) is the solution. The filesystem IS the memory.
+        </div>
+      </div>
+
+      <!-- FILES SECTION -->
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Attempts + CLAUDE.md</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Track attempt progression in attempts/ folder while capturing learnings in CLAUDE.md. The three-attempt pattern becomes visible in file structure.<br>
+          <strong>Why it works:</strong> Can revisit what was learned at each stage.
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"AI doesn't learn" forces file structure</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Memory doesn't persist<br>
+          &rarr; Need external state (CLAUDE.md)<br>
+          &rarr; Need learning capture (LEARNINGS.md)<br>
+          &rarr; Need review tracking (reviews/)<br>
+          &rarr; <strong>Structure IS the workaround for memory</strong>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="files">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip HUMAN-EDITS tracking</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> No HUMAN EDIT markers<br>
+          <strong>THEN:</strong> AI overwrites manual changes<br>
+          <strong>THEN:</strong> Careful work lost silently<br>
+          <strong>THEN:</strong> Trust in AI workflow erodes<br>
+          <strong>FINALLY:</strong> "AI is unpredictable" frustration<br><br>
+          <em>The fix: Mark every human edit. Track in docs/HUMAN-EDITS.md.</em>
+        </div>
+      </div>
+
+      <!-- PROCESS SECTION (4 items) -->
+      <div class="activity-item violation" data-section="process">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip three-step review</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip review ("AI checked it")<br>
+          <strong>THEN:</strong> Confident-but-wrong code ships<br>
+          <strong>THEN:</strong> Bugs in production<br>
+          <strong>THEN:</strong> Trust in AI erodes<br>
+          <strong>FINALLY:</strong> Tool rejection, back to manual<br><br>
+          <em>The fix: Three-step is three-step. No shortcuts.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="process">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you expect 10x productivity</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Expect 10x from social media hype<br>
+          <strong>THEN:</strong> Get 2-3x in practice<br>
+          <strong>THEN:</strong> Feel disappointed<br>
+          <strong>THEN:</strong> Frustration with tool<br>
+          <strong>FINALLY:</strong> Abandon tool, lose actual gains<br><br>
+          <em>The fix: Calibrate to 2-3x. Still excellent ROI.</em>
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="process">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Junior Dev Model + CLAUDE.md</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Capture learnings in CLAUDE.md to prevent repeat mistakes. The "doesn't learn" part is mitigated by external memory.<br>
+          <strong>Why it works:</strong> Filesystem becomes institutional knowledge.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="process">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Junior Dev Model + Team Process</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Normal team review process unchanged. AI-generated code gets same scrutiny as human code.<br>
+          <strong>Why it works:</strong> Quality bar maintained regardless of origin.
+        </div>
+      </div>
+
+      <!-- PATH SECTION (3 items) -->
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How value perception evolves</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Single task:</strong> "2.5x faster, worthwhile"<br>
+          <strong>Project:</strong> "Compounds across features"<br>
+          <strong>Career:</strong> "Fundamental shift in how I work"<br><br>
+          <em>The mental model is right at all scales.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> Can apply three-attempt process<br>
+          <strong>Intermediate:</strong> Efficient at reviews, predicts garbage rate<br>
+          <strong>Advanced:</strong> Minimal attempts for simple tasks<br>
+          <strong>Expert:</strong> Teaches others, calibrates teams
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="path">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible core</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Essence:</strong> "Expect iteration"<br>
+          <strong>Included:</strong> The insight that first attempts won't be perfect<br>
+          <strong>Removed:</strong> Full three-attempt process, three-step review<br>
+          <strong>When:</strong> Quick tasks, low-stakes code
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When task complexity changes the process</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Below threshold (simple):</strong> One attempt might be enough<br>
+          <strong>Above threshold (medium+):</strong> Three attempts needed<br>
+          <strong>THE FLIP:</strong> Medium complexity tasks<br><br>
+          <em>Heuristic: If you can describe it in one sentence, maybe one attempt. Otherwise, budget three.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="gotchas">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you expected perfection first try?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd experience:</strong> Constant disappointment, frustration, tool rejection<br>
+          <strong>Why this fails:</strong> 95% garbage is the reality, not the exception<br>
+          <strong>Hidden constraint:</strong> Iteration is built into the process, not a bug
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Persistent Learning</div>
+        <div class="text-text-secondary text-sm">
+          Memory resets currently. Research ongoing at Anthropic and OpenAI on persistent context, learning, and memory. For now, external state (CLAUDE.md) is the workaround.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Self-Assessment</div>
+        <div class="text-text-secondary text-sm">
+          AI can't judge its own quality. It produces confident output regardless of correctness. Research ongoing on calibration and uncertainty estimation.
+        </div>
+      </div>
+
+      <!-- HARD SECTION (4 items) -->
+      <div class="activity-item gradient" data-section="hard">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How skipping review fails gradually</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10%:</strong> Minor bugs slip through<br>
+          <strong>50%:</strong> Major issues accumulate<br>
+          <strong>90%:</strong> Production failures<br>
+          <strong>100%:</strong> Trust in AI completely eroded<br><br>
+          <em>Each skip compounds. The gradient is invisible until the cliff.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="hard">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How wrong expectations fail gradually</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10%:</strong> Slight frustration ("slower than expected")<br>
+          <strong>50%:</strong> Major disappointment<br>
+          <strong>90%:</strong> Active frustration with tool<br>
+          <strong>100%:</strong> Tool rejection, lost productivity<br><br>
+          <em>Calibration prevents the cascade.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Vincent's 6-Week Claude Code Transition</div>
+        <div class="text-text-secondary text-sm">
+          Transitioned from 18 months of Cursor to 6 weeks of Claude Code. Developed the "junior developer" model through real practice. Validated that the mental model enables sustainable adoption.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="hard">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Pair Programming" Model</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Alternative framing:</strong> AI as pair programming partner<br>
+          <strong>When better:</strong> More collaborative framing, real-time iteration<br>
+          <strong>When worse:</strong> Doesn't capture the "doesn't learn" insight
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (4 items) -->
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you used this for simple tasks?</div>
+        <div class="text-text-secondary text-sm">
+          Three-attempt process for "rename a variable" = overkill<br>
+          <strong>Why it fails:</strong> Overhead exceeds value<br>
+          <strong>Reveals:</strong> Mental model is for medium+ complexity tasks
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Tool" Framing</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Alternative:</strong> Treat AI as just a tool<br>
+          <strong>When better:</strong> Simpler mental model, less cognitive load<br>
+          <strong>When worse:</strong> Misses iteration need, leads to disappointment
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Anti-Composition
+        </div>
+        <div class="font-medium text-text-primary mb-2">Junior Dev Model + No Review</div>
+        <div class="text-text-secondary text-sm">
+          <strong>FAILS:</strong> Skipping review defeats the entire purpose of the model. "Confident but wrong" code ships. The model requires review discipline.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Anti-Composition
+        </div>
+        <div class="font-medium text-text-primary mb-2">Junior Dev Model + 10x Expectations</div>
+        <div class="text-text-secondary text-sm">
+          <strong>FAILS:</strong> The model is about calibration. Expecting 10x while using the model creates cognitive dissonance. The model says 2-3x.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

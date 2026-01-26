@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Deployment Architecture Taxonomy for Claude Code
 
+> **You Are Here:** This is the **infrastructure reference** for running Claude Code. If you're deciding where and how to deploy (local, cloud VM, Docker, serverless, mobile), this document covers every deployment pattern with security considerations, cost analysis, and decision trees. **Note:** This file is DEPRECATED - for current content, see `D-FINAL-operations.md` Section 4.
+
 **Comprehensive Classification of Infrastructure Patterns, Sandboxing Strategies, and Execution Environments**
 
 *Generated: 2026-01-09*
@@ -256,6 +258,24 @@ done
 
 ---
 
+### Checkpoint: Local Development
+**You should now understand:**
+- [ ] The 4 local patterns: Direct CLI, tmux, Git Worktrees, Ralph Loop
+- [ ] How to set up tmux for persistent sessions
+- [ ] The worktree spawn pattern for parallel agents
+- [ ] Ralph loop file structure (prd.json, progress.txt, ralph.sh)
+
+**If unclear:** Re-read Section 1 or see `mastery-ralph-complete.md`
+
+**Terminal verification:**
+```bash
+# Test your local setup
+claude --version && tmux -V && git worktree list
+# You should see: version numbers and worktree list
+```
+
+---
+
 ## 2. Remote Terminal Access
 
 ### 2.1 Cloud VM with SSH/mosh
@@ -408,6 +428,17 @@ Cloud-hosted development environments with browser/SSH access.
 | GitHub | Native | Extension |
 | GitLab | No | Yes |
 | SSH Access | Yes | Yes |
+
+---
+
+### Checkpoint: Remote Access
+**You should now understand:**
+- [ ] SSH/mosh patterns for cloud VMs
+- [ ] GitHub Codespaces and Gitpod configuration
+- [ ] Mobile-first workflows (SSH apps, nano-prompts)
+- [ ] Session persistence strategies (tmux, mosh)
+
+**If unclear:** Re-read Section 2 or see `extractions/infrastructure/` and `extractions/mobility/`
 
 ---
 
@@ -1702,6 +1733,112 @@ tailscale ip -4
 
 ---
 
+## Troubleshooting
+
+### Common Issue: SSH Session Drops During Long Operation
+**Symptom:** Claude Code disconnects mid-task, work lost
+**Cause:** SSH connection timeout, network instability
+**Fix:**
+```bash
+# 1. Use mosh instead of SSH for mobile connections
+mosh user@server
+
+# 2. Use tmux for session persistence
+tmux new -s claude
+# Reconnect: tmux attach -t claude
+
+# 3. Configure SSH keepalive (~/.ssh/config)
+Host *
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+```
+
+### Common Issue: Docker Container Permission Denied
+**Symptom:** Claude Code can't write to mounted volumes
+**Cause:** UID/GID mismatch between container and host
+**Fix:**
+```bash
+# 1. Check host user ID
+id -u && id -g
+
+# 2. Match in Dockerfile
+RUN addgroup -g 1000 claude && adduser -u 1000 -G claude -D claude
+
+# 3. Or use --user flag
+docker run --user $(id -u):$(id -g) ...
+
+# 4. Or fix permissions on host
+chown -R $(id -u):$(id -g) ./project
+```
+
+### Common Issue: Tailscale MagicDNS Not Resolving
+**Symptom:** Can't reach server by hostname, only IP
+**Cause:** DNS not configured or MagicDNS not enabled
+**Fix:**
+```bash
+# 1. Enable MagicDNS in Tailscale admin console
+
+# 2. Check Tailscale status
+tailscale status
+
+# 3. Verify DNS
+tailscale dns
+
+# 4. Force re-authentication if needed
+tailscale up --reset
+```
+
+### Common Issue: Cloudflare Worker Hitting CPU Limits
+**Symptom:** Request terminated, "Worker exceeded CPU time limit"
+**Cause:** Claude Code request too complex for serverless
+**Fix:**
+1. Cloudflare free tier: 10ms CPU per request
+2. Paid plan: 30 seconds CPU
+3. For complex tasks, use Cloudflare Queue or Durable Objects
+4. Or switch to dedicated VM for agent operations
+
+### Common Issue: Push Notifications Not Arriving
+**Symptom:** Agent finishes but no mobile notification
+**Cause:** Hook not configured, service not running, or rate limited
+**Fix:**
+```bash
+# 1. Test notification service directly
+curl -d "title=Test&message=Test&priority=5" \
+  -H "Access-Token: YOUR_KEY" \
+  https://api.pushover.net/1/messages.json
+
+# 2. Check hook is configured in settings.json
+cat ~/.claude/settings.json | jq '.hooks'
+
+# 3. Verify hook script is executable
+chmod +x ~/.claude/hooks/notify.sh
+
+# 4. Test hook manually
+TOOL_NAME="AskUserQuestion" ~/.claude/hooks/notify.sh
+```
+
+### Common Issue: API Key Not Found in Container
+**Symptom:** "ANTHROPIC_API_KEY not set" error
+**Cause:** Environment variable not passed to container
+**Fix:**
+```bash
+# Option 1: Pass at runtime
+docker run -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY ...
+
+# Option 2: Use .env file with docker-compose
+# .env
+ANTHROPIC_API_KEY=sk-...
+
+# docker-compose.yml
+env_file: .env
+
+# Option 3: Use Docker secrets (production)
+docker secret create anthropic_key key.txt
+# Then mount in container
+```
+
+---
+
 ## Sources
 
 This taxonomy synthesizes patterns from:
@@ -1729,6 +1866,7 @@ This taxonomy synthesizes patterns from:
 ---
 
 *Last Updated: 2026-01-09*
+*Wave-3 Enhanced: 2026-01-19*
 *Status: Exhaustive Taxonomy Complete*
 
 ---

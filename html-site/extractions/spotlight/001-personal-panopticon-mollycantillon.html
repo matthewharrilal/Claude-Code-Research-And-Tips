@@ -1,0 +1,2081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Panopticon | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Quote Box */
+    .quote-box {
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      border-left: 4px solid #0D9373;
+      border-radius: 0 12px 12px 0;
+      padding: 20px 24px;
+      margin: 24px 0;
+      font-style: italic;
+      color: #3f3f46;
+    }
+
+    .quote-attribution {
+      margin-top: 12px;
+      font-style: normal;
+      font-size: 13px;
+      color: #71717a;
+    }
+
+    /* Domain Card */
+    .domain-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .domain-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .domain-icon {
+      width: 32px;
+      height: 32px;
+      background: #ecfdf5;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0D9373;
+    }
+
+    .domain-name {
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .domain-desc {
+      font-size: 14px;
+      color: #71717a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">8 parallel Claude instances, each owning a life domain, reversing institutional surveillance asymmetry.</div>
+        </div>
+
+        <div class="quote-box">
+          "It feels borderline unfair seeing around corners, being in ten places at once, surveilling yourself with the attention span of a thousand clones."
+          <div class="quote-attribution">- Molly Cantillon (@mollycantillon)</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Institutions see you but you cannot see back. Claude Code lets you build your own watchtower."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, '~/nox ~/metrics ~/email ~/growth ~/trades ~/health ~/writing ~/personal')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>~/nox ~/metrics ~/email ~/growth ~/trades ~/health ~/writing ~/personal</code>
+          </div>
+
+          <div class="core-anchor">8 isolated directories. 8 Claude instances. One self-legible life.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Pre-modern states were blind to their citizens. They built "apparatus of sight": censuses, surnames, maps. Now corporations have legibility over YOU (behavioral data) but you don't have it over yourself. Personal Panopticon reverses this asymmetry.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          Each Claude instance operates <strong>independently</strong> in its own directory. No cross-contamination. Each spawns short-lived subagents for specific tasks. They exchange context through explicit file-based handoffs. The filesystem IS the persistent memory.
+        </p>
+
+        <div class="quote-box">
+          "The violent gap between how blind you were and how obvious everything feels now with an observer that reads all the feeds, catches what you've unconsciously dropped, notices patterns across domains you'd kept stubbornly separate."
+          <div class="quote-attribution">- Molly Cantillon</div>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-8-domains" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY 8 DOMAINS (NOT 3 OR 20)?</div>
+          <div class="decision-reasoning">
+            8 domains cover the major areas of life without excessive coordination overhead. Fewer means gaps in coverage. More means coordination complexity explodes and maintenance becomes a full-time job.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Start with 3-4 high-impact domains. Add more only when existing domains are stable. The sweet spot is between coverage and manageability.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-isolation">
+          <div class="decision-why">WHY ISOLATED DIRECTORIES?</div>
+          <div class="decision-reasoning">
+            Cross-contamination is the death of clarity. If your trades Claude instance starts reading health data, its recommendations become muddied. Each instance is "contained" to its domain through directory boundaries.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Add explicit boundaries to each domain's CLAUDE.md: "DO NOT access other domains." Use file permissions if needed. Cross-domain communication happens ONLY through the handoff queue.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-filesystem">
+          <div class="decision-why">WHY FILESYSTEM OVER DATABASE?</div>
+          <div class="decision-reasoning">
+            Claude natively reads and writes files. Zero infrastructure required. No database setup, no schema migrations, no connection strings. The filesystem is the persistence layer Claude already speaks.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Start immediately. Create directories and CLAUDE.md files. No infrastructure sprint needed. If you later need more structure, migrate then. Premature optimization is the root of complexity.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY CRON OVER REAL-TIME?</div>
+          <div class="decision-reasoning">
+            Overnight/scheduled runs enable batch processing without babysitting. Most life automation doesn't need sub-second response. Morning briefs, inbox processing, workout generation - all can wait for their scheduled slot.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Schedule heavy processing overnight. Use cron for regular cadences. For time-sensitive triggers (WHOOP sleep detection), use file watchers or webhooks that spawn Claude on demand.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY HUMAN-IN-THE-LOOP VIA TEXT?</div>
+          <div class="decision-reasoning">
+            Checkpoint approvals prevent runaway automation. Text notifications reach you anywhere. Reply to approve, adjust, or abort. You remain in control at decision points while automation handles the grunt work.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Set up Twilio or similar for text notifications. Define checkpoint moments for each domain. Don't make everything autonomous - that's how $2000 in subscriptions renews while you sleep.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY GUI AUTOMATION FALLBACK?</div>
+          <div class="decision-reasoning">
+            Not everything has an API. Some services only offer web interfaces. GUI automation (mouse/keystroke injection) lets Claude control desktop apps directly when APIs fail.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use APIs when available - they're more reliable. Fall back to GUI automation only when necessary. Log all GUI actions. Be prepared for breakage when apps update their interfaces.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>~/ <span class="comment">(Home Directory)</span>
+<span class="comment">├── nox/                      # Company/product domain</span>
+│   ├── CLAUDE.md              <span class="comment"># Domain instructions</span>
+│   ├── .claude/               <span class="comment"># Claude state</span>
+│   ├── inbox/                 <span class="comment"># Tasks from other domains</span>
+│   ├── outbox/                <span class="comment"># Tasks for other domains</span>
+│   └── briefs/                <span class="comment"># Generated reports</span>
+│
+<span class="comment">├── metrics/                  # Analytics/data domain</span>
+│   ├── CLAUDE.md
+│   ├── amplitude-cache/       <span class="comment"># API data cache</span>
+│   └── dashboards/            <span class="comment"># Generated dashboards</span>
+│
+<span class="comment">├── email/                    # Communications domain</span>
+│   ├── CLAUDE.md
+│   ├── drafts/                <span class="comment"># Auto-drafted replies</span>
+│   ├── sorted/                <span class="comment"># Categorized inbox</span>
+│   └── templates/             <span class="comment"># Response templates</span>
+│
+<span class="comment">├── growth/                   # Marketing/acquisition domain</span>
+│   ├── CLAUDE.md
+│   ├── campaigns/             <span class="comment"># A/B test configs</span>
+│   └── copy/                  <span class="comment"># Generated content</span>
+│
+<span class="comment">├── trades/                   # Personal finance domain</span>
+│   ├── CLAUDE.md
+│   ├── morning-brief/         <span class="comment"># Daily financial summary</span>
+│   ├── positions/             <span class="comment"># Current holdings</span>
+│   └── signals/               <span class="comment"># Buy/sell signals</span>
+│
+<span class="comment">├── health/                   # Fitness/sleep domain</span>
+│   ├── CLAUDE.md
+│   ├── workouts/              <span class="comment"># Generated workout plans</span>
+│   ├── sleep-data/            <span class="comment"># WHOOP integration</span>
+│   └── triggers/              <span class="comment"># Automation triggers</span>
+│
+<span class="comment">├── writing/                  # Content creation domain</span>
+│   ├── CLAUDE.md
+│   ├── drafts/                <span class="comment"># Work in progress</span>
+│   └── research/              <span class="comment"># Background material</span>
+│
+<span class="comment">├── personal/                 # Life admin domain</span>
+│   ├── CLAUDE.md
+│   ├── subscriptions/         <span class="comment"># Subscription audit</span>
+│   └── calendar/              <span class="comment"># Schedule management</span>
+│
+<span class="comment">├── .panopticon/              # Central coordination</span>
+│   ├── crontab.txt            <span class="comment"># All scheduled jobs</span>
+│   ├── handoffs/              <span class="comment"># Cross-domain queue</span>
+│   └── notifications/         <span class="comment"># Alert configs</span>
+│
+└── scripts/
+    ├── panopticon-start.sh    <span class="comment"># Launch all domains</span>
+    └── handoff-process.sh     <span class="comment"># Process cross-domain queue</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="domain-claude-md">Sample Domain CLAUDE.md (~/trades/CLAUDE.md)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Trades Domain - Claude Instructions</span>
+
+<span class="comment">## Domain Purpose</span>
+This instance manages personal finance: brokerage data,
+congressional disclosures, market sentiment, morning briefs.
+
+<span class="comment">## Data Sources</span>
+- Brokerage API (overnight scraping)
+- Congressional disclosure RSS
+- Polymarket odds API
+- X/Twitter sentiment (via scraping)
+
+<span class="comment">## Output Expectations</span>
+- Daily: ~/trades/morning-brief/YYYY-MM-DD.md
+- Signals: ~/trades/signals/active.json
+- Alerts: Text notification for actionable items
+
+<span class="comment">## Boundaries</span>
+- DO NOT access other domains
+- DO NOT make trades (advisory only)
+- DO NOT store credentials in files
+
+<span class="comment">## Handoff Protocol</span>
+- Incoming: Check ~/trades/inbox/ for tasks
+- Outgoing: Write to ~/.panopticon/handoffs/ with domain prefix</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="automation-layer">Automation Layer</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Keep system awake during long runs</span>
+caffeinate -i
+
+<span class="comment"># Simple alias for natural language CLI</span>
+<span class="keyword">alias</span> c=<span class="string">'claude'</span>
+<span class="comment"># Usage: c "Show me everyone who hasn't paid in 90 days"</span>
+
+<span class="comment"># Cron jobs for scheduled runs (crontab -e)</span>
+<span class="comment"># Finance brief at 5am</span>
+0 5 * * * <span class="keyword">cd</span> ~/trades && claude <span class="string">"Generate morning brief"</span> >> ~/logs/trades.log 2>&1
+
+<span class="comment"># Email triage at 8am</span>
+0 8 * * * <span class="keyword">cd</span> ~/email && claude <span class="string">"Process inbox"</span> >> ~/logs/email.log 2>&1
+
+<span class="comment"># Process handoffs every hour</span>
+0 * * * * ~/scripts/handoff-process.sh >> ~/logs/handoffs.log 2>&1</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path-finance" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Task
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">Path 1: Morning Finance Brief</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>[T+0min]</strong> Cron triggers at 5:00 AM: <code>cd ~/trades && claude "Generate morning brief"</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>[T+1min]</strong> Claude loads domain context: reads CLAUDE.md, positions/current.json, yesterday's brief</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>[T+2min]</strong> Data collection: scrapes brokerage, fetches congressional disclosures (RSS), Polymarket odds, X sentiment</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>[T+10min]</strong> Synthesis: correlates position changes vs news, identifies unusual activity, generates recommendations</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>[T+15min]</strong> Output: writes <code>morning-brief/2026-01-25.md</code>, updates <code>signals/active.json</code>, sends text if urgent</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>[T+16min]</strong> Session ends. Claude terminates. Brief ready for human review. Fresh context tomorrow.</div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="path-email">Path 2: Email Triage with Handoff</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>[T+0min]</strong> Cron triggers at 8:00 AM: <code>cd ~/email && claude "Process inbox"</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>[T+1min]</strong> Claude loads email domain: reads CLAUDE.md, sorted/ patterns, templates/</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>[T+5min]</strong> Inbox processing: categorizes (support, sales, personal, spam), drafts routine replies, flags items needing human decision</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>[T+15min]</strong> <strong>Handoff detected:</strong> Email about subscription renewal ($2000 found!). Creates <code>~/.panopticon/handoffs/personal-subscription-audit.md</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>[T+20min]</strong> Checkpoint notification: texts "Email processed: 47 sorted, 3 need review". Human replies to approve/adjust.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>[T+25min]</strong> Session ends with handoff queued. Personal domain will pick up subscription audit on next run.</div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="path-health">Path 3: WHOOP Sleep Trigger</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>[T+0min]</strong> External trigger: WHOOP API detects 6+ hours sleep, webhook writes to <code>~/health/triggers/sleep-complete.json</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>[T+1min]</strong> File watcher activates: <code>cd ~/health && claude "Sleep complete, process trigger"</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>[T+2min]</strong> Claude reads trigger context: sleep-complete.json (sleep quality), yesterday's workout, travel schedule</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>[T+5min]</strong> Workout generation: adjusts today's workout based on recovery score, considers travel constraints</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>[T+8min]</strong> <strong>Projector activation:</strong> Recovery score > 80% triggers GUI automation to start morning routine projector</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>[T+10min]</strong> Session ends. Workout written to <code>workouts/2026-01-25.md</code>. Projector running. Human wakes to personalized morning.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit, with concrete numbers and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            1. Domain Cross-Contamination
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent reads files outside its domain, recommendations get muddied</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add explicit boundary in CLAUDE.md: "DO NOT access other domains". Use directory permissions (chmod) if needed.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            2. Handoff Queue Backup
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> ~/.panopticon/handoffs/ fills up, handoffs never processed</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add cron job to process handoffs hourly. Alert on queue size > 10 items.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 10 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            3. Cron Silent Failure
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Scheduled job doesn't run, no error visible</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add <code>>> ~/logs/domain.log 2>&1</code> to every cron entry. Monitor logs daily.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 15 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            4. API Rate Limits
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Brokerage or service blocks overnight scraping</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add rate limiting between requests. Spread requests over 30+ minutes instead of bursting.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 30 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            5. Text Notification Failure
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Twilio down, no checkpoint received, agent stuck waiting</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add fallback notification (email). Add timeout + default action after 30 minutes.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 20 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            6. GUI Automation Breaks
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Desktop app updated, mouse coordinates wrong</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use accessibility APIs where possible (more stable). Log all clicks. Accept occasional manual intervention.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 30 minutes per app</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            7. Context Too Large
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Domain accumulates too much state, Claude slows down</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add cleanup routine. Archive briefs older than 30 days. Keep only recent data in active directories.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 10 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            8. Human Never Responds
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Checkpoint text sent, hours pass, agent stuck waiting</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add timeout + default action. Escalation path: text -> email -> Slack. Consider safe defaults.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 15 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            9. Credential Exposure
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> API key accidentally written to brief or log</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use environment variables exclusively. Add credential scrubbing to output. Never persist secrets in files.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 minutes (but critical)</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            10. Domain Scope Creep
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Trades domain starts handling health concerns, boundaries blur</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Review CLAUDE.md boundaries quarterly. Refactor when domains merge. Consider if domain split is still correct.</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 20 minutes</div>
+        </div>
+
+        <div class="quote-box">
+          <strong>Thread critique addressed:</strong> @flutterwhat: "Swarm of eight instances in parallel is a cute way to say I made eight folders and accidentally reinvented ~/bin plus crontab -e."
+          <div class="quote-attribution">The technical implementation IS simple (directories + cron). The value is in the ORGANIZATION and domain isolation mental model, not novel infrastructure.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Goodhart's Law
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> "Optimize for a metric and you game your way to hollow victory." When WHOOP says recovered but you feel like death - notice the gap.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Keep a "meta-level outside the system" that can argue with the brief. Be ready to delete ~/health tomorrow if it stops serving. "We must continue to live outside it."</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Anthropic Visibility
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Every query goes to Anthropic. They see your finances, health, communications. This is a privacy trade-off with no technical workaround (short of local LLMs).</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> "Sometimes the tower has a landlord. The value exchange is explicit: their visibility into your thinking for access to a thousand-clone attention span. In this case, chosen beats imposed."</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Maintenance Burden
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> 8 domains = 8x the configuration, 8x the monitoring, 8x the potential failure points. This is operational complexity, not technical complexity.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Invest in automation, templates, and health checks. Start with 3-4 domains. Add more slowly. Accept that maintenance is the price of capability.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Diminishing Returns
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Early domains (email, trades) have massive ROI. Later domains have unclear value. Domain #8 might cost more attention than it saves.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Track time-to-value for each domain. Cut domains that don't pay for themselves in attention savings. Quality over quantity.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Human Bottleneck
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> The system can surface insights, but humans still need to ACT. 8 domains producing 8 briefs creates 8 decision backlogs.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Design for actionability, not just information. Reduce decision load - "here's what I recommend" not "here are 10 options." Batch non-urgent decisions.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Integration Complexity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Each new data source needs custom integration. Brokerage APIs differ from WHOOP APIs differ from email APIs. No universal connector exists.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Use MCP servers where available (they standardize the interface). Accept some manual data entry. Don't let perfect integration block good-enough automation.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE PANOPTICON WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multiple distinct life domains need automation (not just one project)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're comfortable with cron, shell scripts, basic sysadmin</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Willing to invest 20+ hours in initial setup</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You accept Anthropic data visibility (explicit trade-off)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Have API access to relevant services (not GUI-only)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Planning to use this for 1+ years (long-term investment)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE PANOPTICON WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Single domain to automate - use simple Claude + cron instead</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>No time for setup investment - use manual Claude sessions</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Privacy-critical data (medical, legal) - consider local LLMs or no AI</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Rapidly changing needs - architecture locks in structure</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Team context - use Gas Town or CC Mirror instead</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Real-time requirements - Panopticon is batch/cron oriented</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Graduation Path</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number" style="background: #71717a;">0</div>
+            <div class="path-content"><strong>Level 0-2:</strong> Single Claude sessions, manual prompting</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number" style="background: #71717a;">3</div>
+            <div class="path-content"><strong>Level 3-4:</strong> Ralph loop for single project automation</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number" style="background: #71717a;">5</div>
+            <div class="path-content"><strong>Level 5:</strong> Multi-project Claude usage, separate contexts</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>Level 6:</strong> <strong>Personal Panopticon (you are here)</strong> - 8 domains, life OS</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number" style="background: #71717a;">7</div>
+            <div class="path-content"><strong>Level 7+:</strong> Gas Town / Factory scale, team orchestration</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Ralph: Filesystem as Memory</div>
+        <div class="text-text-secondary text-sm">
+          Panopticon uses domain directories as persistent memory, same principle as Ralph's progress.txt. <strong>External state > internal memory</strong> applies at life scale, not just project scale.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Gas Town: Domain Isolation</div>
+        <div class="text-text-secondary text-sm">
+          Panopticon's 8 domains mirror Gas Town's role isolation - separate contexts prevent contamination. The principle: specialized agents beat generalist agents.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Unix Philosophy: Tools That Do One Thing</div>
+        <div class="text-text-secondary text-sm">
+          Each domain Claude instance does ONE thing well. Classic Unix philosophy applied to AI: composable, focused, clear interfaces between components.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">Two-Domain Starter</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Included:</strong> 1 work domain + 1 personal domain, basic handoffs<br>
+          <strong>Removed:</strong> Other 6 domains, GUI automation, webhooks<br>
+          <strong>When appropriate:</strong> Testing the pattern, limited time, want to validate ROI before full investment
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Emergent Life Legibility</div>
+        <div class="text-text-secondary text-sm">
+          After running 8 domains, patterns emerge across your life you never noticed. "Seeing around corners" - correlations between sleep and productivity, spending and mood, that no single domain would reveal.
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Delegation Muscle</div>
+        <div class="text-text-secondary text-sm">
+          Running 8 domains trains you to think in delegatable chunks. This skill transfers to human management - you get better at writing clear briefs, defining boundaries, specifying handoffs.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Microservices Architecture for Life</div>
+        <div class="text-text-secondary text-sm">
+          <strong>If you know microservices:</strong><br>
+          Domains = microservices (isolated, single responsibility)<br>
+          Handoffs = APIs (explicit contracts)<br>
+          CLAUDE.md = service configuration<br>
+          .panopticon/handoffs = message queue<br><br>
+          <em>Same architecture principles, applied to life automation.</em>
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Claude sessions are ephemeral" drives everything</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT CONSTRAINT:</strong> Claude sessions don't persist<br>
+          → Need filesystem persistence<br>
+          → Need structured directories<br>
+          → Need handoff protocol<br>
+          → Need explicit boundaries in CLAUDE.md<br>
+          → Need cron to restart sessions<br><br>
+          <em>One constraint creates the entire architecture.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"APIs don't exist for everything" forces GUI fallback</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT CONSTRAINT:</strong> Some services are GUI-only<br>
+          → Need GUI automation fallback<br>
+          → Need coordinate tracking<br>
+          → Need update handling when apps change<br>
+          → Need logging for debugging<br><br>
+          <em>Missing APIs force fragile automation. Accept this cost or skip those services.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if all domains shared one Claude instance?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Why it fails:</strong><br>
+          Context overflow (200K limit hit quickly)<br>
+          No isolation (trades advice polluted by health data)<br>
+          Cross-contamination (wrong recommendations)<br><br>
+          <strong>Hidden constraint revealed:</strong> Isolation is load-bearing, not optional. The 8-directory structure IS the solution.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if no human checkpoints?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Why it fails:</strong><br>
+          Runaway automation (mistakes compound silently)<br>
+          Hallucination propagation (bad data infects other domains)<br>
+          Damage discovered too late (morning reveals chaos)<br><br>
+          <strong>Hidden constraint revealed:</strong> Human-in-loop is a safety mechanism, not a limitation.
+        </div>
+      </div>
+
+      <!-- FILES SECTION -->
+      <div class="activity-item expertise" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> Set up 2-3 domains, basic cron<br>
+          <strong>Intermediate:</strong> 5+ domains, custom CLAUDE.md, handoffs working<br>
+          <strong>Advanced:</strong> Full 8 domains, webhooks, GUI automation<br>
+          <strong>Expert:</strong> Optimize configs, cross-domain synthesis, share patterns back<br><br>
+          <em>Next step from each level: Run for 2 weeks and observe what breaks.</em>
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Panopticon + MCP Servers</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works well:</strong> MCP servers (Gmail, Calendar, Brokerage) provide clean APIs that replace scraping. Reduces fragility.<br>
+          <strong>Danger:</strong> Each MCP server is a dependency. Version them carefully.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Panopticon + Hooks</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works well:</strong> File watchers and hooks reduce polling overhead. Trigger on events (new email, WHOOP data) instead of scheduled checks.<br>
+          <strong>Danger:</strong> More moving parts. Start with cron, add hooks when cron limitations hurt.
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item warstory" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">$2000 Subscription Discovery</div>
+        <div class="text-text-secondary text-sm">
+          Personal domain found $2000 in forgotten subscription charges during its first week. Panopticon paid for itself immediately. "The briefing catches what you've unconsciously dropped."
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Jmail: 18M Users Overnight</div>
+        <div class="text-text-secondary text-sm">
+          Parsed Epstein files overnight using domain automation. Result: 18 million users searched the resulting data. Proof that Panopticon-style automation can produce production-scale output.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Fully Autonomous Customer Support</div>
+        <div class="text-text-secondary text-sm">
+          Customer support domain handles inquiries without human intervention. Scaled support capability without hiring. Human review happens on escalations only.
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip domain isolation</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> One Claude reads all directories<br>
+          <strong>THEN:</strong> Context pollution<br>
+          <strong>THEN:</strong> Wrong recommendations (trades advice includes health tangents)<br>
+          <strong>THEN:</strong> Trust in system erodes<br>
+          <strong>FINALLY:</strong> Rebuild needed, time wasted<br><br>
+          <em>The fix: Explicit boundaries in CLAUDE.md, enforced from day one.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip human checkpoints</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Automation runs unchecked<br>
+          <strong>THEN:</strong> Mistakes compound silently<br>
+          <strong>THEN:</strong> Bad data propagates to other domains<br>
+          <strong>THEN:</strong> Damage discovered too late<br>
+          <strong>FINALLY:</strong> Days of cleanup, trust destroyed<br><br>
+          <em>Human-in-loop is insurance, not overhead.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How cron jobs fail (gradually)</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% healthy:</strong> All domains run on schedule<br>
+          <strong>90%:</strong> One domain skips occasionally (unnoticed)<br>
+          <strong>70%:</strong> Multiple domains miss runs<br>
+          <strong>50%:</strong> Automation mostly manual<br>
+          <strong>10%:</strong> No overnight processing<br><br>
+          <em>Detection: Check logs daily. Silent failures are the norm.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How handoff queues degrade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% healthy:</strong> Handoffs processed hourly<br>
+          <strong>90%:</strong> Minor delays (hours)<br>
+          <strong>70%:</strong> Significant backlogs<br>
+          <strong>50%:</strong> Domains desynchronized<br>
+          <strong>10%:</strong> Cross-domain coordination completely fails<br><br>
+          <em>Detection: Alert on queue size > 10 items.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Cross-Domain Intelligence</div>
+        <div class="text-text-secondary text-sm">
+          Domains are isolated, but no synthesis agent correlates insights across all 8. Someone could build a "meta-brief" that notices patterns invisible to individual domains.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Self-Improving Domain Configs</div>
+        <div class="text-text-secondary text-sm">
+          Domains don't optimize their own CLAUDE.md files. Could adapt from Infinite Orchestra pattern - domains that improve their own instructions based on outcomes.
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Privacy vs Capability</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Keep data local, less capable (local LLMs lag behind)<br>
+          <strong>Pull B:</strong> Send to Anthropic, more capable, they see everything<br><br>
+          <strong>Resolution:</strong> Explicit value exchange. Accept the trade-off or don't use the pattern. "Chosen beats imposed."
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Automation vs Control</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Full autonomy = maximum leverage, but mistakes compound<br>
+          <strong>Pull B:</strong> Full control = no mistakes, but no leverage<br><br>
+          <strong>Resolution:</strong> Human checkpoints at decision points only. Automate execution, verify decisions.
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="hard">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When does domain count flip from benefit to cost?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>2-4 domains:</strong> More domains = more life coverage = benefit<br>
+          <strong>5-6 domains:</strong> Diminishing returns start<br>
+          <strong>7-8 domains:</strong> Maintenance burden begins to dominate<br>
+          <strong>9+ domains:</strong> Overhead exceeds value<br><br>
+          <strong>THE INFLECTION:</strong> ~5-8 domains before diminishing returns<br>
+          <em>Detection: When adding a domain doesn't feel exciting, you've hit the ceiling.</em>
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Is Panopticon right at this time scale?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1 task (minutes):</strong> No - way too much overhead<br>
+          <strong>1 day:</strong> No - setup cost not justified<br>
+          <strong>1 week:</strong> No - won't see benefits yet<br>
+          <strong>1 month:</strong> Maybe - if multiple domains need automation<br>
+          <strong>1+ years:</strong> Yes - long-term life OS investment pays off<br><br>
+          <em>Panopticon is infrastructure, not a quick win.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Manual Claude Sessions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Simple needs, occasional use, exploratory work<br>
+          <strong>When worse:</strong> Ongoing automation needs, multiple domains<br>
+          <em>Don't build infrastructure for problems you don't have yet.</em>
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Single Domain + Ralph</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> One specific area needs automation (just coding, just email)<br>
+          <strong>When worse:</strong> Multiple life areas need coordination<br>
+          <em>Ralph is the single-domain version of this pattern. Start there if unsure.</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Track which sections are in view
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

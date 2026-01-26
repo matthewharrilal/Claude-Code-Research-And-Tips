@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic-Flow | Production Deployment for AI Agents | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer - Draggable divider between Main Panel and Activity Zone */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    /* Prevent text selection during resize */
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    /* Hide resizer when Activity Zone is hidden (responsive) */
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Architecture Diagram */
+    .architecture-diagram {
+      background: #18181b;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .architecture-diagram pre {
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #e4e4e7;
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    .path-timing {
+      font-size: 12px;
+      color: #71717a;
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Metrics Table */
+    .metrics-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+
+    .metrics-table th,
+    .metrics-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .metrics-table th {
+      background: #f4f4f5;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #71717a;
+    }
+
+    .metrics-table td {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .metrics-table tr:hover td {
+      background: #fafafa;
+    }
+
+    .metric-value {
+      font-family: 'Fira Code', monospace;
+      font-weight: 600;
+      color: #0D9373;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Alpha Warning Badge */
+    .alpha-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #92400e;
+    }
+
+    /* Combination Matrix */
+    .combination-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .combination-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .combination-card h4 {
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 8px;
+    }
+
+    .combination-card p {
+      font-size: 13px;
+      color: #71717a;
+    }
+
+    .combination-value {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      display: inline-block;
+      margin-top: 8px;
+    }
+
+    .value-high { background: #dcfce7; color: #166534; }
+    .value-very-high { background: #bbf7d0; color: #14532d; }
+    .value-medium { background: #fef3c7; color: #92400e; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="server" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="alpha-badge">
+        <i data-lucide="flask-conical" class="w-3 h-3"></i>
+        v2.0.1-alpha
+      </span>
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Bridge dev-to-production gap: 66 agents, self-learning ReasoningBank, containerized deployment from prototype to enterprise scale.</div>
+        </div>
+
+        <p class="text-text-secondary mb-4">
+          <strong>Agentic-Flow</strong> is a production-ready AI agent orchestration platform built on Anthropic's Claude Agent SDK. It transforms development-stage agent workflows into scalable, persistent, enterprise-grade deployments.
+        </p>
+
+        <div class="flex items-center gap-4 mb-6">
+          <span class="alpha-badge">
+            <i data-lucide="flask-conical" class="w-3 h-3"></i>
+            v2.0.1-alpha
+          </span>
+          <span class="text-sm text-text-muted">385+ stars | MIT License | @ruvnet</span>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Prototype agents using Claude Code, then deploy fully hosted agents for business purposes across preferred cloud environments."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'npm install agentic-flow')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>npm install agentic-flow</code>
+          </div>
+
+          <div class="core-anchor">66 agents. 213 MCP tools. Self-learning infrastructure.</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Four-Layer Architecture</h3>
+
+        <div class="architecture-diagram">
+          <pre>
+ORCHESTRATION LAYER
++-- Multi-Model Router (20+ LLMs)
++-- Swarm Coordinator (Topologies)
++-- MCP Tools (213 tools)
++-- Task Scheduler
+
+AGENT LAYER (66 Agents)
++-- Development (Coder, Reviewer, Tester)
++-- Swarm (Hierarchical, Mesh, Adaptive)
++-- Consensus (Byzantine, Raft, Gossip)
++-- GitHub (PR Manager, CI/CD)
+
+MEMORY & LEARNING LAYER
++-- AgentDB (Vector Store, HNSW, 150x faster)
++-- ReasoningBank (Pattern Memory)
++-- SONA (Self-Optimizing Neural, LoRA)
+
+TRANSPORT LAYER
++-- QUIC (Sub-ms RTT)
++-- WebSocket
++-- REST API
++-- CLI
+          </pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="sona">SONA: Self-Optimizing Neural Architecture</h3>
+
+        <p class="text-text-secondary mb-4">
+          SONA is the learning backbone that makes agents genuinely improve over time:
+        </p>
+
+        <table class="metrics-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Performance</th>
+              <th>Benefit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Adaptive Learning</td>
+              <td><span class="metric-value">&lt;1ms overhead</span></td>
+              <td>Real-time pattern learning without blocking</td>
+            </tr>
+            <tr>
+              <td>LoRA Fine-tuning</td>
+              <td><span class="metric-value">99% parameter reduction</span></td>
+              <td>Efficient adaptation, no full retraining</td>
+            </tr>
+            <tr>
+              <td>Pattern Retrieval</td>
+              <td><span class="metric-value">300x faster</span></td>
+              <td>150ms to 0.5ms access to past experiences</td>
+            </tr>
+            <tr>
+              <td>HNSW Vector Search</td>
+              <td><span class="metric-value">150x-12,500x faster</span></td>
+              <td>Massive speedup for similarity queries</td>
+            </tr>
+            <tr>
+              <td>Flash Attention</td>
+              <td><span class="metric-value">2.49x-7.47x speedup</span></td>
+              <td>50-75% memory reduction</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Basic Initialization</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="keyword">import</span> { EnhancedAgentDBWrapper } <span class="keyword">from</span> <span class="string">'agentic-flow/core'</span>;
+
+<span class="comment">// Initialize with Flash Attention for 2.49x-7.47x speedup</span>
+<span class="keyword">const</span> <span class="variable">wrapper</span> = <span class="keyword">new</span> EnhancedAgentDBWrapper({
+  enableAttention: <span class="keyword">true</span>,
+  enableGNN: <span class="keyword">true</span>,
+  attentionConfig: {
+    type: <span class="string">'flash'</span>  <span class="comment">// 50-75% memory reduction</span>
+  },
+});
+
+<span class="keyword">await</span> wrapper.initialize();</pre>
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-reasoningbank" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY REASONINGBANK?</div>
+          <div class="decision-reasoning">
+            "Context lost between sessions - each new session starts from zero, repeating expensive learning." ReasoningBank solves the persistent memory problem.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Patterns persist across sessions. Learning transfers. Your agents genuinely improve over time instead of starting from scratch each run.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-quic">
+          <div class="decision-why">WHY QUIC TRANSPORT?</div>
+          <div class="decision-reasoning">
+            "TCP latency kills multi-agent coordination." At scale, traditional HTTP/TCP adds 1-3 RTT overhead for each connection. QUIC provides 0-RTT reconnection.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Sub-millisecond RTT for agent coordination. Stream multiplexing eliminates head-of-line blocking. Connection migration survives WiFi-to-cellular transitions.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-swarms">
+          <div class="decision-why">WHY SWARM TOPOLOGIES?</div>
+          <div class="decision-reasoning">
+            "No single topology fits all use cases." Hierarchical scales to ~100 agents with clear chain of command. Mesh provides full redundancy. Ring enables ordered pipelines.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Choose topology based on workload: <strong>Hierarchical</strong> for codebase analysis, <strong>Mesh</strong> for consensus-heavy tasks, <strong>Ring</strong> for data processing pipelines.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY MULTI-MODEL ROUTING?</div>
+          <div class="decision-reasoning">
+            "No single model is best for everything." Different tasks have different priorities: quality, cost, speed, or privacy.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Route by priority: <code>quality</code> uses Claude 3.5 Sonnet/GPT-4. <code>cost</code> uses OpenRouter/Gemini Flash. <code>privacy</code> uses local ONNX models.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY FLASH ATTENTION?</div>
+          <div class="decision-reasoning">
+            "Memory efficiency at scale." Standard attention is O(n^2) in memory. Flash Attention provides 2.49x-7.47x speedup with 50-75% memory reduction.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Run larger models on smaller hardware. Process longer sequences without OOM. Essential for production workloads.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY SONA?</div>
+          <div class="decision-reasoning">
+            "Self-learning infrastructure - agents genuinely improve over time." Traditional agents reset every session. SONA enables continual learning.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              <1ms overhead for adaptation. 99% parameter reduction with LoRA. EWC++ prevents catastrophic forgetting of previous knowledge.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>agentic-flow-project/
+<span class="comment">+-- package.json</span>
++-- .env                           <span class="comment"># API keys (never commit)</span>
++-- Dockerfile
++-- docker-compose.yml             <span class="comment"># Single container</span>
++-- docker-compose.swarm.yml       <span class="comment"># Multi-container</span>
++-- k8s/                           <span class="comment"># Kubernetes</span>
+|   +-- deployment.yaml
+|   +-- service.yaml
+|   +-- secrets.yaml
++-- src/
+|   +-- index.ts                   <span class="comment"># Entry point</span>
+|   +-- config/
+|   |   +-- sona.config.ts         <span class="comment"># SONA profile</span>
+|   |   +-- attention.config.ts    <span class="comment"># Attention type</span>
+|   |   +-- swarm.config.ts        <span class="comment"># Topology</span>
+|   |   +-- router.config.ts       <span class="comment"># Model routing</span>
+|   +-- skills/
+|       +-- [custom skills]
++-- data/
+    +-- agentdb/                   <span class="comment"># Vector store</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="deployment-configs">Deployment Patterns</h3>
+
+        <h4 class="font-medium text-base mb-3">Pattern 1: Single Container (Development)</h4>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># docker-compose.yml</span>
+<span class="variable">version</span>: <span class="string">'3.8'</span>
+
+<span class="variable">services</span>:
+  agentic-flow:
+    build: .
+    ports:
+      - <span class="string">"3000:3000"</span>
+    volumes:
+      - agentdb-data:/data/agentdb
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - SONA_PROFILE=balanced
+      - ATTENTION_TYPE=flash
+    restart: unless-stopped
+
+<span class="variable">volumes</span>:
+  agentdb-data:</pre>
+        </div>
+
+        <h4 class="font-medium text-base mb-3 mt-6">Pattern 2: Multi-Container Swarm (Production)</h4>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># docker-compose.swarm.yml</span>
+<span class="variable">services</span>:
+  coordinator:
+    image: agentic-flow:latest
+    command: [<span class="string">"npx"</span>, <span class="string">"agentic-flow"</span>, <span class="string">"swarm"</span>, <span class="string">"coordinator"</span>]
+    ports:
+      - <span class="string">"3000:3000"</span>
+      - <span class="string">"4433:4433"</span>  <span class="comment"># QUIC</span>
+    environment:
+      - ROLE=coordinator
+      - SWARM_TOPOLOGY=hierarchical
+      - QUIC_ENABLED=true
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: <span class="string">'2'</span>
+          memory: 4G
+
+  worker:
+    image: agentic-flow:latest
+    command: [<span class="string">"npx"</span>, <span class="string">"agentic-flow"</span>, <span class="string">"swarm"</span>, <span class="string">"worker"</span>]
+    environment:
+      - ROLE=worker
+      - COORDINATOR_URL=http://coordinator:3000
+    deploy:
+      replicas: 4
+      resources:
+        limits:
+          cpus: <span class="string">'1'</span>
+          memory: 2G
+    depends_on:
+      - coordinator</pre>
+        </div>
+
+        <h4 class="font-medium text-base mb-3 mt-6">Pattern 3: Kubernetes (Enterprise)</h4>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># k8s/deployment.yaml</span>
+<span class="variable">apiVersion</span>: apps/v1
+<span class="variable">kind</span>: Deployment
+<span class="variable">metadata</span>:
+  name: agentic-flow-coordinator
+<span class="variable">spec</span>:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agentic-flow
+      role: coordinator
+  template:
+    spec:
+      containers:
+      - name: coordinator
+        image: agentic-flow:latest
+        command: [<span class="string">"npx"</span>, <span class="string">"agentic-flow"</span>, <span class="string">"swarm"</span>, <span class="string">"coordinator"</span>]
+        ports:
+        - containerPort: 3000
+        - containerPort: 4433
+        env:
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: anthropic
+        resources:
+          requests:
+            memory: <span class="string">"2Gi"</span>
+            cpu: <span class="string">"1"</span>
+          limits:
+            memory: <span class="string">"4Gi"</span>
+            cpu: <span class="string">"2"</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Request
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a security review request through the full Agentic-Flow stack:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">
+              <div>Request received via REST API</div>
+              <div class="path-timing">[T+0ms] API authentication</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">
+              <div>Multi-Model Router analyzes task: <code>security_review</code></div>
+              <div class="path-timing">[T+10ms] Priority: quality -> claude-3.5-sonnet</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">
+              <div>Swarm Coordinator spawns agents</div>
+              <div class="path-timing">[T+50ms] Topology: hierarchical | 1 coordinator + 3 workers</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">
+              <div>ReasoningBank queries relevant patterns</div>
+              <div class="path-timing">[T+100ms] Retrieved: SQL injection patterns (0.95 confidence) | 0.5ms vs 150ms</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">
+              <div>Agent Layer executes parallel analysis</div>
+              <div class="path-timing">[T+150ms] Flash Attention: 50% memory reduction</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">
+              <div>Workers report to coordinator</div>
+              <div class="path-timing">[T+5000ms] Consensus: CRDT conflict resolution</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">
+              <div>ReasoningBank stores new patterns</div>
+              <div class="path-timing">[T+5100ms] New vulnerability patterns learned</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">
+              <div>Response returned with findings</div>
+              <div class="path-timing">[T+5200ms] 3 security issues, code recommendations</div>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">
+              <div>Metrics logged for observability</div>
+              <div class="path-timing">[T+5300ms] Latency, tokens, cost tracked</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems in v2.0.0-alpha with concrete numbers and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            HNSW index catastrophically slow on import
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> 183-516ms per vector insertion</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 30 min</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use batch insertion with <code>db.batchStore(vectors, { batchSize: 100 })</code>. Enable WASM acceleration. Pre-build index offline.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            "__dirname is not defined" error
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> ESM/CommonJS context mismatch in agentdb-cli.js</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 min</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use <code>npx agentic-flow-esm agentdb</code> or add <code>"type": "module"</code> to package.json</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Port 3000 conflicts with Docker
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Source and container using same port</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 2 min</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Map to different host port: <code>ports: - "3001:3000"</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Missing dist files causing package load failures
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Import errors, module not found</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 15 min</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Clone and build from source: <code>git clone && npm install && npm run build</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Workers not connecting to coordinator
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Workers stuck in "connecting" state</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 10 min</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify COORDINATOR_URL environment variable. Check network connectivity. Ensure QUIC port 4433 open if using QUIC.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            ReasoningBank empty results
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> No patterns returned from queries</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 min</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Lower <code>minConfidence</code> from 0.8 to 0.5. Check namespace spelling (case-sensitive). Verify patterns exist with <code>npx agentic-flow reasoningbank list</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Out of memory errors
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> OOM crashes during large workloads</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 10 min</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Enable Flash Attention (<code>type: 'flash'</code>). Add <code>gradient_checkpointing: true</code>. Use <code>mixed_precision: 'fp16'</code>.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Latency too high for coordination
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Multi-agent operations slow</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 15 min</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Switch to QUIC transport: <code>transport: 'quic', quicConfig: { zeroRtt: true }</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Low throughput
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Low ops/sec despite good hardware</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 10 min</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use batch SONA profile: <code>sonaProfile: 'batch'</code> for high throughput workloads</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Alpha stability issues
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Various unexpected behaviors</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> Varies</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Pin to specific version. Have fallback plan. Test thoroughly before production.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Context Loss Between Sessions
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> "Each new session starts from zero, repeating expensive learning."</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> LLMs have no built-in persistence. Every restart means full re-learning.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> ReasoningBank provides persistent pattern memory. But you still pay the cost of loading patterns each session.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Scaling Ceiling
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> "Can't move beyond single-agent workflows" without significant infrastructure.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Multi-agent coordination requires consensus, fault tolerance, and monitoring. Each adds complexity.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Swarm topologies abstract coordination. But choosing the right topology requires understanding your workload.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Reliability Gaps
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> "No fault tolerance, recovery, or monitoring" in basic setups.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Production reliability requires Byzantine/Raft consensus, health checks, and observability.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Use the full Gas Town deployment pattern. Accept that reliability = complexity.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost at Scale
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> "$50-200+/day at scale" for production workloads.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Every token costs money. Multi-agent = multiply tokens. Learning = more tokens.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Multi-model routing with cost priority. Use Haiku/GPT-3.5 for low-stakes tasks. Monitor and optimize.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Alpha Status
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> "v2.0.0-alpha has documented issues" with ESM, dist files, HNSW performance.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Active development means breaking changes. Documentation lags implementation.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Pin versions. Read GitHub issues. Have fallback plan. Test thoroughly.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Documentation Complexity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> "241+ documentation files can be overwhelming."</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Comprehensive documentation = more to read. Feature-rich = more to learn.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Start with minimal patterns. Add features as needed. Follow this guide's decision criteria.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE AGENTIC-FLOW WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Moving from prototype to production deployment</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need persistent learning across sessions (ReasoningBank)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multi-agent coordination with fault tolerance</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Enterprise scale with monitoring and observability</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Low-latency requirements (QUIC transport)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Containerized deployments (Docker, Kubernetes, ECS)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE AGENTIC-FLOW WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Personal experiments -> Use plain Claude Code</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Budget-constrained -> Use CC Mirror (lower cost)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple single-agent -> Direct API (less overhead)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Non-production use -> Local development sufficient</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need production stability NOW -> Alpha has known issues</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Combination Matrix</h3>
+
+        <div class="combination-grid">
+          <div class="combination-card">
+            <h4>Agentic-Flow + Ralph</h4>
+            <p>Production Ralph loops with persistence, monitoring, and fault tolerance</p>
+            <span class="combination-value value-high">High Value</span>
+          </div>
+          <div class="combination-card">
+            <h4>Agentic-Flow + Gas Town</h4>
+            <p>Full 8-role orchestration with enterprise infrastructure</p>
+            <span class="combination-value value-very-high">Very High Value</span>
+          </div>
+          <div class="combination-card">
+            <h4>Agentic-Flow + Claude-Flow</h4>
+            <p>Combined swarm tools + deployment (same author)</p>
+            <span class="combination-value value-very-high">Very High Value</span>
+          </div>
+          <div class="combination-card">
+            <h4>Agentic-Flow + CC Mirror</h4>
+            <p>Production multi-agent with subagent coordination</p>
+            <span class="combination-value value-high">High Value</span>
+          </div>
+          <div class="combination-card">
+            <h4>Agentic-Flow + PRD Loops</h4>
+            <p>Document-driven workflows with automated processing</p>
+            <span class="combination-value value-medium">Medium Value</span>
+          </div>
+          <div class="combination-card">
+            <h4>Agentic-Flow + Solo Agent</h4>
+            <p>Simple production deploy with containerization</p>
+            <span class="combination-value value-medium">Medium Value</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with All: External State Principle</div>
+        <div class="text-text-secondary text-sm">
+          ReasoningBank = external state for learning. Same principle as Ralph's progress.txt, Boris's filesystem-as-memory, Gas Town's persistent knowledge. <strong>The invariant:</strong> "External state > internal memory."
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="essence">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Agentic-Flow = Kubernetes for AI</div>
+        <div class="text-text-secondary text-sm">
+          <strong>K8s orchestrates containers</strong> -> Agentic-Flow orchestrates agents<br>
+          <strong>Pods and replicas</strong> -> Swarm topologies<br>
+          <strong>Service discovery</strong> -> Agent coordination<br>
+          <strong>Fault tolerance</strong> -> Byzantine/Raft consensus<br><br>
+          <em>If you've run production K8s, you already understand the architecture.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="essence">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Infrastructure Investment Payoff</div>
+        <div class="text-text-secondary text-sm">
+          "Initial investment, then accelerating returns." Without infrastructure: repeated setup, lost learning. With infrastructure: compound learning, each task benefits from patterns. <strong>The shift:</strong> Linear scaling becomes exponential.
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item constraint" data-section="core">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint -> FIVE layers</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> "Patterns must persist across sessions"<br>
+          -> Need ReasoningBank<br>
+          -> Need AgentDB vector store<br>
+          -> Need HNSW for speed (150x faster)<br>
+          -> Need learning system (SONA)<br>
+          -> Need transport layer for coordination
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How ReasoningBank degrades</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100%:</strong> Patterns retrieved instantly (0.5ms)<br>
+          <strong>90%:</strong> Occasional cache misses<br>
+          <strong>70%:</strong> Frequent re-learning<br>
+          <strong>50%:</strong> No pattern matching<br>
+          <strong>0%:</strong> Stateless operation (each session starts fresh)<br><br>
+          <em>The failure mode is invisible until you notice repeated mistakes.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Gas Town: Swarm Topologies</div>
+        <div class="text-text-secondary text-sm">
+          Hierarchical/mesh topologies mirror Gas Town's role-based architecture. Mayor = Coordinator. Crew = Workers. Dogs = Health checks. Same organizational patterns, different implementations.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION -->
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if we skipped ReasoningBank?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Direct API calls, no pattern storage<br>
+          <strong>Why this fails:</strong> "Each session starts from zero" - expensive relearning every time<br>
+          <strong>Hidden constraint revealed:</strong> Memory is load-bearing for production AI.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if we used TCP instead of QUIC?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Standard HTTP/REST for agent coordination<br>
+          <strong>Why this fails:</strong> "TCP latency kills multi-agent coordination" - 1-3 RTT per connection<br>
+          <strong>Hidden constraint revealed:</strong> Transport matters at scale. 0-RTT vs 3-RTT compounds.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Complexity vs Features</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> More features = more value (persistence, monitoring, swarms)<br>
+          <strong>Pull B:</strong> More features = more complexity (241 docs, 127 deps)<br><br>
+          <strong>Resolution:</strong> Start minimal, add as needed. Don't deploy the full stack for simple use cases.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cost vs Quality</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Quality models = better results (Claude 3.5 Sonnet, GPT-4)<br>
+          <strong>Pull B:</strong> Quality models = higher cost ($50-200+/day)<br><br>
+          <strong>Resolution:</strong> Multi-model router. Use quality for critical paths, cost priority for routine tasks.
+        </div>
+      </div>
+
+      <!-- FILES SECTION -->
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Agentic-Flow + Ralph</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> "Persistence, monitoring, fault tolerance" for Ralph loops. Ralph provides the iteration pattern, Agentic-Flow provides infrastructure.<br>
+          <strong>Config:</strong> Use docker-compose.ralph.yml with checkpointing enabled.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Agentic-Flow + Gas Town</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> "Full 8-role orchestration with infrastructure."<br>
+          <strong>Mapping:</strong> Mayor = coordinator container, Dogs = health check containers, Refinery = worker pool, Witness = metrics container.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">HNSW Slow Import Discovery</div>
+        <div class="text-text-secondary text-sm">
+          183-516ms per vector on first import. Discovered during large-scale ReasoningBank population. <strong>Solution:</strong> Batch insertion with batchSize: 100. Now standard in all deployment templates.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">ESM/CommonJS Mismatch</div>
+        <div class="text-text-secondary text-sm">
+          __dirname errors in alpha breaking CLI tools. <strong>Root cause:</strong> Mixed module systems in package. <strong>Workaround:</strong> agentic-flow-esm entry point or explicit "type": "module".
+        </div>
+      </div>
+
+      <!-- PATH SECTION -->
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When is Agentic-Flow right?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Prototype (hours):</strong> Maybe - local might be faster<br>
+          <strong>MVP (days):</strong> Yes - quick deployment with basic features<br>
+          <strong>Production (weeks):</strong> Yes - full features needed<br>
+          <strong>Enterprise (months):</strong> Definitely - learning compounds<br><br>
+          <em>Don't judge by initial setup time. Judge by operational efficiency over time.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> "What containers do I need?" -> Dockerfile + compose<br>
+          <strong>Intermediate:</strong> "Why these layers?" -> Each solves one problem<br>
+          <strong>Advanced:</strong> "What's minimal?" -> Single container pattern<br>
+          <strong>Staff:</strong> "When add more?" -> Multi-container for scale<br>
+          <strong>Expert:</strong> "Cross-pattern?" -> K8s for enterprise, ECS for AWS
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip persistence</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Deploy without ReasoningBank<br>
+          <strong>THEN:</strong> Each session starts from zero<br>
+          <strong>THEN:</strong> Expensive patterns re-learned constantly<br>
+          <strong>THEN:</strong> No velocity improvement over time<br>
+          <strong>FINALLY:</strong> Week 10 is as slow as week 1<br><br>
+          <em>The fix: ReasoningBank is not optional for production.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When agent count flips from help to hurt</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-4 agents:</strong> Pure benefit (parallelism)<br>
+          <strong>4-8 agents:</strong> Optimal zone for most workloads<br>
+          <strong>8-10 agents:</strong> Diminishing returns (coordination overhead)<br>
+          <strong>10+ agents:</strong> Net negative without hierarchical topology<br><br>
+          <strong>THE INFLECTION:</strong> ~8-10 agents per swarm before diminishing returns.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Swarm Coordination Loss</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100%:</strong> Coordinator + workers perfectly synchronized<br>
+          <strong>90%:</strong> Occasional delays in task distribution<br>
+          <strong>70%:</strong> Frequent retries needed<br>
+          <strong>50%:</strong> Deadlocks occurring<br>
+          <strong>10%:</strong> Single-agent fallback mode<br><br>
+          <em>Detection: Check coordinator logs for "worker timeout" messages.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">Self-Healing Swarms</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Current state:</strong> Manual recovery still needed for most failures. Worker restarts require coordinator awareness.<br>
+          <strong>Who's working on it:</strong> Agentic-Flow team, in roadmap for v2.1<br>
+          <strong>Gap:</strong> Automatic failover and recovery without human intervention.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="gotchas">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Claude-Flow for simpler swarms</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Swarm orchestration without full deployment infrastructure. Same author (@ruvnet).<br>
+          <strong>When worse:</strong> Less production features (no QUIC, less monitoring).<br>
+          <strong>The hybrid:</strong> Claude-Flow swarms + Agentic-Flow infrastructure.
+        </div>
+      </div>
+
+      <!-- HARD SECTION -->
+      <div class="activity-item effect" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Production Mindset Shift</div>
+        <div class="text-text-secondary text-sm">
+          Moving to Agentic-Flow changes how you think:<br>
+          <strong>"It works"</strong> -> "It works reliably"<br>
+          <strong>"I'll remember"</strong> -> "The system remembers"<br>
+          <strong>"Restart if broken"</strong> -> "Self-healing with checkpoints"<br>
+          <strong>"Speed doesn't matter"</strong> -> "Latency = cost at scale"
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="hard">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Multi-agent needs coordination"</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Multiple agents must coordinate<br>
+          -> Need swarm topologies for organization<br>
+          -> Need consensus for agreement<br>
+          -> Need fault tolerance for reliability<br>
+          -> Need monitoring for observability<br><br>
+          <em>Scale drives complexity. Accept this or stay single-agent.</em>
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="hard">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">Single Container Pattern</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What's included:</strong> Basic swarm + AgentDB + Flash Attention<br>
+          <strong>What's removed:</strong> Federation, QUIC, advanced topologies<br>
+          <strong>When appropriate:</strong> Learning, simple deployments, MVPs<br><br>
+          <em>Start here. Add complexity only when you need it.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="hard">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip monitoring</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Deploy without Witness/metrics<br>
+          <strong>THEN:</strong> No visibility into agent behavior<br>
+          <strong>THEN:</strong> Problems discovered too late<br>
+          <strong>THEN:</strong> Debugging becomes archaeology<br>
+          <strong>FINALLY:</strong> 3am incident with no logs<br><br>
+          <em>The fix: Gas Town's Witness role is not optional for production.</em>
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Plain SDK + Cloudflare</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Simpler, less overhead. Good for single-agent production.<br>
+          <strong>When worse:</strong> No learning, no swarms, less enterprise features.<br>
+          <strong>Link:</strong> See 002-claude-sdk-cloudflare.md
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Local Claude Code</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> No deployment needed. Fastest for personal experiments.<br>
+          <strong>When worse:</strong> No distribution, no enterprise features, no persistence.<br>
+          <strong>The default:</strong> Start here, graduate to Agentic-Flow when you need production.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you used Agentic-Flow for personal experiments?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Infrastructure overhead:</strong> Docker, config, setup time<br>
+          <strong>Cost:</strong> Running containers, API calls at higher volume<br>
+          <strong>Complexity:</strong> 241 docs for features you don't need<br><br>
+          <strong>Why this fails:</strong> Overkill. Use plain Claude Code instead.<br>
+          <em>Match infrastructure to use case complexity.</em>
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="when">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">Multi-Agent in Cloudflare</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Current state:</strong> Early patterns emerging. Durable Objects for coordination.<br>
+          <strong>Who's working on it:</strong> Community experiments, Cloudflare team aware.<br>
+          <strong>Gap:</strong> No native multi-agent primitives. Manual coordination needed.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="when">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">DIY Harness Pain</div>
+        <div class="text-text-secondary text-sm">
+          John Turner's journey building DIY tool loops before discovering SDK patterns. Weeks of debugging coordination issues that Agentic-Flow solves out of the box. <strong>Lesson:</strong> Don't reinvent the wheel for production infrastructure.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        // Elements
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        // Bind methods
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Track which sections are in view
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude SDK + Cloudflare Sandboxes | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    .path-timing {
+      font-size: 12px;
+      color: #71717a;
+      margin-left: 8px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Architecture Diagram */
+    .architecture-diagram {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .architecture-diagram pre {
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      color: #3f3f46;
+      line-height: 1.5;
+    }
+
+    /* Source Attribution */
+    .source-box {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .source-box a {
+      color: #0D9373;
+      text-decoration: none;
+    }
+
+    .source-box a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="nav-content"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">SDK + Skills + Sandbox: prototype locally in Claude Code, deploy unchanged to production Cloudflare Workers.</div>
+        </div>
+
+        <div class="source-box">
+          <strong>Source:</strong> <a href="https://x.com/johnturner/status/2007098085412065524" target="_blank">@johnturner</a> (John Turner) - WordPress plugin creator (1M+ users)<br>
+          <strong>Engagement:</strong> 397 likes, 746 bookmarks, 56K views<br>
+          <strong>Starter Template:</strong> <a href="https://github.com/craigsdennis/claude-in-the-box" target="_blank">github.com/craigsdennis/claude-in-the-box</a>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Stop fighting brittle DIY tool loops - use Anthropic's official harness. Skills = composable, reusable mini-apps. Sandbox = safe code execution."</div>
+
+          <div class="architecture-diagram">
+            <pre>
+Claude Agent SDK = reliable tool loop
+         +
+Skills = composable mini-applications
+         +
+Cloudflare Sandbox = safe code execution
+         =
+Production-capable agent
+            </pre>
+          </div>
+
+          <div class="core-anchor">The trinity that unlocks production agents.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          <strong>The Before Pain:</strong> "Used Direct API to build own tool loop harness. Worked, but wasn't consistent. Kept hitting edge cases and reliability issues."
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          <strong>The After Insight:</strong> "If you include skills in the Claude SDK loop and give it a sandbox, everything clicks. Skills are like mini apps the agent can use. It becomes one of the most powerful agents I've worked with."
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">The Stack Architecture</h3>
+
+        <div class="architecture-diagram">
+          <pre>
+Local Development (Claude Code)
+         |
+    Skills (mini apps)
+         |
+  Claude Agent SDK
+         |
+  Cloudflare Sandbox
+         |
+  Production Deployment
+          </pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          <strong>Local to Cloud Symmetry:</strong> "The best part is you can develop skills locally with Claude Code on desktop, test them fast, then deploy to your Cloudflare sandbox running the SDK. Rapid iteration without the deployment friction."
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-sdk" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY CLAUDE AGENT SDK (NOT DIY)?</div>
+          <div class="decision-reasoning">
+            "Kept hitting edge cases and reliability issues" with DIY tool loop harness. The Claude Agent SDK is Anthropic's official, battle-tested harness that handles all the edge cases you'd otherwise discover painfully.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Don't reinvent the wheel. The hours you'd spend debugging DIY harness edge cases are hours you could spend building your actual product. Let Anthropic maintain the tool loop.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-cloudflare">
+          <div class="decision-why">WHY CLOUDFLARE SANDBOX (NOT E2B, DAYTONA)?</div>
+          <div class="decision-reasoning">
+            Cloudflare Workers provide an integrated ecosystem: Durable Objects for session persistence, KV for storage, D1 for databases. If you're already in Cloudflare, this is the natural fit. Edge deployment means low latency to global users.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Choose based on existing infrastructure. AWS/GCP shop? Consider E2B or Daytona. Already on Cloudflare? This stack is a natural extension of your existing tools.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-skills">
+          <div class="decision-why">WHY SKILLS PATTERN?</div>
+          <div class="decision-reasoning">
+            "Skills are like mini apps the agent can use." They're composable, testable, and reusable across agents. Build once, use everywhere. Each skill is a single-purpose capability the agent can invoke.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Think of skills like microservices for your agent. data-analysis skill, code-review skill, search skill. Each is independently testable and deployable. Your skill library accumulates value over time.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-durable-objects">
+          <div class="decision-why">WHY DURABLE OBJECTS FOR SESSIONS?</div>
+          <div class="decision-reasoning">
+            "Save transcript & session in Durable Object after each method. Allows resume if sandbox dies." Cloudflare Workers are stateless by default. Durable Objects provide the persistence layer for conversation continuity.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Sessions must persist across sandbox restarts. Without Durable Objects, a sandbox failure means lost conversation context. Save after EACH method, not just at the end.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY STANDARD-2+ TIER?</div>
+          <div class="decision-reasoning">
+            "Needs at least standard-2 tier. Required for responses >10 seconds. Lower tiers too slow for agent workloads." Agent tasks take time - code execution, analysis, multi-step reasoning. Standard tier has hard timeout limits.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Budget for the right tier from day one. Starting with standard tier and hitting timeout walls is frustrating. standard-2+ is the minimum for real agent workloads.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>claude-in-the-box/
+<span class="comment">├── wrangler.toml              # Cloudflare Worker config</span>
+│   <span class="comment">└── [sandbox settings, DO bindings]</span>
+├── src/
+│   ├── index.ts               <span class="comment"># Worker entry point</span>
+│   ├── agent.ts               <span class="comment"># Claude Agent SDK setup</span>
+│   ├── skills/                <span class="comment"># Composable mini-apps</span>
+│   │   ├── data-analysis.ts   <span class="comment"># Example skill</span>
+│   │   └── code-review.ts     <span class="comment"># Example skill</span>
+│   └── session/               <span class="comment"># Persistence layer</span>
+│       └── durable-object.ts  <span class="comment"># Session state</span>
+├── package.json
+└── .dev.vars                  <span class="comment"># Local secrets (NEVER commit)</span>
+
+<span class="comment"># Environment Variables:</span>
+ANTHROPIC_API_KEY              <span class="comment"># Required</span>
+[other provider keys]          <span class="comment"># Optional</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="wrangler-toml">wrangler.toml - Worker Configuration</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="variable">name</span> = <span class="string">"claude-agent"</span>
+<span class="variable">main</span> = <span class="string">"src/index.ts"</span>
+<span class="variable">compatibility_date</span> = <span class="string">"2024-01-01"</span>
+
+<span class="comment"># IMPORTANT: Use standard-2 or higher for agent workloads</span>
+<span class="comment"># Standard tier times out at 10s - too short for most agent tasks</span>
+[<span class="variable">worker</span>]
+<span class="variable">tier</span> = <span class="string">"standard-2"</span>
+
+<span class="comment"># Durable Objects for session persistence</span>
+[[<span class="variable">durable_objects.bindings</span>]]
+<span class="variable">name</span> = <span class="string">"SESSION"</span>
+<span class="variable">class_name</span> = <span class="string">"SessionDurableObject"</span>
+
+[[<span class="variable">migrations</span>]]
+<span class="variable">tag</span> = <span class="string">"v1"</span>
+<span class="variable">new_classes</span> = [<span class="string">"SessionDurableObject"</span>]</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="skill-template">Skill Template</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">// src/skills/data-analysis.ts</span>
+<span class="keyword">import</span> { Skill } <span class="keyword">from</span> <span class="string">'@anthropic-ai/claude-agent-sdk'</span>;
+
+<span class="keyword">export const</span> <span class="variable">dataAnalysisSkill</span>: Skill = {
+  <span class="variable">name</span>: <span class="string">'data_analysis'</span>,
+  <span class="variable">description</span>: <span class="string">'Analyze data files and find patterns'</span>,
+
+  <span class="keyword">async</span> <span class="variable">execute</span>(params: { data: <span class="keyword">string</span>, query: <span class="keyword">string</span> }) {
+    <span class="comment">// This runs in the sandbox - safe code execution</span>
+    <span class="keyword">const</span> <span class="variable">result</span> = <span class="keyword">await</span> analyzeData(params.data, params.query);
+
+    <span class="comment">// Return structured result for Claude to interpret</span>
+    <span class="keyword">return</span> {
+      <span class="variable">success</span>: <span class="keyword">true</span>,
+      <span class="variable">insights</span>: result.insights,
+      <span class="variable">summary</span>: result.summary
+    };
+  }
+};</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Quick Start Commands</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Clone the starter template</span>
+git clone https://github.com/craigsdennis/claude-in-the-box
+<span class="keyword">cd</span> claude-in-the-box
+
+<span class="comment"># Install dependencies</span>
+npm install
+
+<span class="comment"># Set up local secrets</span>
+<span class="keyword">echo</span> <span class="string">"ANTHROPIC_API_KEY=sk-ant-..."</span> > .dev.vars
+
+<span class="comment"># Run locally</span>
+npx wrangler dev
+
+<span class="comment"># Deploy to production</span>
+npx wrangler secret put ANTHROPIC_API_KEY
+npx wrangler deploy</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a data analysis request through the entire stack:
+        </p>
+
+        <p class="font-semibold text-accent mb-4">USER REQUEST: "Analyze sales.csv and identify top-performing regions"</p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">
+              User sends request (via chatbot/email/API)<br>
+              <span class="path-timing">[T+0ms]</span> Cloudflare Worker receives HTTP request
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">
+              Worker retrieves or creates session<br>
+              <span class="path-timing">[T+20ms]</span> <code>session.getOrCreate(userId)</code> via Durable Object<br>
+              Load previous transcript if exists
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">
+              Claude Agent SDK processes request<br>
+              <span class="path-timing">[T+50ms]</span> Send to Claude with available skills<br>
+              Claude selects: <code>data_analysis</code> skill
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">
+              Skill executes in sandbox<br>
+              <span class="path-timing">[T+200ms]</span> Dynamically write Python code<br>
+              Parse CSV, calculate regional metrics
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">
+              Sandbox returns results<br>
+              <span class="path-timing">[T+2000ms]</span> "Top regions: West (32%), East (28%), Central (22%)"
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">
+              Claude formats response<br>
+              <span class="path-timing">[T+2100ms]</span> Add context, recommendations, insights
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">
+              Session saved to Durable Object<br>
+              <span class="path-timing">[T+2200ms]</span> Persist transcript for resume<br>
+              <em>Critical: save AFTER each method, not just at end</em>
+            </div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">
+              Response returned to user<br>
+              <span class="path-timing">[T+2300ms]</span> Full analysis with insights<br>
+              Total latency: ~2.3 seconds
+            </div>
+          </div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          <strong>Why sandbox matters:</strong> "More reliable than pure LLM math (prevents hallucinations in calculations)." When Claude writes and executes actual code, the math is correct - no hallucinated statistics.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          <strong>Failure path:</strong> If sandbox dies mid-execution, Durable Object has saved state from step 2. New worker instance can resume from last saved transcript.
+        </p>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit, with concrete numbers and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #1: Wrong sandbox tier - responses timeout
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Requests timeout after 10 seconds</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Standard tier has 10s hard limit</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Upgrade to standard-2+ in wrangler.toml</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #2: Session not persisting - context lost
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Conversation context lost between requests</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Not saving to Durable Object after each method</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Call <code>session.save()</code> after EVERY skill execution, not just at response end</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 30 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #3: DIY harness edge cases
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Inconsistent behavior, random failures</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> "Kept hitting edge cases and reliability issues" with custom tool loops</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Switch to Claude Agent SDK - let Anthropic handle the edge cases</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> Hours saved by not debugging</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #4: Skills not found by agent
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent doesn't use your custom skills</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Skills not registered in agent config</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify skill registration: <code>agent.registerSkill(mySkill)</code></div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 10 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #5: WebSocket disconnection
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Real-time updates stop mid-conversation</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> No reconnection logic for WebSocket drops</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Implement exponential backoff reconnection</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 20 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #6: Durable Object cold start
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> First request after idle period is slow (500ms+)</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> DO needs to spin up from cold state</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Pre-warm with cron trigger or accept latency</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 15 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #7: Sandbox code execution blocked
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Dangerous operation blocked" error</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Code attempting disallowed operations (network, filesystem)</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use approved execution patterns, check sandbox docs</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> Varies by operation</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #8: API key not configured in production
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Works locally, authentication errors in prod</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> .dev.vars only works locally, need wrangler secrets for prod</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>npx wrangler secret put ANTHROPIC_API_KEY</code></div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 5 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #9: Local vs deployed mismatch
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Works locally, fails in production</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Environment differences, missing bindings</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use <code>--remote</code> flag for local testing: <code>npx wrangler dev --remote</code></div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 10 minutes</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            #10: Transcript too large
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Session fails to save, DO storage errors</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Transcript exceeds DO storage limits (128KB value limit)</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Implement transcript truncation or summarization for old messages</div>
+          <div class="gotcha-detail"><strong>Time to fix:</strong> 30 minutes</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            DIY vs SDK Trade-off
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> DIY harness gives full control but "kept hitting edge cases and reliability issues." SDK is reliable but opinionated about how things work.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> You can't have both full control AND Anthropic's reliability guarantees. The SDK makes decisions for you.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Accept SDK opinions. Customize where the SDK allows (skills, hooks). Don't fight the framework.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Sandbox Latency
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Secure execution in sandboxed environment adds overhead. Each skill invocation has setup cost.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Security and speed are in tension. Isolation requires boundaries. Boundaries have latency.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Use higher tier (standard-2+). Accept latency as the cost of security. Optimize skill logic, not sandbox overhead.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Session Persistence Complexity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Distributed state is inherently hard. Durable Objects help but require understanding Cloudflare's consistency model.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> "Save after each method" sounds simple but has edge cases: partial saves, race conditions, storage limits.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Study Durable Objects deeply. Test failure scenarios. Accept that some edge cases will surface in production.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Local to Cloud Parity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> "Develop locally, deploy unchanged" is the promise, but environments are never identical.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Local uses .dev.vars, prod uses secrets. Local DO is simulated. Network conditions differ.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Use <code>--remote</code> flag for testing. Have staging environment. Accept some prod-only bugs.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost at Scale
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Higher tiers = higher cost. Agent workloads need standard-2+ which isn't free tier.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Budget constraints vs. performance requirements. Can't have fast AND cheap.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Budget for appropriate tier from start. Monitor usage. Optimize skill efficiency to reduce compute time.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Still Early / Experimental
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Author "only recently got it working." This is cutting edge, not battle-hardened.</div>
+          <div class="hard-detail"><strong>Why it's hard:</strong> Documentation may be incomplete. Community knowledge is sparse. You're an early adopter.</div>
+          <div class="hard-detail"><strong>Coping strategy:</strong> Expect to troubleshoot. Contribute fixes back. Join the Discord/community. Accept pioneer tax.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE SDK + CLOUDFLARE SANDBOX WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Distributing agents:</strong> Building for others, not just personal use</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Dynamic code execution:</strong> Agent needs to write and run code safely</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Session continuity:</strong> Conversations span multiple requests</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Edge deployment:</strong> Need low latency to global users</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Cloudflare ecosystem:</strong> Already using Workers/KV/D1</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Data analysis agents:</strong> Need reliable math (not LLM hallucinations)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE THIS STACK WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Personal, single-user:</strong> Plain Claude Code on desktop is simpler</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Simple chatbot:</strong> No code execution needed - direct API is lighter</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>AWS/GCP infrastructure:</strong> Consider E2B or Daytona for better fit</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Cost-sensitive:</strong> Sandbox tiers add cost - local may be better</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Need full control:</strong> DIY harness if you accept the edge cases</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span><strong>Python-first:</strong> E2B has better Python sandbox support</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Decision Matrix</h3>
+
+        <div class="code-block" style="background: #fafafa; border: 1px solid #e4e4e7;">
+          <pre style="color: #3f3f46;">
+| Use Case                      | Recommendation                |
+|-------------------------------|-------------------------------|
+| Personal, single-user skills  | Plain Claude Code on desktop  |
+| Distributable/production      | SDK + Cloudflare Sandbox      |
+| Chatbots, email agents        | SDK + Cloudflare Sandbox      |
+| Dynamic code execution        | SDK + Sandbox (essential)     |
+| AWS/GCP shop                  | E2B or Daytona                |
+| Full dev environment needed   | Daytona integration           |
+          </pre>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if we kept using DIY harness?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd experience:</strong> "Kept hitting edge cases and reliability issues"<br>
+          <strong>Why this fails:</strong> Tool loop reliability is hard. Anthropic maintains this for you.<br>
+          <strong>Hidden constraint revealed:</strong> SDK value is reliability, not just features.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible core: "Stateless Sandbox"</div>
+        <div class="text-text-secondary text-sm">
+          <strong>SDK + Sandbox, no Durable Objects</strong><br>
+          <strong>When appropriate:</strong> Single-turn interactions only<br>
+          <strong>What you lose:</strong> Session persistence, conversation continuity
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">John's DIY Harness Journey</div>
+        <div class="text-text-secondary text-sm">
+          "Used Direct API to build own tool loop harness. Worked, but wasn't consistent." Switched to SDK, everything clicked.
+        </div>
+      </div>
+
+      <!-- CORE SECTION (3 items) -->
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with Agentic-Flow: Cloudflare Infrastructure</div>
+        <div class="text-text-secondary text-sm">
+          Both use Cloudflare Workers + Durable Objects as deployment foundation. Same infrastructure layer, different abstraction levels.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="core">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with SYSTEM: Cloud Brain Pattern</div>
+        <div class="text-text-secondary text-sm">
+          Both run AI reasoning in Cloudflare, execute locally or in sandbox. The "cloud brain + execution layer" split is a recurring pattern.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">SDK + Sandbox = AWS Lambda + AI</div>
+        <div class="text-text-secondary text-sm">
+          <strong>What you know:</strong> Serverless function + AI<br>
+          <strong>How it applies:</strong> SDK+Sandbox = serverless function + AI + safe code execution<br>
+          If you've deployed Lambda, you understand this.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Agent needs to execute untrusted code"</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Need code execution<br>
+          -> Need sandbox for isolation<br>
+          -> Need Cloudflare tier (standard-2+)<br>
+          -> Need session persistence (DO)<br>
+          -> Need save after each method<br>
+          Code execution drives entire stack.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="decisions">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if we skipped the sandbox?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd have:</strong> Direct code execution without isolation<br>
+          <strong>Why this fails:</strong> Security risk. User code could escape, access secrets, attack your infrastructure.<br>
+          <strong>Revealed:</strong> Sandbox is security requirement, not optional feature.
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">DIY Control vs SDK Reliability</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Full control over harness behavior<br>
+          <strong>Pull B:</strong> Reliable, battle-tested, maintained by Anthropic<br>
+          <strong>Resolution:</strong> Accept SDK opinions, customize where allowed
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cost vs Performance</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Pull A:</strong> Lower tier = cheaper monthly bill<br>
+          <strong>Pull B:</strong> Higher tier = faster, no timeouts<br>
+          <strong>Resolution:</strong> Choose tier based on use case requirements, not budget alone
+        </div>
+      </div>
+
+      <!-- FILES SECTION (3 items) -->
+      <div class="activity-item expertise" data-section="files">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How deep is your understanding?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Novice:</strong> Use starter template, deploy basic agent<br>
+          <strong>Intermediate:</strong> Create custom skills, implement sessions<br>
+          <strong>Advanced:</strong> Full production deployment, optimization<br>
+          <strong>Expert:</strong> Extend architecture, build Agentic-Flow-like system
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">SDK + Cloudflare D1</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Add persistent database to agent state beyond Durable Objects.<br>
+          <strong>Use case:</strong> Store user preferences, historical data, analytics
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Anti-Composition
+        </div>
+        <div class="font-medium text-text-primary mb-2">SDK + AWS Lambda</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Why it fails:</strong> Different cloud providers, lost ecosystem benefits. Durable Objects don't exist in AWS. You'd need to reimplement session persistence.
+        </div>
+      </div>
+
+      <!-- PATH SECTION (3 items) -->
+      <div class="activity-item gradient" data-section="path">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How sandbox timeout fails gradually</div>
+        <div class="text-text-secondary text-sm">
+          <strong>10% degraded:</strong> Occasional slow responses<br>
+          <strong>50% degraded:</strong> Frequent timeouts, retry logic kicking in<br>
+          <strong>90% degraded:</strong> Most requests fail<br>
+          <strong>Total failure:</strong> No code execution works
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you skip session persistence</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Don't save to Durable Object<br>
+          <strong>THEN:</strong> Context lost on sandbox restart<br>
+          <strong>THEN:</strong> User repeats information every request<br>
+          <strong>FINALLY:</strong> Unusable for conversations
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="path">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Skills Become Reusable Library</div>
+        <div class="text-text-secondary text-sm">
+          Once you build skills, they become building blocks for future agents. Your skill library accumulates value over time.
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item inflection" data-section="gotchas">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When request complexity needs tier upgrade</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Below ~5s:</strong> Standard tier might work<br>
+          <strong>Above ~5s:</strong> Need standard-2+<br>
+          <strong>The flip:</strong> Complex code execution crosses the timeout boundary
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">First Sandbox Timeout</div>
+        <div class="text-text-secondary text-sm">
+          Using wrong tier, all requests timing out. Upgraded to standard-2, problem immediately solved. Common first-time gotcha.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Session Loss Discovery</div>
+        <div class="text-text-secondary text-sm">
+          Sandbox died, lost conversation context. Author recommendation: "Save transcript in Durable Object after each method." Implemented, problem solved.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="gotchas">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Multi-Agent in Cloudflare</div>
+        <div class="text-text-secondary text-sm">
+          Single agent per worker currently. No native multi-agent orchestration. Community experiments ongoing.
+        </div>
+      </div>
+
+      <!-- HARD SECTION (3 items) -->
+      <div class="activity-item invariant" data-section="hard">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Shared with All: External State Principle</div>
+        <div class="text-text-secondary text-sm">
+          Durable Objects for session = "external state > internal memory" principle. Same pattern as Ralph's prd.json. The filesystem IS the memory.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="hard">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Is this stack right at different scales?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Prototype (hours):</strong> Maybe - local might be faster<br>
+          <strong>MVP (days):</strong> Yes - quick deployment to test with users<br>
+          <strong>Production (weeks):</strong> Yes - built for this scale<br>
+          <strong>Enterprise (months):</strong> Maybe - consider Agentic-Flow for more features
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Production Mindset Shift</div>
+        <div class="text-text-secondary text-sm">
+          Deploying to Cloudflare changes how you think about agent development. Production-first mindset. You stop thinking "local experiment" and start thinking "distributed system."
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (6 items) -->
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">E2B Sandbox</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> AWS/GCP ecosystem, Python-first workloads<br>
+          <strong>When worse:</strong> Cloudflare integration, edge deployment
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Daytona Integration</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Need full development environment, complex workloads<br>
+          <strong>When worse:</strong> Overkill for simple code execution
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Path
+        </div>
+        <div class="font-medium text-text-primary mb-2">Local Claude Code Only</div>
+        <div class="text-text-secondary text-sm">
+          <strong>When better:</strong> Single user, no distribution needs, cost-sensitive<br>
+          <strong>When worse:</strong> Can't share or deploy to users
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">"Sessions must survive failures"</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Reliability requirement<br>
+          -> Need Durable Objects<br>
+          -> Need to save after each method<br>
+          -> More complexity in code<br>
+          -> More cost (DO pricing)<br>
+          Reliability requirement drives architecture.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="when">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Skills Marketplace</div>
+        <div class="text-text-secondary text-sm">
+          No standard sharing mechanism for skills. Feature gap. Community could benefit from skill registry.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="when">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Sandbox Performance Optimization</div>
+        <div class="text-text-secondary text-sm">
+          standard-2+ required, still has latency. Platform improvements ongoing at Cloudflare. Watch for tier changes.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+<script src="../../js/global-nav.js"></script>
+</body>
+</html>

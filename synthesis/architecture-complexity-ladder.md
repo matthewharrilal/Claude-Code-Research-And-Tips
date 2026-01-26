@@ -11,6 +11,8 @@ This content has been superseded by D-FINAL synthesis.
 
 # Claude Code Complexity Ladder
 
+> **You Are Here:** This is the capability progression roadmap - the path from basic Claude Code usage (Level 0) to full agent factory operations (Level 7). Use this to understand where you are now and what's needed to advance. Start here if you want to know "what's possible" and "what should I learn next."
+
 A progression from beginner to expert Claude Code usage patterns, synthesized from community implementations, power user workflows, and production configurations.
 
 ---
@@ -72,6 +74,15 @@ You can now get AI help for coding tasks, but every session starts from scratch.
 - You find yourself repeating the same instructions
 - You want Claude to "just know" your project's patterns
 - You're tired of re-establishing context every session
+
+### Checkpoint: Level 0 Mastery
+**You should now understand:**
+- [ ] How to start a Claude Code session with `claude`
+- [ ] How to approve/reject operations manually
+- [ ] That context is lost when sessions end
+- [ ] When AI assistance adds value vs. when to code manually
+
+**If unclear:** Practice with 3-5 simple coding tasks before advancing.
 
 ---
 
@@ -137,6 +148,15 @@ Claude now understands your project. Commands take seconds instead of paragraphs
 - You need tasks done in parallel
 - You want automated responses to events (file saves, commits)
 - You want specialized agents for different task types
+
+### Checkpoint: Level 1 Mastery
+**You should now understand:**
+- [ ] How CLAUDE.md provides persistent project context
+- [ ] How to create and invoke slash commands
+- [ ] The difference between global (~/.claude/) and project-level (.claude/) configuration
+- [ ] How to keep CLAUDE.md concise (<500 tokens)
+
+**If unclear:** Re-read the [CLAUDE.md documentation](https://docs.anthropic.com/claude-code) or see `principles-core.md`.
 
 ---
 
@@ -224,6 +244,15 @@ You now have a small AI team. Subagents handle specialized work. Hooks handle au
 - You want Claude to work without your presence
 - You need iterative self-improvement on tasks
 
+### Checkpoint: Level 2 Mastery
+**You should now understand:**
+- [ ] How to create subagent YAML files in `.claude/agents/`
+- [ ] Hook event types: PreToolUse, PostToolUse, SessionStart, SessionEnd
+- [ ] When to use subagents vs. hooks (complex reasoning vs. simple automation)
+- [ ] How subagent contexts are isolated from main context
+
+**If unclear:** See `architecture-primitives.md` for detailed hook and subagent patterns.
+
 ---
 
 ## Level 3: Simple Loops (Basic Ralph)
@@ -285,6 +314,21 @@ Claude can now work without you watching. Come back to find tasks completed.
 - You need structured acceptance criteria
 - You want automatic quality gates
 - You need to track complex multi-story features
+
+### Checkpoint: Level 3 Mastery
+**You should now understand:**
+- [ ] The basic `while :; do claude ... ; done` loop pattern
+- [ ] Why fresh context beats extended sessions (context rot)
+- [ ] How progress.txt serves as external memory
+- [ ] How to use grep to detect completion signals
+
+**Terminal verification:**
+```bash
+# You should be able to run this without errors:
+while [ $i -lt 3 ]; do echo "Iteration $i"; i=$((i+1)); done
+```
+
+**If unclear:** See `mastery-ralph-complete.md` for the full Ralph pattern explanation.
 
 ---
 
@@ -401,6 +445,21 @@ Real features shipped overnight. Learnings compound across iterations.
 - You want agents coordinating on complex tasks
 - You're hitting limits of sequential processing
 
+### Checkpoint: Level 4 Mastery
+**You should now understand:**
+- [ ] prd.json structure with userStories, acceptanceCriteria, and passes fields
+- [ ] How to write atomic, verifiable tasks (2-3 sentence rule)
+- [ ] Quality gate enforcement (typecheck + tests before commit)
+- [ ] The `<promise>COMPLETE</promise>` termination signal
+
+**Terminal verification:**
+```bash
+# Parse prd.json to see incomplete tasks:
+jq '.userStories[] | select(.passes == false) | .title' prd.json
+```
+
+**If unclear:** See `mastery-ralph-complete.md` Section 3 for PRD best practices.
+
 ---
 
 ## Level 5: Multi-Agent Orchestration
@@ -498,6 +557,15 @@ Multiple agents working simultaneously on coordinated tasks.
 - You need truly parallel work on the same codebase
 - You want git worktree isolation
 - You're managing 5+ simultaneous agents
+
+### Checkpoint: Level 5 Mastery
+**You should now understand:**
+- [ ] Orchestrator vs. worker role separation (conductors don't play instruments)
+- [ ] Worker preamble pattern to prevent recursion
+- [ ] Task dependencies with blockedBy/addBlocks
+- [ ] Model selection: Haiku for lookups, Sonnet for implementation, Opus for architecture
+
+**If unclear:** See `architecture-composition-rules.md` for CC Mirror pattern details.
 
 ---
 
@@ -602,6 +670,23 @@ claude "Create prd.json for auth, payments, and notifications features"
 - You want a persistent team of specialized agents
 - You want self-improving systems
 - You're ready for team-scale operations solo
+
+### Checkpoint: Level 6 Mastery
+**You should now understand:**
+- [ ] Git worktree creation and management
+- [ ] Running parallel bash processes with `&` and `wait`
+- [ ] Merge strategies for parallel feature branches
+- [ ] Using tmux or similar for multi-agent monitoring
+
+**Terminal verification:**
+```bash
+# You should be able to create a worktree:
+git worktree add ../test-worktree test-branch
+git worktree list
+git worktree remove ../test-worktree
+```
+
+**If unclear:** See `architecture-domain-isolation.md` for isolation patterns.
 
 ---
 
@@ -873,6 +958,74 @@ One person with Gas Town = small engineering team output.
 Start at Level 0. Master each level before advancing. By Level 4, you're shipping features overnight. By Level 7, you're running a solo engineering department.
 
 The ladder is real. Climb it.
+
+---
+
+## Troubleshooting
+
+### Common Issue: Ralph Loop Never Terminates
+**Symptom:** Loop runs indefinitely, burning API credits
+**Cause:** Completion signal not being emitted or not being detected
+**Fix:**
+1. Verify your prompt includes the exact completion signal format: `<promise>COMPLETE</promise>`
+2. Check that grep is searching the correct output file
+3. Add a maximum iteration limit as a safety net:
+```bash
+MAX_ITERATIONS=25
+for (( i=1; i<=$MAX_ITERATIONS; i++ )); do
+  # ... your loop
+done
+```
+
+### Common Issue: Context Rot Mid-Session
+**Symptom:** Claude starts forgetting instructions, repeating itself, or hallucinating files
+**Cause:** Extended session has accumulated too much context
+**Fix:**
+1. Use fresh context pattern (Level 3+) instead of extended sessions
+2. If you must continue, use `/compact` at 60-70% context usage
+3. Externalize state to files (progress.txt, prd.json) before restarting
+
+### Common Issue: Subagent Spawns Its Own Subagents
+**Symptom:** Runaway recursion, exploding API costs
+**Cause:** Worker agent not properly constrained
+**Fix:** Always include the worker preamble in subagent prompts:
+```markdown
+CONTEXT: You are a WORKER agent, not an orchestrator.
+RULES:
+- Complete ONLY the task described below
+- Do NOT spawn sub-agents
+- Do NOT call TaskCreate or TaskUpdate
+```
+
+### Common Issue: Parallel Agents Create Merge Conflicts
+**Symptom:** Git conflicts when merging parallel feature branches
+**Cause:** Agents modified the same files simultaneously
+**Fix:**
+1. Use git worktrees for true directory isolation (Level 6)
+2. Assign clear file ownership to each agent
+3. Run agents sequentially if they touch shared files
+
+### Common Issue: Tests Pass But Shouldn't
+**Symptom:** Agent marks task complete, but tests are broken or not running
+**Cause:** Exit code not being checked, or test framework misconfigured
+**Fix:**
+1. Always verify test output manually after first few runs
+2. Include exit code checks in your scripts:
+```bash
+npm test
+if [ $? -ne 0 ]; then
+  echo "Tests failed - do not mark complete"
+  exit 1
+fi
+```
+
+### Common Issue: Stuck at Level Transition
+**Symptom:** Not sure if ready to advance to next level
+**Cause:** Missing mastery of current level fundamentals
+**Fix:**
+1. Use the checkpoint checklist for your current level
+2. Complete all items before advancing
+3. Build something non-trivial at your current level before moving up
 
 ---
 

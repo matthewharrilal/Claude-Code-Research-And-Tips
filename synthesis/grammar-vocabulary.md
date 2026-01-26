@@ -1,5 +1,7 @@
 # Agent Pattern Vocabulary
 
+> **You Are Here:** This is the **dictionary** for the Claude Code pattern language. When you encounter unfamiliar terms in other synthesis documents (like "fresh-context", "orchestrator", or "polecat"), look them up here. This document defines every primitive building block that appears across the research corpus. Start here when terminology is confusing, or use it as a reference while reading more advanced documents like `grammar-syntax.md` or `mastery-ralph-complete.md`.
+
 ---
 ## D-FINAL Integration
 **Cross-references:** [D-FINAL-architecture.md Section 6 for combinations, D-FINAL-implementation.md Section 4 for tools]
@@ -108,6 +110,17 @@ if grep -q "<promise>COMPLETE</promise>" output.txt; then break; fi
 ```
 
 **Variants:** `PROMISE COMPLETE HERE`, `ALL TASKS DONE`, custom strings
+
+---
+
+### Checkpoint: Loop Constructs
+**You should now understand:**
+- [ ] The difference between `while-loop` (unbounded) and `for-loop` (bounded)
+- [ ] What "fresh-context" means and why it matters for quality
+- [ ] How stop-conditions terminate autonomous loops
+- [ ] That each iteration spawns a NEW agent with NO memory
+
+**If unclear:** Re-read the `fresh-context` and `iteration` definitions, or see `mastery-ralph-complete.md` for full Ralph pattern explanation.
 
 ---
 
@@ -248,6 +261,17 @@ if grep -q "<promise>COMPLETE</promise>" output.txt; then break; fi
 
 ---
 
+### Checkpoint: State Containers
+**You should now understand:**
+- [ ] The purpose of `progress.txt` (session memory) vs `AGENTS.md` (permanent learnings)
+- [ ] How `prd.json` tracks tasks with `passes` boolean and `priority` ordering
+- [ ] Why `CLAUDE.md` should be under 500 tokens
+- [ ] The difference between ephemeral session state and permanent project documentation
+
+**If unclear:** Re-read the distinction between `progress.txt` and `AGENTS.md`, or see `mastery-context-management.md`.
+
+---
+
 ## Quality Gates
 
 ### typecheck
@@ -319,6 +343,16 @@ if grep -q "<promise>COMPLETE</promise>" output.txt; then break; fi
 - Browserbase cloud browsers
 
 **Use:** "Not complete until verified with screenshot"
+
+---
+
+### Checkpoint: Quality Gates
+**You should now understand:**
+- [ ] The three standard gates: `typecheck`, `test-suite`, `lint`
+- [ ] What makes acceptance criteria verifiable vs vague
+- [ ] Why `browser-verification` matters for UI work
+
+**If unclear:** Re-read the `acceptance-criteria` section for good vs bad examples.
 
 ---
 
@@ -453,6 +487,16 @@ RULES:
 
 ---
 
+### Checkpoint: Agent Types
+**You should now understand:**
+- [ ] The Iron Law: orchestrators coordinate, workers execute—never mix
+- [ ] The three model tiers: Opus (strategy), Sonnet (implementation), Haiku (lookups)
+- [ ] Gas Town terminology: polecat, crew, witness, deacon, dogs, refinery, mayor
+
+**If unclear:** Re-read the `orchestrator` and `worker` definitions, or see `taxonomy-agent-types.md`.
+
+---
+
 ## Communication Primitives
 
 ### git-history
@@ -513,6 +557,16 @@ git diff main..HEAD
 **Syntax:** `Task(description=..., run_in_background=True|False)`
 
 **Use:** Worker delegation, parallel research, adversarial validation
+
+---
+
+### Checkpoint: Communication Primitives
+**You should now understand:**
+- [ ] How `git-history` serves as long-term external memory
+- [ ] File-based coordination patterns: `file-handoff`, `event-bus`
+- [ ] When to use the `Task` tool for spawning subagents
+
+**If unclear:** See `architecture-primitives.md` for deeper primitive analysis.
 
 ---
 
@@ -1047,6 +1101,107 @@ This vocabulary was synthesized from:
 - Infinite Orchestra (@0xSero)
 - Claude Code official documentation
 - 40+ community research extractions
+
+---
+
+## Troubleshooting
+
+### Common Issue: Term Confusion Between Similar Concepts
+
+**Symptom:** Using "orchestrator" and "coordinator" interchangeably, or confusing "worker" with "subagent"
+
+**Cause:** The vocabulary draws from multiple sources (Gas Town, Ralph, Panopticon) that sometimes use different terms for similar concepts
+
+**Fix:**
+- Use this document as the canonical reference
+- When in doubt, check the "Definition" line for each term
+- Remember: `subagent` = short-lived spawned agent, `worker` = role constraint (no coordination), `polecat` = named persistent worker (Gas Town-specific)
+
+**Terminal verification:**
+```bash
+# Search this file for a term
+grep -A5 "### worker" synthesis/grammar-vocabulary.md
+```
+
+---
+
+### Common Issue: State File Purpose Confusion
+
+**Symptom:** Putting session-specific notes in `AGENTS.md` or permanent patterns in `progress.txt`
+
+**Cause:** Both files store learnings, but have different scopes and lifecycles
+
+**Fix:**
+- `progress.txt`: Session-specific, append-only, ephemeral (delete after session)
+- `AGENTS.md`: Permanent, curated, project-level (persists across sessions)
+- Rule: If a human will benefit from this in 6 months, it goes in `AGENTS.md`
+
+---
+
+### Common Issue: Acceptance Criteria Too Vague
+
+**Symptom:** Agent marks tasks "complete" that don't actually work
+
+**Cause:** Acceptance criteria like "works correctly" or "good UX" can't be verified
+
+**Fix:** Every criterion must be automatable:
+```
+# Bad
+- "Handles edge cases"
+- "Works correctly"
+
+# Good
+- "npm run typecheck passes"
+- "Returns 401 on invalid credentials"
+- "Column 'email' has unique constraint"
+```
+
+---
+
+### Common Issue: Context Rot Symptoms
+
+**Symptom:** Agent repeats itself, forgets recent changes, ignores instructions, hallucinates files
+
+**Cause:** Context window filled past 85% capacity
+
+**Fix:**
+1. Check context usage (if using Claude HUD)
+2. If above 70%, consider `/compact` or fresh session
+3. For autonomous work, use Ralph pattern (fresh context each iteration)
+
+**Terminal example (Ralph fresh context):**
+```bash
+# Each iteration starts fresh - no context rot possible
+for (( i=1; i<=25; i++ )); do
+    claude -p "$(cat PROMPT.md)"
+done
+```
+
+---
+
+### Common Issue: Iron Law Violation
+
+**Symptom:** Orchestrator tries to write code, or worker spawns sub-agents
+
+**Cause:** Role boundaries not enforced in prompts
+
+**Fix:** Include explicit role constraints in agent preambles:
+```
+# Worker preamble
+CONTEXT: You are a WORKER agent, not an orchestrator.
+RULES:
+- Complete ONLY the task described below
+- Use tools directly (Read, Write, Edit, Bash)
+- Do NOT spawn sub-agents
+- Do NOT call TaskCreate/TaskUpdate
+
+# Orchestrator preamble
+CONTEXT: You are an ORCHESTRATOR agent, not a worker.
+RULES:
+- Delegate all implementation to workers
+- Use ONLY: Read (1-2 files), Task*, AskUserQuestion
+- NEVER write code or run bash commands
+```
 
 ---
 

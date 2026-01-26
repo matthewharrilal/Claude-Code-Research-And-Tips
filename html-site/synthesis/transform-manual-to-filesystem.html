@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transform: Manual Context to Filesystem State | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',    // Blue
+            'az-effect': '#f59e0b',       // Amber
+            'az-composition': '#8b5cf6',  // Purple
+            'az-frontier': '#ef4444',     // Red
+            'az-warstory': '#10b981',     // Green
+            'az-alternative': '#6b7280',  // Gray
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',    // Indigo
+            'az-constraint': '#8b5cf6',   // Violet
+            'az-gradient': '#f43f5e',     // Rose
+            'az-horizon': '#06b6d4',      // Cyan
+            'az-violation': '#f97316',    // Orange
+            'az-tradeoff': '#f59e0b',     // Amber
+            'az-analogy': '#d946ef',      // Fuchsia
+            'az-expertise': '#10b981',    // Emerald
+            'az-minimal': '#84cc16',      // Lime
+            'az-inflection': '#eab308',   // Yellow
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer - Draggable divider between Main Panel and Activity Zone */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    /* Prevent text selection during resize */
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    /* Hide resizer when Activity Zone is hidden (responsive) */
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders (Original 6) */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+
+    /* Activity Zone generative content types (New 10) */
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box (15 words) */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-code {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .core-code code {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      color: #10b981;
+      white-space: nowrap;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* What's Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When To Use Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Comparison Table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .comparison-table th {
+      background: #f4f4f5;
+      font-weight: 600;
+      color: #3f3f46;
+    }
+
+    .comparison-table tr:hover td {
+      background: #fafafa;
+    }
+
+    /* Diagram Box */
+    .diagram-box {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: auto;
+    }
+
+    /* Checkpoint Box */
+    .checkpoint-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #10b981;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .checkpoint-title {
+      font-weight: 600;
+      color: #166534;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkpoint-content {
+      font-size: 14px;
+      color: #166534;
+    }
+
+    /* Layer Table */
+    .layer-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .layer-table th,
+    .layer-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .layer-table th {
+      background: #f4f4f5;
+      font-weight: 600;
+      color: #3f3f46;
+    }
+
+    /* Checklist */
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 24px 0;
+    }
+
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 0;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .checklist li::before {
+      content: '';
+      width: 18px;
+      height: 18px;
+      border: 2px solid #d4d4d8;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Manual to Filesystem</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The 15-Word Summary</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">Philosophy + Code</a>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="nav-section expanded" data-section="decisions">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="lightbulb" class="w-4 h-4"></i>
+          <span>Design Decisions</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#why-external-state" class="nav-item">Why External State?</a>
+          <a href="#why-three-files" class="nav-item">Why Three Files?</a>
+          <a href="#why-append-only" class="nav-item">Why Append-Only?</a>
+        </div>
+      </div>
+
+      <!-- File Structure -->
+      <div class="nav-section" data-section="files">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="folder" class="w-4 h-4"></i>
+          <span>File Structure</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#file-structure" class="nav-item">The 3 State Files</a>
+          <a href="#progress-txt" class="nav-item">progress.txt</a>
+          <a href="#prd-json" class="nav-item">prd.json</a>
+          <a href="#agents-md" class="nav-item">AGENTS.md</a>
+        </div>
+      </div>
+
+      <!-- Path of a Session -->
+      <div class="nav-section" data-section="path">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          <span>Path of a Session</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#path" class="nav-item">The Flow</a>
+        </div>
+      </div>
+
+      <!-- Gotchas -->
+      <div class="nav-section" data-section="gotchas">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Gotchas</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gotchas" class="nav-item">Practical Problems</a>
+        </div>
+      </div>
+
+      <!-- What's Hard -->
+      <div class="nav-section" data-section="hard">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flame" class="w-4 h-4"></i>
+          <span>What's Hard</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#hard" class="nav-item">Real Complexity</a>
+        </div>
+      </div>
+
+      <!-- When to Use -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Use</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Stop losing knowledge between sessions. Move state from your brain into persistent files.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          <strong>You Are Here:</strong> This transformation shows how to stop re-explaining everything at the start of every session. If you find yourself saying "remember, we're using bcrypt 12 rounds" for the third time, this is the fix. This is the foundation for all autonomous patterns (Ralph, CC Mirror) and validates INV-2: External state over internal memory.
+        </p>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Your brain is RAM. The filesystem is disk. Persist what matters."</div>
+
+          <div class="diagram-box">
+BEFORE: Manual Context Management
+[Your Brain] -----> [Claude Session] -----> [Code Changes]
+     |                    |
+     v                    v
+  Remembers?         Session ends
+     |                    |
+     v                    v
+  Maybe...           [Knowledge Lost]
+
+AFTER: Filesystem State
+[Filesystem State] <---> [Claude Session] -----> [Code Changes]
+       |                        |                      |
+       v                        v                      v
+  [Persists]              [Reads State]          [Updates State]
+       |                        |                      |
+       +------------------------+----------------------+
+                    |
+              [Compounds Over Time]
+          </div>
+
+          <div class="core-anchor">State lives in files. Sessions read and write. Knowledge persists.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The transformation is conceptually simple: move everything you currently keep in your head into files that Claude reads at session start and updates at session end. But this simple shift has profound implications for how you work with AI.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          With manual context, every session starts from zero. You re-explain the same patterns. You re-discover the same gotchas. Knowledge doesn't compound. With filesystem state, each session is more productive than the last. Patterns persist. Discoveries accumulate. Learning becomes permanent.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-external-state" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY EXTERNAL STATE?</div>
+          <div class="decision-reasoning">
+            Claude's context window is finite and ephemeral. When the session ends, everything in context vanishes. When context compacts, early instructions get lost. External state solves both problems: files persist across sessions and can be re-read after compaction.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              If it's not in a file, it doesn't exist. Never rely on "Claude remembering" something from earlier in the session. If you discover a pattern, write it to AGENTS.md. If you complete a task, update prd.json. If you learn something, append to progress.txt.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-three-files">
+          <div class="decision-why">WHY THREE FILES?</div>
+          <div class="decision-reasoning">
+            Different types of state have different lifecycles. progress.txt is session-local (learnings from this run). prd.json is project-local (task states). AGENTS.md is permanent (patterns that apply to all future work). Mixing them creates maintenance nightmares.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              When you learn something, ask: "Is this a session discovery (progress.txt), a task update (prd.json), or a permanent pattern (AGENTS.md)?" Put it in the right place. This discipline prevents state file bloat and keeps each file focused.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-append-only">
+          <div class="decision-why">WHY APPEND-ONLY FOR PROGRESS.TXT?</div>
+          <div class="decision-reasoning">
+            If Claude replaces progress.txt each iteration, you lose the compounding benefit. The whole point is that iteration 20 can learn from iteration 5's discoveries. Append-only preserves the log while building up institutional knowledge.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use "APPEND" in CAPS when instructing Claude to update progress.txt. Without the emphasis, models often interpret "update" as "replace." Periodically archive old entries to prevent unbounded growth (see Gotchas section).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>project/
+<span class="comment">├── scripts/ralph/              # Agent working memory</span>
+│   ├── progress.txt            <span class="comment"># Session log, discoveries (append-only)</span>
+│   ├── prd.json                <span class="comment"># Task board, dependencies</span>
+│   └── scratch/                <span class="comment"># Temporary analysis files</span>
+│
+<span class="comment">├── AGENTS.md                   # Permanent learnings (or .claude/AGENTS.md)</span>
+│
+<span class="comment">├── .git/                       # History as memory</span>
+│   └── (commits tell the story)
+│
+└── src/                        <span class="comment"># The actual code</span></pre>
+        </div>
+
+        <table class="layer-table">
+          <thead>
+            <tr>
+              <th>Layer</th>
+              <th>Purpose</th>
+              <th>Lifespan</th>
+              <th>Who Reads</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>progress.txt</code></td>
+              <td>Session continuity</td>
+              <td>This project</td>
+              <td>Same agent, next session</td>
+            </tr>
+            <tr>
+              <td><code>prd.json</code></td>
+              <td>Task state machine</td>
+              <td>This project</td>
+              <td>Agent, potentially CI</td>
+            </tr>
+            <tr>
+              <td><code>AGENTS.md</code></td>
+              <td>Pattern library</td>
+              <td>Permanent</td>
+              <td>All future agents</td>
+            </tr>
+            <tr>
+              <td><code>.git</code></td>
+              <td>Change history</td>
+              <td>Permanent</td>
+              <td>Anyone</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="progress-txt">progress.txt - Session Memory</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Progress Log</span>
+Project: User Dashboard
+Started: 2026-01-09
+
+<span class="comment">## Codebase Patterns Discovered</span>
+- Migrations: Always use IF NOT EXISTS (learned from failed deploy)
+- Types: Export from actions.ts, import in components
+- React: useRef&lt;Timeout | null&gt;(null) for timer refs
+- Forms: Server actions required, not API routes
+- Auth: bcrypt rounds = 12 (security requirement)
+
+<span class="comment">## Session Log</span>
+
+<span class="comment">### 2026-01-09 - US-001: Login Form</span>
+- Status: COMPLETE
+- Files modified:
+  - app/login/page.tsx
+  - lib/actions/auth.ts
+  - lib/schemas/auth.ts
+- Learnings:
+  - Server actions handle form submission
+  - Zod validation happens server-side
+  - Toast notifications via sonner
+- Time: ~2 hours
+---
+
+<span class="comment">### 2026-01-09 - US-002: Profile Page</span>
+- Status: IN PROGRESS
+- Files modified:
+  - app/profile/page.tsx (started)
+- Blocked by: Need to understand image upload pattern
+- Next: Check how settings page handles uploads
+---</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="prd-json">prd.json - Task State</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>{
+  <span class="string">"project"</span>: <span class="string">"User Dashboard"</span>,
+  <span class="string">"lastUpdated"</span>: <span class="string">"2026-01-09T14:30:00Z"</span>,
+  <span class="string">"userStories"</span>: [
+    {
+      <span class="string">"id"</span>: <span class="string">"US-001"</span>,
+      <span class="string">"title"</span>: <span class="string">"Login Form"</span>,
+      <span class="string">"status"</span>: <span class="string">"complete"</span>,
+      <span class="string">"passes"</span>: <span class="keyword">true</span>,
+      <span class="string">"completedAt"</span>: <span class="string">"2026-01-09T10:00:00Z"</span>
+    },
+    {
+      <span class="string">"id"</span>: <span class="string">"US-002"</span>,
+      <span class="string">"title"</span>: <span class="string">"Profile Page"</span>,
+      <span class="string">"status"</span>: <span class="string">"in_progress"</span>,
+      <span class="string">"passes"</span>: <span class="keyword">false</span>,
+      <span class="string">"blockers"</span>: [<span class="string">"image-upload-pattern"</span>]
+    },
+    {
+      <span class="string">"id"</span>: <span class="string">"US-003"</span>,
+      <span class="string">"title"</span>: <span class="string">"Settings Page"</span>,
+      <span class="string">"status"</span>: <span class="string">"pending"</span>,
+      <span class="string">"passes"</span>: <span class="keyword">false</span>,
+      <span class="string">"dependencies"</span>: [<span class="string">"US-002"</span>]
+    }
+  ],
+  <span class="string">"discoveries"</span>: {
+    <span class="string">"patterns"</span>: [<span class="string">"server-actions-for-forms"</span>, <span class="string">"bcrypt-12-rounds"</span>],
+    <span class="string">"antipatterns"</span>: [<span class="string">"api-routes-for-forms"</span>, <span class="string">"inline-validation"</span>]
+  }
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="agents-md">AGENTS.md - Permanent Learnings</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Agent Learnings</span>
+
+This file contains patterns and knowledge discovered through development.
+Read before starting work. Update when you learn something new.
+
+<span class="comment">## Authentication Module</span>
+
+<span class="comment">### Security Requirements</span>
+- Password hashing: bcrypt with minimum 12 rounds
+- Session tokens: 7-day expiry, refresh on activity
+- Rate limiting: 5 attempts per 15 minutes
+
+<span class="comment">### Patterns</span>
+- All auth actions in `lib/actions/auth.ts`
+- Schemas in `lib/schemas/auth.ts`
+- Use `getServerSession()` not `useSession()` in server components
+
+<span class="comment">## Database</span>
+
+<span class="comment">### Migration Patterns</span>
+- Always use `IF NOT EXISTS` for table creation
+- Always use `IF EXISTS` for drops
+- Name format: `YYYYMMDD_description.sql`
+- Test migrations against production clone before deploy
+
+<span class="comment">### Query Patterns</span>
+- Use prepared statements exclusively
+- Connection pooling via `lib/db/pool.ts`
+- Transactions for multi-table operations
+
+<span class="comment">## Frontend</span>
+
+<span class="comment">### Form Handling</span>
+- Server actions, not API routes
+- Zod validation server-side
+- `useFormState` + `useFormStatus` for state
+- Toast feedback via sonner
+
+<span class="comment">### Component Patterns</span>
+- Ref typing: `useRef&lt;HTMLElement | null&gt;(null)`
+- Timer refs: `useRef&lt;Timeout | null&gt;(null)`
+- Cleanup in useEffect return</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A SESSION -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Session
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a session through the system to see how the pieces connect:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>Session Start:</strong> You prompt Claude "Continue work on user dashboard"</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>State Load:</strong> Claude reads <code>progress.txt</code> to understand where you left off</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>Task Load:</strong> Claude reads <code>prd.json</code> to see task states and blockers</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>Pattern Load:</strong> Claude reads <code>AGENTS.md</code> to load project patterns</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>Work:</strong> Claude picks a task and implements it (with full context)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>Discovery:</strong> Claude learns something new (e.g., "image uploads use presigned URLs")</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content"><strong>State Write:</strong> Claude APPENDS discovery to <code>progress.txt</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content"><strong>Task Update:</strong> Claude updates <code>prd.json</code> with task status</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content"><strong>Permanent Pattern:</strong> If pattern is reusable, Claude adds to <code>AGENTS.md</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content"><strong>Commit:</strong> Claude commits code + state files together</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">11</div>
+            <div class="path-content"><strong>Session End:</strong> Context cleared, but knowledge persists in files</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">12</div>
+            <div class="path-content"><strong>Next Session:</strong> New Claude reads files, continues where you left off</div>
+          </div>
+        </div>
+
+        <div class="checkpoint-box">
+          <div class="checkpoint-title">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            The Transformation Moment
+          </div>
+          <div class="checkpoint-content">
+            <strong>Before:</strong> "Yesterday we finished US-001, we learned server actions are required, the pattern for migrations is IF NOT EXISTS, today we need US-002..."<br><br>
+            <strong>After:</strong> "Continue work on user dashboard." [Claude reads files and knows everything]<br><br>
+            Zero context re-explanation. Knowledge compounds.
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit, with concrete numbers and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Claude doesn't read state files
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Claude starts fresh, asks questions you've already answered in previous sessions</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> CLAUDE.md doesn't instruct Claude to read state files, or files aren't mentioned in session start prompt</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add to CLAUDE.md: "At session start, IMMEDIATELY read: 1) progress.txt, 2) prd.json, 3) AGENTS.md. Do this BEFORE responding."</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            State files become stale
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> progress.txt hasn't been updated in days. Reality has diverged from state files.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Forgot to update at session end, or updates became optional rather than required</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add to CLAUDE.md: "Before session ends, you MUST: 1) Append to progress.txt, 2) Update prd.json, 3) Add patterns to AGENTS.md"</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            progress.txt grows unbounded
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> progress.txt is 1000+ lines. Claude spends more tokens reading than thinking.</div>
+          <div class="gotcha-detail"><strong>Threshold:</strong> >20KB progress.txt starts degrading quality</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Archive old sessions: <code>head -100 progress.txt > archive/progress-$(date +%Y%m).md</code>. Keep last 5 sessions active.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            "APPEND" gets ignored
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> progress.txt keeps getting overwritten, losing previous learnings</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Model interprets "update" as "replace"</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use "APPEND" in CAPS in prompt and CLAUDE.md. The capitalization matters for instruction following.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            prd.json has invalid JSON
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> <code>jq . prd.json</code> fails with parse error. State file is corrupted.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Manual edit introduced syntax error, or Claude wrote invalid JSON</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add pre-commit hook: <code>for f in scripts/ralph/*.json; do jq . "$f" > /dev/null || exit 1; done</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            AGENTS.md has conflicting patterns
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> AGENTS.md says both "use API routes" and "use server actions" for forms</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Patterns added incrementally without reviewing for consistency</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Periodic review: Read entire AGENTS.md, resolve contradictions by keeping newer pattern or adding context for when each applies</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            What to Persist vs What to Forget
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Not everything should persist. Some discoveries are project-specific. Some are session-specific. Some are wrong. Deciding what belongs where requires judgment.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> AGENTS.md filled with low-value patterns. progress.txt bloated with irrelevant history. Important patterns lost because they weren't written down.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Default to writing things down (recoverable). Periodically prune. Use the three-file structure to force categorization. If uncertain, put in progress.txt (session) not AGENTS.md (permanent).</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            State File Hygiene
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> State files need maintenance. progress.txt grows. AGENTS.md accumulates. prd.json drifts from reality. But maintenance is boring, so it gets skipped.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> State files out of sync with code. Claude reads outdated information. "US-003 complete" but feature doesn't exist.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Always commit state files WITH code changes. Never commit code without updating state. Add verification: <code>git diff --name-only | grep -E "progress|prd|AGENTS"</code> should show changes.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Onboarding New Team Members
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> State files optimized for continuity of same person. A new developer (human or AI) sees progress.txt with project-specific shorthand and can't make sense of it.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> New team member lost despite state files existing. Tribal knowledge encoded in state files but not accessible to newcomers.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Add ONBOARDING.md that explains reading order: CLAUDE.md (commands) -> AGENTS.md (patterns) -> prd.json (status) -> progress.txt (recent). Include "Key Context" section for major architectural decisions.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE FILESYSTEM STATE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Working on a project across multiple sessions (most projects)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Discovering patterns you don't want to forget</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Planning to use Ralph or other autonomous patterns</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Working with team members (AI or human) who need context</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Building institutional knowledge for a codebase</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE FILESYSTEM STATE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>One-off scripts you'll never touch again</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Learning/exploration sessions (no state to persist)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Tasks completable in single session (setup cost not worth it)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Highly confidential work (state files create artifacts)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Throwaway prototypes (overhead exceeds benefit)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Complexity Ladder Position</h3>
+
+        <p class="text-text-secondary mb-6">
+          This transformation takes you from <strong>Level 0-1</strong> (Manual/Single Session) to <strong>Level 2+</strong> (Ralph and beyond). It's the prerequisite for all autonomous patterns. Without filesystem state, you can't do Ralph. Without Ralph, you can't do multi-agent. The ladder builds on itself.
+        </p>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Manual Context</th>
+              <th>Filesystem State</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Session start</td>
+              <td>Re-explain everything</td>
+              <td>Read files, continue</td>
+            </tr>
+            <tr>
+              <td>Pattern discovery</td>
+              <td>Lost on session end</td>
+              <td>Persists, compounds</td>
+            </tr>
+            <tr>
+              <td>Handoff to new agent</td>
+              <td>Impossible</td>
+              <td>Read the files</td>
+            </tr>
+            <tr>
+              <td>Debugging old work</td>
+              <td>"What was I thinking?"</td>
+              <td>Check progress.txt</td>
+            </tr>
+            <tr>
+              <td>Avoiding past mistakes</td>
+              <td>Hope you remember</td>
+              <td>It's documented</td>
+            </tr>
+            <tr>
+              <td>Autonomous patterns</td>
+              <td>Not possible</td>
+              <td>Foundation for Ralph</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <!-- Resizer between Main Panel and Activity Zone -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION (3 items) -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if human memory were infinite?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> Keep everything in your head. No files. No overhead.<br>
+          <strong>Why this fails:</strong> Your brain is limited. Context windows are finite. Sessions end.<br>
+          <strong>Hidden constraint revealed:</strong> Filesystem state compensates for biological and technological memory limits.
+        </div>
+      </div>
+
+      <div class="activity-item minimal" data-section="essence">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">The irreducible core</div>
+        <div class="text-text-secondary text-sm">
+          One file: <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">AGENTS.md</code><br>
+          <strong>Essential:</strong> Persistent patterns that survive sessions.<br>
+          <strong>Everything else:</strong> Refinement for different state lifecycles.
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="essence">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">INV-2: External state over internal memory</div>
+        <div class="text-text-secondary text-sm">
+          This transformation IS the invariant made concrete. Ralph, Gas Town, CC Mirror all require external state. This document teaches you how to build it.
+        </div>
+      </div>
+
+      <!-- CORE SECTION (4 items) -->
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Filesystem State = Database for Humans</div>
+        <div class="text-text-secondary text-sm">
+          Your brain = Application memory (fast, volatile)<br>
+          progress.txt = Session storage (survives page refresh)<br>
+          prd.json = Relational DB (structured, queryable)<br>
+          AGENTS.md = Knowledge graph (permanent, cross-session)<br><br>
+          <em>If you've built apps with persistent storage, you understand this transformation.</em>
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="core">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How knowledge loss compounds</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Session 1:</strong> Discover bcrypt needs 12 rounds (the hard way)<br>
+          <strong>Session 2:</strong> Forget, use default 10 rounds<br>
+          <strong>Session 3:</strong> Debug production auth issues<br>
+          <strong>Session 4:</strong> Rediscover bcrypt needs 12 rounds<br><br>
+          <em>Without persistence, you're running in circles.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Compounding returns over time</div>
+        <div class="text-text-secondary text-sm">
+          Session 1: Learn A, write to AGENTS.md<br>
+          Session 2: Read A, learn B, write B<br>
+          Session 3: Read A+B, learn C<br>
+          Session N: Know A through N-1, highly effective<br><br>
+          <strong>Each session more productive than the last.</strong>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="core">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Matt Pocock: "Files carry state between sessions"</div>
+        <div class="text-text-secondary text-sm">
+          This is the Ralph mindset origin. Matt discovered that treating files as the source of truth (not Claude's memory) enabled overnight autonomous development.
+        </div>
+      </div>
+
+      <!-- DECISIONS SECTION (4 items) -->
+      <div class="activity-item constraint" data-section="decisions">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">One constraint, FIVE decisions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Context windows are finite and ephemeral<br>
+          -> State must persist externally<br>
+          -> Multiple state files for different lifecycles<br>
+          -> Append-only for session logs<br>
+          -> Commit state with code<br>
+          -> Read state at session start
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="decisions">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you don't update state files</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Skip updating prd.json at session end<br>
+          <strong>THEN:</strong> Next session reads stale task states<br>
+          <strong>THEN:</strong> Claude works on completed tasks or misses blockers<br>
+          <strong>THEN:</strong> Wasted work compounds<br>
+          <strong>FINALLY:</strong> State diverges from reality, files become useless<br><br>
+          <em>The fix: Make updates mandatory, not optional.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="decisions">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Write Everything vs Write Selectively</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Write everything:</strong> Nothing lost, but files bloat<br>
+          <strong>Write selectively:</strong> Clean files, but might miss something<br>
+          <strong>Middle ground:</strong> Write liberally, prune periodically<br><br>
+          <em>Heuristic: Default to writing (recoverable). Prune on schedule.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="decisions">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Understanding the three-file structure</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Why not one file?" -> Different lifecycles<br>
+          <strong>Intermediate:</strong> "Which file for what?" -> Session vs permanent<br>
+          <strong>Advanced:</strong> "When to archive?" -> 20KB threshold<br>
+          <strong>Staff:</strong> "How to onboard others?" -> ONBOARDING.md<br>
+          <strong>Expert:</strong> "Cross-pattern state?" -> prd.json = Gas Town inbox
+        </div>
+      </div>
+
+      <!-- FILES SECTION (4 items) -->
+      <div class="activity-item composition" data-section="files">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Filesystem State + Git</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Extremely well. State files are version-controlled. History becomes memory.<br>
+          <strong>The benefit:</strong> <code>git log</code> shows the story. <code>git blame</code> explains why.<br>
+          <strong>Recommendation:</strong> Always commit state files with code. Never separately.
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="files">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Cross-Pattern Equivalence
+        </div>
+        <div class="font-medium text-text-primary mb-2">These files appear in every pattern</div>
+        <div class="text-text-secondary text-sm">
+          <strong>progress.txt</strong> = Ralph's learning log<br>
+          <strong>prd.json</strong> = Ralph's task board = Gas Town's inbox<br>
+          <strong>AGENTS.md</strong> = Permanent patterns = CC Mirror's shared memory<br><br>
+          <em>Master this structure once, use it everywhere.</em>
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="files">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if all state were in one file?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd design:</strong> state.md with everything in sections<br>
+          <strong>Why this fails:</strong> Different lifecycles need different handling. Session logs need archiving. Task states need machine-readability. Patterns need permanence.<br>
+          <strong>Hidden constraint revealed:</strong> State separation IS lifecycle management.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="files">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Automatic pattern extraction</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> Can Claude automatically identify which progress.txt entries should graduate to AGENTS.md?<br>
+          <strong>Why it's hard:</strong> Requires judgment about permanence vs transience.<br>
+          <strong>Current practice:</strong> Manual review. Human decides what's permanent.
+        </div>
+      </div>
+
+      <!-- PATH SECTION (4 items) -->
+      <div class="activity-item horizon" data-section="path">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">How perception changes over sessions</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Session 1:</strong> "Writing to files feels like overhead"<br>
+          <strong>Session 3:</strong> "Wait, I remember discovering this before..."<br>
+          <strong>Session 5:</strong> "The files knew what I forgot"<br>
+          <strong>Session 10:</strong> "I can't imagine working without this"<br><br>
+          <em>Don't judge filesystem state by session 1.</em>
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="path">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If Claude doesn't read state at start</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Session starts without reading state files<br>
+          <strong>THEN:</strong> Claude has no context, asks basic questions<br>
+          <strong>THEN:</strong> You re-explain everything manually<br>
+          <strong>THEN:</strong> You're back to manual context<br>
+          <strong>FINALLY:</strong> State files exist but provide no value<br><br>
+          <em>The fix: CLAUDE.md must mandate reading state files FIRST.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="path">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Boris Cherny: "Fresh context beats extended sessions"</div>
+        <div class="text-text-secondary text-sm">
+          The Claude Code creator discovered that starting fresh with state files produces better results than trying to maintain long sessions. This is why the read-work-write cycle works.
+        </div>
+      </div>
+
+      <div class="activity-item inflection" data-section="path">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When state files become essential</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1 session:</strong> Overhead (not worth it)<br>
+          <strong>2-3 sessions:</strong> Break-even (slight benefit)<br>
+          <strong>5+ sessions:</strong> Essential (can't work without)<br>
+          <strong>10+ sessions:</strong> Institutional (defines how you work)<br><br>
+          <strong>THE INFLECTION:</strong> ~3 sessions<br>
+          <em>If you expect <3 sessions, skip state files.</em>
+        </div>
+      </div>
+
+      <!-- GOTCHAS SECTION (4 items) -->
+      <div class="activity-item gradient" data-section="gotchas">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">How progress.txt bloat degrades quality</div>
+        <div class="text-text-secondary text-sm">
+          <strong>0-10KB:</strong> Pure benefit (all learnings useful)<br>
+          <strong>10-20KB:</strong> Diminishing returns (some noise)<br>
+          <strong>20-30KB:</strong> Neutral (reading cost = benefit)<br>
+          <strong>30KB+:</strong> Net negative (context wasted on history)<br><br>
+          <em>Critical: The degradation is invisible until quality drops.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Archive Early vs Archive Late</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Archive early:</strong> Clean files, but might lose useful history<br>
+          <strong>Archive late:</strong> Complete history, but bloated files<br>
+          <strong>The dilemma:</strong> No perfect timing. Varies by project.<br><br>
+          <em>Heuristic: Archive when file > 20KB OR when quality drops.</em>
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="gotchas">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">JSON corruption cascades</div>
+        <div class="text-text-secondary text-sm">
+          One invalid comma in prd.json -> Claude can't read task state -> Claude doesn't know what to work on -> Wasted session -> Manual recovery required.<br><br>
+          <strong>Prevention beats cure:</strong> Add JSON validation to pre-commit hooks.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="gotchas">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Debugging state file issues</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "Files exist but Claude ignores them" -> Check CLAUDE.md instructions<br>
+          <strong>Intermediate:</strong> "State is stale" -> Check session-end discipline<br>
+          <strong>Advanced:</strong> "Files are bloated" -> Archive strategy<br>
+          <strong>Staff:</strong> "Conflicting patterns" -> Periodic review process<br>
+          <strong>Expert:</strong> "State/code divergence" -> Commit together, always
+        </div>
+      </div>
+
+      <!-- HARD SECTION (3 items) -->
+      <div class="activity-item tradeoff" data-section="hard">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Persistence vs Privacy</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Full persistence:</strong> Everything captured, nothing lost<br>
+          <strong>Selective persistence:</strong> Only non-sensitive, but gaps<br>
+          <strong>The dilemma:</strong> State files create artifacts. Some work is confidential.<br><br>
+          <em>Heuristic: Don't use filesystem state for highly confidential work. Or use encrypted state files.</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="hard">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why state file hygiene is hard</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Maintenance is boring<br>
+          -> Hygiene gets skipped<br>
+          -> Files drift from reality<br>
+          -> Trust in files decreases<br>
+          -> People stop reading them<br>
+          -> Files become useless<br><br>
+          <em>Discipline compounds. So does neglect.</em>
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="hard">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ryan Carson: Task decomposition learning curve</div>
+        <div class="text-text-secondary text-sm">
+          "First few Ralph runs, my tasks were too big. Iteration would time out mid-task. Learned to decompose by reviewing failed progress.txt entries. Now my tasks fit in one context window."<br><br>
+          <em>The state files taught him task sizing.</em>
+        </div>
+      </div>
+
+      <!-- WHEN SECTION (3 items) -->
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you used state files for a one-off script?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd have:</strong> 3 state files for a 20-line script<br>
+          <strong>Why this fails:</strong> Setup overhead exceeds benefit. You'll never return to update them.<br>
+          <strong>Hidden constraint revealed:</strong> Filesystem state has minimum viable project size.
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="when">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If filesystem state isn't right for you</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Single session work?</strong> -> Manual context is fine<br>
+          <strong>Learning/exploration?</strong> -> No state needed<br>
+          <strong>Team collaboration?</strong> -> Add ONBOARDING.md<br>
+          <strong>Autonomous development?</strong> -> This is the prerequisite for Ralph
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">When to start using filesystem state</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "Too much setup for this small project"<br>
+          <strong>Day 3:</strong> "Wait, this project is bigger than I thought"<br>
+          <strong>Day 5:</strong> "I wish I had started with state files"<br>
+          <strong>Day 7:</strong> "Retrofitting state files to existing project"<br><br>
+          <em>Heuristic: If you might need >3 sessions, start with state files.</em>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        // Elements
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        // Bind methods
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Track which sections are in view
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      // Update nav active state
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction - hover activity item highlights related content
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

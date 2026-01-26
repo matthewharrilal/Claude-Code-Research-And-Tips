@@ -1,0 +1,2585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unexplored Territory Map | Claude Code Documentation</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP for scroll-sync -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind Config with Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#ffffff',
+            'bg-subtle': '#fafafa',
+            'bg-muted': '#f4f4f5',
+            'text-primary': '#18181b',
+            'text-secondary': '#3f3f46',
+            'text-muted': '#71717a',
+            'accent': '#0D9373',
+            'accent-light': '#10b981',
+            'accent-bg': '#ecfdf5',
+            'border': '#e4e4e7',
+            // Activity Zone content type colors (Original 6)
+            'az-invariant': '#3b82f6',
+            'az-effect': '#f59e0b',
+            'az-composition': '#8b5cf6',
+            'az-frontier': '#ef4444',
+            'az-warstory': '#10b981',
+            'az-alternative': '#6b7280',
+            // Activity Zone generative content types (New 10)
+            'az-inversion': '#4f46e5',
+            'az-constraint': '#8b5cf6',
+            'az-gradient': '#f43f5e',
+            'az-horizon': '#06b6d4',
+            'az-violation': '#f97316',
+            'az-tradeoff': '#f59e0b',
+            'az-analogy': '#d946ef',
+            'az-expertise': '#10b981',
+            'az-minimal': '#84cc16',
+            'az-inflection': '#eab308',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 80px;
+    }
+
+    [id] {
+      scroll-margin-top: 80px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #ffffff;
+      color: #18181b;
+      line-height: 1.7;
+    }
+
+    /* Three Panel Layout */
+    .three-panel-layout {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e4e4e7;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    /* Left Navigation - 240px fixed */
+    .left-nav {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: 240px;
+      height: calc(100vh - 56px);
+      border-right: 1px solid #e4e4e7;
+      background: #ffffff;
+      overflow-y: auto;
+      padding: 16px 0;
+      z-index: 40;
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .nav-section-header:hover {
+      background: #f4f4f5;
+    }
+
+    .nav-section-header.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 6px 12px 6px 44px;
+      font-size: 14px;
+      color: #71717a;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover {
+      color: #3f3f46;
+      background: #f4f4f5;
+    }
+
+    .nav-item.active {
+      color: #0D9373;
+      background: #ecfdf5;
+    }
+
+    .nav-children {
+      display: none;
+      overflow: hidden;
+    }
+
+    .nav-children.expanded {
+      display: block;
+    }
+
+    .nav-chevron {
+      transition: transform 0.2s;
+    }
+
+    .nav-section.expanded .nav-chevron {
+      transform: rotate(90deg);
+    }
+
+    /* Main Content - Flexible, margins for fixed sidebars */
+    .main-content {
+      margin-left: 240px;
+      margin-right: 480px;
+      margin-top: 56px;
+      padding: 48px 48px;
+      min-width: 400px;
+    }
+
+    /* Activity Zone - 480px fixed */
+    .activity-zone {
+      position: fixed;
+      top: 56px;
+      right: 0;
+      width: 480px;
+      height: calc(100vh - 56px);
+      border-left: 1px dashed #e4e4e7;
+      background: #fafafa;
+      overflow-y: auto;
+      padding: 24px 20px;
+      z-index: 40;
+    }
+
+    /* Responsive: Hide Activity Zone below 1400px */
+    @media (max-width: 1400px) {
+      .activity-zone {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+        padding: 40px 32px;
+      }
+    }
+
+    /* Responsive: Hide Left Nav below 768px */
+    @media (max-width: 768px) {
+      .left-nav {
+        display: none;
+      }
+      .left-nav.open {
+        display: block;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        z-index: 50;
+        overflow-y: auto;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 24px 16px;
+        min-width: auto;
+      }
+    }
+
+    /* Resizer */
+    .resizer {
+      position: fixed;
+      top: 56px;
+      right: 480px;
+      width: 6px;
+      height: calc(100vh - 56px);
+      cursor: col-resize;
+      background: transparent;
+      z-index: 50;
+      transition: background 0.15s ease;
+    }
+
+    .resizer:hover {
+      background: rgba(13, 147, 115, 0.15);
+    }
+
+    .resizer.active {
+      background: rgba(13, 147, 115, 0.25);
+    }
+
+    body.resizing {
+      user-select: none;
+      cursor: col-resize !important;
+    }
+
+    body.resizing * {
+      cursor: col-resize !important;
+    }
+
+    @media (max-width: 1400px) {
+      .resizer {
+        display: none;
+      }
+    }
+
+    /* Activity Zone Items */
+    .activity-item {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      font-size: 14px;
+      line-height: 1.6;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item.active {
+      opacity: 1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .activity-item:hover {
+      opacity: 1;
+    }
+
+    .activity-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Activity Zone content type borders */
+    .activity-item.invariant { border-left: 4px solid #3b82f6; }
+    .activity-item.effect { border-left: 4px solid #f59e0b; }
+    .activity-item.composition { border-left: 4px solid #8b5cf6; }
+    .activity-item.frontier { border-left: 4px solid #ef4444; }
+    .activity-item.warstory { border-left: 4px solid #10b981; }
+    .activity-item.alternative { border-left: 4px solid #6b7280; }
+    .activity-item.inversion { border-left: 4px solid #4f46e5; }
+    .activity-item.constraint { border-left: 4px solid #8b5cf6; }
+    .activity-item.gradient { border-left: 4px solid #f43f5e; }
+    .activity-item.horizon { border-left: 4px solid #06b6d4; }
+    .activity-item.violation { border-left: 4px solid #f97316; }
+    .activity-item.tradeoff { border-left: 4px solid #f59e0b; }
+    .activity-item.analogy { border-left: 4px solid #d946ef; }
+    .activity-item.expertise { border-left: 4px solid #10b981; }
+    .activity-item.minimal { border-left: 4px solid #84cc16; }
+    .activity-item.inflection { border-left: 4px solid #eab308; }
+
+    /* Main Content Components */
+
+    /* Section titles with number */
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #18181b;
+      margin-bottom: 20px;
+      margin-top: 56px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* Essence Box */
+    .essence-box {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 40px;
+    }
+
+    .essence-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #10b981;
+      margin-bottom: 12px;
+    }
+
+    .essence-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    /* Core Abstraction Box */
+    .core-abstraction {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .core-philosophy {
+      font-size: 16px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .core-anchor {
+      font-size: 14px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    /* Design Decision Box */
+    .decision-box {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .decision-why {
+      font-size: 16px;
+      font-weight: 600;
+      color: #0D9373;
+      margin-bottom: 12px;
+    }
+
+    .decision-reasoning {
+      font-size: 14px;
+      color: #3f3f46;
+      margin-bottom: 16px;
+    }
+
+    .decision-implication {
+      background: #f4f4f5;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .decision-implication-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: #18181b;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #e4e4e7;
+      line-height: 1.6;
+    }
+
+    .code-block .comment { color: #6b7280; }
+    .code-block .keyword { color: #c084fc; }
+    .code-block .string { color: #10b981; }
+    .code-block .variable { color: #60a5fa; }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #3f3f46;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #52525b;
+    }
+
+    /* Path Steps */
+    .path-container {
+      background: #fafafa;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .path-step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .path-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .path-number {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #0D9373;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .path-content {
+      flex: 1;
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    .path-content code {
+      background: #e4e4e7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+    }
+
+    /* Gotcha Box */
+    .gotcha-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gotcha-title {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gotcha-detail {
+      font-size: 14px;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+
+    .gotcha-detail strong {
+      color: #92400e;
+    }
+
+    /* Hard Box */
+    .hard-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hard-title {
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hard-detail {
+      font-size: 14px;
+      color: #7f1d1d;
+      margin-bottom: 8px;
+    }
+
+    /* When Grid */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .when-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .when-use {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-not {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .when-title {
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .when-use .when-title { color: #166534; }
+    .when-not .when-title { color: #991b1b; }
+
+    .when-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .when-use .when-item { color: #166534; }
+    .when-not .when-item { color: #991b1b; }
+
+    /* Risk Badge */
+    .risk-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .risk-low {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .risk-medium {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+
+    .risk-high {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Combination Card */
+    .combo-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .combo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .combo-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .combo-formula {
+      font-size: 14px;
+      color: #71717a;
+      background: #f4f4f5;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: 'Fira Code', monospace;
+      margin-bottom: 16px;
+    }
+
+    .combo-section {
+      margin-bottom: 16px;
+    }
+
+    .combo-section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #71717a;
+      margin-bottom: 8px;
+    }
+
+    .combo-metrics {
+      display: flex;
+      gap: 24px;
+      padding: 16px;
+      background: #fafafa;
+      border-radius: 8px;
+      margin-top: 16px;
+    }
+
+    .combo-metric {
+      text-align: center;
+    }
+
+    .combo-metric-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .combo-metric-label {
+      font-size: 11px;
+      color: #71717a;
+      text-transform: uppercase;
+    }
+
+    /* Frontier Box */
+    .frontier-box {
+      background: linear-gradient(135deg, #fef2f2 0%, #fff7ed 100%);
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .frontier-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Gap Box */
+    .gap-box {
+      background: #f5f3ff;
+      border: 1px solid #ddd6fe;
+      border-left: 4px solid #8b5cf6;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .gap-title {
+      font-weight: 600;
+      color: #5b21b6;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gap-detail {
+      font-size: 14px;
+      color: #6d28d9;
+      margin-bottom: 8px;
+    }
+
+    /* Opportunity Grid */
+    .opportunity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .opportunity-card {
+      background: #ffffff;
+      border: 1px solid #e4e4e7;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .opportunity-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .opportunity-title {
+      font-weight: 600;
+      color: #18181b;
+    }
+
+    .opportunity-effort {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .effort-low {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .effort-medium {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+
+    .effort-high {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Risk Table */
+    .risk-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+
+    .risk-table th,
+    .risk-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e4e4e7;
+    }
+
+    .risk-table th {
+      background: #f4f4f5;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #71717a;
+    }
+
+    .risk-table td {
+      font-size: 14px;
+      color: #3f3f46;
+    }
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #fafafa;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a1a1aa;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      background: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #71717a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+      <i data-lucide="menu" class="w-5 h-5 text-text-secondary"></i>
+    </button>
+    <div class="flex items-center gap-3">
+      <i data-lucide="terminal" class="w-5 h-5 text-accent"></i>
+      <span class="font-semibold text-text-primary">Claude Code</span>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <button class="flex items-center gap-2 px-4 py-2 bg-bg-muted rounded-lg text-text-muted text-sm hover:bg-border transition-colors">
+        <i data-lucide="search" class="w-4 h-4"></i>
+        <span>Search documentation...</span>
+        <span class="kbd">Cmd+K</span>
+      </button>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#" class="text-sm text-text-muted hover:text-text-primary transition-colors">Support</a>
+      <button class="p-2 hover:bg-bg-muted rounded-lg transition-colors" aria-label="Toggle theme">
+        <i data-lucide="sun" class="w-4 h-4 text-text-muted"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="three-panel-layout">
+    <!-- Left Navigation -->
+    <nav class="left-nav" id="leftNav">
+      <div class="px-4 mb-4">
+        <span class="text-xs font-semibold text-text-muted uppercase tracking-wider">Unexplored Territory</span>
+      </div>
+
+      <!-- Essence -->
+      <div class="nav-section expanded" data-section="essence">
+        <div class="nav-section-header active" onclick="toggleSection(this)">
+          <i data-lucide="compass" class="w-4 h-4"></i>
+          <span>Essence</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#essence" class="nav-item active">The Frontier Map</a>
+        </div>
+      </div>
+
+      <!-- Core Abstraction -->
+      <div class="nav-section expanded" data-section="core">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="box" class="w-4 h-4"></i>
+          <span>Core Abstraction</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#core-abstraction" class="nav-item">Theoretical Exploration</a>
+        </div>
+      </div>
+
+      <!-- High-Potential Combos -->
+      <div class="nav-section expanded" data-section="combinations">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="git-merge" class="w-4 h-4"></i>
+          <span>High-Potential</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children expanded">
+          <a href="#ralph-colonies" class="nav-item">Ralph Colonies</a>
+          <a href="#cross-domain" class="nav-item">Cross-Domain Correlation</a>
+          <a href="#spec-validation" class="nav-item">Spec Validation Swarm</a>
+          <a href="#learned-skills" class="nav-item">Learned Skills</a>
+          <a href="#self-scaling" class="nav-item">Self-Scaling Ralph</a>
+        </div>
+      </div>
+
+      <!-- More Combos -->
+      <div class="nav-section" data-section="more-combos">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>More Combinations</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#skill-markdown" class="nav-item">Skill-Markdown Fusion</a>
+          <a href="#intelligent-kanban" class="nav-item">Intelligent Kanban</a>
+          <a href="#adversarial-testing" class="nav-item">Adversarial Testing</a>
+          <a href="#memory-augmented" class="nav-item">Memory-Augmented Ralph</a>
+          <a href="#live-context" class="nav-item">Live Context Orchestration</a>
+        </div>
+      </div>
+
+      <!-- Theoretical Frontiers -->
+      <div class="nav-section" data-section="frontiers">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          <span>Theoretical Frontiers</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#frontiers" class="nav-item">Self-Modifying Systems</a>
+        </div>
+      </div>
+
+      <!-- Capability Gaps -->
+      <div class="nav-section" data-section="gaps">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+          <span>Capability Gaps</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#gaps" class="nav-item">What's Missing</a>
+        </div>
+      </div>
+
+      <!-- Risk Assessment -->
+      <div class="nav-section" data-section="risk">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="shield" class="w-4 h-4"></i>
+          <span>Risk Assessment</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#risk" class="nav-item">Safe vs Experimental</a>
+        </div>
+      </div>
+
+      <!-- When to Explore -->
+      <div class="nav-section" data-section="when">
+        <div class="nav-section-header" onclick="toggleSection(this)">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          <span>When to Explore</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 nav-chevron ml-auto"></i>
+        </div>
+        <div class="nav-children">
+          <a href="#when" class="nav-item">Decision Criteria</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Theoretical pattern combinations synthesized from existing patterns. Experiments, not proven approaches.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"If pattern A works, and pattern B works, what happens when they meet?"</div>
+
+          <div class="text-text-secondary text-sm mt-4 mb-4">
+            This document maps the frontier - pattern combinations that COULD exist but haven't been documented. These are theoretical explorations synthesized from analyzing all extraction files.
+          </div>
+
+          <div class="core-anchor">Use this for inspiration when you've mastered existing patterns and want to innovate.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Every pattern in the Claude Code ecosystem was designed in isolation. Ralph solves fresh context. CC Mirror solves parallelism. Claude-Mem solves persistence. But what happens when you combine them? Nobody has fully documented the intersection points.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          This is speculative territory. Treat ideas here as experiments, not proven approaches. Some will work brilliantly. Some will fail in ways we can't predict. The value is in exploring the possibility space.
+        </p>
+      </section>
+
+      <!-- Section 3: HIGH-POTENTIAL COMBINATIONS -->
+      <section id="ralph-colonies" data-activity="combinations">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          High-Potential Unexplored Combinations
+        </h2>
+
+        <!-- Ralph Colonies -->
+        <div class="combo-card">
+          <div class="combo-header">
+            <div class="combo-title">1. Ralph Colonies</div>
+            <span class="risk-badge risk-medium">Medium Risk</span>
+          </div>
+
+          <div class="combo-formula">Ralph Loop + CC Mirror Multi-Agent Orchestration</div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">Why Unexplored</div>
+            <p class="text-text-secondary text-sm">Ralph is documented as a sequential, single-agent pattern with fresh contexts per iteration. CC Mirror enables parallel agents with dependency tracking. No one has documented combining them.</p>
+          </div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">The Potential</div>
+            <p class="text-text-secondary text-sm">Run MULTIPLE Ralph loops in parallel, each handling independent branches of a feature tree. A "meta-Ralph" orchestrates which colony works on what.</p>
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Meta-Orchestrator (CC Mirror)</span>
+<span class="variable">Meta-Orchestrator</span>
+    |
+    +-- <span class="string">Ralph Colony A</span> (auth-schema branch)
+    |       |-- Iteration 1: DB migration
+    |       |-- Iteration 2: Model creation
+    |       +-- ...
+    |
+    +-- <span class="string">Ralph Colony B</span> (auth-api branch)
+    |       |-- (soft-blocked by A's schema)
+    |       |-- Starts with mocks, integrates when A completes
+    |       +-- ...
+    |
+    +-- <span class="string">Ralph Colony C</span> (auth-ui branch)
+            |-- Uses API mocks
+            +-- Integrates when A + B complete
+
+<span class="comment"># Colony Coordinator:</span>
+<span class="comment"># - Monitors prd.json for each colony</span>
+<span class="comment"># - Triggers merge when all colonies complete</span>
+<span class="comment"># - Handles cross-colony dependencies</span></pre>
+          </div>
+
+          <div class="combo-metrics">
+            <div class="combo-metric">
+              <div class="combo-metric-value">Medium</div>
+              <div class="combo-metric-label">Risk</div>
+            </div>
+            <div class="combo-metric">
+              <div class="combo-metric-value">High</div>
+              <div class="combo-metric-label">Effort</div>
+            </div>
+            <div class="combo-metric">
+              <div class="combo-metric-value">Very High</div>
+              <div class="combo-metric-label">Value</div>
+            </div>
+            <div class="combo-metric">
+              <div class="combo-metric-value">3-5x</div>
+              <div class="combo-metric-label">Speed Potential</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cross-Domain Correlation -->
+        <div class="combo-card" id="cross-domain">
+          <div class="combo-header">
+            <div class="combo-title">2. Cross-Domain Correlation</div>
+            <span class="risk-badge risk-low">Low Risk</span>
+          </div>
+
+          <div class="combo-formula">Personal Panopticon + Claude-Mem Persistent Memory</div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">Why Unexplored</div>
+            <p class="text-text-secondary text-sm">Panopticon uses filesystem as memory per domain. Claude-Mem uses SQLite + vector DB for semantic search. No documentation shows them working together.</p>
+          </div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">The Potential</div>
+            <p class="text-text-secondary text-sm">Claude-Mem becomes the SHARED BRAIN across all Panopticon instances, enabling cross-domain pattern detection impossible with isolated filesystems.</p>
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Panopticon Instances</span>
+    ~/trades  ----\
+    ~/health  -----\
+    ~/email   ------+--> <span class="string">Shared Claude-Mem Instance</span>
+    ~/nox     ------+    (port 37777)
+    ~/growth  -----/         |
+    ~/personal----/          v
+                      <span class="variable">Cross-Domain Query Layer</span>
+                            |
+                            v
+                      <span class="string">Morning Brief Generator</span>
+                      <span class="comment">"Your trades correlate with</span>
+                      <span class="comment"> stress patterns in ~/health</span>
+                      <span class="comment"> and email volume spikes..."</span></pre>
+          </div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">Unique Capabilities</div>
+            <ul class="text-text-secondary text-sm list-disc pl-5 space-y-1">
+              <li>Query "show me decisions I regretted across all domains"</li>
+              <li>Find patterns: "every time ~/health shows poor sleep, ~/trades has losses"</li>
+              <li>Cross-reference: "who from ~/email also appears in ~/trades discussions"</li>
+            </ul>
+          </div>
+
+          <div class="combo-metrics">
+            <div class="combo-metric">
+              <div class="combo-metric-value">Low</div>
+              <div class="combo-metric-label">Risk</div>
+            </div>
+            <div class="combo-metric">
+              <div class="combo-metric-value">Medium</div>
+              <div class="combo-metric-label">Effort</div>
+            </div>
+            <div class="combo-metric">
+              <div class="combo-metric-value">Very High</div>
+              <div class="combo-metric-label">Value</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Specification Validation Swarm -->
+        <div class="combo-card" id="spec-validation">
+          <div class="combo-header">
+            <div class="combo-title">3. Specification Validation Swarm</div>
+            <span class="risk-badge risk-low">Low Risk</span>
+          </div>
+
+          <div class="combo-formula">CC Mirror Task Decomposition + Adversarial Subagent Review</div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">Why Unexplored</div>
+            <p class="text-text-secondary text-sm">Task decomposition focuses on breaking work into pieces. Adversarial review focuses on reviewing completed work. No pattern shows using adversarial agents to validate SPECIFICATIONS before coding begins.</p>
+          </div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">The Potential</div>
+            <p class="text-text-secondary text-sm">A "Specification Validation Swarm" of specialized critics that attack PRDs BEFORE coding starts. Shift left on quality.</p>
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="variable">PRD Created</span>
+    |
+    v
+<span class="string">Validation Swarm (Parallel)</span>
+    |
+    +-- <span class="comment">Completeness Critic</span>
+    |       "What edge cases are missing?"
+    |
+    +-- <span class="comment">Dependency Critic</span>
+    |       "US-003 can't work without US-001 completing X"
+    |
+    +-- <span class="comment">Testability Critic</span>
+    |       "How will the agent verify 'good UX'?"
+    |
+    +-- <span class="comment">Sizing Critic</span>
+    |       "US-005 is 3 tasks in disguise"
+    |
+    +-- <span class="comment">Security Critic</span>
+            "No auth checks specified for this endpoint"
+    |
+    v
+<span class="string">Consolidated PRD v2 (pre-validated)</span>
+    |
+    v
+<span class="variable">Normal Ralph/CC Mirror execution</span></pre>
+          </div>
+
+          <div class="combo-metrics">
+            <div class="combo-metric">
+              <div class="combo-metric-value">Low</div>
+              <div class="combo-metric-label">Risk</div>
+            </div>
+            <div class="combo-metric">
+              <div class="combo-metric-value">Medium</div>
+              <div class="combo-metric-label">Effort</div>
+            </div>
+            <div class="combo-metric">
+              <div class="combo-metric-value">High</div>
+              <div class="combo-metric-label">Value</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Learned Skills -->
+        <div class="combo-card" id="learned-skills">
+          <div class="combo-header">
+            <div class="combo-title">4. Learned Skills (Auto-Generating)</div>
+            <span class="risk-badge risk-medium">Medium Risk</span>
+          </div>
+
+          <div class="combo-formula">Claude-Mem Session Capture + Skill File Generation</div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">Why Unexplored</div>
+            <p class="text-text-secondary text-sm">Skills are currently human-authored. Claude-Mem captures sessions but doesn't synthesize them into reusable skills.</p>
+          </div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">The Potential</div>
+            <p class="text-text-secondary text-sm">Claude-Mem GENERATES skill files from successful patterns. Skills that write themselves.</p>
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="variable">Claude-Mem Database</span>
+    |
+    v
+<span class="string">Pattern Miner</span> (runs weekly)
+    |
+    +-- Detects repeated successful patterns:
+    |   <span class="comment">"User asked X, agent did A->B->C, worked 5/5 times"</span>
+    |
+    +-- Extracts as candidate skill:
+    |   <span class="comment">"When asked about [X], do A, then B, then C"</span>
+    |
+    v
+<span class="variable">~/.claude/skills/learned/</span>
+    +-- pattern-001-auth-setup.md
+    +-- pattern-002-test-debugging.md
+    +-- pattern-003-prisma-migrations.md
+
+<span class="comment"># Meta-skill file auto-updates:</span>
+<span class="string">"When you see patterns matching X, load learned/pattern-001.md"</span></pre>
+          </div>
+
+          <div class="combo-metrics">
+            <div class="combo-metric">
+              <div class="combo-metric-value">Medium</div>
+              <div class="combo-metric-label">Risk</div>
+            </div>
+            <div class="combo-metric">
+              <div class="combo-metric-value">High</div>
+              <div class="combo-metric-label">Effort</div>
+            </div>
+            <div class="combo-metric">
+              <div class="combo-metric-value">Very High</div>
+              <div class="combo-metric-label">Value</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Self-Scaling Ralph -->
+        <div class="combo-card" id="self-scaling">
+          <div class="combo-header">
+            <div class="combo-title">5. Self-Scaling Ralph</div>
+            <span class="risk-badge risk-high">High Risk</span>
+          </div>
+
+          <div class="combo-formula">Ralph Loop + Gas Town Factory Architecture</div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">Why Unexplored</div>
+            <p class="text-text-secondary text-sm">Ralph is designed for one developer's workflow. Gas Town is designed for massive parallelism. No pattern shows Ralph dynamically spawning more workers.</p>
+          </div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">The Potential</div>
+            <p class="text-text-secondary text-sm">Ralph detects when stories are parallelizable and SPAWNS Gas Town crews to handle them. Best of both worlds.</p>
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="string">ralph.sh v2.0 (Self-Scaling)</span>
+    |
+    v
+<span class="variable">prd.json analysis</span>
+    |
+    +-- Independent stories detected?
+    |       <span class="keyword">YES:</span> Spawn Gas Town crews
+    |       <span class="keyword">NO:</span> Normal Ralph iteration
+    |
+    v
+<span class="comment"># Gas Town Integration:</span>
+gt crew spawn --prd=prd.json --parallel-stories=[US-002,US-003,US-004]
+
+<span class="comment"># Each crew:</span>
+    - Gets one story
+    - Runs one Ralph iteration
+    - Reports back
+
+<span class="comment"># Coordinator:</span>
+    - Merges results
+    - Updates prd.json
+    - Continues sequential flow for dependent stories</pre>
+          </div>
+
+          <div class="combo-metrics">
+            <div class="combo-metric">
+              <div class="combo-metric-value">High</div>
+              <div class="combo-metric-label">Risk</div>
+            </div>
+            <div class="combo-metric">
+              <div class="combo-metric-value">Very High</div>
+              <div class="combo-metric-label">Effort</div>
+            </div>
+            <div class="combo-metric">
+              <div class="combo-metric-value">Very High</div>
+              <div class="combo-metric-label">Value</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: MORE COMBINATIONS -->
+      <section id="skill-markdown" data-activity="more-combos">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          More Unexplored Combinations
+        </h2>
+
+        <!-- Skill-Markdown Fusion -->
+        <div class="combo-card">
+          <div class="combo-header">
+            <div class="combo-title">6. Skill-Markdown Fusion</div>
+            <span class="risk-badge risk-low">Low Risk</span>
+          </div>
+
+          <div class="combo-formula">MDFlow Executable Markdown + Claude Code Skills</div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">The Potential</div>
+            <p class="text-text-secondary text-sm">Skills become composable CLI pipelines, not just context injections.</p>
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Current: Skills load into context</span>
+/skill review-code
+
+<span class="comment"># Proposed: Skills chain as pipelines</span>
+./skills/lint.md | ./skills/review.md | ./skills/suggest-tests.md | ./skills/apply-fixes.md
+
+<span class="comment"># With arguments:</span>
+./skills/refactor.md --pattern=<span class="string">"callback-to-async"</span> src/legacy/ | ./skills/verify.md</pre>
+          </div>
+        </div>
+
+        <!-- Intelligent Kanban -->
+        <div class="combo-card" id="intelligent-kanban">
+          <div class="combo-header">
+            <div class="combo-title">7. Intelligent Kanban</div>
+            <span class="risk-badge risk-low">Low Risk</span>
+          </div>
+
+          <div class="combo-formula">TodoWrite + TaskCreate + External State (prd.json)</div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">The Potential</div>
+            <p class="text-text-secondary text-sm">A "Kanban Mind" that syncs TodoWrite (session), TaskCreate (multi-agent), and prd.json (file) together. Never lose task state again.</p>
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="string">Kanban Mind</span> (Hook-based)
+    |
+    +-- <span class="keyword">SessionStart:</span>
+    |       Load prd.json into TodoWrite
+    |       Sync with TaskCreate if CC Mirror active
+    |
+    +-- <span class="keyword">During session:</span>
+    |       TodoWrite tracks micro-tasks
+    |       TaskCreate tracks agent assignments
+    |       prd.json stays source of truth
+    |
+    +-- <span class="keyword">SessionEnd:</span>
+    |       Merge TodoWrite completions -> prd.json
+    |       Update TaskCreate status
+    |       Generate progress.txt entry
+    |
+    v
+<span class="variable">Unified view (Web UI):</span>
+    - All tasks from all sources
+    - Auto-reconciliation
+    - Conflict detection</pre>
+          </div>
+        </div>
+
+        <!-- Adversarial Acceptance Testing -->
+        <div class="combo-card" id="adversarial-testing">
+          <div class="combo-header">
+            <div class="combo-title">8. Adversarial Acceptance Testing</div>
+            <span class="risk-badge risk-medium">Medium Risk</span>
+          </div>
+
+          <div class="combo-formula">Ralph Acceptance Criteria + Adversarial Subagent</div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">The Potential</div>
+            <p class="text-text-secondary text-sm">An adversarial agent that tries to FAIL criteria even when they pass. Catches bugs before they ship.</p>
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Story: "Add login endpoint"</span>
+<span class="comment"># Criteria: "POST /api/auth/login returns JWT on success"</span>
+
+<span class="string">Implementation Agent:</span>
+    - Creates endpoint
+    - Tests: curl returns JWT
+    - <span class="keyword">"Criteria met!"</span>
+
+<span class="string">Adversarial Acceptance Tester:</span>
+    - "What if email is 10MB?"
+    - "What if password is empty string?"
+    - "What if Content-Type is application/xml?"
+    - Generates edge cases
+    - Runs them
+    - <span class="keyword">Finds:</span> "Empty password returns 200 with invalid JWT!"
+
+<span class="variable">Result:</span>
+    - Criteria BLOCKED until edge cases addressed
+    - OR criteria amended to include edge cases
+    - Next implementation iteration includes fixes</pre>
+          </div>
+        </div>
+
+        <!-- Memory-Augmented Ralph -->
+        <div class="combo-card" id="memory-augmented">
+          <div class="combo-header">
+            <div class="combo-title">9. Memory-Augmented Ralph</div>
+            <span class="risk-badge risk-low">Low Risk</span>
+          </div>
+
+          <div class="combo-formula">Ralph Loop + Claude-Mem Per-Story Context</div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">The Potential</div>
+            <p class="text-text-secondary text-sm">Claude-Mem provides TARGETED injection for each story. Fresh context + targeted memory = best of both worlds.</p>
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="variable">Ralph iteration starts for US-003</span>
+    |
+    v
+<span class="string">Pre-prompt hook:</span>
+    Claude-Mem query: <span class="string">"US-003"</span> AND <span class="string">"previous attempts"</span>
+    Returns:
+        - <span class="comment">"Last attempt failed due to missing import"</span>
+        - <span class="comment">"Pattern: use async/await not callbacks"</span>
+        - <span class="comment">"Gotcha: config file uses tabs not spaces"</span>
+    |
+    v
+<span class="keyword">Inject into iteration prompt:</span>
+    "Previous learnings for this story: [memories]"
+    |
+    v
+<span class="variable">Fresh context + targeted memory = best of both worlds</span></pre>
+          </div>
+        </div>
+
+        <!-- Live Context Orchestration -->
+        <div class="combo-card" id="live-context">
+          <div class="combo-header">
+            <div class="combo-title">10. Live Context Orchestration</div>
+            <span class="risk-badge risk-low">Low Risk</span>
+          </div>
+
+          <div class="combo-formula">Hooks + SessionStart + Dynamic CLAUDE.md</div>
+
+          <div class="combo-section">
+            <div class="combo-section-title">The Potential</div>
+            <p class="text-text-secondary text-sm">SessionStart hook generates LIVE context for CLAUDE.md. Agents start with current awareness.</p>
+          </div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment">#!/bin/bash</span>
+<span class="comment"># ~/.claude/hooks/live-context.sh (SessionStart)</span>
+
+<span class="comment"># Inject current state into CLAUDE.md</span>
+<span class="keyword">cat</span> > .claude/CONTEXT.md << <span class="string">EOF</span>
+<span class="comment">## Current Session Context (Auto-Generated)</span>
+
+<span class="comment">### Git Status</span>
+$(git status --short)
+
+<span class="comment">### Failing Tests</span>
+$(npm test 2>&1 | grep <span class="string">"FAIL"</span> || echo <span class="string">"All passing"</span>)
+
+<span class="comment">### Recent Changes</span>
+$(git log --oneline -5)
+
+<span class="comment">### Unfinished Tasks</span>
+$(jq '.userStories[] | select(.passes == false) | .title' prd.json 2>/dev/null || echo <span class="string">"No PRD"</span>)
+
+<span class="comment">### Technical Debt (from TODO comments)</span>
+$(grep -r <span class="string">"TODO"</span> src/ | head -10)
+
+<span class="string">EOF</span></pre>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Section 5: THEORETICAL FRONTIERS -->
+      <section id="frontiers" data-activity="frontiers">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Theoretical Frontiers
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are the edges of what's conceivable. No implementation sketches - just ideas waiting for pioneers.
+        </p>
+
+        <div class="frontier-box">
+          <div class="frontier-title">
+            <i data-lucide="flask-conical" class="w-5 h-5"></i>
+            Self-Modifying Orchestration
+          </div>
+          <p class="text-text-secondary text-sm">
+            No current pattern allows the orchestration system itself to evolve. Potential: Agents propose changes to ralph.sh. Successful runs reinforce patterns. Failed runs trigger orchestration review. System literally improves its own coordination.
+          </p>
+        </div>
+
+        <div class="frontier-box">
+          <div class="frontier-title">
+            <i data-lucide="flask-conical" class="w-5 h-5"></i>
+            Cross-Project Learning
+          </div>
+          <p class="text-text-secondary text-sm">
+            Current patterns are project-scoped. Potential: Claude-Mem spans ALL projects. Patterns learned in Project A apply to Project B. "I solved this before in another codebase..."
+          </p>
+        </div>
+
+        <div class="frontier-box">
+          <div class="frontier-title">
+            <i data-lucide="flask-conical" class="w-5 h-5"></i>
+            Predictive Task Decomposition
+          </div>
+          <p class="text-text-secondary text-sm">
+            Current decomposition is reactive (given a feature, break it down). Potential: System predicts WHAT features are needed from codebase analysis. Generates PRDs for anticipated work. "Your auth system will need rate limiting soon..."
+          </p>
+        </div>
+
+        <div class="frontier-box">
+          <div class="frontier-title">
+            <i data-lucide="flask-conical" class="w-5 h-5"></i>
+            Natural Language Orchestration
+          </div>
+          <p class="text-text-secondary text-sm">
+            Current orchestration uses JSON (prd.json) and scripts (ralph.sh). Potential: Orchestration via conversation. "Start three agents on auth, two on payments, one monitoring." System translates to TaskCreate/Gas Town commands.
+          </p>
+        </div>
+
+        <div class="frontier-box">
+          <div class="frontier-title">
+            <i data-lucide="flask-conical" class="w-5 h-5"></i>
+            Emergent Specialization
+          </div>
+          <p class="text-text-secondary text-sm">
+            Rather than pre-defining squads, let specialization emerge. Track which agents succeed at which tasks. Route similar tasks to successful agents. Specializations form organically.
+          </p>
+        </div>
+
+      </section>
+
+      <!-- Section 6: CAPABILITY GAPS -->
+      <section id="gaps" data-activity="gaps">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Capability Gaps in Current Ecosystem
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These aren't unexplored combinations - they're missing capabilities that no current pattern addresses.
+        </p>
+
+        <div class="gap-box">
+          <div class="gap-title">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+            Missing: Cross-Session Debugging
+          </div>
+          <div class="gap-detail">When bugs span multiple Ralph iterations: no way to correlate "this worked in iteration 3, broke in iteration 7."</div>
+          <div class="gap-detail"><strong>Need:</strong> Temporal debugging across iteration boundaries.</div>
+        </div>
+
+        <div class="gap-box">
+          <div class="gap-title">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+            Missing: Cost Attribution
+          </div>
+          <div class="gap-detail">For Gas Town / multi-agent setups: which agent spent the most? Which task type costs most?</div>
+          <div class="gap-detail"><strong>Need:</strong> Per-agent, per-task cost tracking.</div>
+        </div>
+
+        <div class="gap-box">
+          <div class="gap-title">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+            Missing: Agent Health Monitoring
+          </div>
+          <div class="gap-detail">When running 10+ agents: no dashboard of agent states. No detection of stuck agents.</div>
+          <div class="gap-detail"><strong>Need:</strong> Observability layer for agent swarms.</div>
+        </div>
+
+        <div class="gap-box">
+          <div class="gap-title">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+            Missing: Rollback Orchestration
+          </div>
+          <div class="gap-detail">When Ralph iteration breaks things: can git reset, but orchestration state is lost.</div>
+          <div class="gap-detail"><strong>Need:</strong> Coordinated rollback of code + prd.json + progress.txt.</div>
+        </div>
+
+        <div class="gap-box">
+          <div class="gap-title">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+            Missing: Skill Versioning
+          </div>
+          <div class="gap-detail">When skills evolve: no tracking of which skill version produced what code.</div>
+          <div class="gap-detail"><strong>Need:</strong> Skill checksums in commit messages.</div>
+        </div>
+
+        <div class="gap-box">
+          <div class="gap-title">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+            Missing: Human Override Patterns
+          </div>
+          <div class="gap-detail">For HITL workflows: no standard pattern for "agent suggests, human decides."</div>
+          <div class="gap-detail"><strong>Need:</strong> Approval gates integrated with TaskCreate.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: RISK ASSESSMENT -->
+      <section id="risk" data-activity="risk">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          Risk Assessment
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4 mt-6">Safe to Try Immediately</h3>
+
+        <table class="risk-table">
+          <thead>
+            <tr>
+              <th>Combination</th>
+              <th>Risk</th>
+              <th>Why Safe</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Live Context Orchestration</td>
+              <td><span class="risk-badge risk-low">Low</span></td>
+              <td>Read-only hook</td>
+            </tr>
+            <tr>
+              <td>Memory-Augmented Ralph</td>
+              <td><span class="risk-badge risk-low">Low</span></td>
+              <td>Additive context</td>
+            </tr>
+            <tr>
+              <td>Always-On Verifier</td>
+              <td><span class="risk-badge risk-low">Low</span></td>
+              <td>More testing is never bad</td>
+            </tr>
+            <tr>
+              <td>Skeptical Panopticon</td>
+              <td><span class="risk-badge risk-low">Low</span></td>
+              <td>Self-critique is valuable</td>
+            </tr>
+            <tr>
+              <td>Cross-Domain Correlation</td>
+              <td><span class="risk-badge risk-low">Low</span></td>
+              <td>Both tools are stable</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Try with Caution</h3>
+
+        <table class="risk-table">
+          <thead>
+            <tr>
+              <th>Combination</th>
+              <th>Risk</th>
+              <th>Mitigation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Specification Validation Swarm</td>
+              <td><span class="risk-badge risk-medium">Medium</span></td>
+              <td>Validate on non-critical PRDs first</td>
+            </tr>
+            <tr>
+              <td>Adversarial Acceptance Testing</td>
+              <td><span class="risk-badge risk-medium">Medium</span></td>
+              <td>Run in shadow mode initially</td>
+            </tr>
+            <tr>
+              <td>Intelligent Kanban</td>
+              <td><span class="risk-badge risk-medium">Medium</span></td>
+              <td>Keep prd.json as source of truth</td>
+            </tr>
+            <tr>
+              <td>Spec-First Vibe Coding</td>
+              <td><span class="risk-badge risk-medium">Medium</span></td>
+              <td>Human review of generated tests</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Experimental Only</h3>
+
+        <table class="risk-table">
+          <thead>
+            <tr>
+              <th>Combination</th>
+              <th>Risk</th>
+              <th>Warning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Ralph Colonies</td>
+              <td><span class="risk-badge risk-high">High</span></td>
+              <td>Branch merge conflicts</td>
+            </tr>
+            <tr>
+              <td>Self-Scaling Ralph</td>
+              <td><span class="risk-badge risk-high">High</span></td>
+              <td>Gas Town is already chaotic</td>
+            </tr>
+            <tr>
+              <td>Specialist Skill Squads</td>
+              <td><span class="risk-badge risk-high">High</span></td>
+              <td>Coordination overhead</td>
+            </tr>
+            <tr>
+              <td>Learned Skills</td>
+              <td><span class="risk-badge risk-high">High</span></td>
+              <td>May encode bad patterns</td>
+            </tr>
+            <tr>
+              <td>Specification-Driven Regeneration</td>
+              <td><span class="risk-badge risk-high">High</span></td>
+              <td>Can break working code</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 8: WHEN TO EXPLORE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Explore / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              EXPLORE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You've mastered existing patterns (Ralph, CC Mirror work reliably)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You have a specific problem existing patterns don't solve</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You can afford failed experiments (time, cost, cleanup)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're on a non-critical project or branch</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You want to contribute back to the community</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T EXPLORE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Still learning basic Ralph or CC Mirror patterns</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Production deadline pressure (use proven patterns)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You need predictable outcomes</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Your team isn't comfortable with uncertainty</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You're exploring for its own sake (solve a real problem)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Next Steps for Exploration</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>Prototype Live Context Orchestration</strong> - Lowest effort, immediate value, just a hook script</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>Test Claude-Mem + Panopticon on two domains</strong> - High value, manageable scope</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>Build Specification Validation Swarm</strong> - Shifts left on quality, low risk</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>Document what you learn</strong> - Enable community experimentation</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Resizer -->
+    <div class="resizer" data-resizer="activity-zone" aria-label="Resize activity panel"></div>
+
+    <!-- Activity Zone -->
+    <aside class="activity-zone" id="activityZone">
+      <div class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Operational Intelligence</div>
+
+      <!-- ESSENCE SECTION -->
+      <div class="activity-item inversion" data-section="essence">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if patterns WERE designed to combine?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd expect:</strong> Documented integration points, shared interfaces, composition guidelines.<br>
+          <strong>Reality:</strong> Each pattern evolved independently to solve its problem.<br>
+          <strong>Hidden constraint:</strong> Integration is YOUR job as the orchestrator.
+        </div>
+      </div>
+
+      <div class="activity-item frontier" data-section="essence">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Pattern composition theory</div>
+        <div class="text-text-secondary text-sm">
+          No formal theory exists for how Claude Code patterns compose. Each combination is empirical. We're in "pre-Newtonian" territory - cataloging phenomena without unifying principles.
+        </div>
+      </div>
+
+      <div class="activity-item warstory" data-section="essence">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">0xSero: Infinite Orchestra</div>
+        <div class="text-text-secondary text-sm">
+          Built multi-agent orchestration by combining MCP + hooks + subagents. "The documentation didn't exist. I just... tried things until they worked." Evidence that combinations ARE viable.
+        </div>
+      </div>
+
+      <!-- CORE SECTION -->
+      <div class="activity-item analogy" data-section="core">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">This = Unix Philosophy</div>
+        <div class="text-text-secondary text-sm">
+          Small programs that do one thing well.<br>
+          Compose via pipes and files.<br>
+          No central coordinator - just convention.<br><br>
+          <em>If you've composed Unix tools, you can compose Claude patterns.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="core">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Proven vs Possible</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Proven patterns:</strong> Reliable, documented, supported, but limited.<br>
+          <strong>Unexplored combinations:</strong> Potentially powerful, but risky, undocumented, unsupported.<br><br>
+          <em>Heuristic: Start proven, explore when you hit limits.</em>
+        </div>
+      </div>
+
+      <!-- COMBINATIONS SECTION -->
+      <div class="activity-item constraint" data-section="combinations">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ralph Colonies: Why not documented</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Ralph designed for single developer workflow<br>
+          -> CC Mirror designed for team coordination<br>
+          -> Different mental models (sequential vs parallel)<br>
+          -> Different state assumptions (files vs TaskCreate)<br>
+          -> Integration requires bridging both paradigms
+        </div>
+      </div>
+
+      <div class="activity-item violation" data-section="combinations">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If Ralph Colonies skip coordinator</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Multiple Ralph loops run without coordination<br>
+          <strong>THEN:</strong> Both modify same files simultaneously<br>
+          <strong>THEN:</strong> Git conflicts on merge<br>
+          <strong>THEN:</strong> Manual cleanup required<br>
+          <strong>FINALLY:</strong> Parallel speed gain lost to conflict resolution<br><br>
+          <em>The fix: Coordinator monitors prd.json across colonies.</em>
+        </div>
+      </div>
+
+      <div class="activity-item invariant" data-section="combinations">
+        <div class="activity-label" style="color: #3b82f6;">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          Invariant Connection
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cross-Domain Correlation shares INV-003</div>
+        <div class="text-text-secondary text-sm">
+          Panopticon, Claude-Mem, and Ralph all share: <strong>External state > internal memory</strong>.<br><br>
+          This is why they CAN combine - they all persist to files/DBs, not agent memory. The invariant creates compatibility.
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="combinations">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Understanding Unexplored Territory</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What's Ralph Colonies?" -> Parallel Ralph loops<br>
+          <strong>Intermediate:</strong> "Why parallel?" -> Independent branches<br>
+          <strong>Advanced:</strong> "What's the catch?" -> Merge conflict risk<br>
+          <strong>Staff:</strong> "When worth it?" -> 3+ truly independent stories<br>
+          <strong>Expert:</strong> "Better alternative?" -> Maybe CC Mirror alone
+        </div>
+      </div>
+
+      <div class="activity-item effect" data-section="combinations">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          Second-Order Effect
+        </div>
+        <div class="font-medium text-text-primary mb-2">Learned Skills: Emergent bad habits</div>
+        <div class="text-text-secondary text-sm">
+          At small scale: Pattern mining captures good patterns.<br>
+          At large scale: Also captures workarounds, hacks, mistakes that "worked."<br><br>
+          <strong>Threshold:</strong> ~100 sessions before bad pattern risk emerges.<br>
+          <strong>Mitigation:</strong> Human review before promoting to skill.
+        </div>
+      </div>
+
+      <!-- MORE-COMBOS SECTION -->
+      <div class="activity-item minimal" data-section="more-combos">
+        <div class="activity-label" style="color: #84cc16;">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+          Minimal Pattern
+        </div>
+        <div class="font-medium text-text-primary mb-2">Simplest Live Context</div>
+        <div class="text-text-secondary text-sm">
+          <code style="background: #f4f4f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">echo "$(git status)" > .claude/CONTEXT.md</code><br><br>
+          <strong>Essential:</strong> Generate context at session start.<br>
+          <strong>Everything else:</strong> Refinement for completeness.
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="more-combos">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Intelligent Kanban + prd.json</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Yes, with prd.json as source of truth.<br>
+          <strong>Danger:</strong> Three sources (TodoWrite, TaskCreate, prd.json) can drift.<br>
+          <strong>Recommendation:</strong> prd.json is master. Others are caches.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="more-combos">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if adversarial testing generated TOO many edge cases?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd expect:</strong> Every edge case is valuable.<br>
+          <strong>Reality:</strong> Adversarial agent can generate infinite edge cases.<br>
+          <strong>Hidden constraint:</strong> Need "edge case budget" or prioritization.<br>
+          <em>Not all edge cases are worth testing.</em>
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="more-combos">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Memory-Augmented Ralph over time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Day 1:</strong> "Extra query overhead"<br>
+          <strong>Week 1:</strong> "Claude repeats old mistakes less"<br>
+          <strong>Month 1:</strong> "Iteration 50 is FASTER than iteration 1"<br>
+          <strong>Month 3:</strong> "This is institutional memory"<br><br>
+          <em>Judge after iteration 30, not iteration 3.</em>
+        </div>
+      </div>
+
+      <!-- FRONTIERS SECTION -->
+      <div class="activity-item frontier" data-section="frontiers">
+        <div class="activity-label" style="color: #ef4444;">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Research Frontier
+        </div>
+        <div class="font-medium text-text-primary mb-2">UNSOLVED: Self-modifying safety</div>
+        <div class="text-text-secondary text-sm">
+          <strong>The question:</strong> How do you let an agent modify its own orchestration without breaking everything?<br>
+          <strong>Why it's hard:</strong> Feedback loops, runaway changes, no rollback.<br>
+          <strong>Current best:</strong> Don't. Just don't. Yet.
+        </div>
+      </div>
+
+      <div class="activity-item gradient" data-section="frontiers">
+        <div class="activity-label" style="color: #f43f5e;">
+          <i data-lucide="trending-down" class="w-4 h-4"></i>
+          Failure Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cross-Project Learning degradation</div>
+        <div class="text-text-secondary text-sm">
+          <strong>100% helpful:</strong> Similar tech stacks<br>
+          <strong>80% helpful:</strong> Same language, different frameworks<br>
+          <strong>50% helpful:</strong> Same domain, different languages<br>
+          <strong>Noise:</strong> Unrelated projects polluting memory<br><br>
+          <em>Critical: Cross-project needs domain filtering.</em>
+        </div>
+      </div>
+
+      <div class="activity-item analogy" data-section="frontiers">
+        <div class="activity-label" style="color: #d946ef;">
+          <i data-lucide="git-compare" class="w-4 h-4"></i>
+          Analogical Bridge
+        </div>
+        <div class="font-medium text-text-primary mb-2">Emergent Specialization = Microservices</div>
+        <div class="text-text-secondary text-sm">
+          Services start generic.<br>
+          Traffic patterns reveal hotspots.<br>
+          You extract specialized services.<br><br>
+          <em>Same principle: Let usage reveal what deserves specialization.</em>
+        </div>
+      </div>
+
+      <!-- GAPS SECTION -->
+      <div class="activity-item violation" data-section="gaps">
+        <div class="activity-label" style="color: #f97316;">
+          <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+          Violation Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">If you lack cross-session debugging</div>
+        <div class="text-text-secondary text-sm">
+          <strong>IF:</strong> Bug spans iterations 3-7<br>
+          <strong>THEN:</strong> You only see git diff, not Claude's reasoning<br>
+          <strong>THEN:</strong> Can't tell if bug was introduced or amplified<br>
+          <strong>THEN:</strong> Fix attempt may repeat original mistake<br>
+          <strong>FINALLY:</strong> Oscillating fixes across iterations<br><br>
+          <em>The gap: No causal chain visible across sessions.</em>
+        </div>
+      </div>
+
+      <div class="activity-item tradeoff" data-section="gaps">
+        <div class="activity-label" style="color: #f59e0b;">
+          <i data-lucide="scale" class="w-4 h-4"></i>
+          Trade-Off Tension
+        </div>
+        <div class="font-medium text-text-primary mb-2">Cost attribution granularity</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Per-session:</strong> Easy to track, but too coarse for optimization.<br>
+          <strong>Per-task:</strong> Useful, but requires metadata injection.<br>
+          <strong>Per-tool-call:</strong> Most useful, but high overhead.<br><br>
+          <em>Heuristic: Per-task is usually the right granularity.</em>
+        </div>
+      </div>
+
+      <div class="activity-item expertise" data-section="gaps">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          Expertise Gradient
+        </div>
+        <div class="font-medium text-text-primary mb-2">Understanding capability gaps</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Beginner:</strong> "What's missing?" -> The 6 gaps listed<br>
+          <strong>Intermediate:</strong> "Why missing?" -> No one built it yet<br>
+          <strong>Advanced:</strong> "Can I build it?" -> Yes, as hooks/tools<br>
+          <strong>Staff:</strong> "Should I?" -> Only if you hit the gap repeatedly<br>
+          <strong>Expert:</strong> "Contribute upstream?" -> Yes, please
+        </div>
+      </div>
+
+      <!-- RISK SECTION -->
+      <div class="activity-item inflection" data-section="risk">
+        <div class="activity-label" style="color: #eab308;">
+          <i data-lucide="activity" class="w-4 h-4"></i>
+          Inflection Point
+        </div>
+        <div class="font-medium text-text-primary mb-2">When experimentation flips from benefit to cost</div>
+        <div class="text-text-secondary text-sm">
+          <strong>1-2 experiments:</strong> Learning, low cost if fail<br>
+          <strong>3-4 experiments:</strong> Building intuition<br>
+          <strong>5-6 experiments:</strong> Diminishing returns<br>
+          <strong>7+ experiments:</strong> Procrastinating from real work<br><br>
+          <strong>THE INFLECTION:</strong> ~5 experiments per quarter<br>
+          <em>Detection: Are you shipping or just tinkering?</em>
+        </div>
+      </div>
+
+      <div class="activity-item constraint" data-section="risk">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="link-2" class="w-4 h-4"></i>
+          Constraint Chain
+        </div>
+        <div class="font-medium text-text-primary mb-2">Why "High Risk" combinations are high risk</div>
+        <div class="text-text-secondary text-sm">
+          <strong>ROOT:</strong> Combines TWO complex systems<br>
+          -> Each system has its own failure modes<br>
+          -> Interactions create NEW failure modes<br>
+          -> Debugging requires expertise in BOTH<br>
+          -> Community support limited (you're first)<br>
+          -> Recovery may require rollback of both
+        </div>
+      </div>
+
+      <div class="activity-item alternative" data-section="risk">
+        <div class="activity-label" style="color: #6b7280;">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          Alternative Paths
+        </div>
+        <div class="font-medium text-text-primary mb-2">If exploring isn't right for you</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Want parallelism?</strong> -> CC Mirror (proven)<br>
+          <strong>Want overnight?</strong> -> Ralph (proven)<br>
+          <strong>Want memory?</strong> -> Claude-Mem (proven)<br>
+          <strong>Want multi-domain?</strong> -> Panopticon (proven)<br><br>
+          <em>Master proven patterns first. Explore when you hit limits.</em>
+        </div>
+      </div>
+
+      <!-- WHEN SECTION -->
+      <div class="activity-item warstory" data-section="when">
+        <div class="activity-label" style="color: #10b981;">
+          <i data-lucide="user" class="w-4 h-4"></i>
+          War Story
+        </div>
+        <div class="font-medium text-text-primary mb-2">Ryan Carson's exploration process</div>
+        <div class="text-text-secondary text-sm">
+          Started with vanilla Ralph. Hit memory limits. Added progress.txt. Hit verification issues. Added Dr. Ralph confidence scoring. Each exploration solved a REAL problem hit in production.
+        </div>
+      </div>
+
+      <div class="activity-item inversion" data-section="when">
+        <div class="activity-label" style="color: #4f46e5;">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          Inversion Lens
+        </div>
+        <div class="font-medium text-text-primary mb-2">What if you explored without a real problem?</div>
+        <div class="text-text-secondary text-sm">
+          <strong>You'd expect:</strong> Learning, interesting discoveries.<br>
+          <strong>Reality:</strong> Solutions looking for problems. YAGNI violations. Complexity without value.<br>
+          <strong>Hidden constraint:</strong> Exploration without pain is procrastination.
+        </div>
+      </div>
+
+      <div class="activity-item horizon" data-section="when">
+        <div class="activity-label" style="color: #06b6d4;">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          Time Horizon Shift
+        </div>
+        <div class="font-medium text-text-primary mb-2">Value of experimentation over time</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Week 1:</strong> "This is a distraction"<br>
+          <strong>Month 1:</strong> "I learned what doesn't work"<br>
+          <strong>Month 3:</strong> "I solved a problem nothing else could"<br>
+          <strong>Month 6:</strong> "My workflow is unique to my needs"<br><br>
+          <em>Don't judge exploration by week 1.</em>
+        </div>
+      </div>
+
+      <div class="activity-item composition" data-section="when">
+        <div class="activity-label" style="color: #8b5cf6;">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          Composition Case
+        </div>
+        <div class="font-medium text-text-primary mb-2">Unexplored + Community</div>
+        <div class="text-text-secondary text-sm">
+          <strong>Works:</strong> Yes, if you document and share.<br>
+          <strong>Benefit:</strong> Others validate, extend, improve.<br>
+          <strong>Danger:</strong> Undocumented experiments die with you.<br>
+          <strong>Recommendation:</strong> Write up every experiment, success or failure.
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <script>
+    /**
+     * PanelResizer - Handles draggable panel dividers
+     */
+    class PanelResizer {
+      constructor(resizerEl, config = {}) {
+        this.resizer = resizerEl;
+        this.config = {
+          storageKey: 'panel-activity-zone-width',
+          minWidth: 280,
+          maxWidth: 900,
+          defaultWidth: 480,
+          ...config
+        };
+
+        this.isResizing = false;
+        this.startX = 0;
+        this.startWidth = 0;
+
+        this.activityZone = document.querySelector('.activity-zone');
+        this.mainContent = document.querySelector('.main-content');
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+
+        this.init();
+      }
+
+      init() {
+        this.restoreWidth();
+        this.resizer.addEventListener('mousedown', this.onMouseDown);
+      }
+
+      onMouseDown(e) {
+        if (e.button !== 0) return;
+
+        this.isResizing = true;
+        this.startX = e.clientX;
+        this.startWidth = this.activityZone.offsetWidth;
+
+        this.resizer.classList.add('active');
+        document.body.classList.add('resizing');
+
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+
+        e.preventDefault();
+      }
+
+      onMouseMove(e) {
+        if (!this.isResizing) return;
+
+        const delta = this.startX - e.clientX;
+        const newWidth = this.startWidth + delta;
+
+        const constrainedWidth = Math.max(
+          this.config.minWidth,
+          Math.min(this.config.maxWidth, newWidth)
+        );
+
+        this.activityZone.style.width = constrainedWidth + 'px';
+        this.mainContent.style.marginRight = constrainedWidth + 'px';
+        this.resizer.style.right = constrainedWidth + 'px';
+      }
+
+      onMouseUp(e) {
+        if (!this.isResizing) return;
+
+        this.isResizing = false;
+
+        this.resizer.classList.remove('active');
+        document.body.classList.remove('resizing');
+
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+
+        this.saveWidth();
+      }
+
+      saveWidth() {
+        const width = this.activityZone.offsetWidth;
+        localStorage.setItem(this.config.storageKey, JSON.stringify({
+          width,
+          timestamp: Date.now()
+        }));
+      }
+
+      restoreWidth() {
+        try {
+          const stored = localStorage.getItem(this.config.storageKey);
+          if (stored) {
+            const { width } = JSON.parse(stored);
+            if (width >= this.config.minWidth && width <= this.config.maxWidth) {
+              this.activityZone.style.width = width + 'px';
+              this.mainContent.style.marginRight = width + 'px';
+              this.resizer.style.right = width + 'px';
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to restore panel width:', e);
+        }
+      }
+
+      destroy() {
+        this.resizer.removeEventListener('mousedown', this.onMouseDown);
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    }
+
+    // Auto-initialize resizers on DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const resizers = document.querySelectorAll('[data-resizer]');
+      resizers.forEach(resizer => new PanelResizer(resizer));
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Navigation toggle
+    function toggleSection(header) {
+      const section = header.closest('.nav-section');
+      section.classList.toggle('expanded');
+      const children = section.querySelector('.nav-children');
+      children.classList.toggle('expanded');
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('leftNav');
+      nav.classList.toggle('open');
+    }
+
+    // Copy functionality
+    function copyCode(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-3 h-3"></i> Copied!';
+        lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+    }
+
+    function copyCodeBlock(btn) {
+      const codeBlock = btn.closest('.code-block');
+      const pre = codeBlock.querySelector('pre');
+      const text = pre.textContent;
+      copyCode(btn, text);
+    }
+
+    // Scroll-sync with GSAP ScrollTrigger
+    gsap.registerPlugin(ScrollTrigger);
+
+    const sections = document.querySelectorAll('[data-activity]');
+    const activityItems = document.querySelectorAll('.activity-item');
+
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 40%',
+        end: 'bottom 40%',
+        onEnter: () => activateSection(section.dataset.activity),
+        onEnterBack: () => activateSection(section.dataset.activity),
+      });
+    });
+
+    function activateSection(sectionName) {
+      activityItems.forEach(item => {
+        if (item.dataset.section === sectionName) {
+          item.classList.add('active');
+          gsap.to(item, {
+            opacity: 1,
+            y: -2,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        } else {
+          item.classList.remove('active');
+          gsap.to(item, {
+            opacity: 0.5,
+            y: 0,
+            boxShadow: 'none',
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        }
+      });
+
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.classList.remove('active');
+      });
+      const activeNav = document.querySelector(`[data-section="${sectionName}"] .nav-section-header`);
+      if (activeNav) {
+        activeNav.classList.add('active');
+      }
+    }
+
+    // Initialize first section as active
+    activateSection('essence');
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Brushing interaction
+    activityItems.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = 'rgba(13, 147, 115, 0.05)';
+          relatedSection.style.transition = 'background-color 0.3s ease';
+        }
+      });
+
+      item.addEventListener('mouseleave', () => {
+        const sectionName = item.dataset.section;
+        const relatedSection = document.querySelector(`[data-activity="${sectionName}"]`);
+        if (relatedSection) {
+          relatedSection.style.backgroundColor = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
