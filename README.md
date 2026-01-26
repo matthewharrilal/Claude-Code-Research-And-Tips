@@ -22,14 +22,16 @@ This project is actively evolving. Current status:
 |-------|--------|
 | Phase 1: Source Extraction | ✅ Complete (120+ extractions) |
 | Phase 2: Synthesis & Audit | ✅ Complete (65 synthesis docs) |
-| Phase 3: HTML Generation | 🔄 In Progress |
-| Phase 4: Search & Navigation | 📋 Planned |
+| Phase 3: HTML Generation | ✅ Complete (237 HTML pages) |
+| Phase 4: Next.js SPA | ✅ Complete (docs-spa/) |
+| Phase 5: Design Audit | 🔄 In Progress |
 
 **Recent additions:**
+- `docs-spa/` - **NEW** Next.js documentation SPA with 75 pages, three-panel layout
+- Design Audit Framework with 220 questions across 30 categories
+- UI Component POC with 6 design variants (Framer Motion)
 - `gallery/` - Three-panel documentation POC (Mintlify-inspired)
 - `UI-Tips/` - AI design workflows and MCP configurations
-- `mvp/` - Pattern showcase website prototype
-- 12 new spotlight extractions for deep-dive topics
 
 ---
 
@@ -143,12 +145,21 @@ Claude-Research-And-Tips/
 │   ├── poc-knowledge/          # Design research & decisions
 │   └── archive/                # Historical iterations
 │
-├── UI-Tips/                    # AI Design Workflows (NEW)
+├── UI-Tips/                    # AI Design Workflows
 │   └── CLAUDE.md               # PAGES framework, MCP stacks
 │
-└── mvp/                        # Pattern Website (NEW)
-    ├── index.html              # Pattern discovery hub
-    └── patterns/               # Individual pattern pages
+├── mvp/                        # Pattern Website
+│   ├── index.html              # Pattern discovery hub
+│   └── patterns/               # Individual pattern pages
+│
+└── docs-spa/                   # Next.js Documentation SPA (NEW)
+    ├── app/                    # Next.js app router
+    ├── components/             # React components
+    │   ├── ui-poc/             # Design variant POC
+    │   └── activity-zone/      # Activity Zone cards
+    ├── content/                # 75 extracted HTML pages
+    ├── DESIGN-AUDIT-FRAMEWORK.md  # 220-question audit
+    └── ATOMIC-DESIGN-AUDIT.md     # Atomic sub-questions
 ```
 
 ---
@@ -245,12 +256,14 @@ This site was built with **ADHD-friendly design**:
 
 | Resource | Description |
 |----------|-------------|
+| **[docs-spa](docs-spa/)** | **Next.js SPA with 75 pages (`npm run dev`)** |
 | [Learning Journey](html-site/start-here/learning-journey.html) | 7-phase structured curriculum |
 | [Master Playbook](html-site/start-here/master-playbook.html) | Complete Level 0-7 progression |
 | [Judgment Guide](html-site/start-here/judgment-guide.html) | When to use what pattern |
 | [Ralph Complete](html-site/patterns/mastery/ralph-complete.html) | Deep dive on the Ralph pattern |
 | [Core Principles](html-site/foundations/principles/core.html) | The 8 foundational principles |
 | [Complexity Ladder](html-site/foundations/architecture/complexity-ladder.html) | Level-by-level breakdown |
+| [Design Audit Framework](docs-spa/DESIGN-AUDIT-FRAMEWORK.md) | 220-question UX audit |
 | [Gallery POC](gallery/ralph-mintlify-poc.html) | Three-panel documentation prototype |
 | [AI Design Workflows](UI-Tips/CLAUDE.md) | PAGES framework & MCP stacks |
 | [Pattern Showcase](mvp/index.html) | Interactive pattern discovery |

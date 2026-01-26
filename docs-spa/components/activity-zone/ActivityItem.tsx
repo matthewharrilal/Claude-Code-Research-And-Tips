@@ -27,6 +27,13 @@ export function ActivityItem({
   onMouseLeave
 }: ActivityItemProps) {
   const config = ACTIVITY_CONFIG[type]
+
+  // Guard against undefined config (invalid type)
+  if (!config) {
+    console.warn(`ActivityItem: Unknown type "${type}"`)
+    return null
+  }
+
   const Icon = config.icon
 
   const handleClick = () => {
