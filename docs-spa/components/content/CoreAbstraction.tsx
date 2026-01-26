@@ -24,7 +24,7 @@ export function CoreAbstraction({
       {/* Philosophy Quote */}
       <blockquote className="border-l-4 border-accent-warm pl-6 py-2 mb-6 bg-warm-cream/50 rounded-r-lg">
         <p className="text-lg italic text-text-secondary leading-relaxed">
-          "{philosophy}"
+          &quot;{philosophy}&quot;
         </p>
         {philosophyAuthor && (
           <cite className="text-sm text-text-muted mt-2 block not-italic">

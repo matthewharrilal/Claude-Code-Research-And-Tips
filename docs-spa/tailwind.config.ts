@@ -33,6 +33,28 @@ const config: Config = {
         'az-expertise': '#10b981',
         'az-minimal': '#84cc16',
         'az-inflection': '#eab308',
+
+        // Semantic text colors
+        'text-secondary': '#3f3f46',
+
+        // Border color
+        'border': '#e4e4e7',
+
+        // Warm accent colors
+        'warm-cream': '#fefcf3',
+        'accent-warm': '#c49052',
+
+        // Success colors (green)
+        'success': '#6b9b7a',
+        'success-light': '#dcfce7',
+
+        // Warning colors (amber)
+        'warning': '#c49052',
+        'warning-light': '#fef3c7',
+
+        // Error colors (red)
+        'error': '#c97065',
+        'error-light': '#fee2e2',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

@@ -26,6 +26,7 @@ const synthesis = defineCollection({
       'taxonomy', 'principles', 'combinations', 'frontier', 'grammar', 'technical', 'reference'
     ]),
     order: s.number().default(999),
+    activityItems: s.array(activityItemSchema).optional(),
     content: s.mdx(),
   }),
 })
@@ -40,6 +41,7 @@ const spotlight = defineCollection({
     description: s.string().max(200).optional(),
     essence: s.string().max(150),
     order: s.number().default(999),
+    activityItems: s.array(activityItemSchema).optional(),
     content: s.mdx(),
   }),
 })

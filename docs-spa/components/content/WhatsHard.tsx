@@ -30,7 +30,7 @@ export function WhatsHard({ title, tension, symptoms, mitigation }: WhatsHardPro
         {/* Symptoms */}
         <div>
           <span className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-2 block">
-            You'll Feel This When...
+            You&apos;ll Feel This When...
           </span>
           <ul className="space-y-2">
             {symptoms.map((symptom, i) => (

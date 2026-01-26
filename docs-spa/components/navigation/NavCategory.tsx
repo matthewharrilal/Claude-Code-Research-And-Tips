@@ -42,7 +42,8 @@ export function NavCategory({ id, title, icon, items, currentSlug, defaultOpen }
   const containsCurrent = items.some(item => item.slug === currentSlug)
   const isExpanded = expandedSections.has(id) || containsCurrent || defaultOpen
 
-  const IconComponent = (Icons as Record<string, any>)[icon] || Icons.Folder
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const IconComponent = (Icons as any)[icon] || Icons.Folder
 
   return (
     <div className="mb-1">

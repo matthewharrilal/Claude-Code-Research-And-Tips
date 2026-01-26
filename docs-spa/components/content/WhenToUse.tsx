@@ -42,7 +42,7 @@ export function WhenToUse({ title, useWhen, dontUseWhen, alternatives }: WhenToU
         <div className="p-5 bg-error-light/5">
           <span className="text-xs font-semibold uppercase tracking-wider text-error mb-3 block flex items-center gap-2">
             <X className="w-4 h-4" />
-            Don't Use When
+            Don&apos;t Use When
           </span>
           <ul className="space-y-2">
             {dontUseWhen.map((item, i) => (
