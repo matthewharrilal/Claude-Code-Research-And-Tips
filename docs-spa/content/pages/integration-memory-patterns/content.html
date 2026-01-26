@@ -1,0 +1,546 @@
+
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Memory layers persist knowledge across sessions: files for state, vectors for semantics, git for truth.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"LLMs have no memory. Everything they 'remember' comes from files or context injection."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Session → Capture → Compress → Store → Retrieve → Inject')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Session -&gt; Capture -&gt; Compress -&gt; Store -&gt; Retrieve -&gt; Inject</code>
+          </div>
+
+          <div class="core-anchor">That's the memory pipeline. Everything else is optimization for different access patterns.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Claude starts every session from zero. The "memory" illusion comes from injecting relevant context at session start. The question isn't WHETHER to persist memory, but HOW: hot memory (current session), warm memory (recent sessions), or cold memory (searchable archive).
+        </p>
+
+        <div class="arch-diagram">
+          <pre>+=====================================================================+
+|                      THE MEMORY PYRAMID                              |
++=====================================================================+
+|                                                                       |
+|                            /\                                         |
+|                           /  \                                        |
+|                          /    \                                       |
+|                         / HOT  \          Current session             |
+|                        / MEMORY \         Full detail available       |
+|                       /   5-10   \        Immediate access            |
+|                      /   items    \                                   |
+|                     +--------------+                                  |
+|                    /                \                                 |
+|                   /    WARM MEMORY   \     Recent sessions            |
+|                  /   Summaries + key  \    Compressed                 |
+|                 /    observations      \   Searchable                 |
+|                /      ~50 items         \                             |
+|               +------------------------+                              |
+|              /                          \                             |
+|             /       COLD MEMORY          \   All historical           |
+|            /     Vector search access     \  Unlimited storage        |
+|           /      Full archive              \                          |
+|          +------------------------------------+                        |
+|                                                                       |
+|  KEY INSIGHT: Progressive disclosure moves data UP the pyramid        |
+|               only when needed, saving tokens                         |
+|                                                                       |
++=====================================================================+
+          </pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          This pyramid mirrors CPU cache hierarchies: L1 (hot) is fast but small, L3 (cold) is slow but huge. Memory tools implement this by storing everything cold and promoting to warm/hot on relevance.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-external-state" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY EXTERNAL STATE?</div>
+          <div class="decision-reasoning">
+            LLMs have no built-in persistence. Context windows reset on every session. If knowledge isn't written externally, it vanishes. This isn't a bug - it's the fundamental architecture of transformer models.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              If it's not in a file, it doesn't exist. Never rely on "Claude remembering" anything. Write to progress.txt, prd.json, AGENTS.md, or use claude-mem. The filesystem IS the memory.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-layered">
+          <div class="decision-why">WHY LAYERED MEMORY?</div>
+          <div class="decision-reasoning">
+            Not all memory has equal retrieval cost. Injecting 50KB of context wastes tokens if you only need 100 bytes. Progressive disclosure loads minimal context first, then fetches details only when needed.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use the 3-layer retrieval pattern: search() returns IDs only (~50 tokens), timeline() adds context (~500 tokens), get_observations() fetches full details (~1000+ tokens). Never fetch all at once.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-progressive">
+          <div class="decision-why">WHY PROGRESSIVE DISCLOSURE?</div>
+          <div class="decision-reasoning">
+            Raw tool output can be 10,000+ tokens. Semantic compression reduces this to ~100 tokens per observation. A 95% reduction means ~20x more tool calls before hitting context limits.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Configure claude-mem to capture observations automatically, compress them semantically, and inject only relevant summaries at session start. The savings compound across iterations.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: THE THREE PILLARS -->
+      <section id="pillars" data-activity="pillars">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The Three Memory Pillars
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          The Claude Code memory ecosystem has three complementary tools, each serving a different persistence pattern:
+        </p>
+
+        <div class="tool-card" id="claude-mem">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">
+              <i data-lucide="brain" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="tool-card-title">Claude-Mem</div>
+              <div class="tool-card-subtitle">Semantic session memory with vector search</div>
+            </div>
+          </div>
+          <p class="text-text-secondary text-sm mb-4">
+            <strong>What it does:</strong> Captures tool output, compresses semantically, stores in SQLite + Chroma vector DB, injects relevant context at session start.
+          </p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># 3-layer retrieval pattern</span>
+search(query=<span class="string">"auth bug"</span>, type=<span class="string">"bugfix"</span>, limit=10)  <span class="comment"># Returns IDs only</span>
+timeline(anchorId=<span class="string">"obs-123"</span>, range=5)              <span class="comment"># Surrounding context</span>
+get_observations(ids=[123, 456])                   <span class="comment"># Full details</span></pre>
+          </div>
+          <p class="text-text-secondary text-sm">
+            <strong>Best for:</strong> Solo developer, multi-session complex features, token optimization critical.
+          </p>
+        </div>
+
+        <div class="tool-card" id="beads">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">
+              <i data-lucide="git-branch" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="tool-card-title">Beads</div>
+              <div class="tool-card-subtitle">Git-backed multi-agent data plane</div>
+            </div>
+          </div>
+          <p class="text-text-secondary text-sm mb-4">
+            <strong>What it does:</strong> Dual-persistence (SQLite for fast queries, JSONL for git truth), three-way merge for collaboration, workflow chemistry (solid/liquid/vapor states).
+          </p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Beads CLI</span>
+bd create <span class="string">"Implement auth middleware"</span>    <span class="comment"># Create issue</span>
+bd list --status in_progress              <span class="comment"># Filter by status</span>
+bd prime                                  <span class="comment"># Get ready work for agent</span>
+bd sync --force                           <span class="comment"># Force reimport from JSONL</span></pre>
+          </div>
+          <p class="text-text-secondary text-sm">
+            <strong>Best for:</strong> Multi-agent coordination, Gas Town deployment, dependency tracking, git-native collaboration.
+          </p>
+        </div>
+
+        <div class="tool-card" id="claude-hud">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">
+              <i data-lucide="activity" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="tool-card-title">Claude HUD</div>
+              <div class="tool-card-subtitle">Real-time session observability</div>
+            </div>
+          </div>
+          <p class="text-text-secondary text-sm mb-4">
+            <strong>What it does:</strong> Displays context consumption, tool activity, agent status, usage limits. No persistence - pure real-time visibility.
+          </p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># HUD display example</span>
+[Opus 4.5] <span class="string">########</span><span class="variable">--</span> 78% | myapp | git:(feature/auth) | 12m
+
+<span class="comment"># Shows: model, context %, project, branch, duration</span></pre>
+          </div>
+          <p class="text-text-secondary text-sm">
+            <strong>Best for:</strong> Monitoring long sessions, debugging context overflow, tracking tool execution, observing agent activity.
+          </p>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Comparison Matrix</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Claude-Mem</th>
+              <th>Beads</th>
+              <th>Claude HUD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Primary Purpose</strong></td>
+              <td>Session memory</td>
+              <td>Work tracking</td>
+              <td>Real-time monitoring</td>
+            </tr>
+            <tr>
+              <td><strong>Persistence</strong></td>
+              <td>SQLite + Chroma</td>
+              <td>Git-backed JSONL</td>
+              <td>None (display only)</td>
+            </tr>
+            <tr>
+              <td><strong>Scope</strong></td>
+              <td>Single Claude instance</td>
+              <td>Multi-agent, multi-machine</td>
+              <td>Single session</td>
+            </tr>
+            <tr>
+              <td><strong>Query Type</strong></td>
+              <td>Semantic search</td>
+              <td>Structured SQL</td>
+              <td>Visual display</td>
+            </tr>
+            <tr>
+              <td><strong>Token Cost</strong></td>
+              <td>Variable (progressive)</td>
+              <td>1-2k (bd prime)</td>
+              <td>0 (display only)</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 5: INTEGRATION PATH -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Memory Integration Path
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow memory through a Ralph + Claude-Mem integration to see how the pieces connect:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">Ralph loop starts fresh Claude instance (zero memory, full context capacity)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Claude-Mem hook triggers: <code>SessionStart</code> event captured</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Worker queries SQLite for relevant observations based on project context</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Compressed summaries injected into context: <code>&lt;claude-mem-context&gt;...&lt;/claude-mem-context&gt;</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Claude reads <code>prd.json</code> and <code>progress.txt</code> (file-based memory)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">Claude implements task, generating tool outputs (read, edit, bash)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Claude-Mem hook triggers: <code>PostToolUse</code> captures observations</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Claude Agent SDK compresses raw output into semantic summary (~50-100 tokens)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">Summary stored in SQLite (structure) and Chroma (vectors) for retrieval</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">Claude updates <code>prd.json</code> and appends to <code>progress.txt</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">11</div>
+            <div class="path-content">Claude commits and exits. Ralph restarts loop with fresh context.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">12</div>
+            <div class="path-content">Next iteration: Steps 2-4 inject prior learnings. Compound knowledge across iterations.</div>
+          </div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          <strong>The compound effect:</strong> Iteration 1 knows nothing. Iteration 5 knows patterns from 1-4. Iteration 20 has institutional memory spanning the entire feature development.
+        </p>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit with memory integration:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Claude-Mem worker blocks Claude Code startup
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Claude Code hangs on startup. Terminal shows no prompt for 30+ seconds.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Previous worker process crashed but left port 37777 bound.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>pkill -f "claude-mem-worker" &amp;&amp; rm -rf ~/.claude-mem/.version-*</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Chroma RAM usage explodes
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> System becomes unresponsive. Activity Monitor shows claude-mem using 8GB+ RAM.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Vector DB loading entire index into memory for similarity search.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Disable Chroma if not using semantic search: <code>{"vector": {"enabled": false}}</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Beads database locked
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "Database locked" error when running bd commands.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Daemon crashed while holding write lock on SQLite.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>bd daemons stop &amp;&amp; rm .beads/bd.sock &amp;&amp; bd sync --force</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Context injection returns empty
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> New sessions show no prior context despite completing multiple iterations.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Observations not being captured (worker not running, or hook not firing).</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Check <code>curl http://localhost:37777/api/health</code> and verify observation count in web UI.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            JSONL/SQLite divergence in Beads
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> CLI shows different data than what's in git. Team members see different issues.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Three-way merge failed silently or daemon sync stalled.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> <code>rm .beads/beads.db &amp;&amp; bd sync --force</code> to rebuild from JSONL truth.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions with no perfect solutions:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Compression vs. Fidelity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Semantic compression saves tokens but loses nuance. Raw storage preserves everything but explodes context.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Compressed summaries miss critical edge cases. Full observations flood context with irrelevant details.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use progressive disclosure. Store full details but retrieve summaries first. Fetch full only when summary indicates relevance. Accept that some information loss is the cost of scalable memory.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Memory Staleness
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Old observations pollute context with outdated patterns. But deleting them loses potentially useful history.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Claude suggests patterns that were refactored weeks ago. Semantic search returns irrelevant old results.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Weight retrieval by recency. Archive old observations to cold storage. Implement decay scoring. Consider project-scoped memory vs. global memory.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Multi-Agent Memory Coordination
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Agents need shared context but can't share context windows. File-based coordination has race conditions.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Agent A discovers pattern, Agent B repeats same mistake. Handoff files get overwritten.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use Beads for multi-agent. Use explicit handoff protocols with timestamps and acknowledgments. Consider message-passing (MCP Agent Mail) over shared state.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Token Budget Allocation
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More context = more knowledge = better decisions. But context has hard limits and marginal costs.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Early iterations excellent, late iterations degraded (context filled with history). OR too aggressive pruning loses useful patterns.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Monitor context usage (Claude HUD). Set hard limits on observation injection. Reserve token budget for task-specific context. Accept that memory is a limited resource requiring active management.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE MEMORY INTEGRATION WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multi-session features where learnings compound (Ralph loops)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Token optimization critical (API key users with cost pressure)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multi-agent coordination needed (Gas Town, CC Mirror)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Long-running autonomous work (overnight, multi-day)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Team projects where context must transfer between engineers</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T ADD MEMORY COMPLEXITY WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>One-off questions or simple tasks (CLAUDE.md is enough)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Single session completes the work (no persistence needed)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Max plan with unlimited tokens (token optimization ROI low)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Debugging sessions where fresh perspective is valuable</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Setup overhead exceeds task duration (small scripts, hotfixes)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Stack Recommendations by Use Case</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Recommended Stack</th>
+              <th>Setup Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Solo dev, complex feature</td>
+              <td>Claude-Mem + progress.txt</td>
+              <td>15 min</td>
+            </tr>
+            <tr>
+              <td>Ralph loop optimization</td>
+              <td>Claude-Mem + Claude HUD</td>
+              <td>20 min</td>
+            </tr>
+            <tr>
+              <td>Team project, shared issues</td>
+              <td>Beads + Claude-Mem</td>
+              <td>30 min</td>
+            </tr>
+            <tr>
+              <td>Gas Town deployment</td>
+              <td>Beads + Claude-Mem + HUD</td>
+              <td>45 min</td>
+            </tr>
+            <tr>
+              <td>Full autonomous operation</td>
+              <td>All three + AGENTS.md</td>
+              <td>1 hour</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    

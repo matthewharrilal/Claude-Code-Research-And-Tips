@@ -1,0 +1,841 @@
+
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Ralph loops fresh Claude instances with external file state for autonomous overnight development that compounds learnings.</div>
+        </div>
+
+        <div class="quote-box">
+          "Think of the AI agent as an eager but somewhat dim junior developer (Ralph) who never sleeps, happily works on one tiny task at a time, commits often, and tells you when it's truly finished - but needs extremely tight scoping, strong feedback loops, and hard limits to avoid disaster."
+          <div class="quote-author">- Matt Pocock</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Context degrades with tokens. Files persist."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'while :; do cat PROMPT.md | claude ; done')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>while :; do cat PROMPT.md | claude ; done</code>
+          </div>
+
+          <div class="core-anchor">That's the whole pattern. Everything else is scaffolding for reliability.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Each iteration spawns a NEW Claude instance. No memory of previous runs. The agent reads its context fresh from files (PROMPT.md, prd.json, progress.txt), does ONE task, writes results back to files, and exits. The bash loop restarts it.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          This is counterintuitive. Surely accumulated context is valuable? No. After ~80K tokens, LLM quality degrades. "Context rot" means the model forgets early instructions, contradicts itself, loses track of goals. Fresh context beats accumulated context.
+        </p>
+
+        <h3 class="subsection-title" id="mental-model">The Three Principles</h3>
+
+        <div class="info-box">
+          <div class="info-box-title">1. Fresh Context Beats Accumulated Context</div>
+          <div class="info-box-content">
+            Each iteration spawns a NEW Claude instance with NO memory. Avoids "context rot" (LLMs degrade with token accumulation). Memory lives in external artifacts, not the model.
+          </div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-box-title">2. Failure Is Data, Not Defeat</div>
+          <div class="info-box-content">
+            "Deterministically bad" failures are predictable and informative. Each failure refines the next attempt. Persistence + learning = eventual success.
+          </div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-box-title">3. Small + Verifiable = Reliable</div>
+          <div class="info-box-content">
+            Tasks must fit in one context window. Every task has explicit, testable acceptance criteria. No subjective goals, no ambiguous endpoints.
+          </div>
+        </div>
+
+        <h3 class="subsection-title">The Kanban vs Multi-Phase Insight</h3>
+
+        <p class="text-text-secondary mb-4">
+          <strong>Old Way (Multi-Phase Plans):</strong> Phase 1 → Phase 2 → Phase 3 → Phase 4. Problems: Hard to add tasks, rigid, requires human orchestration.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          <strong>Ralph Way (Kanban Loop):</strong> Pick task from board → Complete task → Back to board → All done? Exit. Not done? Loop. Focus on WHAT it should do at the end, not HOW to get there.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-fresh-context" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY FRESH CONTEXT?</div>
+          <div class="decision-reasoning">
+            At 80K tokens, Claude's quality degrades. Instructions get lost. The model contradicts itself. This is "context rot" - a fundamental limitation of transformer attention.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Kill and restart. Don't try to extend sessions. If iteration 20 produces worse code than iteration 5, your context is rotting. The fix is to restart, not debug.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-external-state">
+          <div class="decision-why">WHY EXTERNAL STATE?</div>
+          <div class="decision-reasoning">
+            If each iteration is a fresh Claude with no memory, how does progress persist? Through files. Git commits, prd.json (task tracking), progress.txt (learnings). The filesystem IS the memory.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Never rely on "Claude remembering" something. If it's not in a file, it doesn't exist. progress.txt must be append-only. prd.json must be updated after each task. Every learning must be persisted.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-small-tasks">
+          <div class="decision-why">WHY SMALL TASKS?</div>
+          <div class="decision-reasoning">
+            Each task must complete in ONE iteration (one context window). If a task is too big, Claude loses track mid-task and produces broken code. Small tasks = verifiable units = reliable progress.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              If you can't describe a task in 2-3 sentences, split it. "Build auth system" → "Add users table", "Add auth middleware", "Add login form", "Add session handling". Each is one iteration.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-verification">
+          <div class="decision-why">WHY VERIFICATION?</div>
+          <div class="decision-reasoning">
+            Without verification, Ralph produces garbage. Claude's tendency to mark features complete without proper testing means errors compound across iterations. Future iterations inherit broken code.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Always include "npm run typecheck passes" and "npm run test passes" in acceptance criteria. For UI work, add Playwright verification. One unverified task at iteration 5 poisons 15 iterations.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: FILE STRUCTURE -->
+      <section id="file-structure" data-activity="files">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The File Structure
+        </h2>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>project/
+<span class="comment">├── scripts/ralph/           # The Ralph system</span>
+│   ├── ralph.sh             <span class="comment"># The loop engine</span>
+│   ├── prompt.md            <span class="comment"># Instructions per iteration</span>
+│   ├── prd.json             <span class="comment"># Task board (external state)</span>
+│   └── progress.txt         <span class="comment"># Learnings log (append-only)</span>
+└── CLAUDE.md                <span class="comment"># Project context (optional)</span></pre>
+        </div>
+
+        <div class="checkpoint-box">
+          <div class="checkpoint-title">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            Checkpoint: After Creating Directory Structure
+          </div>
+          <div class="checkpoint-detail"><strong>Verify:</strong> <code>ls -la scripts/ralph/</code></div>
+          <div class="checkpoint-detail"><strong>You should see:</strong> Empty directory exists with parent</div>
+          <div class="checkpoint-detail"><strong>If not:</strong> Run <code>mkdir -p scripts/ralph/</code> from project root</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="ralph-sh">ralph.sh - The Loop Engine</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment">#!/bin/bash</span>
+<span class="keyword">set</span> -e
+
+<span class="variable">MAX_ITERATIONS</span>=<span class="variable">${1:-10}</span>
+<span class="variable">SCRIPT_DIR</span>="$(cd "$(dirname "${BASH_SOURCE[0]}")" &amp;&amp; pwd)"
+
+<span class="keyword">echo</span> <span class="string">"Starting Ralph"</span>
+
+<span class="keyword">for</span> i <span class="keyword">in</span> $(seq 1 $MAX_ITERATIONS); <span class="keyword">do</span>
+  <span class="keyword">echo</span> <span class="string">"=== Iteration $i ==="</span>
+
+  OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" \
+    | claude --dangerously-skip-permissions 2&gt;&amp;1 \
+    | tee /dev/stderr) || true
+
+  <span class="keyword">if</span> <span class="keyword">echo</span> "$OUTPUT" | grep -q <span class="string">"&lt;promise&gt;COMPLETE&lt;/promise&gt;"</span>; <span class="keyword">then</span>
+    <span class="keyword">echo</span> <span class="string">"Done!"</span>
+    <span class="keyword">exit</span> 0
+  <span class="keyword">fi</span>
+
+  sleep 2
+<span class="keyword">done</span>
+
+<span class="keyword">echo</span> <span class="string">"Max iterations reached"</span>
+<span class="keyword">exit</span> 1</pre>
+        </div>
+
+        <p class="text-text-secondary mb-4">
+          <strong>Make executable:</strong> <code>chmod +x scripts/ralph/ralph.sh</code>
+        </p>
+        <p class="text-text-secondary mb-6">
+          <strong>Run:</strong> <code>./scripts/ralph/ralph.sh 25</code> (max 25 iterations)
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="prompt-md">prompt.md - Agent Instructions</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Ralph Agent Instructions</span>
+
+<span class="comment">## Your Task</span>
+
+1. Read `scripts/ralph/prd.json`
+2. Read `scripts/ralph/progress.txt` (check Codebase Patterns first)
+3. Check you're on the correct branch
+4. Pick highest priority story where `passes: false`
+5. Implement that ONE story
+6. Run typecheck and tests
+7. Commit: `feat: [ID] - [Title]`
+8. Update prd.json: `passes: true`
+9. APPEND learnings to progress.txt
+
+<span class="comment">## Progress Format</span>
+
+APPEND to progress.txt:
+
+---
+## [Date] - [Story ID]
+- What was implemented
+- Files changed
+- **Learnings:**
+  - Patterns discovered
+  - Gotchas encountered
+
+<span class="comment">## Stop Condition</span>
+
+If ALL stories pass, reply:
+&lt;promise&gt;COMPLETE&lt;/promise&gt;
+
+Otherwise end normally.</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="prd-json">prd.json - Task Board</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>{
+  <span class="string">"project"</span>: <span class="string">"My Feature"</span>,
+  <span class="string">"branchName"</span>: <span class="string">"ralph/my-feature"</span>,
+  <span class="string">"userStories"</span>: [
+    {
+      <span class="string">"id"</span>: <span class="string">"US-001"</span>,
+      <span class="string">"title"</span>: <span class="string">"Add users table schema"</span>,
+      <span class="string">"description"</span>: <span class="string">"Create users table with basic fields"</span>,
+      <span class="string">"acceptanceCriteria"</span>: [
+        <span class="string">"Migration creates users table"</span>,
+        <span class="string">"npm run typecheck passes"</span>,
+        <span class="string">"npm run test passes"</span>
+      ],
+      <span class="string">"priority"</span>: 1,
+      <span class="string">"passes"</span>: <span class="keyword">false</span>,
+      <span class="string">"notes"</span>: <span class="string">""</span>
+    },
+    {
+      <span class="string">"id"</span>: <span class="string">"US-002"</span>,
+      <span class="string">"title"</span>: <span class="string">"Add auth middleware"</span>,
+      <span class="string">"acceptanceCriteria"</span>: [
+        <span class="string">"Middleware checks session"</span>,
+        <span class="string">"Returns 401 if not authenticated"</span>,
+        <span class="string">"npm run typecheck passes"</span>
+      ],
+      <span class="string">"priority"</span>: 2,
+      <span class="string">"passes"</span>: <span class="keyword">false</span>,
+      <span class="string">"notes"</span>: <span class="string">""</span>
+    }
+  ]
+}</pre>
+        </div>
+
+        <div class="checkpoint-box">
+          <div class="checkpoint-title">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            Checkpoint: After Creating prd.json
+          </div>
+          <div class="checkpoint-detail"><strong>Verify:</strong> <code>cat scripts/ralph/prd.json | jq . &gt; /dev/null &amp;&amp; echo "Valid JSON"</code></div>
+          <div class="checkpoint-detail"><strong>Check incomplete tasks:</strong> <code>jq '.userStories[] | select(.passes == false) | .title' scripts/ralph/prd.json</code></div>
+          <div class="checkpoint-detail"><strong>If invalid:</strong> Check for trailing commas, missing quotes, unclosed braces</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="progress-txt">progress.txt - External Memory</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Ralph Progress Log</span>
+Started: 2026-01-09
+
+<span class="comment">## Codebase Patterns</span>
+- Migrations: Use IF NOT EXISTS
+- Zod: Always use .optional() for nullable
+- React: useRef&lt;Timeout | null&gt;(null)
+
+<span class="comment">## Key Files</span>
+- db/schema.ts
+- app/auth/actions.ts
+
+---
+
+<span class="comment">## 2026-01-09 10:00 - US-001</span>
+- Completed: Login form skeleton
+- Files: src/components/LoginForm.tsx
+- Learnings: Use Tailwind for form styling
+
+---
+
+<span class="comment">## 2026-01-09 10:15 - US-002</span>
+- Completed: Auth server action
+- Files: app/auth/actions.ts, db/schema.ts
+- Issue: Had to add explicit nullable type
+- Pattern: Export types from actions.ts</pre>
+        </div>
+
+        <p class="text-text-secondary mb-4">
+          <strong>Critical Rule:</strong> APPEND only, never UPDATE. The word "APPEND" in caps in instructions is essential - models recognize this formatting emphasis.
+        </p>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a task through the system to see how the pieces connect:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">You write <code>PROMPT.md</code> with task instructions and <code>prd.json</code> with stories</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Bash executes <code>ralph.sh</code> - the loop begins</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">New Claude instance spawns (fresh context, zero memory)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Claude reads <code>prd.json</code>, finds first <code>passes: false</code> task</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Claude reads <code>progress.txt</code> for previous learnings and codebase patterns</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">Claude implements the task, writes code to filesystem</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Claude runs verification: <code>npm run typecheck &amp;&amp; npm test</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content"><strong>If tests pass:</strong> Claude marks <code>passes: true</code>, commits with <code>feat: [ID]</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content"><strong>If tests fail:</strong> Claude tries to fix, or iteration ends (next iteration retries)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">Claude APPENDs learnings to <code>progress.txt</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">11</div>
+            <div class="path-content">Claude exits. Bash script restarts loop with fresh Claude instance.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">12</div>
+            <div class="path-content">Repeat until all tasks pass OR max iterations reached</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">13</div>
+            <div class="path-content">Final Claude outputs <code>&lt;promise&gt;COMPLETE&lt;/promise&gt;</code>, loop exits successfully</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5.5: RALPH VARIANTS -->
+      <section id="variants" data-activity="variants">
+        <h2 class="section-title">
+          <span class="section-number">5.5</span>
+          Ralph Variants
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          The Ralph pattern has evolved into multiple variants for different use cases. Each variant adds capabilities while preserving the core loop architecture.
+        </p>
+
+        <div class="variant-box">
+          <div class="variant-header">
+            <i data-lucide="moon" class="w-4 h-4"></i>
+            AFK Ralph (Away From Keyboard)
+          </div>
+          <div class="variant-desc">
+            Full autonomous loop designed to run overnight. Requires bulletproof feedback loops (tests, typecheck, CI). Wake up to completed work.
+          </div>
+          <div class="variant-use-case">
+            <strong>Use when:</strong> Tasks have verifiable acceptance criteria, you have comprehensive test coverage, overnight execution is acceptable.
+          </div>
+        </div>
+
+        <div class="variant-box">
+          <div class="variant-header">
+            <i data-lucide="user" class="w-4 h-4"></i>
+            HOTL Ralph (Human On The Loop)
+          </div>
+          <div class="variant-desc">
+            Single-iteration variant with human review between runs. You review each change before continuing to the next iteration.
+          </div>
+          <div class="variant-use-case">
+            <strong>Use when:</strong> Security-sensitive code, learning a new codebase, debugging stuck loops, training PRD format.
+          </div>
+        </div>
+
+        <div class="variant-box">
+          <div class="variant-header">
+            <i data-lucide="zap" class="w-4 h-4"></i>
+            Dr. Ralph (Confidence Thresholds)
+          </div>
+          <div class="variant-desc">
+            Multi-phase version where agent reports confidence percentage. Only advances when 80%+ confident. Better for complex, uncertain tasks.
+          </div>
+          <div class="variant-use-case">
+            <strong>Use when:</strong> Tasks have ambiguity, simple pass/fail isn't enough, you need phased confidence building.
+          </div>
+        </div>
+
+        <div class="variant-box">
+          <div class="variant-header">
+            <i data-lucide="trending-up" class="w-4 h-4"></i>
+            Compounding Ralph
+          </div>
+          <div class="variant-desc">
+            Archives PRDs from previous runs. Agent references past successes/failures. Each run makes the next better.
+          </div>
+          <div class="variant-use-case">
+            <strong>Use when:</strong> Long-running projects, you want institutional memory across multiple Ralph runs.
+          </div>
+        </div>
+
+        <div class="variant-box">
+          <div class="variant-header">
+            <i data-lucide="git-branch" class="w-4 h-4"></i>
+            Parallel Ralph (Git Worktrees)
+          </div>
+          <div class="variant-desc">
+            Multiple Ralph instances running simultaneously on different features/branches using git worktrees for isolation.
+          </div>
+          <div class="variant-use-case">
+            <strong>Use when:</strong> Multiple independent features, you have machine resources, branches don't conflict.
+          </div>
+        </div>
+
+        <div class="variant-box">
+          <div class="variant-header">
+            <i data-lucide="pen-tool" class="w-4 h-4"></i>
+            Ralph Wiggum Marketer
+          </div>
+          <div class="variant-desc">
+            Self-critiquing content loop for marketing copy. "Would founder publish?" iterates until YES. Separates discovery (database) from synthesis (AI).
+          </div>
+          <div class="variant-use-case">
+            <strong>Use when:</strong> Content generation, voice matching, you have a corpus of writing samples to match.
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Variant</th>
+              <th>Lift</th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Basic Ralph</td>
+              <td>Quick</td>
+              <td>Standard feature development</td>
+            </tr>
+            <tr>
+              <td>AFK Ralph</td>
+              <td>Quick</td>
+              <td>Overnight autonomous work</td>
+            </tr>
+            <tr>
+              <td>HOTL Ralph</td>
+              <td>Quick</td>
+              <td>Security-sensitive, learning</td>
+            </tr>
+            <tr>
+              <td>Dr. Ralph</td>
+              <td>Medium</td>
+              <td>Complex uncertain tasks</td>
+            </tr>
+            <tr>
+              <td>Compounding Ralph</td>
+              <td>Medium</td>
+              <td>Long-running projects</td>
+            </tr>
+            <tr>
+              <td>Parallel Ralph</td>
+              <td>Medium-High</td>
+              <td>Multi-feature overnight</td>
+            </tr>
+            <tr>
+              <td>Ralph Marketer</td>
+              <td>Medium</td>
+              <td>Content generation</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit, with concrete numbers and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            progress.txt grows unbounded
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> After ~50 iterations, Claude spends more tokens reading than thinking</div>
+          <div class="gotcha-detail"><strong>Threshold:</strong> &gt;20KB progress.txt starts degrading quality</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Truncate to last 10 entries between runs. Move permanent learnings to AGENTS.md.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            "APPEND" gets ignored
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> progress.txt keeps getting overwritten, losing learnings</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Model interprets "update" as "replace"</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use "APPEND" in CAPS in prompt.md. The capitalization matters.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Stuck loop (same task repeating)
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Same task attempted 3+ times with no progress</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Task impossible OR verification failing for external reasons</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add stuck detection (check git commits). If same HEAD for 3 iterations, exit. Then manually investigate.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            UI claimed complete but visually broken
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Tests pass but the UI is obviously wrong</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> No visual verification in acceptance criteria</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add Playwright verification. "Verify at localhost:3000 using dev-browser skill."</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Non-idempotent migrations
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Database in inconsistent state; migration fails on re-run</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Migration doesn't handle existing state</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use idempotent SQL: <code>ADD COLUMN IF NOT EXISTS email TEXT;</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Interactive prompts blocking
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Script hangs waiting for user input</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Some npm commands prompt for confirmation</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use auto-confirm flags or pipe empty input: <code>echo -e "\n\n\n" | npm run db:generate</code></div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Context Rot vs. Memory Loss
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Fresh context avoids rot but loses learnings. progress.txt helps but grows unbounded. No perfect solution exists.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Quality drops in late iterations (rot), OR early iterations repeat mistakes from archived runs (memory loss).</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Keep progress.txt under 20KB. Start fresh runs from AGENTS.md (permanent), not progress.txt (session). Accept that some re-learning is the cost of fresh context.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Verification Dependency
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Ralph only works if acceptance criteria are verifiable. But not everything can be verified automatically.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Tasks marked "complete" that aren't actually complete. Garbage compounding across iterations.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Don't use Ralph for subjective tasks. Use HOTL (Human On The Loop) variant for tasks requiring judgment. Accept that some domains (design, UX) aren't Ralph-suitable.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Task Decomposition Skill
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Ralph's success depends on your ability to decompose features into iteration-sized tasks. This is a skill, not a formula.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Tasks too big → context overflow. Tasks too small → overhead dominates. Wrong order → broken dependencies.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start with HOTL Ralph to learn task sizing. Review progress.txt after runs to see what worked. Expect to get better over time.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Upfront Investment
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Ralph requires significant PRD setup time. If your tasks aren't well-defined, you'll burn tokens on brute force.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> 25-30 minute planning sessions feel like overhead. Temptation to skip and "just start coding."</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> View planning as leverage, not overhead. 30 minutes of planning enables 8 hours of autonomous execution. The ROI is massive if you do the prep work.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE RALPH WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Tasks have verifiable acceptance criteria (can detect completion)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Overnight execution is acceptable (fresh context needs restarts)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Feature can be split into &lt;30min subtasks (fits context window)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You have tests/typecheck as verification layer</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You want to "ship while you sleep"</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>You can invest 25-30 minutes in upfront PRD planning</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE RALPH WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Subjective quality goals ("make it pretty") → Human judgment</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Security-critical code → HOTL Ralph with human gates</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need real-time parallelism → CC Mirror</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Exploratory work with no defined end → Single Claude session</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Legacy code without tests → Add tests first</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>One-shot operations → Loop overhead not justified</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 9: RESOURCES -->
+      <section id="resources" data-activity="resources">
+        <h2 class="section-title">
+          <span class="section-number">9</span>
+          Resources &amp; Cost
+        </h2>
+
+        <h3 class="subsection-title">Official Resources</h3>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Resource</th>
+              <th>URL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Original Ralph</td>
+              <td>ghuntley.com/ralph/</td>
+            </tr>
+            <tr>
+              <td>Official Plugin</td>
+              <td>github.com/anthropics/claude-code/tree/main/plugins/ralph-wiggum</td>
+            </tr>
+            <tr>
+              <td>Ryan Carson's Ralph</td>
+              <td>github.com/snarktank/ralph</td>
+            </tr>
+            <tr>
+              <td>PRD Templates</td>
+              <td>github.com/snarktank/ai-dev-tasks</td>
+            </tr>
+            <tr>
+              <td>Marathon Ralph</td>
+              <td>github.com/gruckion/marathon-ralph</td>
+            </tr>
+            <tr>
+              <td>Ralph Marketer</td>
+              <td>github.com/muratcankoylan/ralph-wiggum-marketer</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="subsection-title">Cost Estimates</h3>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Iterations</th>
+              <th>Tokens (est.)</th>
+              <th>Cost @ $15/M</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>10</td>
+              <td>30K-150K</td>
+              <td>$0.45-$2.25</td>
+            </tr>
+            <tr>
+              <td>25</td>
+              <td>75K-375K</td>
+              <td>$1.13-$5.63</td>
+            </tr>
+            <tr>
+              <td>50</td>
+              <td>150K-750K</td>
+              <td>$2.25-$11.25</td>
+            </tr>
+            <tr>
+              <td>100</td>
+              <td>300K-1.5M</td>
+              <td>$4.50-$22.50</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="text-text-secondary mt-4">
+          <strong>Real examples:</strong> Ryan Carson's 14-iteration feature: ~$10-15. Overnight app build (50 iterations): $50-100.
+        </p>
+
+        <h3 class="subsection-title">Key Contributors</h3>
+
+        <ul class="list-disc list-inside text-text-secondary space-y-2 mb-6">
+          <li><strong>Geoffrey Huntley</strong> - Original concept and name</li>
+          <li><strong>Matt Pocock (@mattpocockuk)</strong> - Viral demos, 11 tips guide, PRD format</li>
+          <li><strong>Ryan Carson (@ryancarson)</strong> - Complete implementation guides, Amp integration</li>
+          <li><strong>Arvid Kahl (@arvidkahl)</strong> - Comprehensive variant documentation</li>
+          <li><strong>Muratcan Koylan (@koylanai)</strong> - Ralph Wiggum Marketer</li>
+          <li><strong>Wes Winder (@weswinder)</strong> - Opus 4.5 + Ralph + Playwright stack</li>
+        </ul>
+
+        <div class="quote-box">
+          "Given excellent upfront specification, we can already achieve meaningful unattended software production in 2026."
+          <div class="quote-author">- Community consensus</div>
+        </div>
+      </section>
+
+    

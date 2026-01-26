@@ -2,15 +2,24 @@ import { Check, X } from 'lucide-react'
 
 interface WhenToUseProps {
   title?: string
-  useWhen: string[]
-  dontUseWhen: string[]
-  alternatives?: {
-    name: string
-    when: string
-  }[]
+  use?: string[]
+  dontUse?: string[]
+  // Legacy prop names for compatibility
+  useWhen?: string[]
+  dontUseWhen?: string[]
+  alternatives?: Array<{
+    name?: string
+    when?: string
+    condition?: string
+    pattern?: string
+  }>
 }
 
-export function WhenToUse({ title, useWhen, dontUseWhen, alternatives }: WhenToUseProps) {
+export function WhenToUse({ title, use, dontUse, useWhen, dontUseWhen, alternatives }: WhenToUseProps) {
+  // Support both prop name conventions
+  const useItems = use || useWhen || []
+  const dontUseItems = dontUse || dontUseWhen || []
+
   return (
     <div className="bg-white border border-border rounded-xl mb-6 overflow-hidden">
       {/* Header */}
@@ -29,7 +38,7 @@ export function WhenToUse({ title, useWhen, dontUseWhen, alternatives }: WhenToU
             Use When
           </span>
           <ul className="space-y-2">
-            {useWhen.map((item, i) => (
+            {useItems.map((item, i) => (
               <li key={i} className="flex items-start gap-2 text-text-secondary">
                 <Check className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                 <span>{item}</span>
@@ -45,7 +54,7 @@ export function WhenToUse({ title, useWhen, dontUseWhen, alternatives }: WhenToU
             Don&apos;t Use When
           </span>
           <ul className="space-y-2">
-            {dontUseWhen.map((item, i) => (
+            {dontUseItems.map((item, i) => (
               <li key={i} className="flex items-start gap-2 text-text-secondary">
                 <X className="w-4 h-4 text-error mt-0.5 flex-shrink-0" />
                 <span>{item}</span>
@@ -65,10 +74,10 @@ export function WhenToUse({ title, useWhen, dontUseWhen, alternatives }: WhenToU
             {alternatives.map((alt, i) => (
               <div key={i} className="flex items-baseline gap-2">
                 <span className="font-mono text-sm font-semibold text-accent">
-                  {alt.name}
+                  {alt.name || alt.pattern}
                 </span>
                 <span className="text-text-muted">—</span>
-                <span className="text-sm text-text-secondary">{alt.when}</span>
+                <span className="text-sm text-text-secondary">{alt.when || alt.condition}</span>
               </div>
             ))}
           </div>

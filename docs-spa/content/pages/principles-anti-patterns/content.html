@@ -1,0 +1,764 @@
+
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Anti-Pattern Essence</div>
+          <div class="essence-text">Anti-patterns aren't mistakes - they're constraint violations that compound until catastrophic failure.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          This is the "what NOT to do" guide - a comprehensive catalog of failure modes organized by root cause. Read this when something goes wrong to diagnose the issue, or before starting a complex project to avoid known pitfalls.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          <strong>Companion to:</strong> <code class="bg-bg-muted px-2 py-1 rounded text-sm">principles-core.md</code> (the WHY). This doc shows the consequences of violating those principles.
+        </p>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION - Root Causes -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The 4 Root Causes
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Every anti-pattern traces back to one of four constraint violations."</div>
+
+          <div class="core-code">
+            <code>CONTEXT + ORCHESTRATION + VERIFICATION + PERMISSIONS = FAILURE SURFACE</code>
+          </div>
+
+          <div class="core-anchor">If you understand these four, you'll predict most failures before they happen.</div>
+        </div>
+
+        <div class="category-grid">
+          <div class="category-card">
+            <div class="category-icon">
+              <i data-lucide="brain" class="w-5 h-5"></i>
+            </div>
+            <div class="category-name">Context Violations</div>
+            <div class="category-desc">Long sessions, context rot, filling windows with junk. The model "forgets" or hallucinates.</div>
+          </div>
+
+          <div class="category-card">
+            <div class="category-icon">
+              <i data-lucide="git-branch" class="w-5 h-5"></i>
+            </div>
+            <div class="category-name">Orchestration Violations</div>
+            <div class="category-desc">Workers spawning workers, role confusion, missing completion detection. Infinite loops, runaway costs.</div>
+          </div>
+
+          <div class="category-card">
+            <div class="category-icon">
+              <i data-lucide="check-circle" class="w-5 h-5"></i>
+            </div>
+            <div class="category-name">Verification Violations</div>
+            <div class="category-desc">Trusting Claude's claims, skipping tests, single-point verification. Bugs compound silently.</div>
+          </div>
+
+          <div class="category-card">
+            <div class="category-icon">
+              <i data-lucide="shield" class="w-5 h-5"></i>
+            </div>
+            <div class="category-name">Permission Violations</div>
+            <div class="category-desc">Dangerous commands whitelisted, secrets in context, no path restrictions. Security catastrophes.</div>
+          </div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Each anti-pattern in this guide maps to one or more of these root causes. Understanding the root cause helps you generalize: you'll avoid not just the documented anti-patterns, but novel variations.
+        </p>
+      </section>
+
+      <!-- Section 3: CONTEXT ANTI-PATTERNS -->
+      <section id="context-patterns" data-activity="context">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Context Anti-Patterns
+        </h2>
+
+        <div class="anti-pattern-box">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Long Single-Thread Conversations
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Context fills, response quality progressively degrades, instructions get ignored, Claude "forgets" recent work or hallucinates file contents.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Context rot accumulates. As conversations grow, earlier instructions and context get compressed or lost. The model struggles to maintain coherence across hundreds of turns.</div>
+          <div class="anti-pattern-detail"><strong>Warning signs:</strong></div>
+          <ul class="list-disc list-inside text-sm text-text-secondary ml-4 mb-4">
+            <li>Repetitive or contradictory responses</li>
+            <li>CLAUDE.md directives being ignored</li>
+            <li>Claude referencing files that don't exist</li>
+            <li>Truncated code outputs (functions cut off mid-definition)</li>
+            <li>Claude "forgets" work done 30 minutes ago</li>
+          </ul>
+          <div class="fix-box">
+            <div class="fix-label">The Fix</div>
+            <div class="fix-content">
+              Use Ralph pattern: fresh context per iteration. Persist state externally (files, git history, progress.txt). Start new sessions for unrelated tasks. Use <code>/compact</code> proactively at 60-70% context usage.
+            </div>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box" id="compaction">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Trusting Compaction Blindly
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Important nuance lost during summarization. Critical instructions or edge cases get dropped.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Compaction is lossy. The model must decide what's "important" without knowing your actual priorities. Subtle but critical details often get compressed away.</div>
+          <div class="anti-pattern-detail"><strong>Warning signs:</strong> Post-compaction behavior changes, specific instructions no longer followed, context from early conversation lost.</div>
+          <div class="fix-box">
+            <div class="fix-label">The Fix</div>
+            <div class="fix-content">
+              Maintain external state manually (reflection files, progress logs). Use explicit instruction files (CLAUDE.md) that survive compaction. Compact proactively at 60-70% rather than waiting for auto-compact at 95%.
+            </div>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box" id="codebase-reading">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Reading Entire Codebase
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Context fills immediately with thousands of tokens, leaving no room for actual work.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Context window (~200K tokens) cannot hold a full codebase. Filling it with code leaves no room for reasoning or output.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># BAD: Fills context with junk</span>
+<span class="danger">"Read all the files in src/ to understand the architecture"</span>
+
+<span class="comment"># GOOD: Targeted reads</span>
+<span class="string">"Read src/index.ts and src/config.ts to understand the entry point"</span></pre>
+          </div>
+
+          <div class="fix-box">
+            <div class="fix-label">The Fix</div>
+            <div class="fix-content">
+              Use .claudeignore aggressively. Request targeted reads (specific files for specific tasks). Use subagents for exploration (isolated context). Let Claude search with Glob/Grep rather than loading everything upfront.
+            </div>
+          </div>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Including Build Outputs in Context
+          </div>
+          <div class="warning-detail"><strong>What happens:</strong> node_modules/, dist/, .next/, coverage/ consume massive context budget uselessly.</div>
+          <div class="code-block" style="margin-top: 12px; margin-bottom: 0;">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># .claudeignore</span>
+node_modules/
+dist/
+build/
+.next/
+.cache/
+*.log
+coverage/</pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: ORCHESTRATION ANTI-PATTERNS -->
+      <section id="orchestration-patterns" data-activity="orchestration">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Orchestration Anti-Patterns
+        </h2>
+
+        <div class="anti-pattern-box" id="recursive-explosion">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Workers Spawning Workers (Recursive Explosion)
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> A worker agent spawns subagents, which spawn more subagents, creating exponential context explosion and potential infinite loops.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> No coordination between nested subagents. Context explodes geometrically. Workers lose sight of the original task.</div>
+          <div class="anti-pattern-detail"><strong>Warning signs:</strong> Subagent depth &gt;2 levels, context usage spiking unexpectedly, tasks taking 10x longer than expected, runaway API costs.</div>
+
+          <div class="fix-box">
+            <div class="fix-label">The Fix: Worker Preamble Pattern</div>
+            <div class="code-block" style="margin-top: 12px; margin-bottom: 0;">
+              <button class="copy-btn" onclick="copyCodeBlock(this)">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                Copy
+              </button>
+              <pre><span class="keyword">CONTEXT:</span> You are a WORKER agent, not an orchestrator.
+
+<span class="keyword">RULES:</span>
+- Complete ONLY the task described below
+- Use tools directly (Read, Write, Edit, Bash, etc.)
+- Do NOT spawn sub-agents
+- Do NOT call TaskCreate or TaskUpdate
+- Report your results with absolute file paths</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box" id="role-confusion">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Orchestrator Using Tools Directly
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Orchestrator gets distracted by implementation details. Role confusion between planning and execution.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Mixing concerns leads to scope creep. Orchestrator should think at the coordination level, not get lost in file edits.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># CC Mirror Principle:</span>
+<span class="danger">YOU DO NOT WRITE CODE. YOU DO NOT RUN COMMANDS.
+YOU DO NOT EXPLORE CODEBASES.</span>
+<span class="string">You are the CONDUCTOR. Your agents play the instruments.</span>
+
+<span class="comment"># Orchestrator uses:</span>
+TaskCreate, TaskList, TaskGet, TaskUpdate
+AskUserQuestion
+Task (to spawn workers)
+Read (reference files only, 1-2 max)
+
+<span class="comment"># Workers use:</span>
+Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch, LSP</pre>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box" id="completion-detection">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            No Completion Detection
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Agents run indefinitely without knowing when to stop. Infinite loops consuming API budget.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Without explicit completion criteria, agents have no way to know the task is done.</div>
+
+          <div class="fix-box">
+            <div class="fix-label">The Fix: Completion Promise Pattern</div>
+            <div class="code-block" style="margin-top: 12px; margin-bottom: 0;">
+              <button class="copy-btn" onclick="copyCodeBlock(this)">
+                <i data-lucide="copy" class="w-3 h-3"></i>
+                Copy
+              </button>
+              <pre><span class="keyword">if</span> grep -q <span class="string">"PROMISE COMPLETE HERE"</span> output.txt; <span class="keyword">then</span>
+  <span class="keyword">break</span>
+<span class="keyword">fi</span>
+
+<span class="comment"># Or use testable completion criteria:</span>
+- All PRD items have passes: true
+- Tests pass: npm test exits 0
+- Build succeeds: npm run build exits 0</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: TASK DESIGN ANTI-PATTERNS -->
+      <section id="task-sizing" data-activity="tasks">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Task Design Anti-Patterns
+        </h2>
+
+        <div class="anti-pattern-box">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Tasks Too Large (Context Collapse)
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Scope creep, context exhaustion, incomplete work, degraded quality mid-task.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Tasks exceeding single context window capacity cannot be completed coherently.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># BAD: Too large</span>
+<span class="danger">"Build the entire authentication system"</span>
+
+<span class="comment"># GOOD: Right-sized</span>
+<span class="string">"Implement the login endpoint with:
+1. Email/password validation
+2. JWT token generation
+3. Rate limiting (5 attempts/minute)"</span></pre>
+          </div>
+
+          <div class="checklist-box">
+            <div class="checklist-title">Sizing Heuristics</div>
+            <div class="checklist-item">
+              <i data-lucide="check" class="w-4 h-4 text-accent flex-shrink-0"></i>
+              <span>~100-500 lines of code change</span>
+            </div>
+            <div class="checklist-item">
+              <i data-lucide="check" class="w-4 h-4 text-accent flex-shrink-0"></i>
+              <span>~1-3 files modified</span>
+            </div>
+            <div class="checklist-item">
+              <i data-lucide="check" class="w-4 h-4 text-accent flex-shrink-0"></i>
+              <span>~30-60 minutes equivalent human time</span>
+            </div>
+            <div class="checklist-item">
+              <i data-lucide="check" class="w-4 h-4 text-accent flex-shrink-0"></i>
+              <span>Clear, testable success criteria</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box" id="vague-criteria">
+          <div class="anti-pattern-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Vague Acceptance Criteria
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Claude produces wrong outputs because it doesn't know what "done" looks like.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Ambiguity invites interpretation. Claude's interpretation may not match yours.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># BAD: Vague</span>
+<span class="danger">"Make it work"
+"Fix the bug"
+"Clean up the code"</span>
+
+<span class="comment"># GOOD: Testable criteria</span>
+{
+  <span class="string">"delete_video_shows_confirmation"</span>: {
+    <span class="string">"description"</span>: <span class="string">"Delete video shows confirmation dialog before deleting"</span>,
+    <span class="string">"acceptance"</span>: <span class="string">"User clicks delete, modal appears with 'Confirm' and 'Cancel',
+                    clicking 'Cancel' preserves video"</span>
+  }
+}</pre>
+          </div>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Tasks Too Small (Overhead Exceeds Value)
+          </div>
+          <div class="warning-detail"><strong>What happens:</strong> More time spent spawning agents than doing useful work.</div>
+          <div class="warning-detail"><strong>Why it fails:</strong> Agent startup, context loading, and coordination overhead outweighs trivial task value.</div>
+          <div class="warning-detail"><strong>Examples too small:</strong> "Add a comment to line 42", "Rename variable x to count"</div>
+          <div class="warning-detail"><strong>Just right:</strong> "Implement the User model with email, password hash, and created_at fields"</div>
+        </div>
+      </section>
+
+      <!-- Section 6: SECURITY & COST ANTI-PATTERNS -->
+      <section id="security-patterns" data-activity="security">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Security &amp; Cost Anti-Patterns
+        </h2>
+
+        <div class="anti-pattern-box">
+          <div class="anti-pattern-title">
+            <i data-lucide="shield-alert" class="w-4 h-4"></i>
+            --dangerously-skip-permissions Everywhere
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Claude can execute ANY command, including destructive ones.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> No safety net. One wrong <code>rm -rf</code> and your work is gone.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># DANGEROUS: Never do this</span>
+<span class="danger">alias claude='claude --dangerously-skip-permissions'</span>
+
+<span class="comment"># SAFE: Granular permissions</span>
+{
+  <span class="string">"permissions"</span>: {
+    <span class="string">"commands"</span>: {
+      <span class="string">"git status"</span>: <span class="string">"allow-always"</span>,
+      <span class="string">"npm test"</span>: <span class="string">"allow-always"</span>,
+      <span class="string">"npm run build"</span>: <span class="string">"allow-always"</span>
+    },
+    <span class="string">"blockedPatterns"</span>: [
+      <span class="danger">"rm -rf"</span>,
+      <span class="danger">"sudo"</span>,
+      <span class="danger">"git push --force"</span>,
+      <span class="danger">"git reset --hard"</span>
+    ]
+  }
+}</pre>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box">
+          <div class="anti-pattern-title">
+            <i data-lucide="key" class="w-4 h-4"></i>
+            .env Files in Context
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> API keys, passwords, tokens leak into conversation history.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Credentials become part of context, potentially logged or exposed.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Minimum .claudeignore</span>
+.env*
+*.pem
+*.key
+credentials.json
+secrets/
+node_modules/
+dist/
+build/
+.next/
+coverage/
+*.log</pre>
+          </div>
+        </div>
+
+        <div class="anti-pattern-box" id="cost-patterns">
+          <div class="anti-pattern-title">
+            <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+            No Iteration Limits (Runaway Costs)
+          </div>
+          <div class="anti-pattern-detail"><strong>What happens:</strong> Runaway loops consume unlimited API budget. Bills hit hundreds of dollars.</div>
+          <div class="anti-pattern-detail"><strong>Why it fails:</strong> Without limits, loops run until external intervention.</div>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># The fix: Always set limits</span>
+<span class="variable">MAX_ITERATIONS</span>=25
+timeout 3600 ./ralph.sh 50  <span class="comment"># 1 hour max</span></pre>
+          </div>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Opus for Everything
+          </div>
+          <div class="warning-detail"><strong>What happens:</strong> Massive API bills. $500+ for tasks that could cost $20.</div>
+          <div class="warning-detail"><strong>Why it fails:</strong> Using premium model for routine tasks.</div>
+          <table class="summary-table" style="margin-top: 12px;">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Use Case</th>
+                <th>Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Haiku</td>
+                <td>Simple lookups, file fetching, transforms</td>
+                <td>Cheapest</td>
+              </tr>
+              <tr>
+                <td>Sonnet</td>
+                <td>Implementation, test generation, patterns</td>
+                <td>Medium</td>
+              </tr>
+              <tr>
+                <td>Opus</td>
+                <td>Architecture, complex reasoning, ambiguous tasks</td>
+                <td>Expensive (60x Haiku)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 7: DETECTION -->
+      <section id="detection" data-activity="detection">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          Detection &amp; Red Flags
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Catch anti-patterns early. These red flags indicate you're heading toward a failure mode:
+        </p>
+
+        <div class="checklist-box" id="checklists">
+          <div class="checklist-title">Red Flag Detection</div>
+          <div class="checklist-item">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 flex-shrink-0"></i>
+            <span>Same file edited 5+ times without progress? <strong>Verification loop</strong></span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 flex-shrink-0"></i>
+            <span>Multiple grep/glob calls with no results? <strong>Exploration loop</strong></span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 flex-shrink-0"></i>
+            <span>Context &gt;90% without task completion? <strong>Context collapse imminent</strong></span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 flex-shrink-0"></i>
+            <span>Token consumption rate 3x normal? <strong>Runaway agent</strong></span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 flex-shrink-0"></i>
+            <span>Circular edit patterns? <strong>Logic error</strong></span>
+          </div>
+        </div>
+
+        <div class="checklist-box">
+          <div class="checklist-title">Pre-Session Checklist</div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>Git working directory clean or stashed?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>On dedicated branch (not main/master)?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>.claudeignore excludes sensitive files and build outputs?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>CLAUDE.md updated with current project context?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>Safe commands whitelisted?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>Correct model selected for task complexity?</span>
+          </div>
+        </div>
+
+        <div class="checklist-box">
+          <div class="checklist-title">Post-Session Checklist</div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>All changes reviewed before commit?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>Tests passing?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>No credentials in code/context?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>Session costs within budget?</span>
+          </div>
+          <div class="checklist-item">
+            <i data-lucide="square" class="w-4 h-4 text-text-muted flex-shrink-0"></i>
+            <span>Learnings captured for future sessions?</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 8: RECOVERY STRATEGIES -->
+      <section id="recovery" data-activity="recovery">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          Recovery Strategies
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          When you've hit an anti-pattern, here's how to recover:
+        </p>
+
+        <div class="recovery-box">
+          <div class="recovery-title">
+            <i data-lucide="brain" class="w-4 h-4"></i>
+            From Context Overflow
+          </div>
+          <div class="code-block" style="margin-top: 12px; margin-bottom: 0;">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Compact immediately</span>
+/compact
+
+<span class="comment"># If severely degraded</span>
+/reset
+
+<span class="comment"># Start focused session</span>
+claude <span class="string">"Focus only on src/auth/ - implement OAuth flow"</span></pre>
+          </div>
+        </div>
+
+        <div class="recovery-box">
+          <div class="recovery-title">
+            <i data-lucide="file-x" class="w-4 h-4"></i>
+            From File Corruption
+          </div>
+          <div class="code-block" style="margin-top: 12px; margin-bottom: 0;">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Discard changes to specific file</span>
+git checkout -- path/to/file.ts
+
+<span class="comment"># Recovery from stash</span>
+git stash pop
+
+<span class="comment"># Hard reset (CAREFUL)</span>
+git reset --hard HEAD</pre>
+          </div>
+        </div>
+
+        <div class="recovery-box">
+          <div class="recovery-title">
+            <i data-lucide="infinity" class="w-4 h-4"></i>
+            From Infinite Loops
+          </div>
+          <div class="code-block" style="margin-top: 12px; margin-bottom: 0;">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Graceful interrupt</span>
+Ctrl+C
+
+<span class="comment"># Harder interrupt</span>
+Ctrl+\
+
+<span class="comment"># Force kill</span>
+pkill -9 -f claude
+
+<span class="comment"># Break Ralph loop</span>
+echo <span class="string">"PROMISE COMPLETE HERE"</span> &gt;&gt; progress.txt</pre>
+          </div>
+        </div>
+
+        <div class="recovery-box">
+          <div class="recovery-title">
+            <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+            From Cost Runaway
+          </div>
+          <div class="recovery-detail">1. Kill all Claude processes: <code>pkill -f claude</code></div>
+          <div class="recovery-detail">2. Check Anthropic dashboard for usage</div>
+          <div class="recovery-detail">3. Set hard budget limits in console</div>
+          <div class="recovery-detail">4. Review what caused high usage</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Summary: Core Anti-Pattern Categories</h3>
+
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Root Cause</th>
+              <th>Prevention</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Context</strong></td>
+              <td>Growing conversations</td>
+              <td>Fresh context per iteration (Ralph)</td>
+            </tr>
+            <tr>
+              <td><strong>Orchestration</strong></td>
+              <td>Role confusion</td>
+              <td>Strict orchestrator/worker separation</td>
+            </tr>
+            <tr>
+              <td><strong>Task Design</strong></td>
+              <td>Wrong sizing</td>
+              <td>30-60 min atomic tasks</td>
+            </tr>
+            <tr>
+              <td><strong>Verification</strong></td>
+              <td>Blind trust</td>
+              <td>Layered testing requirements</td>
+            </tr>
+            <tr>
+              <td><strong>Memory</strong></td>
+              <td>In-context only</td>
+              <td>External file-based state</td>
+            </tr>
+            <tr>
+              <td><strong>Cost</strong></td>
+              <td>No limits</td>
+              <td>Iteration caps, model matching</td>
+            </tr>
+            <tr>
+              <td><strong>Security</strong></td>
+              <td>Weak permissions</td>
+              <td>Blocklists, read-only configs</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="when-grid" style="margin-top: 40px;">
+          <div class="when-avoid">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              WHEN NOT TO USE CLAUDE CODE
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Real-time systems (latency-critical code)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Security-critical code (crypto, auth core)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Highly novel domains (cutting-edge research)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Complex stateful debugging (race conditions)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>5+ repeated failures on same task</span>
+            </div>
+          </div>
+
+          <div class="when-ok">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              RED FLAGS THAT INDICATE WRONG TOOL
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Escalating costs without progress</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quality degradation mid-session</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Context constantly full despite compaction</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Human review finding many bugs</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Same mistakes repeated across sessions</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    

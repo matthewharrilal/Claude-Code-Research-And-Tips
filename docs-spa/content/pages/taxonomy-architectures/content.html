@@ -1,0 +1,630 @@
+
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Every agent architecture exists on one axis: orchestration separation. Master this, master all patterns.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"An agent that orchestrates must NEVER directly execute. An agent that executes must NEVER directly orchestrate."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Orchestrator: Task*, Read (minimal) | Worker: Read, Write, Edit, Bash')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Orchestrator: Task*, Read (minimal) | Worker: Read, Write, Edit, Bash</code>
+          </div>
+
+          <div class="core-anchor">This is the Iron Law. Every architecture in this taxonomy obeys it or fails.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The taxonomy organizes 13 architecture patterns across three complexity tiers. But every pattern is a variation on ONE theme: how strictly do you separate orchestration from execution? The strictest separation (CC Mirror) scales best. The loosest (single interactive session) is simplest. Everything else falls on this spectrum.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          This isn't philosophy - it's physics. When an orchestrator writes code, it fills context with implementation details, losing strategic perspective. When a worker spawns sub-workers, coordination explodes exponentially. Mixing roles leads to context pollution, scope creep, verification bypass, and uncontrolled recursion.
+        </p>
+
+        <div class="arch-diagram">
+SINGLE AGENT                    MULTI-AGENT                      SWARM
+     │                              │                              │
+     ▼                              ▼                              ▼
+┌─────────┐               ┌─────────────────┐           ┌─────────────────┐
+│ Human   │               │   Orchestrator  │           │  Task Queue /   │
+│   ↓     │               │   (Opus 4.5)    │           │  Container Pool │
+│ Claude  │               │        ↓        │           │        ↓        │
+│   ↓     │               │ ┌─────┼─────┐   │           │  Dynamic Spawn  │
+│Codebase │               │ ▼     ▼     ▼   │           │  &amp; Scale        │
+└─────────┘               │Worker Worker Worker         └─────────────────┘
+                          │(Sonnet)(Sonnet)(Haiku)
+                          └─────────────────┘
+
+Complexity:  LOW ──────────────── MEDIUM ──────────────── HIGH
+Parallelism: NONE ─────────────── HIGH ────────────────── VERY HIGH
+Cost:        LOW ──────────────── MEDIUM ──────────────── HIGH
+        </div>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-separation" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY ORCHESTRATOR/WORKER SEPARATION?</div>
+          <div class="decision-reasoning">
+            When an orchestrator writes code directly, its context fills with implementation details. It loses the strategic overview needed to coordinate multiple workers. This is called "context pollution" - the orchestrator becomes a worker with extra responsibilities it can't fulfill.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Define roles BEFORE starting. If you're the orchestrator: use only Task*, Read (1-2 files), AskUserQuestion. If you're a worker: use Read, Write, Edit, Bash, but NEVER Task*, NEVER spawn sub-agents. Tool ownership is non-negotiable.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-external-state">
+          <div class="decision-why">WHY EXTERNAL STATE ACROSS ALL PATTERNS?</div>
+          <div class="decision-reasoning">
+            Every pattern in this taxonomy uses external state (files, git, task boards) rather than relying on agent memory. This isn't a Ralph-specific decision - it's universal. INV-003 (External state &gt; internal memory) appears in Ralph, Gas Town, CC Mirror, and Panopticon because it's physics, not preference.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Whatever architecture you choose, design your persistence layer FIRST. For Ralph: prd.json + progress.txt. For CC Mirror: TaskCreate/TaskUpdate. For Gas Town: ~/.gt/. For Panopticon: domain directories. The agent can forget - the filesystem cannot.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-flat-hierarchy">
+          <div class="decision-why">WHY FLAT HIERARCHY (2 LEVELS MAX)?</div>
+          <div class="decision-reasoning">
+            Deep nesting (&gt;2 levels) is an anti-pattern across ALL architectures. Each additional level compounds: context passing becomes lossy, coordination overhead multiplies, debugging becomes exponentially harder, and latency compounds. Even Gas Town's 3-level appearance is really 2 levels with role specialization.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              If you're reaching for a third level, you've mis-decomposed. Workers that need to delegate should report back and let the orchestrator spawn. Never Orchestrator → Worker → SubWorker. Always Orchestrator → Worker A, Orchestrator → Worker B (flat).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: THE PATTERNS -->
+      <section id="patterns" data-activity="patterns">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          The Architecture Patterns
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="single-agent">Single Agent Patterns (4)</h3>
+
+        <table class="arch-table">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Description</th>
+              <th>Complexity</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Interactive Session</strong></td>
+              <td>Human &lt;-&gt; Claude conversation loop. Baseline pattern.</td>
+              <td><span class="level-badge level-0">L0</span></td>
+              <td>Exploration, debugging, learning</td>
+            </tr>
+            <tr>
+              <td><strong>Ralph Loop</strong></td>
+              <td><code>while :; do cat PROMPT.md | claude; done</code> Fresh context per iteration, external state.</td>
+              <td><span class="level-badge level-1">L1-2</span></td>
+              <td>Overnight autonomous development</td>
+            </tr>
+            <tr>
+              <td><strong>Subagent Spawning</strong></td>
+              <td>Parent spawns ephemeral children for isolated tasks. Results absorbed back.</td>
+              <td><span class="level-badge level-2">L2</span></td>
+              <td>Research, validation, parallel exploration</td>
+            </tr>
+            <tr>
+              <td><strong>Cron-Scheduled</strong></td>
+              <td>Scheduled Claude invocations (Panopticon pattern). No human intervention.</td>
+              <td><span class="level-badge level-2">L2-3</span></td>
+              <td>Automated reports, morning briefs</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Ralph Loop - The gateway to autonomous work</span>
+<span class="keyword">while</span> :; <span class="keyword">do</span>
+  cat PROMPT.md | claude --dangerously-skip-permissions
+  sleep 2
+<span class="keyword">done</span>
+
+<span class="comment"># Cron-Scheduled - The Panopticon foundation</span>
+<span class="comment"># crontab entry:</span>
+0 6 * * * cd ~/trades &amp;&amp; claude <span class="string">"Generate morning brief"</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="multi-agent">Multi-Agent Patterns (5)</h3>
+
+        <table class="arch-table">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Description</th>
+              <th>Complexity</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hub-and-Spoke (CC Mirror)</strong></td>
+              <td>Central orchestrator (Opus) delegates to specialized workers (Sonnet/Haiku). Strictest separation.</td>
+              <td><span class="level-badge level-3">L3-4</span></td>
+              <td>Team projects, parallel features</td>
+            </tr>
+            <tr>
+              <td><strong>Factory (Gas Town)</strong></td>
+              <td>Full "town" with Mayor, Deacon, Dogs, Refinery, Polecats, Crew. Agent factory.</td>
+              <td><span class="level-badge level-5">L5-7</span></td>
+              <td>Enterprise scale, 10+ agents</td>
+            </tr>
+            <tr>
+              <td><strong>Kanban Loop</strong></td>
+              <td>Single agent operates against task board. Pick → Work → Complete → Next.</td>
+              <td><span class="level-badge level-2">L2</span></td>
+              <td>Task-based workflow, CI/CD</td>
+            </tr>
+            <tr>
+              <td><strong>Parallel Branch</strong></td>
+              <td>Multiple agents on separate git branches. Human merges.</td>
+              <td><span class="level-badge level-2">L2-3</span></td>
+              <td>Independent feature development</td>
+            </tr>
+            <tr>
+              <td><strong>Panopticon</strong></td>
+              <td>8 parallel Claude instances, each owning a life domain. Self-legibility through automation.</td>
+              <td><span class="level-badge level-4">L4-5</span></td>
+              <td>Personal automation, comprehensive life management</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="arch-diagram">
+<span class="comment"># Hub-and-Spoke (CC Mirror)</span>
+         ┌─────────────────┐
+         │   ORCHESTRATOR  │ ← "YOU DO NOT WRITE CODE."
+         │   (Opus 4.5)    │
+         └────────┬────────┘
+                  │ Task(description=..., run_in_background=True)
+    ┌─────────────┼─────────────┐
+    ▼             ▼             ▼
+┌───────┐   ┌───────┐   ┌───────┐
+│ Coder │   │ Tester│   │ Docs  │
+│(Sonnet)│   │(Sonnet)│   │(Haiku)│
+└───────┘   └───────┘   └───────┘
+
+<span class="comment"># Gas Town Factory</span>
+Gas Town (~/.gt)
+├── HQ (town-level management)
+├── Rigs (project repos)
+│   └── Witness (per-rig observer)
+└── Workers
+    ├── Mayor (town coordination)
+    ├── Deacon (monitoring/handshakes)
+    ├── Dogs (quality gates)
+    ├── Refinery (task decomposition)
+    ├── Polecat (persistent workers)
+    └── Crew (ephemeral workers)
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="swarm">Swarm Architectures (4)</h3>
+
+        <table class="arch-table">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Description</th>
+              <th>Complexity</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Infinite Orchestra</strong></td>
+              <td>Self-improving orchestrator in Docker. Specialized worker profiles. 24/7 operation.</td>
+              <td><span class="level-badge level-4">L4-5</span></td>
+              <td>Self-improving systems</td>
+            </tr>
+            <tr>
+              <td><strong>Container-Isolated (AI-Maestro)</strong></td>
+              <td>Claude instances in Docker containers. Shared volumes for communication.</td>
+              <td><span class="level-badge level-4">L4</span></td>
+              <td>CI/CD integration, isolation</td>
+            </tr>
+            <tr>
+              <td><strong>Git Worktree Swarm</strong></td>
+              <td>Git worktrees create isolated directories. Parallel agents share history.</td>
+              <td><span class="level-badge level-3">L3</span></td>
+              <td>Parallel feature development</td>
+            </tr>
+            <tr>
+              <td><strong>Task Queue Swarm</strong></td>
+              <td>Agents claim from shared queue. Dynamic scaling, load balancing.</td>
+              <td><span class="level-badge level-4">L4-5</span></td>
+              <td>Variable workload, auto-scaling</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Git Worktree Swarm - Parallel Ralph loops</span>
+<span class="keyword">for</span> feature <span class="keyword">in</span> auth payments notifications; <span class="keyword">do</span>
+  git worktree add ../wt-$feature $feature-branch
+  (cd ../wt-$feature &amp;&amp; ./ralph.sh 20) &amp;
+<span class="keyword">done</span>
+wait
+
+<span class="comment"># Container-Isolated - docker-compose.yml</span>
+services:
+  agent-1:
+    build: ./agent
+    volumes:
+      - ./project:/workspace
+      - agent-1-data:/data
+  agent-2:
+    build: ./agent
+    volumes:
+      - ./project:/workspace
+      - agent-2-data:/data</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: SELECTION PATH -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Selection Path
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Use this decision tree to select your architecture. Start at the top, follow the branches.
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>Single task, one session?</strong> YES -&gt; <code>Interactive Session</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>Multiple sequential tasks, overnight?</strong> YES -&gt; <code>Ralph Loop</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>Need parallel work?</strong> Same repo? -&gt; <code>Git Worktrees</code> | Different domains? -&gt; <code>Panopticon</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>Complex decomposition, 2-5 workers?</strong> YES -&gt; <code>Hub-and-Spoke (CC Mirror)</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>Need specialized roles (7+ types)?</strong> YES -&gt; <code>Gas Town Factory</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>Massive scale (10+ agents)?</strong> YES -&gt; <code>Gas Town</code> or <code>Task Queue Swarm</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content"><strong>CI/CD integration?</strong> YES -&gt; <code>Container-Isolated Parallel</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content"><strong>Self-improving system?</strong> YES -&gt; <code>Infinite Orchestra</code></div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Comparison Matrix</h3>
+
+        <table class="arch-table">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Complexity</th>
+              <th>Parallelism</th>
+              <th>Context Isolation</th>
+              <th>Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Interactive Session</td>
+              <td>Low</td>
+              <td>None</td>
+              <td>N/A</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>Ralph Loop</td>
+              <td>Low-Medium</td>
+              <td>Sequential</td>
+              <td>Per-iteration</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td>Subagent Spawning</td>
+              <td>Medium</td>
+              <td>Limited</td>
+              <td>Per-subagent</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td>Hub-and-Spoke</td>
+              <td>Medium-High</td>
+              <td>High</td>
+              <td>Per-worker</td>
+              <td>Medium-High</td>
+            </tr>
+            <tr>
+              <td>Factory (Gas Town)</td>
+              <td>Very High</td>
+              <td>Very High</td>
+              <td>Per-worker</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td>Panopticon</td>
+              <td>High</td>
+              <td>High</td>
+              <td>Per-domain</td>
+              <td>High</td>
+            </tr>
+            <tr>
+              <td>Worktree Swarm</td>
+              <td>Medium</td>
+              <td>High</td>
+              <td>Per-worktree</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td>Container Swarm</td>
+              <td>High</td>
+              <td>Very High</td>
+              <td>Per-container</td>
+              <td>High</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Architecture mistakes that compound. Learn from others' failures.
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Orchestrator writing code directly
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Main agent context fills up, loses strategic view, quality degrades</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Violating Iron Law - orchestrator took on worker role</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add explicit worker preamble: "You are a WORKER. Do NOT spawn sub-agents."</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Worker spawning sub-workers
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Exponential context explosion, coordination nightmare, lost tasks</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Worker trying to orchestrate instead of execute</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Workers NEVER spawn. They report back, orchestrator spawns next worker. Flat hierarchy only.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Wrong model for task type
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> High costs on simple tasks, or poor quality on complex ones</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Not matching model to task complexity</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Haiku for lookups/errands. Sonnet for implementation. Opus for architecture/ambiguity.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Starting too complex
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Spending more time debugging orchestration than building features</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Jumped to Gas Town when Ralph would suffice</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Start simple, add complexity only when you hit limits. Ralph -&gt; CC Mirror -&gt; Gas Town.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions that don't go away. Manage them, don't solve them.
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Coordination Overhead vs. Parallelism
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More agents = more parallelism, but also more coordination. At some point, coordination cost exceeds parallelism benefit.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Agents waiting for each other. Merge conflicts. Duplicated work.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Strict domain isolation. Each agent owns specific directories/files. Use worktrees or containers for physical isolation. Accept sequential when domains overlap.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Observability vs. Simplicity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Multi-agent systems need monitoring, but monitoring infrastructure adds complexity. You can't debug what you can't see.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "What is agent 5 doing?" unanswerable. Silent failures. Morning reveals chaos.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start with rpai or Claude HUD. Add Gas Town's Witness pattern for audit trails. Accept that full observability has cost.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Architecture Selection Regret
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> You can't know the right architecture until you've tried it. But switching architectures mid-project is expensive.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> "We should have used X" realizations at 60% completion.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start one level simpler than you think you need. Migrate when you hit concrete limits, not anticipated ones. Preserve external state formats across migrations.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use This Taxonomy
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE THIS TAXONOMY WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Starting a new AI-assisted project (architecture selection)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Current architecture hitting limits (migration planning)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Explaining agent architectures to team (shared vocabulary)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Evaluating new tools/patterns (where do they fit?)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Debugging architecture problems (anti-pattern identification)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE THIS TAXONOMY WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>One-off scripts or experiments (just use interactive session)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Looking for implementation details (see pattern-specific docs)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need specific tool setup (see tooling docs instead)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Optimizing existing working system (don't fix what works)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Quick Selection by Scenario</h3>
+
+        <table class="arch-table">
+          <thead>
+            <tr>
+              <th>Your Scenario</th>
+              <th>Recommended Pattern</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Single feature, overnight</td>
+              <td>Ralph Loop</td>
+              <td>Simplest autonomous pattern</td>
+            </tr>
+            <tr>
+              <td>Multiple life domains</td>
+              <td>Panopticon</td>
+              <td>Isolated directories, domain expertise</td>
+            </tr>
+            <tr>
+              <td>Team project, parallel features</td>
+              <td>Git Worktrees + Branch Discipline</td>
+              <td>Isolated work, shared history</td>
+            </tr>
+            <tr>
+              <td>Complex architecture work</td>
+              <td>Hub-and-Spoke (CC Mirror)</td>
+              <td>Specialized workers, clear separation</td>
+            </tr>
+            <tr>
+              <td>Production app with dependencies</td>
+              <td>CC Mirror native orchestration</td>
+              <td>Task management built-in</td>
+            </tr>
+            <tr>
+              <td>Massive scale (10+ agents)</td>
+              <td>Gas Town Factory</td>
+              <td>Full town infrastructure</td>
+            </tr>
+            <tr>
+              <td>CI/CD integration</td>
+              <td>Container-Isolated Parallel</td>
+              <td>Docker isolation, reproducibility</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    

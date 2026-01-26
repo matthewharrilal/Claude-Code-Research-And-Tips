@@ -1,0 +1,491 @@
+
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Async coordination enables parallel agents to share work without stepping on each other's files.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Agents that can't talk end up fighting over the same files."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'register_agent() → reserve_files() → do_work() → release()')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>register_agent() → reserve_files() → do_work() → release()</code>
+          </div>
+
+          <div class="core-anchor">That's the whole pattern. Everything else is preventing collisions.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          When multiple agents work on the same codebase asynchronously, they can overwrite each other's work. Agent A edits routes.py, Agent B edits routes.py, Agent B's commit overwrites Agent A's work. Hours of debugging follow.
+        </p>
+
+        <div class="diagram-container">
+          <pre>+===========================================================================+
+|                    THE FILE CONFLICT PROBLEM                              |
++===========================================================================+
+|                                                                           |
+|  Time T0: Agent A starts editing src/api/routes.py                       |
+|  Time T1: Agent B starts editing src/api/routes.py (unaware of A)        |
+|  Time T2: Agent A commits their changes                                   |
+|  Time T3: Agent B commits their changes                                   |
+|           --&gt; Agent B's commit OVERWRITES Agent A's work                  |
+|           --&gt; Both agents confused by unexpected diffs                    |
+|           --&gt; Human spends hours reconciling changes                      |
+|                                                                           |
++===========================================================================+
+          </pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The solution: coordination infrastructure. Agents register themselves, reserve files before editing, and release when done. Two paradigms exist: email-like (Agent Mail) for single-machine coordination, and message-queue (NATS/Station) for distributed systems.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-advisory" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY ADVISORY LOCKS?</div>
+          <div class="decision-reasoning">
+            Traditional locks are enforced by the filesystem - if locked, you cannot proceed. Advisory locks are signals that agents CHOOSE to respect. This prevents deadlocks and allows graceful degradation.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              File reservations are "Do Not Disturb" signs, not locked doors. Well-behaved agents check and respect them. If you need hard enforcement, add pre-commit guards.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-ttl">
+          <div class="decision-why">WHY TTL LEASES?</div>
+          <div class="decision-reasoning">
+            Without TTL (Time-To-Live), a crashed agent holds reservations forever. TTL-based leases automatically expire after the configured duration, preventing permanent deadlocks.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Always set appropriate TTL. Too short = losing reservations mid-work. Too long = blocking others unnecessarily. 1 hour is typical for feature work.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-dual-persistence">
+          <div class="decision-why">WHY DUAL PERSISTENCE?</div>
+          <div class="decision-reasoning">
+            Agent Mail stores messages in both SQLite (for fast queries) and Git (for human-readable audit trails). This serves two audiences: agents need speed, humans need readability.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              You can search messages programmatically via SQLite FTS5, or browse them as markdown files in the git repo. Both views are always in sync.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: AGENT MAIL -->
+      <section id="file-reservations" data-activity="agentmail">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Agent Mail File Reservations
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Agent Mail implements file reservations as TTL-based advisory leases. Reserve before editing, release when done.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Step 1: Register identity</span>
+<span class="variable">register_agent</span>(
+    project_key=<span class="string">"/my/project"</span>,
+    agent_name=<span class="string">"GreenCastle"</span>,       <span class="comment"># Memorable adjective+noun</span>
+    program=<span class="string">"Claude Code"</span>,
+    model=<span class="string">"Opus 4.5"</span>
+)
+
+<span class="comment"># Step 2: Reserve work surface</span>
+<span class="variable">result</span> = <span class="variable">file_reservation_paths</span>(
+    project_key=<span class="string">"/my/project"</span>,
+    agent_name=<span class="string">"GreenCastle"</span>,
+    paths=[<span class="string">"src/api/**/*.py"</span>],      <span class="comment"># Glob patterns work</span>
+    ttl_seconds=<span class="variable">3600</span>,              <span class="comment"># 1 hour lease</span>
+    exclusive=<span class="keyword">True</span>,                <span class="comment"># No shared access</span>
+    reason=<span class="string">"br-123"</span>                <span class="comment"># Link to task/issue</span>
+)
+
+<span class="keyword">if</span> result.conflicts:
+    <span class="comment"># Another agent holds conflicting reservation</span>
+    <span class="keyword">print</span>(<span class="string">f"Conflict with: {result.conflicts}"</span>)
+    <span class="comment"># Options: Wait, work on different files, or request shared access</span>
+
+<span class="comment"># Step 3: Do the work...</span>
+
+<span class="comment"># Step 4: Release reservation</span>
+<span class="variable">release_file_reservations</span>(
+    project_key=<span class="string">"/my/project"</span>,
+    agent_name=<span class="string">"GreenCastle"</span>
+)</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="message-threading">Message Threading</h3>
+
+        <p class="text-text-secondary mb-6">
+          Agents communicate through threaded messages. All messages about a feature share a thread_id, creating traceable conversation trails.
+        </p>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># All messages about feature br-123 share thread_id</span>
+<span class="variable">send_message</span>(
+    project_key=<span class="string">"/my/project"</span>,
+    from_agent=<span class="string">"GreenCastle"</span>,
+    to_agents=[<span class="string">"RedCat"</span>, <span class="string">"BlueLake"</span>],
+    thread_id=<span class="string">"br-123"</span>,                    <span class="comment"># Links to task/issue</span>
+    subject=<span class="string">"[br-123] Start: Auth API"</span>,
+    body=<span class="string">"Implementation plan and status..."</span>
+)
+
+<span class="comment"># Later response in same thread</span>
+<span class="variable">send_message</span>(
+    thread_id=<span class="string">"br-123"</span>,                    <span class="comment"># Same thread</span>
+    from_agent=<span class="string">"RedCat"</span>,
+    to_agents=[<span class="string">"GreenCastle"</span>],
+    subject=<span class="string">"RE: [br-123] Start: Auth API"</span>,
+    body=<span class="string">"Frontend ready for integration..."</span>
+)</pre>
+        </div>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Behavior</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>TTL-Based</strong></td>
+              <td>Automatically expires after ttl_seconds</td>
+            </tr>
+            <tr>
+              <td><strong>Advisory</strong></td>
+              <td>Not enforced by filesystem, agents choose to respect</td>
+            </tr>
+            <tr>
+              <td><strong>Glob Support</strong></td>
+              <td>Reserve <code>src/api/**/*.py</code> not just single files</td>
+            </tr>
+            <tr>
+              <td><strong>Exclusive/Shared</strong></td>
+              <td>Exclusive blocks all others; shared allows readers</td>
+            </tr>
+            <tr>
+              <td><strong>Traceable</strong></td>
+              <td>reason field links to task IDs for audit</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 5: STATION/NATS -->
+      <section id="lattice-mesh" data-activity="station">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Station's Lattice Mesh
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Agent Mail solves coordination for agents on one machine. For distributed agent teams across multiple machines, Station introduces Lattice - a NATS-based mesh network.
+        </p>
+
+        <div class="diagram-container">
+          <pre>+===========================================================================+
+|                        LATTICE MESH ARCHITECTURE                          |
++===========================================================================+
+|                                                                           |
+|  +------------------------------------------------------------------+    |
+|  |                        LATTICE MESH                               |    |
+|  |  +---------------+    +---------------+    +---------------+      |    |
+|  |  |  Station A    |    |  Station B    |    |  Station C    |      |    |
+|  |  |  (Security)   |&lt;--&gt;|  (Orchestr.)  |&lt;--&gt;|   (SRE)       |      |    |
+|  |  |               |    |               |    |               |      |    |
+|  |  | VulnScanner   |    | Coordinator   |    | K8sHealth     |      |    |
+|  |  | CVELookup     |    |               |    | LogAnalyzer   |      |    |
+|  |  | NetworkAudit  |    |               |    | Deployer      |      |    |
+|  |  +---------------+    +---------------+    +---------------+      |    |
+|  |         |                   |                   |                 |    |
+|  |         +-------------------+-------------------+                 |    |
+|  |                             |                                     |    |
+|  |                    +--------v--------+                            |    |
+|  |                    |   NATS Server   |                            |    |
+|  |                    |   + JetStream   |                            |    |
+|  |                    +-----------------+                            |    |
+|  +------------------------------------------------------------------+    |
+|                                                                           |
++===========================================================================+
+          </pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="message-patterns">Message Flow Patterns</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Use Case</th>
+              <th>Subject Format</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Request-Reply</strong></td>
+              <td>Agent invocation</td>
+              <td><code>lattice.station.{id}.agent.invoke</code></td>
+            </tr>
+            <tr>
+              <td><strong>Pub/Sub</strong></td>
+              <td>Presence heartbeats</td>
+              <td><code>lattice.presence.heartbeat</code></td>
+            </tr>
+            <tr>
+              <td><strong>Streaming</strong></td>
+              <td>Work progress</td>
+              <td><code>lattice.work.{workID}.response</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Three operating modes</span>
+
+<span class="comment"># Standalone: Default single-station, no mesh</span>
+<span class="variable">stn serve</span>
+
+<span class="comment"># Orchestrator: Runs embedded NATS (port 4222)</span>
+<span class="variable">stn serve --orchestration</span>
+
+<span class="comment"># Member: Joins orchestrator mesh</span>
+<span class="variable">stn serve --lattice nats://orchestrator:4222</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit, with concrete numbers and fixes.
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            from_agent not registered
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Message send fails with registration error</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Sending message before calling register_agent()</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Always register_agent() first. It's a one-time call per session.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            FILE_RESERVATION_CONFLICT
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Cannot reserve files, conflict returned</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Another agent holds exclusive reservation</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Wait for TTL expiry (check expires_in), use exclusive=False for reading, or work on different files.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Agent name rejected
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Registration fails with invalid name error</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Name doesn't match adjective+noun pattern</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use names like GreenCastle, RedCat, SwiftFalcon. Not steve, claude, or agent123.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            NATS connection refused
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Station member can't connect to lattice</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Orchestrator not running or wrong port</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify orchestrator: <code>stn status</code>. Default NATS port is 4222.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions, not bugs to fix.
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Advisory vs Enforced
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Advisory locks are flexible but rely on agent cooperation. Enforced locks prevent conflicts but can cause deadlocks.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Rogue agents ignoring reservations, or legitimate agents blocked by crashed holders.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use pre-commit guards for enforcement layer. TTL handles crashed agents. Accept some risk for flexibility.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Polling vs Push
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Agent Mail uses polling (higher latency, simpler). NATS uses push (real-time, more complex). No single best choice.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Delayed message handling with Agent Mail, or deployment complexity with NATS.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use Agent Mail for same-machine coordination. Use NATS when sub-millisecond latency or cross-machine coordination is required.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Audit Trail Granularity
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Fine-grained audit trails (every action) consume storage and slow queries. Coarse trails miss important details.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Can't debug coordination failures, or audit data overwhelming.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Thread-based logging captures conversation context. JetStream has configurable retention (default 7 days).</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE ASYNC COORDINATION WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multiple agents editing same codebase (prevents file conflicts)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need human-readable audit trails (Agent Mail's git storage)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Cross-machine agent teams (Station/NATS lattice)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Integration with Gas Town, Ralph, or CC Mirror (natural fit)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Long-running tasks requiring handoffs between agents</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Single agent workflow (no coordination needed)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Agents work on completely separate files (use git worktrees)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need real-time synchronous coordination (use CC Mirror tasks)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple sequential Ralph loops (progress.txt is sufficient)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Infrastructure overhead not justified (single-machine, few agents)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Decision Flowchart</h3>
+
+        <div class="diagram-container">
+          <pre>START: How many agents?
+              |
+       +------+------+
+       |             |
+       v             v
+    1 agent       2+ agents
+       |             |
+       v             |
+  No coordination    +---&gt; Same machine? ----+
+  needed                      |              |
+                             YES            NO
+                              |              |
+                              v              v
+                         Agent Mail     Station/NATS
+                              |              |
+                              v              v
+                  Need human-readable   Need sub-ms
+                  audit trails?          latency?
+                      |     |               |     |
+                     YES   NO              YES   NO
+                      |     |               |     |
+                      v     v               v     v
+                  Agent   Consider      Station  Agent Mail
+                  Mail    Station       (NATS)   may work
+                          for scale
+          </pre>
+        </div>
+      </section>
+
+    

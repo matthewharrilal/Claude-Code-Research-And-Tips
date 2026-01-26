@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, Fira_Code } from 'next/font/google'
+import { LazyMotion, domAnimation } from 'framer-motion'
 import './globals.css'
 
 const inter = Inter({
@@ -25,7 +26,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${firaCode.variable} antialiased`}>
-        {children}
+        <LazyMotion features={domAnimation}>
+          {children}
+        </LazyMotion>
       </body>
     </html>
   )

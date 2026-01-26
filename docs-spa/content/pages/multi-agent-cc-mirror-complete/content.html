@@ -1,0 +1,619 @@
+
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">CC Mirror unlocks Anthropic's hidden multi-agent orchestration for parallel task execution with dependency tracking.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Anthropic built it. Anthropic disabled it. CC Mirror enables it."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'npx cc-mirror quick --provider mirror --name mclaude')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>npx cc-mirror quick --provider mirror --name mclaude</code>
+          </div>
+
+          <div class="core-anchor">That unlocks TaskCreate, TaskList, TaskUpdate, TaskGet. Everything else is orchestration.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          CC Mirror patches Claude Code's minified JavaScript to enable internal APIs that Anthropic built but turned off. These APIs provide a complete task graph with dependency management, ownership tracking, and team visibility. You get multi-agent orchestration without building infrastructure.
+        </p>
+
+        <p class="text-text-secondary mb-6">
+          The key insight: Claude Code already HAS the primitives for multi-agent work. The orchestrator spawns workers, workers claim tasks from a shared queue, tasks can block other tasks. This is production-grade orchestration hiding in plain sight.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="hub-spoke">The Hub-and-Spoke Model</h3>
+
+        <div class="architecture-diagram">
+<pre>              +------------------+
+              |   <span class="highlight">ORCHESTRATOR</span>   |
+              |   (Conductor)    |
+              +--------+---------+
+                       |
+                       | <span class="muted">Task() with run_in_background=True</span>
+                       |
+       +---------------+---------------+
+       |               |               |
+       v               v               v
+  +---------+   +---------+   +---------+
+  | <span class="highlight">Worker1</span> |   | <span class="highlight">Worker2</span> |   | <span class="highlight">Worker3</span> |
+  | (Coder) |   | (Tester)|   | (Docs)  |
+  +---------+   +---------+   +---------+
+        |             |             |
+        +-------------+-------------+
+                      |
+               <span class="muted">Shared Filesystem</span>
+               <span class="muted">(handoff files)</span></pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The orchestrator never writes code. The orchestrator never reads more than 1-2 files. The orchestrator creates tasks, spawns workers, and synthesizes results. Workers do the actual work. This separation is the Iron Law.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-hidden-api" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY HIDDEN API?</div>
+          <div class="decision-reasoning">
+            Anthropic built TaskCreate, TaskList, TaskUpdate, TaskGet into Claude Code but disabled them. Why? Likely for safety, cost control, or staged rollout. CC Mirror patches the minified JS to flip them back on.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              These APIs exist because Anthropic intended multi-agent orchestration. You're not hacking unsupported features - you're enabling designed functionality. But it IS beta. Updates may break it.
+            </div>
+          </div>
+        </div>
+
+        <div class="iron-law-box" id="why-iron-law">
+          <div class="iron-law-title">
+            <i data-lucide="shield" class="w-5 h-5"></i>
+            THE IRON LAW
+          </div>
+          <div class="iron-law-content">
+            YOU DO NOT WRITE CODE. YOU DO NOT RUN COMMANDS. YOU DO NOT EXPLORE CODEBASES.<br><br>
+            You are the CONDUCTOR. Your agents play the instruments.
+          </div>
+        </div>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY THE IRON LAW?</div>
+          <div class="decision-reasoning">
+            If the orchestrator writes code, it pollutes its own context. If the orchestrator explores the codebase, it loses strategic view. If the orchestrator does worker work, it becomes a bottleneck. The role separation is architectural.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Delegation threshold: If you're reading more than 2 files, spawn an agent instead. If you're writing any code, you've violated the law. The orchestrator's job is to think, not to do.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-task-graph">
+          <div class="decision-why">WHY TASK GRAPH?</div>
+          <div class="decision-reasoning">
+            Tasks support blocks/blockedBy relationships. When Task A blocks Task B, the system prevents workers from claiming Task B until Task A resolves. This is automatic dependency resolution - no manual orchestration needed.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Model your work as a DAG. "Implement API" blocks "Write tests" blocks "Update docs". Workers automatically pick up the next available task. You don't coordinate - the system does.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: IMPLEMENTATION -->
+      <section id="quick-start" data-activity="implementation">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Implementation
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">Quick Start (3 Commands)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Step 1: Create isolated variant</span>
+<span class="variable">npx</span> cc-mirror quick --provider mirror --name mclaude
+
+<span class="comment"># Step 2: Launch it</span>
+<span class="variable">mclaude</span>
+
+<span class="comment"># Step 3: In the terminal</span>
+<span class="string">"Load the orchestration skill and initiate"</span></pre>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          That's it. 3 steps to multi-agent orchestration. The variant creates an isolated Claude instance with the orchestration primitives enabled.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="task-api">Task Management API</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># TaskCreate - Create with dependencies</span>
+{
+  <span class="string">"subject"</span>: <span class="string">"Implement authentication middleware"</span>,
+  <span class="string">"description"</span>: <span class="string">"Create Express middleware for JWT verification"</span>,
+  <span class="string">"acceptanceCriteria"</span>: [
+    <span class="string">"Middleware validates JWT signature"</span>,
+    <span class="string">"Returns 401 on invalid/expired token"</span>,
+    <span class="string">"npm run typecheck passes"</span>
+  ],
+  <span class="string">"priority"</span>: 1,
+  <span class="string">"blockedBy"</span>: [<span class="string">"task-id-001"</span>],
+  <span class="string">"blocks"</span>: [<span class="string">"task-id-003"</span>, <span class="string">"task-id-004"</span>]
+}
+
+<span class="comment"># TaskList - Query available tasks</span>
+<span class="variable">TaskList</span> --status=open --no-owner --not-blocked
+
+<span class="comment"># TaskUpdate - Claim and update</span>
+{
+  <span class="string">"taskId"</span>: <span class="string">"task-id-002"</span>,
+  <span class="string">"owner"</span>: <span class="string">"worker-agent-id"</span>,
+  <span class="string">"status"</span>: <span class="string">"in_progress"</span>,
+  <span class="string">"comments"</span>: [<span class="string">"Found edge case in token parsing"</span>]
+}</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Tool Ownership Division</h3>
+
+        <div class="tool-grid">
+          <div class="tool-card orchestrator">
+            <div class="tool-card-title">
+              <i data-lucide="crown" class="w-4 h-4 text-accent"></i>
+              Orchestrator Uses
+            </div>
+            <div class="tool-list">
+              <p class="mb-2"><code>Read</code> (1-2 files max)</p>
+              <p class="mb-2"><code>TaskCreate</code>, <code>TaskList</code>, <code>TaskGet</code>, <code>TaskUpdate</code></p>
+              <p class="mb-2"><code>Task</code> (to spawn workers)</p>
+              <p><code>AskUserQuestion</code></p>
+            </div>
+          </div>
+          <div class="tool-card worker">
+            <div class="tool-card-title">
+              <i data-lucide="wrench" class="w-4 h-4 text-blue-500"></i>
+              Workers Use
+            </div>
+            <div class="tool-list">
+              <p class="mb-2"><code>Read</code>, <code>Write</code>, <code>Edit</code>, <code>Bash</code></p>
+              <p class="mb-2"><code>Glob</code>, <code>Grep</code>, <code>WebFetch</code></p>
+              <p class="mb-2"><strong class="text-red-600">NEVER:</strong> <code>Task*</code>, spawn sub-agents</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="worker-patterns">Worker Preamble Template</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="variable">CONTEXT</span>: You are a WORKER agent, not an orchestrator.
+
+<span class="variable">RULES</span>:
+- Complete ONLY the task described below
+- Use tools directly (Read, Write, Edit, Bash, etc.)
+- Do NOT spawn sub-agents
+- Do NOT call TaskCreate or TaskUpdate
+- Report your results with absolute file paths
+
+<span class="variable">TASK</span>:
+[Your specific task here]</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Model Selection by Complexity</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Use Case</th>
+              <th>Spawn Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Haiku</strong></td>
+              <td>Errand runner: fetch files, grep, simple lookups</td>
+              <td>5-10 in parallel</td>
+            </tr>
+            <tr>
+              <td><strong>Sonnet</strong></td>
+              <td>Capable worker: structured implementation, tests</td>
+              <td>2-5 parallel</td>
+            </tr>
+            <tr>
+              <td><strong>Opus</strong></td>
+              <td>Complex reasoning, architecture decisions</td>
+              <td>1 (sequential)</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Path of a Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a task through the CC Mirror system to see how orchestration flows:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">User describes goal to orchestrator: "Build auth system"</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Orchestrator decomposes into <code>TaskCreate</code> calls with dependencies</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Task graph established: Task 1 (schema) blocks Task 2 (API) blocks Task 3 (tests)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Orchestrator spawns Worker A with <code>Task(run_in_background=True)</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Worker A receives preamble: "You are a WORKER agent..."</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">Worker A claims Task 1, implements, runs tests, marks <code>status: resolved</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Task 2 automatically unblocks (dependency resolved)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Orchestrator spawns Worker B for Task 2 (parallel with Worker C for Task 4 if unblocked)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">Workers complete, orchestrator synthesizes results</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content"><code>TaskList</code> shows all tasks resolved, orchestrator reports to user</div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="coordination">Coordination Patterns</h3>
+
+        <h4 class="font-medium text-base mb-3 text-text-secondary">Pattern 1: Fan-Out (Parallel Dispatch)</h4>
+        <div class="architecture-diagram">
+<pre>           +------------------+
+           |   <span class="highlight">ORCHESTRATOR</span>   |
+           +--------+---------+
+                    |
+    +---------------+---------------+
+    |               |               |
+    v               v               v
++--------+   +--------+   +--------+
+|<span class="highlight">Worker A</span>|   |<span class="highlight">Worker B</span>|   |<span class="highlight">Worker C</span>|
++--------+   +--------+   +--------+
+  <span class="muted">(parallel execution - no dependencies)</span></pre>
+        </div>
+
+        <h4 class="font-medium text-base mb-3 mt-6 text-text-secondary">Pattern 2: Pipeline (Sequential Handoffs)</h4>
+        <div class="architecture-diagram">
+<pre>+--------+     +--------+     +--------+
+| Task 1 | --&gt; | Task 2 | --&gt; | Task 3 |
+| Schema |     | Backend|     |  Tests |
++--------+     +--------+     +--------+
+    |             ^   |           ^
+    +--<span class="highlight">blocks</span>-----+   +--<span class="highlight">blocks</span>---+</pre>
+        </div>
+
+        <h4 class="font-medium text-base mb-3 mt-6 text-text-secondary">Pattern 3: Map-Reduce (Parallel + Aggregation)</h4>
+        <div class="architecture-diagram">
+<pre>              +------------------+
+              |   <span class="highlight">ORCHESTRATOR</span>   |
+              +--------+---------+
+                       |
+         <span class="muted">MAP PHASE</span>     |
+                       |
+   +-------------------+-------------------+
+   |                   |                   |
+   v                   v                   v
++--------+        +--------+        +--------+
+|Research|        |Research|        |Research|
+|  Auth  |        | Payment|        |  DB    |
++--------+        +--------+        +--------+
+   |                   |                   |
+   +-------------------+-------------------+
+                       |
+        <span class="muted">REDUCE PHASE</span>   v
+              +------------------+
+              |    <span class="highlight">SYNTHESIZE</span>    |
+              | (Orchestrator)   |
+              +------------------+</pre>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit with CC Mirror, with concrete symptoms and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Skill file not loading
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Claude says it doesn't know about TaskCreate/TaskUpdate</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> cc_mirror_mode not set, or skill file missing</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Run <code>npx cc-mirror doctor</code> to verify installation. Check ~/.claude/settings.json for cc_mirror: true</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Workers touching same files
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Multiple workers modify same file, edits overwrite each other</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Task decomposition didn't isolate file ownership</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Add explicit file ownership to task descriptions: "Ownership: src/auth/*.ts - DO NOT MODIFY: src/components/*"</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Context collapse in orchestrator
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Orchestrator forgets task state, makes inconsistent decisions</div>
+          <div class="gotcha-detail"><strong>Threshold:</strong> &gt;70% context usage, or too many workers spawned</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Enable auto-compact in settings.json. Run /compact proactively. Monitor with /context</div>
+        </div>
+
+        <div class="gotcha-box" id="troubleshooting">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Hidden API disappeared after update
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> CC Mirror was working, Claude Code updated, now broken</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Claude Code update changed minified JS, patch no longer applies</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Run <code>npx cc-mirror update</code>. Check GitHub issues for compatibility. This is beta - expect breakage.</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Emergency Recovery</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Kill all stuck workers</span>
+pkill -f "claude"
+
+<span class="comment"># Check task state</span>
+npx cc-mirror tasks list --all
+
+<span class="comment"># Clear stuck tasks</span>
+npx cc-mirror tasks clean --stuck
+
+<span class="comment"># Full reset (loses task state)</span>
+npx cc-mirror remove mclaude
+npx cc-mirror quick --provider mirror --name mclaude</pre>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are fundamental tensions in multi-agent orchestration, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Beta Feature Instability
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> CC Mirror patches disabled Anthropic internals. Any Claude Code update can break it. You're trading stability for capability.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Commands stop working after updates. New Claude Code versions have different JS structure.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Pin Claude Code version for production work. Check CC Mirror releases before updating. Have fallback to standard Task() tool.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Parallel Worker Conflicts
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Parallel execution is the point, but parallel git operations conflict. Multiple workers touching same files corrupt output.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Merge conflicts, overwritten changes, corrupted files.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use git worktrees for true isolation. Assign file ownership explicitly in task descriptions. Use branch-per-worker strategy.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Production Readiness Gap
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> CC Mirror is great for demos and personal projects, but lacks production requirements: custom observability, business logic gates, precise state control.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Can't integrate with existing monitoring. No way to add domain-specific validation.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use for prototyping, not production. For production, build custom orchestration on standard Task() tool or use Gas Town.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            The 80/20 Rule
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> CC Mirror covers 80% of use cases with zero effort. The remaining 20% needs custom work - but you don't know which 20% until you're in it.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Start with CC Mirror, hit limitation, have to rebuild.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Evaluate complexity upfront. If you're building something that needs custom orchestration, start with Gas Town or custom Task() patterns.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              USE CC MIRROR WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Tasks have clear decomposition with dependencies</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need parallel execution with automatic dependency resolution</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quick setup matters (3 commands)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Projects benefit from task persistence across sessions</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Personal projects and prototyping</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T USE CC MIRROR WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need production reliability - Use custom orchestration</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need custom observability - Build on Task() tool</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Sequential iteration is fine - Use Ralph loops</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Running 10+ agents regularly - Use Gas Town</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need official Anthropic support</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="comparison">Pattern Comparison</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>CC Mirror</th>
+              <th>Gas Town</th>
+              <th>Ralph Loop</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Setup Time</strong></td>
+              <td>&lt;5 minutes</td>
+              <td>Hours+</td>
+              <td>&lt;10 minutes</td>
+            </tr>
+            <tr>
+              <td><strong>Complexity</strong></td>
+              <td>Low</td>
+              <td>High (Stage 7+)</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td><strong>Execution</strong></td>
+              <td>Parallel</td>
+              <td>Parallel</td>
+              <td>Sequential</td>
+            </tr>
+            <tr>
+              <td><strong>Dependencies</strong></td>
+              <td>Built-in blocks/blockedBy</td>
+              <td>Inbox-based</td>
+              <td>Manual ordering</td>
+            </tr>
+            <tr>
+              <td><strong>Use Case</strong></td>
+              <td>80% generic</td>
+              <td>20% complex</td>
+              <td>Overnight features</td>
+            </tr>
+            <tr>
+              <td><strong>Cost</strong></td>
+              <td>Normal</td>
+              <td>"Expensive as hell"</td>
+              <td>Moderate</td>
+            </tr>
+            <tr>
+              <td><strong>Author</strong></td>
+              <td>@nummanali</td>
+              <td>@steve_yegge</td>
+              <td>@mattpocockuk</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    

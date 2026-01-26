@@ -1,0 +1,778 @@
+
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Claude Code deployment spans local CLI to serverless cloud, each trading isolation for convenience.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"More isolation = more safety, less convenience. Choose based on trust level."</div>
+
+          <div class="architecture-diagram">
+            <pre>                LOCAL &lt;-------------------------&gt; CLOUD
+                  |                                     |
+  Direct CLI --------&gt; VM/SSH --------&gt; Container --------&gt; Serverless
+       |                  |                   |                    |
+  Bare metal         Persistent          Isolated            Ephemeral
+  Full access        Terminal            Sandboxed           Managed
+  No isolation       Manual              Reproducible        Scalable</pre>
+          </div>
+
+          <div class="core-anchor">Every deployment pattern is a point on this spectrum. Match isolation to risk.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Claude Code can run anywhere: your laptop, a cloud VM, a Docker container, or a serverless function. The key insight is that each deployment pattern trades off between <strong>isolation</strong> (safety from destructive actions), <strong>persistence</strong> (session continuity), and <strong>convenience</strong> (setup overhead).
+        </p>
+
+        <h3 class="subsection-title">Key Dimensions</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>Spectrum</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Isolation</strong></td>
+              <td>None --&gt; Process --&gt; Container --&gt; VM --&gt; Cloud Sandbox</td>
+            </tr>
+            <tr>
+              <td><strong>Persistence</strong></td>
+              <td>Ephemeral --&gt; Session --&gt; Persistent --&gt; Durable</td>
+            </tr>
+            <tr>
+              <td><strong>Scalability</strong></td>
+              <td>Single Instance --&gt; Parallel --&gt; Auto-Scaling</td>
+            </tr>
+            <tr>
+              <td><strong>Network</strong></td>
+              <td>Full Access --&gt; Allowlist --&gt; API-Only --&gt; Isolated</td>
+            </tr>
+            <tr>
+              <td><strong>Security</strong></td>
+              <td>Permissive --&gt; Gated --&gt; Sandboxed --&gt; Zero-Trust</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-isolation" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY ISOLATION MATTERS?</div>
+          <div class="decision-reasoning">
+            Claude Code has full bash access. It can <code>rm -rf /</code>, install packages, make network requests. In supervised interactive mode, you approve each action. In autonomous mode (--dangerously-skip-permissions), mistakes can be catastrophic. Isolation contains the blast radius.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Never run YOLO mode on your main machine. Use containers or VMs for overnight autonomous work. The extra setup time is insurance against destructive commands.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-network-controls">
+          <div class="decision-why">WHY NETWORK CONTROLS?</div>
+          <div class="decision-reasoning">
+            Agents can exfiltrate data, download malware, or make unexpected API calls. Network isolation limits what an agent can access. At minimum, allowlist only api.anthropic.com. For sensitive work, use full network isolation with a proxy.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Don't give agents full internet access when they don't need it. Use <code>--network none</code> in Docker for read-only tasks. Use egress proxies for production deployments.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-persistence">
+          <div class="decision-why">WHY SESSION PERSISTENCE?</div>
+          <div class="decision-reasoning">
+            SSH connections drop. Networks fail. Agents run for hours. Without session persistence (tmux, mosh), you lose work when connections break. tmux sessions survive disconnects, letting you reconnect and continue.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Always use tmux for remote Claude Code sessions. Use mosh instead of SSH for mobile connections. Configure auto-attach so reconnection is automatic.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: INFRASTRUCTURE PATTERNS -->
+      <section id="patterns" data-activity="patterns">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Infrastructure Patterns
+        </h2>
+
+        <h3 class="subsection-title">Local Development Patterns</h3>
+
+        <div class="deployment-card">
+          <div class="deployment-card-header">
+            <div class="deployment-card-icon">
+              <i data-lucide="terminal" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="deployment-card-title">Direct CLI</div>
+              <div class="deployment-card-subtitle">Zero setup, full access, interactive approval</div>
+            </div>
+          </div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Basic usage</span>
+claude
+
+<span class="comment"># With specific model</span>
+claude --model claude-opus-4-5-20251101
+
+<span class="comment"># Continue previous session</span>
+claude --continue
+
+<span class="comment"># Headless/scripted mode</span>
+claude --print <span class="string">"Review this file"</span> &lt; file.ts</pre>
+          </div>
+          <p class="text-text-secondary text-sm">
+            <strong>When to use:</strong> Personal development, interactive exploration, supervised coding.
+          </p>
+        </div>
+
+        <div class="deployment-card">
+          <div class="deployment-card-header">
+            <div class="deployment-card-icon">
+              <i data-lucide="layout-grid" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="deployment-card-title">tmux-Based Sessions</div>
+              <div class="deployment-card-subtitle">Persistent sessions, multiple parallel agents</div>
+            </div>
+          </div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># ~/.tmux.conf for Claude Code</span>
+set -g mouse on
+set -g history-limit 100000
+set -g base-index 1
+
+<span class="comment"># Auto-save sessions</span>
+set -g @plugin <span class="string">'tmux-plugins/tmux-resurrect'</span>
+set -g @plugin <span class="string">'tmux-plugins/tmux-continuum'</span>
+set -g @continuum-restore <span class="string">'on'</span>
+set -g @resurrect-processes <span class="string">'claude node python'</span>
+
+<span class="comment"># Status bar showing git branch</span>
+set -g status-right <span class="string">'#(cd #{pane_current_path} &amp;&amp; git branch --show-current)'</span></pre>
+          </div>
+        </div>
+
+        <div class="deployment-card">
+          <div class="deployment-card-header">
+            <div class="deployment-card-icon">
+              <i data-lucide="git-branch" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="deployment-card-title">Git Worktrees for Parallel Isolation</div>
+              <div class="deployment-card-subtitle">Branch-based parallelization without conflicts</div>
+            </div>
+          </div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment">#!/bin/bash</span>
+<span class="comment"># spawn-parallel-agent.sh</span>
+
+BRANCH=$1
+TASK=$2
+WORKTREE_DIR=<span class="string">"../worktrees/$BRANCH"</span>
+
+<span class="comment"># Create worktree</span>
+git worktree add <span class="string">"$WORKTREE_DIR"</span> -b <span class="string">"$BRANCH"</span> 2&gt;/dev/null || \
+git worktree add <span class="string">"$WORKTREE_DIR"</span> <span class="string">"$BRANCH"</span>
+
+<span class="comment"># Launch Claude in worktree</span>
+cd <span class="string">"$WORKTREE_DIR"</span>
+tmux new-window -n <span class="string">"$BRANCH"</span> <span class="string">"claude '$TASK'"</span>
+
+echo <span class="string">"Agent started in $WORKTREE_DIR"</span></pre>
+          </div>
+        </div>
+
+        <h3 class="subsection-title" id="remote-patterns">Remote Access Patterns</h3>
+
+        <div class="deployment-card">
+          <div class="deployment-card-header">
+            <div class="deployment-card-icon">
+              <i data-lucide="cloud" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="deployment-card-title">Cloud VM with Tailscale</div>
+              <div class="deployment-card-subtitle">Secure VPN access, no public SSH exposure</div>
+            </div>
+          </div>
+
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Tier</th>
+                <th>Cost/Month</th>
+                <th>Best For</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Hetzner</strong></td>
+                <td>CX31 (4 vCPU, 8GB)</td>
+                <td>$13</td>
+                <td>Best value (EU)</td>
+              </tr>
+              <tr>
+                <td><strong>Vultr</strong></td>
+                <td>vhf-8c-32gb</td>
+                <td>~$210 (or $7/day)</td>
+                <td>US, hourly billing</td>
+              </tr>
+              <tr>
+                <td><strong>DigitalOcean</strong></td>
+                <td>s-4vcpu-8gb</td>
+                <td>$48</td>
+                <td>Simple UX</td>
+              </tr>
+              <tr>
+                <td><strong>Oracle Cloud</strong></td>
+                <td>Always Free</td>
+                <td>$0</td>
+                <td>Budget option</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Setup pattern (Hetzner)</span>
+
+<span class="comment"># 1. Create VM</span>
+hcloud server create --name claude-dev --type cx31 --image ubuntu-24.04
+
+<span class="comment"># 2. Install Tailscale</span>
+curl -fsSL https://tailscale.com/install.sh | sh
+tailscale up
+
+<span class="comment"># 3. Harden SSH (Tailscale only)</span>
+ufw allow from 100.64.0.0/10  <span class="comment"># Tailscale CIDR only</span>
+ufw enable
+
+<span class="comment"># 4. Install Claude Code</span>
+npm install -g @anthropic-ai/claude-code
+
+<span class="comment"># 5. Configure tmux auto-attach</span>
+echo <span class="string">'if [[ -z "$TMUX" ]]; then tmux attach -t main 2&gt;/dev/null || tmux new -s main; fi'</span> &gt;&gt; ~/.zshrc</pre>
+          </div>
+        </div>
+
+        <h3 class="subsection-title" id="container-patterns">Containerized Patterns</h3>
+
+        <div class="deployment-card">
+          <div class="deployment-card-header">
+            <div class="deployment-card-icon">
+              <i data-lucide="box" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="deployment-card-title">Secure Docker Setup</div>
+              <div class="deployment-card-subtitle">Production-grade containerization with security controls</div>
+            </div>
+          </div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># Dockerfile</span>
+FROM node:20-alpine
+
+<span class="comment"># Security hardening</span>
+RUN apk add --no-cache dumb-init git
+RUN npm install -g @anthropic-ai/claude-code
+
+<span class="comment"># Non-root user</span>
+RUN addgroup -g 1000 claude &amp;&amp; adduser -u 1000 -G claude -D claude
+USER claude
+
+WORKDIR /workspace
+ENTRYPOINT [<span class="string">"/usr/bin/dumb-init"</span>, <span class="string">"--"</span>]
+CMD [<span class="string">"claude"</span>]</pre>
+          </div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCodeBlock(this)">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <pre><span class="comment"># docker-compose.yml</span>
+version: <span class="string">'3.8'</span>
+services:
+  claude:
+    build: .
+    volumes:
+      - ./project:/workspace
+      - claude-config:/home/claude/.claude
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=100M,mode=1777
+
+volumes:
+  claude-config:</pre>
+          </div>
+        </div>
+
+        <h3 class="subsection-title" id="serverless-patterns">Serverless Patterns</h3>
+
+        <div class="deployment-card">
+          <div class="deployment-card-header">
+            <div class="deployment-card-icon">
+              <i data-lucide="cloud-lightning" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="deployment-card-title">Cloudflare Workers + Agent SDK</div>
+              <div class="deployment-card-subtitle">Fully serverless with Durable Objects for persistence</div>
+            </div>
+          </div>
+          <div class="architecture-diagram">
+            <pre>  Worker (Stateless Compute)
+  +-- Claude Agent SDK
+  +-- Skills (mini-apps)
+  +-- Tool orchestration
+  +-- WebSocket for real-time
+        |
+        v
+  Durable Object (Stateful)
+  +-- Session persistence
+  +-- Transcript storage
+  +-- Resume on sandbox death
+        |
+        v
+  Sandbox (Code Execution)
+  +-- Tier: standard-2 (required for &gt;10s)
+  +-- Dynamic code writing
+  +-- Safe execution environment</pre>
+          </div>
+          <p class="text-text-secondary text-sm mb-4">
+            <strong>The Stack:</strong> Claude Agent SDK (reliable tool loop) + Skills (composable mini-apps) + Sandbox (safe code execution) = Production-capable serverless agent.
+          </p>
+          <p class="text-text-secondary text-sm">
+            <strong>Starter Template:</strong> github.com/craigsdennis/claude-in-the-box
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A REQUEST (DECISION TREE) -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          The Decision Flow
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Choose your deployment pattern based on what you're building and your constraints:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>Personal dev work (supervised)?</strong> --&gt; LOCAL CLI. Add tmux for persistence.</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>Overnight autonomous tasks?</strong> --&gt; LOCAL + RALPH LOOP (if can use local machine) or CLOUD VM + RALPH LOOP</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>Multi-agent parallel work?</strong> --&gt; GIT WORKTREES (if branch conflicts likely) or TMUX PARALLEL SESSIONS</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>Team/production deployment?</strong> --&gt; CONTAINERIZED with security controls (if no sandbox needed) or CLOUDFLARE SANDBOX / E2B</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>Mobile-first workflow?</strong> --&gt; HOME MAC + TAILSCALE (if always-on machine) or CLOUD VM + TAILSCALE</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content"><strong>Browser automation needed?</strong> --&gt; LOCAL CHROME MCP (if dev only) or BROWSERBASE (production/parallel)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content"><strong>Enterprise deployment?</strong> --&gt; HYBRID: Cloudflare Workers + VPC endpoints + SSO</div>
+          </div>
+        </div>
+
+        <h3 class="subsection-title">Isolation Level Selection</h3>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content"><strong>Reading/exploring only?</strong> --&gt; No sandbox needed</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content"><strong>Writing files in project?</strong> --&gt; PATH RESTRICTIONS in config</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content"><strong>Running shell commands?</strong> --&gt; WHITELIST commands (if known safe) or CONTAINER with limits</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content"><strong>Autonomous overnight work?</strong> --&gt; CONTAINER or VM isolation required</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content"><strong>Running untrusted/generated code?</strong> --&gt; CLOUD SANDBOX (Cloudflare/E2B)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real problems you'll hit when deploying Claude Code, with fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            SSH Session Drops During Long Operation
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Claude Code disconnects mid-task, work lost</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> SSH connection timeout, network instability</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use mosh instead of SSH. Use tmux. Configure SSH keepalive: <code>ServerAliveInterval 60</code> in ~/.ssh/config</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Docker Container Permission Denied
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Claude Code can't write to mounted volumes</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> UID/GID mismatch between container and host</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Match UID in Dockerfile: <code>adduser -u 1000 -G claude -D claude</code>. Or use <code>--user $(id -u):$(id -g)</code></div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Tailscale MagicDNS Not Resolving
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Can't reach server by hostname, only IP</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> DNS not configured or MagicDNS not enabled</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Enable MagicDNS in Tailscale admin. Run <code>tailscale up --reset</code> to re-authenticate.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Cloudflare Worker Hitting CPU Limits
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Request terminated, "Worker exceeded CPU time limit"</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Free tier: 10ms CPU/request. Paid: 30s CPU.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> For complex tasks, use Cloudflare Queue or Durable Objects. Or switch to dedicated VM.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            API Key Not Found in Container
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> "ANTHROPIC_API_KEY not set" error</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Environment variable not passed to container</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Pass at runtime: <code>docker run -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY</code>. Or use .env file with docker-compose.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Push Notifications Not Arriving
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Agent finishes but no mobile notification</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Hook not configured, service not running, or rate limited</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Test notification service directly. Check hook is executable: <code>chmod +x ~/.claude/hooks/notify.sh</code></div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions in deployment architecture that don't have clean solutions:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Security vs. Convenience
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> More isolation = more setup. Full sandboxing = complex infrastructure. No isolation = fast but risky. No perfect balance exists.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Team avoids secure setups because "too slow." Or spends hours on infrastructure instead of building.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Match isolation to risk, not to "best practice." YOLO in containers is fine. YOLO on production machines is not. Context matters.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost vs. Availability
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Always-on VMs cost money. Stopping VMs when idle saves money but breaks mobile workflows. Serverless scales but has cold starts and limits.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Surprised by cloud bills. Or missing agent notifications because VM was stopped.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Use hourly billing (Vultr). Stop VMs when idle via iOS Shortcuts. Use home Mac for $0 always-on option.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Portability vs. Optimization
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Generic containers work everywhere but aren't optimized. Provider-specific setups (Cloudflare Workers, AWS Lambda) are optimized but lock you in.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Spending time on infrastructure that doesn't transfer. Or suboptimal performance because using lowest common denominator.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start with Docker (portable). Only optimize for specific providers when scale demands it. Keep skills portable between deployments.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO USE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Use Each Pattern
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              LOCAL CLI
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quick prototyping and exploration</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Supervised AI-assisted coding</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Single feature development</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Learning and experimentation</span>
+            </div>
+          </div>
+
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              CLOUD VM + TAILSCALE
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Mobile-first workflows</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Overnight autonomous development</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Always-on agent availability</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multi-device access needed</span>
+            </div>
+          </div>
+
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              DOCKER CONTAINERS
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Reproducible environments</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>CI/CD integration</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Autonomous work with isolation</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Safe YOLO mode</span>
+            </div>
+          </div>
+
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              CLOUDFLARE WORKERS
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Production agents at scale</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multi-tenant applications</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Chatbots and email agents</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Auto-scaling requirements</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="when-grid">
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              AVOID LOCAL CLI WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Unsupervised overnight work --&gt; Use containers</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Running untrusted code --&gt; Use cloud sandbox</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need mobile access --&gt; Use cloud VM</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              AVOID SERVERLESS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Long-running tasks (&gt;30s) --&gt; Use VM or container</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Heavy compute workloads --&gt; Use dedicated VM</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need persistent filesystem --&gt; Use cloud VM</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="subsection-title">Quick Reference: Deployment Selection</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Recommended Deployment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Quick prototyping</td>
+              <td>Local CLI</td>
+            </tr>
+            <tr>
+              <td>Single feature, overnight</td>
+              <td>Local + Ralph Loop</td>
+            </tr>
+            <tr>
+              <td>Multiple life domains</td>
+              <td>Panopticon (isolated directories)</td>
+            </tr>
+            <tr>
+              <td>Team parallel features</td>
+              <td>Git worktrees + tmux</td>
+            </tr>
+            <tr>
+              <td>Production app</td>
+              <td>Docker + security hardening</td>
+            </tr>
+            <tr>
+              <td>Serverless agents</td>
+              <td>Cloudflare Workers + Sandbox</td>
+            </tr>
+            <tr>
+              <td>Browser automation at scale</td>
+              <td>Browserbase</td>
+            </tr>
+            <tr>
+              <td>Mobile-first development</td>
+              <td>Cloud VM + Tailscale + push notifications</td>
+            </tr>
+            <tr>
+              <td>Self-improving systems</td>
+              <td>Infinite Orchestra (Docker 24/7)</td>
+            </tr>
+            <tr>
+              <td>Industrial scale (10+ agents)</td>
+              <td>Gas Town</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    

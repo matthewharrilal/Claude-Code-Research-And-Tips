@@ -1,0 +1,666 @@
+
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Model tiering, fresh context, and prompt caching reduce AI costs 60-90% without quality loss.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Right-size every call. Opus for decisions. Haiku for errands."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Cost = (model_rate * tokens) * iterations * parallel_workers')">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Cost = (model_rate * tokens) * iterations * parallel_workers</code>
+          </div>
+
+          <div class="core-anchor">Four levers. Model rate is the biggest. Everything else multiplies it.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          Most teams waste 60-80% of their AI budget on two mistakes: using Opus when Sonnet suffices, and letting context accumulate until quality degrades. The fix isn't complex infrastructure. It's a discipline: match model capability to task complexity, reset context frequently, and cache what doesn't change.
+        </p>
+
+        <div class="formula-box">
+          <div class="font-semibold text-text-primary mb-3">The Cost Formula</div>
+          <code>Total Cost = Context Cost + Iteration Cost + Parallelism Overhead</code>
+          <code class="mt-2">Context Cost = tokens_per_iteration * model_rate * iterations</code>
+          <code>Iteration Cost = (setup + task + verification) * model_rate</code>
+          <code>Parallelism Overhead = workers * coordination_tokens * model_rate</code>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          The formula reveals where to cut. Model rate affects everything. Token count compounds with iterations. Parallelism multiplies both. Optimize in that order: model first, tokens second, parallelism third.
+        </p>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-model-tiering" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY MODEL TIERING?</div>
+          <div class="decision-reasoning">
+            Opus output costs 60x more than Haiku output. For a 1000-token response: $0.075 (Opus) vs $0.00125 (Haiku). Most tasks don't need maximum reasoning. File lookups, test runs, and formatting don't require the smartest model.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Default to Sonnet. Use Haiku for simple tasks (file reads, status checks). Reserve Opus for architecture decisions and complex reasoning. One bad Opus call costs 60 Haiku calls. Make that trade consciously.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-fresh-context">
+          <div class="decision-why">WHY FRESH CONTEXT SAVES MONEY?</div>
+          <div class="decision-reasoning">
+            Context accumulates. A 10-iteration session with growing context costs ~$5-10. The same work with fresh context per iteration costs ~$2-4. That's 50-60% savings. Bonus: quality stays high because context rot doesn't accumulate.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Use the Ralph pattern. Each iteration spawns fresh Claude. State persists in files (prd.json, progress.txt), not in context. You pay for 10K tokens per iteration instead of 100K tokens in a single session.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-prompt-caching">
+          <div class="decision-why">WHY PROMPT CACHING?</div>
+          <div class="decision-reasoning">
+            Anthropic's prompt caching provides 90% discount on cached content. If your system prompt is 5K tokens and you make 100 calls/day, uncached: $7.50/day. Cached: $1.88/day. That's $170/month saved on system prompts alone.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Put large, static content at the beginning of messages with cache_control. CLAUDE.md, project context, and instructions that don't change between calls. Cache write costs 25% more than base price. Cache read costs 90% less. Break-even is ~3-4 calls.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: MODEL SELECTION -->
+      <section id="model-selection" data-activity="models">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Model Selection Strategy
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          The price differential between models is dramatic. This table shows the fundamental cost landscape.
+        </p>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Input (per 1M tokens)</th>
+              <th>Output (per 1M tokens)</th>
+              <th>Cost Multiplier</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Claude 3.5 Haiku</strong></td>
+              <td>$0.25</td>
+              <td>$1.25</td>
+              <td>1x (baseline)</td>
+            </tr>
+            <tr>
+              <td><strong>Claude Sonnet 4</strong></td>
+              <td>$3.00</td>
+              <td>$15.00</td>
+              <td>12x</td>
+            </tr>
+            <tr>
+              <td><strong>Claude Opus 4.5</strong></td>
+              <td>$15.00</td>
+              <td>$75.00</td>
+              <td>60x</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="model-when">When to Use Each Model</h3>
+
+        <div class="cost-card">
+          <div class="cost-card-header">
+            <div class="cost-card-title">Opus 4.5 - The Architect</div>
+            <div class="cost-card-price">$15-20/hour</div>
+          </div>
+          <div class="cost-card-detail">
+            <strong>Use for:</strong> Complex reasoning, architecture decisions, orchestration planning, ambiguous requirements, quality-critical review.<br>
+            <strong>Rule:</strong> If a mistake cascades into expensive rework, use Opus.
+          </div>
+        </div>
+
+        <div class="cost-card">
+          <div class="cost-card-header">
+            <div class="cost-card-title">Sonnet 4 - The Workhorse</div>
+            <div class="cost-card-price">$5-10/hour</div>
+          </div>
+          <div class="cost-card-detail">
+            <strong>Use for:</strong> General implementation, worker tasks, most coding, test generation, code review.<br>
+            <strong>Rule:</strong> Default to Sonnet. Upgrade to Opus only when Sonnet fails or task needs complex reasoning.
+          </div>
+        </div>
+
+        <div class="cost-card">
+          <div class="cost-card-header">
+            <div class="cost-card-title">Haiku 3.5 - The Runner</div>
+            <div class="cost-card-price">$1-3/hour</div>
+          </div>
+          <div class="cost-card-detail">
+            <strong>Use for:</strong> File lookups, grep operations, test running, health checks, high-volume repetitive tasks.<br>
+            <strong>Rule:</strong> For embarrassingly parallel tasks, 10 Haiku workers outperform 1 Opus at 1/60th the cost.
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Gas Town Role-to-Model Mapping</h3>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Recommended Model</th>
+              <th>Hourly Cost Est.</th>
+              <th>Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Mayor</strong> (coordination)</td>
+              <td>Opus 4.5</td>
+              <td>$15-20</td>
+              <td>Complex cross-rig decisions</td>
+            </tr>
+            <tr>
+              <td><strong>Refinery</strong> (decomposition)</td>
+              <td>Opus 4.5</td>
+              <td>$15-20</td>
+              <td>Task breakdown is architectural</td>
+            </tr>
+            <tr>
+              <td><strong>Dogs</strong> (quality gates)</td>
+              <td>Sonnet</td>
+              <td>$5-8</td>
+              <td>Review requires judgment</td>
+            </tr>
+            <tr>
+              <td><strong>Polecat</strong> (named workers)</td>
+              <td>Sonnet</td>
+              <td>$5-10</td>
+              <td>Implementation work</td>
+            </tr>
+            <tr>
+              <td><strong>Witness</strong> (observation)</td>
+              <td>Haiku</td>
+              <td>$1-3</td>
+              <td>Logging, status tracking</td>
+            </tr>
+            <tr>
+              <td><strong>Deacon</strong> (health checks)</td>
+              <td>Haiku</td>
+              <td>$1-2</td>
+              <td>Simple monitoring</td>
+            </tr>
+            <tr>
+              <td><strong>Crew</strong> (ephemeral)</td>
+              <td>Haiku</td>
+              <td>$0.50-2</td>
+              <td>Quick, isolated tasks</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 5: COST PATTERNS -->
+      <section id="patterns" data-activity="patterns">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Cost Optimization Patterns
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Seven patterns that compound. Implement in order of ROI: model selection first, caching second, everything else follows.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">Pattern 1: Fresh Context (Ralph)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Traditional long session (expensive)</span>
+Iteration 1:  <span class="number">10K</span> context
+Iteration 5:  <span class="number">50K</span> context  <span class="comment"># 5x input cost</span>
+Iteration 10: <span class="number">100K</span> context <span class="comment"># 10x input cost</span>
+<span class="comment"># Quality degrading, more retries needed</span>
+
+<span class="comment"># Ralph fresh context (cheap)</span>
+Iteration 1:  <span class="number">10K</span> context
+Iteration 5:  <span class="number">10K</span> context  <span class="comment"># same cost</span>
+Iteration 10: <span class="number">10K</span> context  <span class="comment"># same cost</span>
+<span class="comment"># Quality maintained, fewer retries</span>
+
+<span class="comment"># Savings: 50-60%</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Pattern 2: Tiered Model Selection</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>orchestrator: opus   <span class="comment"># planning, coordination</span>
+    └── workers: sonnet <span class="comment"># implementation</span>
+            └── verification: haiku <span class="comment"># testing</span>
+
+<span class="comment"># Cost comparison:</span>
+All-Opus workflow:      <span class="variable">$100</span> (baseline)
+Tiered workflow:        <span class="variable">$35</span>  <span class="comment"># -65%</span>
+Aggressive Haiku use:   <span class="variable">$20</span>  <span class="comment"># -80%</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Pattern 3: Early Exit (Promise Pattern)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="keyword">if</span> grep -q <span class="string">"&lt;promise&gt;COMPLETE&lt;/promise&gt;"</span> output.txt; <span class="keyword">then</span>
+  <span class="keyword">echo</span> <span class="string">"Done early!"</span>
+  <span class="keyword">break</span>
+<span class="keyword">fi</span>
+
+<span class="comment"># Without early exit: Always runs MAX_ITERATIONS</span>
+<span class="comment"># With early exit: Average 60-70% of MAX_ITERATIONS</span>
+<span class="comment"># Savings: 30-40% on iteration costs</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Pattern 4: Prompt Caching</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>response = client.messages.create(
+    model=<span class="string">"claude-sonnet-4-20250514"</span>,
+    system=[{
+        <span class="string">"type"</span>: <span class="string">"text"</span>,
+        <span class="string">"text"</span>: <span class="string">"Large static system prompt..."</span>,
+        <span class="string">"cache_control"</span>: {<span class="string">"type"</span>: <span class="string">"ephemeral"</span>}  <span class="comment"># Cache this!</span>
+    }],
+    messages=[{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"Variable query"</span>}]
+)
+
+<span class="comment"># Cache write: 25% premium</span>
+<span class="comment"># Cache read: 90% discount</span>
+<span class="comment"># Break-even: ~3-4 calls with same system prompt</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Pattern 5: Batches API</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>batch = client.batches.create(
+    requests=[
+        {<span class="string">"custom_id"</span>: <span class="string">"req1"</span>, <span class="string">"params"</span>: {...}},
+        {<span class="string">"custom_id"</span>: <span class="string">"req2"</span>, <span class="string">"params"</span>: {...}},
+        <span class="comment"># Up to 100,000 requests per batch</span>
+    ]
+)
+
+<span class="comment"># 50% discount for non-urgent workloads</span>
+<span class="comment"># Best for: Bulk processing, overnight analysis</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Pattern 6: Subagent Token Isolation</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>Main Agent (lean)
+    │
+    └── Subagent: Browser Automation
+        └── (High token cost stays isolated)
+        └── Returns: Summary only
+
+<span class="comment"># Quote from @TendiesOfWisdom:</span>
+<span class="comment"># "Put costly tools like browser control in subagents</span>
+<span class="comment">#  to protect your main context window tokens"</span>
+
+<span class="comment"># Savings: 50-70% for browser/MCP-heavy workflows</span></pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Pattern 7: Output Length Control</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>response = client.messages.create(
+    model=<span class="string">"claude-sonnet-4-20250514"</span>,
+    max_tokens=<span class="number">500</span>,  <span class="comment"># Hard limit</span>
+    messages=[{
+        <span class="string">"role"</span>: <span class="string">"user"</span>,
+        <span class="string">"content"</span>: <span class="string">"""
+        Respond in 3-5 sentences maximum.
+        Use bullet points, not paragraphs.
+        Skip preambles and conclusions.
+        """</span>
+    }]
+)
+
+<span class="comment"># Output tokens cost 5x more than input</span>
+<span class="comment"># Savings: 50-80% on output tokens</span></pre>
+        </div>
+      </section>
+
+      <!-- Section 6: GOTCHAS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Gotchas
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Real cost problems you'll hit, with concrete detection signals and fixes.
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            API bill 3x higher than expected
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Daily budget exceeded by noon. Cost tracking shows spikes you can't explain.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Using Opus for everything. Workers spawning sub-workers. Context accumulation in long sessions.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Audit model selection first. Check worker preambles prevent sub-spawning. Monitor context percentage with Claude HUD.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Ralph loop costs $50 instead of $15
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> 25-iteration loop costs 3x estimate. Late iterations are slow AND expensive.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Context not actually resetting. progress.txt grew to 50KB. Reading dominates thinking.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify fresh Claude per iteration. Check <code>wc -l progress.txt</code>. Archive and reset if &gt;20KB.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Prompt caching shows no savings
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Expecting 90% discount but billing shows full prices.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> cache_control not set. Prompts too small (&lt;1024 tokens). Cache TTL expired.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Verify cache_control on system prompts. Check response.usage.cache_read_input_tokens. Ensure prompts exceed minimum.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Parallel workers duplicate work
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> 5 workers costs 15x a single worker (should be 5x). Same tasks repeated.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> Poor task decomposition. Workers unaware of each other's assignments.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Ensure orchestrator assigns unique, non-overlapping tasks. Add task ID to each worker context.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Budget alerts never fire
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Exceeded monthly budget without warning. Discovered days later.</div>
+          <div class="gotcha-detail"><strong>Cause:</strong> No monitoring configured. Relying on manual checks.</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Set up Anthropic Console budget alerts. Add local tracking: <code>echo "$(date),${COST}" &gt;&gt; ~/.claude/cost-log.csv</code></div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          These are genuine tensions without perfect solutions. Accept the trade-off, don't search for magic.
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Cost vs. Quality
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Cheaper models make more mistakes. Mistakes cost rework. Rework costs more than using the better model. But you can't use Opus for everything.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Haiku produces garbage 30% of the time. Sonnet is fine 90% of the time. Opus is overkill 80% of the time. How do you know which is which before you try?</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start cheap, escalate on failure. Fallback cascade: Haiku → Sonnet → Opus. Accept some rework is cheaper than over-engineering model selection.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Fresh Context vs. Accumulated Learning
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Fresh context saves money and maintains quality. But each iteration "forgets" 90% of the prior. progress.txt is lossy. Some re-learning is inevitable.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Iteration 15 repeats a mistake from iteration 3 that was "fixed" but not recorded. Or progress.txt grows so large it defeats the purpose.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Keep progress.txt under 20KB. Move permanent learnings to AGENTS.md. Accept re-learning as the cost of avoiding context rot.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Optimization ROI Uncertainty
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Setting up caching takes time. Implementing tiering takes time. Monitoring takes time. When does the optimization pay for itself?</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Spent a day implementing prompt caching for a workflow that runs 10x/day. Break-even: 6 months. Was this the right investment?</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Optimize what's expensive first. If daily spend is $5, don't invest days in optimization. If daily spend is $500, one hour of optimization is worth weeks of savings.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO OPTIMIZE -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Optimize / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              OPTIMIZE COSTS WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Daily spend exceeds $50 (optimization pays back quickly)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Running autonomous workflows (Ralph, Gas Town) overnight</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Using parallel workers (costs multiply)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Same system prompt used 100+ times/day (caching)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Bulk processing with flexible timelines (batching)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T OPTIMIZE WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Daily spend is under $10 (focus on shipping)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Quality is suffering (cheap isn't valuable if broken)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Exploration phase (don't optimize what might change)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>One-off tasks (setup cost exceeds savings)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Security-critical code (use Opus, accept the cost)</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Budget Tiers by User Type</h3>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>User Type</th>
+              <th>Monthly Budget</th>
+              <th>Recommended Setup</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hobbyist</strong></td>
+              <td>$20-50</td>
+              <td>Pro subscription, occasional API</td>
+            </tr>
+            <tr>
+              <td><strong>Solo dev</strong></td>
+              <td>$100-300</td>
+              <td>Ralph loops, Sonnet-heavy</td>
+            </tr>
+            <tr>
+              <td><strong>Power user</strong></td>
+              <td>$500-1000</td>
+              <td>CC Mirror, tiered models</td>
+            </tr>
+            <tr>
+              <td><strong>Team</strong></td>
+              <td>$1000-3000</td>
+              <td>Gas Town minimal, shared infra</td>
+            </tr>
+            <tr>
+              <td><strong>Agency</strong></td>
+              <td>$3000-10000</td>
+              <td>Gas Town full, multi-project</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">Top 10 Cost Optimization Strategies</h3>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Strategy</th>
+              <th>Potential Savings</th>
+              <th>Effort</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td><strong>Model selection</strong> (Haiku/Sonnet over Opus)</td>
+              <td>60-95%</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><strong>Prompt caching</strong> for large system prompts</td>
+              <td>90% on cached</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><strong>Batches API</strong> for bulk work</td>
+              <td>50%</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><strong>Output length limits</strong></td>
+              <td>50-80%</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td><strong>Subagent delegation</strong> for expensive tools</td>
+              <td>50-70%</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td><strong>Fresh context</strong> (Ralph pattern)</td>
+              <td>60-80%</td>
+              <td>Medium</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td><strong>Early exit conditions</strong></td>
+              <td>30-40%</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td><strong>Concise prompts</strong></td>
+              <td>10-50%</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td><strong>Context monitoring</strong> (Claude HUD)</td>
+              <td>20-30%</td>
+              <td>Low</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td><strong>Model fallback cascade</strong></td>
+              <td>40-60%</td>
+              <td>Medium</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    

@@ -17,21 +17,23 @@ interface ActivityConfig {
   label: string
 }
 
+// Color palette designed for maximum visual distinction
+// Each color is perceptually unique across hue, saturation, and lightness
 export const ACTIVITY_CONFIG: Record<ActivityType, ActivityConfig> = {
-  invariant: { icon: Link, color: '#3b82f6', label: 'Invariant Connection' },
-  effect: { icon: Zap, color: '#f59e0b', label: 'Second-Order Effect' },
-  composition: { icon: Layers, color: '#8b5cf6', label: 'Composition Case' },
-  frontier: { icon: Telescope, color: '#ef4444', label: 'Research Frontier' },
-  warstory: { icon: Flame, color: '#10b981', label: 'War Story' },
-  alternative: { icon: GitFork, color: '#6b7280', label: 'Alternative Path' },
-  inversion: { icon: RefreshCw, color: '#4f46e5', label: 'Inversion Lens' },
-  constraint: { icon: Link2, color: '#8b5cf6', label: 'Constraint Chain' },
-  gradient: { icon: AlertTriangle, color: '#f43f5e', label: 'Failure Gradient' },
-  horizon: { icon: Clock, color: '#06b6d4', label: 'Time Horizon Shift' },
-  violation: { icon: AlertOctagon, color: '#f97316', label: 'Violation Chain' },
-  tradeoff: { icon: Scale, color: '#f59e0b', label: 'Trade-Off Tension' },
-  analogy: { icon: Merge, color: '#d946ef', label: 'Analogical Bridge' },
-  expertise: { icon: TrendingUp, color: '#10b981', label: 'Expertise Gradient' },
-  minimal: { icon: Minimize2, color: '#84cc16', label: 'Minimal Pattern' },
-  inflection: { icon: ArrowUpRight, color: '#eab308', label: 'Inflection Point' },
+  invariant: { icon: Link, color: '#2563eb', label: 'Invariant Connection' },       // Blue-600 - core links
+  effect: { icon: Zap, color: '#f59e0b', label: 'Second-Order Effect' },            // Amber-500 - energy/impact
+  composition: { icon: Layers, color: '#7c3aed', label: 'Composition Case' },       // Violet-600 - layered/stacked
+  frontier: { icon: Telescope, color: '#dc2626', label: 'Research Frontier' },      // Red-600 - exploration/danger
+  warstory: { icon: Flame, color: '#ea580c', label: 'War Story' },                  // Orange-600 - battle/heat
+  alternative: { icon: GitFork, color: '#6b7280', label: 'Alternative Path' },      // Gray-500 - neutral choices
+  inversion: { icon: RefreshCw, color: '#4f46e5', label: 'Inversion Lens' },        // Indigo-600 - flip/reverse
+  constraint: { icon: Link2, color: '#0891b2', label: 'Constraint Chain' },         // Cyan-600 - boundaries/limits
+  gradient: { icon: AlertTriangle, color: '#be123c', label: 'Failure Gradient' },   // Rose-700 - failure/warning
+  horizon: { icon: Clock, color: '#0d9488', label: 'Time Horizon Shift' },          // Teal-600 - time/future
+  violation: { icon: AlertOctagon, color: '#9f1239', label: 'Violation Chain' },    // Rose-800 - danger/broken
+  tradeoff: { icon: Scale, color: '#ca8a04', label: 'Trade-Off Tension' },          // Yellow-600 - balance/weighing
+  analogy: { icon: Merge, color: '#c026d3', label: 'Analogical Bridge' },           // Fuchsia-600 - creative connection
+  expertise: { icon: TrendingUp, color: '#16a34a', label: 'Expertise Gradient' },   // Green-600 - growth/skill
+  minimal: { icon: Minimize2, color: '#65a30d', label: 'Minimal Pattern' },         // Lime-600 - simplicity/reduction
+  inflection: { icon: ArrowUpRight, color: '#7c2d12', label: 'Inflection Point' },  // Orange-900 - turning points
 }

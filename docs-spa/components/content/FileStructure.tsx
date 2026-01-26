@@ -13,7 +13,7 @@ interface FileNode {
 }
 
 interface FileStructureProps {
-  tree: FileNode[]
+  tree: FileNode[] | string
   title?: string
 }
 
@@ -105,6 +105,23 @@ function FileTreeNode({ node, depth = 0 }: { node: FileNode; depth?: number }) {
 }
 
 export function FileStructure({ tree, title }: FileStructureProps) {
+  // Handle string tree (ASCII art format)
+  if (typeof tree === 'string') {
+    return (
+      <div className="bg-warm-cream border border-border rounded-lg mb-6 overflow-hidden">
+        {title && (
+          <div className="bg-gray-100 px-4 py-2 border-b border-border">
+            <span className="font-mono text-sm text-text-secondary">{title}</span>
+          </div>
+        )}
+        <pre className="p-4 font-mono text-sm text-text-primary whitespace-pre overflow-x-auto">
+          {tree.trim()}
+        </pre>
+      </div>
+    )
+  }
+
+  // Handle array tree (FileNode[] format)
   return (
     <div className="bg-warm-cream border border-border rounded-lg mb-6 overflow-hidden">
       {title && (

@@ -2,10 +2,14 @@
 
 import { GrandNav } from '@/components/navigation'
 
-export function LeftNav() {
+interface LeftNavProps {
+  collapsed?: boolean
+}
+
+export function LeftNav({ collapsed = false }: LeftNavProps) {
   return (
     <div className="h-full">
-      <GrandNav />
+      <GrandNav collapsed={collapsed} />
     </div>
   )
 }

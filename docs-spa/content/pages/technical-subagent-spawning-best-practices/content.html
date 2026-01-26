@@ -1,0 +1,641 @@
+
+
+      <!-- Section 1: ESSENCE -->
+      <section id="essence" data-activity="essence">
+        <div class="essence-box">
+          <div class="essence-label">Essence (15 words)</div>
+          <div class="essence-text">Subagents isolate context for parallel work but cost 5-10K tokens overhead per spawn.</div>
+        </div>
+      </section>
+
+      <!-- Section 2: CORE ABSTRACTION + IMPLEMENTATION -->
+      <section id="core-abstraction" data-activity="core">
+        <h2 class="section-title">
+          <span class="section-number">2</span>
+          The Core Abstraction
+        </h2>
+
+        <div class="core-abstraction">
+          <div class="core-philosophy">"Subagents provide context isolation but come with overhead costs."</div>
+
+          <div class="core-code">
+            <button class="copy-btn" onclick="copyCode(this, 'Task(subagent_type=\" worker\",="" prompt="\&quot;...\&quot;," run_in_background="True)')&quot;">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              Copy
+            </button>
+            <code>Task(subagent_type="worker", prompt="...", run_in_background=True)</code>
+          </div>
+
+          <div class="core-anchor">Every spawn is a trade-off: isolation benefit vs. token cost.</div>
+        </div>
+
+        <p class="text-text-secondary mb-6">
+          A subagent is a fresh Claude instance with its own context window. The main agent spawns it, passes a task, and collects results. The subagent's work never pollutes the main context. This isolation is the value proposition.
+        </p>
+
+        <div class="diagram-box">
+          <pre>SUBAGENT OVERHEAD (per spawn)
+
+FIXED COSTS:
+├── Context initialization: ~2-5K tokens
+├── System prompt loading: ~1-3K tokens
+├── CLAUDE.md inheritance: ~1-2K tokens
+└── Tool initialization: ~1K tokens
+
+VARIABLE COSTS:
+├── Task description passage: varies
+├── Result communication: varies
+└── Coordination overhead: depends on complexity
+
+MINIMUM VIABLE SPAWN: ~5-10K tokens overhead
+          </pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4" id="decision-framework">The Golden Rule</h3>
+
+        <blockquote class="border-l-4 border-accent pl-4 py-2 mb-6 italic text-text-secondary">
+          "Using a subagent for a one-liner adds unnecessary overhead. Match the tool to the task complexity."
+        </blockquote>
+
+        <p class="text-text-secondary mb-6">
+          <strong>Break-even point:</strong> Tasks requiring ~15-20K+ tokens of focused work justify subagent spawn overhead. Below that, the main agent should handle it directly.
+        </p>
+
+        <h3 class="font-semibold text-lg mb-4">Quick Reference: Decision Matrix</h3>
+
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Spawn?</th>
+              <th>Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Single file, small change</td>
+              <td class="spawn-no">NO</td>
+              <td>Main agent sufficient, overhead not justified</td>
+            </tr>
+            <tr>
+              <td>Multiple independent files</td>
+              <td class="spawn-yes">YES</td>
+              <td>Parallel efficiency, no context pollution</td>
+            </tr>
+            <tr>
+              <td>Research + implement</td>
+              <td class="spawn-yes">YES</td>
+              <td>Research doesn't pollute implementation context</td>
+            </tr>
+            <tr>
+              <td>Complex refactor (coupled files)</td>
+              <td class="spawn-maybe">MAYBE</td>
+              <td>Tightly coupled = single agent better</td>
+            </tr>
+            <tr>
+              <td>Testing + fixing</td>
+              <td class="spawn-yes">YES</td>
+              <td>Test output doesn't fill main context</td>
+            </tr>
+            <tr>
+              <td>Code review</td>
+              <td class="spawn-yes">YES</td>
+              <td>Adversarial review benefits from separate context</td>
+            </tr>
+            <tr>
+              <td>Simple grep/lookup</td>
+              <td class="spawn-no">NO</td>
+              <td>Main agent tools sufficient</td>
+            </tr>
+            <tr>
+              <td>Architecture decision</td>
+              <td class="spawn-yes">YES</td>
+              <td>Benefits from parallel exploration</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Section 3: DESIGN DECISIONS -->
+      <section id="why-spawn" data-activity="decisions">
+        <h2 class="section-title">
+          <span class="section-number">3</span>
+          Design Decisions
+        </h2>
+
+        <div class="decision-box">
+          <div class="decision-why">WHY SPAWN SUBAGENTS?</div>
+          <div class="decision-reasoning">
+            Main agent context is precious. Heavy tool outputs (browser, large files), exploratory research, or adversarial reviews can flood it. Subagents contain this mess in their own context window.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Ask yourself: "If this task fails or takes 50 tool calls, will it ruin my main conversation?" If YES, spawn a subagent to contain the potential mess. If NO, main agent is fine.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-worker-preamble">
+          <div class="decision-why">WHY WORKER PREAMBLE?</div>
+          <div class="decision-reasoning">
+            Without explicit instructions, subagents might spawn their own sub-subagents, creating recursive depth and cost explosion. Worker preambles prevent this by constraining what the subagent can do.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Always include: "You are a WORKER agent. Do NOT spawn sub-agents. Do NOT call TaskCreate." This prevents $50+ bills from recursive spawning.
+            </div>
+          </div>
+        </div>
+
+        <div class="decision-box" id="why-model-selection">
+          <div class="decision-why">WHY MODEL SELECTION MATTERS?</div>
+          <div class="decision-reasoning">
+            Opus costs 60x more than Haiku per token. Using Opus for file lookups wastes money. Using Haiku for architecture decisions produces poor results requiring retries.
+          </div>
+          <div class="decision-implication">
+            <div class="decision-implication-label">What this means for you</div>
+            <div class="text-text-secondary text-sm">
+              Match model to task. Haiku for simple lookups (~$0.01-0.05), Sonnet for implementation (~$0.10-0.50), Opus for deep reasoning (~$0.50-2.00).
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: SPAWNING PATTERNS -->
+      <section id="sequential" data-activity="patterns">
+        <h2 class="section-title">
+          <span class="section-number">4</span>
+          Spawning Patterns
+        </h2>
+
+        <h3 class="font-semibold text-lg mb-4">Sequential Spawning</h3>
+
+        <p class="text-text-secondary mb-4">
+          <strong>When:</strong> Tasks have dependencies, output of one feeds input of next.
+        </p>
+
+        <div class="diagram-box">
+          <pre>SEQUENTIAL PATTERN
+
+Main Agent
+    |
+    +---&gt; [Subagent 1: Research]
+    |           |
+    |           v Result
+    |
+    +---&gt; [Subagent 2: Plan based on research]
+    |           |
+    |           v Result
+    |
+    +---&gt; [Subagent 3: Implement based on plan]
+                |
+                v Result
+
+Main Agent synthesizes final result
+          </pre>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Sequential spawning pattern</span>
+<span class="comment"># Each subagent's output becomes context for the next</span>
+
+<span class="comment"># Step 1: Research</span>
+Task(
+    subagent_type=<span class="string">"research"</span>,
+    description=<span class="string">"Research best practices for authentication"</span>,
+    prompt=<span class="string">"Research and document authentication patterns..."</span>,
+    run_in_background=<span class="keyword">False</span>  <span class="comment"># Wait for completion</span>
+)
+
+<span class="comment"># Step 2: Plan (uses research output)</span>
+Task(
+    subagent_type=<span class="string">"architect"</span>,
+    description=<span class="string">"Create implementation plan"</span>,
+    prompt=<span class="string">"Based on the research findings, create a plan..."</span>,
+    run_in_background=<span class="keyword">False</span>
+)
+
+<span class="comment"># Step 3: Implement (uses plan)</span>
+Task(
+    subagent_type=<span class="string">"coder"</span>,
+    description=<span class="string">"Implement authentication"</span>,
+    prompt=<span class="string">"Following the approved plan, implement..."</span>,
+    run_in_background=<span class="keyword">False</span>
+)</pre>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="parallel">Parallel Spawning</h3>
+
+        <p class="text-text-secondary mb-4">
+          <strong>When:</strong> Tasks are independent, can run simultaneously.
+        </p>
+
+        <div class="diagram-box">
+          <pre>PARALLEL PATTERN
+
+Main Agent (Orchestrator)
+    |
+    +-------------+-------------+-------------+
+    |             |             |             |
+    v             v             v             v
+[Subagent 1]  [Subagent 2]  [Subagent 3]  [Subagent 4]
+Frontend      Backend       Tests         Docs
+    |             |             |             |
+    +-------------+-------------+-------------+
+                      |
+                      v
+Main Agent collects and synthesizes results
+          </pre>
+        </div>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Parallel spawning pattern</span>
+<span class="comment"># All subagents run simultaneously with run_in_background=True</span>
+
+Task(
+    subagent_type=<span class="string">"frontend"</span>,
+    description=<span class="string">"Implement login form UI"</span>,
+    prompt=<span class="string">"Create the login form component..."</span>,
+    run_in_background=<span class="keyword">True</span>
+)
+
+Task(
+    subagent_type=<span class="string">"backend"</span>,
+    description=<span class="string">"Implement auth API"</span>,
+    prompt=<span class="string">"Create authentication endpoints..."</span>,
+    run_in_background=<span class="keyword">True</span>
+)
+
+Task(
+    subagent_type=<span class="string">"tester"</span>,
+    description=<span class="string">"Write auth tests"</span>,
+    prompt=<span class="string">"Create test suite for authentication..."</span>,
+    run_in_background=<span class="keyword">True</span>
+)
+
+<span class="comment"># Monitor and collect results with TaskList</span></pre>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Parallel agents on same files cause conflicts
+          </div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Use file ownership rules or git worktrees for true isolation.</div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8" id="coordination">Coordination Strategies</h3>
+
+        <h4 class="font-medium text-base mb-3">Option 1: File-Based Context Sharing</h4>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>project/
+├── .agent-context/
+│   ├── research-findings.md      <span class="comment"># Subagent 1 writes, others read</span>
+│   ├── implementation-plan.md    <span class="comment"># Subagent 2 writes, coder reads</span>
+│   ├── progress.json             <span class="comment"># All agents update</span>
+│   └── handoff-notes.md          <span class="comment"># Inter-agent communication</span></pre>
+        </div>
+
+        <h4 class="font-medium text-base mb-3 mt-6">Option 2: Git-Based Context (Ralph Pattern)</h4>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>project/
+├── plans/
+│   ├── prd.json           <span class="comment"># Task status (passes: true/false)</span>
+│   └── progress.txt       <span class="comment"># Append-only learnings log</span>
+
+<span class="comment"># Each iteration's subagent:</span>
+<span class="comment"># 1. Reads prd.json for task status</span>
+<span class="comment"># 2. Reads progress.txt for previous learnings</span>
+<span class="comment"># 3. Does work</span>
+<span class="comment"># 4. Updates prd.json with completion status</span>
+<span class="comment"># 5. Appends to progress.txt</span>
+<span class="comment"># 6. Commits changes to git</span></pre>
+        </div>
+
+        <h4 class="font-medium text-base mb-3 mt-6">Status File Format</h4>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre>{
+  <span class="string">"agent_id"</span>: <span class="string">"coder-1"</span>,
+  <span class="string">"current_task"</span>: <span class="string">"US-003: Implement login endpoint"</span>,
+  <span class="string">"status"</span>: <span class="string">"in_progress"</span>,
+  <span class="string">"started_at"</span>: <span class="string">"2026-01-13T10:30:00Z"</span>,
+  <span class="string">"files_touching"</span>: [<span class="string">"src/api/auth.ts"</span>, <span class="string">"src/models/user.ts"</span>],
+  <span class="string">"blockers"</span>: [],
+  <span class="string">"progress_pct"</span>: 60,
+  <span class="string">"notes"</span>: <span class="string">"Found existing auth utilities, will reuse"</span>
+}</pre>
+        </div>
+      </section>
+
+      <!-- Section 5: PATH OF A TASK -->
+      <section id="path" data-activity="path">
+        <h2 class="section-title">
+          <span class="section-number">5</span>
+          Path of a Subagent Task
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Follow a task through the subagent spawning system:
+        </p>
+
+        <div class="path-container">
+          <div class="path-step">
+            <div class="path-number">1</div>
+            <div class="path-content">Main agent encounters task needing isolation (&gt;15K tokens, parallel work, adversarial review)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">2</div>
+            <div class="path-content">Main agent decides: spawn sequential or parallel? Choose model (Haiku/Sonnet/Opus)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">3</div>
+            <div class="path-content">Main agent prepares task prompt with <strong>worker preamble</strong>: "You are a WORKER. Do NOT spawn sub-agents."</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">4</div>
+            <div class="path-content">Main agent calls <code>Task()</code> with <code>run_in_background=True/False</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">5</div>
+            <div class="path-content">Subagent spawns with fresh context (~5-10K tokens overhead)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">6</div>
+            <div class="path-content">Subagent reads any context files (<code>.agent-context/</code>, <code>progress.txt</code>)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">7</div>
+            <div class="path-content">Subagent executes task using tools directly (Read, Write, Edit, Bash)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">8</div>
+            <div class="path-content">Subagent writes results to coordination files, updates status</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">9</div>
+            <div class="path-content">Subagent outputs structured completion: <code>{"status": "complete", "files_modified": [...]}</code></div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">10</div>
+            <div class="path-content">Main agent collects results (if parallel: waits for all; if sequential: feeds to next)</div>
+          </div>
+          <div class="path-step">
+            <div class="path-number">11</div>
+            <div class="path-content">Main agent synthesizes results, continues with main task</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: ANTI-PATTERNS -->
+      <section id="gotchas" data-activity="gotchas">
+        <h2 class="section-title">
+          <span class="section-number">6</span>
+          Anti-Patterns
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Common mistakes with concrete numbers and fixes:
+        </p>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Over-Spawning
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> $50+ bill for simple tasks. Each spawn is 5-10K tokens.</div>
+          <div class="gotcha-detail"><strong>Bad:</strong> <code>Task(prompt="Add a comment to line 42")</code> - 5-10K overhead for 10-token change</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> If task description is longer than likely implementation, don't spawn. Use <code>Edit()</code> directly.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Context Pollution
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Subagent produces irrelevant output, misses key requirements</div>
+          <div class="gotcha-detail"><strong>Bad:</strong> Dumping 50K tokens of codebase docs into subagent prompt</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Pass minimal, relevant context. "RELEVANT FILES: [list]. CONSTRAINTS: [list]. TASK: [specific]."</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Missing Coordination
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Parallel workers produce conflicting changes, git conflicts</div>
+          <div class="gotcha-detail"><strong>Bad:</strong> Two parallel agents both editing <code>src/auth.ts</code></div>
+          <div class="gotcha-detail"><strong>Fix:</strong> File ownership rules ("ONLY modify lines 1-50") or git worktrees for true isolation.</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Deep Nesting
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> Unexpected $50+ bill from one task, recursive agent spawning</div>
+          <div class="gotcha-detail"><strong>Bad:</strong> Subagent spawns sub-subagent spawns sub-sub-subagent</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Always include worker preamble: "Do NOT spawn sub-agents. Do NOT call TaskCreate."</div>
+        </div>
+
+        <div class="gotcha-box">
+          <div class="gotcha-title">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            Wrong Model for Task
+          </div>
+          <div class="gotcha-detail"><strong>Symptom:</strong> 10x overpay (Opus for lookups) or poor quality requiring retries (Haiku for architecture)</div>
+          <div class="gotcha-detail"><strong>Fix:</strong> Match model to task complexity. See Model Selection Guide below.</div>
+        </div>
+      </section>
+
+      <!-- Section 7: WHAT'S HARD -->
+      <section id="hard" data-activity="hard">
+        <h2 class="section-title">
+          <span class="section-number">7</span>
+          What's Hard
+        </h2>
+
+        <p class="text-text-secondary mb-6">
+          Fundamental tensions, not bugs to fix:
+        </p>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Isolation vs. Communication Cost
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Subagents provide context isolation, but passing context to them and getting results back costs tokens. The more context you share, the less isolation you have.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Either subagents miss important context (too little shared) OR subagent overhead approaches main agent cost (too much shared).</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Pass only what's needed. Use file-based coordination for persistent state. Accept that some redundancy is the cost of isolation.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Parallel Efficiency vs. Conflict Risk
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> Parallel spawning is faster but risks file conflicts. Sequential is safe but slower.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Parallel agents produce conflicting changes. Sequential agents take 3x longer.</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Parallelize only when truly independent. Use file ownership rules. Git worktrees for heavy parallelism.</div>
+        </div>
+
+        <div class="hard-box">
+          <div class="hard-title">
+            <i data-lucide="flame" class="w-4 h-4"></i>
+            Spawn Decision Judgment
+          </div>
+          <div class="hard-detail"><strong>The tension:</strong> "Should I spawn?" requires judgment. The 15-20K token break-even is a guideline, not a formula. Task complexity varies.</div>
+          <div class="hard-detail"><strong>Symptoms:</strong> Over-spawning (high bills) or under-spawning (context pollution).</div>
+          <div class="hard-detail"><strong>Mitigation:</strong> Start with the "context pollution test": Would 50 failed tool calls ruin your main conversation? If yes, spawn. Review bills and adjust.</div>
+        </div>
+      </section>
+
+      <!-- Section 8: WHEN TO SPAWN -->
+      <section id="when" data-activity="when">
+        <h2 class="section-title">
+          <span class="section-number">8</span>
+          When to Spawn / When Not
+        </h2>
+
+        <div class="when-grid">
+          <div class="when-use">
+            <div class="when-title">
+              <i data-lucide="check" class="w-5 h-5"></i>
+              SPAWN WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Task requires &gt;15K tokens of focused work (break-even point)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Heavy tool output would flood main context (browser, large files)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Multiple independent tasks can run in parallel</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Need adversarial review (separate context = different perspective)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="check" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Task might fail repeatedly (contain the mess)</span>
+            </div>
+          </div>
+
+          <div class="when-not">
+            <div class="when-title">
+              <i data-lucide="x" class="w-5 h-5"></i>
+              DON'T SPAWN WHEN
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple task (&lt;5K tokens) - overhead exceeds benefit</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Main agent already has all needed context</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Tasks are tightly coupled (serialize in main agent)</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Task description longer than likely code change</span>
+            </div>
+            <div class="when-item">
+              <i data-lucide="x" class="w-4 h-4 flex-shrink-0"></i>
+              <span>Simple grep/lookup - main agent tools sufficient</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="font-semibold text-lg mb-4">Model Selection Guide</h3>
+
+        <table class="cost-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Input/1M</th>
+              <th>Output/1M</th>
+              <th>Typical Cost</th>
+              <th>Use For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="model-haiku">Haiku</td>
+              <td>$0.25</td>
+              <td>$1.25</td>
+              <td>$0.01-0.05</td>
+              <td>Lookups, simple transforms, status checks</td>
+            </tr>
+            <tr>
+              <td class="model-sonnet">Sonnet</td>
+              <td>$3.00</td>
+              <td>$15.00</td>
+              <td>$0.10-0.50</td>
+              <td>Standard implementation, tests, bug fixes</td>
+            </tr>
+            <tr>
+              <td class="model-opus">Opus</td>
+              <td>$15.00</td>
+              <td>$75.00</td>
+              <td>$0.50-2.00</td>
+              <td>Architecture, security, complex debugging</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="font-semibold text-lg mb-4 mt-8">The Worker Preamble (Copy-Paste Ready)</h3>
+
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCodeBlock(this)">
+            <i data-lucide="copy" class="w-3 h-3"></i>
+            Copy
+          </button>
+          <pre><span class="comment"># Worker Preamble (prevents recursive spawning)</span>
+
+CONTEXT: You are a WORKER agent, not an orchestrator.
+
+RULES:
+- Complete ONLY the task described below
+- Use tools directly (Read, Write, Edit, Bash, etc.)
+- Do NOT spawn sub-agents
+- Do NOT call TaskCreate or TaskUpdate
+- Report your results with absolute file paths
+
+TASK:
+[Your specific task here]</pre>
+        </div>
+
+      </section>
+
+    
