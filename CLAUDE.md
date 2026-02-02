@@ -62,7 +62,13 @@ Claude-Research-And-Tips/
 ├── mvp/                     # Pattern Website
 │   └── index.html
 │
-└── docs-spa/                # Next.js Documentation SPA (NEW)
+├── design-system/           # Extracted Design System (NEW)
+│   ├── docs/README.md       # Documentation
+│   └── src/
+│       ├── styles/          # CSS tokens, typography, themes
+│       └── components/      # React/TSX components (13 total)
+│
+└── docs-spa/                # Next.js Documentation SPA
     ├── app/                 # App router pages
     ├── components/          # React components
     ├── content/             # Extracted HTML content (75 pages)
@@ -83,6 +89,8 @@ Claude-Research-And-Tips/
 | Deep dive on Ralph pattern | `synthesis/mastery-ralph-complete.md` |
 | Make architectural decisions | `synthesis/JUDGMENT-GUIDE.md` |
 | See the design POC | `gallery/ralph-mintlify-poc.html` |
+| **Use the design system** | `design-system/docs/README.md` |
+| **View design system demo** | `docs-spa/app/poc/design-system/` |
 | Learn AI design workflows | `UI-Tips/CLAUDE.md` |
 | Explore pattern showcase | `mvp/index.html` |
 | **Run the documentation SPA** | `docs-spa/` (npm run dev) |
