@@ -1,6 +1,37 @@
 # CLAUDE.md — KortAI Design System
 
 ═══════════════════════════════════════════════════════════════════════════════
+## 0. THE KORTAI DESIGN MIND — READ FIRST
+═══════════════════════════════════════════════════════════════════════════════
+
+**BEFORE DOING ANYTHING, READ:** `README.md` (THE KORTAI DESIGN MIND)
+
+This is not a style guide. It is the operating manual for understanding, digesting,
+and THINKING WITH this design system. It explains:
+
+- **Part I:** What this system IS and why it's different (discovered vs decided)
+- **Part II:** How the 5-stage research pipeline works and compounds
+- **Part III:** The provenance chain — 7 structures, 2 traversals, living system metaphor
+- **Part IV:** The 4 levels of engagement and 7-step digestion protocol
+- **Part V:** The interception framework + sub-agent paradigm (4 types, 3 dimensions)
+- **Part VI:** How to reproduce this methodology (7 structures as day-one)
+- **Part VII:** File structure as embodied knowledge + new files required
+- **Part VIII:** The meta-insight — this is a design MIND, not just a system
+- **Part IX:** Retroactive update bridge — execution sequence and verification tests
+
+**Three Reading Modes:**
+- **Mode 1: First Read** (45-60 min) — Philosophy → Understanding
+- **Mode 2: Task Execution** (15-20 min) — Reference → Action
+- **Mode 3: Context Recovery** (10-15 min) — Reset → Reorientation
+
+**The core question:** Can a system absorb the REASONING behind design decisions
+well enough to make NEW decisions consistent with prior ones — even when those
+new decisions were never explicitly specified?
+
+**If you skip README.md, you will apply rules mechanically. If you absorb it,
+you will THINK the way the system thinks.**
+
+═══════════════════════════════════════════════════════════════════════════════
 ## 1. IDENTITY
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -12,16 +43,19 @@ This is NOT a component library. It's a system with:
 - **Tokens:** The locked values (geometry, colors, typography, spacing)
 - **Patterns:** The validated rhythms (density, organization, axis, combination)
 - **Provenance:** The research chain that justifies everything
+- **Mind:** The transferable reasoning documented in README.md
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## 2. HOW TO READ
 ═══════════════════════════════════════════════════════════════════════════════
 
-**Start with:** `BACKBONE.md` — The master narrative of the entire system
+**Start with:** `README.md` (THE KORTAI DESIGN MIND) — Understand HOW to think
+**Then:** `BACKBONE.md` — The master narrative of the entire system
 
 | I want to... | Read |
 |--------------|------|
-| Understand the whole system | `BACKBONE.md` |
+| **Understand how to THINK with this system** | `README.md` ★★★ |
+| Understand the whole system narrative | `BACKBONE.md` |
 | Apply a pattern | `patterns/PATTERN-INDEX.md` |
 | Look up token values | `tokens/*.md` |
 | Trace a finding | `provenance/PIPELINE-MANIFEST.md` |
@@ -36,9 +70,9 @@ This is NOT a component library. It's a system with:
 
 | Directory/File | Status | Purpose |
 |----------------|--------|---------|
-| `BACKBONE.md` | ✅ | Master narrative — **START HERE** |
+| `README.md` | ✅ | **THE KORTAI DESIGN MIND** — How to think with this system ★★★ |
+| `BACKBONE.md` | ✅ | Master narrative of the pipeline |
 | `QUICK-START.md` | ✅ | Quick reference |
-| `README.md` | ✅ | Overview |
 | `tokens/` | ✅ | Locked design values |
 | `patterns/` | ✅ | Validated rhythms (density complete, org pending) |
 | `components/` | ✅ | Component specifications |
@@ -66,15 +100,27 @@ Their SPECIFICATIONS live here in `components/`.
 ## 5. MINDSET
 ═══════════════════════════════════════════════════════════════════════════════
 
-**The design system is the AUTHORITY.**
+**This is a DESIGN MIND, not just a design system.**
 
-When there's a question about how something should look:
+The skeleton (tokens, patterns, rules) tells you WHAT.
+The muscle (provenance chain) tells you WHY.
+The DNA (soul pieces) tells you what CANNOT change.
+README.md teaches you HOW TO THINK with all of it.
+
+**The Four Levels of Engagement (from README.md):**
+- **Level 1: Application** — Apply patterns mechanically (sufficient for covered cases)
+- **Level 2: Understanding** — Follow provenance backward (when fit isn't obvious)
+- **Level 3: Extension** — Absorb chain, make new decisions (for uncovered cases)
+- **Level 4: Validation** — Use chain as criteria (always, after building anything)
+
+**When there's a question about how something should look:**
 - Check `tokens/` for locked values
 - Check `patterns/` for validated rhythms
 - Check `anti-patterns/` for what to avoid
 - Check `provenance/` for WHY
+- Check `README.md` for HOW TO REASON about it
 
-When there's a conflict between code and design system:
+**When there's a conflict between code and design system:**
 - The design system wins
 - Update the code to match
 - Don't update the design system to match code
@@ -82,5 +128,8 @@ When there's a conflict between code and design system:
 **The chain is the proof.** Every pattern traces back to research. Every research
 finding was validated through exploration. Every exploration was audited for soul
 compliance. If you skip the chain, you're building on sand.
+
+**The mind is transferable.** Anyone who follows the structure absorbs the mind.
+Anyone who extends the structure grows the mind.
 
 ═══════════════════════════════════════════════════════════════════════════════
