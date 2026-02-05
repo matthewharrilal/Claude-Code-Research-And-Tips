@@ -1,3 +1,17 @@
+/**
+ * DesignDecision — "The Impartial Cartographer"
+ *
+ * Research Applied:
+ * - R1-006: Horizontal Comparison Break (multi-column for comparison)
+ * - R1-023: Decision Matrix Layout (Options × Criteria grid)
+ * - R5-A3: Anti-Pattern: Decision Paralysis (only one matrix per section)
+ *
+ * Soul Compliance:
+ * - border-radius: 0 (LOCKED) — was rounded-xl
+ * - box-shadow: none (LOCKED) — was shadow-sm
+ * - Border: 4px left red accent + 1px border
+ * - Colors: KortAI palette only
+ */
 interface DesignDecisionProps {
   question: string
   reasoning: string | React.ReactNode
@@ -12,31 +26,55 @@ export function DesignDecision({
   alternatives
 }: DesignDecisionProps) {
   return (
-    <div className="bg-white border border-border rounded-xl shadow-sm mb-8 overflow-hidden">
+    <div
+      className="border-l-4 mb-8 overflow-hidden"
+      style={{
+        backgroundColor: '#FFFFFF',
+        border: '1px solid #E0D5C5',
+        borderLeftWidth: '4px',
+        borderLeftColor: '#E83025',
+        borderRadius: 0,
+        boxShadow: 'none'
+      }}
+    >
       {/* Header */}
-      <div className="bg-accent-light/20 px-6 py-4 border-b border-border">
-        <h3 className="text-xl font-bold text-text-primary">
+      <div
+        className="px-6 py-4 border-b"
+        style={{
+          backgroundColor: '#FEF9F5',
+          borderBottomColor: '#E0D5C5'
+        }}
+      >
+        <h3 className="text-xl font-bold" style={{ color: '#1A1A1A' }}>
           Why {question}?
         </h3>
       </div>
 
       {/* Reasoning */}
       <div className="px-6 py-5">
-        <div className="text-text-secondary leading-relaxed">
+        <div className="leading-relaxed" style={{ color: '#666666' }}>
           {typeof reasoning === 'string' ? <p>{reasoning}</p> : reasoning}
         </div>
 
         {/* Alternatives considered */}
         {alternatives && alternatives.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-border/50">
-            <span className="text-sm font-medium text-text-muted">
+          <div
+            className="mt-4 pt-4"
+            style={{ borderTop: '1px solid #F0EBE3' }}
+          >
+            <span className="text-sm font-medium" style={{ color: '#666666' }}>
               Alternatives considered:
             </span>
             <ul className="mt-2 flex flex-wrap gap-2">
               {alternatives.map((alt, i) => (
                 <li
                   key={i}
-                  className="text-sm px-3 py-1 bg-gray-100 text-text-muted rounded-full"
+                  className="text-sm px-3 py-1"
+                  style={{
+                    backgroundColor: '#F0EBE3',
+                    color: '#666666',
+                    borderRadius: 0
+                  }}
                 >
                   {alt}
                 </li>
@@ -47,11 +85,20 @@ export function DesignDecision({
       </div>
 
       {/* What This Means For You */}
-      <div className="bg-success-light/10 px-6 py-4 border-t border-success-light/30">
-        <span className="text-xs font-semibold uppercase tracking-wider text-success mb-2 block">
+      <div
+        className="px-6 py-4"
+        style={{
+          backgroundColor: '#F0EBE3',
+          borderTop: '1px solid #E0D5C5'
+        }}
+      >
+        <span
+          className="text-xs font-semibold uppercase tracking-wider mb-2 block"
+          style={{ color: '#E83025', letterSpacing: '0.05em' }}
+        >
           What This Means For You
         </span>
-        <div className="text-text-secondary">
+        <div style={{ color: '#666666' }}>
           {typeof forYou === 'string' ? <p>{forYou}</p> : forYou}
         </div>
       </div>

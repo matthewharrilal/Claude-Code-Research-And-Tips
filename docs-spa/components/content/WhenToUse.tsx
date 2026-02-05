@@ -1,5 +1,13 @@
 import { Check, X } from 'lucide-react'
 
+/**
+ * WhenToUse — Comparison component
+ *
+ * Soul Compliance:
+ * - border-radius: 0 (LOCKED)
+ * - box-shadow: none (LOCKED)
+ * - Colors: KortAI palette
+ */
 interface WhenToUseProps {
   title?: string
   use?: string[]
@@ -21,26 +29,39 @@ export function WhenToUse({ title, use, dontUse, useWhen, dontUseWhen, alternati
   const dontUseItems = dontUse || dontUseWhen || []
 
   return (
-    <div className="bg-white border border-border rounded-xl mb-6 overflow-hidden">
+    <div
+      className="mb-6 overflow-hidden"
+      style={{
+        backgroundColor: '#FFFFFF',
+        border: '1px solid #E0D5C5',
+        borderRadius: 0
+      }}
+    >
       {/* Header */}
       {title && (
-        <div className="px-5 py-3 border-b border-border">
-          <h4 className="font-bold text-text-primary">{title}</h4>
+        <div
+          className="px-5 py-3"
+          style={{ borderBottom: '1px solid #E0D5C5' }}
+        >
+          <h4 className="font-bold" style={{ color: '#1A1A1A' }}>{title}</h4>
         </div>
       )}
 
       {/* Two-column layout */}
-      <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-border">
+      <div className="grid md:grid-cols-2">
         {/* Use When - Green */}
-        <div className="p-5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-success mb-3 block flex items-center gap-2">
+        <div className="p-5" style={{ borderRight: '1px solid #E0D5C5' }}>
+          <span
+            className="text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-2"
+            style={{ color: '#6b9b7a', letterSpacing: '0.05em' }}
+          >
             <Check className="w-4 h-4" />
             Use When
           </span>
           <ul className="space-y-2">
             {useItems.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-text-secondary">
-                <Check className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
+              <li key={i} className="flex items-start gap-2" style={{ color: '#666666' }}>
+                <Check className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#6b9b7a' }} />
                 <span>{item}</span>
               </li>
             ))}
@@ -48,15 +69,18 @@ export function WhenToUse({ title, use, dontUse, useWhen, dontUseWhen, alternati
         </div>
 
         {/* Don't Use When - Red */}
-        <div className="p-5 bg-error-light/5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-error mb-3 block flex items-center gap-2">
+        <div className="p-5" style={{ backgroundColor: '#FEF9F5' }}>
+          <span
+            className="text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-2"
+            style={{ color: '#E83025', letterSpacing: '0.05em' }}
+          >
             <X className="w-4 h-4" />
             Don&apos;t Use When
           </span>
           <ul className="space-y-2">
             {dontUseItems.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-text-secondary">
-                <X className="w-4 h-4 text-error mt-0.5 flex-shrink-0" />
+              <li key={i} className="flex items-start gap-2" style={{ color: '#666666' }}>
+                <X className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#E83025' }} />
                 <span>{item}</span>
               </li>
             ))}
@@ -66,18 +90,33 @@ export function WhenToUse({ title, use, dontUse, useWhen, dontUseWhen, alternati
 
       {/* Alternatives */}
       {alternatives && alternatives.length > 0 && (
-        <div className="px-5 py-4 bg-gray-50 border-t border-border">
-          <span className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-3 block">
+        <div
+          className="px-5 py-4"
+          style={{
+            backgroundColor: '#F0EBE3',
+            borderTop: '1px solid #E0D5C5'
+          }}
+        >
+          <span
+            className="text-xs font-semibold uppercase tracking-wider mb-3 block"
+            style={{ color: '#666666', letterSpacing: '0.05em' }}
+          >
             Consider Instead
           </span>
           <div className="space-y-2">
             {alternatives.map((alt, i) => (
               <div key={i} className="flex items-baseline gap-2">
-                <span className="font-mono text-sm font-semibold text-accent">
+                <span
+                  className="text-sm font-semibold"
+                  style={{
+                    fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
+                    color: '#E83025'
+                  }}
+                >
                   {alt.name || alt.pattern}
                 </span>
-                <span className="text-text-muted">—</span>
-                <span className="text-sm text-text-secondary">{alt.when || alt.condition}</span>
+                <span style={{ color: '#666666' }}>—</span>
+                <span className="text-sm" style={{ color: '#666666' }}>{alt.when || alt.condition}</span>
               </div>
             ))}
           </div>
