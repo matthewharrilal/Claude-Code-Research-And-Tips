@@ -23,14 +23,16 @@
 | Checkpoints | 3 | checkpoints/*.md |
 | Root | ~9 | *.md |
 
-### showcase Inventory (18 files identified)
+### showcase Inventory (Updated 2026-02-04)
 
 | Category | Count | Path Pattern |
 |----------|-------|--------------|
 | Research | 6 | research/*.md |
-| Explorations | 3 | explorations/density/*.html |
-| Screenshots | 3 | screenshots/explorations/*.png |
+| Explorations | 6 | explorations/density/*.html (DD-001 through DD-006) |
+| Screenshots | 12 | screenshots/explorations/*.png (6 original + 6 audit) |
 | Checkpoints | 5 | checkpoints/*.md |
+| DESIGN-SYSTEM | 11 | DESIGN-SYSTEM/**/*.md |
+| knowledge-architecture | 5 | knowledge-architecture/*.md |
 | Root | 1 | FINDINGS-INDEX.md |
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -78,9 +80,12 @@
 | research/R4-*.md | T2-FRAMEWORK | Derived from synthesis + external |
 | research/R5-*.md | T2-FRAMEWORK | Derived from synthesis + external |
 | research/RESEARCH-SYNTHESIS.md | T2-FRAMEWORK | Derived from R1-R5 |
-| explorations/DD-002 | T3-PATTERN | Validated CRESCENDO (score 34/40) |
-| explorations/DD-001 | T3-PATTERN | Documented PULSE (score 30.5/40) |
-| explorations/DD-003 | T3-PATTERN | Documented Tidal Pools (score 30.5/40) |
+| explorations/DD-002 | T3-PATTERN | Validated CRESCENDO (audit: 8.57/10, score 34/40) ★ INCLUDE |
+| explorations/DD-004 | T3-PATTERN | Validated GEOLOGICAL (audit: 8.43/10, score 33.5/40) ★ INCLUDE |
+| explorations/DD-005 | T3-PATTERN | Validated RIVERS (audit: 8.50/10, score 34/40) ★ INCLUDE |
+| explorations/DD-006 | T3-PATTERN | Validated FRACTAL (audit: 8.64/10, score 35/40) ★★ BEST |
+| explorations/DD-001 | T3-PATTERN | Documented PULSE (audit: 7.36/10, score 30/40) DOCUMENT |
+| explorations/DD-003 | T3-PATTERN | Documented ISLANDS (audit: 7.86/10, score 31/40) DOCUMENT |
 | checkpoints/*.md | T4-OPERATIONAL | Execution state |
 | screenshots/*.png | OUTPUT | Regenerable |
 
@@ -151,15 +156,18 @@ CONTRADICTION: [Topic]
 | 1 | SPECULATIVE | Idea without strong backing |
 | 0 | SUPERSEDED | Known to be replaced |
 
-### Preliminary Confidence Assignments
+### Confidence Assignments (Updated 2026-02-04 Post-Audit)
 
 | Finding/Spec | Confidence | Evidence | To Increase |
 |--------------|------------|----------|-------------|
-| CRESCENDO pattern | 4-VALIDATED | DD-002 score 34/40 | Production use |
-| PULSE pattern | 3-RESEARCHED | DD-001 score 30.5/40 | More validation |
-| Tidal Pools pattern | 3-RESEARCHED | DD-003 score 30.5/40 | More validation |
-| 6 Density Dimensions | 3-RESEARCHED | R-3 research | Needs exploration testing |
-| Component Properties Model | 3-RESEARCHED | R-5 research | Needs validation |
+| CRESCENDO pattern | 4-VALIDATED | DD-002 audit score 8.57/10, total 34/40 | Production use |
+| GEOLOGICAL LAYERS pattern | 4-VALIDATED | DD-004 audit score 8.43/10, total 33.5/40 | Production use |
+| RIVER FLOW pattern | 4-VALIDATED | DD-005 audit score 8.50/10, total 34/40 | Production use |
+| FRACTAL SELF-SIMILARITY | 4-VALIDATED | DD-006 audit score 8.64/10, total 35/40 ★★ | Production use |
+| PULSE/BREATHING pattern | 3-RESEARCHED | DD-001 audit score 7.36/10, total 30/40 | Fix traffic-light |
+| ISLANDS pattern | 3-RESEARCHED | DD-003 audit score 7.86/10, total 31/40 | Strengthen callouts |
+| 6 Density Dimensions | 4-VALIDATED | DD-001-006 applied dimensions | Production use |
+| Component Properties Model | 3-RESEARCHED | R-5 research | Needs CD-* testing |
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## DEPENDENCY GRAPH
@@ -221,6 +229,15 @@ TIER 4: checkpoints/ (execution state)
 ═══════════════════════════════════════════════════════════════════════════════
 ## UPDATE LOG
 ═══════════════════════════════════════════════════════════════════════════════
+
+### 2026-02-04 [Phase 2.1 Perceptual Depth Audit]
+- Executed full 7-agent visual audit on DD-001 through DD-006
+- Took fresh screenshots of all 6 explorations
+- Verified scores against rubric criteria
+- Updated confidence levels: 4 patterns promoted to VALIDATED (4)
+- Audit findings documented in DESIGN-SYSTEM/patterns/density-patterns.md
+- R-3 application status updated in RESEARCH-ACTIVE.md
+- **Decision:** Phase 2.1 VERIFIED — Ready for OD-001
 
 ### 2026-02-04 [Initial Setup]
 - Created KA-DECISIONS.md
