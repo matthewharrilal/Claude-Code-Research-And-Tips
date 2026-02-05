@@ -1,0 +1,65 @@
+# CLAUDE.md — Explorations Directory
+
+═══════════════════════════════════════════════════════════════════════════════
+## 1. IDENTITY
+═══════════════════════════════════════════════════════════════════════════════
+
+**Name:** Explorations Directory
+**Anatomical Role:** The artifacts — validated HTML files from each exploration stage.
+
+These are the PROOFS. The provenance lives in `DESIGN-SYSTEM/provenance/`.
+These files are the ARTIFACTS that validate the patterns.
+
+═══════════════════════════════════════════════════════════════════════════════
+## 2. HOW TO READ
+═══════════════════════════════════════════════════════════════════════════════
+
+| Directory | Status | Explorations |
+|-----------|--------|--------------|
+| `density/` | ✅ COMPLETE | DD-001 through DD-006 (6 files) |
+| `organizational/` | ⏳ IN PROGRESS | OD-001 through OD-006 (pending) |
+| `axis/` | ⏳ PENDING | AD-001 through AD-006 (future) |
+| `combination/` | ⏳ PENDING | CD-001 through CD-006 (future) |
+
+═══════════════════════════════════════════════════════════════════════════════
+## 3. WHAT'S HERE
+═══════════════════════════════════════════════════════════════════════════════
+
+| Folder | Status | Files |
+|--------|--------|-------|
+| `density/` | ✅ | DD-001-006.html (all 6 complete, all INCLUDE) |
+| `organizational/` | ⏳ | Empty (OD work pending) |
+| `axis/` | ⏳ | Empty (AD work pending) |
+| `combination/` | ⏳ | Empty (CD work pending) |
+
+═══════════════════════════════════════════════════════════════════════════════
+## 4. HOW THIS CONNECTS
+═══════════════════════════════════════════════════════════════════════════════
+
+**Artifacts are here. Provenance is in DESIGN-SYSTEM/provenance/.**
+
+| Exploration | Artifact | Provenance |
+|-------------|----------|------------|
+| DD-001-006 | `density/DD-*.html` | `../DESIGN-SYSTEM/provenance/stage-2-density-dd/` |
+| OD-001-006 | `organizational/OD-*.html` | `../DESIGN-SYSTEM/provenance/stage-3-organization-od/` |
+| AD-001-006 | `axis/AD-*.html` | `../DESIGN-SYSTEM/provenance/stage-4-axis-ad/` |
+| CD-001-006 | `combination/CD-*.html` | `../DESIGN-SYSTEM/provenance/stage-5-combination-cd/` |
+
+**Screenshots:** `../screenshots/explorations/`
+
+═══════════════════════════════════════════════════════════════════════════════
+## 5. MINDSET
+═══════════════════════════════════════════════════════════════════════════════
+
+**These files use inline KortAI styles.**
+
+Every DD exploration has:
+- Complete locked tokens in `:root`
+- Full component implementations
+- Realistic documentation content (not lorem ipsum)
+
+To view: Open in browser. The files are self-contained HTML.
+
+The scores and decisions live in provenance. The artifacts live here.
+
+═══════════════════════════════════════════════════════════════════════════════
