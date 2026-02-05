@@ -1,291 +1,497 @@
-# RESEARCH-ACTIVE — Research Tracking + Application Status
-## All Findings, Applied/Unapplied Status, Cross-References
+# RESEARCH-ACTIVE — Comprehensive Research Tracking
+## All 337 Findings with Application Status
+
+Last Updated: 2026-02-04
+Last Updated By: Mandatory Research Application System Implementation
 
 ═══════════════════════════════════════════════════════════════════════════════
-## VERSION CONTROL — LATEST STATE TRACKING
+## GLOBAL SUMMARY
 ═══════════════════════════════════════════════════════════════════════════════
 
-**CRITICAL:** This document tracks research findings and their application status.
-After compaction, this tells you exactly what research has been gathered and used.
+| Research | Total Findings | UNAPPLIED | APPLIED | VALIDATED | INVALIDATED |
+|----------|----------------|-----------|---------|-----------|-------------|
+| R-1 | 28 | 28 | 0 | 0 | 0 |
+| R-2 | 27 | 27 | 0 | 0 | 0 |
+| R-3 | 51 | 41 | 10 | 0 | 0 |
+| R-4 | 192 | 192 | 0 | 0 | 0 |
+| R-5 | 39 | 39 | 0 | 0 | 0 |
+| **TOTAL** | **337** | **327** | **10** | **0** | **0** |
 
-### Current Status Summary
+**Application Rate:** 2.97% of findings have been applied
+**Gap Rate:** 97.03% of findings remain unapplied
 
-| Research Agent | Status | Findings Count | Applied Count | Unapplied Count |
-|---------------|--------|----------------|---------------|-----------------|
-| R-1: Documentation Patterns | COMPLETE ✓ | 24 | 0 | 24 |
-| R-2: Creative Layouts | COMPLETE ✓ | 25 | 0 | 25 |
-| R-3: Density Dimensions | COMPLETE ✓ | 30 | 0 | 30 |
-| R-4: Axis Innovations | COMPLETE ✓ | 25 | 0 | 25 |
-| R-5: Combination Theory | COMPLETE ✓ | 20 | 0 | 20 |
-| SYNTHESIS | COMPLETE ✓ | 10 (unified) | 0 | 10 |
-
-**Last Updated:** 2026-02-04 [Phase 1 COMPLETE]
-**Total Findings:** 124+ distinct findings
-**Applied:** 0 (0%) — Phase 2-3 will apply these
-**Unapplied:** 124+ — Ready for application
+### Status Definitions
+| Status | Definition |
+|--------|------------|
+| UNAPPLIED | Finding identified but not yet used in any exploration/section |
+| APPLIED | Finding used in at least one exploration/section |
+| VALIDATED | Finding applied AND confirmed working via audit (Confidence 4+) |
+| INVALIDATED | Finding applied but found not to work as expected |
 
 ═══════════════════════════════════════════════════════════════════════════════
-## R-1: DOCUMENTATION PATTERNS
+## R-1: DOCUMENTATION PATTERNS (28 Findings)
 ═══════════════════════════════════════════════════════════════════════════════
 
-**Status:** COMPLETE ✓
-**Output File:** research/R1-DOCUMENTATION-PATTERNS.md (created 2026-02-04)
+**Status:** COMPLETE
+**Output File:** research/R1-DOCUMENTATION-PATTERNS.md
 **Mission:** Analyze Stripe, Vercel, Linear, Notion docs for patterns
 
-### Findings Summary (24 findings)
+### R-1 Summary
+- Total: 28
+- UNAPPLIED: 28
+- APPLIED: 0
+- VALIDATED: 0
+- INVALIDATED: 0
 
-| ID | Finding | Source | Applied? | Apply To |
-|----|---------|--------|----------|----------|
-| R1-001 | Density Rhythm Principle (HIGH→LOW→MEDIUM waves) | Stripe, Linear | No | All sections |
-| R1-002 | 38% Retention Rule (smart whitespace) | Loop11 | No | All sections |
-| R1-003 | Viewport Principle (one concept per viewport) | Apple HIG | No | All sections |
-| R1-004 | Three-Column Doctrine (nav\|content\|code) | Stripe | No | Section 4, 5 |
-| R1-005 | Responsive Collapse Hierarchy | MDN | No | Responsive design |
-| R1-006 | Horizontal Comparison Break | Component Gallery | No | Section 3, 4 |
-| R1-007 | Callout Positioning Doctrine | Splunk, Docusaurus | No | All sections |
-| R1-008 | Callout Scarcity Principle (max 1-2 per page) | IDRB | No | All sections |
-| R1-009 | Code-Adjacent Callout Pattern | Quarto | No | Section 1, 2 |
-| R1-010 | Grouping Proximity Law (8-16px/24-48px) | Nord Design | No | All sections |
-| ... | (14 more findings in full document) | Various | No | Various |
+### R-1 Full Finding Table
 
-### Questions Answered
-- [x] What density patterns do premium docs use? → Rhythm oscillation, viewport principle
-- [x] How do they handle axis transitions? → Three-column doctrine, responsive collapse
-- [x] What component arrangements are common? → Code-adjacent callouts, grouping proximity
-- [x] What makes their design systems feel cohesive? → Typography-first hierarchy, scarcity
+| ID | Finding | Status | Applied In | Evidence | Date |
+|----|---------|--------|------------|----------|------|
+| R1-001 | Density Rhythm Principle (HIGH→LOW→MEDIUM waves) | UNAPPLIED | | | |
+| R1-002 | 38% Retention Rule (smart whitespace improves retention by 38%) | UNAPPLIED | | | |
+| R1-003 | Viewport Principle (one major concept per viewport height) | UNAPPLIED | | | |
+| R1-004 | Three-Column Doctrine (nav\|content\|code layout) | UNAPPLIED | | | |
+| R1-005 | Responsive Collapse Hierarchy (Desktop 3-col, Tablet 2-col, Mobile 1-col) | UNAPPLIED | | | |
+| R1-006 | Horizontal Comparison Break (multi-column only for comparisons) | UNAPPLIED | | | |
+| R1-007 | Callout Positioning Doctrine (callouts FOLLOW content except warnings BEFORE) | UNAPPLIED | | | |
+| R1-008 | Callout Scarcity Principle (max 1-2 callouts per page) | UNAPPLIED | | | |
+| R1-009 | Code-Adjacent Callout Pattern (Tip after code, Warning before code) | UNAPPLIED | | | |
+| R1-010 | Grouping Proximity Law (related 8-16px, unrelated 24-48px) | UNAPPLIED | | | |
+| R1-011 | Default Story Pattern (first showcase = only required props) | UNAPPLIED | | | |
+| R1-012 | Permutation Strategy (one story per significant variant) | UNAPPLIED | | | |
+| R1-013 | Do/Don't Grid (side-by-side visual examples with explicit labels) | UNAPPLIED | | | |
+| R1-014 | Interactive Playground Pattern (live code editors with real-time preview) | UNAPPLIED | | | |
+| R1-015 | Recipe Pattern (showcase components in combination, not isolation) | UNAPPLIED | | | |
+| R1-016 | Typography-First Hierarchy (Size → Weight → Color → Space) | UNAPPLIED | | | |
+| R1-017 | Monospace Differentiation Pattern (monospace for code, sans for prose) | UNAPPLIED | | | |
+| R1-018 | Drop Cap & Pull Quote Pattern (magazine techniques for section emphasis) | UNAPPLIED | | | |
+| R1-019 | Tech Spec Aesthetic (grayscale + accent, monospace, sharp edges) | UNAPPLIED | | | |
+| R1-020 | Four Pillars of Editorial (Layout, Typography, Color, Imagery) | UNAPPLIED | | | |
+| R1-021 | Code Snippet Best Practices (syntax highlighting, hover-to-copy, multi-language tabs) | UNAPPLIED | | | |
+| R1-022 | File Tree Visualization (ASCII tree with box-drawing characters) | UNAPPLIED | | | |
+| R1-023 | Decision Matrix Layout (Options × Criteria grid with visual scoring) | UNAPPLIED | | | |
+| R1-024 | Props/API Table Format (Name\|Type\|Required\|Default\|Description) | UNAPPLIED | | | |
+| R1-025 | Branded Shell Pattern (documentation as brand touchpoint) | UNAPPLIED | | | |
+| R1-026 | Collapsible Callout Pattern (expand/collapse for supplementary detail) | UNAPPLIED | | | |
+| R1-027 | Status Grouping Pattern (Production Ready/Experimental/Deprecated) | UNAPPLIED | | | |
+| R1-028 | WAI-ARIA Compliance Callout (document accessibility for each component) | UNAPPLIED | | | |
+
+### R-1 Priority Queue
+1. R1-001 (Density Rhythm) — Apply in: OD-001, all future explorations
+2. R1-007 (Callout Positioning) — Apply in: OD-001
+3. R1-008 (Callout Scarcity) — Apply in: All explorations
+4. R1-010 (Grouping Proximity) — Apply in: OD-001
+5. R1-016 (Typography-First) — Apply in: All explorations
 
 ═══════════════════════════════════════════════════════════════════════════════
-## R-2: CREATIVE LAYOUTS
+## R-2: CREATIVE LAYOUTS (27 Findings)
 ═══════════════════════════════════════════════════════════════════════════════
 
-**Status:** COMPLETE ✓
-**Output File:** research/R2-CREATIVE-LAYOUTS.md (created 2026-02-04)
+**Status:** COMPLETE
+**Output File:** research/R2-CREATIVE-LAYOUTS.md
 **Mission:** Analyze magazines, dashboards, design system showcases
 
-### Findings Summary (25 findings)
+### R-2 Summary
+- Total: 27
+- UNAPPLIED: 27
+- APPLIED: 0
+- VALIDATED: 0
+- INVALIDATED: 0
 
-| ID | Finding | Source | Applied? | Apply To |
-|----|---------|--------|----------|----------|
-| R2-001 | Breaking the Grid ("Intentional Mess") | Medium Design | No | Section 7 |
-| R2-002 | Pull Quotes as Structural Elements | Magazine Design | No | Section 1 (Essence) |
-| R2-003 | Multi-Column with Visual Interruptions | Azura Magazine | No | Section 4 |
-| R2-004 | Running Headers and Section Markers | Flip180 | No | Navigation |
-| R2-005 | White Space as Content | Apple | No | All sections |
-| R2-006 | F-Pattern and Z-Pattern for Hierarchy | Dashboard UX | No | Section 4 |
-| R2-007 | Card-Based Composition | Dashboard UX | No | Section 1 |
-| R2-008 | Maturity Badges (Stable/Beta/Deprecated) | Design Systems | No | Section 1 |
-| R2-009 | Bento Grid Layout | BentoGrids | No | Section 1, 4 |
-| R2-010 | Asymmetric/Broken Grid (+20% engagement) | Design Research | No | Section 7 |
-| ... | (15 more findings in full document) | Various | No | Various |
+### R-2 Full Finding Table
 
-### Questions Answered
-- [x] What layout innovations exist beyond standard grids? → Bento, broken grid, asymmetric
-- [x] How do magazines create visual hierarchy? → Pull quotes, whitespace as content
-- [x] What non-standard axis patterns exist? → Z/F patterns, spiral, scrollytelling
-- [x] How do design showcases display components? → Bento grid, maturity badges, recipes
+| ID | Finding | Status | Applied In | Evidence | Date |
+|----|---------|--------|------------|----------|------|
+| R2-001 | Breaking the Grid (strategic asymmetric storytelling) | UNAPPLIED | — | — | — |
+| R2-002 | Pull Quotes as Structural Elements (large typographic excerpts) | UNAPPLIED | — | — | — |
+| R2-003 | Multi-Column Text with Visual Interruptions (CSS column-span) | UNAPPLIED | — | — | — |
+| R2-004 | Running Headers and Section Markers (sticky breadcrumbs, progress bars) | UNAPPLIED | — | — | — |
+| R2-005 | White Space as Content (92px+ top margins, proportional spacing) | UNAPPLIED | — | — | — |
+| R2-006 | F-Pattern and Z-Pattern for Information Hierarchy | UNAPPLIED | — | — | — |
+| R2-007 | Card-Based Composition with Hierarchy Signals (size/whitespace priority) | UNAPPLIED | — | — | — |
+| R2-008 | Dense but Breathable Interfaces (reduce padding, increase information efficiency) | UNAPPLIED | — | — | — |
+| R2-009 | Analytical Dashboard Storylines (dashboards as narratives) | UNAPPLIED | — | — | — |
+| R2-010 | Maturity Badges and Component Status (Stable/Beta/Under Review/Deprecated) | UNAPPLIED | — | — | — |
+| R2-011 | Brand-Forward Documentation (Audi Pattern - marketing + education) | UNAPPLIED | — | — | — |
+| R2-012 | Development Kitchen / Experimental Namespace | UNAPPLIED | — | — | — |
+| R2-013 | Atomic Design Organization (Atoms → Molecules → Organisms) | UNAPPLIED | — | — | — |
+| R2-014 | Bento Grid Layout (Japanese-inspired modular layout) | UNAPPLIED | — | — | — |
+| R2-015 | Asymmetric / Broken Grid Layouts (+20% user engagement) | UNAPPLIED | — | — | — |
+| R2-016 | CSS Grid with Fractional Units (asymmetric columns via fr) | UNAPPLIED | — | — | — |
+| R2-017 | Golden Ratio Grid System (1:1.618 proportion) | UNAPPLIED | — | — | — |
+| R2-018 | Swiss Design Grid System (modular grid with asymmetric layouts) | UNAPPLIED | — | — | — |
+| R2-019 | Typography as Primary Design Element (72px+ display, tight line-height) | UNAPPLIED | — | — | — |
+| R2-020 | Whitespace for Hierarchy (Proximity Principle) | UNAPPLIED | — | — | — |
+| R2-021 | Typographic Hierarchy Techniques (font size, weight, color as differentiation) | UNAPPLIED | — | — | — |
+| R2-022 | Dramatic Typography as Content (96-200px bold text) | UNAPPLIED | — | — | — |
+| R2-023 | Split Screen Layouts (50/50, 60/40, 70/30 divisions) | UNAPPLIED | — | — | — |
+| R2-024 | Overlapping/Layered Elements with Z-Index | UNAPPLIED | — | — | — |
+| R2-025 | Scrollytelling for Documentation (scroll-driven narrative) | UNAPPLIED | — | — | — |
+| R2-026 | Card Manipulation and Animation (tactile shadows, drag-and-drop) | UNAPPLIED | — | — | — |
+| R2-027 | Copy-Paste Component Philosophy (shadcn/ui approach) | UNAPPLIED | — | — | — |
+
+### R-2 Priority Queue
+1. R2-005 (White Space as Content) — Apply in: All explorations
+2. R2-014 (Bento Grid) — Apply in: AD-003
+3. R2-019 (Typography as Primary Design Element) — Apply in: All explorations
+4. R2-020 (Whitespace for Hierarchy) — Apply in: All explorations
+5. R2-021 (Typographic Hierarchy) — Apply in: All explorations
 
 ═══════════════════════════════════════════════════════════════════════════════
-## R-3: DENSITY DIMENSIONS
+## R-3: DENSITY DIMENSIONS (51 Findings)
 ═══════════════════════════════════════════════════════════════════════════════
 
-**Status:** COMPLETE ✓
-**Output File:** research/R3-DENSITY-DIMENSIONS.md (created 2026-02-04)
+**Status:** COMPLETE
+**Output File:** research/R3-DENSITY-DIMENSIONS.md
 **Mission:** Explore density beyond spatial (temporal, depth, semantic, cognitive, interaction)
 
-### Findings Summary (30 findings across 6 density dimensions)
+### R-3 Summary
+- Total: 51
+- UNAPPLIED: 41
+- APPLIED: 10
+- VALIDATED: 0
+- INVALIDATED: 0
 
-| ID | Finding | Dimension | Applied? | Apply To |
-|----|---------|-----------|----------|----------|
-| R3-001 | Scroll Velocity Mapping | Temporal | No | All sections |
-| R3-002 | Density Rhythm Patterns (PULSE, CRESCENDO, BOOKENDS, WAVE) | Temporal | No | Section 3 |
-| R3-003 | Scroll-Triggered Density Shifts | Temporal | No | Interactive features |
-| R3-004 | The Geological Model (surface/sediment/bedrock) | Depth | No | Section 3 |
-| R3-005 | Progressive Disclosure Density Gradient | Depth | No | All sections |
-| R3-006 | The Jargon Paradox (expert efficiency vs novice hostility) | Semantic | No | Section 1 |
-| R3-007 | Component Type Semantic Ranking | Semantic | No | Section 2 |
-| R3-008 | The Novelty Factor | Cognitive | No | Section 7 |
-| R3-009 | Decision Fatigue Zones | Cognitive | No | Section 5 |
-| R3-010 | Three Interaction Zones (exploration/action/reading) | Interaction | No | Interactive features |
-| ... | (20 more findings in full document) | Various | No | Various |
+### R-3 Full Finding Table
 
-### Novel Frameworks Created
-- **Density Manifold** — Multi-dimensional surface representing all density combinations
-- **Breathing Framework** — Inhale/exhale patterns for page rhythm
-- **Tidal Framework** — Information waves with tidal pools
-- **Musical Framework** — Density as dynamics (forte/piano/crescendo)
-- **Fractal Framework** — Self-similar patterns at multiple scales
-- **Geological Framework** — Density strata from atmosphere to bedrock
+| ID | Finding | Dimension | Status | Applied In | Evidence | Date |
+|----|---------|-----------|--------|------------|----------|------|
+| R3-001 | Scroll velocity mapping varies by content type | Temporal | UNAPPLIED | — | — | — |
+| R3-002 | First fold paradox - low temporal + high semantic | Temporal | UNAPPLIED | — | — | — |
+| R3-003 | PULSE pattern (high-low-high-low cycles) | Temporal | APPLIED | DD-001 | Alternating density cycles observed | 2026-02-04 |
+| R3-004 | CRESCENDO pattern (sparse to dense builds) | Temporal | APPLIED | DD-002 | Progressive density escalation documented | 2026-02-04 |
+| R3-005 | BOOKENDS pattern (dense start/end, sparse middle) | Temporal | UNAPPLIED | — | — | — |
+| R3-006 | WAVE pattern (irregular but rhythmic density) | Temporal | UNAPPLIED | — | — | — |
+| R3-007 | Scroll-triggered density shifts | Temporal | UNAPPLIED | — | — | — |
+| R3-008 | Showcase opening low temporal density | Temporal | UNAPPLIED | — | — | — |
+| R3-009 | PULSE pattern for sustained engagement | Temporal | UNAPPLIED | — | — | — |
+| R3-010 | Geological Model (surface/sediment/bedrock) | Depth | APPLIED | DD-004 | Three-level depth architecture | 2026-02-04 |
+| R3-011 | Z-Index as Information Priority | Depth | UNAPPLIED | — | — | — |
+| R3-012 | Progressive Disclosure Density Gradient | Depth | APPLIED | DD-002, DD-004 | Layered disclosure patterns | 2026-02-04 |
+| R3-013 | Hover Reveal Anti-Pattern | Depth | UNAPPLIED | — | — | — |
+| R3-014 | Shadow Depth as Density Signal | Depth | UNAPPLIED | — | — | — |
+| R3-015 | Showcase depth architecture - 3 levels | Depth | UNAPPLIED | — | — | — |
+| R3-016 | Shadow intensity increase with info potential | Depth | UNAPPLIED | — | — | — |
+| R3-017 | Jargon Paradox (expert vs novice) | Semantic | UNAPPLIED | — | — | — |
+| R3-018 | Icon Semantic Density | Semantic | UNAPPLIED | — | — | — |
+| R3-019 | Component Type Semantic Ranking | Semantic | UNAPPLIED | — | — | — |
+| R3-020 | Semantic Density vs Reading Speed | Semantic | UNAPPLIED | — | — | — |
+| R3-021 | Showcase semantic approach | Semantic | UNAPPLIED | — | — | — |
+| R3-022 | Novelty Factor | Cognitive | UNAPPLIED | — | — | — |
+| R3-023 | Decision Fatigue Zones | Cognitive | UNAPPLIED | — | — | — |
+| R3-024 | Explanation Burden | Cognitive | UNAPPLIED | — | — | — |
+| R3-025 | Color as Cognitive Load | Cognitive | UNAPPLIED | — | — | — |
+| R3-026 | Motion as Cognitive Density | Cognitive | UNAPPLIED | — | — | — |
+| R3-027 | Showcase cognitive approach | Cognitive | UNAPPLIED | — | — | — |
+| R3-028 | Touch Target Tax | Interaction | UNAPPLIED | — | — | — |
+| R3-029 | Interaction Density Zones | Interaction | UNAPPLIED | — | — | — |
+| R3-030 | Playground Pattern | Interaction | UNAPPLIED | — | — | — |
+| R3-031 | Interaction Depth vs Breadth | Interaction | UNAPPLIED | — | — | — |
+| R3-032 | Showcase interaction approach | Interaction | UNAPPLIED | — | — | — |
+| R3-033 | Breathing Framework | Metaphor | UNAPPLIED | — | — | — |
+| R3-034 | Tidal Framework | Metaphor | APPLIED | DD-005 | Tidal density cycles | 2026-02-04 |
+| R3-035 | Musical Framework | Metaphor | APPLIED | DD-005 | Musical rhythm density patterns | 2026-02-04 |
+| R3-036 | Fractal Self-Similar Density | Framework | APPLIED | DD-006 | Self-similar patterns across scales | 2026-02-04 |
+| R3-037 | Geological Density Strata | Framework | UNAPPLIED | — | — | — |
+| R3-038 | Gradient Principle | Transition | UNAPPLIED | — | — | — |
+| R3-039 | Transition Techniques | Transition | UNAPPLIED | — | — | — |
+| R3-040 | Expansion Moment | Transition | UNAPPLIED | — | — | — |
+| R3-041 | Showcase Density Architecture table | Showcase | UNAPPLIED | — | — | — |
+| R3-042 | Pattern Card Density | Showcase | UNAPPLIED | — | — | — |
+| R3-043 | 10-Second Test | Showcase | UNAPPLIED | — | — | — |
+| R3-044 | Density Red Flags to Avoid | Showcase | UNAPPLIED | — | — | — |
+| R3-045 | Density Potential | Novel | UNAPPLIED | — | — | — |
+| R3-046 | Density Inheritance | Novel | UNAPPLIED | — | — | — |
+| R3-047 | Density Contrast | Novel | APPLIED | DD-003 | Contrast patterns documented | 2026-02-04 |
+| R3-048 | Density Debt | Novel | APPLIED | All DD explorations | Systematic debt tracking | 2026-02-04 |
+| R3-049 | Density Manifold | Synthesis | UNAPPLIED | — | — | — |
+| R3-050 | Ideal Showcase Point on Manifold | Synthesis | UNAPPLIED | — | — | — |
+| R3-051 | Navigation Through Density Manifold | Synthesis | UNAPPLIED | — | — | — |
 
-### Questions Answered
-- [x] What dimensions of density exist beyond spatial? → 6 dimensions: temporal, depth, semantic, cognitive, interaction, spatial
-- [x] How do these dimensions interact? → Density Manifold model
-- [x] Can density be "breathing"? → Yes, PULSE and Breathing Framework
-- [x] What is "density rhythm" across a page? → PULSE, CRESCENDO, BOOKENDS, WAVE patterns
+### R-3 Application Summary
+| Finding ID | Pattern Name | Applied In | Audit Score |
+|------------|--------------|------------|-------------|
+| R3-003 | PULSE | DD-001 | 7.36/10 |
+| R3-004 | CRESCENDO | DD-002 | 8.57/10 |
+| R3-010 | Geological Model | DD-004 | 8.43/10 |
+| R3-012 | Progressive Disclosure | DD-002, DD-004 | 8.5/10 avg |
+| R3-034 | Tidal Framework | DD-005 | 8.50/10 |
+| R3-035 | Musical Framework | DD-005 | 8.50/10 |
+| R3-036 | Fractal Self-Similar | DD-006 | 8.64/10 |
+| R3-047 | Density Contrast | DD-003 | 7.86/10 |
+| R3-048 | Density Debt | All DD | N/A |
+
+### R-3 Priority Queue (Unapplied)
+1. R3-005 (BOOKENDS) — Apply in: OD-002
+2. R3-006 (WAVE) — Apply in: Long-form sections
+3. R3-017 (Jargon Paradox) — Apply in: Section 1 (Catalog)
+4. R3-043 (10-Second Test) — Apply in: All explorations
+5. R3-049 (Density Manifold) — Apply in: Section 3 (Density)
 
 ═══════════════════════════════════════════════════════════════════════════════
-## R-4: AXIS INNOVATIONS
+## R-4: AXIS INNOVATIONS (192 Findings)
 ═══════════════════════════════════════════════════════════════════════════════
 
-**Status:** COMPLETE ✓
-**Output File:** research/R4-AXIS-INNOVATIONS.md (created 2026-02-04)
+**Status:** COMPLETE
+**Output File:** research/R4-AXIS-INNOVATIONS.md
 **Mission:** Explore axis patterns (Z, F, Gutenberg, bento, spiral, diagonal)
 
-### Findings Summary (25 findings)
+### R-4 Summary
+- Total: 192
+- UNAPPLIED: 192
+- APPLIED: 0
+- VALIDATED: 0
+- INVALIDATED: 0
 
-| ID | Finding | Pattern Type | Applied? | Apply To |
-|----|---------|--------------|----------|----------|
-| R4-001 | Z-Pattern (diagonal sweep, minimal content) | Classic | No | Hero sections |
-| R4-002 | F-Pattern (horizontal scans + vertical descent) | Classic | No | Text-heavy pages |
-| R4-003 | Gutenberg Diagram (4 quadrants, reading gravity) | Classic | No | CTA placement |
-| R4-004 | Bento Grid (varied cell sizes) | Innovation | No | Section 1, 4 |
-| R4-005 | Masonry Grid (CSS grid-lanes) | Innovation | No | Section 7 |
-| R4-006 | Asymmetric/Broken Grid (intentional rule-breaking) | Innovation | No | Section 7 |
-| R4-007 | Visual Rhythm (regular, alternating, progressive, flowing, random) | Movement | No | All sections |
-| R4-008 | Cinematic Patterns (wide→close→wide) | Movement | No | Section 5 |
-| R4-009 | Axis Transitions (H↔V choreography) | Movement | No | Section 4 |
-| R4-010 | Golden Ratio/Fibonacci Spiral | Non-linear | No | Section 4 |
-| ... | (15 more findings in full document) | Various | No | Various |
+### R-4 Findings by Category
 
-### Implementation Patterns Defined
-1. **Orchestrated Axis Flow** — Z-hero + Bento features + F-details
-2. **Rhythm-Based Section Flow** — verse/chorus/bridge structure
-3. **Cinematic Documentation Journey** — establishing-medium-closeup-wide
+| ID Range | Pattern Category | Finding Count | Status |
+|----------|------------------|---------------|--------|
+| R4-001 to R4-015 | Classic Reading Patterns (Z, F, Gutenberg) | 15 | UNAPPLIED |
+| R4-016 to R4-028 | Bento Grid Patterns | 13 | UNAPPLIED |
+| R4-029 to R4-034 | Masonry Grid | 6 | UNAPPLIED |
+| R4-035 to R4-049 | Broken/Asymmetric Grid | 15 | UNAPPLIED |
+| R4-050 to R4-068 | Visual Rhythm | 19 | UNAPPLIED |
+| R4-069 to R4-076 | Cinematic Patterns | 8 | UNAPPLIED |
+| R4-077 to R4-092 | Axis Transitions | 16 | UNAPPLIED |
+| R4-093 to R4-103 | Golden Ratio | 11 | UNAPPLIED |
+| R4-104 to R4-115 | Hub and Spoke | 12 | UNAPPLIED |
+| R4-116 to R4-131 | Progressive Disclosure | 16 | UNAPPLIED |
+| R4-132 to R4-147 | Diagonal Patterns | 16 | UNAPPLIED |
+| R4-148 to R4-169 | Pattern Use Cases | 22 | UNAPPLIED |
+| R4-170 to R4-192 | Pattern Combinations | 23 | UNAPPLIED |
 
-### Questions Answered
-- [x] How does eye movement follow Z/F patterns? → Documented with ASCII diagrams
-- [x] What are bento grid variations? → Varied cell sizes, importance signaling
-- [x] How can axis transitions be "choreographed"? → Musical/cinematic patterns
-- [x] What grid innovations exist for documentation? → Bento, masonry, broken grid
+### R-4 Key Findings Reference
+
+| ID | Finding | Primary Use |
+|----|---------|-------------|
+| R4-001 | Z-pattern (diagonal sweep, minimal content) | Hero sections, landing pages |
+| R4-002 | F-pattern (horizontal scans + vertical descent) | Text-heavy documentation |
+| R4-004 | Bento Grid (varied cell sizes) | Feature showcases |
+| R4-050 | Five types of visual rhythm | All layouts |
+| R4-069 | Cinematic wide-close-wide | Tutorials |
+| R4-093 | Golden Ratio (1.618) | Layout proportions |
+| R4-104 | Hub and Spoke | Task-based documentation |
+| R4-116 | Progressive Disclosure reduces cognitive load | Complex documentation |
+| R4-170 | Landing pages: Z-hero + Bento + Progressive | Page composition |
+| R4-190 | Orchestrated Axis Flow | Full-page pattern |
+
+### R-4 Priority Queue
+1. R4-001, R4-002 (Z/F patterns) — Apply in: AD-001, AD-002
+2. R4-004 (Bento Grid) — Apply in: AD-003
+3. R4-050-068 (Visual Rhythm) — Apply in: All explorations
+4. R4-069-076 (Cinematic) — Apply in: AD-005
+5. R4-116-131 (Progressive Disclosure) — Apply in: All sections
+
+### R-4 Full Listing Reference
+For complete 192-finding list, see: research/R4-AXIS-INNOVATIONS.md
 
 ═══════════════════════════════════════════════════════════════════════════════
-## R-5: COMBINATION THEORY
+## R-5: COMBINATION THEORY (39 Findings)
 ═══════════════════════════════════════════════════════════════════════════════
 
-**Status:** COMPLETE ✓
-**Output File:** research/R5-COMBINATION-THEORY.md (created 2026-02-04)
+**Status:** COMPLETE
+**Output File:** research/R5-COMBINATION-THEORY.md
 **Mission:** Develop component combination principles (harmony, tension, sequence, grouping)
 
-### Findings Summary (20 core principles + 7 anti-patterns + 6 recipes)
+### R-5 Summary
+- Total: 39
+- UNAPPLIED: 39
+- APPLIED: 0
+- VALIDATED: 0
+- INVALIDATED: 0
 
-| ID | Finding | Category | Applied? | Apply To |
-|----|---------|----------|----------|----------|
-| R5-H1 | Family Cohesion Through Shared DNA | Harmony | No | Section 2 |
-| R5-H2 | Contrast Creates Perceived Harmony | Harmony | No | All sections |
-| R5-H3 | Shared Visual Anchors | Harmony | No | All sections |
-| R5-H4 | Editorial Spread Pattern | Harmony | No | Section 7 |
-| R5-T1 | Productive Tension vs. Jarring Collision | Tension | No | All sections |
-| R5-T2 | Velocity Mismatch Rule (don't stack slow+slow) | Tension | No | All sections |
-| R5-T3 | Semantic Dissonance (warm/neutral/cold) | Tension | No | All sections |
-| R5-S1 | Setup-Payoff Arc Sequence | Sequence | No | Section 5 |
-| R5-S2 | Density Wave Sequencing | Sequence | No | Section 3 |
-| R5-G1 | Semantic Proximity (8-16px / 24-32px / 48-64px) | Grouping | No | All sections |
+### R-5 Full Finding Table
 
-### Novel Frameworks Created
-- **Velocity Model** — Components have reading speeds (fast/medium/slow)
-- **Temperature Model** — Components have semantic warmth (warm/neutral/cold)
-- **Weight Model** — Components have visual weight (heavy/medium/light)
-- **Kinship Model** — Components have family relationships
+| ID | Finding | Category | Status | Applied In | Evidence | Date |
+|----|---------|----------|--------|------------|----------|------|
+| R5-H1 | Family Cohesion Through Shared DNA | Harmony | UNAPPLIED | | | |
+| R5-H2 | Contrast Creates Perceived Harmony | Harmony | UNAPPLIED | | | |
+| R5-H3 | Shared Visual Anchors | Harmony | UNAPPLIED | | | |
+| R5-H4 | Editorial Spread Pattern | Harmony | UNAPPLIED | | | |
+| R5-T1 | Productive Tension vs Jarring Collision | Tension | UNAPPLIED | | | |
+| R5-T2 | Velocity Mismatch Rule | Tension | UNAPPLIED | | | |
+| R5-T3 | Semantic Dissonance | Tension | UNAPPLIED | | | |
+| R5-T4 | 2-Callout Limit | Tension | UNAPPLIED | | | |
+| R5-S1 | Setup-Payoff Arc | Sequence | UNAPPLIED | | | |
+| R5-S2 | Density Wave Sequencing | Sequence | UNAPPLIED | | | |
+| R5-S3 | First Component Rule | Sequence | UNAPPLIED | | | |
+| R5-S4 | Resolution Component | Sequence | UNAPPLIED | | | |
+| R5-S5 | Teaching Moment Sequence | Sequence | UNAPPLIED | | | |
+| R5-G1 | Semantic Proximity | Grouping | UNAPPLIED | | | |
+| R5-G2 | Container Signal | Grouping | UNAPPLIED | | | |
+| R5-G3 | Visual Weight Balance | Grouping | UNAPPLIED | | | |
+| R5-G4 | Advisory Cluster | Grouping | UNAPPLIED | | | |
+| R5-N1 | Components Stack Not Nest | Nesting | UNAPPLIED | | | |
+| R5-N2 | Composite Components Pre-Composed | Nesting | UNAPPLIED | | | |
+| R5-N3 | Re-sequence Instead of Nest | Nesting | UNAPPLIED | | | |
+| R5-N4 | Depth Limit | Nesting | UNAPPLIED | | | |
+| R5-R1 | Kinship Model | Relationship | UNAPPLIED | | | |
+| R5-R2 | Component Moods | Relationship | UNAPPLIED | | | |
+| R5-R3 | Component Voices | Relationship | UNAPPLIED | | | |
+| R5-A1 | Anti-Pattern: Callout Cacophony | Anti-Pattern | UNAPPLIED | | | |
+| R5-A2 | Anti-Pattern: Code Wall | Anti-Pattern | UNAPPLIED | | | |
+| R5-A3 | Anti-Pattern: Decision Paralysis | Anti-Pattern | UNAPPLIED | | | |
+| R5-A4 | Anti-Pattern: Orphaned Heavy Components | Anti-Pattern | UNAPPLIED | | | |
+| R5-A5 | Anti-Pattern: Temperature Whiplash | Anti-Pattern | UNAPPLIED | | | |
+| R5-A6 | Anti-Pattern: Missing Context Start | Anti-Pattern | UNAPPLIED | | | |
+| R5-A7 | Anti-Pattern: Anxiety Ending | Anti-Pattern | UNAPPLIED | | | |
+| R5-Recipe1 | Quick Reference recipe | Recipe | UNAPPLIED | | | |
+| R5-Recipe2 | Deep Dive recipe | Recipe | UNAPPLIED | | | |
+| R5-Recipe3 | Decision Guide recipe | Recipe | UNAPPLIED | | | |
+| R5-Recipe4 | Troubleshooting Guide recipe | Recipe | UNAPPLIED | | | |
+| R5-Recipe5 | Tutorial Section recipe | Recipe | UNAPPLIED | | | |
+| R5-Recipe6 | Architecture Overview recipe | Recipe | UNAPPLIED | | | |
+| R5-Q1 | Component Density Limits | Quantitative | UNAPPLIED | | | |
+| R5-Q2 | Spacing Standards | Quantitative | UNAPPLIED | | | |
+| R5-Q3 | Reading Rhythm Ratios | Quantitative | UNAPPLIED | | | |
 
-### Questions Answered
-- [x] What creates harmony between components? → Family DNA, contrast, shared anchors
-- [x] When is tension between components useful? → Cognitive pause without dissonance
-- [x] How should components be sequenced? → Setup-payoff arcs, density waves
-- [x] What grouping principles apply? → Semantic proximity, visual weight balance
-- [x] When should components nest vs. stack? → Stack preferred, nest max 1 level
-
-═══════════════════════════════════════════════════════════════════════════════
-## RESEARCH SYNTHESIS
-═══════════════════════════════════════════════════════════════════════════════
-
-**Status:** COMPLETE ✓
-**Output File:** research/RESEARCH-SYNTHESIS.md (created 2026-02-04)
-
-### Synthesis Questions Answered
-- [x] What overlapping insights emerged? → Density rhythm, typography-first, whitespace
-- [x] What conflicting insights need resolution? → Grid breaking vs sharp edges (resolved)
-- [x] What unified framework emerges? → 5 unified design principles
-- [x] What concrete design decisions follow? → Section design matrix, 10 actionable findings
-
-### Cross-Research Connections
-
-| Connection | R-1 | R-2 | R-3 | R-4 | R-5 | Implication |
-|------------|-----|-----|-----|-----|-----|-------------|
-| Density Rhythm | ✓ | - | ✓ | - | ✓ | Use PULSE/WAVE patterns |
-| Typography First | ✓ | ✓ | - | - | - | No decoration, type creates hierarchy |
-| Whitespace | ✓ | ✓ | ✓ | - | ✓ | 24/48px spacing, viewport principle |
-| Axis Choreography | - | ✓ | - | ✓ | - | Z→F→Bento flow |
-| Component Chemistry | - | - | - | - | ✓ | Velocity/temperature/weight models |
-
-═══════════════════════════════════════════════════════════════════════════════
-## EXISTING RESEARCH TO LEVERAGE
-═══════════════════════════════════════════════════════════════════════════════
-
-These files from previous phases contain relevant research:
-
-### From component-system/archive/research-phase-3/
-
-| File | Relevant To | Key Findings |
-|------|-------------|--------------|
-| 4D-editorial-documentation.md | R-1, R-2 | Editorial patterns in docs |
-| 4B-code-block-anatomy.md | R-5 | Code block component theory |
-| 4C-callout-taxonomy.md | R-5 | Callout family relationships |
-| 4E-brutalist-ui-patterns.md | R-2 | Alternative design approaches |
-| 4F-file-tree-designs.md | R-5 | File tree component theory |
-| 4G-progression-indicators.md | R-3 | Progression/density patterns |
-| 4H-decision-matrix-design.md | R-5 | Matrix component theory |
-| 4I-core-abstraction-design.md | R-5 | Composite component theory |
-| 4A-ascii-dither-techniques.md | R-2 | Visual texture techniques |
-
-### From card-system/experiments/
-
-| File | Relevant To | Key Insights |
-|------|-------------|--------------|
-| phase3-page-composition.html | R-1, R-4 | Page layout experiments |
-| phase2-component-library.html | R-2 | Component showcase patterns |
-| exp6-layout-infrastructure.html | R-4 | Grid infrastructure |
-| step7-5-coexistence.html | R-5 | Coexistence testing |
-
-### From perceptual-audit-v2/tracking/
-
-| File | Relevant To | Key Insights |
-|------|-------------|--------------|
-| PERCEPTUAL-TRUTHS.md | R-5 | Component soul truths |
-| ANTI-PATTERNS.md | All | What NOT to do |
+### R-5 Priority Queue
+1. R5-T4 (2-Callout Limit) — Apply in: All explorations
+2. R5-S1 (Setup-Payoff Arc) — Apply in: OD-002
+3. R5-S3 (First Component Rule) — Apply in: All explorations
+4. R5-A1-A7 (Anti-Patterns) — Check in: All explorations
+5. R5-Recipe1-6 (Recipes) — Apply in: CD-001 through CD-006
 
 ═══════════════════════════════════════════════════════════════════════════════
-## APPLICATION TRACKING
+## APPLICATION TRACKING BY EXPLORATION
 ═══════════════════════════════════════════════════════════════════════════════
 
-### By Section
+### Density Explorations (DD-001 through DD-006)
+
+| Exploration | Research Applied | Findings Used | Score |
+|-------------|------------------|---------------|-------|
+| DD-001 Breathing | R3-003 (PULSE) | 1 finding | 30/40 DOCUMENT |
+| DD-002 Gradient | R3-004, R3-012 | 2 findings | 34/40 INCLUDE ★ |
+| DD-003 Islands | R3-047 | 1 finding | 31/40 DOCUMENT |
+| DD-004 Layers | R3-010, R3-012 | 2 findings | 33.5/40 INCLUDE ★ |
+| DD-005 Rivers | R3-034, R3-035 | 2 findings | 34/40 INCLUDE ★ |
+| DD-006 Fractal | R3-036 | 1 finding | 35/40 INCLUDE ★★ BEST |
+
+**Gap Analysis:** Only ~10 of 51 R-3 findings were applied to DD explorations.
+Future explorations should intentionally apply remaining R-3 findings.
+
+### Organizational Explorations (OD-001 through OD-006)
+
+| Exploration | Research Applied | Findings Used | Score |
+|-------------|------------------|---------------|-------|
+| OD-001 Conversational | (NEXT) | | |
+| OD-002 Narrative Arc | (pending) | | |
+| OD-003 Task-Based | (pending) | | |
+| OD-004 Confidence-Based | (pending) | | |
+| OD-005 Spatial/Map | (pending) | | |
+| OD-006 Creative Slot | (pending) | | |
+
+### Axis Explorations (AD-001 through AD-006)
+
+| Exploration | Research Applied | Findings Used | Score |
+|-------------|------------------|---------------|-------|
+| AD-001 Z-Pattern | (pending) | | |
+| AD-002 F-Pattern | (pending) | | |
+| AD-003 Bento Grid | (pending) | | |
+| AD-004 Spiral Reveal | (pending) | | |
+| AD-005 Axis Choreography | (pending) | | |
+| AD-006 Creative Slot | (pending) | | |
+
+### Combination Explorations (CD-001 through CD-006)
+
+| Exploration | Research Applied | Findings Used | Score |
+|-------------|------------------|---------------|-------|
+| CD-001 Reasoning Inside Code | (pending) | | |
+| CD-002 Task + Decision | (pending) | | |
+| CD-003 File Tree + Callouts | (pending) | | |
+| CD-004 Essence as Background | (pending) | | |
+| CD-005 Callouts as Conversation | (pending) | | |
+| CD-006 Creative Slot | (pending) | | |
+
+═══════════════════════════════════════════════════════════════════════════════
+## APPLICATION TRACKING BY SECTION
+═══════════════════════════════════════════════════════════════════════════════
 
 | Section | Research Applied | Findings Used |
 |---------|------------------|---------------|
-| Section 1: Catalog | (pending) | - |
-| Section 2: Families | (pending) | - |
-| Section 3: Density | (pending) | - |
-| Section 4: Axis | (pending) | - |
-| Section 5: Structures | (pending) | - |
-| Section 6: Stress | (pending) | - |
-| Section 7: Discoveries | (pending) | - |
+| Section 1: Catalog | (pending) | |
+| Section 2: Families | (pending) | |
+| Section 3: Density | (pending) | |
+| Section 4: Axis | (pending) | |
+| Section 5: Structures | (pending) | |
+| Section 6: Stress | (pending) | |
+| Section 7: Discoveries | (pending) | |
 
-### Unapplied Findings Checklist
+═══════════════════════════════════════════════════════════════════════════════
+## UPDATE LOG
+═══════════════════════════════════════════════════════════════════════════════
 
-At end of Phase 3, verify ALL findings were considered:
+### 2026-02-04 — Retroactive Research Audit Reconciliation
 
-- [ ] All R-1 findings reviewed for Section 5 (Structures)
-- [ ] All R-2 findings reviewed for Section 7 (Discoveries)
-- [ ] All R-3 findings reviewed for Section 3 (Density)
-- [ ] All R-4 findings reviewed for Section 4 (Axis)
-- [ ] All R-5 findings reviewed for Section 2 (Families)
+**Audit Result:** DD-001 through DD-006 audited against ALL 128 applicable findings
+**Full Report:** `checkpoints/RETROACTIVE-AUDIT-DD-001-006.md`
+
+**Application Rates by Exploration:**
+| Exploration | Critical Findings Checked | Application Rate | Anti-Patterns |
+|-------------|---------------------------|------------------|---------------|
+| DD-001 | 10 | 70% | 1 (Traffic-Light) |
+| DD-002 | 10 | 80% | 0 |
+| DD-003 | 9 | 56% | 0-1 borderline |
+| DD-004 | 13 | 85% | 0 |
+| DD-005 | 12 | 83% | 0 |
+| DD-006 | 8 | 88% | 0 |
+
+**Reconciliation Note:**
+The finding tables below track individual R-X IDs with SPECIFIC evidence. The audit rates above reflect broader categorical coverage (e.g., "density contrast applied" covers multiple related findings). The tracking table shows 10 explicitly marked APPLIED in R-3 because those have line-number evidence; the 76% average rate reflects the audit's assessment of conceptual coverage.
+
+**EXEMPLARY Applications Identified:**
+- R3-005 (Geological Layers) → DD-004
+- R3-029 (Density Contrast) → DD-005
+- R3-023 (Fractal Self-Similar) → DD-006
+- R3-035 (PULSE) → DD-001
+- R3-036 (CRESCENDO) → DD-002
+- R3-044-046 (Surface/Sediment/Bedrock) → DD-004
+
+**Anti-Pattern Violations:**
+- Traffic-Light (DD-001): Green Tip adjacent to Red Gotcha at lines 469-484 — NEEDS FIX
+
+---
+
+### 2026-02-04 — Mandatory Research Application System Implementation
+
+**Actions:**
+- Restructured RESEARCH-ACTIVE.md to comprehensive format
+- Added all 337 findings (R1: 28, R2: 27, R3: 51, R4: 192, R5: 39)
+- Updated R-3 with 10 applied findings from DD explorations
+- Created priority queues for each research stream
+- Added application tracking by exploration and section
+
+**Research Applied:**
+| Finding ID | Applied In | How | Evidence |
+|------------|------------|-----|----------|
+| R3-003 | DD-001 | PULSE density pattern | Alternating density cycles |
+| R3-004 | DD-002 | CRESCENDO pattern | Progressive density escalation |
+| R3-010 | DD-004 | Geological Model | 5-layer depth architecture |
+| R3-012 | DD-002, DD-004 | Progressive Disclosure | Layered content revelation |
+| R3-034 | DD-005 | Tidal Framework | River width = inverse density |
+| R3-035 | DD-005 | Musical Framework | Dynamics-based pacing |
+| R3-036 | DD-006 | Fractal Self-Similarity | Same rhythm at all scales |
+| R3-047 | DD-003 | Density Contrast | Sparse ocean, dense islands |
+| R3-048 | All DD | Density Debt | Recovery whitespace after dense |
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## DOCUMENT METADATA
 ═══════════════════════════════════════════════════════════════════════════════
 
 **Created:** 2026-02-04
-**Purpose:** Track research findings and their application throughout project
+**Last Updated:** 2026-02-04
+**Purpose:** Track ALL 337 research findings and their application status
 **Update Frequency:**
 - After each research agent completes: Add findings
-- After each section built: Mark findings as applied
+- After each exploration/section built: Mark findings as applied
 - End of Phase 3: Verify all findings considered
-**Critical:** This prevents research from being wasted
+
+**Critical:** This is the CENTRAL TRUTH for research application.
+Every piece of work MUST update this file.
+
+**Related Files:**
+- RESEARCH-APPLICATION-ENFORCEMENT-TEMPLATE.md — Fill-in form for each task
+- CLAUDE.md — Project-level mandatory research protocol
+- MASTER-STATE.md — Current project position
+- DISCOVERIES-LOG.md — Learnings from explorations
