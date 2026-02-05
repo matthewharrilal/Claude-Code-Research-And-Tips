@@ -146,3 +146,57 @@ More than 2 = alarm fatigue. The signal is lost.
 | Reference/Lookup | Islands (custom) | Dense clusters in sparse ocean |
 | Long-form docs | WAVE | Responds to content needs |
 | Context-Action-Summary | BOOKENDS | Clear structure |
+
+═══════════════════════════════════════════════════════════════════════════════
+
+## Validated Exploration Patterns (Phase 2.1 Audit)
+
+The following patterns were validated through perceptual depth audit on 2026-02-04:
+
+### CRESCENDO — Validated by DD-002 (Score: 34/40 INCLUDE ★)
+```
+░░░░░░░████████████████
+```
+**Exploration:** DD-002-gradient.html demonstrates sparse→dense onboarding flow.
+**Key Finding:** Remove density indicators after section 2 — users learn the pattern.
+**Audit Score:** 8.57/10 average across 7 zones.
+
+### GEOLOGICAL LAYERS — Validated by DD-004 (Score: 33.5/40 INCLUDE ★)
+```
+Atmosphere (minimal) → Surface (low) → Topsoil (medium) → Subsoil (high) → Bedrock (max)
+```
+**Exploration:** DD-004-layers.html demonstrates 5-layer depth stratification.
+**Key Finding:** 5-bar depth indicator system communicates layer position effectively.
+**Audit Score:** 8.43/10 average across 7 zones.
+
+### RIVER FLOW — Validated by DD-005 (Score: 34/40 INCLUDE ★)
+```
+Wide (sparse) ═══════════════
+Medium (balanced) ═══════
+Narrow (dense) ═══
+```
+**Exploration:** DD-005-rivers.html demonstrates width = inverse density.
+**Key Finding:** Parallel rivers enable comparison; confluence points for decisions.
+**Flow Patterns:** Wide→Narrow, Parallel, Delta (1→3 split), Confluence (merge).
+**Audit Score:** 8.50/10 average across 7 zones.
+
+### FRACTAL SELF-SIMILARITY — Validated by DD-006 (Score: 35/40 INCLUDE ★★ BEST)
+```
+Page:      █░░█░░█░░
+Section:   █░░█░░█░░
+Component: █░░█░░█░░
+Character: █░░█░░█░░
+```
+**Exploration:** DD-006-fractal.html demonstrates same rhythm at all scales.
+**Key Finding:** Self-similar patterns make documentation feel coherent and navigable.
+**Audit Score:** 8.64/10 average across 7 zones — highest scoring exploration.
+
+### Patterns Documented (Not Included)
+
+**BREATHING (DD-001)** — Score: 30/40 DOCUMENT
+- Inhale/Exhale rhythm works but has traffic-light anti-pattern (green+red adjacent)
+- Foundation for PULSE; needs refinement before production use
+
+**ISLANDS (DD-003)** — Score: 31/40 DOCUMENT
+- Dense clusters in sparse ocean work conceptually
+- Archipelago metaphor underutilized; callout borders too subtle
