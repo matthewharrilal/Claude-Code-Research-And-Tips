@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DD-006: Fractal Density</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════════════════
+       LOCKED DESIGN TOKENS — From DESIGN-TOKEN-SUMMARY.md
+       DD-005 Lessons: Visualization at top, labels on elements, flow patterns
+       ═══════════════════════════════════════════════════════════════════════════ */
+    :root {
+      /* Colors */
+      --color-primary: #E83025;
+      --color-background: #FEF9F5;
+      --color-text: #1A1A1A;
+      --color-text-secondary: #666666;
+      --color-border: #E0D5C5;
+      --color-border-subtle: #F0EBE3;
+
+      /* Typography */
+      --font-display: 'Instrument Serif', Georgia, serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+      /* Geometry — LOCKED */
+      --border-radius: 0;
+      --box-shadow: none;
+
+      /* Spacing */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --space-12: 48px;
+      --space-16: 64px;
+      --space-20: 80px;
+
+      /* Callout Accents */
+      --accent-blue: #4A90D9;
+      --accent-green: #4A9D6B;
+      --accent-amber: #D97706;
+      --accent-purple: #7C3AED;
+
+      /* Standardized Border */
+      --border-left-width: 4px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--color-background);
+      color: var(--color-text);
+      line-height: 1.7;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       EXPLORATION HEADER
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .exploration-header {
+      border-bottom: 3px solid var(--color-primary);
+      padding: var(--space-6);
+      background: white;
+      margin-bottom: var(--space-16);
+    }
+
+    .exploration-id {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-2);
+    }
+
+    .exploration-title {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-style: italic;
+      margin-bottom: var(--space-3);
+    }
+
+    .exploration-hypothesis {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      max-width: 600px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       PAGE CONTAINER
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .page-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       FRACTAL VISUALIZATION — The concept
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .fractal-visualization {
+      margin: var(--space-8) 0;
+      padding: var(--space-6);
+      background: white;
+      border-left: var(--border-left-width) solid var(--color-primary);
+    }
+
+    .fractal-visualization__title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-4);
+    }
+
+    .fractal-diagram {
+      display: flex;
+      gap: var(--space-6);
+      align-items: flex-start;
+    }
+
+    @media (max-width: 768px) {
+      .fractal-diagram {
+        flex-direction: column;
+      }
+    }
+
+    .fractal-scale {
+      flex: 1;
+      text-align: center;
+    }
+
+    .fractal-scale__label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-2);
+    }
+
+    .fractal-scale__box {
+      background: var(--color-border-subtle);
+      border-left: 3px solid var(--color-primary);
+      padding: var(--space-3);
+      margin-bottom: var(--space-2);
+    }
+
+    .fractal-scale__description {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+    }
+
+    .fractal-connector {
+      display: flex;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 16px;
+      color: var(--color-border);
+      padding-top: var(--space-8);
+    }
+
+    /* Nested box visualization */
+    .fractal-nested {
+      padding: var(--space-4);
+      border-left: 3px solid var(--color-primary);
+      background: rgba(232, 48, 37, 0.03);
+    }
+
+    .fractal-nested .fractal-nested {
+      margin-top: var(--space-3);
+      background: rgba(232, 48, 37, 0.06);
+    }
+
+    .fractal-nested .fractal-nested .fractal-nested {
+      background: rgba(232, 48, 37, 0.09);
+    }
+
+    .fractal-nested__label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-primary);
+      margin-bottom: var(--space-1);
+    }
+
+    .fractal-nested__content {
+      font-size: 12px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       SCALE LEVELS — Each demonstrates the same density rhythm
+       Research: R-3 Insight #23 (Self-Similar Density)
+       ═══════════════════════════════════════════════════════════════════════════ */
+
+    /* SCALE CONTAINER — Generic wrapper */
+    .scale-demo {
+      margin-bottom: var(--space-12);
+      position: relative;
+    }
+
+    .scale-demo__header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-4);
+      padding-bottom: var(--space-2);
+      border-bottom: 2px solid var(--color-primary);
+    }
+
+    .scale-demo__level {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-primary);
+      background: rgba(232, 48, 37, 0.1);
+      padding: var(--space-1) var(--space-2);
+    }
+
+    .scale-demo__title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-style: italic;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       LEVEL 1: PAGE SCALE — Dense/Sparse sections
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .page-scale {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-4);
+    }
+
+    @media (max-width: 768px) {
+      .page-scale {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .page-scale__section {
+      border-left: var(--border-left-width) solid var(--color-border);
+      padding: var(--space-4);
+    }
+
+    .page-scale__section--dense {
+      background: var(--color-border-subtle);
+      border-left-color: var(--color-primary);
+    }
+
+    .page-scale__section--sparse {
+      background: white;
+    }
+
+    .page-scale__label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-2);
+    }
+
+    .page-scale__content {
+      font-size: 13px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       LEVEL 2: SECTION SCALE — Dense/Sparse paragraphs
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .section-scale {
+      background: white;
+      border-left: var(--border-left-width) solid var(--color-border);
+      padding: var(--space-5);
+    }
+
+    .section-scale__title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-style: italic;
+      margin-bottom: var(--space-4);
+    }
+
+    .section-scale__para {
+      margin-bottom: var(--space-4);
+    }
+
+    .section-scale__para--dense {
+      background: var(--color-border-subtle);
+      padding: var(--space-3);
+      border-left: 2px solid var(--color-primary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .section-scale__para--sparse {
+      font-size: 15px;
+      line-height: 1.8;
+      max-width: 60ch;
+    }
+
+    .section-scale__para-label {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-1);
+      display: block;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       LEVEL 3: COMPONENT SCALE — Dense/Sparse zones within component
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .component-scale {
+      background: white;
+      border-left: var(--border-left-width) solid var(--accent-blue);
+      padding: var(--space-4);
+    }
+
+    .component-scale__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border-subtle);
+      margin-bottom: var(--space-3);
+    }
+
+    .component-scale__label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-blue);
+    }
+
+    .component-scale__dense-zone {
+      background: var(--color-border-subtle);
+      padding: var(--space-2);
+      margin-bottom: var(--space-2);
+      font-size: 12px;
+    }
+
+    .component-scale__sparse-zone {
+      padding: var(--space-2);
+      font-size: 14px;
+      color: var(--color-text-secondary);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       LEVEL 4: CHARACTER SCALE — Dense code / Sparse comments
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .character-scale {
+      background: #1E1E1E;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.6;
+      color: #F5F0EB;
+      padding: var(--space-4);
+    }
+
+    .character-scale__line {
+      display: flex;
+      gap: var(--space-3);
+    }
+
+    .character-scale__num {
+      color: #666;
+      user-select: none;
+      min-width: 24px;
+    }
+
+    .character-scale__code {
+      color: #F5F0EB;
+    }
+
+    .character-scale__comment {
+      color: #6A9955;
+    }
+
+    .character-scale .keyword { color: #569CD6; }
+    .character-scale .string { color: #CE9178; }
+    .character-scale .function { color: #DCDCAA; }
+    .character-scale .variable { color: #9CDCFE; }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       COMPLETE FRACTAL EXAMPLE — All scales in one structure
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .fractal-complete {
+      border: 1px solid var(--color-border-subtle);
+      border-left: var(--border-left-width) solid var(--color-primary);
+      margin-bottom: var(--space-8);
+    }
+
+    .fractal-complete__header {
+      background: rgba(232, 48, 37, 0.05);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .fractal-complete__title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-primary);
+    }
+
+    .fractal-complete__body {
+      padding: var(--space-5);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       TYPOGRAPHY — Standard
+       ═══════════════════════════════════════════════════════════════════════════ */
+    h2 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-style: italic;
+      margin-bottom: var(--space-4);
+    }
+
+    h3 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-style: italic;
+      margin-bottom: var(--space-3);
+    }
+
+    p {
+      margin-bottom: var(--space-4);
+      max-width: 65ch;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       CALLOUTS
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .callout-essence {
+      border-left: var(--border-left-width) solid var(--accent-amber);
+      background: rgba(217, 119, 6, 0.08);
+      padding: var(--space-5);
+      margin: var(--space-6) 0;
+    }
+
+    .callout-essence__label {
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-amber);
+      margin-bottom: var(--space-2);
+    }
+
+    .callout-essence__content {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-style: italic;
+      line-height: 1.7;
+    }
+
+    .callout-info {
+      border-left: var(--border-left-width) solid var(--accent-blue);
+      background: rgba(74, 144, 217, 0.08);
+      padding: var(--space-4);
+      margin: var(--space-4) 0;
+    }
+
+    .callout-info__label {
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-blue);
+      margin-bottom: var(--space-2);
+    }
+
+    .callout-info__content {
+      font-size: 14px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       WIDE INTRO
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .intro {
+      max-width: 700px;
+      margin: 0 auto var(--space-12);
+      text-align: center;
+    }
+
+    .intro h2 {
+      margin-bottom: var(--space-3);
+    }
+
+    .intro p {
+      font-size: 16px;
+      max-width: none;
+      margin: 0 auto;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       SCALE COMPARISON — Side by side
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .scale-comparison {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-4);
+      margin: var(--space-8) 0;
+    }
+
+    @media (max-width: 900px) {
+      .scale-comparison {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 500px) {
+      .scale-comparison {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .scale-comparison__item {
+      border-left: 3px solid var(--color-primary);
+      padding: var(--space-3);
+      background: white;
+    }
+
+    .scale-comparison__level {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .scale-comparison__pattern {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-2);
+    }
+
+    .scale-comparison__example {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       SECTION DIVIDER
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .section-divider {
+      margin: var(--space-12) 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .section-divider::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: var(--color-border-subtle);
+    }
+
+    .section-divider__label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--color-border);
+      background: var(--color-background);
+      padding: 0 var(--space-4);
+      position: relative;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- EXPLORATION HEADER -->
+  <header class="exploration-header">
+    <div class="exploration-id">DD-006 — Density Exploration (Creative Slot)</div>
+    <h1 class="exploration-title">Fractal Density</h1>
+    <p class="exploration-hypothesis">
+      <strong>Hypothesis:</strong> Good density patterns are self-similar at multiple scales —
+      the same rhythm of dense/sparse appears at page level, section level, component level,
+      and even character level. This creates coherent, recognizable structure.
+      Applying R-3 Insight #23 (Self-Similar Density).
+    </p>
+  </header>
+
+  <main class="page-container">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         FRACTAL VISUALIZATION — The concept
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="fractal-visualization">
+      <div class="fractal-visualization__title">The Same Rhythm at Every Scale</div>
+      <div class="fractal-diagram">
+        <div class="fractal-scale">
+          <div class="fractal-scale__label">Page Level</div>
+          <div class="fractal-scale__box">Dense section</div>
+          <div class="fractal-scale__box" style="background: white;">Sparse section</div>
+          <div class="fractal-scale__box">Dense section</div>
+          <div class="fractal-scale__description">Sections alternate</div>
+        </div>
+
+        <div class="fractal-connector">≈</div>
+
+        <div class="fractal-scale">
+          <div class="fractal-scale__label">Section Level</div>
+          <div class="fractal-scale__box">Dense paragraph</div>
+          <div class="fractal-scale__box" style="background: white;">Whitespace</div>
+          <div class="fractal-scale__box">Dense paragraph</div>
+          <div class="fractal-scale__description">Paragraphs alternate</div>
+        </div>
+
+        <div class="fractal-connector">≈</div>
+
+        <div class="fractal-scale">
+          <div class="fractal-scale__label">Component Level</div>
+          <div class="fractal-scale__box">Dense header</div>
+          <div class="fractal-scale__box" style="background: white;">Sparse body</div>
+          <div class="fractal-scale__box">Dense footer</div>
+          <div class="fractal-scale__description">Zones alternate</div>
+        </div>
+
+        <div class="fractal-connector">≈</div>
+
+        <div class="fractal-scale">
+          <div class="fractal-scale__label">Character Level</div>
+          <div class="fractal-scale__box">Dense code</div>
+          <div class="fractal-scale__box" style="background: white;">Sparse comment</div>
+          <div class="fractal-scale__box">Dense code</div>
+          <div class="fractal-scale__description">Lines alternate</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         INTRO
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="intro">
+      <h2>Self-Similarity Creates Recognition</h2>
+      <p>
+        Like fractals in nature — fern leaves, coastlines, snowflakes — documentation that
+        follows the same density rhythm at every scale feels coherent and navigable.
+        You learn the pattern once and recognize it everywhere.
+      </p>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SCALE COMPARISON — The pattern at each level
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="scale-comparison">
+      <div class="scale-comparison__item">
+        <div class="scale-comparison__level">Page</div>
+        <div class="scale-comparison__pattern">█░░█░░█░░</div>
+        <div class="scale-comparison__example">Dense sections alternate with sparse</div>
+      </div>
+      <div class="scale-comparison__item">
+        <div class="scale-comparison__level">Section</div>
+        <div class="scale-comparison__pattern">█░░█░░█░░</div>
+        <div class="scale-comparison__example">Dense paragraphs alternate with whitespace</div>
+      </div>
+      <div class="scale-comparison__item">
+        <div class="scale-comparison__level">Component</div>
+        <div class="scale-comparison__pattern">█░░█░░█░░</div>
+        <div class="scale-comparison__example">Dense labels alternate with sparse content</div>
+      </div>
+      <div class="scale-comparison__item">
+        <div class="scale-comparison__level">Character</div>
+        <div class="scale-comparison__pattern">█░░█░░█░░</div>
+        <div class="scale-comparison__example">Dense code alternate with sparse comments</div>
+      </div>
+    </div>
+
+
+    <div class="section-divider">
+      <span class="section-divider__label">Demonstration at Each Scale</span>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         LEVEL 1: PAGE SCALE
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="scale-demo">
+      <div class="scale-demo__header">
+        <span class="scale-demo__level">Level 1</span>
+        <span class="scale-demo__title">Page Scale — Dense vs Sparse Sections</span>
+      </div>
+
+      <div class="page-scale">
+        <div class="page-scale__section page-scale__section--dense">
+          <div class="page-scale__label">Dense Section</div>
+          <div class="page-scale__content">
+            <p style="margin: 0;">Configuration options, API reference, code examples, parameter tables — information-rich content that experts scan quickly.</p>
+          </div>
+        </div>
+
+        <div class="page-scale__section page-scale__section--sparse">
+          <div class="page-scale__label">Sparse Section</div>
+          <div class="page-scale__content">
+            <p style="margin: 0;">Breathing room. Context. Philosophy. The "why" before the "how."</p>
+          </div>
+        </div>
+
+        <div class="page-scale__section page-scale__section--dense">
+          <div class="page-scale__label">Dense Section</div>
+          <div class="page-scale__content">
+            <p style="margin: 0;">Implementation details, error handling, edge cases, troubleshooting — detailed reference material.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         LEVEL 2: SECTION SCALE
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="scale-demo">
+      <div class="scale-demo__header">
+        <span class="scale-demo__level">Level 2</span>
+        <span class="scale-demo__title">Section Scale — Dense vs Sparse Paragraphs</span>
+      </div>
+
+      <div class="section-scale">
+        <h3 class="section-scale__title">Error Handling Patterns</h3>
+
+        <div class="section-scale__para section-scale__para--sparse">
+          <span class="section-scale__para-label">Sparse — Context</span>
+          Errors are inevitable. How you handle them determines whether your application
+          feels robust or fragile. The goal isn't to prevent all errors — it's to respond
+          gracefully when they occur.
+        </div>
+
+        <div class="section-scale__para section-scale__para--dense">
+          <span class="section-scale__para-label">Dense — Details</span>
+          Catch specific exceptions, not generic ones. Log the stack trace. Include request ID in error responses. Implement retry logic with exponential backoff. Set appropriate timeouts. Return meaningful error codes (4xx for client errors, 5xx for server errors). Never expose internal details in production error messages.
+        </div>
+
+        <div class="section-scale__para section-scale__para--sparse">
+          <span class="section-scale__para-label">Sparse — Reflection</span>
+          Well-handled errors build user trust. They show you've anticipated problems
+          and cared enough to provide guidance.
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         LEVEL 3: COMPONENT SCALE
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="scale-demo">
+      <div class="scale-demo__header">
+        <span class="scale-demo__level">Level 3</span>
+        <span class="scale-demo__title">Component Scale — Dense vs Sparse Zones</span>
+      </div>
+
+      <div class="component-scale">
+        <div class="component-scale__header">
+          <span class="component-scale__label">Info Callout</span>
+          <span style="font-size: 11px; color: var(--color-text-secondary);">Dense label zone</span>
+        </div>
+        <div class="component-scale__dense-zone">
+          <strong>Rate Limit:</strong> 100 req/min | <strong>Timeout:</strong> 30s | <strong>Retry:</strong> 3x
+        </div>
+        <div class="component-scale__sparse-zone">
+          These limits apply to all API endpoints. Contact support for higher limits.
+        </div>
+      </div>
+
+      <div class="callout-info" style="margin-top: var(--space-4);">
+        <div class="callout-info__label">Same Pattern</div>
+        <div class="callout-info__content">
+          Notice how this callout also has a <strong>dense label zone</strong> (the blue label)
+          followed by a <strong>sparse content zone</strong> (this text). The pattern repeats.
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         LEVEL 4: CHARACTER SCALE
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="scale-demo">
+      <div class="scale-demo__header">
+        <span class="scale-demo__level">Level 4</span>
+        <span class="scale-demo__title">Character Scale — Dense Code vs Sparse Comments</span>
+      </div>
+
+      <div class="character-scale">
+        <div class="character-scale__line">
+          <span class="character-scale__num">1</span>
+          <span class="character-scale__comment">// Sparse: What this function does</span>
+        </div>
+        <div class="character-scale__line">
+          <span class="character-scale__num">2</span>
+          <span class="character-scale__code"><span class="keyword">async function</span> <span class="function">fetchUser</span>(<span class="variable">id</span>) {</span>
+        </div>
+        <div class="character-scale__line">
+          <span class="character-scale__num">3</span>
+          <span class="character-scale__code">  <span class="keyword">const</span> <span class="variable">response</span> = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">`/api/users/${id}`</span>);</span>
+        </div>
+        <div class="character-scale__line">
+          <span class="character-scale__num">4</span>
+          <span class="character-scale__code">&nbsp;</span>
+        </div>
+        <div class="character-scale__line">
+          <span class="character-scale__num">5</span>
+          <span class="character-scale__comment">  // Sparse: Why we check status</span>
+        </div>
+        <div class="character-scale__line">
+          <span class="character-scale__num">6</span>
+          <span class="character-scale__code">  <span class="keyword">if</span> (!<span class="variable">response</span>.<span class="variable">ok</span>) <span class="keyword">throw new</span> <span class="function">Error</span>(<span class="string">'Failed'</span>);</span>
+        </div>
+        <div class="character-scale__line">
+          <span class="character-scale__num">7</span>
+          <span class="character-scale__code">&nbsp;</span>
+        </div>
+        <div class="character-scale__line">
+          <span class="character-scale__num">8</span>
+          <span class="character-scale__comment">  // Sparse: Why we parse JSON</span>
+        </div>
+        <div class="character-scale__line">
+          <span class="character-scale__num">9</span>
+          <span class="character-scale__code">  <span class="keyword">return await</span> <span class="variable">response</span>.<span class="function">json</span>();</span>
+        </div>
+        <div class="character-scale__line">
+          <span class="character-scale__num">10</span>
+          <span class="character-scale__code">}</span>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="section-divider">
+      <span class="section-divider__label">Complete Fractal Example</span>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         COMPLETE EXAMPLE — All scales nested
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="fractal-complete">
+      <div class="fractal-complete__header">
+        <div class="fractal-complete__title">All Four Scales in One Structure</div>
+      </div>
+      <div class="fractal-complete__body">
+
+        <!-- Page scale: This is a dense section -->
+        <div class="fractal-nested">
+          <div class="fractal-nested__label">Page Scale: Dense Section</div>
+          <div class="fractal-nested__content">
+
+            <!-- Section scale: Dense/sparse paragraphs -->
+            <p style="font-size: 14px; margin-bottom: var(--space-3);">
+              <strong>Authentication</strong> — Every request must include a valid API key.
+            </p>
+
+            <!-- Component scale: Info callout -->
+            <div class="fractal-nested">
+              <div class="fractal-nested__label">Component Scale: Info Callout</div>
+              <div class="fractal-nested__content">
+                <div style="font-family: var(--font-mono); font-size: 10px; color: var(--accent-blue); margin-bottom: 4px;">API KEY FORMAT</div>
+                <div style="font-size: 12px;">
+
+                  <!-- Character scale: Code with comments -->
+                  <div class="fractal-nested">
+                    <div class="fractal-nested__label">Character Scale: Code</div>
+                    <div class="fractal-nested__content">
+                      <code style="font-size: 11px;">
+                        <span style="color: #6A9955;">// Your API key</span><br>
+                        <span style="color: #569CD6;">const</span> key = <span style="color: #CE9178;">"sk_live_..."</span>;
+                      </code>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         ESSENCE — Key insight
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="callout-essence" style="max-width: 700px; margin: var(--space-12) auto;">
+      <div class="callout-essence__label">Key Insight</div>
+      <div class="callout-essence__content">
+        You've just experienced fractal density: the same rhythm of dense/sparse repeating at
+        every level of scale. Page sections alternate dense and sparse. Within sections,
+        paragraphs alternate. Within components, zones alternate. Within code, lines alternate.
+        This self-similarity makes documentation feel coherent and navigable — you learn the
+        pattern once and recognize it everywhere.
+      </div>
+    </div>
+
+  </main>
+
+  <!--
+    ═══════════════════════════════════════════════════════════════════════════
+    FRACTAL DENSITY PATTERN SUMMARY
+    ═══════════════════════════════════════════════════════════════════════════
+
+    CORE CONCEPT:
+    Good density patterns are FRACTAL — the same rhythm appears at multiple scales.
+    Dense/Sparse alternation is self-similar from page down to character level.
+
+    SCALE LEVELS:
+
+    Level 1 — PAGE SCALE
+    - Dense sections (code, reference, config)
+    - Sparse sections (context, philosophy, overview)
+    - Pattern: █░░█░░█░░
+
+    Level 2 — SECTION SCALE
+    - Dense paragraphs (detailed, compact, information-rich)
+    - Sparse paragraphs (context, breathing, reflection)
+    - Pattern: █░░█░░█░░
+
+    Level 3 — COMPONENT SCALE
+    - Dense zones (labels, metadata, key-value)
+    - Sparse zones (content, descriptions, explanations)
+    - Pattern: █░░█░░█░░
+
+    Level 4 — CHARACTER SCALE
+    - Dense lines (code, syntax, logic)
+    - Sparse lines (comments, whitespace)
+    - Pattern: █░░█░░█░░
+
+    RESEARCH APPLIED:
+    - R-3 Insight #23: Self-similar density patterns (the core insight)
+    - R-3 Insight #28: Density inheritance (context affects perceived density)
+    - R-3 Fractal Framework: Same pattern at different scales
+
+    WHY IT WORKS:
+    1. Recognition: Learn the pattern once, recognize it everywhere
+    2. Navigation: Predictable rhythm aids scanning
+    3. Coherence: Feels like one unified design system
+    4. Comfort: Familiar patterns reduce cognitive load
+
+    IMPLEMENTATION:
+    - Alternate dense/sparse at every level
+    - Visual signals: background color, border weight, spacing
+    - Labels help identify current scale level
+    - Nested visualization shows the fractal nature
+
+    DD-005 LESSONS APPLIED:
+    - ✓ Visualization at top (four-column scale comparison)
+    - ✓ Each scale gets its own demonstration
+    - ✓ Labels throughout indicate scale level
+    - ✓ Complete example shows all scales nested
+    ═══════════════════════════════════════════════════════════════════════════
+  -->
+
+</body>
+</html>
