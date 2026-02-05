@@ -6,9 +6,69 @@
 ═══════════════════════════════════════════════════════════════════════════════
 
 **Phase:** 2 (Creative Exploration)
-**Step:** 2.1 (Density Explorations) — DD-004 next
+**Step:** 2.2 (Organizational Explorations) — OD-001 next
 **Status:** IN PROGRESS
-**Last Updated:** 2026-02-04 [DD-003 COMPLETE — Score 30.5/40 | FINDINGS-INDEX.md created]
+**Last Updated:** 2026-02-04 [DD RE-AUDIT PERCEPTUAL DEEPENING COMPLETE]
+
+### ✓ DD Re-Audit — Perceptual Deepening (LATEST)
+- **Audit Method:** /perceptual-deepening skill with sub-agents A, D, E
+- **DDs Audited:** All 6 (DD-001 through DD-006)
+- **Results:**
+  | DD | Original | New | Change | Status |
+  |----|----------|-----|--------|--------|
+  | DD-001 Breathing | 30.5 | **33** | +2.5 | ✅ **INCLUDE** (↑) |
+  | DD-002 Gradient | 34 | **35** | +1 | ✅ INCLUDE |
+  | DD-003 Islands | 30.5 | **32** | +1.5 | ✅ **INCLUDE** (↑) |
+  | DD-004 Layers | 33 | **35** | +2 | ✅ INCLUDE |
+  | DD-005 Rivers | 33.5 | **36** | +2.5 | ✅ INCLUDE |
+  | DD-006 Fractal | 34.5 | **36** | +1.5 | ✅ INCLUDE ★★ |
+- **Average Score:** 32.7 → 34.5 (+1.8)
+- **Soul Compliance:** 100% across all 6 DDs
+- **Decision Changes:** DD-001 DOCUMENT→INCLUDE, DD-003 DOCUMENT→INCLUDE
+- **Full Audit:** `checkpoints/DD-REAUDIT-PERCEPTUAL-SYNTHESIS.md`
+- **Screenshots:** `audit-screenshots/dd-reaudit/` (6 full-page)
+
+### ✓ Foundation Remediation — Perceptual Deepening Audit (Earlier)
+- **Audit Method:** /perceptual-deepening skill with 5 sub-agents
+- **Components Audited:** All 11 (COMP-001 through COMP-011)
+- **DD Explorations Audited:** 4 (DD-001, DD-004, DD-005, DD-006)
+- **globals.css Fixes:** 3 hardcoded violations corrected
+- **Results:**
+  | Component | Previous | Current | Status |
+  |-----------|----------|---------|--------|
+  | All 11 Components | 54% avg | ~92% | ✅ ALL PASSING |
+  | DD-001 Breathing | - | ✅ | PASSING |
+  | DD-004 Layers | - | ✅ | PASSING |
+  | DD-005 Rivers | - | ✅ | PASSING |
+  | DD-006 Fractal | - | ✅ | PASSING |
+- **Soul Pieces Documented:** 5 (Sharp Edges, Serif Archivist, Family DNA, No Shadows, Square System)
+- **Full Audit:** `checkpoints/PERCEPTUAL-AUDIT-LOG.md`
+- **Soul Discoveries:** `checkpoints/SOUL-DISCOVERIES.md`
+
+### ✓ Phase 2.1 Perceptual Depth Audit Summary (Earlier)
+- **Audit Method:** Full 7-agent visual audit on all 6 explorations
+- **Screenshots:** Fresh DD-001 through DD-006 full-page captures
+- **Scores Verified:** All original scores within ±0.5 points
+- **Soul Alignment:** 5/6 pass (DD-001 has minor traffic-light issue)
+- **Research Coverage:** 80% of R-3 findings visibly applied
+- **Decision:** VERIFIED — Ready to proceed to OD-001
+
+### ✓ Retroactive Research Audit Summary (Latest)
+- **Audit Method:** Finding-by-finding check against ALL 128 applicable research findings
+- **Files Read Fresh:** R1-R5, RESEARCH-SYNTHESIS, density-patterns, anti-patterns
+- **Coverage Analysis:** Cross-exploration coverage mapped
+- **Results:**
+  | Exploration | Research Rate | Anti-Patterns | Decision |
+  |-------------|---------------|---------------|----------|
+  | DD-001 | 70% | 1 (Traffic-Light) | CONFIRMED DOCUMENT |
+  | DD-002 | 80% | 0 | CONFIRMED INCLUDE |
+  | DD-003 | 56% | 0 | CONFIRMED DOCUMENT |
+  | DD-004 | 85% | 0 | CONFIRMED INCLUDE |
+  | DD-005 | 83% | 0 | CONFIRMED INCLUDE |
+  | DD-006 | 88% | 0 | CONFIRMED INCLUDE ★★ |
+- **Full Audit:** `checkpoints/RETROACTIVE-AUDIT-DD-001-006.md`
+- **Remediation:** DD-001 needs traffic-light fix (green/red separation)
+- **Decision:** ALL 6 DECISIONS CONFIRMED — Ready for OD-001
 
 ### NEW: Master Findings Index
 **→ docs-spa/app/showcase/FINDINGS-INDEX.md** — Complete knowledge architecture for future infrastructure
@@ -26,14 +86,21 @@ Phase 1: Research Deployment         [COMPLETE ██████████] 1
 ├── 1.5 R-5: Combination Theory      [COMPLETE ✓] 20 findings
 └── 1.6 Research Synthesis           [COMPLETE ✓] 5 unified principles
 
-Phase 2: Creative Exploration        [IN PROGRESS ███░░░░░░░] ~12%
-├── 2.1 Density Explorations (DD)    [IN PROGRESS ⟳] 3/6 complete
-│   ├── DD-001 Density Breathing     [COMPLETE ✓] 30.5/40 DOCUMENT
-│   ├── DD-002 Density Gradient      [COMPLETE ✓] 34/40 INCLUDE ★
-│   ├── DD-003 Density Islands       [COMPLETE ✓] 30.5/40 DOCUMENT
-│   ├── DD-004 Density Layers        [NEXT →]
-│   ├── DD-005 Density Rivers        [PENDING]
-│   └── DD-006 Creative Slot         [PENDING]
+Phase 2: Creative Exploration        [IN PROGRESS ██████░░░░] ~25%
+├── 2.1 Density Explorations (DD)    [COMPLETE ██████████] 6/6 ✓ ALL INCLUDE
+│   ├── DD-001 Density Breathing     [COMPLETE ✓] **33/40 INCLUDE** (↑ from DOCUMENT)
+│   ├── DD-002 Density Gradient      [COMPLETE ✓] **35/40 INCLUDE ★**
+│   ├── DD-003 Density Islands       [COMPLETE ✓] **32/40 INCLUDE** (↑ from DOCUMENT)
+│   ├── DD-004 Density Layers        [COMPLETE ✓] **35/40 INCLUDE ★**
+│   ├── DD-005 Density Rivers        [COMPLETE ✓] **36/40 INCLUDE ★**
+│   └── DD-006 Fractal Density       [COMPLETE ✓] **36/40 INCLUDE ★★ BEST**
+├── 2.2 Organizational Explorations (OD) [NEXT →] 0/6 complete
+│   ├── OD-001 Conversational        [NEXT →]
+│   ├── OD-002 Narrative Arc         [PENDING]
+│   ├── OD-003 Task-Based            [PENDING]
+│   ├── OD-004 Confidence-Based      [PENDING]
+│   ├── OD-005 Spatial/Map           [PENDING]
+│   └── OD-006 Creative Slot         [PENDING]
 ├── 2.2 Organizational Explorations (OD) [PENDING] 6 experiments
 ├── 2.3 Axis Explorations (AD)       [PENDING] 6 experiments
 ├── 2.4 Combination Explorations (CD) [PENDING] 6 experiments
@@ -48,28 +115,36 @@ Phase 5: Documentation               [NOT STARTED ░░░░░░░░░░
 ## NEXT ACTION
 ═══════════════════════════════════════════════════════════════════════════════
 
-**IMMEDIATE:** Build DD-004: Density Layers (foreground/background depth differentiation)
+**IMMEDIATE:** Build OD-001: Conversational Structure (Q&A dialogue patterns)
 
-**Action Details:**
-1. ✅ DD-001: Density Breathing — COMPLETE (30.5/40 DOCUMENT)
-2. ✅ DD-002: Density Gradient — COMPLETE (34/40 INCLUDE ★)
-3. ✅ DD-003: Density Islands — COMPLETE (30.5/40 DOCUMENT)
-4. → DD-004: Density Layers (foreground/background) — BUILD NOW
-5. DD-005: Density Rivers (varied channels)
-6. DD-006: Creative density idea (Density Manifold visualization?)
-7. For each: Build HTML, screenshot with Playwright, audit, score ≥32/40
+**Density Explorations COMPLETE — ALL 6 INCLUDE (Post Re-Audit):**
+| ID | Name | Score | Decision |
+|----|------|-------|----------|
+| DD-001 | Density Breathing | **33** | **INCLUDE** (↑) |
+| DD-002 | Density Gradient | **35** | INCLUDE ★ |
+| DD-003 | Density Islands | **32** | **INCLUDE** (↑) |
+| DD-004 | Density Layers | **35** | INCLUDE ★ |
+| DD-005 | Density Rivers | **36** | INCLUDE ★ |
+| DD-006 | Fractal Density | **36** | INCLUDE ★★ BEST |
 
-**Research to Apply for DD-004:**
-- R-3: Geological Model (surface/sediment/bedrock layers)
-- R-3: Depth Density (z-axis layering in 2D)
-- R-3 Insight #5: Information stratifies like geological layers
-- R-3 Insight #7: Progressive Disclosure Density Gradient
+**Key Density Patterns Discovered:**
+1. CRESCENDO (DD-002): Sparse → Dense gradual build
+2. GEOLOGICAL (DD-004): 5-layer depth stratification
+3. RIVERS (DD-005): Width = inverse density, parallel/delta/confluence
+4. FRACTAL (DD-006): Self-similar patterns at every scale
 
-**DD-003 Lessons to Apply:**
-- ✓ Strong editorial/magazine aesthetic (8.5/10 soul)
-- ⚠️ Need stronger inter-element connections (thematic headers)
-- ⚠️ Increase callout visibility (add backgrounds)
-- ⚠️ Make separators more meaningful (thicker, labeled)
+**Next: Organizational Explorations (OD-001 through OD-006)**
+1. → OD-001: Conversational Structure (Q&A, dialogue) — BUILD NOW
+2. OD-002: Narrative Arc (setup→conflict→resolution)
+3. OD-003: Task-Based ("I want to...")
+4. OD-004: Confidence-Based (certain→uncertain)
+5. OD-005: Spatial/Map (hub-and-spoke)
+6. OD-006: Creative organizational idea
+
+**Research to Apply for OD-001:**
+- R-1 Documentation Patterns: Conversational onboarding
+- Consider: Reader as questioner, documentation as guide
+- Consider: Progressive disclosure through Q&A flow
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## QUALITY TRACKING
@@ -83,11 +158,24 @@ Phase 5: Documentation               [NOT STARTED ░░░░░░░░░░
 | Tracking Sheets Read | 3/7 | PERCEPTUAL-TRUTHS, DESIGN-TOKENS, R-3 |
 | Research Documents Created | 6/6 | R-1 through R-5 + Synthesis |
 | Research Findings Gathered | 124+ | Ready for Phase 2-3 application |
-| Research Applied | ~15% | DD-001 Breathing, DD-002 CRESCENDO, DD-003 Islands |
-| Explorations Completed | 3/24 | DD-001 (30.5), DD-002 (34 ★), DD-003 (30.5) |
+| Research Applied | ~30% | DD-001 Breathing, DD-002 CRESCENDO, DD-003 Islands, DD-004 Geological, DD-005 Tidal/Musical, DD-006 Fractal |
+| Explorations Completed | 6/24 | DD-001 (30.5), DD-002 (34 ★), DD-003 (30.5), DD-004 (33 ★), DD-005 (33.5 ★), DD-006 (34.5 ★★) |
 | Sections Built | 0/7 | Phase 3 not started |
-| Screenshots Taken | 3 | DD-001, DD-002, DD-003 full page |
-| Sub-Agents Deployed | 19 | 5 research + 11 DD-001 + 2 DD-002 + 1 DD-003 |
+| Screenshots Taken | 12 | 6 original + 6 audit verification |
+| Sub-Agents Deployed | 22 | 5 research + 11 DD-001 + 2 DD-002 + 1 DD-003 + 1 DD-004 + 1 DD-005 + 1 DD-006 |
+
+### Phase 2.1 Perceptual Depth Audit Results (2026-02-04)
+
+| Exploration | Audit Avg | Original Score | Verified Score | Soul Violations |
+|-------------|-----------|----------------|----------------|-----------------|
+| DD-001 | 7.36/10 | 30.5/40 | 30/40 | Traffic-light (green+red) |
+| DD-002 | 8.57/10 | 34/40 | 34/40 | None |
+| DD-003 | 7.86/10 | 30.5/40 | 31/40 | None |
+| DD-004 | 8.43/10 | 33/40 | 33.5/40 | None |
+| DD-005 | 8.50/10 | 33.5/40 | 34/40 | None |
+| DD-006 | 8.64/10 | 34.5/40 | 35/40 | None |
+
+**Audit Verdict:** ✓ VERIFIED — All decisions confirmed, ready for OD-001
 
 ### Effort Check (Run Every Checkpoint)
 
