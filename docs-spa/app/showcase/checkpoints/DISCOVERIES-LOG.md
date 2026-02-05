@@ -12,15 +12,46 @@ After compaction, this tells you exactly what experiments exist and their status
 
 | Category | Total | Scored ≥32 (INCLUDE) | Scored 24-31 (DOCUMENT) | Scored <24 (DISCARD) |
 |----------|-------|---------------------|------------------------|---------------------|
-| Density (DD) | 3 | 1 | 2 | 0 |
+| Density (DD) | 6 | **6** | 0 | 0 |
 | Organizational (OD) | 0 | 0 | 0 | 0 |
 | Axis (AD) | 0 | 0 | 0 | 0 |
 | Combination (CD) | 0 | 0 | 0 | 0 |
-| **TOTAL** | **3** | **1** | **2** | **0** |
+| **TOTAL** | **6** | **6** | **0** | **0** |
 
-**Last Updated:** 2026-02-04 [DD-003 COMPLETE — Score 30.5/40]
-**Explorations Completed:** 3/24 minimum
-**Ready for Section 7:** PARTIAL (1 INCLUDE: DD-002, 2 DOCUMENT: DD-001, DD-003)
+**Last Updated:** 2026-02-04 [DD RE-AUDIT PERCEPTUAL DEEPENING COMPLETE]
+**Explorations Completed:** 6/24 minimum
+**Ready for Section 7:** DENSITY COMPLETE — ALL 6 NOW INCLUDE
+**Audit Status:** ALL 6 PASS SOUL COMPLIANCE via perceptual deepening audit
+
+### DD Re-Audit — Perceptual Deepening Results (2026-02-04)
+
+| Exploration | Original Score | New Score | Change | Soul Compliance | Decision |
+|-------------|----------------|-----------|--------|-----------------|----------|
+| DD-001 | 30.5 | **33** | +2.5 | 100% | **INCLUDE** (↑) |
+| DD-002 | 34 | **35** | +1 | 100% | INCLUDE |
+| DD-003 | 30.5 | **32** | +1.5 | 100% | **INCLUDE** (↑) |
+| DD-004 | 33 | **35** | +2 | 100% | INCLUDE |
+| DD-005 | 33.5 | **36** | +2.5 | 100% | INCLUDE |
+| DD-006 | 34.5 | **36** | +1.5 | 100% | INCLUDE ★★ |
+
+**Full audit:** `checkpoints/DD-REAUDIT-PERCEPTUAL-SYNTHESIS.md`
+
+**Key Findings:**
+- All 5 soul pieces verified across all 6 DDs
+- border-radius: 0 and box-shadow: none in all CSS
+- Serif italic present in all Essence callouts
+- 2-zone callout structure maintained throughout
+- Average score increased from 32.7 to 34.5 (+1.8)
+
+### Density Explorations Summary (COMPLETE — ALL INCLUDE)
+| ID | Name | Score | Decision |
+|----|------|-------|----------|
+| DD-001 | Density Breathing | **33** | **INCLUDE** |
+| DD-002 | Density Gradient | **35** | INCLUDE ★ |
+| DD-003 | Density Islands | **32** | **INCLUDE** |
+| DD-004 | Density Layers | **35** | INCLUDE ★ |
+| DD-005 | Density Rivers | **36** | INCLUDE ★ |
+| DD-006 | Fractal Density | **36** | INCLUDE ★★ (Best) |
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## SCORING RUBRIC
@@ -151,62 +182,138 @@ Each exploration is scored on 4 dimensions (1-10 each):
 ---
 
 ### DD-004: Density Layers
-**Status:** NOT STARTED
-**Hypothesis:** What if density existed on foreground/background layers?
-**Expected:** Visual depth through density differentiation
-**Research Basis:** R-3 findings (pending)
+**Status:** COMPLETE ✓
+**Hypothesis:** What if density was stratified like geological strata (Atmosphere, Surface, Topsoil, Subsoil, Bedrock)?
+**Expected:** Visual depth through background intensity, border weight, and spacing compression
+**Research Basis:** R-3 Insight #5 (Geological Model), #6 (Z-Index Priority), #7 (Progressive Disclosure)
 
 | Metric | Score | Notes |
 |--------|-------|-------|
-| Innovation | - | - |
-| Utility | - | - |
-| Soul Alignment | - | - |
-| Execution | - | - |
-| **TOTAL** | **-** | - |
+| Innovation | 8.5 | Geological metaphor is novel; layer depth indicator system is creative and informative |
+| Utility | 8 | Clear practical application for docs; Expert vs Novice path flexibility is valuable |
+| Soul Alignment | 8.5 | Sharp, flat, editorial; passes Bootstrap test; distinctly KortAI aesthetic |
+| Execution | 8 | Solid implementation; audit scores 8.2/10 average across 7 zones |
+| **TOTAL** | **33** | INCLUDE threshold (≥32) ✓ — Ready for Section 7 |
 
-**Decision:** PENDING
-**Files:** -
-**Screenshots:** -
+**Decision:** INCLUDE ★ — Demonstrates Geological Model pattern effectively
+
+**Key Strengths:**
+- ✅ Stacked layers visualization immediately communicates the metaphor
+- ✅ 5-bar depth indicator system is innovative and informative
+- ✅ Multiple paths (Expert skips middle, Novice gets more explanation)
+- ✅ Background intensity progression creates visual depth
+- ✅ Practical OAuth documentation example
+
+**Audit Scores:**
+| Zone | Score |
+|------|-------|
+| Typography | 8/10 |
+| Spacing | 8/10 |
+| Containers | 8.5/10 |
+| Hierarchy | 8.5/10 |
+| Composition | 8/10 |
+| Color | 8.5/10 |
+| Layout | 8/10 |
+
+**Minor Improvements:**
+- Add `font-style: italic` to h3 subsoil headings
+- File tree could have stronger visual distinction
+- Stacked layers visualization could use more padding
+
+**Files:** explorations/density/DD-004-layers.html
+**Screenshots:** screenshots/explorations/DD-004-layers-full.png
 
 ---
 
 ### DD-005: Density Rivers
-**Status:** NOT STARTED
-**Hypothesis:** What if density flowed through channels of varying width?
-**Expected:** Information "rivers" with varying density flow
-**Research Basis:** R-3 findings (pending)
+**Status:** COMPLETE ✓
+**Hypothesis:** What if information flowed through channels of varying width (rivers), where width is inversely proportional to density?
+**Expected:** Narrow streams = high density (code), wide rivers = low density (context), with parallel, delta, and confluence patterns
+**Research Basis:** R-3 Tidal Framework, Musical Framework, Insight #23 (fractal), #29 (contrast), #30 (density debt)
 
 | Metric | Score | Notes |
 |--------|-------|-------|
-| Innovation | - | - |
-| Utility | - | - |
-| Soul Alignment | - | - |
-| Execution | - | - |
-| **TOTAL** | **-** | - |
+| Innovation | 8.5 | River width = inverse density is novel; parallel, delta, confluence patterns are creative |
+| Utility | 8.5 | Very practical for tutorials; parallel comparisons and decision points highly useful |
+| Soul Alignment | 8.5 | Sharp, flat, editorial; distinctly KortAI; river labels add systematic feel |
+| Execution | 8 | Solid implementation; audit average 8.36/10 across 7 zones |
+| **TOTAL** | **33.5** | INCLUDE threshold (≥32) ✓ — Ready for Section 7 |
 
-**Decision:** PENDING
-**Files:** -
-**Screenshots:** -
+**Decision:** INCLUDE ★ — Demonstrates River Flow pattern with parallel, delta, and confluence
+
+**Key Strengths:**
+- ✅ River visualization at top explains metaphor immediately
+- ✅ Parallel rivers enable side-by-side algorithm comparison
+- ✅ Confluence points (amber) for decision frameworks
+- ✅ River delta (3-column) for implementation path splits
+- ✅ Practical API rate limiting example
+
+**Audit Scores:**
+| Zone | Score |
+|------|-------|
+| Typography | 8.5/10 |
+| Spacing | 8/10 |
+| Containers | 8.5/10 |
+| Hierarchy | 8.5/10 |
+| Composition | 8/10 |
+| Color | 8.5/10 |
+| Layout | 8.5/10 |
+
+**Flow Patterns Demonstrated:**
+1. Wide → Narrow (progressive focusing)
+2. Parallel Rivers (side-by-side comparison)
+3. River Delta (1→3 split)
+4. Confluence (streams merging at decisions)
+5. Asymmetric Parallel (2fr/1fr theory + reference)
+6. Narrowing Flow (Full → Wide → Medium → Narrow)
+
+**Files:** explorations/density/DD-005-rivers.html
+**Screenshots:** screenshots/explorations/DD-005-rivers-full.png
 
 ---
 
-### DD-006: [CREATIVE SLOT]
-**Status:** NOT STARTED
-**Hypothesis:** (Your own density idea)
-**Expected:** -
-**Research Basis:** -
+### DD-006: Fractal Density
+**Status:** COMPLETE ✓
+**Hypothesis:** Good density patterns are self-similar at multiple scales — the same rhythm of dense/sparse appears at page, section, component, and character levels
+**Expected:** Visual demonstration of the same █░░█░░█░░ pattern at 4 scale levels, with nested example showing all scales together
+**Research Basis:** R-3 Insight #23 (Self-Similar Density), Fractal Framework
 
 | Metric | Score | Notes |
 |--------|-------|-------|
-| Innovation | - | - |
-| Utility | - | - |
-| Soul Alignment | - | - |
-| Execution | - | - |
-| **TOTAL** | **-** | - |
+| Innovation | 9 | Fractal/self-similar concept is highly novel; pattern visualization (█░░█░░█░░) is creative |
+| Utility | 8.5 | Teaches a powerful design principle; nested example shows practical application |
+| Soul Alignment | 8.5 | Sharp, flat, editorial; systematic scale labeling fits KortAI |
+| Execution | 8.5 | Highest audit average (8.57/10); clear, well-organized |
+| **TOTAL** | **34.5** | INCLUDE threshold (≥32) ✓ — HIGHEST SCORING EXPLORATION |
 
-**Decision:** PENDING
-**Files:** -
-**Screenshots:** -
+**Decision:** INCLUDE ★★ — Best exploration! Demonstrates Fractal Density pattern
+
+**Key Strengths:**
+- ✅ "█░░█░░█░░" pattern comparison across all 4 scales is brilliant
+- ✅ Four-scale demonstration (Page → Section → Component → Character)
+- ✅ "All Four Scales in One Structure" nested example is innovative
+- ✅ Teaches a design principle, not just a technique
+- ✅ Highest audit score (8.57/10 average)
+
+**Audit Scores:**
+| Zone | Score |
+|------|-------|
+| Typography | 8.5/10 |
+| Spacing | 8.5/10 |
+| Containers | 8.5/10 |
+| Hierarchy | 9/10 |
+| Composition | 8.5/10 |
+| Color | 8.5/10 |
+| Layout | 8.5/10 |
+
+**Scales Demonstrated:**
+1. **Page Scale** — Dense vs Sparse sections (3-column grid)
+2. **Section Scale** — Dense vs Sparse paragraphs (error handling example)
+3. **Component Scale** — Dense vs Sparse zones within callout
+4. **Character Scale** — Dense code vs Sparse comments
+
+**Files:** explorations/density/DD-006-fractal.html
+**Screenshots:** screenshots/explorations/DD-006-fractal-full.png
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## ORGANIZATIONAL EXPLORATIONS (OD-001 through OD-006+)
@@ -573,6 +680,48 @@ Each exploration is scored on 4 dimensions (1-10 each):
 **Decision:** PENDING
 **Files:** -
 **Screenshots:** -
+
+═══════════════════════════════════════════════════════════════════════════════
+## LESSONS LEARNED FROM RETROACTIVE AUDIT
+═══════════════════════════════════════════════════════════════════════════════
+
+### 2026-02-04 — Retroactive Research Audit Lessons
+
+#### Lesson 1: Traffic-Light Anti-Pattern is CRITICAL
+**Discovery:** DD-001 has green Tip callout adjacent to red Gotcha callout
+**Impact:** Reduces professional appearance, creates "kindergarten-level" visual language
+**Rule:** ALWAYS separate green (#4A9D6B) and red (#E83025) with 48px+ whitespace OR neutral component
+**Applied In:** DD-002 (used purple Challenge instead), DD-004 (used coral Gotcha)
+
+#### Lesson 2: Research Application Rate Correlates with Score
+**Discovery:** Higher research application rate → higher exploration scores
+- DD-006 (88% application) → 34.5/40
+- DD-001 (70% application) → 30.5/40
+**Rule:** Explicitly map findings to implementation decisions BEFORE building
+
+#### Lesson 3: EXEMPLARY Application of Single Finding is Valuable
+**Discovery:** DD-004, DD-005, DD-006 each have ONE finding applied EXEMPLARY
+- DD-004: R3-005 Geological Layers
+- DD-005: R3-029 Density Contrast
+- DD-006: R3-023 Fractal Self-Similarity
+**Rule:** Better to deeply apply 1 finding than shallowly apply many
+
+#### Lesson 4: Fractal Pattern Within Components is Often Missed
+**Discovery:** R3-023 (fractal self-similarity) is partially applied in most but EXEMPLARY only in DD-006
+**Gap:** Other explorations apply rhythm at section level but not within components
+**Rule:** Apply dense/sparse rhythm at ALL scales: page, section, component, character
+
+### Innovations Discovered (Worth Adding to Research)
+
+| Innovation | Source | Description | Potential Research ID |
+|------------|--------|-------------|----------------------|
+| Parallel Rivers | DD-005 | Side-by-side comparison streams | R3-052 |
+| River Delta | DD-005 | 1→3 splitting pattern for choices | R3-053 |
+| Confluence Points | DD-005 | Decision points where streams merge | R3-054 |
+| Asymmetric Parallel | DD-005 | 2fr/1fr theory + reference columns | R2-079 |
+| Layer Depth Indicator | DD-004 | 5-bar visual showing current depth | R3-055 |
+| Expert vs Novice Paths | DD-004 | Surface→Bedrock skip option | R3-056 |
+| Scale Pattern Visual | DD-006 | █░░█░░█░░ pattern representation | Visual aid |
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## CURATION RESULTS SUMMARY
