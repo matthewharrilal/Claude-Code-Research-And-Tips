@@ -1,9 +1,34 @@
+---
+backbone_ref: DESIGN-SYSTEM/BACKBONE.md
+manifest_ref: DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md
+provenance: Stage 2 (DD) density explorations
+last_updated: 2026-02-05
+---
+
 # Density Patterns
 ## Layout Rhythm for Documentation
 
 ═══════════════════════════════════════════════════════════════════════════════
 
-## The 4 Density Patterns
+## PROVENANCE NOTICE
+
+These patterns are NOT arbitrary. Each was validated through DD explorations
+with perceptual deepening audit. See `provenance/stage-2-density-dd/` for full chain.
+
+| Pattern | Exploration | Score | Finding ID |
+|---------|-------------|-------|------------|
+| PULSE | DD-001 Breathing | 33/40 | DD-F-001 |
+| CRESCENDO | DD-002 Gradient | 35/40 | DD-F-002 |
+| ISLANDS | DD-003 Islands | 32/40 | DD-F-003 |
+| GEOLOGICAL | DD-004 Layers | 35/40 | DD-F-004 |
+| TIDAL/RIVERS | DD-005 Rivers | 36/40 | DD-F-005 |
+| FRACTAL | DD-006 Fractal | 36/40 | DD-F-006 ★ META |
+
+**To understand WHY a pattern works:** Read its provenance in PATTERN-INDEX.md
+
+═══════════════════════════════════════════════════════════════════════════════
+
+## The 6 Density Patterns
 
 ### PULSE — Rhythmic High-Low Cycles
 ```
