@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DD-005: Density Rivers</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════════════════
+       LOCKED DESIGN TOKENS — From DESIGN-TOKEN-SUMMARY.md
+       DD-004 Lessons: Visual system at top, multiple usage paths
+       ═══════════════════════════════════════════════════════════════════════════ */
+    :root {
+      /* Colors */
+      --color-primary: #E83025;
+      --color-background: #FEF9F5;
+      --color-text: #1A1A1A;
+      --color-text-secondary: #666666;
+      --color-border: #E0D5C5;
+      --color-border-subtle: #F0EBE3;
+
+      /* Typography */
+      --font-display: 'Instrument Serif', Georgia, serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+      /* Geometry — LOCKED */
+      --border-radius: 0;
+      --box-shadow: none;
+
+      /* Spacing */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --space-12: 48px;
+      --space-16: 64px;
+      --space-20: 80px;
+      --space-24: 96px;
+
+      /* Callout Accents */
+      --accent-blue: #4A90D9;
+      --accent-green: #4A9D6B;
+      --accent-amber: #D97706;
+      --accent-purple: #7C3AED;
+      --accent-coral: #C97065;
+
+      /* Standardized Border */
+      --border-left-width: 4px;
+
+      /* River-Specific Variables */
+      --river-narrow: 280px;
+      --river-medium: 450px;
+      --river-wide: 700px;
+      --river-full: 100%;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--color-background);
+      color: var(--color-text);
+      line-height: 1.7;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       EXPLORATION HEADER
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .exploration-header {
+      border-bottom: 3px solid var(--color-primary);
+      padding: var(--space-6);
+      background: white;
+      margin-bottom: var(--space-16);
+    }
+
+    .exploration-id {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-2);
+    }
+
+    .exploration-title {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-style: italic;
+      margin-bottom: var(--space-3);
+    }
+
+    .exploration-hypothesis {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      max-width: 600px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       PAGE CONTAINER
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .page-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       RIVER VISUALIZATION — Showing the concept
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .river-visualization {
+      margin: var(--space-8) 0;
+      padding: var(--space-6);
+      background: white;
+      border-left: var(--border-left-width) solid var(--color-primary);
+    }
+
+    .river-visualization__title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-4);
+    }
+
+    .river-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .river-channel {
+      height: 24px;
+      background: var(--color-border-subtle);
+      border-left: 3px solid var(--color-primary);
+      display: flex;
+      align-items: center;
+      padding-left: var(--space-3);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-text-secondary);
+    }
+
+    .river-channel--narrow {
+      width: 25%;
+    }
+
+    .river-channel--medium {
+      width: 50%;
+    }
+
+    .river-channel--wide {
+      width: 75%;
+    }
+
+    .river-channel--full {
+      width: 100%;
+    }
+
+    .river-channel--confluence {
+      width: 100%;
+      background: linear-gradient(to right, var(--color-border-subtle) 0%, var(--color-border) 100%);
+      border-left-color: var(--accent-amber);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       RIVER SYSTEM — Information flow through varying channels
+       Research: R-3 Tidal Framework, Musical Framework
+
+       Flow Types:
+       - NARROW: High density, focused content (code, reference)
+       - MEDIUM: Balanced density (explanations, examples)
+       - WIDE: Low density (context, summaries)
+       - CONFLUENCE: Where streams merge (decision points)
+       ═══════════════════════════════════════════════════════════════════════════ */
+
+    /* Base River Styles */
+    .river {
+      margin-bottom: var(--space-6);
+      position: relative;
+    }
+
+    .river__label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--color-border);
+      position: absolute;
+      top: var(--space-2);
+      right: var(--space-3);
+    }
+
+    /* NARROW RIVER — High density, focused */
+    .river--narrow {
+      max-width: var(--river-narrow);
+      background: var(--color-background);
+      border-left: var(--border-left-width) solid var(--color-primary);
+      padding: var(--space-4);
+    }
+
+    .river--narrow.river--right {
+      margin-left: auto;
+    }
+
+    .river--narrow.river--center {
+      margin: 0 auto;
+    }
+
+    /* MEDIUM RIVER — Balanced density */
+    .river--medium {
+      max-width: var(--river-medium);
+      background: white;
+      border-left: var(--border-left-width) solid var(--color-border);
+      padding: var(--space-5);
+    }
+
+    .river--medium.river--right {
+      margin-left: auto;
+    }
+
+    .river--medium.river--center {
+      margin: 0 auto;
+    }
+
+    /* WIDE RIVER — Low density, context */
+    .river--wide {
+      max-width: var(--river-wide);
+      background: white;
+      border-left: var(--border-left-width) solid var(--color-border-subtle);
+      padding: var(--space-6);
+    }
+
+    .river--wide.river--center {
+      margin: 0 auto;
+    }
+
+    /* FULL RIVER — Maximum width, lowest density */
+    .river--full {
+      max-width: 100%;
+      background: white;
+      border-left: var(--border-left-width) solid var(--color-border-subtle);
+      padding: var(--space-8);
+    }
+
+    /* CONFLUENCE — Where streams merge */
+    .river--confluence {
+      max-width: 100%;
+      background: linear-gradient(135deg, rgba(217, 119, 6, 0.05) 0%, rgba(254, 249, 245, 1) 100%);
+      border-left: var(--border-left-width) solid var(--accent-amber);
+      padding: var(--space-6);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       PARALLEL RIVERS — Side-by-side streams
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .parallel-rivers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+      margin-bottom: var(--space-6);
+    }
+
+    @media (max-width: 768px) {
+      .parallel-rivers {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .parallel-rivers .river {
+      max-width: none;
+      margin: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       RIVER DELTA — Splitting into multiple streams
+       ═══════════════════════════════════════════════════════════════════════════ */
+    .river-delta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+
+    @media (max-width: 768px) {
+      .river-delta {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .river-delta .river {
+      max-width: none;
+      margin: 0;
+    }
+
+    .delta-label {
+      grid-column: 1 / -1;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--color-text-secondary);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border-subtle);
+      margin-bottom: var(--space-2);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       TYPOGRAPHY — River-appropriate
+       ═══════════════════════════════════════════════════════════════════════════ */
+    h2 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-style: italic;
+      margin-bottom: var(--space-4);
+    }
+
+    h3 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-style: italic;
+      margin-bottom: var(--space-3);
+    }
+
+    h4 {
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+    }
+
+    p {
+      margin-bottom: var(--space-3);
+    }
+
+    /* Narrow river text is more compact */
+    .river--narrow p {
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: var(--space-2);
+    }
+
+    .river--narrow h4 {
+      font-size: 13px;
+    }
+
+    /* Wide river text is more spacious */
+    .river--wide p,
+    .river--full p {
+      font-size: 16px;
+      line-height: 1.8;
+      max-width: 65ch;
+    }
+
+    .river--wide h2,
+    .river--full h2 {
+      font-size: 32px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════════
+       COMPONENTS — Styled for river context
+       ═══════════════════════════════════════════════════════════════════════════ */
+
+    /* Code Snippet — Narrow rivers */
+    .code-snippet {
+      background: #1E1E1E;
+      margin: var(--space-3) 0;
+    }
+
+    .code-snippet__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-2) var(--space-3);
+      background: rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .code-snippet__filename {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #888;
+    }
+
+    .code-snippet__copy {
+      font-family: var(--font-body);
+      font-size: 10px;
+      color: var(--color-primary);
+      padding: var(--space-1) var(--space-2);
+      border: 1px solid var(--color-primary);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .code-snippet__content {
+      padding: var(--space-3);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+      color: #F5F0EB;
+      overflow-x: auto;
+    }
+
+    .code-snippet__content .comment { color: #6A9955; }
+    .code-snippet__content .keyword { color: #569CD6; }
+    .code-snippet__content .string { color: #CE9178; }
+    .code-snippet__content .function { color: #DCDCAA; }
+    .code-snippet__content .variable { color: #9CDCFE; }
+
+    /* Callouts — Adapt to river width */
+    .callout-essence {
+      border-left: var(--border-left-width) solid var(--accent-amber);
+      background: rgba(217, 119, 6, 0.08);
+      padding: var(--space-4);
+      margin: var(--space-4) 0;
+    }
+
+    .callout-essence__label {
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-amber);
+      margin-bottom: var(--space-2);
+    }
+
+    .callout-essence__content {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-style: italic;
+      line-height: 1.7;
+    }
+
+    .callout-tip {
+      border-left: var(--border-left-width) solid var(--accent-green);
+      background: rgba(74, 157, 107, 0.08);
+      padding: var(--space-3);
+      margin: var(--space-3) 0;
+    }
+
+    .callout-tip__label {
+      font-family: var(--font-body);
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-green);
+      margin-bottom: var(--space-1);
+    }
+
+    .callout-tip__content {
+      font-size: 13px;
+    }
+
+    .callout-info {
+      border-left: var(--border-left-width) solid var(--accent-blue);
+      background: rgba(74, 144, 217, 0.08);
+      padding: var(--space-4);
+      margin: var(--space-4) 0;
+    }
+
+    .callout-info__label {
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-blue);
+      margin-bottom: var(--space-2);
+    }
+
+    .callout-info__content {
+      font-size: 14px;
+    }
+
+    /* Quick Reference List — Narrow rivers */
+    .quick-ref {
+      font-size: 12px;
+    }
+
+    .quick-ref__item {
+      display: flex;
+      justify-content: space-between;
+      padding: var(--space-1) 0;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .quick-ref__item:last-child {
+      border-bottom: none;
+    }
+
+    .quick-ref__key {
+      font-family: var(--font-mono);
+      color: var(--color-text-secondary);
+    }
+
+    .quick-ref__value {
+      font-weight: 500;
+    }
+
+    /* Decision Point — Confluence */
+    .decision-point {
+      margin: var(--space-4) 0;
+    }
+
+    .decision-point__question {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-style: italic;
+      margin-bottom: var(--space-4);
+    }
+
+    .decision-point__options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
+
+    @media (max-width: 768px) {
+      .decision-point__options {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .decision-point__option {
+      border: 1px solid var(--color-border);
+      border-left: var(--border-left-width) solid var(--color-primary);
+      padding: var(--space-4);
+    }
+
+    .decision-point__option-title {
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+    }
+
+    .decision-point__option-desc {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+
+    /* Flow Transition */
+    .flow-transition {
+      height: var(--space-8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flow-transition__arrow {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      color: var(--color-border);
+    }
+
+    /* Section Separator */
+    .section-separator {
+      margin: var(--space-12) 0;
+      text-align: center;
+    }
+
+    .section-separator__label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--color-border);
+      background: var(--color-background);
+      padding: 0 var(--space-4);
+      position: relative;
+    }
+
+    .section-separator::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1px;
+      background: var(--color-border-subtle);
+      z-index: -1;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- EXPLORATION HEADER -->
+  <header class="exploration-header">
+    <div class="exploration-id">DD-005 — Density Exploration</div>
+    <h1 class="exploration-title">Density Rivers</h1>
+    <p class="exploration-hypothesis">
+      <strong>Hypothesis:</strong> Information can flow through channels of varying width,
+      like rivers. Narrow streams carry dense, focused content; wide rivers carry spacious context.
+      Streams can run parallel, split into deltas, or merge at confluence points.
+      Applying R-3 Tidal and Musical frameworks.
+    </p>
+  </header>
+
+  <main class="page-container">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         RIVER VISUALIZATION — The concept
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="river-visualization">
+      <div class="river-visualization__title">River Width = Density Inversely Proportional</div>
+      <div class="river-diagram">
+        <div class="river-channel river-channel--narrow">Narrow — High density (code, reference)</div>
+        <div class="river-channel river-channel--medium">Medium — Balanced (explanations, examples)</div>
+        <div class="river-channel river-channel--wide">Wide — Low density (context, summaries)</div>
+        <div class="river-channel river-channel--full">Full — Minimal density (philosophy, overview)</div>
+        <div class="river-channel river-channel--confluence">Confluence — Where streams merge (decisions)</div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         EXAMPLE: API Rate Limiting Tutorial
+         Demonstrating river flow patterns
+         ═══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- WIDE RIVER — Opening context -->
+    <div class="river river--wide river--center">
+      <span class="river__label">Wide</span>
+      <h2>Understanding API Rate Limiting</h2>
+      <p>
+        Every API needs protection from abuse. Rate limiting is the guardian that ensures
+        fair access for all users while protecting your infrastructure from overload.
+        Think of it as traffic management for your API — controlling the flow to prevent
+        gridlock.
+      </p>
+    </div>
+
+    <div class="flow-transition">
+      <span class="flow-transition__arrow">↓</span>
+    </div>
+
+    <!-- MEDIUM RIVER — Core concept -->
+    <div class="river river--medium">
+      <span class="river__label">Medium</span>
+      <h3>How Rate Limiting Works</h3>
+      <p>
+        Rate limiting tracks requests per client over a time window. When a client
+        exceeds their quota, subsequent requests are rejected until the window resets.
+      </p>
+      <div class="callout-info">
+        <div class="callout-info__label">Note</div>
+        <div class="callout-info__content">
+          The "window" can be fixed (e.g., 100 requests per minute) or sliding
+          (e.g., 100 requests in any 60-second period). Sliding windows are more
+          accurate but more complex to implement.
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-transition">
+      <span class="flow-transition__arrow">↓</span>
+    </div>
+
+    <!-- PARALLEL RIVERS — Two approaches side by side -->
+    <div class="parallel-rivers">
+      <div class="river river--narrow">
+        <span class="river__label">Narrow</span>
+        <h4>Token Bucket Algorithm</h4>
+        <p>Tokens added at fixed rate. Each request consumes a token. No tokens = rejected.</p>
+        <div class="quick-ref">
+          <div class="quick-ref__item">
+            <span class="quick-ref__key">Pros</span>
+            <span class="quick-ref__value">Allows bursts</span>
+          </div>
+          <div class="quick-ref__item">
+            <span class="quick-ref__key">Cons</span>
+            <span class="quick-ref__value">Memory per client</span>
+          </div>
+          <div class="quick-ref__item">
+            <span class="quick-ref__key">Best for</span>
+            <span class="quick-ref__value">Bursty traffic</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="river river--narrow">
+        <span class="river__label">Narrow</span>
+        <h4>Sliding Window Log</h4>
+        <p>Store timestamp of each request. Count requests in current window.</p>
+        <div class="quick-ref">
+          <div class="quick-ref__item">
+            <span class="quick-ref__key">Pros</span>
+            <span class="quick-ref__value">Precise</span>
+          </div>
+          <div class="quick-ref__item">
+            <span class="quick-ref__key">Cons</span>
+            <span class="quick-ref__value">High memory</span>
+          </div>
+          <div class="quick-ref__item">
+            <span class="quick-ref__key">Best for</span>
+            <span class="quick-ref__value">Accuracy critical</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-transition">
+      <span class="flow-transition__arrow">↓</span>
+    </div>
+
+    <!-- CONFLUENCE — Decision point -->
+    <div class="river river--confluence">
+      <span class="river__label">Confluence</span>
+      <div class="decision-point">
+        <div class="decision-point__question">Which algorithm fits your use case?</div>
+        <div class="decision-point__options">
+          <div class="decision-point__option">
+            <div class="decision-point__option-title">Choose Token Bucket if...</div>
+            <div class="decision-point__option-desc">
+              You want to allow short bursts of traffic while maintaining an average rate.
+              Good for APIs with variable request patterns.
+            </div>
+          </div>
+          <div class="decision-point__option">
+            <div class="decision-point__option-title">Choose Sliding Window if...</div>
+            <div class="decision-point__option-desc">
+              You need precise rate enforcement with no burst allowance.
+              Good for billing-sensitive or security-critical APIs.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-transition">
+      <span class="flow-transition__arrow">↓</span>
+    </div>
+
+    <!-- RIVER DELTA — Splitting into implementation streams -->
+    <div class="river-delta">
+      <div class="delta-label">Implementation Paths (Choose Your Stack)</div>
+
+      <div class="river river--narrow">
+        <h4>Redis + Node.js</h4>
+        <div class="code-snippet">
+          <div class="code-snippet__header">
+            <span class="code-snippet__filename">rateLimit.ts</span>
+            <button class="code-snippet__copy">Copy</button>
+          </div>
+          <div class="code-snippet__content">
+<span class="keyword">const</span> <span class="variable">limit</span> = <span class="keyword">await</span> <span class="variable">redis</span>
+  .<span class="function">incr</span>(<span class="variable">key</span>);
+
+<span class="keyword">if</span> (<span class="variable">limit</span> === <span class="variable">1</span>) {
+  <span class="keyword">await</span> <span class="variable">redis</span>
+    .<span class="function">expire</span>(<span class="variable">key</span>, <span class="variable">60</span>);
+}
+
+<span class="keyword">return</span> <span class="variable">limit</span> <= <span class="variable">100</span>;
+          </div>
+        </div>
+        <div class="callout-tip">
+          <div class="callout-tip__label">Tip</div>
+          <div class="callout-tip__content">Use MULTI/EXEC for atomic operations.</div>
+        </div>
+      </div>
+
+      <div class="river river--narrow">
+        <h4>In-Memory (Single Node)</h4>
+        <div class="code-snippet">
+          <div class="code-snippet__header">
+            <span class="code-snippet__filename">rateLimit.ts</span>
+            <button class="code-snippet__copy">Copy</button>
+          </div>
+          <div class="code-snippet__content">
+<span class="keyword">const</span> <span class="variable">buckets</span> = <span class="keyword">new</span> <span class="function">Map</span>();
+
+<span class="keyword">function</span> <span class="function">check</span>(<span class="variable">id</span>) {
+  <span class="keyword">const</span> <span class="variable">now</span> = <span class="function">Date</span>.<span class="function">now</span>();
+  <span class="keyword">const</span> <span class="variable">b</span> = <span class="variable">buckets</span>.<span class="function">get</span>(<span class="variable">id</span>)
+    || { <span class="variable">tokens</span>: <span class="variable">10</span> };
+  <span class="comment">// Refill logic...</span>
+}
+          </div>
+        </div>
+        <div class="callout-tip">
+          <div class="callout-tip__label">Tip</div>
+          <div class="callout-tip__content">Clean up stale entries periodically.</div>
+        </div>
+      </div>
+
+      <div class="river river--narrow">
+        <h4>Cloud-Native (AWS)</h4>
+        <div class="code-snippet">
+          <div class="code-snippet__header">
+            <span class="code-snippet__filename">serverless.yml</span>
+            <button class="code-snippet__copy">Copy</button>
+          </div>
+          <div class="code-snippet__content">
+<span class="variable">usagePlan</span>:
+  <span class="variable">quota</span>:
+    <span class="variable">limit</span>: <span class="string">1000</span>
+    <span class="variable">period</span>: <span class="string">DAY</span>
+  <span class="variable">throttle</span>:
+    <span class="variable">rateLimit</span>: <span class="string">10</span>
+    <span class="variable">burstLimit</span>: <span class="string">20</span>
+          </div>
+        </div>
+        <div class="callout-tip">
+          <div class="callout-tip__label">Tip</div>
+          <div class="callout-tip__content">API Gateway handles it for you.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-transition">
+      <span class="flow-transition__arrow">↓</span>
+    </div>
+
+    <!-- MEDIUM RIVER — Best practices -->
+    <div class="river river--medium river--right">
+      <span class="river__label">Medium</span>
+      <h3>Response Headers</h3>
+      <p>
+        Always tell clients about their rate limit status. Include these headers
+        in every response so clients can self-regulate:
+      </p>
+      <div class="quick-ref" style="margin-top: var(--space-3);">
+        <div class="quick-ref__item">
+          <span class="quick-ref__key">X-RateLimit-Limit</span>
+          <span class="quick-ref__value">Maximum requests allowed</span>
+        </div>
+        <div class="quick-ref__item">
+          <span class="quick-ref__key">X-RateLimit-Remaining</span>
+          <span class="quick-ref__value">Requests left in window</span>
+        </div>
+        <div class="quick-ref__item">
+          <span class="quick-ref__key">X-RateLimit-Reset</span>
+          <span class="quick-ref__value">Unix timestamp when window resets</span>
+        </div>
+        <div class="quick-ref__item">
+          <span class="quick-ref__key">Retry-After</span>
+          <span class="quick-ref__value">Seconds to wait (on 429)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-transition">
+      <span class="flow-transition__arrow">↓</span>
+    </div>
+
+    <!-- WIDE RIVER — Closing context -->
+    <div class="river river--wide river--center">
+      <span class="river__label">Wide</span>
+      <div class="callout-essence">
+        <div class="callout-essence__label">Key Insight</div>
+        <div class="callout-essence__content">
+          You've just experienced density rivers: information flowing through channels
+          of varying width. Wide rivers for context, narrow streams for dense code,
+          parallel flows for comparison, and confluence points for decisions.
+          The width guides your reading pace — slow and contemplative in wide rivers,
+          quick and focused in narrow streams.
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SECTION SEPARATOR
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="section-separator">
+      <span class="section-separator__label">Pattern Variations</span>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         VARIATION: Asymmetric Parallel Rivers
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="parallel-rivers" style="grid-template-columns: 2fr 1fr;">
+      <div class="river river--medium">
+        <span class="river__label">Medium (Wide)</span>
+        <h3>The Theory</h3>
+        <p>
+          Rate limiting is fundamentally about fairness and protection. Without limits,
+          a single misbehaving client could monopolize server resources, degrading
+          experience for everyone else. The goal isn't to restrict — it's to ensure
+          equitable access.
+        </p>
+        <p>
+          Different tiers of clients may warrant different limits. Free users might
+          get 100 requests/minute while paid users get 1000. This creates a natural
+          upgrade path while protecting the service.
+        </p>
+      </div>
+
+      <div class="river river--narrow">
+        <span class="river__label">Narrow (Reference)</span>
+        <h4>Quick Reference</h4>
+        <div class="quick-ref">
+          <div class="quick-ref__item">
+            <span class="quick-ref__key">429</span>
+            <span class="quick-ref__value">Too Many Requests</span>
+          </div>
+          <div class="quick-ref__item">
+            <span class="quick-ref__key">503</span>
+            <span class="quick-ref__value">Service Unavailable</span>
+          </div>
+          <div class="quick-ref__item">
+            <span class="quick-ref__key">RFC 6585</span>
+            <span class="quick-ref__value">HTTP 429 spec</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         VARIATION: Narrowing Flow (Wide → Narrow)
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="river river--full" style="margin-top: var(--space-8);">
+      <span class="river__label">Full</span>
+      <h2>Handling Rate Limit Errors Gracefully</h2>
+      <p>
+        When your API returns a 429, don't just fail — help the client recover gracefully.
+        The response should include enough information for automatic retry logic.
+      </p>
+    </div>
+
+    <div class="river river--wide">
+      <span class="river__label">Wide</span>
+      <p>
+        Implement exponential backoff with jitter in your client SDKs. Start with
+        the Retry-After header value, then double the wait time on each subsequent
+        failure, adding random jitter to prevent thundering herd.
+      </p>
+    </div>
+
+    <div class="river river--medium river--center">
+      <span class="river__label">Medium</span>
+      <p>
+        The retry formula: <code>wait = min(retry_after * 2^attempt + random(0, 1000), max_wait)</code>
+      </p>
+    </div>
+
+    <div class="river river--narrow river--right">
+      <span class="river__label">Narrow</span>
+      <div class="code-snippet">
+        <div class="code-snippet__header">
+          <span class="code-snippet__filename">retry.ts</span>
+          <button class="code-snippet__copy">Copy</button>
+        </div>
+        <div class="code-snippet__content">
+<span class="keyword">async function</span> <span class="function">retry</span>(<span class="variable">fn</span>, <span class="variable">max</span> = <span class="variable">3</span>) {
+  <span class="keyword">for</span> (<span class="keyword">let</span> <span class="variable">i</span> = <span class="variable">0</span>; <span class="variable">i</span> < <span class="variable">max</span>; <span class="variable">i</span>++) {
+    <span class="keyword">try</span> { <span class="keyword">return await</span> <span class="function">fn</span>(); }
+    <span class="keyword">catch</span> (<span class="variable">e</span>) {
+      <span class="keyword">if</span> (<span class="variable">e</span>.<span class="variable">status</span> !== <span class="variable">429</span>) <span class="keyword">throw</span> <span class="variable">e</span>;
+      <span class="keyword">await</span> <span class="function">sleep</span>(<span class="variable">2</span> ** <span class="variable">i</span> * <span class="variable">1000</span>);
+    }
+  }
+}
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!--
+    ═══════════════════════════════════════════════════════════════════════════
+    DENSITY RIVERS PATTERN SUMMARY
+    ═══════════════════════════════════════════════════════════════════════════
+
+    RIVER WIDTH SYSTEM (Inverse Density Correlation):
+
+    NARROW (280px max)
+    - Border: 4px primary red
+    - Background: Cream
+    - Typography: 13px body, compact line-height
+    - Content: Code, quick reference, focused facts
+    - Density: HIGH
+
+    MEDIUM (450px max)
+    - Border: 4px border color
+    - Background: White
+    - Typography: 14-15px body
+    - Content: Explanations, examples, callouts
+    - Density: BALANCED
+
+    WIDE (700px max)
+    - Border: 4px subtle border
+    - Background: White
+    - Typography: 16px body, spacious line-height
+    - Content: Context, summaries, philosophy
+    - Density: LOW
+
+    FULL (100% width)
+    - Border: 4px subtle border
+    - Background: White
+    - Typography: 16px body, maximum breathing
+    - Content: Opening/closing statements, overview
+    - Density: MINIMAL
+
+    CONFLUENCE
+    - Border: 4px amber
+    - Background: Gradient
+    - Content: Decision points where streams merge
+    - Density: VARIED
+
+    FLOW PATTERNS:
+    1. Wide → Narrow: Progressive focusing (onboarding)
+    2. Parallel Rivers: Side-by-side comparison
+    3. River Delta: Splitting into options (1→3)
+    4. Confluence: Merging at decision points
+    5. Asymmetric Parallel: Theory + Reference columns
+
+    RESEARCH APPLIED:
+    - R-3 Tidal Framework: Information in waves
+    - R-3 Musical Framework: Dynamics (forte/piano)
+    - R-3 Insight #23: Self-similar density (fractal)
+    - R-3 Insight #29: Density contrast (relative perception)
+    - R-3 Insight #30: Density debt (narrow streams need wide recovery)
+
+    VISUAL SIGNALS:
+    - Width indicates density expectation
+    - Left border color indicates importance
+    - Flow arrows show progression direction
+    - Position (left/center/right) creates rhythm
+    - Parallel layout enables comparison
+
+    DD-004 LESSONS APPLIED:
+    - ✓ Visualization at top (river diagram)
+    - ✓ Multiple flow patterns demonstrated
+    - ✓ Labels indicate current river width
+    - ✓ Flow transitions create visual progression
+    ═══════════════════════════════════════════════════════════════════════════
+  -->
+
+</body>
+</html>
