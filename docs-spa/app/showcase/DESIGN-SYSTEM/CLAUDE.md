@@ -56,7 +56,6 @@ This is NOT a component library. It's a system with:
 |--------------|------|
 | **Understand how to THINK with this system** | `README.md` ★★★ |
 | Understand the whole system narrative | `BACKBONE.md` |
-| **Quick pattern lookup (Feature Consumers)** | `QUICK-REFERENCE.md` ★★ |
 | Apply a pattern | `patterns/PATTERN-INDEX.md` |
 | Look up token values | `tokens/*.md` |
 | Trace a finding | `provenance/PIPELINE-MANIFEST.md` |
@@ -64,9 +63,6 @@ This is NOT a component library. It's a system with:
 | Understand components | `components/OVERVIEW.md` |
 | Avoid anti-patterns | `anti-patterns/registry.md` |
 | Migrate a page | `guides/migration-guide.md` |
-| **Build an exploration** | `ACTOR-GUIDES/builder-exploration.md` |
-| **Audit an exploration** | `ACTOR-GUIDES/auditor-verification.md` |
-| **Transition between stages** | `ACTOR-GUIDES/stage-transition.md` |
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## 3. WHAT'S HERE
@@ -76,9 +72,7 @@ This is NOT a component library. It's a system with:
 |----------------|--------|---------|
 | `README.md` | ✅ | **THE KORTAI DESIGN MIND** — How to think with this system ★★★ |
 | `BACKBONE.md` | ✅ | Master narrative of the pipeline |
-| `QUICK-START.md` | ✅ | Quick reference for getting started |
-| `QUICK-REFERENCE.md` | ✅ | **Pattern lookup for feature building** ★★ |
-| `ACTOR-GUIDES/` | ✅ | **Role-specific journey guides** |
+| `QUICK-START.md` | ✅ | Quick reference |
 | `tokens/` | ✅ | Locked design values |
 | `patterns/` | ✅ | Validated rhythms (density complete, org pending) |
 | `components/` | ✅ | Component specifications |
@@ -103,25 +97,7 @@ Some are synced here for archival (SOUL-DISCOVERIES, RESEARCH-ACTIVE).
 Their SPECIFICATIONS live here in `components/`.
 
 ═══════════════════════════════════════════════════════════════════════════════
-## 5. ACTOR ROUTING — FIND YOUR PATH
-═══════════════════════════════════════════════════════════════════════════════
-
-**Which actor are you?** Find your role and go directly to your guide:
-
-| Actor Type | Description | Your Guide |
-|------------|-------------|------------|
-| **Stage Transition Builder** | Completed Stage N, setting up Stage N+1 | `ACTOR-GUIDES/stage-transition.md` |
-| **Feature Consumer** | Building a feature using the finished system | `QUICK-REFERENCE.md` |
-| **Retroactive Refactorer** | Adding provenance to existing work | README.md PART IX |
-| **Auditor** | Verifying work meets quality bar | `ACTOR-GUIDES/auditor-verification.md` |
-| **New Stage Executor** | Building explorations within a stage | `ACTOR-GUIDES/builder-exploration.md` |
-| **Protocol Updater** | Updating existing execution protocols | README.md PART VI |
-| **External Contributor** | New to the system, need onboarding | README.md (Mode 1: First Read) |
-
-**Not sure which you are?** Read README.md START HERE section for detailed routing.
-
-═══════════════════════════════════════════════════════════════════════════════
-## 6. MINDSET
+## 5. MINDSET
 ═══════════════════════════════════════════════════════════════════════════════
 
 **This is a DESIGN MIND, not just a design system.**
