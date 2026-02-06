@@ -1,3 +1,29 @@
+<!--
+═══════════════════════════════════════════════════════════════
+⚠️  SUPERSEDED — DO NOT USE FOR NEW WORK
+═══════════════════════════════════════════════════════════════
+
+STATUS: This file has been superseded and contains OUTDATED values.
+
+SUPERSEDED BY: design-extraction/component-system/perceptual-audit-v2/synthesis/ANTI-PATTERNS-REGISTRY.md
+
+WHY THIS EXISTS: 56KB rough analysis superseded by 19KB T1 synthesis
+with finding IDs.
+
+DANGER: Values in this file may CONFLICT with soul-locked tokens.
+Using these values will break the design system's soul alignment.
+
+DO NOT:
+- Copy values from this file
+- Reference this file in new work
+- Update this file (it's frozen as historical record)
+
+INSTEAD: Use the superseding document linked above.
+
+Last verified: 2026-02-06
+═══════════════════════════════════════════════════════════════
+-->
+
 # Component System Anti-Patterns
 
 ## What NOT to Build: A Comprehensive Guide to Generic Design

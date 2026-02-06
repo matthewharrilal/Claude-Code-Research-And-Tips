@@ -1,3 +1,29 @@
+<!--
+═══════════════════════════════════════════════════════════════
+⚠️  SUPERSEDED — DO NOT USE FOR NEW WORK
+═══════════════════════════════════════════════════════════════
+
+STATUS: This file has been superseded and contains OUTDATED values.
+
+SUPERSEDED BY: design-extraction/component-system/css/core-abstraction.css
+
+WHY THIS EXISTS: Research-phase-3 design explorations consumed into
+production CSS implementations.
+
+DANGER: Values in this file may CONFLICT with soul-locked tokens.
+Using these values will break the design system's soul alignment.
+
+DO NOT:
+- Copy values from this file
+- Reference this file in new work
+- Update this file (it's frozen as historical record)
+
+INSTEAD: Use the superseding document linked above.
+
+Last verified: 2026-02-06
+═══════════════════════════════════════════════════════════════
+-->
+
 # Core Abstraction Component Design Research
 ## Sub-Agent 4I: Philosophy-Code Relationship Design
 ## Timestamp: 2026-02-03

@@ -1,3 +1,30 @@
+<!--
+═══════════════════════════════════════════════════════════════
+⚠️  SUPERSEDED — DO NOT USE FOR NEW WORK
+═══════════════════════════════════════════════════════════════
+
+STATUS: This file has been superseded and contains OUTDATED values.
+
+SUPERSEDED BY: design-extraction/component-system/SOUL-DEFINITION.md
+  (which itself feeds into MASTER-SOUL-SYNTHESIS.md)
+
+WHY THIS EXISTS: Card-system soul definition from Phase 3. Superseded
+by component-system SOUL-DEFINITION.md which covers all components.
+
+DANGER: Values in this file may CONFLICT with soul-locked tokens.
+Using these values will break the design system's soul alignment.
+
+DO NOT:
+- Copy values from this file
+- Reference this file in new work
+- Update this file (it's frozen as historical record)
+
+INSTEAD: Use the superseding document linked above.
+
+Last verified: 2026-02-06
+═══════════════════════════════════════════════════════════════
+-->
+
 # Card Component Soul Definition
 ## Phase 3 Synthesis Document
 ## Timestamp: 2026-02-03

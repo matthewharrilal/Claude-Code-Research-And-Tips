@@ -1,3 +1,29 @@
+<!--
+═══════════════════════════════════════════════════════════════
+⚠️  SUPERSEDED — DO NOT USE FOR NEW WORK
+═══════════════════════════════════════════════════════════════
+
+STATUS: This file has been superseded and contains OUTDATED values.
+
+SUPERSEDED BY: design-extraction/component-system/SOUL-DEFINITION.md
+
+WHY THIS EXISTS: Validation sprint experiments consumed into final
+SOUL-DEFINITION.md. Historical record of design exploration process.
+
+DANGER: Values in this file may CONFLICT with soul-locked tokens.
+Using these values will break the design system's soul alignment.
+
+DO NOT:
+- Copy values from this file
+- Reference this file in new work
+- Update this file (it's frozen as historical record)
+
+INSTEAD: Use the superseding document linked above.
+
+Last verified: 2026-02-06
+═══════════════════════════════════════════════════════════════
+-->
+
 # EXPERIMENT 4 RESULTS: USE CASE ALIGNMENT
 
 **Date:** 2026-02-03
