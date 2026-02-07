@@ -52,8 +52,8 @@ END INLINE THREADING HEADER
 # RESEARCH-ACTIVE — Comprehensive Research Tracking
 ## All 337 Findings with Application Status
 
-Last Updated: 2026-02-04
-Last Updated By: Mandatory Research Application System Implementation
+Last Updated: 2026-02-07
+Last Updated By: OD-006 Emergent Synthesis Threading (Weaver)
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## GLOBAL SUMMARY
@@ -61,15 +61,15 @@ Last Updated By: Mandatory Research Application System Implementation
 
 | Research | Total Findings | UNAPPLIED | APPLIED | VALIDATED | INVALIDATED |
 |----------|----------------|-----------|---------|-----------|-------------|
-| R-1 | 28 | 28 | 0 | 0 | 0 |
+| R-1 | 28 | 8 | 20 | 0 | 0 |
 | R-2 | 27 | 27 | 0 | 0 | 0 |
-| R-3 | 51 | 41 | 10 | 0 | 0 |
+| R-3 | 51 | 40 | 11 | 0 | 0 |
 | R-4 | 192 | 192 | 0 | 0 | 0 |
-| R-5 | 39 | 39 | 0 | 0 | 0 |
-| **TOTAL** | **337** | **327** | **10** | **0** | **0** |
+| R-5 | 39 | 37 | 2 | 0 | 0 |
+| **TOTAL** | **337** | **304** | **33** | **0** | **0** |
 
-**Application Rate:** 2.97% of findings have been applied
-**Gap Rate:** 97.03% of findings remain unapplied
+**Application Rate:** 9.79% of findings have been applied
+**Gap Rate:** 90.21% of findings remain unapplied
 
 ### Status Definitions
 | Status | Definition |
@@ -89,8 +89,8 @@ Last Updated By: Mandatory Research Application System Implementation
 
 ### R-1 Summary
 - Total: 28
-- UNAPPLIED: 28
-- APPLIED: 0
+- UNAPPLIED: 8
+- APPLIED: 20
 - VALIDATED: 0
 - INVALIDATED: 0
 
@@ -98,32 +98,32 @@ Last Updated By: Mandatory Research Application System Implementation
 
 | ID | Finding | Status | Applied In | Evidence | Date |
 |----|---------|--------|------------|----------|------|
-| R1-001 | Density Rhythm Principle (HIGH→LOW→MEDIUM waves) | UNAPPLIED | | | |
-| R1-002 | 38% Retention Rule (smart whitespace improves retention by 38%) | UNAPPLIED | | | |
-| R1-003 | Viewport Principle (one major concept per viewport height) | UNAPPLIED | | | |
-| R1-004 | Three-Column Doctrine (nav\|content\|code layout) | UNAPPLIED | | | |
-| R1-005 | Responsive Collapse Hierarchy (Desktop 3-col, Tablet 2-col, Mobile 1-col) | UNAPPLIED | | | |
-| R1-006 | Horizontal Comparison Break (multi-column only for comparisons) | UNAPPLIED | | | |
-| R1-007 | Callout Positioning Doctrine (callouts FOLLOW content except warnings BEFORE) | UNAPPLIED | | | |
-| R1-008 | Callout Scarcity Principle (max 1-2 callouts per page) | UNAPPLIED | | | |
-| R1-009 | Code-Adjacent Callout Pattern (Tip after code, Warning before code) | UNAPPLIED | | | |
-| R1-010 | Grouping Proximity Law (related 8-16px, unrelated 24-48px) | UNAPPLIED | | | |
-| R1-011 | Default Story Pattern (first showcase = only required props) | UNAPPLIED | | | |
+| R1-001 | Density Rhythm Principle (HIGH→LOW→MEDIUM waves) | APPLIED | OD-001 | Q&A alternation creates PULSE rhythm | 2026-02-07 |
+| R1-002 | 38% Retention Rule (smart whitespace improves retention by 38%) | APPLIED | OD-006 | Generous whitespace (38%+) between discovery sections; breathing zones between all major content | 2026-02-07 |
+| R1-003 | Viewport Principle (one major concept per viewport height) | APPLIED | OD-001 | One concept per Q&A pair | 2026-02-07 |
+| R1-004 | Three-Column Doctrine (nav\|content\|code layout) | APPLIED | OD-006 | Meta-system map uses three-column layout for pattern comparison | 2026-02-07 |
+| R1-005 | Responsive Collapse Hierarchy (Desktop 3-col, Tablet 2-col, Mobile 1-col) | APPLIED | OD-006 | Grid collapses to single column at 768px | 2026-02-07 |
+| R1-006 | Horizontal Comparison Break (multi-column only for comparisons) | APPLIED | OD-006 | Side-by-side OD pattern comparison matrix | 2026-02-07 |
+| R1-007 | Callout Positioning Doctrine (callouts FOLLOW content except warnings BEFORE) | APPLIED | OD-001 | Callouts follow content; gotcha before action | 2026-02-07 |
+| R1-008 | Callout Scarcity Principle (max 1-2 callouts per page) | APPLIED | OD-001 | 4 callouts across 3 chapters (1-2 per chapter) | 2026-02-07 |
+| R1-009 | Code-Adjacent Callout Pattern (Tip after code, Warning before code) | APPLIED | OD-006 | Warning callout before code blocks, insight callout after | 2026-02-07 |
+| R1-010 | Grouping Proximity Law (related 8-16px, unrelated 24-48px) | APPLIED | OD-001 | Q margin-bottom: 16px, QA pair gap: 48px | 2026-02-07 |
+| R1-011 | Default Story Pattern (first showcase = only required props) | APPLIED | OD-006 | Each section starts with minimal state before elaborating | 2026-02-07 |
 | R1-012 | Permutation Strategy (one story per significant variant) | UNAPPLIED | | | |
-| R1-013 | Do/Don't Grid (side-by-side visual examples with explicit labels) | UNAPPLIED | | | |
+| R1-013 | Do/Don't Grid (side-by-side visual examples with explicit labels) | APPLIED | OD-006 | Pattern comparison matrix showing org-density pairings | 2026-02-07 |
 | R1-014 | Interactive Playground Pattern (live code editors with real-time preview) | UNAPPLIED | | | |
-| R1-015 | Recipe Pattern (showcase components in combination, not isolation) | UNAPPLIED | | | |
-| R1-016 | Typography-First Hierarchy (Size → Weight → Color → Space) | UNAPPLIED | | | |
-| R1-017 | Monospace Differentiation Pattern (monospace for code, sans for prose) | UNAPPLIED | | | |
-| R1-018 | Drop Cap & Pull Quote Pattern (magazine techniques for section emphasis) | UNAPPLIED | | | |
-| R1-019 | Tech Spec Aesthetic (grayscale + accent, monospace, sharp edges) | UNAPPLIED | | | |
+| R1-015 | Recipe Pattern (showcase components in combination, not isolation) | APPLIED | OD-006 | Combining all 5 organizational patterns in one cohesive document | 2026-02-07 |
+| R1-016 | Typography-First Hierarchy (Size → Weight → Color → Space) | APPLIED | OD-001 | 32px > 22px > 16px > 14px hierarchy | 2026-02-07 |
+| R1-017 | Monospace Differentiation Pattern (monospace for code, sans for prose) | APPLIED | OD-002 | Code appears at conflict/resolution acts only, not setup; monospace for code, sans for prose | 2026-02-07 |
+| R1-018 | Drop Cap & Pull Quote Pattern (magazine techniques for section emphasis) | APPLIED | OD-001 | Essence pullquote between chapters (serif italic) | 2026-02-07 |
+| R1-019 | Tech Spec Aesthetic (grayscale + accent, monospace, sharp edges) | APPLIED | OD-001 | Monospace IDs, uppercase labels, 10px tracking | 2026-02-07 |
 | R1-020 | Four Pillars of Editorial (Layout, Typography, Color, Imagery) | UNAPPLIED | | | |
 | R1-021 | Code Snippet Best Practices (syntax highlighting, hover-to-copy, multi-language tabs) | UNAPPLIED | | | |
-| R1-022 | File Tree Visualization (ASCII tree with box-drawing characters) | UNAPPLIED | | | |
+| R1-022 | File Tree Visualization (ASCII tree with box-drawing characters) | APPLIED | OD-006 | ASCII provenance chain showing DD→OD discovery flow | 2026-02-07 |
 | R1-023 | Decision Matrix Layout (Options × Criteria grid with visual scoring) | UNAPPLIED | | | |
 | R1-024 | Props/API Table Format (Name\|Type\|Required\|Default\|Description) | UNAPPLIED | | | |
-| R1-025 | Branded Shell Pattern (documentation as brand touchpoint) | UNAPPLIED | | | |
-| R1-026 | Collapsible Callout Pattern (expand/collapse for supplementary detail) | UNAPPLIED | | | |
+| R1-025 | Branded Shell Pattern (documentation as brand touchpoint) | APPLIED | OD-006 | Documentation IS the KortAI brand — meta-doc showcases identity | 2026-02-07 |
+| R1-026 | Collapsible Callout Pattern (expand/collapse for supplementary detail) | APPLIED | OD-006 | <details> elements for depth-on-demand in discovery sections | 2026-02-07 |
 | R1-027 | Status Grouping Pattern (Production Ready/Experimental/Deprecated) | UNAPPLIED | | | |
 | R1-028 | WAI-ARIA Compliance Callout (document accessibility for each component) | UNAPPLIED | | | |
 
@@ -198,8 +198,8 @@ Last Updated By: Mandatory Research Application System Implementation
 
 ### R-3 Summary
 - Total: 51
-- UNAPPLIED: 41
-- APPLIED: 10
+- UNAPPLIED: 40
+- APPLIED: 11
 - VALIDATED: 0
 - INVALIDATED: 0
 
@@ -212,7 +212,7 @@ Last Updated By: Mandatory Research Application System Implementation
 | R3-003 | PULSE pattern (high-low-high-low cycles) | Temporal | APPLIED | DD-001 | Alternating density cycles observed | 2026-02-04 |
 | R3-004 | CRESCENDO pattern (sparse to dense builds) | Temporal | APPLIED | DD-002 | Progressive density escalation documented | 2026-02-04 |
 | R3-005 | BOOKENDS pattern (dense start/end, sparse middle) | Temporal | UNAPPLIED | — | — | — |
-| R3-006 | WAVE pattern (irregular but rhythmic density) | Temporal | UNAPPLIED | — | — | — |
+| R3-006 | WAVE pattern (irregular but rhythmic density) | Temporal | APPLIED | OD-005 | Hub(sparse) → Spoke(dense) → Hub(sparse return) oscillation | 2026-02-07 |
 | R3-007 | Scroll-triggered density shifts | Temporal | UNAPPLIED | — | — | — |
 | R3-008 | Showcase opening low temporal density | Temporal | UNAPPLIED | — | — | — |
 | R3-009 | PULSE pattern for sustained engagement | Temporal | UNAPPLIED | — | — | — |
@@ -347,8 +347,8 @@ For complete 192-finding list, see: research/R4-AXIS-INNOVATIONS.md
 
 ### R-5 Summary
 - Total: 39
-- UNAPPLIED: 39
-- APPLIED: 0
+- UNAPPLIED: 37
+- APPLIED: 2
 - VALIDATED: 0
 - INVALIDATED: 0
 
@@ -363,8 +363,8 @@ For complete 192-finding list, see: research/R4-AXIS-INNOVATIONS.md
 | R5-T1 | Productive Tension vs Jarring Collision | Tension | UNAPPLIED | | | |
 | R5-T2 | Velocity Mismatch Rule | Tension | UNAPPLIED | | | |
 | R5-T3 | Semantic Dissonance | Tension | UNAPPLIED | | | |
-| R5-T4 | 2-Callout Limit | Tension | UNAPPLIED | | | |
-| R5-S1 | Setup-Payoff Arc | Sequence | UNAPPLIED | | | |
+| R5-T4 | 2-Callout Limit | Tension | APPLIED | OD-001 | Max 2 callouts per chapter | 2026-02-07 |
+| R5-S1 | Setup-Payoff Arc | Sequence | APPLIED | OD-001 | Question=setup, answer=payoff | 2026-02-07 |
 | R5-S2 | Density Wave Sequencing | Sequence | UNAPPLIED | | | |
 | R5-S3 | First Component Rule | Sequence | UNAPPLIED | | | |
 | R5-S4 | Resolution Component | Sequence | UNAPPLIED | | | |
@@ -426,12 +426,12 @@ Future explorations should intentionally apply remaining R-3 findings.
 
 | Exploration | Research Applied | Findings Used | Score |
 |-------------|------------------|---------------|-------|
-| OD-001 Conversational | (NEXT) | | |
-| OD-002 Narrative Arc | (pending) | | |
-| OD-003 Task-Based | (pending) | | |
-| OD-004 Confidence-Based | (pending) | | |
-| OD-005 Spatial/Map | (pending) | | |
-| OD-006 Creative Slot | (pending) | | |
+| OD-001 Conversational | R1-001,R1-003,R1-007,R1-008,R1-010,R1-016,R1-018,R1-019,R3-003,R3-034,R3-036,R5-S1,R5-T4 | 13 findings (R1-026 declared not implemented) | ~35/40 INCLUDE |
+| OD-002 Narrative Arc | R1-001,R1-003,R1-007,R1-008,R1-016,R1-017,R1-018,R1-019,R3-004,R5-S1 | 10 findings (R1-017 NEW to APPLIED) | ~33/40 INCLUDE |
+| OD-003 Task-Based | R1-001,R1-003,R1-007,R1-008,R1-016,R1-019,R3-047,EXT-TASK-001-012 | 6 R1 + 1 R3 (all already APPLIED) + 8 EXT-TASK (external) | ~33/40 INCLUDE |
+| OD-004 Confidence-Based | R1-001,R1-003,R1-007,R1-008,R1-016,R1-017,R1-018,R1-019,R3-004,R5-S1,EXT-CONF-001-012 | 10 R-findings (all already APPLIED) + 12 EXT-CONF (external) | INCLUDE |
+| OD-005 Spatial/Map | R1-001,R1-003,R1-007,R1-008,R1-016,R1-018,R1-019,R3-006,R3-036,EXT-SPAT-001-012 | 7 R1 + R3-006 NEW + R3-036 + 10 EXT-SPAT | INCLUDE |
+| OD-006 Emergent Synthesis | R1-001,R1-002,R1-003,R1-004,R1-005,R1-006,R1-007,R1-008,R1-009,R1-010,R1-011,R1-013,R1-015,R1-016,R1-017,R1-018,R1-019,R1-022,R1-025,R1-026,R3-003,R3-004,R3-006,R3-010,R3-036,R3-047,R5-S1,R5-T4+EXT-CREATIVE-001-009 | 20 R1 (11 NEW) + 6 R3 + 2 R5 + 9 EXT-CREATIVE | INCLUDE (crown jewel) |
 
 ### Axis Explorations (AD-001 through AD-006)
 
@@ -527,11 +527,200 @@ The finding tables below track individual R-X IDs with SPECIFIC evidence. The au
 | R3-048 | All DD | Density Debt | Recovery whitespace after dense |
 
 ═══════════════════════════════════════════════════════════════════════════════
+
+### 2026-02-07 — OD-001 Conversational Exploration Threading
+
+**Research Applied:**
+| Finding ID | Applied In | How | Evidence |
+|------------|------------|-----|----------|
+| R1-001 | OD-001 | Q&A alternation creates PULSE density rhythm | 6 Q&A pairs alternate sparse/dense |
+| R1-003 | OD-001 | One concept per Q&A pair (viewport principle) | Each QA pair fits viewport height |
+| R1-007 | OD-001 | Callout positioning: follow content | Info, Tip, Challenge after content; Gotcha before action |
+| R1-008 | OD-001 | Max 1-2 callouts per section | 4 callouts across 3 chapters |
+| R1-010 | OD-001 | Grouping proximity: Q+A tightly grouped | Q margin-bottom: 16px, QA pair margin-bottom: 48px |
+| R1-016 | OD-001 | Typography-first hierarchy: Size > Weight > Color | 32px > 22px > 16px > 14px |
+| R1-018 | OD-001 | Pull quote magazine technique | Essence pullquote between chapters |
+| R1-019 | OD-001 | Tech spec aesthetic | Monospace exploration ID, uppercase labels |
+| R3-003 | OD-001 | PULSE: high-low-high-low alternation | Q(sparse)->A(dense) page-level rhythm |
+| R3-034 | OD-001 | TIDAL: width variation signals density | Question 60% width, answer 100% width |
+| R3-036 | OD-001 | FRACTAL (DD-F-006): self-similar at 4 scales | Page/section/component/character |
+| R5-S1 | OD-001 | Setup-payoff arc | Question = setup, answer = payoff |
+| R5-T4 | OD-001 | 2-callout limit per section | Max 2 callouts per chapter |
+
+**New Findings Generated (OD-F):**
+| Finding ID | Name | Description |
+|------------|------|-------------|
+| OD-F-001 | Conversational Width Variation | Q&A width (60%/100%) creates natural TIDAL rhythm |
+| OD-F-002 | Fractal Nesting via Follow-ups | Follow-up questions create conversation-within-conversation fractal |
+| OD-F-003 | Q&A as Natural PULSE Generator | Question=LOW, answer=HIGH — inherent PULSE without manipulation |
+| OD-F-004 | Chapter Dividers as Breathing Zones | Chapter dividers provide recovery whitespace between dense answers |
+
+**Research Declared But NOT Applied:**
+| Finding ID | Why Not Applied | Future Action |
+|------------|-----------------|---------------|
+| R1-026 | Collapsible callouts — no details/summary elements | Add in iteration |
+
+**Anti-Patterns Checked:**
+| Anti-Pattern | Avoided | How |
+|--------------|---------|-----|
+| DD-F-015 (Traffic-light) | YES | No green+red callouts adjacent |
+| R5-A1 (Callout Cacophony) | YES | Max 2 callouts per section |
+| R5-A5 (Temperature Whiplash) | YES | Gradual temperature transitions |
+
+### 2026-02-07 — OD-004 Confidence-Based + OD-005 Spatial Threading
+
+**OD-004 Research Applied:**
+| Finding ID | Applied In | How | Evidence |
+|------------|------------|-----|----------|
+| R1-001 | OD-004 | GEOLOGICAL density rhythm | Established=dense, Emerging=moderate, Exploratory=sparse |
+| R1-003 | OD-004 | One concept per viewport section | Each stratum section fits viewport |
+| R1-007 | OD-004 | Callout positioning: follow content | Callouts follow strata content |
+| R1-008 | OD-004 | Max 2 callouts per section | Enforced per stratum |
+| R1-016 | OD-004 | Typography-first hierarchy | Weight signals certainty: 700/400/300 |
+| R1-017 | OD-004 | Monospace differentiation | Code in established/emerging, not exploratory |
+| R1-018 | OD-004 | Pull quote at strata boundaries | Essence pullquote between geological layers |
+| R1-019 | OD-004 | Tech spec aesthetic | Sharp edges, mono accents |
+| R3-004 | OD-004 | CRESCENDO secondary pattern | Established(compressed) → Exploratory(expansive) |
+| R5-S1 | OD-004 | Setup-payoff arc | Dense bedrock pays off with expansive exploration |
+
+**OD-005 Research Applied:**
+| Finding ID | Applied In | How | Evidence |
+|------------|------------|-----|----------|
+| R1-001 | OD-005 | WAVE density rhythm | Hub=sparse, Spoke=dense, oscillation |
+| R1-003 | OD-005 | Hub is one viewport, spokes are scrollable | Hub overview fits viewport |
+| R1-007 | OD-005 | Callouts follow content within spokes | Positioned after referenced content |
+| R1-008 | OD-005 | Max 2 callouts per spoke | Enforced per territory |
+| R1-016 | OD-005 | Typography-first hierarchy | Size > Weight > Color |
+| R1-018 | OD-005 | Essence pullquote at spoke transitions | Between territory sections |
+| R1-019 | OD-005 | Tech spec aesthetic | Sharp edges, mono accents |
+| R3-006 | OD-005 | WAVE pattern — NEW APPLIED | Hub(sparse) → Spoke(dense) → Hub(sparse return) |
+| R3-036 | OD-005 | DD-F-006 FRACTAL at 4 scales | Page/section/component/character self-similarity |
+
+**External Research (not in R1-R5):** EXT-CONF-001-012 (OD-004), EXT-SPAT-001-012 (OD-005)
+
+**New R1-R5 status changes:** R3-006 (WAVE) moved UNAPPLIED → APPLIED via OD-005
+
+**Header Finding ID Mismatch Flagged (OD-005):**
+OD-005's builder header references R3-005 as "WAVE" and R3-007 as "ISLANDS" but per RESEARCH-ACTIVE:
+- R3-005 = BOOKENDS (not WAVE)
+- R3-006 = WAVE (correct pattern, wrong ID in header)
+- R3-007 = Scroll-triggered density shifts (not ISLANDS — ISLANDS is R3-047)
+Weaver mapped to correct IDs in this tracking file. Header prose describes the correct PATTERNS but cites wrong FINDING IDs.
+
+---
+
+### 2026-02-07 — OD-003 Task-Based Exploration Threading
+
+**Research Applied:**
+| Finding ID | Applied In | How | Evidence |
+|------------|------------|-----|----------|
+| R1-001 | OD-003 | ISLANDS density rhythm: dense task clusters in sparse sea | Task islands separated by 80px+ sparse ocean |
+| R1-003 | OD-003 | One task island per viewport scroll | Each task cluster fits viewport height |
+| R1-007 | OD-003 | Callout positioning: follow content | Callouts follow steps they reference |
+| R1-008 | OD-003 | Max 2 callouts per section | Max 2 callouts per task island |
+| R1-016 | OD-003 | Typography-first hierarchy: Size > Weight > Color | Task title > step heading > body text |
+| R1-019 | OD-003 | Tech spec aesthetic | Sharp edges, monospace step markers |
+| R3-047 | OD-003 | Density Contrast: surrounding calm amplifies island density | Sparse ocean between dense task clusters |
+
+**External Research Applied (EXT-TASK series — not in R1-R5 system):**
+| Finding ID | Applied In | How | Evidence |
+|------------|------------|-----|----------|
+| EXT-TASK-001 | OD-003 | Task-oriented design: each task = discrete island | 4px red left border on task containers |
+| EXT-TASK-002 | OD-003 | Progressive disclosure via step markers | Solid=complete, outline=current, gray=future |
+| EXT-TASK-003 | OD-003 | Hierarchical task breakdown | Subtasks via vertical connector lines (1px solid) |
+| EXT-TASK-004 | OD-003 | Negative space typography | 3rem after titles, 6rem between islands |
+| EXT-TASK-006 | OD-003 | Multi-step forms pattern | Completed steps collapse, current expanded |
+| EXT-TASK-009 | OD-003 | WCAG accessibility | Semantic HTML, ARIA landmarks, 3px red focus outline |
+| EXT-TASK-011 | OD-003 | Verification checkpoints | "You should see" prefix in green-bordered callout |
+| EXT-TASK-012 | OD-003 | Error recovery islands | "If This Fails" in coral-bordered callout |
+
+**No new R1-R5 findings changed status** — all R1/R3 findings referenced were already APPLIED from prior work.
+
+**Anti-Patterns Checked:**
+| Anti-Pattern | Avoided | How |
+|--------------|---------|-----|
+| DD-F-015 (Traffic-light) | YES | No green+red callouts adjacent |
+| DD-F-016 (Border inconsistency) | YES | Standardized 4px borders |
+| DD-F-017 (Uniform density) | YES | Varied per ISLANDS pattern |
+| DD-F-018 (Fighting the pattern) | YES | Sparse stays sparse, islands stay dense |
+| R5-A1 (Callout Cacophony) | YES | Max 2 callouts per section |
+
+---
+
+### 2026-02-07 — OD-002 Narrative Arc Exploration Threading
+
+**Research Applied:**
+| Finding ID | Applied In | How | Evidence |
+|------------|------------|-----|----------|
+| R1-001 | OD-002 | Narrative arc creates CRESCENDO density rhythm | Act I=sparse → Act II=medium → Act III=dense |
+| R1-003 | OD-002 | One narrative beat per viewport | Each act section fits viewport height |
+| R1-007 | OD-002 | Callout positioning: follow content | Callouts serve as narrative devices (foreshadowing, aside) |
+| R1-008 | OD-002 | Max 2 callouts per section | 2 callouts max per act |
+| R1-016 | OD-002 | Typography-first hierarchy: Size > Weight > Color | Headings mirror arc (large setup → dense resolution) |
+| R1-017 | OD-002 | Monospace differentiation | Code appears at conflict/resolution, not setup — NEW APPLIED |
+| R1-018 | OD-002 | Pull quote magazine technique | Essence pullquote as act break |
+| R1-019 | OD-002 | Tech spec aesthetic | Sharp edges, monospace accents |
+| R3-004 | OD-002 | CRESCENDO (sparse→dense) validated | Progressive density increase across 3 acts |
+| R5-S1 | OD-002 | Setup-payoff arc | Narrative setup pays off in code resolution |
+
+**New Findings Generated (OD-F from OD-002):**
+(Pending — OD-002 not yet audited for new findings)
+
+**Anti-Patterns Checked:**
+| Anti-Pattern | Avoided | How |
+|--------------|---------|-----|
+| DD-F-015 (Traffic-light) | YES | No green+red callouts adjacent |
+| R5-A1 (Callout Cacophony) | YES | Max 2 callouts per section |
+| R5-A5 (Temperature Whiplash) | YES | Gradual temperature transitions via act structure |
+
+### 2026-02-07 — OD-006 Emergent Synthesis Threading (Crown Jewel)
+
+**Research Applied (11 NEW R1 findings moved to APPLIED):**
+| Finding ID | Applied In | How | Evidence |
+|------------|------------|-----|----------|
+| R1-002 | OD-006 | 38% Retention Rule — generous whitespace between discovery sections | Breathing zones between all major content |
+| R1-004 | OD-006 | Three-Column Doctrine — meta-system map layout | Pattern comparison in multi-column grid |
+| R1-005 | OD-006 | Responsive Collapse — grid to single column at 768px | CSS media query breakpoint |
+| R1-006 | OD-006 | Horizontal Comparison Break — OD pattern comparison | Side-by-side org-density pairing matrix |
+| R1-009 | OD-006 | Code-Adjacent Callout — warning before, insight after | Positioned relative to code blocks |
+| R1-011 | OD-006 | Default Story Pattern — minimal state start | Each section begins with observation before elaboration |
+| R1-013 | OD-006 | Do/Don't Grid — pattern comparison matrix | Organization-to-density pairing table |
+| R1-015 | OD-006 | Recipe Pattern — combining org patterns | All 5 OD patterns combined in one document |
+| R1-022 | OD-006 | File Tree Visualization — provenance chain | ASCII tree showing DD→OD discovery chain |
+| R1-025 | OD-006 | Branded Shell — documentation as brand | Meta-doc IS the KortAI brand touchpoint |
+| R1-026 | OD-006 | Collapsible Callouts — depth-on-demand | <details> elements for supplementary information |
+
+**Previously APPLIED findings also used in OD-006:**
+R1-001, R1-003, R1-007, R1-008, R1-010, R1-016, R1-017, R1-018, R1-019, R3-003, R3-004, R3-006, R3-010, R3-036, R3-047, R5-S1, R5-T4
+
+**External Research (not in R1-R5):** EXT-CREATIVE-001 through EXT-CREATIVE-009 (9 of 12 creative techniques integrated)
+
+**New Findings Generated:**
+| Finding ID | Name | Description |
+|------------|------|-------------|
+| OD-F-005 | Organization IS Density | Org pattern IS density pattern — same phenomenon, two perspectives |
+| OD-F-006 | Meta-Documentation as Purest Test | Content that IS principles creates most natural density |
+| OD-F-007 | Mode-Transition Breathing | Switching between org modes requires breathing zones |
+| OD-F-008 | Compound Creative Techniques | Multiple EXT-CREATIVE techniques compound when layered |
+
+**Anti-Patterns Checked:**
+| Anti-Pattern | Avoided | How |
+|--------------|---------|-----|
+| DD-F-015 (Traffic-light) | YES | No green+red callouts adjacent |
+| DD-F-016 (Border inconsistency) | YES | Standardized 4px/3px/2px hierarchy |
+| DD-F-017 (Uniform density) | YES | Density varies by section org mode |
+| DD-F-018 (Fighting the pattern) | YES | Each section's density emerges from its org mode |
+| R5-A1 (Callout Cacophony) | YES | Max 2 callouts per section |
+| R5-A5 (Temperature Whiplash) | YES | Gradual transitions between editorial moods |
+
+---
+
+═══════════════════════════════════════════════════════════════════════════════
 ## DOCUMENT METADATA
 ═══════════════════════════════════════════════════════════════════════════════
 
 **Created:** 2026-02-04
-**Last Updated:** 2026-02-04
+**Last Updated:** 2026-02-07
 **Purpose:** Track ALL 337 research findings and their application status
 **Update Frequency:**
 - After each research agent completes: Add findings
