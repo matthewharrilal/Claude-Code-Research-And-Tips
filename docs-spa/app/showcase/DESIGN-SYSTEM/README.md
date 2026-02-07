@@ -109,15 +109,15 @@ the 5 soul pieces into reasoning, examples, and transferable understanding:
 - OD-F-007/008/009 are hypothetical examples used to illustrate the
   compounding pipeline. When actual OD work is completed, these examples
   should be validated or replaced with real finding IDs.
-- Part IX (Retroactive Bridge) describes execution sequences that have
-  not yet been fully implemented in the codebase.
+- Part IX (Retroactive Bridge) execution sequences are now partially
+  implemented via Phase 2B inline sections (7 of 10 structures exist).
+  Remaining: Question Generator formalization, HANDOFF documents for
+  stages 3-5, CONSUMPTION-RECEIPT files.
 - The interception framework (Part V) and sub-agent paradigm describe
   4 sub-agent types and 3 dimensions but these have not been exercised
   in production OD work yet.
 - Reproduction methodology (Part VI) has not been tested by an
   independent team — it is theoretically sound but empirically unproven.
-- The document is 109KB / 2053 lines — there is no condensed version
-  for quick philosophical refresh shorter than Mode 3's 10-15 minutes.
 
 10. DIAGNOSTIC QUESTIONS
 Q1: Does every finding ID referenced in this document (COMP-F-XXX,
@@ -180,12 +180,16 @@ Q5: Does DESIGN-SYSTEM/CLAUDE.md's summary of this document accurately
 
 ### Mode 3: CONTEXT RECOVERY (Reset → Reorientation)
 **You are:** Returning after context loss, need to re-ground
-**Time:** 10-15 minutes
+**Time:** 5-10 minutes
 **Path:**
-1. Read BACKBONE.md — Current state snapshot
-2. Read this document's PART II — Refresh pipeline understanding
-3. Read the specific PART for your current task
+1. Read FOLDER-MAP.md — Understand codebase structure, find current phase
+2. Read the **inline threading section** of your target file — Extract constraints, dependencies, blast radius
+3. Read BACKBONE.md — Current state snapshot
+4. Read this document's PART II — Refresh pipeline understanding
+5. Read the specific PART for your current task
 **After:** You're re-oriented and can continue work.
+
+> **Why inline sections first?** The inline section of your target file tells you what it BUILT ON (what to read next), what it MUST HONOR (constraints), and what BREAKS IF CHANGED (blast radius). This is faster than reading the full provenance chain — the provenance is already summarized at the point of use.
 
 ---
 
@@ -482,6 +486,20 @@ The provenance chain makes the connection VISIBLE — not in prose, not in a nar
 ## 🔨 THE SEVEN STRUCTURES
 
 The provenance chain operates through seven concrete structures. Each has an exact format. Each serves a specific transmission purpose.
+
+> ### How Inline Sections Embody the Seven Structures
+>
+> As of Phase 2B (2026-02-06), 253 files have **inline threading sections** that EMBODY the seven structures described below. Rather than creating separate provenance files, the provenance is embedded IN each file.
+>
+> **What this means for you:**
+> - To find **Research Activation:** Read the BUILT ON table in your target file's inline section
+> - To trace **Derivation:** Follow the BUILT ON chain backward through inline sections
+> - To understand **Constraints:** Read the MUST HONOR section in the inline section
+> - To see **Consumers:** Read the CONSUMED BY table in the inline section
+> - To find **Research Debt:** Read the RESEARCH DEBT section (Tier A files)
+> - To **verify before modifying:** Answer the DIAGNOSTIC QUESTIONS
+>
+> The structures below remain the **SPECIFICATION**. The inline sections are the **IMPLEMENTATION**. Understanding the structures helps you understand what the inline sections contain and why.
 
 ### Structure 1: Research Activation Table
 
@@ -1409,6 +1427,17 @@ With interception: "The design system says border-radius: 0. The provenance chai
 
 ## The Sub-Agent Paradigm: External Knowledge Integration
 
+> ### Critical: Sub-Agents Carry Accumulated Context from Inline Sections
+>
+> When deploying sub-agents for external research, the prompt MUST include context accumulated from **inline threading sections**. This is what makes the research COMPOUND rather than just accumulate.
+>
+> **Before deploying a sub-agent, traverse the relevant inline sections and extract:**
+> - What you **KNOW** (from BUILT ON, MUST HONOR)
+> - What you're **UNCERTAIN** about (from RESEARCH DEBT)
+> - What **CONSTRAINTS** are active (from MUST HONOR)
+>
+> Then embed this in the sub-agent prompt. A sub-agent searching with accumulated context will find research that INTEGRATES into our provenance chain. A sub-agent searching generically will find disconnected articles that can't be threaded.
+
 ### The Shift: Generic → Context-Aware Research
 
 **BEFORE (Generic Prompt):**
@@ -1804,6 +1833,54 @@ showcase/explorations/
 
 These are the actual built artifacts — HTML files you can open in a browser. They use inline KortAI styles (correct colors), not globals.css (outdated).
 
+### The Navigation Layer (Added Phase 2B)
+
+In addition to the Output, Provenance, Operational, and Artifacts layers, Phase 2B added a **Navigation layer**:
+
+```
+showcase/
+├── FOLDER-MAP.md          ← Single-file codebase map with T1/T2 classification
+├── CLAUDE.md              ← Lab-level navigation and process enforcement
+├── DESIGN-SYSTEM/
+│   └── CLAUDE.md          ← Design system navigation and identity
+├── checkpoints/
+│   └── CLAUDE.md          ← Operational checkpoint navigation
+├── explorations/
+│   ├── CLAUDE.md          ← Exploration navigation
+│   └── density/
+│       └── CLAUDE.md      ← Density exploration navigation
+├── research/
+│   └── CLAUDE.md          ← Research stream navigation
+└── knowledge-architecture/
+    └── CLAUDE.md          ← KA folder navigation
+```
+
+**FOLDER-MAP.md** provides:
+- Complete codebase structure at a glance
+- T1 (authoritative) vs T2 (derivative) classification
+- Context Recovery section showing current phase state
+- Cross-references to detailed CLAUDE.md files
+
+**CLAUDE.md files** provide:
+- Per-folder navigation with identity signatures
+- File listings with status and purpose
+- How the folder connects to the pipeline
+- What to read first and in what order
+
+This layer enables faster **Context Recovery** (Mode 3) — instead of reading multiple files to understand structure, read FOLDER-MAP.md first, then the CLAUDE.md in your target directory.
+
+### Inline Threading Sections (Added Phase 2B)
+
+Every file in the system now carries its own provenance metadata as an inline threading section. These sections are invisible in rendered views (HTML comments for .md, block comments for .css/.tsx) but visible in source. They contain:
+
+- **WHY THIS EXISTS** — file identity and authority
+- **BUILT ON** — upstream dependencies (backward traversal)
+- **CONSUMED BY** — downstream consumers (forward traversal)
+- **MUST HONOR** — constraints that cannot be violated (Tier A/B only)
+- **DIAGNOSTIC QUESTIONS** — testable verification before modification (Tier A/B only)
+
+This means the provenance chain is no longer only in the folder structure — it is embedded at the point of use, in every file.
+
 ## New Files Required
 
 ### Files to Create
@@ -1916,18 +1993,25 @@ This document describes the structures. Now they must be CREATED in the actual d
 
 ## What Exists vs What Must Be Created
 
-| Structure | Currently Exists? | Must Create | Location |
-|-----------|------------------|-------------|----------|
-| Research Activation Tables | ❌ NO | RESEARCH-ACTIVATION-DD.md, RESEARCH-ACTIVATION-OD.md | Each stage folder |
-| Derivation Chains | ❌ NO | Section in every pattern file | density-patterns.md, org-patterns.md |
-| Exploration Protocol | ❌ NO | EXPLORATION-PROTOCOL-[PHASE].md | Each stage folder |
-| Consumption Receipts | ❌ NO | CONSUMPTION-RECEIPT-[EXPLORATION].md | Each stage folder |
-| Question Generator | ❌ NO | QUESTIONS section in PIPELINE-MANIFEST | provenance/PIPELINE-MANIFEST.md |
-| Reflection Protocol | ❌ NO | REFLECTION-PROTOCOL.md | Each stage folder |
-| Identity Signatures | ❌ NO | Section in every CLAUDE.md | Each folder's CLAUDE.md |
-| `source:` fields | ❌ NO | Field on every finding | PIPELINE-MANIFEST findings |
-| `built_on:` fields | ❌ NO | Field on every finding | PIPELINE-MANIFEST findings |
+| Structure | Currently Exists? | Implementation | Location |
+|-----------|------------------|----------------|----------|
+| Research Activation Tables | ✅ YES (via inline BUILT ON) | Phase 2B inline threading sections | Each file's inline section |
+| Derivation Chains | ✅ YES (via inline BUILT ON + MUST HONOR) | Phase 2B inline threading sections | Each file's inline section — follow BUILT ON chain backward |
+| Exploration Protocol | ✅ YES | OD Execution Protocol v2.0 | provenance/stage-3-organization-od/ |
+| Consumption Receipts | ✅ YES (via inline CONSUMED BY) | Phase 2B inline threading sections | Each file's inline section |
+| Question Generator | ⚠️ PARTIAL (via RESEARCH DEBT) | Phase 2B inline sections capture known gaps | Inline sections + PIPELINE-MANIFEST.md |
+| Reflection Protocol | ✅ YES (via DIAGNOSTIC QUESTIONS) | Phase 2B inline threading sections | Each file's inline section |
+| Identity Signatures | ✅ YES (via WHY THIS EXISTS + STATUS) | Phase 2B inline sections + CLAUDE.md files | Each file's inline section + folder CLAUDE.md files |
+| `source:` fields | ✅ YES (via inline BUILT ON) | Phase 2B inline threading sections | Each file's BUILT ON table |
+| `built_on:` fields | ✅ YES (via inline BUILT ON) | Phase 2B inline threading sections | Each file's BUILT ON table |
 | HANDOFF documents | ⚠️ PARTIAL | HANDOFF-DD-TO-OD.md exists, others needed | provenance/ folders |
+
+> **Phase 2B Update (2026-02-06):** The inline threading sections added to 253 files embody the 7 provenance structures described above. Rather than creating separate files for each structure, the structures are embedded IN each file's inline section. This approach has two advantages:
+>
+> 1. **The provenance travels WITH the file** — not in a separate location that can become desynchronized
+> 2. **Modification guards are visible immediately** when opening any file — no need to consult an external document
+>
+> The structures exist. The retroactive work below focuses on USING them (for OD/AD/CD stages), not creating them from scratch.
 
 ---
 
@@ -2140,7 +2224,7 @@ The person executing retroactive updates should produce:
 |-------|--------|---------|
 | Color sync | PENDING | globals.css uses teal/white (#0D9373, #fff). DESIGN-SYSTEM/tokens/colors.md has KortAI (#E83025, #FEF9F5). DD explorations use correct inline KortAI colors. |
 | poc/ deprecation | DOCUMENTED | 27 POC directories mostly superseded by showcase/. See app/poc/CLAUDE.md. |
-| README.md outdated | KNOWN | Describes 2026-01-26 state, missing subsequent showcase/ and soul compliance work. |
+| README.md outdated | ✅ RESOLVED | Updated 2026-02-07 to reflect Phase 2B inline sections, navigation layer, and context recovery improvements. |
 
 ---
 
