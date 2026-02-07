@@ -1,3 +1,45 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/02-threading-data/design-system-threading.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Documents threading data for all 30 design-system/ files and their complete
+provenance disconnection from the showcase/design-extraction T1 chain. Every
+file has threading_ready: NO (0% readiness). Records 4 critical token
+divergences, 8 competing token namespaces, and the single undocumented
+Instrument Serif font dependency.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| design-system-analysis.md (Agent GAMMA) | Raw analysis data for 30 files        |
+| cross-pollination-investigation.md      | Confirmed disconnection from T1 chain  |
+| All 30 design-system/ files             | Subjects of threading analysis         |
+
+6. MUST HONOR
+- 0% threading readiness — every file lacks provenance documentation
+- 4 critical token divergences from soul-locked values (border-radius, box-shadow, primary red, type scale)
+- 8 different token sources of truth within design-system/ alone
+- design-system/ is an independent parallel effort, not a broken dependency
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| Phase 2B threading header work          | Primary source for design-system headers |
+| PHASE-2B-BATCH-MANIFEST.md             | References as Batch 10 file #161      |
+| 06-threading-summary.md                 | Aggregates readiness percentages       |
+| 04-cross-directory-analysis.md          | Token divergence data consumed         |
+| 07-QUESTIONS-FOR-HUMAN.md              | Q-001 references disconnection evidence |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # Threading Data -- design-system/ (30 files)
 
 **Generated:** 2026-02-05

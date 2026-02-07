@@ -1,3 +1,45 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/01-reachability-report.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Documents the forward reachability analysis from the 6 T1 foundation files,
+mapping which of the 463 project files are connected (353), orphaned (35), or
+ambiguous (75). Provides relevance scores for the top 20 most-connected files
+and identifies the design-system/ directory as entirely disconnected from T1.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| Phase 1B analysis work                  | Forward trace from T1 foundation      |
+| 6 T1 synthesis files                    | Starting nodes for reachability graph  |
+| showcase-analysis.md (Agent ALPHA)      | Showcase file connection data          |
+| design-extraction-analysis.md (Agent BETA) | Design-extraction connection data   |
+| design-system-analysis.md (Agent GAMMA) | Design-system disconnection evidence   |
+| cross-pollination-investigation.md      | Cross-directory edge verification      |
+
+6. MUST HONOR
+- T1 foundation files are the root nodes; reachability flows outward only
+- design-system/ is documented as fully disconnected (30 files, 0 T1 edges)
+- Relevance scoring formula: (Inbound*2) + Outbound + (T1*10) + (Critical*5)
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| PHASE-2B-BATCH-MANIFEST.md             | References as Batch 10 file #158      |
+| knowledge-architecture/PHASE-1B-MEGA-DEBRIEF.md | Cites reachability findings  |
+| Phase 2B threading header work          | Input for deriving header content      |
+| Future agents needing file connection data | Lookup for orphan/connected status  |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # Reachability Report -- From T1 Foundation
 
 **Generated:** 2026-02-05

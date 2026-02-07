@@ -1,3 +1,43 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/components/content/CoreAbstraction.tsx
+Tier: B | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+"The Sagacious Mentor" — a composite component that unifies a philosophy quote
+(serif italic) with an optional code block, presenting principle-then-proof
+teaching sequences. Combines Essence Callout DNA with Code Snippet DNA into a
+single pedagogical unit. The philosophy zone uses Instrument Serif italic as
+its defining character trait.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| React (core)                            | Component rendering and children prop |
+
+6. MUST HONOR
+- border-radius: 0 on all elements (soul-locked)
+- box-shadow: none (soul-locked)
+- Philosophy zone MUST use Instrument Serif italic (R1-018)
+- Code zone: #1A1A1A bg, #F0EBE3 text (KortAI dark code palette)
+- Quote accent: #D97706 amber left border on #FEF9F5 cream bg
+- R5-N2: Composite Components Pre-Composed, R5-S5: Teaching Moment Sequence
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/components/content/index.ts    | Re-exported from barrel file          |
+| docs-spa/mdx-components.tsx             | Registered as MDX component           |
+| MDX content pages                       | Used for principle + proof sections   |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+*/
 interface CoreAbstractionProps {
   title: string
   philosophy: string

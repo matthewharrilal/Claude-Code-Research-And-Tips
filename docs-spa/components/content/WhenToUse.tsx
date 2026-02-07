@@ -1,3 +1,43 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/components/content/WhenToUse.tsx
+Tier: B | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Usage guidance comparison component that presents "Use When" vs "Don't Use When"
+in a two-column green/red layout, with an optional "Consider Instead" section
+for alternatives. Supports both `use`/`dontUse` and legacy `useWhen`/`dontUseWhen`
+prop names for backward compatibility. Helps readers make pattern selection
+decisions quickly via visual comparison.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| lucide-react (Check, X)                 | Icons for use (green check) and don't-use (red X) items |
+
+6. MUST HONOR
+- border-radius: 0 on all elements (soul-locked)
+- box-shadow: none (soul-locked)
+- Use column: #6b9b7a sage green icons/label, white bg
+- Don't Use column: #E83025 red icons/label, #FEF9F5 cream bg
+- Alternatives section: #F0EBE3 bg, JetBrains Mono for pattern names
+- Colors: KortAI palette only
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/components/content/index.ts    | Re-exported from barrel file          |
+| docs-spa/mdx-components.tsx             | Registered as MDX component           |
+| MDX content pages                       | Used for pattern selection guidance   |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+*/
 import { Check, X } from 'lucide-react'
 
 /**

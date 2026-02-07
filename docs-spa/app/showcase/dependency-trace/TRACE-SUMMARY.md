@@ -1,3 +1,47 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/TRACE-SUMMARY.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Executive summary of the entire Phase 1B dependency trace across 463 project
+files in three directories (showcase/83, design-extraction/350,
+design-system/30). Distills the top 10 critical findings, key statistics,
+tier distributions, and actionable recommendations from all subordinate trace
+reports into a single decision-ready document.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| 08-OBSERVATIONS-LOG.md                  | Anomalies aggregated into findings     |
+| 09-INTEGRITY-REPORT.md                  | Broken refs summary                    |
+| 10-MOVE-RECOMMENDATIONS.md              | Move counts and priorities             |
+| 11-DEPRECATION-ASSESSMENT.md            | Deprecation counts and severities      |
+| DD-SOURCE-OF-TRUTH-EXTRACTION.md        | Token divergence findings              |
+| DD-TYPOGRAPHY-VISUAL-AUDIT.md           | Typography audit findings              |
+| ALPHA/BETA/GAMMA agent analyses         | Per-directory statistics and tiers     |
+
+6. MUST HONOR
+- This is a summary document; authoritative detail lives in source reports
+- Finding numbers and statistics must match subordinate reports
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| PHASE-2A-CLASSIFICATION.md/.yaml        | Summary drives classification strategy |
+| PHASE-1B-MEGA-DEBRIEF.md               | References trace summary findings      |
+| knowledge-architecture/ documents       | Executive-level trace reference         |
+| Phase 2B batch manifest                 | File inventory derived from here       |
+| Future agents                           | First-read orientation to file system  |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # TRACE-SUMMARY.md
 ## Dependency Trace Executive Overview
 

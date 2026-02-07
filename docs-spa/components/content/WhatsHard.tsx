@@ -1,3 +1,43 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/components/content/WhatsHard.tsx
+Tier: B | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Difficulty/challenge callout that surfaces the core tension in a topic, lists
+symptoms the reader will experience, and provides mitigation guidance. Uses a
+3-zone structure: Core Tension (the fundamental conflict), Symptoms ("You'll
+Feel This When..."), and How to Navigate (mitigation in a bordered inset box).
+Flame icon in the header signals difficulty.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| lucide-react (Flame)                    | Header icon indicating difficulty     |
+
+6. MUST HONOR
+- border-radius: 0 on all elements (soul-locked)
+- box-shadow: none (soul-locked)
+- Header accent: #E83025 red (Flame icon + left border)
+- Symptom bullets: red square marker (#E83025)
+- Mitigation box: white bg with #E0D5C5 border, no rounded corners
+- Colors: KortAI palette only
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/components/content/index.ts    | Re-exported from barrel file          |
+| docs-spa/mdx-components.tsx             | Registered as MDX component           |
+| MDX content pages                       | Used for difficulty/challenge sections |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+*/
 import { Flame } from 'lucide-react'
 
 /**

@@ -1,3 +1,46 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/04-cross-directory-analysis.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Analyzes the cross-directory relationships between showcase/ (83 files),
+design-extraction/ (350 files), and design-system/ (30 files). Contains the
+complete token value comparison table, duplicate detection registry, token
+divergence severity assessments, integration point analysis, and system
+maturity comparison across all three directories.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| showcase-analysis.md (Agent ALPHA)      | Showcase token and structure data      |
+| design-extraction-analysis.md (Agent BETA) | T1 token values and provenance data |
+| design-system-analysis.md (Agent GAMMA) | Divergent token values and namespaces  |
+| cross-pollination-investigation.md      | Integration point evidence             |
+| 02-threading-data/ (all 3 files)        | Per-file dependency records consumed   |
+
+6. MUST HONOR
+- Core locked tokens (primary, background, text, border, geometry) are identical between T1 and showcase
+- Secondary tokens show documented drift (accent-amber, accent-purple, bg-info, bg-tip)
+- design-system/ has 4 CRITICAL divergences (border-radius, box-shadow, primary red, type scale)
+- All 15 intentional showcase duplicates are documented and must be preserved
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| 05-cleanup-recommendations.md           | Derives cleanup actions from analysis  |
+| 07-QUESTIONS-FOR-HUMAN.md              | Q-001, Q-006 reference token data      |
+| PHASE-2B-BATCH-MANIFEST.md             | References as Batch 10 file #164      |
+| Phase 2B threading header work          | Token comparison informs header content|
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # Cross-Directory Analysis
 
 **Generated:** 2026-02-05

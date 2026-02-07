@@ -1,3 +1,44 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/DD-TYPOGRAPHY-VISUAL-AUDIT.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Playwright-automated visual audit extracting getComputedStyle() typography
+values from all 6 DD HTML files rendered in a real browser. Documents which
+heading levels (h1-h6), paragraph, and code typography values are LOCKED
+(identical across all 6 files) vs. VARYING (per-exploration). Provides
+ground-truth rendered values that CSS source inspection alone cannot reveal.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| DD-001 through DD-006 HTML files        | Rendered in browser for extraction     |
+| Playwright MCP browser automation       | Method: getComputedStyle() extraction  |
+| DD-SOURCE-OF-TRUTH-EXTRACTION.md        | Companion CSS-level token extraction   |
+| User trust directive                    | DD files = ultimate sources of truth   |
+
+6. MUST HONOR
+- Computed values here are authoritative over CSS source declarations
+- DD-001 has known divergences from DD-002+ (line-height 1.6 vs 1.7)
+- DD-004 h3 intentionally uses Inter (body font), not Instrument Serif
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| TRACE-SUMMARY.md                        | Typography findings in exec summary    |
+| design-system/ token alignment          | Definitive rendered typography values  |
+| PHASE-2A-CLASSIFICATION.md/.yaml        | Audit evidence for classification      |
+| Future typography standardization       | Ground-truth reference for all levels  |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # DD Typography Visual Audit — Playwright Extraction
 
 **Date:** 2026-02-06

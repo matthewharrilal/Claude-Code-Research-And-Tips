@@ -1,3 +1,29 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: design-extraction/archive/CLAUDE.md
+Tier: C | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Navigation file for agents entering archive/. Documents the DANGEROUS superseded
+values in tokens/ (wrong border-radius, wrong shadows, wrong fonts like 'Bebas Neue')
+and warns agents never to copy values from this folder.
+
+3. STATUS
+ACTIVE (the warning is active; the content it describes is SUPERSEDED/DANGEROUS)
+
+5. BUILT ON
+Historical token definitions, component specs, and layout experiments from
+pre-audit phases. Created during Phase 2A Part 3 classification.
+
+8. CONSUMED BY
+Agents entering archive/ read this to understand the folder is frozen and dangerous.
+Redirects to perceptual-audit-v2/synthesis/DESIGN-TOKEN-SUMMARY.md for current values.
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # archive — CLAUDE.md
 
 ## STATUS: ARCHIVE — Contains DANGEROUS Superseded Values

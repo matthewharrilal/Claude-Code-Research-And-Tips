@@ -1,3 +1,44 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/11-DEPRECATION-ASSESSMENT.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Classifies all deprecated, superseded, and stale files across 463 project
+files by confidence level (HIGH/MEDIUM/LOW). Identifies 7 HIGH-confidence
+deprecated files (~118KB) including DANGEROUS archive/tokens/ values, ~27
+MEDIUM-confidence files (~700KB) in archive/ directories, and LOW-confidence
+stale items. Critical for preventing agents from consuming wrong token values.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| Phase 1B analysis (463 connections)     | File inventory and tier assignments    |
+| 08-OBSERVATIONS-LOG.md                  | OBS-004 (dangerous archive/tokens/)    |
+| T1 synthesis files                      | Define what supersedes deprecated files|
+| MASTER-INDEX.md                         | Archive markers for phase-2.5 files    |
+
+6. MUST HONOR
+- archive/ files are RETAINED for provenance (never deleted)
+- "SUPERSEDED" = content absorbed into newer files
+- "ARCHIVED" = research consumed during implementation
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| TRACE-SUMMARY.md                        | Deprecation counts in exec summary     |
+| 10-MOVE-RECOMMENDATIONS.md              | SUPERSEDED headers recommended here    |
+| PHASE-2A-CLASSIFICATION.md/.yaml        | 64 SUPERSEDED classification derived   |
+| Future agents                           | Avoiding consumption of wrong values   |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # 11-DEPRECATION-ASSESSMENT.md
 ## Deprecated, Superseded, and Stale File Assessment
 

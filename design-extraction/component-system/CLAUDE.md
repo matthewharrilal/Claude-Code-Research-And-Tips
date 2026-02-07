@@ -1,3 +1,29 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: design-extraction/component-system/CLAUDE.md
+Tier: C | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Navigation file for agents entering component-system/. Documents the folder's
+TRANSITIONAL status, explains which sub-artifacts are ACTIVE vs SUPERSEDED,
+and directs agents to perceptual-audit-v2/synthesis/ as the T1 authority.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+Folder contents: perceptual-audit-v2/, SOUL-DEFINITION.md, ANTI-PATTERNS.md,
+css/, components/, archive/. Created during Phase 2A Part 3 classification.
+
+8. CONSUMED BY
+All agents entering component-system/ read this first. It prevents agents from
+using SUPERSEDED files (ANTI-PATTERNS.md, archive/) and routes them to T1 synthesis.
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # component-system — CLAUDE.md
 
 ## STATUS: TRANSITIONAL — Bridge to T1 Synthesis

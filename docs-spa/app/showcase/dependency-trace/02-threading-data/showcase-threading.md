@@ -1,3 +1,42 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/02-threading-data/showcase-threading.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Documents per-file threading data (source, built_on, cited, mandatory_for,
+threading_ready, threading_gaps) for all 83 showcase/ files across 8 groups.
+This is the primary input for Phase 2B header generation on showcase files —
+each file's header content is derived from the threading record here.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| showcase-analysis.md (Agent ALPHA)      | Raw analysis data for all 83 files    |
+| cross-pollination-investigation.md      | Cross-directory edge verification      |
+| All 83 showcase/ files                  | Subjects of threading analysis         |
+
+6. MUST HONOR
+- Threading readiness is 71% (59/83 ready, 24 not ready)
+- Primary gap pattern: files with empty cited fields are audit records/trackers
+- Group structure (1-8) mirrors showcase directory organization
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| Phase 2B threading header work          | Primary source for showcase file headers |
+| PHASE-2B-BATCH-MANIFEST.md             | References as Batch 10 file #159      |
+| 06-threading-summary.md                 | Aggregates readiness percentages       |
+| Future agents writing showcase headers  | Lookup for source/built_on/cited data  |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # Threading Data -- showcase/ (83 files)
 
 **Generated:** 2026-02-05

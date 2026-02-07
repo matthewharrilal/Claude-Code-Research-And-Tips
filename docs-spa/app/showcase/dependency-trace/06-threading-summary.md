@@ -1,3 +1,46 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/06-threading-summary.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Aggregates threading readiness across all 463 files from the 3 threading data
+files. Reports per-directory completeness (showcase 71%, design-extraction 82%,
+design-system 0%), field gap analysis (source 82%, built_on 99%, cited 81%,
+mandatory_for 100%), top 5 blockers for Phase 3, work estimates (~14-22 hours),
+cross-directory edge summary (19 edges, all unidirectional), and a field
+completeness heatmap.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| 02-threading-data/showcase-threading.md | Showcase readiness data (71%)          |
+| 02-threading-data/design-extraction-threading.md | D-extraction readiness (82%) |
+| 02-threading-data/design-system-threading.md | Design-system readiness (0%)      |
+| cross-pollination-investigation.md      | Cross-directory edge count (19)        |
+
+6. MUST HONOR
+- Overall threading readiness is 63% (376/463 files with cited data)
+- design-system/ is the primary blocker (0% source field, 30 files)
+- Work estimate of 14-22 hours for full remediation is a planning baseline
+- Field completeness heatmap uses 5-level scale ([====] to [    ])
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| PHASE-2B-BATCH-MANIFEST.md             | References as Batch 10 file #166      |
+| Phase 2B threading header work          | Readiness data drives batch planning   |
+| knowledge-architecture/PHASE-1B-MEGA-DEBRIEF.md | Cites overall readiness %   |
+| Future Phase 3 planning                 | Work estimates and blocker analysis    |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # Threading Readiness Assessment
 
 **Generated:** 2026-02-05

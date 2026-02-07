@@ -1,3 +1,29 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: design-extraction/component-system/perceptual-audit-v2/CLAUDE.md
+Tier: C | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Navigation file for agents entering perceptual-audit-v2/. Documents the folder's
+role as the T1 SYNTHESIS AUTHORITY — the 6 canonical synthesis files that define
+the KORTAI design system's soul, tokens, characters, anti-patterns, and rules.
+
+3. STATUS
+ACTIVE (T1 authority — highest precedence in design-extraction)
+
+5. BUILT ON
+The 6 T1 synthesis files in synthesis/, 11 component audits, foundation research,
+and tracking registries. Created during Phase 2A Part 3 classification.
+
+8. CONSUMED BY
+All agents doing design work read this to locate T1 authority files. Routes agents
+to synthesis/ and enforces constraints (border-radius: 0, box-shadow: none, locked tokens).
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # perceptual-audit-v2 — CLAUDE.md
 
 ## STATUS: ACTIVE — T1 SYNTHESIS AUTHORITY

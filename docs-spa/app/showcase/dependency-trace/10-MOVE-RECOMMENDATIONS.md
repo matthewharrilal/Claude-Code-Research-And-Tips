@@ -1,3 +1,44 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/10-MOVE-RECOMMENDATIONS.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Actionable recommendations for moving, reorganizing, and adding protective
+headers to files across all three directories. Organized by confidence level
+(HIGH/MEDIUM/LOW). Principle: minimize moves — most recommendations are
+hygiene fixes (e.g., .gitignore additions, SUPERSEDED warnings), not
+structural reorganizations.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| 08-OBSERVATIONS-LOG.md                  | Anomalies drive move recommendations   |
+| 09-INTEGRITY-REPORT.md                  | Broken refs inform path corrections    |
+| 11-DEPRECATION-ASSESSMENT.md            | Deprecated files need SUPERSEDED hdrs  |
+| Phase 1B analysis (463 connections)     | Dependency data prevents breaking moves|
+
+6. MUST HONOR
+- Moves must not break any existing cross-directory references
+- DD exploration files are immovable (T1 sources of truth)
+- archive/ files are retained for provenance, not deleted
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| TRACE-SUMMARY.md                        | Move count in executive summary        |
+| PHASE-2A-CLASSIFICATION.md/.yaml        | Move decisions feed classification     |
+| Future cleanup agents                   | Execute recommended moves              |
+| knowledge-architecture/ documents       | Reference recommended actions          |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # Move Recommendations
 
 **Generated:** 2026-02-05

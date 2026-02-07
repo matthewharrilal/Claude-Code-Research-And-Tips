@@ -1,3 +1,43 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/09-INTEGRITY-REPORT.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Systematic integrity verification report checking broken references, circular
+dependencies, orphaned finding IDs, supersession gaps, and version conflicts
+across all three directories (showcase, design-extraction, design-system).
+Verdict: zero truly broken references found.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| Phase 1B analysis (463 connections)     | All cross-references traced here       |
+| showcase/ (83 files)                    | Intra- and cross-directory path refs   |
+| design-extraction/ (350 project files)  | Path references and version conflicts  |
+| design-system/ (30 files)              | Token divergence and provenance checks |
+
+6. MUST HONOR
+- Path references are point-in-time; file moves invalidate this report
+- "NOT YET CREATED" entries are expected (future stage outputs)
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| TRACE-SUMMARY.md                        | Summary of broken refs count           |
+| 10-MOVE-RECOMMENDATIONS.md              | Integrity issues drive move decisions  |
+| PHASE-2A-CLASSIFICATION.md/.yaml        | Integrity informs keep/delete calls    |
+| PHASE-1B-MEGA-DEBRIEF.md               | References integrity findings          |
+| Future agents                           | Validating cross-directory references  |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # Integrity Report
 
 **Generated:** 2026-02-05

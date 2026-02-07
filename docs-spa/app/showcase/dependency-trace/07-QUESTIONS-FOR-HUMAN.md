@@ -1,3 +1,46 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/07-QUESTIONS-FOR-HUMAN.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Collects 6 questions (Q-001 through Q-006) that emerged from the Phase 1B
+dependency trace but cannot be resolved by analysis alone — each requires a
+human judgment call about intent, direction, or priority. Covers design-system
+token alignment, R2 finding count discrepancy, node_modules gitignore, blend
+component status, CLAUDE.md Phase 4 coverage, and accent token drift.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| 04-cross-directory-analysis.md          | Token divergence data for Q-001, Q-006 |
+| 05-cleanup-recommendations.md           | Cleanup items elevated to questions    |
+| 01-reachability-report.md               | Orphan/connected data for Q-003        |
+| 02-threading-data/ (all 3 files)        | Threading gaps driving Q-002, Q-005    |
+| All Phase 1B analysis files             | Evidence base for each question        |
+
+6. MUST HONOR
+- Each question includes Options with pros/cons and a Recommendation
+- Confidence levels (HIGH/MEDIUM) indicate analysis certainty
+- Questions are OPEN — no answer has been given yet by the human
+- Q-001 (design-system alignment) is the highest-impact decision
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| PHASE-2B-BATCH-MANIFEST.md             | References as Batch 10 file #167      |
+| Human project owner                     | Decision-making on 6 open questions    |
+| Future work depending on Q-001 answer   | design-system alignment direction      |
+| knowledge-architecture/PHASE-1B-MEGA-DEBRIEF.md | Cites open questions       |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # 07-QUESTIONS-FOR-HUMAN.md
 ## Unresolvable Issues Requiring Human Decision
 

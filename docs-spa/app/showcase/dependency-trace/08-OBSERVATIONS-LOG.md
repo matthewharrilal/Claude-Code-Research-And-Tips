@@ -1,3 +1,44 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/08-OBSERVATIONS-LOG.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Aggregated anomaly and observation log from Phase 1B dependency tracing across
+all three directory analyses (ALPHA/showcase, BETA/design-extraction,
+GAMMA/design-system). Documents discrepancies, incomplete items, deprecated
+content, and cross-directory issues found during systematic file analysis.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| showcase-analysis.md (ALPHA agent)      | Source observations for showcase/      |
+| design-extraction-analysis.md (BETA)    | Source observations for design-extract |
+| design-system-analysis.md (GAMMA)       | Source observations for design-system/ |
+| cross-pollination-investigation.md      | Cross-directory anomaly source         |
+| CRITICAL-TRUST-RULES.md                 | DD trust directive governing analysis  |
+
+6. MUST HONOR
+- DD exploration files are SOURCES OF TRUTH per user directive
+- Observation IDs (OBS-XXX) are stable references used downstream
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| TRACE-SUMMARY.md                        | Critical findings derived from obs     |
+| 11-DEPRECATION-ASSESSMENT.md            | OBS-004 feeds deprecation decisions    |
+| PHASE-2A-CLASSIFICATION.md/.yaml        | Observations inform classification     |
+| knowledge-architecture/ documents       | Reference observation IDs              |
+| Future agents                           | Understanding file system anomalies    |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # 08-OBSERVATIONS-LOG.md
 ## Aggregated Anomalies Across All 3 Directory Analyses
 

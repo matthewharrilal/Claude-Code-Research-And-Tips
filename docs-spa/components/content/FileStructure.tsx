@@ -1,3 +1,44 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/components/content/FileStructure.tsx
+Tier: B | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+"The Methodical Surveyor" — renders interactive file tree visualizations with
+expandable folders, file content previews, and highlight markers. Accepts either
+a structured FileNode[] array (interactive tree) or a plain string (ASCII art
+format). Used to show project architecture and directory layouts in documentation.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| react (useState)                        | Tracks folder open/close and content visibility |
+| lucide-react (ChevronRight, ChevronDown, File, Folder, FolderOpen) | Tree node icons |
+
+6. MUST HONOR
+- border-radius: 0 on all elements (soul-locked)
+- box-shadow: none (soul-locked)
+- Folder icon color: #4A90D9 blue, File icon: #666666
+- Highlighted items: #E83025 red text, bold weight
+- Font: JetBrains Mono / SF Mono monospace stack
+- File content previews: #1A1A1A bg, #F0EBE3 text (dark code palette)
+- R1-017: Monospace Differentiation, R1-022: File Tree Visualization
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/components/content/index.ts    | Re-exported from barrel file          |
+| docs-spa/mdx-components.tsx             | Registered as MDX component           |
+| MDX content pages                       | Used for architecture/directory views |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+*/
 'use client'
 
 import { useState } from 'react'

@@ -1,3 +1,29 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: design-extraction/font-research/CLAUDE.md
+Tier: C | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Navigation file for agents entering font-research/. Documents the completed
+typography research that led to selecting Instrument Serif as the KORTAI display
+font. The decision is LOCKED and feeds into T1 synthesis via DESIGN-TOKEN-SUMMARY.md.
+
+3. STATUS
+ACTIVE (decision is final and locked — folder is read-only archive)
+
+5. BUILT ON
+7 font specimens, 5 comparison analyses, feasibility study, letterform analysis.
+Created during Phase 2A Part 3 classification.
+
+8. CONSUMED BY
+Agents needing font rationale read FINAL-DECISION.md. The Instrument Serif
+decision feeds into typography-system/ and DESIGN-TOKEN-SUMMARY.md (--font-display).
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # font-research — CLAUDE.md
 
 ## STATUS: ARCHIVE — Complete (Instrument Serif Decision Final)

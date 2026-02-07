@@ -1,3 +1,43 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/components/content/DesignDecision.tsx
+Tier: B | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+"The Impartial Cartographer" — documents design decisions with structured
+reasoning: the question being answered, the rationale, alternatives considered,
+and what the decision means for the reader. Uses a red left-accent border to
+distinguish from other callout types. Enforces the one-matrix-per-section rule
+to prevent decision paralysis (R5-A3).
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| React (core)                            | Component rendering, ReactNode props  |
+
+6. MUST HONOR
+- border-radius: 0 on all elements (soul-locked)
+- box-shadow: none (soul-locked)
+- Left accent: 4px #E83025 red border (distinguishes from amber EssenceBox)
+- Alternative tags: #F0EBE3 bg, no rounded corners
+- R1-006: Horizontal Comparison Break, R1-023: Decision Matrix Layout
+- R5-A3: Only one decision matrix per section
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/components/content/index.ts    | Re-exported from barrel file          |
+| docs-spa/mdx-components.tsx             | Registered as MDX component           |
+| MDX content pages                       | Used for documenting design rationale |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+*/
 /**
  * DesignDecision — "The Impartial Cartographer"
  *

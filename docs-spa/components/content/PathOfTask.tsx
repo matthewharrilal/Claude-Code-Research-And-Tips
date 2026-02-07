@@ -1,3 +1,44 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/components/content/PathOfTask.tsx
+Tier: B | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+"The Diligent Scribe" — renders step-by-step task progressions with numbered
+steps connected by a vertical line. Each step can include description text,
+code blocks, decision branches (yes/no fork with GitBranch icon), and tips.
+Step numbers are SQUARE (not circle) per soul compliance. Decision branches
+use a green/red two-column layout for yes/no paths.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| lucide-react (Check, GitBranch)         | Icons for tips and decision branches  |
+
+6. MUST HONOR
+- border-radius: 0 on ALL elements including step numbers (soul-locked, SQUARE not circle)
+- box-shadow: none (soul-locked)
+- Step number: #E83025 red bg, white text, square shape
+- Code blocks: #1A1A1A bg, #F0EBE3 text, JetBrains Mono font
+- Decision yes: #6b9b7a green border, Decision no: #E83025 red border
+- Connecting line: #E0D5C5 vertical between steps
+- R1-024: Props/API Table Format, R5-T2: Velocity Mismatch Rule (FAST)
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/components/content/index.ts    | Re-exported from barrel file          |
+| docs-spa/mdx-components.tsx             | Registered as MDX component           |
+| MDX content pages                       | Used for procedural/tutorial content  |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+*/
 import { Check, GitBranch } from 'lucide-react'
 
 /**

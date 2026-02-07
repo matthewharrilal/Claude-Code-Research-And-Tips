@@ -1,3 +1,44 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/components/content/EssenceBox.tsx
+Tier: B | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+"The Archivist of Axioms" — displays soul/essence statements with reverent,
+timeless typography. Like marginalia in a first-edition book. The defining
+character trait is Instrument Serif ITALIC body text with a #D97706 amber
+left-accent border on cream background. Used for distilled philosophical
+principles and core truths.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| React (core)                            | Component rendering, children prop    |
+
+6. MUST HONOR
+- border-radius: 0 on all elements (soul-locked)
+- box-shadow: none (soul-locked)
+- Body text MUST use Instrument Serif italic (defining character trait)
+- Accent: #D97706 amber 4px left border on #FEF9F5 cream bg
+- Label: "ESSENCE" uppercase, #D97706 color
+- R1-018: Drop Cap & Pull Quote, R2-019: Typography as Primary Design
+- R5-R3: Component Voices via Typography (Serif = "Archivist" voice)
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/components/content/index.ts    | Re-exported from barrel file          |
+| docs-spa/mdx-components.tsx             | Registered as MDX component           |
+| MDX content pages                       | Used for core philosophy/essence text |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+*/
 interface EssenceBoxProps {
   children: React.ReactNode
 }

@@ -1,3 +1,45 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/DD-SOURCE-OF-TRUTH-EXTRACTION.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Exhaustive extraction of all CSS custom properties from the 6 DD HTML files
+(the user-designated sources of truth for KortAI's locked design tokens).
+Identifies which tokens are truly locked vs. per-exploration variations, and
+compares against design-system/tokens.css and DESIGN-TOKEN-SUMMARY.md to
+surface critical divergences.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| DD-001 through DD-006 HTML files        | :root token values extracted from each |
+| design-system/src/styles/tokens.css     | Compared against for divergences       |
+| DESIGN-TOKEN-SUMMARY.md (T1)           | Compared against for divergences       |
+| User trust directive                    | DD files = ultimate source of truth    |
+
+6. MUST HONOR
+- DD files are SOURCES OF TRUTH per user directive (not tokens.css)
+- Token values extracted here override any conflicting downstream file
+- Locked vs. varying distinction is authoritative
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| TRACE-SUMMARY.md                        | 4 CRITICAL token divergences reported  |
+| DD-TYPOGRAPHY-VISUAL-AUDIT.md           | Companion audit using same DD sources  |
+| PHASE-2A-CLASSIFICATION.md/.yaml        | Token divergence informs classification|
+| knowledge-architecture/ documents       | Token authority references             |
+| Future token alignment work             | Definitive locked value registry       |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # DD Source-of-Truth Token Extraction
 
 **Date:** 2026-02-05

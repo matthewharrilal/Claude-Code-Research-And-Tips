@@ -1,3 +1,43 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/components/content/CopyButtonHandler.tsx
+Tier: B | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Client-side handler that wires up copy-to-clipboard functionality for code
+blocks in rendered HTML content. Exposes global `copyCode` and `copyCodeBlock`
+functions for onclick handlers, and uses a MutationObserver to auto-attach
+click handlers to any `.copy-btn` elements that appear dynamically (e.g., from
+HTML content injection). Renders nothing visually — pure behavior component.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| react (useEffect)                       | Lifecycle hook for mounting/cleanup   |
+| navigator.clipboard API                 | Browser clipboard write               |
+| MutationObserver API                    | Watches DOM for new copy buttons      |
+
+6. MUST HONOR
+- Must expose window.copyCode and window.copyCodeBlock globally (HTML onclick handlers depend on them)
+- Must clean up observer and global functions on unmount
+- Copy feedback animation: 2000ms timeout, checkmark SVG + "Copied!" text
+- Targets .copy-btn and .code-block/.core-code CSS classes from HTML content
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/components/content/index.ts    | Re-exported from barrel file          |
+| docs-spa/app/(docs)/layout.tsx          | Mounted once in docs layout for all pages |
+| HTML content with .copy-btn elements    | onclick handlers call window.copyCode |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+*/
 'use client'
 
 import { useEffect } from 'react'

@@ -1,3 +1,29 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: design-extraction/card-system/CLAUDE.md
+Tier: C | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Navigation file for agents entering card-system/. Documents the folder's
+SUPERSEDED status and warns agents NOT to use its values. The card-focused
+design exploration was superseded by component-system/ and then perceptual-audit-v2/.
+
+3. STATUS
+SUPERSEDED (historical record only — do not use for new work)
+
+5. BUILT ON
+Card system research (3A-3D), original 10 soul principles, CSS experiments.
+Created during Phase 2A Part 3 classification.
+
+8. CONSUMED BY
+Agents entering card-system/ read this to understand the folder is frozen.
+Redirects to perceptual-audit-v2/synthesis/ for current authority.
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # card-system — CLAUDE.md
 
 ## STATUS: SUPERSEDED — Historical Record Only

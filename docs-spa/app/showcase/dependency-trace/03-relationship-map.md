@@ -1,3 +1,47 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/03-relationship-map.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Human-readable visual dependency graph showing how the 3 directories
+(showcase, design-extraction, design-system) relate. Contains ASCII diagrams,
+the complete edge registry (E-001 through E-014), 4 supersession chains,
+critical node rankings, within-directory hub nodes, intentional duplicate
+registry, anomaly table, and summary statistics for all 463 files.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| 03-relationship-map-data.yaml           | Structured data rendered here          |
+| showcase-analysis.md (Agent ALPHA)      | Showcase hub node rankings             |
+| design-extraction-analysis.md (Agent BETA) | D-extraction hub node rankings      |
+| design-system-analysis.md (Agent GAMMA) | Disconnection evidence                 |
+| cross-pollination-investigation.md      | Edge registry, confirmed non-edges     |
+| CRITICAL-TRUST-RULES.md                 | Trust hierarchy informing edge direction|
+
+6. MUST HONOR
+- All flow is unidirectional: design-extraction -> showcase (no reverse)
+- 14 total cross-directory edges (13 documented + 1 undocumented Instrument Serif)
+- design-system/ has 0 edges to/from showcase (completely independent)
+- Blast radius definitions: CRITICAL (15+ files), HIGH (8+), MODERATE (3-7), LOW (0-2)
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| PHASE-2B-BATCH-MANIFEST.md             | References as Batch 10 file #163      |
+| knowledge-architecture/PHASE-1B-MEGA-DEBRIEF.md | Cites relationship findings  |
+| Phase 2B threading header work          | Visual reference for dependency flow   |
+| Future agents needing architecture overview | Primary orientation document       |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # Relationship Map -- KortAI Design System
 
 ## Generated: 2026-02-05

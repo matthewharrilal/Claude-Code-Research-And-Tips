@@ -1,3 +1,44 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/02-threading-data/design-extraction-threading.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Documents threading data for all 350 design-extraction/ project files. Provides
+full per-file records for the 6 T1 synthesis files and 7 tracking files (most
+critical), and group-level threading for repetitive directories (archive/,
+font-research/, sub-agent analyses). Includes 4 supersession chains documenting
+how token/soul/anti-pattern knowledge evolved through the extraction phases.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| design-extraction-analysis.md (Agent BETA) | Raw analysis data for 350 files    |
+| cross-pollination-investigation.md      | Cross-directory edge verification      |
+| All 350 design-extraction/ project files | Subjects of threading analysis        |
+
+6. MUST HONOR
+- Threading readiness is 82% (287/350 ready, 63 not ready)
+- T1 synthesis (6 files) and tracking (7 files) have full individual records
+- Group-level threading is used for directories with repetitive structure
+- 4 supersession chains must be preserved (Typography, Soul, Anti-Pattern, Perceptual Audit)
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| Phase 2B threading header work          | Primary source for design-extraction headers |
+| PHASE-2B-BATCH-MANIFEST.md             | References as Batch 10 file #160      |
+| 06-threading-summary.md                 | Aggregates readiness percentages       |
+| Future agents writing d-extraction headers | Lookup for threading data           |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # Threading Data -- design-extraction/ (350 project files)
 
 **Generated:** 2026-02-05

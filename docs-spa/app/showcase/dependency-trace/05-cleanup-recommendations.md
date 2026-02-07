@@ -1,3 +1,44 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/05-cleanup-recommendations.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Prioritized cleanup recommendations derived from the dependency trace analysis.
+Organizes actions into CRITICAL (3), HIGH (5), MEDIUM (6), LOW (7), and
+DO NOT TOUCH (10 categories) tiers with specific file targets, justification,
+and risk assessments. Includes a phased execution order (A through E).
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| 04-cross-directory-analysis.md          | Token divergences -> cleanup actions   |
+| 01-reachability-report.md               | Orphan identification -> cleanup scope |
+| 02-threading-data/ (all 3 files)        | Threading gaps -> remediation actions  |
+| All four Phase 1B analysis files        | Raw findings driving recommendations   |
+
+6. MUST HONOR
+- DO NOT TOUCH items are explicitly protected (15 intentional duplicates, 6 T1 files, etc.)
+- CR-003 (archive/tokens/ deprecation) is CRITICAL — wrong values produce soul-violating CSS
+- Execution order (Phase A-E) respects dependency between cleanup actions
+- archive/tokens/ files must get deprecation headers but NOT be deleted
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| 07-QUESTIONS-FOR-HUMAN.md              | Q-003, Q-005 reference specific CRs   |
+| PHASE-2B-BATCH-MANIFEST.md             | References as Batch 10 file #165      |
+| Future cleanup work                     | Actionable task list with priorities   |
+| knowledge-architecture/PHASE-1B-MEGA-DEBRIEF.md | Cites cleanup scope         |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # Cleanup Recommendations
 
 **Generated:** 2026-02-05

@@ -1,3 +1,48 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/dependency-trace/PHASE-2A-CLASSIFICATION.md
+Tier: B | Batch: 10 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Human-readable manifest classifying all 910 source files across 3 directories
+into DELETE (131), SUPERSEDED (64), KEEP+FULL (253), KEEP+LIGHT (461), and
+FLAGGED (1). Includes verification gate results (all 5 PASS), comparison to
+plan estimates, and per-file classification with rationale. This is the
+authoritative classification that Phase 2B threading headers are derived from.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| TRACE-SUMMARY.md                        | Executive findings inform strategy     |
+| 08-OBSERVATIONS-LOG.md                  | Anomalies inform classification        |
+| 09-INTEGRITY-REPORT.md                  | Ref integrity informs keep/delete      |
+| 11-DEPRECATION-ASSESSMENT.md            | 64 SUPERSEDED files classified here    |
+| 02-threading-data/                      | Tier assignments for traced files      |
+| 03-relationship-map-data.yaml           | Connection data for reachability       |
+
+6. MUST HONOR
+- All T1/DD files must be KEEP+FULL (verification gate V2)
+- All debrief outputs must be KEEP+FULL (verification gate V3)
+- No KEEP file may have code imports to a DELETE file (gate V1)
+- Supersession chains must be complete (gate V5)
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| PHASE-2A-CLASSIFICATION.yaml            | Machine-readable mirror of this data   |
+| Phase 2B batch manifest                 | KEEP+FULL = Tier A/B, KEEP+LIGHT = C  |
+| Phase 2B threading headers (all files)  | Tier assignment drives header template |
+| Future cleanup/deletion agents          | DELETE list for execution              |
+| Future agents                           | Which files matter, which to ignore    |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # PHASE 2A CLASSIFICATION — Verified File Manifest
 
 **Generated:** 2026-02-06

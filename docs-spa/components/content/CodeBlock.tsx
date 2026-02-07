@@ -1,3 +1,42 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/components/content/CodeBlock.tsx
+Tier: B | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Renders code snippets with syntax-aware styling and a copy-to-clipboard button.
+"The Precise Transcriptionist" — uses JetBrains Mono font, dark background
+(#1A1A1A), and optional filename header bar. Also serves as the MDX `pre`
+element override, so all fenced code blocks in MDX content render through this.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| react (useState)                        | Tracks copied state for button feedback |
+| lucide-react (Check, Copy)              | Icons for copy button states          |
+
+6. MUST HONOR
+- border-radius: 0 on all elements (soul-locked)
+- box-shadow: none (soul-locked)
+- Background: #1A1A1A, text: #F0EBE3 (KortAI dark code palette)
+- Font: JetBrains Mono / SF Mono monospace stack
+- R1-017: Monospace Differentiation, R1-021: Code Snippet Best Practices
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/components/content/index.ts    | Re-exported from barrel file          |
+| docs-spa/mdx-components.tsx             | Registered as MDX component + pre override |
+| All MDX content pages                   | Renders fenced code blocks            |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+*/
 'use client'
 
 import { useState } from 'react'

@@ -1,3 +1,29 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: design-extraction/typography-system/CLAUDE.md
+Tier: C | Batch: 9 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Navigation file for agents entering typography-system/. Documents the production
+typography implementation for KORTAI: typography.css entry point, 3 CSS modules
+(type-scale, stroke-treatments, typography-components), and Playwright test coverage.
+
+3. STATUS
+ACTIVE (T1 locked — modifications require Phase-level approval)
+
+5. BUILT ON
+font-research/FINAL-DECISION.md (Instrument Serif selection), DESIGN-TOKEN-SUMMARY.md
+(locked token values). Created during Phase 2A Part 3 classification.
+
+8. CONSUMED BY
+Agents implementing typography consume these CSS files. typography.css is imported
+by component-system CSS. Import order matters: type-scale -> stroke-treatments -> typography-components.
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # typography-system — CLAUDE.md
 
 ## STATUS: ACTIVE — T1 Typography Implementation
