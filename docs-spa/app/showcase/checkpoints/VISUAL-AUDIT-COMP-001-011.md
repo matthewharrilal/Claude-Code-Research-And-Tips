@@ -1,3 +1,45 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/VISUAL-AUDIT-COMP-001-011.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Records the soul token verification audit of all 11 React components (COMP-001
+through COMP-011). Documents the remediation from an average 54% soul score to
+90%+ compliance. Each component is verified at code level for border-radius: 0,
+box-shadow: none, correct colors, and typography constraints.
+
+2. THE QUESTION THIS ANSWERS
+"Are all 11 React components actually soul-compliant at the code level after remediation?"
+
+3. STATUS
+LOCKED — All 11 components verified as REMEDIATED. Code-level audit complete.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/SOUL-DISCOVERIES.md         | Soul constraints used for verification criteria |
+| design-extraction/component-system/perceptual-audit-v2/synthesis/DESIGN-TOKEN-SUMMARY.md | Locked token values verified against |
+
+6. MUST HONOR
+- Soul token values are NON-NEGOTIABLE: border-radius: 0, box-shadow: none, #E83025 primary, #FEF9F5 background
+- Component scores reflect code-level verification only; runtime visual testing requires Next.js dev server
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/MASTER-STATE.md             | References component remediation status in Foundation Remediation section |
+
+10. DIAGNOSTIC QUESTIONS
+- Does every COMP entry show explicit code line numbers where soul tokens are implemented?
+- Are all 7 dedicated components (001, 004, 005, 007, 008, 009, 010) scored 90%+?
+- Is the gap between previous average (54%) and current (90%+) documented with evidence?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # VISUAL AUDIT: COMP-001 through COMP-011
 ## React Component Soul Token Verification
 

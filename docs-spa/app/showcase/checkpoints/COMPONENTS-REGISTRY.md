@@ -1,3 +1,49 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/COMPONENTS-REGISTRY.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Central registry of all 11 KortAI components with their character names,
+soul scores, structural profiles, CSS tokens, verification checklists, and
+showcase progress status. Created as the identity reference document —
+the single place to look up any component's character, family, density
+contribution, and axis behavior.
+
+2. THE QUESTION THIS ANSWERS
+"What are the 11 KortAI components, what are their characters and soul identities, and what is their showcase build status?"
+
+3. STATUS
+ACTIVE — showcase status columns (Catalog, Families, Density, Axis, Stress) are all NOT STARTED; component identities are locked
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| (external: design-extraction) component soul extractions | 11 component character names and soul truths |
+| checkpoints/SOUL-DISCOVERIES.md         | Soul score percentages and verification criteria |
+
+6. MUST HONOR
+- Character names are canonical (e.g., "Precise Transcriptionist" for Code Snippet)
+- CSS token values are locked design system values, not approximations
+- Soul scores reflect post-remediation values (~82-90% range)
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| research/R5-COMBINATION-THEORY.md       | References component identities for combination analysis |
+| DESIGN-SYSTEM/components/OVERVIEW.md    | Uses registry as source for component overview documentation |
+
+10. DIAGNOSTIC QUESTIONS
+- Are all 11 components present with complete structural profiles?
+- Do character names match the canonical names in the design-extraction source?
+- Are CSS token values consistent with DESIGN-SYSTEM/tokens/ locked values?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # COMPONENTS-REGISTRY — All 11 KortAI Components
 ## Showcase Status, Structural Profiles, Soul Scores
 

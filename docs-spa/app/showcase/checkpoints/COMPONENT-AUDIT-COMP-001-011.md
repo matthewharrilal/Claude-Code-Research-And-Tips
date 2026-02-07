@@ -1,3 +1,52 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/COMPONENT-AUDIT-COMP-001-011.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Complete 11-component soul compliance audit that revealed a critical 32%
+soul gap (86% claimed vs 54% actual). Created 2026-02-04 using 7 sub-agents
+per component against COMPONENT-AUDIT-FOUNDATION.md findings. Identified
+4 systemic issues (border-radius, shadows, color palette, typography) and
+triggered the foundation remediation crisis response.
+
+2. THE QUESTION THIS ANSWERS
+"What is the true soul compliance score for each of the 11 KortAI components, and what specific violations exist?"
+
+3. STATUS
+LOCKED — audit complete; violations have since been remediated (see FOUNDATION-REMEDIATION-SYNTHESIS.md)
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/COMPONENT-AUDIT-FOUNDATION.md | Audit methodology and finding lookup table |
+| checkpoints/SOUL-DISCOVERIES.md         | Soul constraints (5 soul pieces) used as compliance criteria |
+| research/R1-DOCUMENTATION-PATTERNS.md   | Specific findings: R1-017, R1-019, R1-021 |
+| research/R3-DENSITY-DIMENSIONS.md       | Specific finding: R3-015 (decision points) |
+| docs-spa/app/globals.css                | Analyzed for token violations (radius, shadow, color vars) |
+
+6. MUST HONOR
+- Soul scores are calculated, not estimated — methodology must be reproducible
+- The 54% vs 86% discrepancy is a documented historical fact
+- Component-specific violations must reference exact CSS properties and values
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/FOUNDATION-REMEDIATION-SYNTHESIS.md | Uses 54% baseline to measure remediation progress to ~92% |
+| checkpoints/REMEDIATION-CHECKPOINT.md   | Uses violation list as remediation task backlog |
+
+10. DIAGNOSTIC QUESTIONS
+- Does each component's audit follow the same 7-section template?
+- Are the 4 systemic issues (radius, shadow, color, typography) consistently flagged across all 11 components?
+- Has the 54% average been superseded by the remediated ~92% score?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # COMPONENT AUDIT: COMP-001 through COMP-011
 ## Full 11-Component Research-Grounded Perceptual Depth Audit
 

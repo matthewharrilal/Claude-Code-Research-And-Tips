@@ -1,3 +1,35 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/CLAUDE.md
+Tier: C | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Navigation file for agents entering the checkpoints/ directory. Explains the
+operational vs archival distinction (checkpoints = live work, provenance = archive),
+lists all checkpoint files, and documents the sync protocol to provenance/.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| Sync protocol documentation             | Defines checkpoints (operational) vs provenance (archival) relationship |
+| All checkpoint files in this directory   | Catalogued and categorized for agent navigation |
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| Claude Code agent                       | Auto-read on checkpoints/ directory entry for orientation |
+| checkpoints/MASTER-STATE.md             | References this file's sync protocol for provenance updates |
+| checkpoints/SOUL-DISCOVERIES.md         | Follows sync protocol defined here |
+| checkpoints/RESEARCH-ACTIVE.md          | Follows sync protocol defined here |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # CLAUDE.md — Checkpoints Directory
 
 ═══════════════════════════════════════════════════════════════════════════════

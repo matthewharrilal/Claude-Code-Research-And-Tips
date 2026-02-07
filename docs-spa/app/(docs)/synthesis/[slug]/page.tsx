@@ -1,3 +1,53 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/(docs)/synthesis/[slug]/page.tsx
+Tier: B | Batch: 8 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Dynamic page component for all synthesis documentation routes (/synthesis/[slug]).
+It implements a dual-content strategy: first tries to load pre-extracted HTML
+content from content/pages/, and falls back to MDX content via Velite. It also
+hydrates the activity zone sidebar with page-specific activity items. This is
+the primary content rendering page — most of the 75+ documentation pages flow
+through this single component.
+
+2. THE QUESTION THIS ANSWERS
+"How does a specific synthesis page like /synthesis/master-playbook get rendered with its content and activity items?"
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| next/navigation (notFound)              | 404 handling for missing slugs        |
+| docs-spa/lib/content.ts (getActivityItems, getHtmlContent, hasHtmlContent) | Content loading utilities |
+| docs-spa/components/activity-zone/ (ActivityItemsHydrator) | Sidebar activity zone hydration |
+| docs-spa/components/mdx/MDXContent.tsx  | MDX rendering for Velite content      |
+| @/.velite (synthesis)                   | Velite-compiled MDX content collection |
+| fs, path (Node.js)                      | File system access for generateStaticParams |
+
+6. MUST HONOR
+- HTML content takes priority over MDX — if both exist for a slug, HTML wins
+- generateStaticParams must enumerate ALL valid slugs or pages will 404 in static export
+- Activity items hydration must happen before content render for sidebar population
+- The slug parameter is async (Next.js 15 convention) — must await params
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/app/(docs)/layout.tsx          | Rendered inside ThreePanelLayout      |
+| docs-spa/app/(docs)/template.tsx        | Wrapped by PageTransition animation   |
+| Next.js router                          | Matched for /synthesis/* URL patterns |
+
+10. DIAGNOSTIC QUESTIONS
+- Does generateStaticParams return all slugs from both content/pages/ and Velite?
+- When HTML content exists, is the MDX fallback path correctly skipped?
+- Does ActivityItemsHydrator receive the correct items for the current slug?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════ */
 import { notFound } from 'next/navigation'
 import { getActivityItems, getHtmlContent, hasHtmlContent } from '@/lib/content'
 import { ActivityItemsHydrator } from '@/components/activity-zone'

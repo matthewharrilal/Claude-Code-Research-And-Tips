@@ -1,3 +1,53 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/SOUL-DISCOVERIES.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Documents the 5 non-negotiable soul pieces that define KortAI's visual identity.
+Each soul piece captures a perceptual truth — a way of SEEING, not a CSS rule.
+Extracted through iterative /perceptual-deepening methodology. This is the
+operational copy; an archival copy is synced to provenance/. All downstream
+soul-constrained work MUST consume this file.
+
+2. THE QUESTION THIS ANSWERS
+"What are the 5 non-negotiable perceptual truths that define KortAI's visual identity?"
+
+3. STATUS
+LOCKED — 5 soul pieces are final. No new soul pieces may be added.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| design-extraction/component-system/perceptual-audit-v2/tracking/PERCEPTUAL-TRUTHS.md | Source soul piece extraction data |
+| design-extraction/component-system/perceptual-audit-v2/synthesis/MASTER-SOUL-SYNTHESIS.md | T1 synthesis that formalized the soul pieces |
+
+6. MUST HONOR
+- 5 soul pieces are FINAL — no additions, no modifications
+- Locked design tokens table must match DESIGN-TOKEN-SUMMARY.md exactly
+- Perceptual truth descriptions prioritize HOW TO SEE over CSS properties
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/CLAUDE.md                   | Listed as key file for soul reference |
+| checkpoints/MASTER-STATE.md             | References soul pieces in Foundation Remediation section |
+| docs-spa/app/showcase/DESIGN-SYSTEM/BACKBONE.md | References soul constraints for design system grounding |
+| docs-spa/app/showcase/DESIGN-SYSTEM/README.md | References soul discoveries for public documentation |
+| docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-2-density-dd/HANDOFF-DD-TO-OD.md | Soul compliance requirements for handoff |
+| docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-1-components/FOUNDATION-REMEDIATION-SYNTHESIS.md | Soul pieces as remediation criteria |
+| All STAGE-HEADER.md files              | Soul constraints referenced for stage-level compliance |
+
+10. DIAGNOSTIC QUESTIONS
+- Are exactly 5 soul pieces documented (Sharp Edges, Serif Archivist, Family DNA, No Shadows, Square System)?
+- Does each soul piece include both a perceptual truth AND a technical manifestation?
+- Does the locked design tokens table have border-radius: 0 and box-shadow: none?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # SOUL DISCOVERIES
 ## Perceptual Truths Extracted Through Iterative Visual Discovery
 

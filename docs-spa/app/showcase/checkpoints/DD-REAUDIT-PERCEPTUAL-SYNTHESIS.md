@@ -1,3 +1,56 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/DD-REAUDIT-PERCEPTUAL-SYNTHESIS.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Complete synthesis of all 6 DD exploration perceptual audits, consolidating
+per-DD scores, soul piece verification results, and the final scoring matrix.
+Created 2026-02-04 as the definitive Stage 2 audit record. Contains the
+SOUL PIECE VERIFICATION MATRIX proving all 5 soul pieces are correctly
+expressed across all explorations, with CSS token verification evidence.
+
+2. THE QUESTION THIS ANSWERS
+"Do all 6 DD explorations pass soul compliance after foundation remediation, and what are their final verified scores?"
+
+3. STATUS
+LOCKED — all 6 DDs audited, synthesis complete, scores finalized (avg 34.2/40)
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| explorations/density/DD-001-breathing.html | Audit subject: scored and verified |
+| explorations/density/DD-002-gradient.html | Audit subject: scored and verified |
+| explorations/density/DD-003-islands.html | Audit subject: scored and verified |
+| explorations/density/DD-004-layers.html | Audit subject: scored and verified |
+| explorations/density/DD-005-rivers.html | Audit subject: scored and verified |
+| explorations/density/DD-006-fractal.html | Audit subject: scored and verified |
+| checkpoints/MASTER-STATE.md             | Overall position context for audit |
+| checkpoints/DISCOVERIES-LOG.md          | Prior learnings referenced during audit |
+| DESIGN-SYSTEM/patterns/density-patterns.md | Validated patterns used as scoring criteria |
+
+6. MUST HONOR
+- Scores are per-DD and verified via 8-step visual protocol
+- Soul piece verification must show CSS evidence (var values, not just YES/NO)
+- Average score improvement (32.7 to 34.2) must be traceable to specific fixes
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/DD-REAUDIT-CHECKPOINT.md    | References synthesis results for progress tracking |
+| DESIGN-SYSTEM/provenance/stage-2-density-dd/STAGE-HEADER.md | Archives final DD audit scores and decisions |
+
+10. DIAGNOSTIC QUESTIONS
+- Do all 6 DD scores sum to the reported average (34.2/40)?
+- Is the SOUL PIECE VERIFICATION MATRIX complete for all 5 pieces across all 6 DDs?
+- Are CSS token values cited as evidence consistent with actual DD HTML files?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # DD RE-AUDIT — PERCEPTUAL DEEPENING SYNTHESIS
 ## 6 Density Explorations Audited with Soul Piece Verification
 

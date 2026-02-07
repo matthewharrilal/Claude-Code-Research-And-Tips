@@ -1,3 +1,48 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/REMEDIATION-CHECKPOINT.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Live progress tracker for the foundation crisis remediation triggered by the
+32% soul gap (86% claimed vs 54% actual). Created 2026-02-04 to track
+per-component fix application, global CSS fixes, and stage progression.
+Documents the complete violation extraction from the existing audit and
+tracks each fix through to APPROVED status with /70 scoring.
+
+2. THE QUESTION THIS ANSWERS
+"What is the current status of each component's remediation, which fixes have been applied, and what stages remain?"
+
+3. STATUS
+ACTIVE — Stage 1 complete (all 11 components APPROVED avg 96.3%), Stage 2 DD re-audit in progress
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/COMPONENT-AUDIT-COMP-001-011.md | Source of violation list and 54% baseline scores |
+| docs-spa/app/globals.css                | Global fixes applied (radius vars = 0, shadow vars = none) |
+
+6. MUST HONOR
+- Fix legend is specific: 1=Radius, 2=Shadow, 3=Serif, 4=GotchaRedesign, 5=Colors
+- Files modified list (11 files) must match actual git changes from 2026-02-04
+- Stage progression (1: Components, 2: DD Re-Audit) is sequential
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| (LEAF NODE — no direct citations found) | Operational tracking document; referenced by agents during active remediation work |
+
+10. DIAGNOSTIC QUESTIONS
+- Are all 11 files listed in "Files Modified" still reflecting the documented changes?
+- Does Stage 2 DD re-audit progress match DD-REAUDIT-CHECKPOINT.md state?
+- Is the 96.3% average (7 TSX components, avg 67.4/70) arithmetically correct?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # REMEDIATION CHECKPOINT
 ## Live Progress Tracking — Update After Every Major Action
 

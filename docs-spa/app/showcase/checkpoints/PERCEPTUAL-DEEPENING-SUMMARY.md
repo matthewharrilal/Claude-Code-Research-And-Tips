@@ -1,3 +1,52 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/PERCEPTUAL-DEEPENING-SUMMARY.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Complete summary of the 7-agent retroactive visual audit covering all 6 DD
+explorations and 7 COMP component code files. Created 2026-02-04 documenting
+6 phases: skill location, DD visual audit (avg 60.8/70 = 87%), DD-001
+traffic-light fix, COMP code verification, squint test, and documentation.
+Tracks soul compliance at ~92% after the full deepening process.
+
+2. THE QUESTION THIS ANSWERS
+"What was the complete outcome of the 7-agent perceptual deepening audit across all DD explorations and component code files?"
+
+3. STATUS
+LOCKED — all 6 phases complete, DD-001 traffic-light fix applied
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| explorations/density/DD-001-breathing.html | Audited + traffic-light fix applied (lines 328-339) |
+| explorations/density/DD-002-gradient.html | Audited: 63/70 (90%) |
+| explorations/density/DD-003-islands.html | Audited: 58/70 (83%) |
+| explorations/density/DD-004-layers.html | Audited: 63/70 (90%) |
+| explorations/density/DD-005-rivers.html | Audited: 62/70 (89%) |
+| explorations/density/DD-006-fractal.html | Audited: 63/70 (90%) |
+
+6. MUST HONOR
+- 7-agent format (A-G) is an adaptation of the 5-agent (A-E) perceptual deepening skill
+- DD-001 traffic-light fix is a permanent change to the HTML file
+- Per-DD scores use /70 scale (7 agents x 10 points each)
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| (LEAF NODE — no direct citations found) | Serves as standalone audit summary; referenced indirectly during subsequent DD work |
+
+10. DIAGNOSTIC QUESTIONS
+- Does the DD-001 traffic-light fix (lines 328-339) still exist in the HTML file?
+- Are all 7 agent dimensions (Typography, Spacing, Containers, Hierarchy, Composition, Color, Layout) scored per DD?
+- Does the average 87% match recalculation from individual DD scores?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # PERCEPTUAL DEEPENING VISUAL AUDIT — COMPLETE SUMMARY
 ## Full 7-Agent Retroactive Audit with Visual Verification
 

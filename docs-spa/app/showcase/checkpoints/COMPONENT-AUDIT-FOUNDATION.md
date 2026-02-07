@@ -1,3 +1,52 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/COMPONENT-AUDIT-FOUNDATION.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Foundational reference document that loads and catalogues all 337 research
+findings (R1-R5) as the audit basis for the 11-component soul compliance
+audit. Created 2026-02-04 as Phase 1-4 of the component audit pipeline.
+Establishes the complete finding inventory so COMP-001 through COMP-011
+audits can reference specific finding IDs against actual component behavior.
+
+2. THE QUESTION THIS ANSWERS
+"What is the complete inventory of all research findings available for component auditing, and how is each finding categorized?"
+
+3. STATUS
+LOCKED — all 337 findings loaded, phases 1-4 complete
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| research/R1-DOCUMENTATION-PATTERNS.md   | Source: 28 findings loaded and indexed |
+| research/R2-CREATIVE-LAYOUTS.md         | Source: 27 findings loaded and indexed |
+| research/R3-DENSITY-DIMENSIONS.md       | Source: 51 findings loaded and indexed |
+| research/R4-AXIS-INNOVATIONS.md         | Source: 192 findings loaded and indexed |
+| research/R5-COMBINATION-THEORY.md       | Source: 39 findings loaded and indexed |
+
+6. MUST HONOR
+- Finding counts must match actual research files (28+27+51+192+39 = 337)
+- Finding IDs must be verbatim from source research files
+- This is a READ-ONLY reference — findings are not modified here
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/COMPONENT-AUDIT-COMP-001-011.md | Uses as finding lookup table for per-component audit |
+| (indirect) All audit workflows          | Foundational reference during any component-level audit work |
+
+10. DIAGNOSTIC QUESTIONS
+- Does the total finding count (337) still match the sum of all R1-R5 files?
+- Are all finding IDs present and correctly transcribed from source research?
+- Has any research stream added findings since this was locked?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # COMPONENT AUDIT FOUNDATION
 ## Research Grounding + Methodology for All 11 Component Audits
 

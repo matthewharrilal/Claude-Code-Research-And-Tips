@@ -1,3 +1,48 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/RESEARCH-APPLICATION-ENFORCEMENT-TEMPLATE.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Mandatory checklist template that must be copied and completed for every piece
+of exploration, section, or output work. Enforces research grounding by requiring
+agents to document which R-X findings they read, which they will apply, which
+anti-patterns they will avoid, and which validated explorations they will reference.
+Incomplete forms mean invalid work.
+
+2. THE QUESTION THIS ANSWERS
+"How do I prove that my work is grounded in research rather than generated from memory?"
+
+3. STATUS
+ACTIVE — Template; never modified directly. Copied per-task.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/app/showcase/CLAUDE.md         | Research grounding methodology this template enforces |
+
+6. MUST HONOR
+- Every [FILL] placeholder must be replaced with actual content before submission
+- Minimum 5 findings must be identified in Part A3
+- Minimum 3 anti-patterns must be identified in Part A4
+- Post-work verification (Part B) is not optional
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/app/showcase/CLAUDE.md         | Referenced in mandatory files list for exploration tasks |
+| All exploration/section/migration work  | Template copied and filled for each task as process enforcement |
+
+10. DIAGNOSTIC QUESTIONS
+- Does Part A require reading the 5 mandatory research files before any work begins?
+- Does Part B require post-work evidence of research application (not just intent)?
+- Is the commitment statement (Part A6) present and non-optional?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # RESEARCH APPLICATION ENFORCEMENT TEMPLATE
 ## This Form MUST Be Completed For Every Piece of Work
 

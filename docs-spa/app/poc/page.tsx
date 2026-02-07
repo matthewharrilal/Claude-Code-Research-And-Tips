@@ -1,3 +1,33 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/poc/page.tsx
+Tier: C | Batch: 8 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+POC gallery page that showcases 8 design variation experiments (Editorial Docs,
+Blueprint, Notebook, Mountain, Trading Cards, Constellation, Sketchbook Blend,
+Attio Docs) for the Complexity Ladder visualization. Also includes a before/after
+comparison of raw HTML vs. React component approaches.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/components/ui-poc/LevelCardPOC.tsx | Imports LevelCard, LevelCardList, LevelCardListItem for component demo |
+| next/link                               | Navigation to individual variant demo pages |
+| framer-motion                           | Staggered entrance animations for variant cards |
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| Next.js App Router                      | Serves as page component at /poc route |
+| docs-spa/app/poc/variants/page.tsx      | Linked from this page's variant cards  |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════ */
 'use client'
 
 /**

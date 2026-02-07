@@ -1,3 +1,54 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/RESEARCH-ACTIVE.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Central tracking file for all 337 research findings across R1-R5. Records
+application status (UNAPPLIED/APPLIED/VALIDATED/INVALIDATED) for every finding.
+Must be consulted before any exploration work and updated after every piece of
+work. Currently shows 97% of findings remain unapplied (327/337), making this
+the primary source of "what research is available but unused."
+
+2. THE QUESTION THIS ANSWERS
+"Which research findings have been applied, which are still unapplied, and what is the overall research utilization rate?"
+
+3. STATUS
+ACTIVE — Must be updated after every piece of work per showcase/CLAUDE.md mandatory rules.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/app/showcase/research/R1-DOCUMENTATION-PATTERNS.md | 28 findings consolidated from R1 |
+| docs-spa/app/showcase/research/R2-CREATIVE-LAYOUTS.md | 27 findings consolidated from R2 |
+| docs-spa/app/showcase/research/R3-DENSITY-DIMENSIONS.md | 51 findings consolidated from R3 |
+| docs-spa/app/showcase/research/R4-AXIS-INNOVATIONS.md | 192 findings consolidated from R4 |
+| docs-spa/app/showcase/research/R5-COMBINATION-THEORY.md | 39 findings consolidated from R5 |
+
+6. MUST HONOR
+- Finding IDs (R1-001, R3-012, etc.) must match source research files exactly
+- Status transitions must be evidence-based: APPLIED requires "Applied In" + "Evidence" columns filled
+- VALIDATED requires Confidence 4+ from audit verification
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/app/showcase/CLAUDE.md         | Mandatory reading before any exploration work (Step 1 of research grounding) |
+| docs-spa/app/showcase/DESIGN-SYSTEM/CLAUDE.md | Referenced for research coverage tracking |
+| checkpoints/RESEARCH-APPLICATION-ENFORCEMENT-TEMPLATE.md | Template references this file as mandatory pre-work reading |
+| docs-spa/app/showcase/DESIGN-SYSTEM/BACKBONE.md | References research application status |
+| docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-2-density-dd/HANDOFF-DD-TO-OD.md | References research utilization for handoff context |
+
+10. DIAGNOSTIC QUESTIONS
+- Does the GLOBAL SUMMARY table match the sum of per-R-stream finding counts?
+- Are all 337 findings accounted for (no gaps in ID sequences)?
+- Has the "Last Updated" field been touched since the most recent piece of work?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # RESEARCH-ACTIVE — Comprehensive Research Tracking
 ## All 337 Findings with Application Status
 

@@ -1,3 +1,51 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/MASTER-STATE.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Central state tracker for the entire showcase project. After context compaction,
+this file tells an agent exactly where the project is: current phase, current step,
+what's complete, what's next. References 13+ external files across design-extraction
+and checkpoints. Designed to survive compaction events as the single recovery document.
+
+2. THE QUESTION THIS ANSWERS
+"What is the current state of the showcase project and what should happen next?"
+
+3. STATUS
+ACTIVE — Updated after every major action. Currently at Phase 2.2 (Organizational Explorations), OD-001 next.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/SOUL-DISCOVERIES.md         | Soul pieces documented and referenced in Foundation Remediation section |
+| design-extraction/component-system/perceptual-audit-v2/synthesis/DESIGN-TOKEN-SUMMARY.md | Token values referenced for compliance tracking |
+| design-extraction/component-system/perceptual-audit-v2/synthesis/MASTER-SOUL-SYNTHESIS.md | Soul synthesis referenced for audit methodology |
+| checkpoints/VISUAL-AUDIT-COMP-001-011.md | COMP-F findings feeding component status |
+| checkpoints/VISUAL-AUDIT-DD-001-006.md  | DD-F findings feeding exploration status |
+
+6. MUST HONOR
+- Must be updated after EVERY major action — stale state = dangerous state
+- Phase/step/status triple must always reflect reality
+- All score tables must include both original and current scores for audit trail
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/app/showcase/CLAUDE.md         | Referenced as position tracker in Key File Locations |
+| checkpoints/DD-REAUDIT-CHECKPOINT.md    | References master state for phase context |
+| docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-1-components/FOUNDATION-REMEDIATION-SYNTHESIS.md | References master state for remediation history |
+
+10. DIAGNOSTIC QUESTIONS
+- Does the state machine position diagram match the prose description of current phase?
+- Are all completed audit summaries linked with correct checkpoint file paths?
+- Is the "Last Updated" timestamp recent enough to trust the state?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # MASTER-STATE — Compaction Survival Document
 ## Position, Next Action, Quality, Recovery Protocol
 

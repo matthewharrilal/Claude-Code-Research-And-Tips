@@ -1,3 +1,48 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/VISUAL-AUDIT-DD-001-006.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Records the complete 7-agent perceptual depth assessment of all 6 density
+explorations (DD-001 through DD-006). Confirms that DD HTML explorations are
+SOUL COMPLIANT (87% aggregate score, 61/70) while documenting that React COMP
+components were NOT compliant at the time of audit. Includes squint test results,
+quality gate verification, and per-agent dimensional scoring.
+
+2. THE QUESTION THIS ANSWERS
+"Do the DD-001 through DD-006 HTML explorations pass a rigorous multi-dimensional visual audit for soul compliance?"
+
+3. STATUS
+LOCKED — All 6 DDs audited. Overall status: PASS WITH REMEDIATION REQUIRED (DD-001 traffic-light issue).
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/app/showcase/explorations/density/DD-001.html through DD-006.html | Audit subjects — the HTML files being assessed |
+| design-extraction/component-system/perceptual-audit-v2/synthesis/MASTER-SOUL-SYNTHESIS.md | Soul piece constraints used as verification criteria |
+| checkpoints/SOUL-DISCOVERIES.md         | 5 soul pieces verified in squint test |
+
+6. MUST HONOR
+- Aggregate score must meet ≥56/70 (80%) quality gate threshold
+- No single agent dimension may score below 7/10
+- Soul token violations must be zero in DD explorations
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/MASTER-STATE.md             | References 7-agent audit scores in Phase 2.1 Perceptual Depth Audit Summary |
+
+10. DIAGNOSTIC QUESTIONS
+- Does every DD have scores from all 7 agents (A through G)?
+- Is the DD-001 traffic-light remediation issue documented with specific fix instructions?
+- Does the squint test section describe actual perceptual observations, not just pass/fail?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # VISUAL AUDIT: DD-001 through DD-006
 ## Complete 7-Agent Perceptual Depth Assessment
 

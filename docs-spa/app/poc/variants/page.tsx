@@ -1,3 +1,30 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/poc/variants/page.tsx
+Tier: C | Batch: 8 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Design variant showcase page that renders six different LevelCard visual styles
+(Glassmorphism, Bold Minimal, Dark Premium, Gradient Border, Colorful Panel,
+Notion-style) side by side for comparison and design direction evaluation.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/components/ui-poc/LevelCardVariants.tsx | Imports all 6 variant components (Glass, Minimal, Dark, Gradient, Colorful, Notion) |
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| Next.js App Router                      | Serves as page component at /poc/variants route |
+| docs-spa/app/poc/page.tsx               | Links to this page from variant gallery |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════ */
 'use client'
 
 /**

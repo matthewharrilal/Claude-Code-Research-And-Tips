@@ -1,3 +1,56 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/DD-REAUDIT-CHECKPOINT.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Live progress tracker for the DD re-audit phase (Stage 2), documenting
+screenshot capture, per-DD audit steps, component mapping, and soul piece
+verification across all 6 density explorations. Created 2026-02-04 as an
+operational checkpoint updated after every major action during the
+perceptual deepening re-audit workflow.
+
+2. THE QUESTION THIS ANSWERS
+"What is the current progress of the DD re-audit, and which explorations have completed which audit steps?"
+
+3. STATUS
+ACTIVE — updated during DD re-audit work (may have incomplete checkboxes for pending steps)
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/SOUL-DISCOVERIES.md         | 5 soul pieces used as per-DD verification criteria |
+| checkpoints/FOUNDATION-REMEDIATION-SYNTHESIS.md | ~92% scores confirmed as baseline for re-audit |
+| checkpoints/PERCEPTUAL-AUDIT-LOG.md     | Audit methodology and iteration history |
+| explorations/density/DD-001-breathing.html | Audit subject: screenshots captured |
+| explorations/density/DD-002-gradient.html | Audit subject: screenshots captured |
+| explorations/density/DD-003-islands.html | Audit subject: screenshots captured |
+| explorations/density/DD-004-layers.html | Audit subject: screenshots captured |
+| explorations/density/DD-005-rivers.html | Audit subject: screenshots captured |
+| explorations/density/DD-006-fractal.html | Audit subject: screenshots captured |
+
+6. MUST HONOR
+- Checkpoint must be updated after every major action (not retroactively)
+- Soul piece verification must cover all 5 pieces per DD where applicable
+- 8-step visual protocol must be completed per DD before marking as done
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/DD-REAUDIT-PERCEPTUAL-SYNTHESIS.md | References progress state for synthesis write-up |
+| (LEAF NODE for direct citation)         | Not directly cited elsewhere; operational tracking only |
+
+10. DIAGNOSTIC QUESTIONS
+- Are all 6 DD screenshots captured and file sizes verified?
+- Do the component mappings per DD match the actual HTML file contents?
+- Are incomplete checkboxes still accurate or have steps been completed without updating?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # DD RE-AUDIT CHECKPOINT
 ## Live Progress Tracking — Update After EVERY Major Action
 

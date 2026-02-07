@@ -1,3 +1,48 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/DISCOVERIES-LOG.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Tracks all exploration experiments with explicit scoring, curation decisions
+(INCLUDE/DOCUMENT/DISCARD), and version control. Records novel discoveries
+generated during DD exploration work that extend beyond original R1-R5 research.
+Currently shows all 6 density explorations scored and curated (all 6 INCLUDE
+after perceptual deepening re-audit).
+
+2. THE QUESTION THIS ANSWERS
+"What explorations exist, what are their scores, and which ones are included for downstream use?"
+
+3. STATUS
+ACTIVE — Updated after every exploration completion. Currently 6/24 minimum explorations completed (density only).
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| DD exploration work (DD-001 through DD-006) | Source experiments being tracked and scored |
+| checkpoints/DD-REAUDIT-CHECKPOINT.md    | Re-audit process that updated DD scores |
+
+6. MUST HONOR
+- Curation thresholds are fixed: >=32 INCLUDE, 24-31 DOCUMENT, <24 DISCARD
+- Scoring rubric is 4 dimensions x 10 points = /40 total
+- Score changes from re-audits must preserve original scores for audit trail
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/app/showcase/CLAUDE.md         | Mandatory reading before any exploration work (Step 1 research grounding) |
+| checkpoints/DD-REAUDIT-CHECKPOINT.md    | References discovery log for curation status |
+
+10. DIAGNOSTIC QUESTIONS
+- Does the curation summary table match the individual exploration scores?
+- Are both original and re-audited scores preserved for every DD that was re-audited?
+- Is the "Explorations Completed" count accurate against the detailed entries?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
 # DISCOVERIES-LOG — Exploration Tracking + Curation
 ## All Experiments, Scores, Keep/Discard Decisions
 

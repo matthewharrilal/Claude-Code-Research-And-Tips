@@ -1,3 +1,52 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/FOUNDATION-REMEDIATION-SYNTHESIS.md
+Tier: B | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Stage 1 completion synthesis documenting the remediation of all 11 components
+from 54% average soul compliance to ~92%. Created 2026-02-04 after the
+foundation crisis response. Records the 3 globals.css violations fixed,
+the 5 soul pieces discovered, and the per-component before/after verification
+results. Also includes Stage 2 DD exploration re-audit results (4 DDs verified).
+
+2. THE QUESTION THIS ANSWERS
+"What was fixed during foundation remediation, what are the before/after soul scores, and are all 11 components now passing?"
+
+3. STATUS
+LOCKED — Stage 1 complete, all 11 components passing, globals.css fixes applied
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/SOUL-DISCOVERIES.md         | 5 soul pieces used as compliance criteria |
+| checkpoints/PERCEPTUAL-AUDIT-LOG.md     | Iteration history for each component audit |
+| docs-spa/app/globals.css                | 3 violations fixed (lines 175, 178, 206) |
+| checkpoints/MASTER-STATE.md             | Overall position context |
+| checkpoints/COMPONENT-AUDIT-COMP-001-011.md | Source of 54% baseline scores |
+
+6. MUST HONOR
+- The 54% to ~92% improvement is a measured fact, not an estimate
+- globals.css fixes are specific: border-radius 50% to 0, box-shadow deletions
+- All 11 component verdicts must remain consistent with actual component files
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/DD-REAUDIT-CHECKPOINT.md    | References ~92% scores as re-audit baseline |
+| DESIGN-SYSTEM/provenance/stage-1-components/STAGE-HEADER.md | Archives Stage 1 completion record |
+
+10. DIAGNOSTIC QUESTIONS
+- Are all 3 globals.css fixes still in place (lines 175, 178, 206)?
+- Do the ~92% scores still hold if components are re-audited today?
+- Are the 5 soul pieces listed here consistent with SOUL-DISCOVERIES.md?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # FOUNDATION REMEDIATION — PERCEPTUAL DEEPENING SYNTHESIS
 ## Final Summary and Deliverables
 

@@ -1,3 +1,78 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/checkpoints/RETROACTIVE-AUDIT-DD-001-006.md
+Tier: A | Batch: 7 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Retroactive research audit that systematically evaluates all 6 Density Design
+explorations (DD-001 through DD-006) against the full 388-finding research base
+(R1-R5 plus synthesis and anti-patterns). Created 2026-02-04 as the most
+thorough cross-referencing document in the audit chain, mapping every applicable
+finding to every DD exploration. Unique authority as the per-DD cross-matrix
+showing exactly which research was applied, missed, or not applicable.
+
+2. THE QUESTION THIS ANSWERS
+"For each DD exploration, which specific research findings were applied, which were missed, and what is the complete compliance matrix?"
+
+3. STATUS
+LOCKED — complete audit record, no modifications expected
+
+4. SOUL ALIGNMENT
+Soul-adjacent — validates that soul-derived constraints (border-radius: 0, box-shadow: none, serif italic, KortAI palette) are expressed in each DD exploration by cross-referencing against research findings that define those constraints.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| research/R3-DENSITY-DIMENSIONS.md       | Primary source: 48/51 findings applicable to DD work |
+| research/R1-DOCUMENTATION-PATTERNS.md   | Supporting: 5 key findings (R1-001/002/003/010/019) |
+| research/R2-CREATIVE-LAYOUTS.md         | Supporting: 6 findings on spacing and density |
+| research/R5-COMBINATION-THEORY.md       | Supporting: findings on pattern combinations |
+| research/RESEARCH-SYNTHESIS.md          | Cross-research insights and 5 principles |
+| DESIGN-SYSTEM/patterns/density-patterns.md | 4 validated patterns + 6 dimensions |
+| DESIGN-SYSTEM/anti-patterns/registry.md | 14 anti-patterns checked against DDs |
+| explorations/density/DD-001-breathing.html | Audit subject: Density Breathing |
+| explorations/density/DD-002-gradient.html | Audit subject: Density Gradient |
+| explorations/density/DD-003-islands.html | Audit subject: Density Islands |
+| explorations/density/DD-004-layers.html | Audit subject: Density Layers |
+| explorations/density/DD-005-rivers.html | Audit subject: Density Rivers |
+| explorations/density/DD-006-fractal.html | Audit subject: Density Fractal |
+
+6. MUST HONOR
+- Finding IDs must match actual research file content (R3-001 format)
+- Applicability ratings (YES/NO/MAYBE/CRITICAL) reflect genuine analysis
+- Per-DD matrices must cover all 6 explorations without gaps
+
+7. WHAT BREAKS IF THIS CHANGES
+HIGH blast radius — this is the authoritative finding-to-DD mapping.
+| Affected File                           | Impact                                |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/DD-REAUDIT-PERCEPTUAL-SYNTHESIS.md | Loses research cross-reference for scoring |
+| checkpoints/DD-REAUDIT-CHECKPOINT.md    | Loses audit foundation for re-audit phase |
+| checkpoints/RESEARCH-ACTIVE.md          | Applied/unapplied tracking becomes unreliable |
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| (LEAF NODE — standalone audit record)   | Not directly cited by other files; serves as authoritative reference during DD re-audit work and future research application verification |
+
+9. RESEARCH DEBT
+- cited field is empty: no known downstream consumers reference this file directly
+- R-4 (192 findings) applicability analysis may be incomplete — only subset checked
+- Per-DD cross-matrix format could be extended to OD/AD/CD explorations if created
+
+10. DIAGNOSTIC QUESTIONS
+- Does the R3 applicable count (48/51) still match if R3 findings are updated?
+- Are all 6 DD HTML files still present at their expected paths?
+- Does the total research base (388 findings) match current R1-R5 file contents?
+- Are the applicability ratings (YES/NO/MAYBE) consistent across DD matrices?
+- Has any finding been reclassified since this audit was locked?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # RETROACTIVE RESEARCH AUDIT: DD-001 through DD-006
 ## Complete Finding-by-Finding Analysis Against Compiled Research
 

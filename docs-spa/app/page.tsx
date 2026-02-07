@@ -1,3 +1,46 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/page.tsx
+Tier: B | Batch: 8 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Homepage of the Claude Code Knowledge Base SPA, rendered at the / route. This
+is the landing page users see before entering the documentation. It provides a
+centered hero with the project title, a CTA link to the Master Playbook
+synthesis page, and badge indicators for SPA readiness and 3-panel layout. It
+uses Tailwind utility classes referencing the KortAI design tokens from globals.css.
+
+2. THE QUESTION THIS ANSWERS
+"What does the user see when they first visit the docs SPA root URL?"
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| next/link (Link)                        | Client-side navigation to /synthesis/master-playbook |
+| docs-spa/app/globals.css (via layout)   | Tailwind tokens: bg-bg-base, text-text-primary, etc. |
+
+6. MUST HONOR
+- The CTA href "/synthesis/master-playbook" must correspond to a valid slug in content/pages/
+- Activity zone color tokens (az-warstory) used for badge styling must stay in sync with globals.css
+- This page renders OUTSIDE the (docs) route group — no ThreePanelLayout here
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| docs-spa/app/layout.tsx                 | Wrapped by root layout at / route     |
+| Next.js router                          | Served as the index page at /         |
+
+10. DIAGNOSTIC QUESTIONS
+- Does the "Enter Documentation" link navigate to a valid synthesis page?
+- Are the bg-bg-base and text-text-primary tokens rendering correct colors?
+- Is this page correctly excluded from the ThreePanelLayout?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════ */
 import Link from 'next/link'
 
 export default function Home() {
