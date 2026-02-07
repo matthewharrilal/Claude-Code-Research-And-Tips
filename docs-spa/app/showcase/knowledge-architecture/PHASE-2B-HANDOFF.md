@@ -6,15 +6,41 @@
 
 ---
 
-## 1. What Is Phase 2B?
+## 0. QUICK START — Your First 10 Minutes
 
-Phase 2B adds **inline threading headers** to all 253 KEEP+FULL files in the repository. These headers are "modification guards" — metadata blocks that tell any future agent: "You're about to touch this file. Here's what you need to know about its dependencies, consumers, and constraints."
+**Your task:** Add structured metadata headers to 164 remaining files. Headers are invisible comments (HTML/CSS/JS block comments) prepended to the top of each file. 89 files already have headers (Batches 1-6). You're continuing from Batch 7.
 
-The headers are **invisible in rendered views** (HTML comments for .md files, CSS/JS block comments for code files) but visible in source. They contain structured metadata about each file's role in the knowledge graph.
+**Step 1:** Read these two files from the repo:
+- `knowledge-architecture/PHASE-2B-BATCH-MANIFEST.md` — the complete file list (which files, which tier, which batch)
+- `dependency-trace/02-threading-data/showcase-threading.md` — upstream/downstream connection data
+(All paths relative to `docs-spa/app/showcase/`)
+
+**Step 2:** Verify current state:
+```bash
+grep -rl "INLINE THREADING HEADER" docs-spa/app/showcase/ design-extraction/ | wc -l
+# Should return 89 (Batches 1-6 complete)
+```
+
+**Step 3:** Start at Batch 7 (files 90-109). Use parallel agents, 8-10 files each. Give each agent:
+- The header template inline (see Section 4 below for copy-paste examples)
+- The threading data file to read for connection info
+- The exact file list with tier assignments
+
+**Step 4:** After each batch group, commit and push. Don't wait for all 164 files.
+
+**CRITICAL WARNING:** The `showcase/CLAUDE.md` file will auto-load with aggressive research grounding rules. Those rules are for design creation, NOT for this metadata insertion task. Ignore them. See Section 6.
 
 ---
 
-## 2. Current State (as of commit 1795004)
+## 1. What Is Phase 2B?
+
+Phase 2B adds **inline threading headers** to 253 files. These are "modification guards" — metadata blocks prepended as comments that tell any future agent: "Here's what you need to know about this file's dependencies, consumers, and constraints."
+
+The headers are **invisible in rendered views** but visible in source.
+
+---
+
+## 2. Current State
 
 | Metric | Value |
 |--------|-------|
@@ -115,6 +141,131 @@ All paths above are relative to `docs-spa/app/showcase/`.
 
 Note: Section numbers are intentionally non-sequential (they match the Tier A numbering for consistency).
 
+### Copy-Paste Tier B Example (for .md files)
+
+This is a REAL header from a completed file. Copy this structure exactly:
+
+```html
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/research/R1-DOCUMENTATION-PATTERNS.md
+Tier: B | Batch: 4 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+R1-DOCUMENTATION-PATTERNS.md captures 28 findings from external competitive
+analysis of premium documentation sites. It was produced on 2026-02-04 by
+research sub-agent R-1 as the PRIMARY research input for the Organizational
+Density (OD) stage. Its authority comes from being the only structured
+extraction of documentation-specific design patterns in this repository.
+
+2. THE QUESTION THIS ANSWERS
+"What documentation design patterns do premium sites use for density rhythm,
+whitespace, typography hierarchy, and component presentation?"
+
+3. STATUS
+ACTIVE (locked data). 28 findings are complete and immutable.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| Stripe, Linear, Apple HIG et al.       | External reference sites analyzed      |
+
+6. MUST HONOR
+- Do not modify findings — this is locked data
+- Finding IDs are R1-001 through R1-028
+- Copies in provenance/original-research/ must match
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/RESEARCH-ACTIVE.md          | Tracks which R1 findings applied       |
+| checkpoints/COMPONENT-AUDIT-FOUNDATION.md | References R1 for component decisions |
+
+10. DIAGNOSTIC QUESTIONS
+- Can every R1-NNN ID be found in this file?
+- Does provenance/original-research/R1-*.md match this file exactly?
+- Are all 28 findings present and numbered sequentially?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+```
+
+### Copy-Paste Tier C Example (for .md files)
+
+```html
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/CLAUDE.md
+Tier: C | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Navigation file for agents entering the DESIGN-SYSTEM/ directory. Identifies
+README.md (109K) as "THE KORTAI DESIGN MIND" that must be read first.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| README.md (109K)                        | The KortAI Design Mind                 |
+| BACKBONE.md                             | Structural backbone                    |
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| Claude Code agent                       | Auto-read on directory entry           |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+```
+
+### Copy-Paste Tier B Example (for .css files)
+
+```css
+/* ═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: design-extraction/component-system/css/variables.css
+Tier: B | Batch: 8 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+[3-5 sentences about what this CSS file does]
+
+2. THE QUESTION THIS ANSWERS
+"[question]"
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| [upstream file]                         | [relationship]                         |
+
+6. MUST HONOR
+- [constraint]
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| [downstream file]                       | [how used]                             |
+
+10. DIAGNOSTIC QUESTIONS
+- [question 1]
+- [question 2]
+- [question 3]
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════ */
+```
+
 ---
 
 ## 5. Format Rules by File Type
@@ -182,34 +333,28 @@ Similarly, the `checkpoints/CLAUDE.md` and `DESIGN-SYSTEM/CLAUDE.md` navigation 
 
 ---
 
-## 7. Edge Cases (F1-F9) — The Gotchas
+## 7. Edge Cases Still Relevant for Remaining Batches
 
-These are documented in PHASE-2B-MASTER-EXECUTION.md Part 7 but here's the practical summary:
+### When a file has no upstream ("Built On")
+Write: "ORIGIN FILE — no upstream within repository. Sources are [external research / Sanrok screenshots / etc.]"
 
-### F1: Soul Alignment for Non-Visual Files
-Research/tracking/checkpoint files have no CSS. For section 4, write: "This file is soul-adjacent, not soul-implementing" + describe conceptual alignment.
+### When a file has no downstream ("Consumed By")
+Write: "LEAF NODE — consumed during [audit/exploration] process, not referenced by path in other files."
 
-### F2: Origin Files (no upstream)
-For "Built On" in files with no upstream: "ORIGIN FILE — no upstream within repository. Sources are [external research / Sanrok screenshots / etc.]"
+### Soul Alignment (Tier A Section 4) for non-visual files
+Checkpoint/research/tracking files have no CSS. Write: "This file is soul-adjacent, not soul-implementing" + describe conceptual alignment.
 
-### F3: Leaf Nodes (no downstream)
-For "Consumed By" in files nothing references: "LEAF NODE — consumed during [audit/exploration] process, not referenced by path in other files."
+### Research Debt (Tier A Section 9)
+No file documents its own gaps. Infer from: TODO/TBD markers, threading gaps, coverage gaps.
 
-### F4-F5: Must Honor Direction
-- Files that CONSUME constraints: "MUST HONOR" format with inherited constraints
-- Files that ESTABLISH constraints: "ESTABLISHES" format listing what this file defines
+### Must Honor direction
+- Files that CONSUME constraints: use "MUST HONOR" format
+- Files that ESTABLISH constraints: use "ESTABLISHES" format
 
-### F6: Research Debt
-No file documents its own gaps. Infer from: TODO/TBD markers in the file, threading gaps, coverage gaps.
+### YAML frontmatter
+Some .md files start with `---` YAML frontmatter. Header goes AFTER the closing `---`, BEFORE the first `#` heading. If you prepend before frontmatter, you break parsers. Check first 5 lines of every .md file.
 
-### F7: DO NOT TOUCH Files
-Files >50KB: prepend-only minimal header. Do not modify existing content. (This was relevant for SOUL-DEFINITION.md 58KB, 55-PAIR-CONSISTENCY-MATRIX.md 63KB, README.md 109KB — all already done in Batches 1-2.)
-
-### F8: Synced Duplicates
-Provenance copies (e.g., provenance/original-research/R1-*.md is a copy of research/R1-*.md): Note "SYNCED DUPLICATE of [original path]" in Status section. Most of these are done (Batch 6).
-
-### F9: SUPERSEDED Files
-Files with existing SUPERSEDED headers (from Phase 2A): Threading header goes ABOVE the SUPERSEDED header. (46 SUPERSEDED files exist but they are NOT in the 253 KEEP+FULL list — they were handled separately in Phase 2A.)
+(For the full F1-F9 edge case list including historical ones, see PHASE-2B-MASTER-EXECUTION.md Part 7.)
 
 ---
 
@@ -351,50 +496,34 @@ After processing each batch, spot-check:
 
 ---
 
-## 11. Things a Fresh Instance Might Miss
+## 11. Gotchas That Will Bite You
 
-### The Batch Manifest Status Column
-The manifest (`PHASE-2B-BATCH-MANIFEST.md`) still shows all files as PENDING. Batches 1-6 are actually DONE (committed in git). The manifest was never updated. You can either:
-- Update status to DONE for files 1-89
-- Or just ignore the status column and use git to verify (files with headers = done)
+### The manifest says PENDING for everything
+The batch manifest still shows all 253 files as PENDING. Files 1-89 are actually DONE. Verify with `grep -rl "INLINE THREADING HEADER"`, not the manifest status column.
 
-### The Scratchpad Files
-There are 4 discovery/spec files in the old session's scratchpad at `/private/tmp/claude-501/-Users-spacewizardmoneygang-Desktop-Claude-Research-And-Tips/df16c5ef-*/scratchpad/`:
-- `PHASE-2B-BATCH-MANIFEST.md` — NOW COPIED TO REPO (knowledge-architecture/)
-- `PHASE-2B-DEEP-DISCOVERY-PART2.md` — Contains 3 verbatim sample headers (734 lines). Useful reference but not critical.
-- `PHASE-2B-DISCOVERY-REPORT.md` — Initial discovery notes. Historical only.
-- `PHASE-2B-EXECUTION-SPEC.md` — Early version of what became PHASE-2B-MASTER-EXECUTION.md. Superseded.
+### CLAUDE.md files auto-load and look "done"
+Several CLAUDE.md files (checkpoints/CLAUDE.md, DESIGN-SYSTEM/CLAUDE.md, etc.) will appear in your system context when you enter their directory. Seeing their content does NOT mean they have threading headers. File #108 (checkpoints/CLAUDE.md) is in Batch 7 and still needs processing.
 
-These scratchpad files may or may not exist on a fresh machine. The repo now has everything critical.
+### File #90 is Tier A — the only one left
+RETROACTIVE-AUDIT-DD-001-006.md is the ONLY remaining Tier A file. It needs all 10 sections (not 7). Easy to miss when batch-processing the rest of Batch 7 as Tier B.
 
-### Threading Data Coverage Gaps
-The threading data files don't cover every file. Specifically:
-- `showcase-threading.md` covers 83 files in docs-spa/app/showcase/
-- `design-extraction-threading.md` covers design-extraction/ files
-- Content components (docs-spa/components/content/*.tsx) are NOT in any threading file — you'll need to infer connections from import statements
-- Content HTML pages (Batches 11-13) are NOT individually threaded — their upstream is the matching synthesis .md file
+### Content HTML pages are fragments
+The 75 content.html files (Batches 11-13) have NO `<!DOCTYPE html>`. They start with blank lines then `<!-- Section 1: ESSENCE -->`. Only read first ~10 lines. Match on `<!-- Section 1:` for Edit tool insertion.
 
-### The checkpoints/ Directory Has a CLAUDE.md
-`docs-spa/app/showcase/checkpoints/CLAUDE.md` is file #108 in the manifest (Tier C, Batch 7). It already exists and has content but does NOT have a threading header yet. It's automatically loaded when Claude enters that directory, so it will appear in your system context. Don't confuse "I can see this file's content" with "this file has been processed."
+### Threading data has gaps
+`showcase-threading.md` covers showcase/ files. `design-extraction-threading.md` covers design-extraction/. But TSX components, app code, content HTML, and dependency-trace files have NO threading data. See Section 16 for how to handle these.
 
-### Tier A File in Batch 7
-File #90 (RETROACTIVE-AUDIT-DD-001-006.md) is the ONLY Tier A file in the remaining batches. It needs all 10 sections including Soul Alignment, What Breaks, and Research Debt. Don't miss this — it's easy to process all of Batch 7 as Tier B.
+### 3 files can't have inline headers
+Skip these — JSON/binary can't hold comments. Note in manifest only:
+- File #129: `docs-spa/app/favicon.ico` (binary)
+- File #132: `docs-spa/.prettierrc` (JSON)
+- File #252: `docs-spa/content/navigation.json` (JSON)
 
-### HTML Content Pages Are Fragments, Not Full Documents
-The content.html files in Batches 11-13 are HTML **fragments** (not full documents). They do NOT have `<!DOCTYPE html>`. They typically start with 2 blank lines then `<!-- Section 1: ESSENCE -->`. The header goes at the very top, before the blank lines. Each file can be 500-2000+ lines — only read the first ~10 lines to confirm the pattern. Don't read the full file — it will waste context.
+### File #253 needs JSX comments
+`index.mdx` is MDX. Use `{/* ... */}` not `<!-- -->`. Only MDX file in the manifest.
 
-**Edit tool anchor:** Match on `<!-- Section 1: ESSENCE -->` (or whatever the first non-blank line is) and prepend the header before it.
-
-### YAML Frontmatter Trap
-Some .md files have YAML frontmatter (delimited by `---`). The threading header goes AFTER the frontmatter close `---` but BEFORE the first `#` heading. If you prepend before the frontmatter, you'll break any tool that parses it. Check the first 5 lines of each .md file for `---`.
-
-Files known to have frontmatter: PIPELINE-MANIFEST.md (already done), some STAGE-HEADER.md files (already done). In remaining batches, watch for this in Batch 10 dependency-trace files.
-
-### The MDX File
-`docs-spa/content/synthesis/master-playbook/index.mdx` (file #253, last file) uses MDX format. Comments must use JSX syntax: `{/* ... */}` not HTML `<!-- -->`. This is the ONLY .mdx file in the manifest.
-
-### Binary File
-`docs-spa/app/favicon.ico` (file #129) is binary. Cannot add comments. Skip inline, add manifest note.
+### next-env.d.ts will lose its header
+File #130 is auto-generated by Next.js. Add the header anyway, but it will be overwritten on next build.
 
 ---
 
@@ -427,13 +556,12 @@ Split into 4-5 agents. Each header is ~10 lines (4 sections). Fast.
 
 ## 13. After All 253 Files Are Done
 
-Per PHASE-2B-MASTER-EXECUTION.md Part 10:
-
 1. **Traversal Verification:** Spot-check that "Consumed By" paths exist and "Built On" paths exist
 2. **Bidirectional Cross-Check:** For sample pairs, verify A's "Consumed By: B" matches B's "Built On: A"
-3. **Batch Manifest Update:** Mark all files DONE
-4. **Commit and push**
-5. **Phase 2C** is the insertion of headers into source files... but wait, we already did that directly. The original plan had a staging step (PHASE-2B-OUTPUTS/) but we skipped it and wrote headers directly to source files. So Phase 2C is effectively already done as part of Phase 2B.
+3. **Batch Manifest Update:** Mark all files DONE in the manifest
+4. **Final commit and push**
+5. **Run the verification checklist** in Section 20
+6. Phase 2B is then COMPLETE. No separate Phase 2C needed — headers were written directly to source files.
 
 ---
 
@@ -458,9 +586,6 @@ done
 
 # Verify no broken references in completed headers
 grep -h "Built On\|Consumed By" docs-spa/app/showcase/research/R1-DOCUMENTATION-PATTERNS.md
-
-# Count remaining files needing headers (should decrease as you work)
-comm -23 <(sort /tmp/manifest-files.txt) <(grep -rl "INLINE THREADING HEADER" docs-spa/ design-extraction/ | sort) | wc -l
 ```
 
 ---
@@ -607,24 +732,10 @@ This prevents losing work if a session hits context limits or crashes.
 
 ---
 
-## 20. Files to Skip (No Inline Header Possible)
-
-These files cannot have inline comments. Track them in the manifest with a note instead:
-
-| File # | Path | Reason |
-|--------|------|--------|
-| 129 | docs-spa/app/favicon.ico | Binary file |
-| 132 | docs-spa/.prettierrc | JSON format (no comments) |
-| 252 | docs-spa/content/navigation.json | JSON format (no comments) |
-
-Total skipped: 3 files. Effective remaining for inline insertion: 161 files.
-
----
-
-## 21. Verification Checklist — Run After All Batches Complete
+## 20. Verification Checklist — Run After All Batches Complete
 
 ```bash
-# 1. Total header count (should be ~250, accounting for 3 skipped files)
+# 1. Total header count (expect ~250: 253 minus 3 skipped JSON/binary files)
 grep -rl "INLINE THREADING HEADER" docs-spa/ design-extraction/ | wc -l
 
 # 2. Check no file got a duplicate header
