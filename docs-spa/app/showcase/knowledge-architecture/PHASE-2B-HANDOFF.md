@@ -18,7 +18,7 @@
 **Step 2:** Verify current state:
 ```bash
 grep -rl "INLINE THREADING HEADER" docs-spa/app/showcase/ design-extraction/ | wc -l
-# Should return 89 (Batches 1-6 complete)
+# Should return ~90 (89 real headers + 1 false positive: this handoff doc contains the string in template examples)
 ```
 
 **Step 3:** Start at Batch 7 (files 90-109). Use parallel agents, 8-10 files each. Give each agent:
@@ -270,96 +270,29 @@ END INLINE THREADING HEADER
 
 ## 5. HOW TO DERIVE EACH SECTION — The Methodology
 
-This is the core process. For each file, you need two inputs:
-1. **The file itself** (read first 60-80 lines)
-2. **The threading data entry** for that file (from `showcase-threading.md` or `design-extraction-threading.md`)
+This is the core skill. If you understand this section, you can process any file in the manifest. If you skip this section, your headers will be either empty boilerplate or fabricated.
 
-### What Threading Data Looks Like
+### 5.1 The Two Inputs You Need
 
-Each file has an entry in the threading data that looks like this:
+For each file, you always need exactly two inputs:
+1. **The file itself** — Read first 60-80 lines to understand its purpose
+2. **The threading data entry** for that file — From one of these files:
+   - `dependency-trace/02-threading-data/showcase-threading.md` — for files in `docs-spa/app/showcase/`
+   - `dependency-trace/02-threading-data/design-extraction-threading.md` — for files in `design-extraction/`
 
-```
-### RESEARCH-ACTIVE.md
-- source: R1-R5 research files (consolidation of all finding tracking)
-- built_on: R1-DOCUMENTATION-PATTERNS.md (28 findings), R2-CREATIVE-LAYOUTS.md (78 findings), ...
-- cited: showcase/CLAUDE.md (mandatory reading), DESIGN-SYSTEM/CLAUDE.md, BACKBONE.md, ...
-- mandatory_for: every exploration task (must be updated after work)
-- threading_ready: YES
-- threading_gaps: none
-```
+Not every file has threading data. ~83 showcase files and ~50 design-extraction files are covered. TSX components, app code, content HTML, and dependency-trace files are NOT covered. See Section 5.7 for those.
 
-### Field → Section Mapping
+### 5.2 How to Find a File's Threading Entry
 
-| Threading Data Field | Maps To Header Section | How to Use It |
-|---------------------|----------------------|---------------|
-| `source` | 1. WHY THIS EXISTS | Explains where the file came from. Use this + file's opening lines to write the 3-5 sentence summary. |
-| `built_on` | 5. BUILT ON | These are the upstream dependencies. Resolve each to a real file path. Each becomes a row in the table. |
-| `cited` | 8. CONSUMED BY | These are the downstream consumers. Each file listed here uses this file somehow. Each becomes a row. |
-| `mandatory_for` | 6. MUST HONOR / 8. CONSUMED BY | If it says "mandatory for X," X must appear in Consumed By. The constraint itself may inform Must Honor. |
-| `threading_ready` | 3. STATUS | YES = ACTIVE. NO = check if data is incomplete, may still be ACTIVE. |
-| `threading_gaps` | 9. RESEARCH DEBT (Tier A only) | If gaps exist, note them. Also scan the file itself for TODO/TBD markers. |
+The threading files are organized by GROUP sections. Each file has a `### FILENAME` heading.
 
-### Section-by-Section Derivation
+**To find the entry for, say, `MASTER-STATE.md`:**
 
-**Section 1: WHY THIS EXISTS** (All tiers)
-- **Input:** File's first 50 lines + threading `source` field
-- **Process:** Answer in 3-5 sentences: What does this file do? When/why was it created? What authority does it have? What makes it unique in the repo?
-- **Bad:** "This file tracks research." (too vague, 1 sentence)
-- **Good:** "Consolidation tracker for all 337 R1-R5 research findings, maintained as the central record of which findings have been applied and which remain pending. Updated after every exploration or building task. Authority derives from being the single source of truth for finding application status across all 5 research streams."
+1. Open `showcase-threading.md`
+2. Search for `### MASTER-STATE` (use Grep or your editor's search)
+3. Read the entry — it will have 6 fields: `source`, `built_on`, `cited`, `mandatory_for`, `threading_ready`, `threading_gaps`
 
-**Section 2: THE QUESTION THIS ANSWERS** (Tier A and B only)
-- **Input:** File's title + purpose from Section 1
-- **Process:** Write ONE question in quotes that someone would ask that this file answers.
-- **Example:** "Which research findings have been applied to explorations and which are still pending?"
-
-**Section 3: STATUS** (All tiers)
-- **Input:** Threading `threading_ready` + file content
-- **Process:** ACTIVE = file is in use and current. LOCKED = file is complete and should not be modified. Check file for any "COMPLETE", "LOCKED", or date stamps.
-- **Format:** "ACTIVE" or "ACTIVE — locked data, updated only when X" or "LOCKED — completed 2026-02-04"
-
-**Section 4: SOUL ALIGNMENT** (Tier A only)
-- **Input:** File content — look for CSS values, soul piece references, design token references
-- **Process:** If the file implements visual design: list the specific CSS values and which soul pieces they implement. If the file is non-visual (research, tracking, audit): write "This file is soul-adjacent, not soul-implementing" and describe its conceptual relationship to the soul.
-
-**Section 5: BUILT ON** (All tiers)
-- **Input:** Threading `built_on` field
-- **Process:** Each item in `built_on` becomes a table row. Resolve to actual file paths. Describe the relationship.
-- **When threading data is missing:** Read the file's first 30 lines for import statements, citations, or "based on" references. For origin files with no upstream: write "ORIGIN FILE — no upstream within repository."
-
-**Section 6: MUST HONOR** (Tier A and B only)
-- **Input:** File content — scan for rules, constraints, warnings, "DO NOT" statements, locked values
-- **Process:** List specific constraints this file establishes or must respect.
-- **For files that ESTABLISH constraints:** "border-radius: 0 everywhere — NEVER deviate"
-- **For files that CONSUME constraints:** "Must match values in DESIGN-TOKEN-SUMMARY.md"
-- **When nothing obvious:** Check if `mandatory_for` in threading data implies constraints.
-
-**Section 7: WHAT BREAKS IF THIS CHANGES** (Tier A only)
-- **Input:** Threading `cited` field (count of inbound refs) + `mandatory_for`
-- **Process:** Count downstream consumers. Rate blast radius:
-  - 20+ inbound refs = CATASTROPHIC
-  - 10-20 = HIGH
-  - <10 = MEDIUM
-- List the specific files that would break.
-
-**Section 8: CONSUMED BY** (All tiers)
-- **Input:** Threading `cited` + `mandatory_for` fields
-- **Process:** Each cited file becomes a table row. Describe HOW it uses this file.
-- **When threading data is missing:** `grep -rl "FILENAME" docs-spa/ design-extraction/` to find files that reference this one.
-- **For leaf nodes** (no consumers): "LEAF NODE — consumed during audit process, not referenced by path in other files."
-
-**Section 9: RESEARCH DEBT** (Tier A only)
-- **Input:** Threading `threading_gaps` + scan file for TODO/TBD/FIXME markers
-- **Process:** List specific gaps. If none found: check for coverage gaps (e.g., "R4 findings not yet applied"), methodology limitations, or known discrepancies.
-
-**Section 10: DIAGNOSTIC QUESTIONS** (Tier A = 5 questions, Tier B = 3 questions)
-- **Input:** Sections 5, 6, 8 you just wrote
-- **Process:** Write testable yes/no questions that verify this file's integrity. Each should be checkable by reading the file or its sources.
-- **Bad:** "Is this file good?" (not testable)
-- **Good:** "Do all finding IDs referenced in this file exist in R3-DENSITY-DIMENSIONS.md?"
-
-### Worked Example: Processing MASTER-STATE.md (Tier B, Batch 7)
-
-**Step 1:** Read threading data (showcase-threading.md GROUP 4):
+**Example of what you'll find:**
 ```
 ### MASTER-STATE.md
 - source: N/A (authored as state tracker)
@@ -368,11 +301,149 @@ Each file has an entry in the threading data that looks like this:
 - cited: showcase/CLAUDE.md, DD-REAUDIT-CHECKPOINT.md, FOUNDATION-REMEDIATION-SYNTHESIS.md
 - mandatory_for: state tracking; references 13 design-extraction files
 - threading_ready: YES
+- threading_gaps: none
 ```
 
-**Step 2:** Read the file (first 60 lines) to understand its purpose.
+**If the file doesn't appear in the threading data:** Skip to Section 5.7 (inference-based approach).
 
-**Step 3:** Generate header:
+### 5.3 Path Resolution — Turning Shorthand Into Real Paths
+
+Threading data uses shorthand. You must resolve to actual paths. Here are the rules:
+
+| Threading Data Says | Actual Path | Rule |
+|---------------------|-------------|------|
+| `SOUL-DISCOVERIES.md` | `checkpoints/SOUL-DISCOVERIES.md` | Bare filenames for checkpoint files → `checkpoints/` prefix |
+| `DD-REAUDIT-CHECKPOINT.md` | `checkpoints/DD-REAUDIT-CHECKPOINT.md` | Same — checkpoint audit files live in `checkpoints/` |
+| `DESIGN-TOKEN-SUMMARY.md (external: design-extraction)` | `design-extraction/component-system/perceptual-audit-v2/synthesis/DESIGN-TOKEN-SUMMARY.md` | `(external: design-extraction)` = file is in the design-extraction tree. The 6 T1 synthesis files are all at `design-extraction/component-system/perceptual-audit-v2/synthesis/` |
+| `MASTER-SOUL-SYNTHESIS.md (external: design-extraction)` | `design-extraction/component-system/perceptual-audit-v2/synthesis/MASTER-SOUL-SYNTHESIS.md` | Same pattern |
+| `showcase/CLAUDE.md` | `docs-spa/app/showcase/CLAUDE.md` | Paths starting with `showcase/` are relative to `docs-spa/app/` |
+| `BACKBONE.md` | `DESIGN-SYSTEM/BACKBONE.md` | Design system files → `DESIGN-SYSTEM/` prefix |
+| `density-patterns.md` | `DESIGN-SYSTEM/patterns/density-patterns.md` | Pattern files → `DESIGN-SYSTEM/patterns/` |
+| `R3-DENSITY-DIMENSIONS.md` | `research/R3-DENSITY-DIMENSIONS.md` | Research files → `research/` prefix |
+| `DD-outbound-findings.md` | `DESIGN-SYSTEM/provenance/stage-2-density-dd/DD-outbound-findings.md` | Stage provenance files → the stage directory |
+
+**When unsure:** Run `find docs-spa/app/showcase/ design-extraction/ -name "FILENAME.md"` to locate the actual file. Better to spend 5 seconds confirming than to write a wrong path that breaks the bidirectional trust.
+
+**DO NOT write abbreviated paths like `design-extraction/.../DESIGN-TOKEN-SUMMARY.md`.** That was used in the worked example for brevity, but in actual headers, either use the FULL relative path or the shortest unambiguous path. Compare these real examples from completed headers:
+
+- GOOD: `design-extraction/component-system/perceptual-audit-v2/synthesis/DESIGN-TOKEN-SUMMARY.md`
+- GOOD: `showcase/research/R3-DENSITY-DIMENSIONS.md`
+- BAD: `design-extraction/.../DESIGN-TOKEN-SUMMARY.md` (ambiguous — where is `...`?)
+- BAD: `DESIGN-TOKEN-SUMMARY.md` (bare filename with no path — which copy?)
+
+### 5.4 Field → Section Mapping
+
+| Threading Data Field | Maps To Header Section | How to Use It |
+|---------------------|----------------------|---------------|
+| `source` | **1. WHY THIS EXISTS** | Explains where the file came from. Use this + file's opening lines to write the 3-5 sentence summary. |
+| `built_on` | **5. BUILT ON** | These are the upstream dependencies. Resolve each to a real file path (see 5.3). Each becomes a row in the table. |
+| `cited` | **8. CONSUMED BY** | These are files that REFERENCE/CITE this file — i.e., this file's downstream consumers. Each becomes a row. |
+| `mandatory_for` | **6. MUST HONOR** / **8. CONSUMED BY** | If it says "mandatory for X," X must appear in Consumed By. The constraint itself ("must be accurate," "must be updated") informs Must Honor. |
+| `threading_ready` | **3. STATUS** | YES = ACTIVE. NO = check if data is incomplete, may still be ACTIVE. |
+| `threading_gaps` | **9. RESEARCH DEBT** (Tier A only) | If gaps exist, note them. Also scan the file itself for TODO/TBD markers. |
+
+**Important terminology:** The `cited` field means "files that cite/reference THIS file." This is the REVERSE of what you might expect. `cited: showcase/CLAUDE.md` means "showcase/CLAUDE.md cites this file" — making showcase/CLAUDE.md a CONSUMER.
+
+### 5.5 Section-by-Section Derivation Guide
+
+**Section 1: WHY THIS EXISTS** (All tiers)
+- **Input:** File's first 50 lines + threading `source` field
+- **Process:** Answer in 3-5 sentences: What does this file do? When/why was it created? What authority does it have? What makes it unique in the repo?
+- **DO:** "Consolidation tracker for all 337 R1-R5 research findings, maintained as the central record of which findings have been applied and which remain pending. Updated after every exploration or building task. Authority derives from being the single source of truth for finding application status across all 5 research streams."
+- **DON'T:** "This file tracks research." (too vague, 1 sentence, no authority claim, no uniqueness)
+- **DON'T:** "Important file that contains valuable information about the project." (says nothing specific)
+
+**Section 2: THE QUESTION THIS ANSWERS** (Tier A and B only)
+- **Input:** File's title + purpose from Section 1
+- **Process:** Write ONE question in quotes that someone would ask that this file answers.
+- **DO:** "Which research findings have been applied to explorations and which are still pending?"
+- **DON'T:** "What does this file contain?" (too meta — every file answers this)
+
+**Section 3: STATUS** (All tiers)
+- **Input:** Threading `threading_ready` + file content
+- **Process:** ACTIVE = file is in use and current. LOCKED = file is complete and should not be modified. Check file for any "COMPLETE", "LOCKED", or date stamps.
+- **Format options:** "ACTIVE" or "ACTIVE — locked data, updated only when X" or "LOCKED — completed 2026-02-04"
+- **DON'T:** Invent status information. If the file doesn't say it's locked, don't write LOCKED.
+
+**Section 4: SOUL ALIGNMENT** (Tier A only)
+- **Input:** File content — look for CSS values, soul piece references, design token references
+- **Process:** If the file implements visual design (HTML/CSS): list the specific CSS values and which soul pieces they implement, with LINE NUMBERS. If the file is non-visual (research, tracking, audit): write "Soul-adjacent — [explain conceptual relationship]."
+- **DO (visual file):** "border-radius | --border-radius: 0 | line 124" as a table entry with specific CSS variable, value, and line number
+- **DO (non-visual):** "Soul-adjacent — indexes all soul-implementing findings without implementing soul values directly."
+- **DON'T:** Skip this section for non-visual Tier A files. They still need the soul-adjacent explanation.
+
+**Section 5: BUILT ON** (All tiers)
+- **Input:** Threading `built_on` field
+- **Process:** Each item in `built_on` becomes a table row. Resolve to actual file paths (see 5.3). Describe the relationship.
+- **When threading data is missing:** Read the file's first 30 lines for import statements, citations, or "based on" references. For origin files with no upstream: write "ORIGIN FILE — no upstream within repository."
+- **DON'T:** List dependencies you're guessing about. If you can't verify it, don't include it.
+
+**Section 6: MUST HONOR** (Tier A and B only)
+- **Input:** File content — scan for rules, constraints, warnings, "DO NOT" statements, locked values + `mandatory_for` field
+- **Process:** List specific constraints this file establishes or must respect.
+- **For files that ESTABLISH constraints:** "border-radius: 0 everywhere — NEVER deviate"
+- **For files that CONSUME constraints:** "Must match values in DESIGN-TOKEN-SUMMARY.md"
+- **DON'T:** Write generic constraints like "Don't break things." Every MUST HONOR should be specific and verifiable.
+- **DON'T:** Confuse MUST HONOR with CONSUMED BY. MUST HONOR = constraints/rules. CONSUMED BY = files that read this one.
+
+**Section 7: WHAT BREAKS IF THIS CHANGES** (Tier A only)
+- **Input:** Threading `cited` field (count of inbound refs) + `mandatory_for`
+- **Process:** Count downstream consumers. Rate blast radius:
+  - 20+ inbound refs = CATASTROPHIC (e.g., DD-006-fractal.html)
+  - 10-20 = HIGH
+  - <10 = MEDIUM
+  - 0 = LOW (leaf node)
+- List the specific files that would break.
+
+**Section 8: CONSUMED BY** (All tiers)
+- **Input:** Threading `cited` + `mandatory_for` fields
+- **Process:** Each cited file becomes a table row with TWO columns: the consumer path, and HOW it uses this file.
+- **The "How Used" column** — This is where most people get stuck. The threading data only says `cited: FILE.md`, not HOW. You derive "How Used" from:
+  - The consumer file's NAME (e.g., `DD-REAUDIT-CHECKPOINT.md` → "References state for audit context")
+  - The threading `mandatory_for` field (e.g., "mandatory for every exploration task" → "Must be updated after work")
+  - Common patterns: CLAUDE.md files → "Referenced as mandatory reading"; audit files → "References for audit verification"; BACKBONE → "Pipeline state tracking"
+- **DO:** `| checkpoints/DD-REAUDIT-CHECKPOINT.md | References pipeline state for audit context |`
+- **DON'T:** `| DD-REAUDIT-CHECKPOINT.md | Uses this file |` (no path prefix, "uses this file" says nothing)
+- **For leaf nodes** (no consumers): "LEAF NODE — consumed during audit process, not referenced by path in other files."
+
+**Section 9: RESEARCH DEBT** (Tier A only)
+- **Input:** Threading `threading_gaps` + scan file for TODO/TBD/FIXME markers
+- **Process:** List specific gaps. If none found: check for coverage gaps (e.g., "R4 findings not yet applied"), methodology limitations, or known discrepancies.
+- **DON'T:** Write "None" without checking. Every Tier A file has SOME debt — even if it's just "OD/AD/CD findings not yet integrated."
+
+**Section 10: DIAGNOSTIC QUESTIONS** (Tier A = 5 questions, Tier B = 3 questions)
+- **Input:** Sections 5, 6, 8 you just wrote
+- **Process:** Write testable yes/no questions that verify this file's integrity. Each should be checkable by reading the file or its sources.
+- **DO:** "Do all finding IDs referenced in this file exist in R3-DENSITY-DIMENSIONS.md?"
+- **DON'T:** "Is this file good?" (not testable, not specific)
+- **DON'T:** "Does this file exist?" (trivially true — you're reading it)
+
+### 5.6 Worked Example A: File WITH Threading Data (MASTER-STATE.md, Tier B, Batch 7)
+
+**Step 1: Find the threading entry.**
+Open `showcase-threading.md`. Search for `### MASTER-STATE`. Found at GROUP 4 (checkpoints):
+```
+### MASTER-STATE.md
+- source: N/A (authored as state tracker)
+- built_on: SOUL-DISCOVERIES.md, DESIGN-TOKEN-SUMMARY.md (external: design-extraction),
+            MASTER-SOUL-SYNTHESIS.md (external: design-extraction), COMP-F findings, DD-F findings
+- cited: showcase/CLAUDE.md, DD-REAUDIT-CHECKPOINT.md, FOUNDATION-REMEDIATION-SYNTHESIS.md
+- mandatory_for: state tracking; references 13 design-extraction files
+- threading_ready: YES
+- threading_gaps: none
+```
+
+**Step 2: Read the file** (first 60 lines). I see it's a pipeline state tracker — tracks which stages are complete, what findings exist, what's next.
+
+**Step 3: Resolve paths.** Using the rules from 5.3:
+- `SOUL-DISCOVERIES.md` → `checkpoints/SOUL-DISCOVERIES.md` (it's a checkpoint file)
+- `DESIGN-TOKEN-SUMMARY.md (external: design-extraction)` → `design-extraction/component-system/perceptual-audit-v2/synthesis/DESIGN-TOKEN-SUMMARY.md`
+- `MASTER-SOUL-SYNTHESIS.md (external: design-extraction)` → `design-extraction/component-system/perceptual-audit-v2/synthesis/MASTER-SOUL-SYNTHESIS.md`
+- `showcase/CLAUDE.md` → already a relative path, use as-is
+- `DD-REAUDIT-CHECKPOINT.md` → `checkpoints/DD-REAUDIT-CHECKPOINT.md`
+- `FOUNDATION-REMEDIATION-SYNTHESIS.md` → `checkpoints/FOUNDATION-REMEDIATION-SYNTHESIS.md`
+
+**Step 4: Generate the 7 Tier B sections:**
 
 ```
 1. WHY THIS EXISTS
@@ -390,23 +461,23 @@ complete, which are in progress, and what has been produced so far?"
 ACTIVE — updated after each major pipeline stage completion
 
 5. BUILT ON
-| Dependency                              | Relationship                          |
-|-----------------------------------------|---------------------------------------|
-| checkpoints/SOUL-DISCOVERIES.md         | 5 soul pieces tracked                  |
-| design-extraction/.../DESIGN-TOKEN-SUMMARY.md | T1 token values referenced       |
-| design-extraction/.../MASTER-SOUL-SYNTHESIS.md | T1 soul synthesis referenced     |
-| COMP-F and DD-F findings               | Finding counts and status              |
+| Dependency                                                                  | Relationship                          |
+|-----------------------------------------------------------------------------|---------------------------------------|
+| checkpoints/SOUL-DISCOVERIES.md                                             | 5 soul pieces tracked                  |
+| design-extraction/component-system/perceptual-audit-v2/synthesis/DESIGN-TOKEN-SUMMARY.md | T1 token values referenced  |
+| design-extraction/component-system/perceptual-audit-v2/synthesis/MASTER-SOUL-SYNTHESIS.md | T1 soul synthesis referenced |
+| COMP-F and DD-F findings                                                    | Finding counts and status              |
 
 6. MUST HONOR
 - Must accurately reflect actual pipeline state (do not mark stages complete prematurely)
 - References to design-extraction T1 files must match actual file content
 
 8. CONSUMED BY
-| Consumer                                | How Used                              |
-|-----------------------------------------|---------------------------------------|
-| showcase/CLAUDE.md                      | Referenced as mandatory reading         |
-| checkpoints/DD-REAUDIT-CHECKPOINT.md    | References state for audit context     |
-| checkpoints/FOUNDATION-REMEDIATION-SYNTHESIS.md | References state for synthesis  |
+| Consumer                                          | How Used                                    |
+|---------------------------------------------------|---------------------------------------------|
+| showcase/CLAUDE.md                                | Referenced as mandatory reading               |
+| checkpoints/DD-REAUDIT-CHECKPOINT.md              | References pipeline state for audit context  |
+| checkpoints/FOUNDATION-REMEDIATION-SYNTHESIS.md   | References pipeline state for synthesis      |
 
 10. DIAGNOSTIC QUESTIONS
 - Does the pipeline state described here match the actual file state on disk?
@@ -414,7 +485,134 @@ ACTIVE — updated after each major pipeline stage completion
 - Do the finding counts (COMP-F, DD-F) match their source files?
 ```
 
-### When There Is No Threading Data
+**Step 5: Wrap in comment block and prepend.** This is a .md file, so use `<!-- ... -->`. The file has no YAML frontmatter, so the header goes at the very top, before the first `#` heading.
+
+### 5.7 Worked Example B: File WITHOUT Threading Data (EssenceBox.tsx, Tier B, Batch 9)
+
+**This is common for Batches 8-9.** TSX components have NO entry in the threading files. Here's how to derive the header entirely from the file itself.
+
+**Step 1: Confirm no threading entry.**
+Search `showcase-threading.md` for `EssenceBox` — not found.
+Search `design-extraction-threading.md` for `EssenceBox` — not found.
+
+**Step 2: Read the file** (first 30 lines). See:
+```tsx
+interface EssenceBoxProps {
+  children: React.ReactNode
+}
+
+/**
+ * EssenceBox — "The Archivist of Axioms"
+ *
+ * Character: Reverent, timeless philosophy. Like marginalia in a first-edition book.
+ * Critical: Uses Instrument Serif ITALIC for body text — this is the defining character trait.
+ *
+ * Research Applied:
+ * - R1-018: Drop Cap & Pull Quote Pattern (serif italic for section emphasis)
+ * - R2-002: Pull Quotes as Structural Elements (large typographic excerpt)
+ * - R2-019: Typography as Primary Design (serif italic quote)
+ * - R5-R3: Component Voices via Typography (Serif = "Archivist" voice)
+ *
+ * Soul Compliance:
+ * - border-radius: 0 (no rounded corners)
+ * - box-shadow: none (flat design)
+ * - Colors: KortAI palette only (#D97706 amber accent, #FEF9F5 cream bg)
+ */
+export function EssenceBox({ children }: EssenceBoxProps) {
+  return (
+    <div className="border-l-4 p-6 mb-8"
+      style={{ backgroundColor: '#FEF9F5', borderLeftColor: '#D97706', borderRadius: 0 }}>
+```
+
+**Step 3: Derive "Built On"** from the file content:
+- No import statements — this is a pure React component
+- The JSDoc comment cites specific research findings: R1-018, R2-002, R2-019, R5-R3
+- Soul compliance section references the design token values
+- The component embodies CHARACTER-FAMILY-COMPLETE.md's "Archivist" character
+
+**Step 4: Derive "Consumed By"** by searching for references:
+```bash
+grep -rl "EssenceBox" docs-spa/components/ docs-spa/app/
+```
+Result: `docs-spa/components/content/index.ts` (barrel export), `docs-spa/app/poc/component-audit/page.tsx`, `docs-spa/app/poc/dense-match/page.tsx`
+
+Also check: prose references in showcase/ files (audit logs, remediation docs mention this component by name).
+
+**Step 5: Generate the header:**
+
+```
+1. WHY THIS EXISTS
+React component implementing the "Archivist of Axioms" character — a reverent,
+timeless philosophy voice using Instrument Serif italic. Created during component
+system remediation to embody the Character Family typography system. Applies
+R1-018 (drop cap pattern), R2-002 (pull quote structure), R2-019 (typography
+as primary design), and R5-R3 (component voices via typography).
+
+2. THE QUESTION THIS ANSWERS
+"How should 'essence' content — philosophical, foundational insights — be
+visually presented in the documentation app?"
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| R1-018, R2-002, R2-019, R5-R3          | Research findings applied (per JSDoc)  |
+| Soul Piece #2 (Archivist Speaks in Serif) | Typography character identity         |
+| KortAI design tokens (#D97706, #FEF9F5) | Inline style values                   |
+| CHARACTER-FAMILY-COMPLETE.md            | Character definition source            |
+
+6. MUST HONOR
+- border-radius: 0 — enforced inline (style prop)
+- box-shadow: none — flat design per Soul Piece #4
+- Instrument Serif italic — this IS the Archivist's defining character trait
+- Colors must stay on KortAI palette (#D97706 amber, #FEF9F5 cream)
+
+8. CONSUMED BY
+| Consumer                                          | How Used                              |
+|---------------------------------------------------|---------------------------------------|
+| docs-spa/components/content/index.ts              | Re-exported in barrel file             |
+| docs-spa/app/poc/component-audit/page.tsx         | Rendered in component audit demo       |
+| docs-spa/app/poc/dense-match/page.tsx             | Rendered in dense match demo           |
+
+10. DIAGNOSTIC QUESTIONS
+- Does the inline borderRadius: 0 enforce Soul Piece #1?
+- Is this component still listed in the barrel export (index.ts)?
+- Do the color values (#D97706, #FEF9F5) match DESIGN-TOKEN-SUMMARY.md?
+```
+
+**Key difference from Example A:** No threading data was used. Everything was derived from:
+- Reading the file's JSDoc comment (research citations, soul compliance)
+- Grep for consumers (barrel file + page imports)
+- Knowledge of the character family system (Archivist = Serif = Soul Piece #2)
+
+**Notice:** This component's JSDoc is rich with provenance data. Not all TSX files will have this. For simpler components, the header will be shorter — that's fine. Only document what you can verify.
+
+### 5.8 Common Mistakes — What NOT To Do
+
+**Mistake 1: Fabricating connections**
+DON'T write "Built On: BACKBONE.md" just because BACKBONE.md is important. Only list ACTUAL dependencies — files this file directly imports, references, or was derived from. If you can't verify the connection, don't include it.
+
+**Mistake 2: Copy-pasting threading data verbatim**
+DON'T paste `built_on: SOUL-DISCOVERIES.md, DESIGN-TOKEN-SUMMARY.md (external: design-extraction)` directly into the BUILT ON table. You need to RESOLVE paths (Section 5.3) and DESCRIBE relationships.
+
+**Mistake 3: Generic "How Used" descriptions**
+DON'T write `| CLAUDE.md | References this file |`. Write `| showcase/CLAUDE.md | Referenced as mandatory reading for research grounding |`. The consumer needs a FULL PATH and a SPECIFIC description of how it uses the file.
+
+**Mistake 4: Confusing BUILT ON and CONSUMED BY direction**
+- BUILT ON = files that THIS file depends on (upstream, backward)
+- CONSUMED BY = files that depend on THIS file (downstream, forward)
+If A imports B, then A's header says "Built On: B" and B's header says "Consumed By: A".
+
+**Mistake 5: Writing MUST HONOR as a restatement of BUILT ON**
+DON'T: "Must honor SOUL-DISCOVERIES.md" (that's just a dependency, not a constraint).
+DO: "Must honor border-radius: 0 constraint from Soul Piece #1 — no rounded corners anywhere."
+
+**Mistake 6: Skipping the file read**
+DON'T derive the entire header from threading data alone. The threading data tells you connections, but the file itself tells you PURPOSE, STATUS, and CONSTRAINTS. Always read first 50-80 lines.
+
+### 5.9 When There Is No Threading Data — Summary
 
 For files NOT in the threading data (TSX components, app code, content HTML, configs):
 
@@ -424,7 +622,7 @@ For files NOT in the threading data (TSX components, app code, content HTML, con
 4. **For "Why This Exists":** Describe what the file does based on its content
 5. **For "Status":** Almost always ACTIVE unless there's evidence otherwise
 
-For the 75 content HTML pages, see the uniform template in Section 16.
+For the 75 content HTML pages, see the uniform template in Section 17.
 
 ---
 
@@ -617,7 +815,7 @@ Mixed directory: 10 CSS files in design-extraction, 14 app code files in docs-sp
 | 136-138 | showcase HTML files (index, showcase-all, showcase-nested) | B | HTML |
 | 139 | PROGRESS.md | C | MD |
 | 140-145 | CLAUDE.md navigation files (6) | C | MD |
-| 146-157 | docs-spa/components/content/*.tsx (12 components) | B | TSX |
+| 146-157 | docs-spa/components/content/*.tsx (11 components + 1 barrel index.ts) | B | TSX |
 
 **Threading data sources:**
 - design-extraction files: `design-extraction-threading.md`
@@ -730,7 +928,7 @@ Split into 4-5 agents. Each header is ~10 lines (4 sections). Fast.
 ```bash
 # Count files with threading headers
 grep -rl "INLINE THREADING HEADER" docs-spa/app/showcase/ design-extraction/ | wc -l
-# Should be 89 now, 253 when done
+# Should be ~90 now (89 real + 1 false positive from this handoff doc), ~250 when done (253 minus 3 unskippable JSON/binary)
 
 # Check a specific file has a header
 head -5 docs-spa/app/showcase/checkpoints/RETROACTIVE-AUDIT-DD-001-006.md
@@ -808,7 +1006,6 @@ ACTIVE — static content, updated only when source synthesis is revised
 | Dependency                              | Relationship                          |
 |-----------------------------------------|---------------------------------------|
 | synthesis/[matching-slug].md            | Original markdown source               |
-| docs-spa/scripts/extract-content.ts     | Extraction pipeline that generated it  |
 
 8. CONSUMED BY
 | Consumer                                | How Used                              |

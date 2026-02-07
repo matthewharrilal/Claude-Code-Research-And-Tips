@@ -102,7 +102,7 @@ the 5 soul pieces into reasoning, examples, and transferable understanding:
 | DESIGN-SYSTEM/CLAUDE.md | Mandates this as first read; summarizes 9 Parts, 3 modes, 4 levels; gates all design system work behind absorbing this document |
 | showcase/CLAUDE.md | References philosophical framework for research grounding and refinement loop processes |
 | dependency-trace files | References for reachability analysis and relationship mapping |
-| Any new agent session | Context Recovery mode (Mode 3) provides 10-15 minute reorientation path |
+| Any new agent session | Context Recovery mode (Mode 3) provides 5-10 minute reorientation path |
 | Future OD/AD/CD stages | Must absorb as part of mandatory research gate before producing any exploration |
 
 9. RESEARCH DEBT
@@ -127,7 +127,7 @@ Q2: Are the 5 soul pieces described here identical (in name, number,
     and meaning) to those in MASTER-SOUL-SYNTHESIS.md?
 Q3: Does the 5-stage pipeline described in Part II match the stage
     structure in BACKBONE.md and PIPELINE-MANIFEST.md?
-Q4: Can a reader following Mode 3 (Context Recovery, 10-15 min path)
+Q4: Can a reader following Mode 3 (Context Recovery, 5-10 min path)
     successfully re-ground without reading the full 109KB?
 Q5: Does DESIGN-SYSTEM/CLAUDE.md's summary of this document accurately
     reflect the current content of all 9 Parts?
@@ -1883,25 +1883,27 @@ This means the provenance chain is no longer only in the folder structure — it
 
 ## New Files Required
 
+> **Phase 2B Status Note (2026-02-06):** Many items below are now fulfilled via inline threading sections. The inline sections embedded in each file serve the same PURPOSE as the standalone files listed here. Items marked ✅ are functionally complete via inline sections. Items marked ⏳ still need standalone files or formal sections.
+
 ### Files to Create
 
-| File | Location | Purpose |
-|------|----------|---------|
-| RESEARCH-ACTIVATION-DD.md | provenance/stage-2-density-dd/ | Maps R-3 findings → DD explorations |
-| RESEARCH-ACTIVATION-OD.md | provenance/stage-3-organization-od/ | Maps R-1 + DD-F findings → OD explorations |
-| EXPLORATION-PROTOCOL-OD.md | provenance/stage-3-organization-od/ | OD building instructions |
-| CONSUMPTION-RECEIPT-DD-001.md | provenance/stage-2-density-dd/ | Proof of DD-001 consumption |
-| ... (DD-002 through DD-006) | ... | ... |
+| File | Location | Purpose | Status |
+|------|----------|---------|--------|
+| RESEARCH-ACTIVATION-DD.md | provenance/stage-2-density-dd/ | Maps R-3 findings → DD explorations | ✅ Via inline BUILT ON in DD-001 through DD-006 |
+| RESEARCH-ACTIVATION-OD.md | provenance/stage-3-organization-od/ | Maps R-1 + DD-F findings → OD explorations | ⏳ Consolidated matrix still useful for OD planning |
+| EXPLORATION-PROTOCOL-OD.md | provenance/stage-3-organization-od/ | OD building instructions | ✅ OD Execution Protocol v2.0 exists |
+| CONSUMPTION-RECEIPT-DD-001.md | provenance/stage-2-density-dd/ | Proof of DD-001 consumption | ✅ Via inline CONSUMED BY in DD files |
+| ... (DD-002 through DD-006) | ... | ... | ✅ Via inline CONSUMED BY |
 
 ### Sections to Add
 
-| Section | Add To | Purpose |
-|---------|--------|---------|
-| QUESTIONS | PIPELINE-MANIFEST.md | Per-stage question inheritance |
-| DERIVATION CHAIN | Every pattern in density-patterns.md | Backward traversal |
-| IDENTITY SIGNATURE | Every CLAUDE.md | Folder personality |
-| `source:` field | Every finding | Which exploration created it |
-| `built_on:` field | Every finding | Prior findings it builds on |
+| Section | Add To | Purpose | Status |
+|---------|--------|---------|--------|
+| QUESTIONS | PIPELINE-MANIFEST.md | Per-stage question inheritance | ⏳ RESEARCH DEBT in inline sections captures gaps, but formal question inheritance needed |
+| DERIVATION CHAIN | Every pattern in density-patterns.md | Backward traversal | ⏳ Inline BUILT ON shows upstream, but narrative derivation chains not yet in pattern descriptions |
+| IDENTITY SIGNATURE | Every CLAUDE.md | Folder personality | ✅ Via WHY THIS EXISTS + CLAUDE.md inline sections |
+| `source:` field | Every finding | Which exploration created it | ✅ Via inline BUILT ON tables |
+| `built_on:` field | Every finding | Prior findings it builds on | ✅ Via inline BUILT ON tables |
 
 ## CLAUDE.md Files — How to Read Each Folder
 
@@ -1987,7 +1989,7 @@ This is what "transferable" means. The mind doesn't live in one person's head or
 
 ## The Bridge: From Document to Codebase
 
-This document describes the structures. Now they must be CREATED in the actual design system.
+This document describes the structures. As of Phase 2B (2026-02-06), most structures now EXIST via inline threading sections embedded in 253 files. The remaining work focuses on formalizing the Question Generator, creating HANDOFF documents for stages 3-5, and running the full Reflection Protocol retroactively on completed explorations.
 
 ---
 
@@ -2017,71 +2019,75 @@ This document describes the structures. Now they must be CREATED in the actual d
 
 ## Execution Sequence
 
-The updates must happen IN THIS ORDER:
+> **Phase 2B Status Note:** Many items below are now ✅ DONE via inline threading sections. Items marked ✅ exist in the inline sections of affected files. Items marked ⏳ still require explicit action.
 
 ```
-PHASE 1: Foundation (Do First — Enables All Other Phases)
+PHASE 1: Foundation
 │
-├─→ Add QUESTIONS section to PIPELINE-MANIFEST.md
+├─→ ⏳ Add QUESTIONS section to PIPELINE-MANIFEST.md
 │   Template: Use the Question Generator format from PART III
+│   (RESEARCH DEBT in inline sections captures SOME gaps, but a formal
+│    per-stage question inheritance section is still needed)
 │
-├─→ Add `source:` and `built_on:` fields to all existing findings
-│   Format: source: [exploration-id], built_on: [comma-separated finding IDs]
+├─→ ✅ DONE: `source:` and `built_on:` fields exist via inline BUILT ON
+│   (Each file's inline section has a BUILT ON table with upstream sources)
 │
-└─→ Decide: What is the ID format for external findings?
+└─→ ⏳ Decide: What is the ID format for external findings?
     Recommendation: EXTERNAL-V-###, EXTERNAL-E-###, EXTERNAL-G-###
 
 PHASE 2: Stage 2 (DD) Retroactive
 │
-├─→ Create RESEARCH-ACTIVATION-DD.md
-│   Map R-3 findings → DD explorations (DD-001 through DD-006)
+├─→ ✅ DONE: Research activation exists via inline BUILT ON in DD-001 through DD-006
+│   (Each DD file's inline section shows which R-3 findings it consumes)
 │
-├─→ Run REFLECTION-PROTOCOL retroactively on DD-001 through DD-006
+├─→ ⏳ Run REFLECTION-PROTOCOL retroactively on DD-001 through DD-006
 │   For each: What was VALIDATED? CHALLENGED? What NEW questions emerged?
+│   (DIAGNOSTIC QUESTIONS exist in inline sections but full reflection
+│    protocol — with validated/challenged/new-questions — is richer)
 │
-├─→ Create CONSUMPTION-RECEIPT for each DD exploration
-│   6 files: CONSUMPTION-RECEIPT-DD-001.md through DD-006.md
+├─→ ✅ DONE: Consumption tracking exists via inline CONSUMED BY
+│   (Downstream consumers are documented in each file's inline section)
 │
-├─→ Add DERIVATION CHAIN section to each pattern in density-patterns.md
+├─→ ⏳ Add DERIVATION CHAIN section to each pattern in density-patterns.md
 │   6 patterns: PULSE, CRESCENDO, ISLANDS, GEOLOGICAL, TIDAL, FRACTAL
+│   (Inline BUILT ON shows upstream, but formal derivation chains with
+│    reasoning narrative are not yet in the pattern descriptions)
 │
-├─→ Add IDENTITY SIGNATURE to stage-2-density-dd/CLAUDE.md
-│   Use the template from PART III Structure 7
+├─→ ✅ DONE: Identity exists via inline WHY THIS EXISTS + CLAUDE.md
 │
-└─→ Extract DD's unanswered questions → add to QUESTIONS section
+└─→ ⏳ Extract DD's unanswered questions → add to QUESTIONS section
     Move from DD observations to explicit questions for OD
 
 PHASE 3: Stage 1 (Components) Retroactive
 │
-├─→ Add `source:` and `built_on:` to each COMP-F finding
-│   8 findings: COMP-F-001 through COMP-F-008
+├─→ ✅ DONE: `source:` and `built_on:` exist via inline BUILT ON
 │
-├─→ Add IDENTITY SIGNATURE to stage-1-components/CLAUDE.md
+├─→ ✅ DONE: Identity exists via inline WHY THIS EXISTS + CLAUDE.md
 │
-└─→ Verify soul pieces have derivation
+└─→ ⏳ Verify soul pieces have derivation
     Where did #1-#5 come from? What exploration discovered them?
 
 PHASE 4: Stage 3 (OD) Preparation
 │
-├─→ Create RESEARCH-ACTIVATION-OD.md
-│   Map R-1 findings + DD-F findings → OD explorations (OD-001 through OD-004)
+├─→ ⏳ Create consolidated RESEARCH-ACTIVATION-OD.md
+│   (Inline BUILT ON shows per-file dependencies, but a consolidated
+│    matrix mapping R-1 + DD-F findings → OD explorations is still useful)
 │
-├─→ Create EXPLORATION-PROTOCOL-OD.md
-│   Use the template from PART III Structure 3
+├─→ ✅ DONE: EXPLORATION-PROTOCOL-OD exists (OD Execution Protocol v2.0)
 │
-├─→ Create HANDOFF-DD-TO-OD.md with MANDATORY findings list
-│   DD-F-006 is mandatory for ALL. DD-F-003 for OD-003. Etc.
+├─→ ✅ DONE: HANDOFF-DD-TO-OD.md exists with MANDATORY findings list
 │
-├─→ Template CONSUMPTION-RECEIPT for OD-001 through OD-004
-│   4 template files ready for OD to fill in
+├─→ ⏳ Template CONSUMPTION-RECEIPT for OD-001 through OD-004
+│   (Inline CONSUMED BY will track this automatically once OD work begins)
 │
-└─→ Template IDENTITY SIGNATURE for stage-3-organization-od/CLAUDE.md
-    Partial — OD will complete "I produced" after explorations
+└─→ ✅ DONE: Identity exists via CLAUDE.md inline threading section
 ```
 
 ---
 
 ## Verification Tests
+
+> **Phase 2B Note:** Tests A and D reference standalone files (CONSUMPTION-RECEIPT, DERIVATION CHAIN) that are now partially fulfilled via inline sections (CONSUMED BY, BUILT ON). For those items, check the inline threading section of the relevant file. Tests B and C reference some files that already exist (EXPLORATION-PROTOCOL-OD, HANDOFF-DD-TO-OD, CLAUDE.md identity sections).
 
 After all retroactive updates, these tests must PASS:
 

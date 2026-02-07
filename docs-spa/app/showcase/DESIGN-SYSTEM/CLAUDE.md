@@ -51,7 +51,7 @@ and THINKING WITH this design system. It explains:
 **Three Reading Modes:**
 - **Mode 1: First Read** (45-60 min) — Philosophy → Understanding
 - **Mode 2: Task Execution** (15-20 min) — Reference → Action
-- **Mode 3: Context Recovery** (10-15 min) — Reset → Reorientation
+- **Mode 3: Context Recovery** (5-10 min) — Reset → Reorientation
 
 **The core question:** Can a system absorb the REASONING behind design decisions
 well enough to make NEW decisions consistent with prior ones — even when those
