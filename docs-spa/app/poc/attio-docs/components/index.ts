@@ -1,6 +1,0 @@
-export { AttioHeader } from './AttioHeader'
-export { AttioSidebar } from './AttioSidebar'
-export { AttioBreadcrumbs } from './AttioBreadcrumbs'
-export { AttioTOC } from './AttioTOC'
-export { AttioContent } from './AttioContent'
-export { AttioDocsLayout } from './AttioDocsLayout'
