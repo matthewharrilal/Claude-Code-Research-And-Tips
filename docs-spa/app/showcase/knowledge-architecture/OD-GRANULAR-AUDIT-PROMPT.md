@@ -1,15 +1,144 @@
 # OD GRANULAR AUDIT PROMPT
-## Comprehensive Identity-Grounded Visual Audit for Every OD Exploration
+## Comprehensive Identity-Grounded Adversarial Visual Audit for Every OD Exploration
 
-**Purpose:** This prompt is given to the Claude instance responsible for building/auditing OD explorations. It enforces IDENTITY-FIRST design judgment at the most granular UI level — every border, every pixel of spacing, every font choice, every color value — filtered through the accumulated identity that emerges from traversing the inline threading headers.
+**Purpose:** This prompt is given to the Claude instance responsible for auditing OD explorations. It enforces IDENTITY-FIRST design judgment at the most granular UI level — every border, every pixel of spacing, every font choice, every color value — filtered through the accumulated identity that emerges from traversing the inline threading headers.
 
-**The Core Problem This Solves:** External research gathered by sub-agents (EXT-CONV-001 through EXT-DENSITY-003, etc.) is being applied as raw directives rather than as CANDIDATES that must be refined against the accumulated identity. A sub-agent bounded by accumulated context finds "neobrutalist solid offsets" and the builder applies it directly — but the SOUL says "nothing should float, everything grounded on the same plane." The research is technically not `box-shadow`, but it creates the SAME perceptual effect of fake depth. This prompt closes that gap.
+**The Core Problem This Solves:** Two failures compound on each other:
+
+1. **Unrefined Research:** External research gathered by sub-agents is applied as raw directives rather than as candidates filtered through the soul. A sub-agent finds "neobrutalist solid offsets" and the builder applies it directly — but the soul says "nothing should float."
+
+2. **Unchallenged Decisions:** Every design choice, once made, becomes invisible to the person who made it. The builder rationalizes. The auditor who shares the builder's context also rationalizes. Without ADVERSARIAL CHALLENGE, bad decisions survive indefinitely because nobody constructs the case that they're wrong.
+
+**This prompt closes both gaps through ADVERSARIAL REVIEW — the practice of arguing AGAINST every design decision before accepting it.**
 
 ---
 
-## SECTION 0: THE HIERARCHY OF AUDIT METHODS
+## SECTION 0: THE ADVERSARIAL OPERATING MODE
 
-**Read this first. It governs the ENTIRE prompt.**
+### This is not a section. This is the LENS through which you read EVERY other section.
+
+**What adversarial review means:**
+
+An ordinary audit asks: *"Does this match the spec?"*
+An adversarial audit asks: *"ASSUME this is wrong. Now prove it's right. If you can't — it IS wrong."*
+
+This is not negativity. This is not demolition. This is LOYAL OPPOSITION.
+
+**The accumulated identity — the inline headers, the research, the soul pieces, the threading — was built over months of genuine work. It was refined iteratively. It is TRUSTWORTHY.** The adversarial review does not question the FOUNDATION. It pushes on the EDGES — the places where implementation decisions were made quickly, where research was applied without enough filtering, where a choice was made but never stress-tested.
+
+When the adversary finds something that doesn't hold up, that is an IMPROVEMENT OPPORTUNITY. It does not mean the thread or the context is wrong. It means this specific INSTANCE of applying that context could be better. The identity holds. The inline headers hold. The soul holds. But this border, this spacing, this component choice — THOSE are what get challenged.
+
+A decision that survives adversarial challenge is a VALIDATED decision. A decision that doesn't survive is not a failure of the system — it's a chance to STRENGTHEN the implementation. The thread doesn't break. It gets refined.
+
+**The three levels of adversarial challenge:**
+
+```
+LEVEL 1 — CHALLENGE THE IMPLEMENTATION
+"Is this ACTUALLY 4px? Prove it. Measure it. Don't trust the CSS —
+check the COMPUTED value. Don't trust the computed value — LOOK at it."
+
+LEVEL 2 — CHALLENGE THE CHOICE
+"Even if it IS 4px, SHOULD it be 4px HERE? Does this element NEED a
+border? Is the border adding visual noise the soul wouldn't want?
+What if you REMOVED it — would the page be better or worse?"
+
+LEVEL 3 — CHALLENGE THE REASONING
+"The research said to do this. The inline header says this is BUILT ON
+DD-005. But was DD-005's approach RIGHT for THIS OD context? What if the
+upstream recommendation doesn't apply here? What if the sub-agent that
+gathered this research was biased by its own accumulated context?"
+```
+
+**Every section in this prompt must be read through this adversarial lens.** When Section 4 says "check the border color against the palette," the adversarial reading is: "Check the border color — AND THEN argue that the border itself shouldn't exist. See if the argument holds."
+
+### The Devil's Advocate Protocol
+
+For EVERY design element you encounter during the audit, you MUST:
+
+1. **ASSUME it's wrong.** Not "check if it's right" — START from the position that it's wrong.
+2. **Construct the case AGAINST it.** "This border is wrong because..." "This spacing is wrong because..." "This color choice is wrong because..." Be specific. Use the accumulated identity as your ammunition.
+3. **Let the element defend itself.** Now look at the evidence. Does the element's implementation actually refute your case? Or does your case stand?
+4. **Only ACCEPT the element if it survives the challenge.** If your case against it was even PARTIALLY convincing, the element needs revision.
+
+This is not optional. This is how EVERY element gets evaluated. The natural state of a design decision is "unproven" until it survives adversarial challenge.
+
+### The Inversion Test
+
+For every design choice, ask: **"What if we did the OPPOSITE?"**
+
+- The border is 4px. What if it were 0px? Would the element be clearer without it?
+- The heading is Instrument Serif italic. What if it were Inter regular? Would the hierarchy break?
+- The spacing between Q&A pairs is 32px. What if it were 16px? Would the grouping feel tighter in a good way, or would it feel cramped?
+- The callout has a blue tint background. What if it were white? Would the callout still read as a callout?
+
+**If the opposite is only MARGINALLY worse, the original choice wasn't strong enough.** A good design choice should be OBVIOUSLY better than its opposite. If you have to squint to see the difference, the choice is carrying insufficient conviction.
+
+### The "Prove It" Gate
+
+Every visual element must survive this question:
+
+> **"Why are you this size, this color, this weight, at this position?"**
+
+If the answer is "because the spec says so" — **that is INSUFFICIENT.** That's compliance, not conviction.
+
+The answer must be: "Because the spec says so AND it makes sense in this specific context because [reason derived from accumulated identity]."
+
+- A 4px border is justified not because Rule 5 says so, but because this element is a callout that needs CONFIDENT visual weight to signal "this is important, pay attention." **The adversary then asks: "But does THIS callout need that weight? Is it in a dense zone where it competes, or a sparse zone where it could be lighter?"**
+- Instrument Serif italic is justified not because Rule 4 says so, but because this is an Essence quote that carries accumulated wisdom — the Archivist's voice. **The adversary asks: "Is this ACTUALLY wisdom content, or is it regular body text styled as wisdom? Does the content EARN the serif treatment?"**
+- The 32px gap between Q&A pairs is justified not because the spacing spec says so, but because this gap needs to CLEARLY separate pairs while the 8px gap within pairs CLEARLY groups Q with A. **The adversary asks: "Is the 32px/8px ratio creating OBVIOUS Gestalt grouping, or does it just look like slightly different margins?"**
+
+**When an element SURVIVES the "Prove It" gate** — when it has both spec alignment AND contextual justification AND the adversary's challenge was answered — that element is VALIDATED. Note it as validated and move on. Not everything needs to change. The adversary's job is to TEST, not to demolish.
+
+**When an element FAILS the "Prove It" gate** — when it can't justify itself beyond "the spec says so," or when the adversary's challenge reveals that the spec was applied without considering this context — that element gets flagged for improvement. The spec itself doesn't change. The IMPLEMENTATION of the spec in this specific location needs attention.
+
+### The Relationship Between Adversary and Context
+
+This is critical to understand:
+
+```
+THE ACCUMULATED CONTEXT (inline headers, research, soul) = THE CONSTITUTION
+THE IMPLEMENTATION (CSS, HTML, visual choices) = THE LEGISLATION
+
+The adversary DEFENDS the constitution.
+The adversary CHALLENGES the legislation.
+
+When legislation doesn't live up to the constitution's intent,
+the legislation gets improved. The constitution doesn't get weakened.
+```
+
+The inline headers were built through months of traversal, extraction, and refinement. The soul was DISCOVERED through perceptual deepening. The research represents 337 findings across 5 streams. This foundation is SOLID. Trust it.
+
+But the implementation of that foundation in specific OD files — the specific border width chosen, the specific spacing applied, the specific color used, the specific component selected — THOSE are implementation decisions that may or may not fully realize the foundation's intent. Those are what the adversary tests.
+
+**When the adversary pushes on something and it doesn't hold up, the right response is:** "The identity says X. This implementation was trying to express X but didn't fully succeed. Here's how to make it express X more faithfully." NOT: "The identity was wrong about X."
+
+### How Adversarial Review Intersects with Accumulated Identity
+
+This is where the real power lives. The adversarial reviewer is not a random critic — they are someone who has DEEPLY ABSORBED the accumulated identity through traversing inline headers, and who uses that understanding to construct INFORMED challenges.
+
+**Without accumulated identity:** "This border looks weird" (vague impression)
+**With accumulated identity:** "This border is 2px. But I traversed the BUILT ON chain to DESIGN-TOKEN-SUMMARY.md, which says 'Heavy Borders When Bordered — 1px borders signal uncertainty.' This 2px border is neither heavy (3-4px) nor absent (0px) — it's in the uncertain middle ground. The soul says COMMIT. Either border this element with conviction (4px) or don't border it at all." (informed, specific, actionable)
+
+**The intersection is:** You use your UNDERSTANDING of the WHY behind every design rule to construct CHALLENGES that are precise, relevant, and devastating. You don't just say "that looks wrong." You say "that looks wrong BECAUSE the accumulated identity says X, and this element contradicts X in this specific way."
+
+### The Bias You're Fighting
+
+The specific biases that adversarial review defeats:
+
+| Bias | What It Looks Like | How Adversarial Review Defeats It |
+|------|-------------------|----------------------------------|
+| **Confirmation bias** | "I applied R3-012, so the density must be right" | "ASSUME the density is wrong. Can you see PULSE rhythm when you squint? If not, R3-012 wasn't applied successfully — it was just cited." |
+| **Sunk cost bias** | "I spent 3 hours on this research enrichment, so it must add value" | "REMOVE the enrichment. Is the page better or worse without it? If you can't tell the difference, it was decoration." |
+| **Authority bias** | "The external research says to do X, so X must be good" | "The research was gathered by a sub-agent in a different context. Does X actually WORK here? What if the sub-agent was wrong?" |
+| **Anchoring bias** | "DD-005 did it this way, so we should too" | "DD-005 was a DENSITY exploration. This is an ORGANIZATIONAL exploration. Should the same visual treatment apply? Challenge the assumption." |
+| **Consistency bias** | "All callouts have 4px borders, so this one should too" | "Should this ELEMENT even be a callout? Maybe the content would be better as inline text. Challenge the component choice, not just the styling." |
+| **Expertise bias** | "I traversed all inline headers, so my judgment is reliable" | "Your traversal gave you knowledge, but knowledge creates blind spots too. What would someone who DIDN'T traverse see that you're missing?" |
+
+---
+
+## SECTION 0.5: THE HIERARCHY OF AUDIT METHODS
+
+**Read this second. It governs execution order.**
 
 ```
 PRIORITY 1 (PRIMARY):   VISUAL AUDITING — Looking at the page with your eyes.
@@ -17,20 +146,32 @@ PRIORITY 1 (PRIMARY):   VISUAL AUDITING — Looking at the page with your eyes.
                          This is what catches "this border feels weird" and "this code
                          looks half-baked" — the things that matter most.
 
+                         ADVERSARIAL LAYER: For every visual impression, ARGUE THE
+                         OPPOSITE. "This looks good" → "ASSUME it looks wrong. What
+                         specifically would make you change your mind?"
+
 PRIORITY 2 (SECONDARY): META-COGNITIVE REASONING — Asking "Does this SIZE make sense
                          HERE relative to OTHER things?" informed by deep understanding
                          of the inline headers and accumulated identity. This is not
                          checking a value — it's questioning whether a CHOICE is appropriate.
 
+                         ADVERSARIAL LAYER: "Does this make sense?" is not enough.
+                         Ask "WHY SHOULDN'T this make sense? What's the case AGAINST
+                         this proportion/size/placement?"
+
 PRIORITY 3 (SUPPORT):   PROGRAMMATIC CHECKS — JavaScript evaluation via Playwright to
                          extract computed values. These CONFIRM what your eyes suspect.
                          They catch what eyes miss (like an off-by-1px border color).
                          But they are NEVER the primary method.
+
+                         ADVERSARIAL LAYER: When a programmatic check PASSES, don't
+                         move on. Ask "Could this value be technically correct but
+                         contextually wrong? Does passing the spec mean it's GOOD?"
 ```
 
 **The Playwright MCP is your EYES, not just your calculator.** Use `browser_take_screenshot` and `browser_snapshot` FIRST. LOOK at what's rendered. Form impressions. THEN run evaluations to verify or disprove those impressions.
 
-**If a programmatic check says "all borders are 4px" but your eyes say "that border looks wrong" — YOUR EYES WIN until you understand the discrepancy.**
+**If a programmatic check says "all borders are 4px" but your eyes say "that border looks wrong" — YOUR EYES WIN until you understand the discrepancy. And even if the discrepancy resolves in the code's favor, ask: "Should 4px be the right value HERE?"**
 
 ---
 
@@ -39,6 +180,8 @@ PRIORITY 3 (SUPPORT):   PROGRAMMATIC CHECKS — JavaScript evaluation via Playwr
 ### You MUST traverse before you touch a single CSS property.
 
 Traversal is not "reading files." Traversal is BUILDING AN IDENTITY IN YOUR MIND that you then CARRY into every decision. The inline threading headers are not metadata — they are the nervous system of this design system. Every `BUILT ON` table is a genealogy. Every `MUST HONOR` row is a non-negotiable constraint. Every `CONSUMED BY` entry is a promise you're making to a downstream consumer.
+
+**ADVERSARIAL NOTE:** Traversal also builds your AMMUNITION. The deeper you understand the identity, the more precisely you can challenge deviations from it. A shallow traversal produces vague challenges ("this looks off"). A deep traversal produces devastating challenges ("this violates the specific constraint from DD-F-016 that was established because DD-001's inconsistent border widths scored 2.5 points lower than DD-005's consistent ones").
 
 ### Step 1: Read the Accumulated Identity
 
@@ -207,7 +350,13 @@ Step 8: Take viewport-height screenshot of a Q&A pair (or equivalent structural 
 6. Does the typography feel like a premium publication or a blog post?
 7. Are there any elements that look unfinished, broken, or placeholder-ish?
 
-**Write down your visual impressions BEFORE running any programmatic checks.** These impressions are PRIMARY evidence.
+**Then apply the ADVERSARIAL LAYER to each answer:**
+
+8. For whatever your eye was drawn to FIRST — **argue that it SHOULDN'T be the focal point.** What SHOULD be the focal point based on the content hierarchy? If your eye was drawn to a decorative border instead of the content, the decoration is winning over substance.
+9. For anything that looks "fine" — **argue that it's NOT fine.** Force yourself to find something wrong. If you genuinely can't find anything wrong after a sustained effort, THEN it passes. But "it looks okay" is never sufficient — "I tried to break this and couldn't" is the standard.
+10. For the overall impression — **argue that a completely different approach would be better.** Would this section work better WITHOUT that callout? Would this code block work better WITHOUT syntax highlighting? Would this heading work better in Inter instead of Instrument Serif? If the answer is clearly "no, the current approach is right," then the current approach is validated. If the answer is "actually, maybe..." — that's a finding.
+
+**Write down your visual impressions AND your adversarial challenges BEFORE running any programmatic checks.** Both are PRIMARY evidence.
 
 ### 3-VISUAL-B: The Meta-Cognitive Proportional Reasoning Audit
 
@@ -241,6 +390,18 @@ PROPORTIONAL REASONING QUESTIONS:
 | "Does this page region feel like it BELONGS with the rest of the page?" | Is there visual continuity from top to bottom? | A header with one color temperature and body with another. Or a footer section that uses different typography conventions than the header. |
 
 **The meta-cognitive audit is NOT a checklist.** It is a PRACTICE. For each viewport-height slice of the page, pause and ASK these questions. Let your accumulated identity INFORM your judgment. If something feels wrong but you can't articulate why — THAT IS A FINDING. Name it "perceptual discomfort at [location]" and investigate with code AFTER you've noted the impression.
+
+**ADVERSARIAL LAYER FOR PROPORTIONAL REASONING:**
+
+For each proportional question, don't just answer it — ARGUE BOTH SIDES:
+
+> **"Is this heading the right size relative to its body text?"**
+> DEFENSE: "Yes, because the type scale says h3 = 1.5rem and body = 1rem, giving a 1.5x ratio that creates clear hierarchy."
+> CHALLENGE: "But in THIS context, the heading introduces a minor sub-section within a dense answer zone. A 1.5x ratio gives it too much prominence — it SHOUTS in a zone that should be calm. The CONTEXT demands a smaller heading, even if the TYPE SCALE permits a larger one."
+
+This is where adversarial review meets accumulated identity. The type scale is CORRECT (it's part of the trusted foundation). But the APPLICATION of the type scale to this specific context may not be optimal. The adversary doesn't challenge the scale — they challenge whether THIS use of the scale serves the identity's intent of "editorial calm" and "confident restraint."
+
+**Does this organization make sense?** — Not just "are the components arranged logically," but "is a GRID of territory cards the right way to organize THIS content? Would a simple LIST be more 'unhurried editor'? The identity says 'content defines its own space' — does a rigid grid honor that?" CHALLENGE the organizational choice, not just the styling of that choice.
 
 ### 3-VISUAL-C: The Slow Scroll Visual Audit
 
@@ -277,6 +438,11 @@ For each viewport slice:
 ## SECTION 4: THE GRANULAR UI AUDIT CHECKLIST
 
 ### This is the SUPPLEMENTARY programmatic audit. Run it AFTER the visual audit to confirm or investigate findings.
+
+**ADVERSARIAL POSTURE FOR THIS ENTIRE SECTION:** Every check below asks "does this VALUE match the spec?" But the adversarial auditor asks TWO additional questions after every passing check:
+
+1. **"Is the spec being applied in the right CONTEXT?"** — A border might be 4px (correct value) but on an element that shouldn't have a border at all (wrong context). The value passes; the decision fails.
+2. **"Does this passing check create a FALSE sense of security?"** — All callout borders at 4px doesn't mean the callouts are GOOD. It means one dimension is correct. What about spacing, alignment, color temperature, content density, visual weight relative to neighbors? Passing one check is not passing the audit.
 
 ### 4A: BORDERS — The Most Common Violation Area
 
