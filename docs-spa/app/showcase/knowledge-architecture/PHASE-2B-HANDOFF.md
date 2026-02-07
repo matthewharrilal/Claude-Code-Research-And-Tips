@@ -28,7 +28,7 @@ grep -rl "INLINE THREADING HEADER" docs-spa/app/showcase/ design-extraction/ | w
 
 **Step 4:** After each batch group, commit and push. Don't wait for all 164 files.
 
-**CRITICAL WARNING:** The `showcase/CLAUDE.md` file will auto-load with aggressive research grounding rules. Those rules are for design creation, NOT for this metadata insertion task. Ignore them. See Section 6.
+**CRITICAL WARNING:** The `showcase/CLAUDE.md` file will auto-load with aggressive research grounding rules. Those rules are for design creation, NOT for this metadata insertion task. Ignore them. See Section 7.
 
 ---
 
@@ -268,7 +268,167 @@ END INLINE THREADING HEADER
 
 ---
 
-## 5. Format Rules by File Type
+## 5. HOW TO DERIVE EACH SECTION — The Methodology
+
+This is the core process. For each file, you need two inputs:
+1. **The file itself** (read first 60-80 lines)
+2. **The threading data entry** for that file (from `showcase-threading.md` or `design-extraction-threading.md`)
+
+### What Threading Data Looks Like
+
+Each file has an entry in the threading data that looks like this:
+
+```
+### RESEARCH-ACTIVE.md
+- source: R1-R5 research files (consolidation of all finding tracking)
+- built_on: R1-DOCUMENTATION-PATTERNS.md (28 findings), R2-CREATIVE-LAYOUTS.md (78 findings), ...
+- cited: showcase/CLAUDE.md (mandatory reading), DESIGN-SYSTEM/CLAUDE.md, BACKBONE.md, ...
+- mandatory_for: every exploration task (must be updated after work)
+- threading_ready: YES
+- threading_gaps: none
+```
+
+### Field → Section Mapping
+
+| Threading Data Field | Maps To Header Section | How to Use It |
+|---------------------|----------------------|---------------|
+| `source` | 1. WHY THIS EXISTS | Explains where the file came from. Use this + file's opening lines to write the 3-5 sentence summary. |
+| `built_on` | 5. BUILT ON | These are the upstream dependencies. Resolve each to a real file path. Each becomes a row in the table. |
+| `cited` | 8. CONSUMED BY | These are the downstream consumers. Each file listed here uses this file somehow. Each becomes a row. |
+| `mandatory_for` | 6. MUST HONOR / 8. CONSUMED BY | If it says "mandatory for X," X must appear in Consumed By. The constraint itself may inform Must Honor. |
+| `threading_ready` | 3. STATUS | YES = ACTIVE. NO = check if data is incomplete, may still be ACTIVE. |
+| `threading_gaps` | 9. RESEARCH DEBT (Tier A only) | If gaps exist, note them. Also scan the file itself for TODO/TBD markers. |
+
+### Section-by-Section Derivation
+
+**Section 1: WHY THIS EXISTS** (All tiers)
+- **Input:** File's first 50 lines + threading `source` field
+- **Process:** Answer in 3-5 sentences: What does this file do? When/why was it created? What authority does it have? What makes it unique in the repo?
+- **Bad:** "This file tracks research." (too vague, 1 sentence)
+- **Good:** "Consolidation tracker for all 337 R1-R5 research findings, maintained as the central record of which findings have been applied and which remain pending. Updated after every exploration or building task. Authority derives from being the single source of truth for finding application status across all 5 research streams."
+
+**Section 2: THE QUESTION THIS ANSWERS** (Tier A and B only)
+- **Input:** File's title + purpose from Section 1
+- **Process:** Write ONE question in quotes that someone would ask that this file answers.
+- **Example:** "Which research findings have been applied to explorations and which are still pending?"
+
+**Section 3: STATUS** (All tiers)
+- **Input:** Threading `threading_ready` + file content
+- **Process:** ACTIVE = file is in use and current. LOCKED = file is complete and should not be modified. Check file for any "COMPLETE", "LOCKED", or date stamps.
+- **Format:** "ACTIVE" or "ACTIVE — locked data, updated only when X" or "LOCKED — completed 2026-02-04"
+
+**Section 4: SOUL ALIGNMENT** (Tier A only)
+- **Input:** File content — look for CSS values, soul piece references, design token references
+- **Process:** If the file implements visual design: list the specific CSS values and which soul pieces they implement. If the file is non-visual (research, tracking, audit): write "This file is soul-adjacent, not soul-implementing" and describe its conceptual relationship to the soul.
+
+**Section 5: BUILT ON** (All tiers)
+- **Input:** Threading `built_on` field
+- **Process:** Each item in `built_on` becomes a table row. Resolve to actual file paths. Describe the relationship.
+- **When threading data is missing:** Read the file's first 30 lines for import statements, citations, or "based on" references. For origin files with no upstream: write "ORIGIN FILE — no upstream within repository."
+
+**Section 6: MUST HONOR** (Tier A and B only)
+- **Input:** File content — scan for rules, constraints, warnings, "DO NOT" statements, locked values
+- **Process:** List specific constraints this file establishes or must respect.
+- **For files that ESTABLISH constraints:** "border-radius: 0 everywhere — NEVER deviate"
+- **For files that CONSUME constraints:** "Must match values in DESIGN-TOKEN-SUMMARY.md"
+- **When nothing obvious:** Check if `mandatory_for` in threading data implies constraints.
+
+**Section 7: WHAT BREAKS IF THIS CHANGES** (Tier A only)
+- **Input:** Threading `cited` field (count of inbound refs) + `mandatory_for`
+- **Process:** Count downstream consumers. Rate blast radius:
+  - 20+ inbound refs = CATASTROPHIC
+  - 10-20 = HIGH
+  - <10 = MEDIUM
+- List the specific files that would break.
+
+**Section 8: CONSUMED BY** (All tiers)
+- **Input:** Threading `cited` + `mandatory_for` fields
+- **Process:** Each cited file becomes a table row. Describe HOW it uses this file.
+- **When threading data is missing:** `grep -rl "FILENAME" docs-spa/ design-extraction/` to find files that reference this one.
+- **For leaf nodes** (no consumers): "LEAF NODE — consumed during audit process, not referenced by path in other files."
+
+**Section 9: RESEARCH DEBT** (Tier A only)
+- **Input:** Threading `threading_gaps` + scan file for TODO/TBD/FIXME markers
+- **Process:** List specific gaps. If none found: check for coverage gaps (e.g., "R4 findings not yet applied"), methodology limitations, or known discrepancies.
+
+**Section 10: DIAGNOSTIC QUESTIONS** (Tier A = 5 questions, Tier B = 3 questions)
+- **Input:** Sections 5, 6, 8 you just wrote
+- **Process:** Write testable yes/no questions that verify this file's integrity. Each should be checkable by reading the file or its sources.
+- **Bad:** "Is this file good?" (not testable)
+- **Good:** "Do all finding IDs referenced in this file exist in R3-DENSITY-DIMENSIONS.md?"
+
+### Worked Example: Processing MASTER-STATE.md (Tier B, Batch 7)
+
+**Step 1:** Read threading data (showcase-threading.md GROUP 4):
+```
+### MASTER-STATE.md
+- source: N/A (authored as state tracker)
+- built_on: SOUL-DISCOVERIES.md, DESIGN-TOKEN-SUMMARY.md (external: design-extraction),
+            MASTER-SOUL-SYNTHESIS.md (external: design-extraction), COMP-F findings, DD-F findings
+- cited: showcase/CLAUDE.md, DD-REAUDIT-CHECKPOINT.md, FOUNDATION-REMEDIATION-SYNTHESIS.md
+- mandatory_for: state tracking; references 13 design-extraction files
+- threading_ready: YES
+```
+
+**Step 2:** Read the file (first 60 lines) to understand its purpose.
+
+**Step 3:** Generate header:
+
+```
+1. WHY THIS EXISTS
+Overall position tracker for the KortAI design system pipeline. Tracks which
+pipeline stages are complete, what findings have been generated, and current
+state across all workstreams. References 13 design-extraction T1 files as
+external dependencies. Serves as the single orientation point for agents
+resuming work after context loss.
+
+2. THE QUESTION THIS ANSWERS
+"What is the current state of the design system pipeline — which stages are
+complete, which are in progress, and what has been produced so far?"
+
+3. STATUS
+ACTIVE — updated after each major pipeline stage completion
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| checkpoints/SOUL-DISCOVERIES.md         | 5 soul pieces tracked                  |
+| design-extraction/.../DESIGN-TOKEN-SUMMARY.md | T1 token values referenced       |
+| design-extraction/.../MASTER-SOUL-SYNTHESIS.md | T1 soul synthesis referenced     |
+| COMP-F and DD-F findings               | Finding counts and status              |
+
+6. MUST HONOR
+- Must accurately reflect actual pipeline state (do not mark stages complete prematurely)
+- References to design-extraction T1 files must match actual file content
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| showcase/CLAUDE.md                      | Referenced as mandatory reading         |
+| checkpoints/DD-REAUDIT-CHECKPOINT.md    | References state for audit context     |
+| checkpoints/FOUNDATION-REMEDIATION-SYNTHESIS.md | References state for synthesis  |
+
+10. DIAGNOSTIC QUESTIONS
+- Does the pipeline state described here match the actual file state on disk?
+- Are all 13 referenced design-extraction files still present?
+- Do the finding counts (COMP-F, DD-F) match their source files?
+```
+
+### When There Is No Threading Data
+
+For files NOT in the threading data (TSX components, app code, content HTML, configs):
+
+1. **Read the file** (first 20-30 lines)
+2. **For "Built On":** Check import statements, file references, comments citing sources
+3. **For "Consumed By":** Run `grep -rl "filename" docs-spa/` to find files that import/reference this one
+4. **For "Why This Exists":** Describe what the file does based on its content
+5. **For "Status":** Almost always ACTIVE unless there's evidence otherwise
+
+For the 75 content HTML pages, see the uniform template in Section 16.
+
+---
+
+## 6. Format Rules by File Type
 
 ### .md files
 - **Placement:** HTML comment `<!-- ... -->` at TOP of file, BEFORE first `#` heading
@@ -312,7 +472,7 @@ END INLINE THREADING HEADER
 
 ---
 
-## 6. CRITICAL TRAP: Ignore showcase/CLAUDE.md Research Rules
+## 7. CRITICAL TRAP: Ignore showcase/CLAUDE.md Research Rules
 
 **This will waste hours if you don't know about it.**
 
@@ -333,7 +493,7 @@ Similarly, the `checkpoints/CLAUDE.md` and `DESIGN-SYSTEM/CLAUDE.md` navigation 
 
 ---
 
-## 7. Edge Cases Still Relevant for Remaining Batches
+## 8. Edge Cases Still Relevant for Remaining Batches
 
 ### When a file has no upstream ("Built On")
 Write: "ORIGIN FILE — no upstream within repository. Sources are [external research / Sanrok screenshots / etc.]"
@@ -358,7 +518,7 @@ Some .md files start with `---` YAML frontmatter. Header goes AFTER the closing 
 
 ---
 
-## 8. How the Previous Session Worked (Operational Pattern)
+## 9. How the Previous Session Worked (Operational Pattern)
 
 ### Agent Structure
 Files were processed in parallel using background Task agents (subagent_type: general-purpose). Each agent handled 7-12 files.
@@ -386,7 +546,7 @@ Files were processed in parallel using background Task agents (subagent_type: ge
 
 ---
 
-## 9. Remaining Batch Details
+## 10. Remaining Batch Details
 
 ### Batch 7: Component Audits + Checkpoints (20 files)
 
@@ -445,9 +605,9 @@ Mixed directory: 10 CSS files in design-extraction, 14 app code files in docs-sp
 
 **Special cases:**
 - favicon.ico: Binary file, skip inline, manifest note only
-- .prettierrc: JSON file — skip inline, manifest note only (see Section 5)
+- .prettierrc: JSON file — skip inline, manifest note only (see Section 6)
 - .gitignore/.prettierignore: Use `#` comment format
-- next-env.d.ts: Auto-generated by Next.js — header will be lost on rebuild (see Section 5)
+- next-env.d.ts: Auto-generated by Next.js — header will be lost on rebuild (see Section 6)
 
 ### Batch 9: Design-Extraction Root + Content Components (24 files)
 
@@ -483,7 +643,7 @@ All Tier C (4 sections only). All are `docs-spa/content/pages/*/content.html` fi
 
 ---
 
-## 10. Quality Gates to Verify
+## 11. Quality Gates to Verify
 
 After processing each batch, spot-check:
 
@@ -496,7 +656,7 @@ After processing each batch, spot-check:
 
 ---
 
-## 11. Gotchas That Will Bite You
+## 12. Gotchas That Will Bite You
 
 ### The manifest says PENDING for everything
 The batch manifest still shows all 253 files as PENDING. Files 1-89 are actually DONE. Verify with `grep -rl "INLINE THREADING HEADER"`, not the manifest status column.
@@ -511,7 +671,7 @@ RETROACTIVE-AUDIT-DD-001-006.md is the ONLY remaining Tier A file. It needs all 
 The 75 content.html files (Batches 11-13) have NO `<!DOCTYPE html>`. They start with blank lines then `<!-- Section 1: ESSENCE -->`. Only read first ~10 lines. Match on `<!-- Section 1:` for Edit tool insertion.
 
 ### Threading data has gaps
-`showcase-threading.md` covers showcase/ files. `design-extraction-threading.md` covers design-extraction/. But TSX components, app code, content HTML, and dependency-trace files have NO threading data. See Section 16 for how to handle these.
+`showcase-threading.md` covers showcase/ files. `design-extraction-threading.md` covers design-extraction/. But TSX components, app code, content HTML, and dependency-trace files have NO threading data. See Section 17 for how to handle these.
 
 ### 3 files can't have inline headers
 Skip these — JSON/binary can't hold comments. Note in manifest only:
@@ -527,7 +687,7 @@ File #130 is auto-generated by Next.js. Add the header anyway, but it will be ov
 
 ---
 
-## 12. Recommended Execution Strategy
+## 13. Recommended Execution Strategy
 
 ### Batch 7 (20 files)
 Split into 2 agents: B07a (files 90-99, 10 files) and B07b (files 100-109, 10 files). Both read `showcase-threading.md`. File 90 is Tier A (10 sections), file 108 is Tier C (4 sections), rest are Tier B.
@@ -554,18 +714,18 @@ Split into 4-5 agents. Each header is ~10 lines (4 sections). Fast.
 
 ---
 
-## 13. After All 253 Files Are Done
+## 14. After All 253 Files Are Done
 
 1. **Traversal Verification:** Spot-check that "Consumed By" paths exist and "Built On" paths exist
 2. **Bidirectional Cross-Check:** For sample pairs, verify A's "Consumed By: B" matches B's "Built On: A"
 3. **Batch Manifest Update:** Mark all files DONE in the manifest
 4. **Final commit and push**
-5. **Run the verification checklist** in Section 20
+5. **Run the verification checklist** in Section 21
 6. Phase 2B is then COMPLETE. No separate Phase 2C needed — headers were written directly to source files.
 
 ---
 
-## 14. Quick Verification Commands
+## 15. Quick Verification Commands
 
 ```bash
 # Count files with threading headers
@@ -590,7 +750,7 @@ grep -h "Built On\|Consumed By" docs-spa/app/showcase/research/R1-DOCUMENTATION-
 
 ---
 
-## 15. Threading Data GROUP → Batch Mapping
+## 16. Threading Data GROUP → Batch Mapping
 
 The `showcase-threading.md` file is organized into 8 GROUPs. Here's which GROUP feeds which batch:
 
@@ -609,11 +769,11 @@ The `showcase-threading.md` file is organized into 8 GROUPs. Here's which GROUP 
 
 **For Batch 8 CSS files:** Use `design-extraction-threading.md`, not showcase-threading.md.
 
-**For Batches 8-9 TSX files, Batches 10-13:** Not covered by threading data. See Section 16.
+**For Batches 8-9 TSX files, Batches 10-13:** Not covered by threading data. See Section 17.
 
 ---
 
-## 16. How to Handle Files Without Threading Data
+## 17. How to Handle Files Without Threading Data
 
 ### TSX Content Components (Batch 9, files 146-157)
 
@@ -667,7 +827,7 @@ These are self-referential — they're the analysis that produced the threading 
 
 ---
 
-## 17. Edit Tool Mechanics for Prepending Headers
+## 18. Edit Tool Mechanics for Prepending Headers
 
 This is critical operational knowledge for the agents doing the actual insertion.
 
@@ -697,7 +857,7 @@ When crafting agent prompts, paste the complete header template directly into th
 
 ---
 
-## 18. Content Page "Built On" Slug Mapping
+## 19. Content Page "Built On" Slug Mapping
 
 Each `docs-spa/content/pages/[slug]/content.html` was extracted from a synthesis markdown file. The mapping is:
 
@@ -713,7 +873,7 @@ Some content pages may map to files in `extractions/` rather than `synthesis/`. 
 
 ---
 
-## 19. Cost Optimization
+## 20. Cost Optimization
 
 ### Use Haiku for Uniform Batches
 
@@ -732,7 +892,7 @@ This prevents losing work if a session hits context limits or crashes.
 
 ---
 
-## 20. Verification Checklist — Run After All Batches Complete
+## 21. Verification Checklist — Run After All Batches Complete
 
 ```bash
 # 1. Total header count (expect ~250: 253 minus 3 skipped JSON/binary files)
