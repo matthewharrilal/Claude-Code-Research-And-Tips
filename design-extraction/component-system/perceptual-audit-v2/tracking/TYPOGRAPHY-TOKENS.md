@@ -1,3 +1,87 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/tracking/TYPOGRAPHY-TOKENS.md
+     Tier: B | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+This file tracks all typography tokens extracted during the perceptual
+audit, organized by their STRUCTURAL role in creating zone hierarchy,
+information organization, and density. It consolidates findings from all
+11 component ZONE-TYPOGRAPHY-ANALYSIS.md sub-agent analyses into three
+token categories: Font Families (structural role differentiation), Font
+Sizes (zone hierarchy), and per-component typography tables documenting
+exact font, size, weight, and structural purpose per zone. The file
+establishes the foundational three-family type system (Serif = title
+zones, Sans = content zones, Mono = technical zones) and the size-based
+zone separation rule (4px+ jump = zone boundary, 2px jump = within-zone
+variation). This tracking file fed typography data into T1 synthesis.
+
+2. THE QUESTION THIS ANSWERS
+
+"What exact typography values (font family, size, weight, style) does
+each KORTAI component use in each zone, and how does typography create
+zone hierarchy, organize information, and control density across the
+design system?"
+
+3. STATUS
+
+ACTIVE (locked data). All 11 components populated with zone-level
+typography data. Created 2026-02-04. The three-family system
+(Instrument Serif / Inter / JetBrains Mono) and 7-step size scale
+(11px-28px) are locked. The Essence Callout serif italic body and
+Reasoning Component serif italic title are the two documented
+exceptions to the default sans-serif body typography. No further
+population expected unless new components are added.
+
+5. BUILT ON
+
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| Code Snippet ZONE-TYPOGRAPHY-ANALYSIS.md | Component type data | Mono-dominant, 13px code, 11px labels | components/code-snippet/sub-agent-analyses/ZONE-TYPOGRAPHY-ANALYSIS.md |
+| Info Callout ZONE-TYPOGRAPHY-ANALYSIS.md | Component type data | Sans only, 10-11px label, 14-16px body | components/info-callout/sub-agent-analyses/ZONE-TYPOGRAPHY-ANALYSIS.md |
+| Tip Callout ZONE-TYPOGRAPHY-ANALYSIS.md | Component type data | Same as Info (family DNA) | components/tip-callout/sub-agent-analyses/ZONE-TYPOGRAPHY-ANALYSIS.md |
+| Gotcha Callout ZONE-TYPOGRAPHY-ANALYSIS.md | Component type data | Same as Info (family DNA) | components/gotcha-callout/sub-agent-analyses/ZONE-TYPOGRAPHY-ANALYSIS.md |
+| Essence Callout ZONE-TYPOGRAPHY-ANALYSIS.md | Component type data | UNIQUE serif italic body | components/essence-callout/sub-agent-analyses/ZONE-TYPOGRAPHY-ANALYSIS.md |
+| Challenge Callout ZONE-TYPOGRAPHY-ANALYSIS.md | Component type data | Same as Info (family DNA) | components/challenge-callout/sub-agent-analyses/ZONE-TYPOGRAPHY-ANALYSIS.md |
+| File Tree ZONE-TYPOGRAPHY-ANALYSIS.md | Component type data | Mono-dominant, typography IS architecture | components/file-tree/sub-agent-analyses/ZONE-TYPOGRAPHY-ANALYSIS.md |
+| Decision Matrix minimal audit | Type data | Sans 4-tier hierarchy, 10-14px range | (minimal audit) |
+| Core Abstraction minimal audit | Type data | Serif italic quote + mono code (composite) | (minimal audit) |
+| Task Component minimal audit | Type data | Strikethrough for completion, weight descent | (minimal audit) |
+| Reasoning Component minimal audit | Type data | Serif italic title, sans body, amber summary | (minimal audit) |
+| typography-system/ CSS files | Font family decisions | Instrument Serif, Inter, JetBrains Mono | ../../typography-system/ |
+
+6. MUST HONOR
+
+| # | Constraint | Rationale |
+|---|-----------|-----------|
+| 1 | Values in this file were consolidated into T1 synthesis (DESIGN-TOKEN-SUMMARY.md) | Do not modify without checking synthesis files for downstream impact |
+| 2 | Three-family system (serif/sans/mono) is soul-locked | Font family choices are perceptual decisions, not arbitrary -- serif = editorial, sans = functional, mono = technical |
+| 3 | Essence Callout serif italic body is the ONLY callout with non-sans body | This is a documented soul exception that creates "editorial pull-quote prominence" -- it must not be normalized |
+| 4 | Size jump rule: 4px+ = zone boundary, 2px = within-zone | This governs how font size creates visual hierarchy -- it is a design principle, not just a measurement |
+| 5 | Typography Truth statements are perceptual observations | They describe what the typography FEELS LIKE, not just what it IS -- treat as soul data |
+
+8. CONSUMED BY
+
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| synthesis/DESIGN-TOKEN-SUMMARY.md (T1) | Consolidates font families, size scale, and weight tokens into the canonical :root CSS variable block |
+| showcase/checkpoints/MASTER-STATE.md | References typography token values for implementation verification |
+| synthesis/PRODUCTION-RULES.md (T1) | Uses typography data to enforce font usage constraints (e.g., "serif only for titles and Essence body") |
+| synthesis/CHARACTER-FAMILY-COMPLETE.md (T1) | References typography exceptions (Essence serif, Reasoning serif title) in character specifications |
+
+10. DIAGNOSTIC QUESTIONS
+
+Q1: Do all 11 component sections contain a "Typography Truth" summary statement and a complete zone-by-zone table with Font, Size, Weight, and Structural Purpose columns? (Expected: YES)
+
+Q2: Are there exactly 2 components that use Serif (Instrument Serif) in their body/content zones -- Essence Callout (body) and Core Abstraction (wisdom quote) -- plus 1 that uses it for a title zone (Reasoning Component)? (Expected: YES -- these are the only serif exceptions)
+
+Q3: Does the 7-step size scale (size-xs:11px through size-2xl:28px) in the "FONT SIZES" section match the values in synthesis/DESIGN-TOKEN-SUMMARY.md, and does every component's per-zone size fall within this scale? (Expected: YES -- no values outside the scale)
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # TYPOGRAPHY TOKENS — Structural Focus
 ## Phase 4 Re-Audit Tracking Sheet
 

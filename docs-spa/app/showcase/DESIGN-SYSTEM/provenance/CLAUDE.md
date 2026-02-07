@@ -1,3 +1,33 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/CLAUDE.md
+Tier: C | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Navigation file for agents entering the provenance/ directory. Maps the
+research chain structure, provides quick navigation to finding traces,
+and documents the R3-023 chain trace example.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| R3-023 full chain trace                 | Example provenance walkthrough         |
+| PIPELINE-MANIFEST.md                    | Master registry referenced for nav     |
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| HANDOFF-DD-TO-OD.md                     | References provenance directory nav    |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # CLAUDE.md — Provenance Directory
 
 ═══════════════════════════════════════════════════════════════════════════════

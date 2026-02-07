@@ -9,6 +9,87 @@ manifest_ref: DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md
 last_updated: 2026-02-05
 ---
 
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-2-density-dd/DD-outbound-findings.md
+Tier: A | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Defines all DD-F-### finding IDs from Stage 2 Density Exploration. This is the
+FIRST LINK in the outbound finding chain. DD-F-001 through DD-F-018 are formally
+declared here, including the 5 density pattern findings, the DD-F-006 FRACTAL
+meta-pattern (strongest principle), and anti-pattern findings DD-F-015 through
+DD-F-018. Every downstream stage consumes these findings.
+
+2. THE QUESTION THIS ANSWERS
+"What are the exact DD-F finding definitions, and which is the meta-pattern that
+governs all subsequent stages?"
+
+3. STATUS
+ACTIVE — CRITICAL for provenance chain. 12+ inbound references. HIGH blast radius.
+
+4. SOUL ALIGNMENT
+Soul-adjacent. This file defines findings ABOUT soul-implementing explorations.
+DD-F-006 (fractal self-similarity) is the strongest principle discovered. The
+density patterns were validated on soul-compliant components, so findings carry
+soul context forward implicitly.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| DD-001 through DD-006 exploration results| Source explorations for findings      |
+| DD-F-001 through DD-F-018               | Finding IDs declared here             |
+| BACKBONE.md                             | Structural backbone referenced        |
+| PIPELINE-MANIFEST.md                    | Finding registry connection           |
+| component-findings.md                   | Predecessor outbound findings         |
+
+6. MUST HONOR
+- DD-F IDs are immutable once declared (12+ downstream references)
+- DD-F-006 FRACTAL must remain marked as "THE STRONGEST PRINCIPLE"
+- Anti-pattern findings (DD-F-015 through DD-F-018) must remain defined
+- Chain Impact column must accurately reflect ALL downstream stages
+- Source scores must match exploration audit results
+
+7. WHAT BREAKS IF THIS CHANGES
+- BACKBONE.md loses finding references (structural narrative breaks)
+- HANDOFF-DD-TO-OD.md forwards stale finding definitions to OD
+- density-patterns.md pattern definitions lose provenance anchors
+- PATTERN-INDEX.md index entries become orphaned
+- All OD, AD, CD explorations citing DD-F IDs lose their chain
+- 12+ inbound references across the system break or become stale
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| BACKBONE.md                             | Finding summary in master narrative   |
+| provenance/CLAUDE.md                    | Navigation to DD findings             |
+| stage-2-density-dd/STAGE-HEADER.md      | DD finding context in stage story     |
+| density-patterns.md                     | Pattern definitions cite DD-F IDs     |
+| PATTERN-INDEX.md                        | Pattern index entries reference DD-F  |
+| HANDOFF-DD-TO-OD.md                     | All DD-F findings forwarded to OD     |
+| stage-3-organization-od/ (future)       | OD explorations consume DD-F findings |
+| All downstream stages (AD, CD, Migration)| Chain citation of DD-F IDs           |
+
+9. RESEARCH DEBT
+- DD-F-006 fractal principle needs quantitative validation (currently qualitative
+  scoring only — 36/40 is perceptual, not measured)
+- Anti-pattern findings (DD-F-015 through DD-F-018) lack explicit violation
+  examples from actual explorations
+- No formal test for DD-F finding consistency across the 12+ consumers
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Are DD-F-001 through DD-F-005 present with density pattern mappings (PULSE, CRESCENDO, ISLANDS, GEOLOGICAL, TIDAL)?
+Q2: Is DD-F-006 FRACTAL present and marked as meta-pattern / strongest principle with "ALL ODs, ALL ADs, ALL CDs" scope?
+Q3: Are anti-pattern findings DD-F-015 through DD-F-018 present and defined?
+Q4: Does each finding include Source, Score, For Which OD/Stage, and Chain Impact columns?
+Q5: Does the predecessor field in YAML frontmatter point to stage-1-components/component-findings.md?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # DD OUTBOUND FINDINGS (DD-F-###)
 ## First Generation of Cross-Stage Research
 

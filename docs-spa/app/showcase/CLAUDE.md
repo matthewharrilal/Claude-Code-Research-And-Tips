@@ -1,3 +1,34 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/CLAUDE.md
+Tier: C | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Process enforcement document for ALL work within the showcase/ directory. Read
+automatically by Claude Code on directory entry. Enforces mandatory research
+grounding (5-file read requirement), research citation format, and exploration
+methodology before any creation or modification.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| R3-012                                  | Template example for density patterns  |
+| R5-007                                  | Template example for advanced patterns |
+| R4-003                                  | Template example for component patterns|
+| 337 total research findings             | Aggregate count enforced in grounding  |
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| Claude Code agent                       | Auto-read on showcase/ directory entry |
+| ALL showcase/ work                      | Mandatory process enforcement          |
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════ -->
+
 # CLAUDE.md — Project Instructions
 ## Persistent Rules for KortAI Design System Development
 

@@ -1,3 +1,66 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/tracking/SPACING-TOKENS.md
+     Tier: B | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+This file is the canonical tracking sheet for all spacing token values extracted
+during the Phase 4 perceptual re-audit of 11 KORTAI components. It documents the
+8-step spacing scale (4px to 48px) and records how each component uses spacing to
+create organized density, zone boundaries, and breathing points. The "Spacing Truth"
+prose summaries per component capture the perceptual intent behind raw pixel values,
+making this the bridge between measured CSS and the editorial soul.
+
+2. THE QUESTION THIS ANSWERS
+"What are the exact spacing values used by each KORTAI component, and what
+structural role does each value play in creating zone boundaries and density rhythm?"
+
+3. STATUS
+ACTIVE — Populated during Phase 4 re-audit (2026-02-04). Values consolidated into
+T1 DESIGN-TOKEN-SUMMARY.md. This file remains the detailed source record; the
+synthesis file is the locked authority for downstream consumers.
+
+5. BUILT ON
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| Code Snippet zone-spacing analysis | Spacing data for 1 of 11 components | padding 16px, header 12px, line-height 1.6 | components/code-snippet/sub-agent-analyses/ZONE-SPACING-ANALYSIS.md |
+| Info Callout zone-spacing analysis | Spacing data | 24/28px asymmetric padding, 8px label-body | components/info-callout/sub-agent-analyses/ZONE-SPACING-ANALYSIS.md |
+| File Tree zone-spacing analysis | Spacing data | 4-space indent, 1.4 line-height | components/file-tree/sub-agent-analyses/ZONE-SPACING-ANALYSIS.md |
+| Decision Matrix zone-spacing analysis | Spacing data | 48px row height, 24px col gap | components/decision-matrix/sub-agent-analyses/ZONE-SPACING-ANALYSIS.md |
+| Core Abstraction zone-spacing analysis | Spacing data | 1px frame, 16px code padding | components/core-abstraction/sub-agent-analyses/ZONE-SPACING-ANALYSIS.md |
+| Task Component zone-spacing analysis | Spacing data | 12px checkbox gap, 0px task-task gap | components/task-component/sub-agent-analyses/ZONE-SPACING-ANALYSIS.md |
+| Reasoning Component zone-spacing analysis | Spacing data | 16-20px column padding, 1px divider | components/reasoning-component/sub-agent-analyses/ZONE-SPACING-ANALYSIS.md |
+| All 7 full zone files (+ callout variants) | Complete per-component spacing audits | Full spacing tables per component | components/*/sub-agent-analyses/ZONE-SPACING-ANALYSIS.md |
+
+6. MUST HONOR
+| Constraint | Detail |
+|------------|--------|
+| Values are consolidated into T1 | Any modification here must be checked against synthesis/DESIGN-TOKEN-SUMMARY.md |
+| 8-step spacing scale is locked | space-xs(4) through space-3xl(48) — do not add or remove steps |
+| Structural boundary semantics are authoritative | 4-8px = "one thing", 12-16px = "related", 24-32px = "sections", 48px+ = "regions" |
+| Spacing Truths are editorial | Prose summaries capture soul intent; do not reduce to pure numbers |
+| Asymmetric padding is intentional | Callout 24/28 top/bottom is a deliberate soul choice, not a bug |
+
+8. CONSUMED BY
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| synthesis/DESIGN-TOKEN-SUMMARY.md (T1) | Consolidated spacing scale values into locked :root block |
+| MASTER-STATE.md / MASTER-INDEX.md | References this as authoritative spacing tracking document |
+| Any future component implementation | Source data for spacing decisions and density rationale |
+| CONSISTENCY-REGISTRY.md | Cross-references spacing values for consistency verification |
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does the 8-step spacing scale here (4/8/12/16/20/24/32/48) exactly match
+    the --space-* tokens in synthesis/DESIGN-TOKEN-SUMMARY.md?
+Q2: Are all 11 components represented with per-component spacing tables, or are
+    any missing from the "USAGE BY COMPONENT" section?
+Q3: Does the callout family still document asymmetric padding (24px top / 28px
+    bottom), and is this reflected in the T1 synthesis?
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # SPACING TOKENS — Structural Focus
 ## Phase 4 Re-Audit Tracking Sheet
 

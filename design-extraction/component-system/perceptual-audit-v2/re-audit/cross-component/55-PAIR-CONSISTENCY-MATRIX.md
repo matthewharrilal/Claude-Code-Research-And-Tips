@@ -1,3 +1,117 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/re-audit/cross-component/55-PAIR-CONSISTENCY-MATRIX.md
+     Tier: A | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+This file is the exhaustive cross-component structural verification dataset
+for the KORTAI design system. It contains 55 pairwise comparisons — every
+unique combination of the 11 KORTAI components (C(11,2) = 55) — evaluated
+on 5 consistency criteria: Gap Uniformity, Color Harmony, Density Transition,
+Axis Compatibility, and Visual Hierarchy. Each pair receives a score out of
+25 (5 criteria x 5-point scale) with detailed structural observations, ASCII
+diagrams showing vertical/horizontal stack behavior, and a "Perceptual Truth"
+capturing the relationship metaphor. This is the RAW DATA layer that feeds
+into the T1 synthesis file CONSISTENCY-VERIFICATION.md, transforming 55
+individual pair analyses into a systematic pass/fail verification framework.
+
+2. THE QUESTION THIS ANSWERS
+"When any two of the 11 KORTAI components appear adjacent on a page, do they
+maintain structural harmony — and if so, what is the specific evidence for
+each of the 55 possible pairings?"
+
+3. STATUS
+ACTIVE | LOCKED | DO NOT TOUCH — 63KB (1428 lines). Prepend-only header.
+No modifications to existing content.
+
+4. SOUL ALIGNMENT
+This file does not implement soul — it VERIFIES soul consistency across
+component pairs. Each pair is scored on whether the soul pieces survive
+coexistence:
+- SP#1 Sharp Edges (border-radius: 0) — Verified via structural diagrams
+- SP#2 Archivist Speaks in Serif — Verified via typography shift analysis
+  (e.g., JetBrains Mono → Instrument Serif italic in Code+Essence pairs)
+- SP#3 Callout Family DNA — Verified via callout-to-callout pair scoring
+  (Sections B-F cover all intra-callout combinations)
+- SP#4 Shadows Lie About Depth (box-shadow: none) — Verified implicitly:
+  no pair introduces shadow in coexistence
+- SP#5 Squares Signal System — Verified in Task Component pairs
+
+5. BUILT ON
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| code-snippet-soul-extraction.md | Component 1 soul data | Dark bg, HIGH density, V-dominant, JetBrains Mono | perceptual-audit-v2/soul-extractions/ |
+| info-callout-soul-extraction.md | Component 2 soul data | Gray border, LOW density, V-simple | perceptual-audit-v2/soul-extractions/ |
+| tip-callout-soul-extraction.md | Component 3 soul data | Mint, LOW density, V-simple | perceptual-audit-v2/soul-extractions/ |
+| gotcha-callout-soul-extraction.md | Component 4 soul data | Coral, MEDIUM density, V-simple | perceptual-audit-v2/soul-extractions/ |
+| essence-callout-soul-extraction.md | Component 5 soul data | Cream, LOW density, serif italic | perceptual-audit-v2/soul-extractions/ |
+| challenge-callout-soul-extraction.md | Component 6 soul data | Lavender, MEDIUM density, V-simple | perceptual-audit-v2/soul-extractions/ |
+| file-tree-soul-extraction.md | Component 7 soul data | MEDIUM-HIGH density, V-hierarchical | perceptual-audit-v2/soul-extractions/ |
+| decision-matrix-soul-extraction.md | Component 8 soul data | HIGH density, H-dominant (column scan) | perceptual-audit-v2/soul-extractions/ |
+| core-abstraction-soul-extraction.md | Component 9 soul data | HIGH density, V-dominant (wisdom→code) | perceptual-audit-v2/soul-extractions/ |
+| task-component-soul-extraction.md | Component 10 soul data | HIGH density, V-list (checkbox line) | perceptual-audit-v2/soul-extractions/ |
+| reasoning-component-soul-extraction.md | Component 11 soul data | MEDIUM density, H-split inside V-frame | perceptual-audit-v2/soul-extractions/ |
+
+6. MUST HONOR
+| Constraint | Source | Consequence of Violation |
+|------------|--------|--------------------------|
+| 5-point scoring scale (1-5 per criterion) | Internal methodology (line 49-69) | Inconsistent scoring breaks aggregation |
+| 5 criteria with equal 20% weight | Internal methodology (line 54-60) | Skewed pair scores, invalid averages |
+| System coherence target >= 4.0/5.0 | Internal threshold (line 69) | Below threshold = system failure flag |
+| All 55 pairs must be present | C(11,2) combinatorial completeness | Missing pairs = verification gaps |
+| 24px standard gap assumption | DESIGN-TOKEN-SUMMARY.md | Gap Uniformity scores become meaningless |
+| Perceptual Truth per pair | Methodology requirement | Loss of qualitative insight layer |
+
+7. WHAT BREAKS IF THIS CHANGES
+- **CONSISTENCY-VERIFICATION.md (T1)** — Directly consumes this file's
+  55-pair data to build its coexistence verification checklists. If pair
+  scores change, the T1 pass/fail criteria become ungrounded.
+- **ANTI-PATTERNS-REGISTRY.md (T1)** — References coexistence failures
+  from this matrix as anti-pattern evidence.
+- **PRODUCTION-RULES.md (T1)** — Rules about component adjacency are
+  justified by this matrix's scoring data.
+- **Blast radius:** 3 T1 synthesis files + any downstream DD/OD work
+  that references coexistence patterns.
+- **Files affected:**
+  - design-extraction/component-system/perceptual-audit-v2/synthesis/CONSISTENCY-VERIFICATION.md
+  - design-extraction/component-system/perceptual-audit-v2/synthesis/ANTI-PATTERNS-REGISTRY.md
+  - design-extraction/component-system/perceptual-audit-v2/synthesis/PRODUCTION-RULES.md
+
+8. CONSUMED BY
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| CONSISTENCY-VERIFICATION.md (T1) | Transforms 55 pair scores into systematic verification checklists and coexistence rules |
+| ANTI-PATTERNS-REGISTRY.md (T1) | Cites low-scoring pairs (if any) as evidence for adjacency anti-patterns |
+| PRODUCTION-RULES.md (T1) | Derives mandatory coexistence rules from highest- and lowest-scoring pair patterns |
+| Phase 2A classification files | References this file for dependency tracing and reachability analysis |
+
+9. RESEARCH DEBT
+- No pairs scored below 4.0/5.0 in current matrix — this means the
+  system has no documented tension pairs. If future components are
+  added, the matrix must expand from 55 to C(n,2) pairs.
+- The matrix only tests VERTICAL adjacency stacks — horizontal
+  side-by-side coexistence (e.g., in 2-column layouts) is not verified.
+- Page-level composition (3+ components in sequence) is not covered
+  here; that verification lives in CONSISTENCY-VERIFICATION.md.
+- No automated regression — scoring is manual/visual. A Playwright-based
+  coexistence regression suite would close this gap.
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does the matrix contain exactly 55 unique pairs with no duplicates
+    and no missing combinations? (Count sections A through J.)
+Q2: Does every pair have all 5 criterion scores filled in, totaling to
+    the correct sum out of 25?
+Q3: Is the system-wide average score >= 4.0/5.0 as required by the
+    coherence threshold on line 69?
+Q4: Does every pair include a structural observation ASCII diagram AND
+    a Perceptual Truth statement?
+Q5: If a new 12th component were added, could this matrix be extended
+    to 66 pairs (C(12,2)) using the same methodology without ambiguity?
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # Phase 4-DELTA: 55-Pair Consistency Matrix
 ## Exhaustive Cross-Component Structural Verification
 

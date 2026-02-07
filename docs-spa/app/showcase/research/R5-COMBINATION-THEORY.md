@@ -1,3 +1,74 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/research/R5-COMBINATION-THEORY.md
+Tier: B | Batch: 4 | Generated: 2026-02-06
+═══════════════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+R5-COMBINATION-THEORY.md captures 39 findings establishing the theoretical
+framework for how KortAI's 11 documentation components should combine,
+covering harmony, tension, sequence, grouping, nesting, and meta-relationships.
+It was produced on 2026-02-04 by research sub-agent R-5 and uniquely bridges
+external research with internal design-extraction references (PERCEPTUAL-TRUTHS.md,
+CHARACTER-FAMILY-COMPLETE.md, batch-04-heavy-cross.html, COMPONENTS-REGISTRY.md).
+It serves as the PRIMARY research input for the Combination Dimension (CD)
+stage (Stage 5) of the KortAI showcase pipeline.
+
+2. THE QUESTION THIS ANSWERS
+
+"How should KortAI's 11 documentation components combine — what creates
+harmony, what creates productive tension, what sequencing and grouping rules
+should govern component choreography?"
+
+3. STATUS
+
+ACTIVE (locked data). 39 findings (R5-001 through R5-039) are complete and
+immutable. No new findings will be added. CD explorations have not yet begun;
+findings remain largely unapplied.
+
+5. BUILT ON
+
+Source                                                          | Role                     | Key Values                                         | Path
+PERCEPTUAL-TRUTHS.md                                            | Internal design-extraction | Component character DNA, perceptual ground truth    | design-extraction/component-system/perceptual-audit-v2/tracking/PERCEPTUAL-TRUTHS.md
+CHARACTER-FAMILY-COMPLETE.md                                    | Internal design-extraction | Family relationships, component kinship             | design-extraction/component-system/perceptual-audit-v2/synthesis/CHARACTER-FAMILY-COMPLETE.md
+batch-04-heavy-cross.html                                       | Internal design-extraction | Cross-component interaction patterns                | design-extraction/component-system/perceptual-audit-v2/re-audit/cross-component/batch-04-heavy-cross.html (if exists)
+COMPONENTS-REGISTRY.md                                          | Internal design-extraction | Component catalog and structural specifications     | design-extraction/component-system/perceptual-audit-v2/ (registry location)
+External combination theory                                     | External reference         | Harmony/tension principles, grouping theory          | Various URLs (inline in findings)
+
+6. MUST HONOR
+
+#  | Constraint                                     | Rationale
+1  | Do not modify findings — this is locked data    | Future CD explorations will reference these IDs; stability is mandatory
+2  | Finding IDs are R5-001 through R5-039           | Cross-references from RETROACTIVE-AUDIT and STAGE-HEADER (CD) use these IDs
+3  | Copies in provenance/original-research/ must match | Chain integration requires identical content
+4  | Cross-directory dependencies must remain valid   | R5 uniquely references design-extraction/ files; those paths must stay valid
+
+8. CONSUMED BY
+
+Consumer                                                                          | How It Uses This File
+showcase/checkpoints/RESEARCH-ACTIVE.md                                           | Tracks which R5 findings have been applied and which remain unapplied
+showcase/checkpoints/RETROACTIVE-AUDIT-DD-001-006.md                              | Cross-references R5 combination findings relevant to DD exploration context
+DESIGN-SYSTEM/provenance/stage-5-combination-cd/STAGE-HEADER.md                   | Lists R5 as PRIMARY research input for CD stage
+DESIGN-SYSTEM/provenance/stage-2-density-dd/HANDOFF-DD-TO-OD.md                   | Transfers applicable R5 findings from DD scope to OD and beyond
+showcase/research/RESEARCH-SYNTHESIS.md                                           | Synthesizes R5 into Principle 3 (Components as Characters)
+showcase/research/CLAUDE.md                                                       | Lists R5 finding count (39) and stage mapping for agent navigation
+
+10. DIAGNOSTIC QUESTIONS
+
+Q1: Can every R5-0XX ID referenced in RESEARCH-ACTIVE.md or RETROACTIVE-AUDIT
+    be found as an actual finding in this file?
+Q2: Are the cross-directory design-extraction paths (PERCEPTUAL-TRUTHS.md,
+    CHARACTER-FAMILY-COMPLETE.md) still valid and accessible?
+Q3: Are all 39 findings present and numbered sequentially from R5-001
+    through R5-039?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # R5-COMBINATION-THEORY
 ## Component Combination Principles for KortAI Documentation
 

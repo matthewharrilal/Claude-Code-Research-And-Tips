@@ -1,3 +1,44 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/knowledge-architecture/KA-POSITION.md
+Tier: B | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Position paper and progress tracker for the knowledge architecture effort. Records
+current phase, step-by-step completion status, metrics, and critical context that
+must survive context compaction across sessions.
+
+2. THE QUESTION THIS ANSWERS
+"Where are we in the knowledge architecture process, what's been completed, and
+what critical context must be preserved across sessions?"
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| MASTER-SOUL-SYNTHESIS.md (design-extraction) | External: soul definition source  |
+| perceptual-audit-v2/synthesis/ (design-extraction) | External: T1 synthesis files |
+
+6. MUST HONOR
+- Knowledge architecture positioning and phase tracking
+- Critical context sections must survive compaction — they carry session-spanning state
+
+8. CONSUMED BY
+LEAF NODE — Not directly referenced by path from other files.
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does the phase/step status in this file match the actual state of deliverables
+    (e.g., if Phase 6 says COMPLETE, do the design system package files exist)?
+Q2: Are the file counts in METRICS consistent with the inventory counts in
+    KA-DECISIONS.md?
+Q3: Does the CRITICAL CONTEXT section contain enough information to resume work
+    without re-reading the full knowledge architecture?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════ -->
+
 # KA-POSITION.md — Knowledge Architecture Position Tracker
 ## Current Position, Next Action, Critical Context
 

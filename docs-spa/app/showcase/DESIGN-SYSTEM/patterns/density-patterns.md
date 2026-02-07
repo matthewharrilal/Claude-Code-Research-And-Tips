@@ -5,6 +5,92 @@ provenance: Stage 2 (DD) density explorations
 last_updated: 2026-02-05
 ---
 
+<!-- ═══════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/patterns/density-patterns.md
+Tier: A | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Contains the 6 validated density patterns (PULSE, CRESCENDO, ISLANDS,
+GEOLOGICAL, TIDAL, FRACTAL) with CSS implementations, scores, and
+usage recommendations. This is the core pattern library — the validated
+rhythms that give KortAI documentation its distinctive visual cadence.
+
+2. THE QUESTION THIS ANSWERS
+"What are the exact CSS implementations for each validated density
+pattern, what scores did they achieve, and when should I use each one?"
+
+3. STATUS
+COMPLETE — all 6 patterns validated through DD explorations with
+perceptual deepening audit. Scores range 32/40 to 36/40. CSS
+implementations are copy-paste ready.
+
+4. SOUL ALIGNMENT
+Soul-implementing — contains CSS pattern implementations that MUST
+honor locked tokens (border-radius: 0, box-shadow: none, correct
+color palette). These patterns are the "muscles" that give form to
+the "skeleton" of tokens.
+
+5. BUILT ON
+- DD-F-001 (PULSE, 33/40) from DD-001 Breathing exploration
+- DD-F-002 (CRESCENDO, 35/40) from DD-002 Gradient exploration
+- DD-F-003 (ISLANDS, 32/40) from DD-003 Islands exploration
+- DD-F-004 (GEOLOGICAL, 35/40) from DD-004 Layers exploration
+- DD-F-005 (TIDAL/RIVERS, 36/40) from DD-005 Rivers exploration
+- DD-F-006 (FRACTAL, 36/40) from DD-006 Fractal exploration (META)
+- R3-035, R3-036 (density research findings)
+- BACKBONE.md (pipeline context)
+- PIPELINE-MANIFEST.md (provenance chain)
+
+6. MUST HONOR
+- All CSS must use locked token values (--border-radius: 0, etc.)
+- Scores are from audited explorations — do not inflate or modify
+- DD-F-006 FRACTAL is the meta-pattern that all others should exhibit
+  at multiple scales
+- Pattern CSS must not introduce box-shadow, border-radius > 0, or
+  cool gray backgrounds
+- Spacing values must align with the defined spacing scale
+
+7. WHAT BREAKS IF THIS CHANGES
+HIGH blast radius (8+ inbound refs). Listed as mandatory reading in
+showcase/CLAUDE.md. Referenced by PATTERN-INDEX.md for pattern selection,
+QUICK-START.md for pattern overview, DESIGN-SYSTEM/CLAUDE.md for
+navigation, migration-guide.md for content type mappings. Changing CSS
+implementations here means every downstream page using these patterns
+becomes potentially non-compliant.
+
+8. CONSUMED BY
+- showcase/CLAUDE.md (mandatory reading list, Step 1 research context)
+- PATTERN-INDEX.md (pattern selection references and provenance)
+- DESIGN-SYSTEM/CLAUDE.md (navigation table)
+- QUICK-START.md (pattern references)
+- migration-guide.md (content type → pattern CSS)
+- Future OD/CD explorations (density vocabulary)
+- 8+ inbound references total
+
+9. RESEARCH DEBT
+- Pattern interaction rules (combining PULSE + ISLANDS, etc.) need
+  formalization beyond combination-rules.md
+- Responsive behavior at different viewport sizes not yet specified
+- Animation/transition guidelines for pattern shifts not explored
+- DD-F-006 FRACTAL meta-pattern application methodology needs
+  step-by-step guide
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does every CSS implementation here use border-radius: 0 and
+    box-shadow: none without exception?
+Q2: Do the scores (33, 35, 32, 35, 36, 36) match the values in
+    BACKBONE.md and PIPELINE-MANIFEST.md exactly?
+Q3: Does the FRACTAL pattern section explain its meta-pattern role
+    (self-similarity at section, page, and site scales)?
+Q4: Are all color values in CSS implementations using the locked
+    token variables (--color-*, --accent-*) rather than hardcoded hex?
+Q5: Does each pattern's "Best For" recommendation align with the
+    content type mappings in PATTERN-INDEX.md?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════ -->
+
 # Density Patterns
 ## Layout Rhythm for Documentation
 

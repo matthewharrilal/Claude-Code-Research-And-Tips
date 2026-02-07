@@ -1,3 +1,111 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/synthesis/MASTER-SOUL-SYNTHESIS.md
+     Tier: A | Batch: 1 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+## 1. Why This Exists
+
+MASTER-SOUL-SYNTHESIS.md is the single authoritative distillation of the KortAI design system's soul, produced during Phase 4A-E synthesis on 2026-02-04. It was created by synthesizing tracking/PERCEPTUAL-TRUTHS.md (raw perceptual truth data across 11 components), SOUL-DEFINITION.md (the 58KB exhaustive document with 6 universal rules), and all component soul extraction and re-audit files into a 16KB authoritative statement. Its unique contribution is the master soul statement — "The Unhurried Editor" — and the 6 Universal Rules with their locked CSS values, plus 11 named component characters with perceptual truth summaries and structural archetypes. This file is the apex of the soul supersession chain: `card-system/SOUL-DEFINITION.md (10 principles) -> component-system/SOUL-DEFINITION.md (6 universal rules, 58KB) -> MASTER-SOUL-SYNTHESIS.md (T1 distillation, 16KB)`.
+
+## 2. The Question This Answers
+
+> "What IS the KortAI soul — stated completely, authoritatively, and concisely enough that any downstream work can consume it without reading 58KB of exhaustive analysis?"
+
+## 3. Status
+
+**ACTIVE / LOCKED** — T1 synthesis authority. Lifecycle: COMPLETE (all 11 components audited, all perceptual truths captured, all structural re-audits incorporated). Authority level: HIGHEST — this is the root constraint document for all soul-dependent work. No modifications permitted without Phase-level approval.
+
+## 4. Soul Alignment
+
+This file DEFINES the soul. The 5 soul pieces with their CSS enforcement:
+
+| # | Soul Piece | Perceptual Truth | Locked CSS |
+|---|-----------|-----------------|------------|
+| 1 | **Sharp edges communicate precision** | "Sharp edges communicate decisiveness and confidence. Rounded corners signal 'friendly' and 'safe' — which means forgettable." | `border-radius: 0;` |
+| 2 | **Flat design communicates honesty** | "Shadows create fake 3D depth — a lie about the medium. Web content is flat. Print is flat. Editorial design honors this truth." | `box-shadow: none;` |
+| 3 | **Serif italic carries accumulated wisdom** | "The serif/sans tension creates visual rhythm. Serif carries authority (editorials, books). Sans carries clarity (modern, readable)." | `--font-display: 'Instrument Serif', Georgia, serif;` / `--font-body: 'Inter', system-ui, sans-serif;` |
+| 4 | **Family structure creates cognitive ease** | "Limited palette forces restraint. Every use of red becomes meaningful because it's the ONLY accent." | `--color-primary: #E83025;` / `--color-background: #FEF9F5;` / `--color-text: #1A1A1A;` |
+| 5 | **Shape communicates stakes** | "If you're going to have a border, commit to it. 1px borders signal uncertainty. Editorial design is confident." | `border: 3px solid var(--color-primary);` / `padding: 24px 32px; line-height: 1.6;` |
+
+## 5. Built On (Backward Traversal)
+
+| Source | Role | Key Values Extracted | Path |
+|--------|------|---------------------|------|
+| PERCEPTUAL-TRUTHS.md | Raw perceptual truth data for all 11 components | Master Soul Truths, Phase 1 Zone Truths (7 zones each), Phase 4 Structural Truths | `design-extraction/component-system/perceptual-audit-v2/tracking/PERCEPTUAL-TRUTHS.md` |
+| SOUL-DEFINITION.md (component-system) | Exhaustive soul authority (58KB) with locked :root block | `border-radius: 0`, `box-shadow: none`, `--color-primary: #E83025`, `--font-display: 'Instrument Serif'`, 6 Universal Rules | `design-extraction/component-system/SOUL-DEFINITION.md` |
+| 11 soul extraction files | Per-component soul character analysis | Named characters (e.g., "The Precise Transcriptionist" 49/60, "The Senior Concierge" 53/60), component-specific perceptual truths | `design-extraction/component-system/perceptual-audit-v2/soul-extractions/*.md` |
+| 8 component structural re-audits | Phase 4-ALPHA structural verification | Structural zone counts, archetype classifications (Single-Purpose Block, Left-Flagged Aside, etc.) | `design-extraction/component-system/perceptual-audit-v2/re-audit/component-reaudits/*.md` |
+| KORTAI-ESSENCE-FOUNDATION.md | Deep soul research and root metaphor | "The Unhurried Editor" named character, "editorial calm" philosophy, magazine-as-interface root metaphor | `design-extraction/component-system/perceptual-audit-v2/foundation/KORTAI-ESSENCE-FOUNDATION.md` |
+
+## 6. Must Honor (Constraints)
+
+This file ESTABLISHES the following constraints that all downstream work MUST honor:
+
+| Constraint | Specification | Enforcement |
+|-----------|--------------|-------------|
+| **Master Soul Statement** | "KortAI is the Unhurried Editor — a senior professional at a premium publication who has nothing to prove." | All component design must pass the editorial identity test |
+| **Rule 1: Sharp Edges** | `border-radius: 0` — no exceptions | LOCKED CSS value |
+| **Rule 2: Flat Design** | `box-shadow: none` — no exceptions | LOCKED CSS value |
+| **Rule 3: Limited Palette** | `#E83025` (red), `#FEF9F5` (cream), `#1A1A1A` (text) only | LOCKED CSS values |
+| **Rule 4: Typography Hierarchy** | Instrument Serif (display), Inter (body), JetBrains Mono (code) | LOCKED font stack |
+| **Rule 5: Heavy Borders** | `3px solid` minimum when bordered; 1px = failure | LOCKED border weight |
+| **Rule 6: Whitespace as Design** | `padding: 24px 32px`, `line-height: 1.6` | LOCKED spacing values |
+| **The Soul Test** | "Could this component exist in a Bootstrap/Tailwind/Material project without modification?" If yes = FAIL | 5 verification questions defined |
+| **11 Component Characters** | Each component has a locked named character and perceptual truth | Cannot be renamed or redefined |
+
+## 7. What Breaks If This Changes
+
+**BLAST RADIUS: CRITICAL (29 inbound references)**
+
+Files directly affected:
+- `docs-spa/app/showcase/checkpoints/MASTER-STATE.md` — References this as authoritative soul source
+- `docs-spa/app/showcase/knowledge-architecture/KA-POSITION.md` — Maps soul pieces to pipeline position
+- `docs-spa/app/showcase/knowledge-architecture/SOURCE-OF-TRUTH-REGISTRY.md` — Lists this as T1 entry
+- `docs-spa/app/showcase/knowledge-architecture/PIPELINE-BACKBONE.md` — Positions this in T1 -> DD -> OD -> AD -> CD chain
+- `docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-1-components/` — Traces soul definition to this file
+- `design-extraction/component-system/perceptual-audit-v2/CLAUDE.md` — Describes this as "The 5 soul pieces that define KORTAI's character"
+- All 20 docs-spa dependency-trace and knowledge-architecture files that reference this
+- All 9 design-extraction files that reference this (FOLDER-MAP, CLAUDE.md files, checkpoints, indexes)
+- Any future OD/AD/CD stage work that MUST consume synthesis/ before starting
+
+Changing a locked CSS value (e.g., `border-radius: 0` to `border-radius: 4px`) would invalidate the entire soul definition, all 11 component characters, and every downstream provenance chain.
+
+## 8. Consumed By (Forward Traversal)
+
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| `docs-spa/app/showcase/checkpoints/MASTER-STATE.md` | References soul definition as authoritative source; reload instruction points here |
+| `docs-spa/app/showcase/knowledge-architecture/KA-POSITION.md` | Maps this file as position #3 in the soul pipeline (after ESSENCE-FOUNDATION and SOUL-TRANSLATION-GUIDE) |
+| `docs-spa/app/showcase/knowledge-architecture/SOURCE-OF-TRUTH-REGISTRY.md` | Lists this as T1 source of truth for "Complete KortAI soul definition" |
+| `docs-spa/app/showcase/knowledge-architecture/PIPELINE-BACKBONE.md` | Places this in the T1 -> DD pipeline flow; documents that DD consumes soul definition from here |
+| `docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-1-components/` | Traces the 5 soul pieces (COMP-F-001 through COMP-F-005) back to this file |
+| `docs-spa/app/showcase/dependency-trace/PHASE-2A-CLASSIFICATION.yaml` | Classifies this as `t1_synthesis` tier |
+| `docs-spa/app/showcase/dependency-trace/01-reachability-report.md` | Lists this as file #1 in the T1 reachability ranking (15,658 bytes) |
+| `docs-spa/app/showcase/dependency-trace/02-threading-data/design-extraction-threading.md` | Contains full threading record for this file |
+| `design-extraction/component-system/perceptual-audit-v2/CLAUDE.md` | Points to this as the first file to read ("Understand the soul") |
+| `design-extraction/component-system/CLAUDE.md` | Directs all soul queries to perceptual-audit-v2/synthesis/ (this file) |
+
+## 9. Research Debt
+
+1. **"Challenge Callout" soul truth is thin.** Its structural truth is a single sentence ("shares the callout family structural DNA — purple accent invites exploration and action") with no zone-level detail, unlike Code Snippet which has 7 zone truths. No structural re-audit file exists for Challenge Callout.
+2. **No SOUL-EXTRACTION-COMPLETE.md files found on disk.** The threading data references "all SOUL-EXTRACTION-COMPLETE.md files" as a built-on source, but glob search returns zero matches. The actual files are named `*-soul-extraction.md` in `soul-extractions/`. The threading data naming is inaccurate.
+3. **"5 soul pieces" vs "6 Universal Rules" terminology gap.** Downstream consumers (CLAUDE.md, BACKBONE.md, stage-1-components) consistently reference "5 soul pieces," but this file defines 6 Universal Rules. The mapping between the two is implicit, not explicit. Which rule maps to which soul piece is never formally stated in this file.
+4. **Tip Callout and Gotcha Callout structural truths lack zone-level detail.** Both are described as "sharing structural DNA" with Info Callout rather than having independent structural analysis.
+5. **No score normalization documented.** Component scores range from 48.5/60 to 54/60, but the scoring methodology (what constitutes each point) is not defined in this file or referenced.
+
+## 10. Diagnostic Questions
+
+1. **Does `border-radius: 0` appear as a LOCKED value?** Verify: search this file for `border-radius: 0` and confirm it appears with the `/* LOCKED */` comment in Rule 1.
+2. **Are all 11 components present with named characters?** Verify: count the `###` headings under "PERCEPTUAL TRUTHS BY COMPONENT" — should yield exactly 11 (Code Snippet, Info Callout, Tip Callout, Gotcha Callout, Essence Callout, Challenge Callout, File Tree, Decision Matrix, Core Abstraction, Task Component, Reasoning Component).
+3. **Does the master soul statement contain "Unhurried Editor"?** Verify: search for the exact string "Unhurried Editor" in the blockquote under "Master Soul Statement."
+4. **Are all 7 structural archetypes defined in the archetype table?** Verify: count rows in the table under "Archetype Definitions" — should yield exactly 7.
+5. **Does The Soul Test define the bootstrap rejection criterion?** Verify: search for "Could this component exist in a Bootstrap" to confirm the ultimate soul test question is present with its FAIL verdict.
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
+
 # MASTER SOUL SYNTHESIS
 ## Complete KortAI Soul Definition
 

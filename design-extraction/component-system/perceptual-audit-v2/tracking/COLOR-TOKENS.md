@@ -1,3 +1,86 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/tracking/COLOR-TOKENS.md
+     Tier: B | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+This file tracks all color tokens extracted during the perceptual audit,
+organized by their STRUCTURAL role rather than mere aesthetic function.
+It consolidates findings from all 11 component ZONE-COLOR-ANALYSIS.md
+sub-agent analyses into three token categories: Text Colors (hierarchy
+signaling), Background Colors (zone differentiation), and Accent Colors
+(structural emphasis). Per-component color tables document exact hex
+values and their structural purpose per zone. This tracking file was the
+primary consolidation point that fed color data into the T1 synthesis
+file DESIGN-TOKEN-SUMMARY.md. Note: known drift exists between some
+values here and the showcase implementation for accent-amber,
+accent-purple, bg-info, and bg-tip.
+
+2. THE QUESTION THIS ANSWERS
+
+"What exact color values does each KORTAI component use in each zone,
+and what structural role does each color serve -- how does color create
+zone differentiation, hierarchy signaling, and semantic meaning across
+the system?"
+
+3. STATUS
+
+ACTIVE (locked data). All 11 components populated with zone-level color
+data. Created 2026-02-04. Known drift: accent-amber (#C49052 here vs
+possible variant in showcase), accent-purple (#7B68EE here vs #7C3AED
+in component usage), bg-info (#F0F7FF here vs #F5F8FA in Info Callout
+component section), bg-tip (#F0F7F0 here vs #F5FAF5 in Tip Callout
+component section). The palette-level tokens are authoritative for T1;
+component-level specifics may reflect actual measured values from audits.
+
+5. BUILT ON
+
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| Code Snippet ZONE-COLOR-ANALYSIS.md | Component color data | Dark slate #1E1E1E, syntax colors | components/code-snippet/sub-agent-analyses/ZONE-COLOR-ANALYSIS.md |
+| Info Callout ZONE-COLOR-ANALYSIS.md | Component color data | Blue #4A90D9, bg #F5F8FA | components/info-callout/sub-agent-analyses/ZONE-COLOR-ANALYSIS.md |
+| Tip Callout ZONE-COLOR-ANALYSIS.md | Component color data | Green #4A9D6B, bg #F5FAF5 | components/tip-callout/sub-agent-analyses/ZONE-COLOR-ANALYSIS.md |
+| Gotcha Callout ZONE-COLOR-ANALYSIS.md | Component color data | Red #E83025, bg #FEF6F5 | components/gotcha-callout/sub-agent-analyses/ZONE-COLOR-ANALYSIS.md |
+| Essence Callout ZONE-COLOR-ANALYSIS.md | Component color data | Amber #D97706, bg #FEF9F0 | components/essence-callout/sub-agent-analyses/ZONE-COLOR-ANALYSIS.md |
+| Challenge Callout ZONE-COLOR-ANALYSIS.md | Component color data | Purple #7C3AED, bg #F5F0FF | components/challenge-callout/sub-agent-analyses/ZONE-COLOR-ANALYSIS.md |
+| File Tree ZONE-COLOR-ANALYSIS.md | Component color data | Blue folders #4A90D9, cream #FEFCF3 | components/file-tree/sub-agent-analyses/ZONE-COLOR-ANALYSIS.md |
+| Decision Matrix minimal audit | Color data | Red #E83025, cream #FEFCF3 | (minimal audit) |
+| Core Abstraction minimal audit | Color data | Red labels, dark code #1E1E1E | (minimal audit) |
+| Task Component minimal audit | Color data | Red #E83025 for status elements | (minimal audit) |
+| Reasoning Component minimal audit | Color data | Amber #D97706 summary, red labels | (minimal audit) |
+
+6. MUST HONOR
+
+| # | Constraint | Rationale |
+|---|-----------|-----------|
+| 1 | Values in this file were consolidated into T1 synthesis (DESIGN-TOKEN-SUMMARY.md) | Do not modify without checking synthesis files for downstream impact |
+| 2 | Palette-level tokens (Section: COLOR PALETTE) are the authoritative abstraction | Component-level tables show measured values; palette tokens are the canonical names |
+| 3 | Known drift for accent-amber, accent-purple, bg-info, bg-tip must be resolved against DESIGN-TOKEN-SUMMARY.md | Palette section may differ from per-component measured values; T1 synthesis is the tiebreaker |
+| 4 | Color Truth statements are perceptual observations, not CSS specifications | They describe what the color FEELS LIKE, not just what it IS -- treat as soul data |
+| 5 | Structural role column is mandatory for every token | Color without structural justification violates the audit methodology |
+
+8. CONSUMED BY
+
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| synthesis/DESIGN-TOKEN-SUMMARY.md (T1) | Consolidates palette-level tokens into the canonical :root CSS variable block |
+| showcase/checkpoints/MASTER-STATE.md | References color token values for implementation verification |
+| synthesis/PRODUCTION-RULES.md (T1) | Uses structural role data to enforce color usage constraints |
+| Any downstream DD/OD/AD/CD work | Color token source data for implementation |
+
+10. DIAGNOSTIC QUESTIONS
+
+Q1: Do all 11 component sections contain a "Color Truth" summary statement and a complete zone-by-zone color table with Bg Color, Text Color, Accent, and Structural Purpose columns? (Expected: YES)
+
+Q2: For the 4 known drift tokens (accent-amber, accent-purple, bg-info, bg-tip), do the palette-level values in the "COLOR PALETTE" section match the values in synthesis/DESIGN-TOKEN-SUMMARY.md? (Expected: Must be verified -- known drift area)
+
+Q3: Does every accent color in the palette have a corresponding "Category flag" usage in at least one component's per-zone table? (Expected: YES -- accent-red in Gotcha, accent-blue in Info, accent-green in Tip, accent-amber in Essence/Reasoning, accent-purple in Challenge)
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # COLOR TOKENS — Structural Focus
 ## Phase 4 Re-Audit Tracking Sheet
 

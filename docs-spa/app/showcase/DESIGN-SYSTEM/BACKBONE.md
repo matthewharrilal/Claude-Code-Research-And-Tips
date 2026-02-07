@@ -1,3 +1,59 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/BACKBONE.md
+Tier: B | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Master narrative document that tells the story of how scattered research
+(337 findings across R1-R5) became a connected design system through a
+5-stage pipeline. This is the "spine" — every other DESIGN-SYSTEM file
+hangs off the structure and provenance chain documented here.
+
+2. THE QUESTION THIS ANSWERS
+"How did 337 research findings become 6 validated density patterns,
+21 component findings, 18 DD findings, and a coherent design system —
+and what is the exact chain of evidence?"
+
+3. STATUS
+COMPLETE — covers full pipeline from original research through Stage 2
+(DD). Stage 3 (OD/CD) sections are placeholders awaiting future work.
+
+5. BUILT ON
+- COMP-F-001 to COMP-F-021 (component findings)
+- DD-F-001 to DD-F-018 (density dimension findings)
+- DD-F-006 FRACTAL meta-pattern
+- R3-023 (density dimension research finding)
+- SOUL-DISCOVERIES.md
+- RESEARCH-ACTIVE.md
+- PIPELINE-MANIFEST.md
+- component-findings.md
+- DD-outbound-findings.md
+
+6. MUST HONOR
+- Finding IDs must match PIPELINE-MANIFEST.md exactly
+- Score values must match DD exploration audit scores
+- Stage ordering (Components → DD → OD → CD) is immutable
+- R3-023 full chain trace must remain intact
+
+8. CONSUMED BY
+- DESIGN-SYSTEM/CLAUDE.md (navigation table, "read BACKBONE" instruction)
+- Multiple STAGE-HEADERs (provenance references)
+- DD-outbound-findings.md (backlinks)
+- density-patterns.md (provenance references)
+- PATTERN-INDEX.md (chain requirement references)
+- 12+ inbound references total
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does every finding ID cited here (COMP-F-XXX, DD-F-XXX) have a
+    matching entry in PIPELINE-MANIFEST.md?
+Q2: Does the R3-023 chain trace connect unbroken from original research
+    through DD exploration to validated pattern?
+Q3: Are the DD exploration scores (e.g., 33/40, 35/40) consistent with
+    the values in density-patterns.md?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════ -->
+
 # BACKBONE.md
 ## The Master Narrative of the KortAI Design System
 

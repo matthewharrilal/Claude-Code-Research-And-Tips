@@ -1,3 +1,80 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/research/R3-DENSITY-DIMENSIONS.md
+Tier: B | Batch: 4 | Generated: 2026-02-06
+═══════════════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+R3-DENSITY-DIMENSIONS.md captures 51 findings expanding density beyond the
+single spatial dimension into six distinct dimensions: temporal, depth,
+semantic, cognitive, interaction, and spatial. It was produced on 2026-02-04
+by research sub-agent R-3 and serves as the PRIMARY research input for ALL
+Density Dimension (DD) explorations (DD-001 through DD-006). This file has
+the highest inbound reference count of any research file in the repository,
+with citations from RESEARCH-ACTIVE.md, RETROACTIVE-AUDIT-DD-001-006.md,
+density-patterns.md, PATTERN-INDEX.md, PIPELINE-MANIFEST.md, BACKBONE.md,
+the 109K README.md, multiple STAGE-HEADERs, and DD-outbound-findings.md.
+
+2. THE QUESTION THIS ANSWERS
+
+"What dimensions of density exist beyond spatial arrangement, and how can
+each be independently manipulated to create rhythm, pacing, and cognitive
+comfort in documentation showcases?"
+
+3. STATUS
+
+ACTIVE (locked data). 51 findings (R3-001 through R3-051) are complete and
+immutable. Approximately 76% of findings have been applied during DD
+explorations. The R3-023 to DD-F-006 chain is a critical cross-reference
+pathway. No new findings will be added.
+
+5. BUILT ON
+
+Source                                  | Role               | Key Values                                              | Path
+External density research               | External reference | Six-dimensional density model (temporal, depth, semantic, cognitive, interaction, spatial) | Various URLs (inline in findings)
+Scroll velocity research                | External reference | Scroll-to-information ratios, temporal density pacing    | Various URLs (inline in findings)
+Cognitive load theory                   | External reference | Progressive disclosure, layered density, depth dimension  | Various URLs (inline in findings)
+Interaction density patterns            | External reference | Interactive elements per viewport, engagement mechanics   | Various URLs (inline in findings)
+
+6. MUST HONOR
+
+#  | Constraint                                     | Rationale
+1  | Do not modify findings — this is locked data    | DD explorations, density-patterns.md, and RETROACTIVE-AUDIT all depend on stable IDs
+2  | Finding IDs are R3-001 through R3-051           | Cross-references span 10+ downstream files using these IDs
+3  | R3-023 to DD-F-006 chain must remain intact     | Critical provenance chain linking research to validated exploration finding
+4  | Copies in provenance/original-research/ must match | Chain integration requires identical content
+
+8. CONSUMED BY
+
+Consumer                                                                          | How It Uses This File
+showcase/checkpoints/RESEARCH-ACTIVE.md                                           | Tracks R3 application status (most entries of any research stream)
+showcase/checkpoints/RETROACTIVE-AUDIT-DD-001-006.md                              | Audits which R3 findings were applied during DD-001 through DD-006
+DESIGN-SYSTEM/patterns/density-patterns.md                                        | Validates density patterns using R3 findings as evidence
+DESIGN-SYSTEM/patterns/PATTERN-INDEX.md                                           | Indexes R3-derived patterns alongside other validated patterns
+DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md                                     | Maps R3 findings through the provenance pipeline
+DESIGN-SYSTEM/BACKBONE.md                                                         | References R3 density dimensions in system architecture
+DESIGN-SYSTEM/provenance/stage-2-density-dd/STAGE-HEADER.md                       | Lists R3 as PRIMARY research input for DD stage
+DESIGN-SYSTEM/provenance/stage-2-density-dd/DD-outbound-findings.md               | Traces R3 findings that generated new DD findings
+DESIGN-SYSTEM/provenance/stage-2-density-dd/HANDOFF-DD-TO-OD.md                   | Transfers applicable R3 findings from DD to OD scope
+showcase/research/RESEARCH-SYNTHESIS.md                                           | Synthesizes R3 into Principle 1 (Density as Rhythm)
+showcase/research/CLAUDE.md                                                       | Lists R3 finding count and stage mapping for agent navigation
+
+10. DIAGNOSTIC QUESTIONS
+
+Q1: Can every R3-0XX ID referenced in RESEARCH-ACTIVE.md, RETROACTIVE-AUDIT,
+    and density-patterns.md be found as an actual finding in this file?
+Q2: Does the R3-023 finding exist in this file, and does DD-outbound-findings.md
+    contain the corresponding DD-F-006 entry?
+Q3: Are all 51 findings present and numbered sequentially from R3-001
+    through R3-051?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # R3: Density Dimensions Research
 
 ## Research Agent: R-3

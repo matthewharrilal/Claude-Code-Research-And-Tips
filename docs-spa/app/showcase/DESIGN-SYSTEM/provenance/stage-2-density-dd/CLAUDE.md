@@ -1,3 +1,34 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-2-density-dd/CLAUDE.md
+Tier: C | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Navigation file for agents entering the stage-2-density-dd/ directory. Provides
+reading order, file descriptions, and identifies DD-F-006 as "the most important
+finding in this folder."
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| DD-F-006                                | Emphasized as most important finding  |
+| stage-2 directory structure             | Files listed and described            |
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| Claude Code agent                       | Auto-read on stage-2-density-dd/ entry|
+| Agents entering Stage 2 provenance      | Orientation and reading order         |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # CLAUDE.md — Stage 2: Density Exploration (DD)
 
 ═══════════════════════════════════════════════════════════════════════════════

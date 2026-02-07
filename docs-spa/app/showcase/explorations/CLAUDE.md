@@ -1,3 +1,30 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/explorations/CLAUDE.md
+Tier: C | Batch: 5 | Date: 2026-02-06
+═══════════════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+Navigation file for agents entering the explorations/ directory. Provides
+directory layout (density/, organizational/, axis/, combination/), status of
+each sub-directory, and artifact-to-provenance mapping.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+- Directory structure knowledge (density/, organizational/, axis/, combination/)
+
+8. CONSUMED BY
+- HANDOFF-DD-TO-OD.md (cited)
+- All agents entering explorations/ (mandatory navigation)
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+ -->
+
 # CLAUDE.md — Explorations Directory
 
 ═══════════════════════════════════════════════════════════════════════════════

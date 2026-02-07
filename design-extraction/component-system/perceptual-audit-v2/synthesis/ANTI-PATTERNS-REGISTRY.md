@@ -1,3 +1,128 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/synthesis/ANTI-PATTERNS-REGISTRY.md
+     Tier: A | Batch: 1 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+## 1. Why This Exists
+
+This file defines the complete anti-pattern registry for the KortAI design system — the inverse of the soul. Where MASTER-SOUL-SYNTHESIS.md declares what KortAI IS, this file declares what KortAI must NEVER be. Created during Phase 4A-E synthesis by consolidating the 56KB component-system/ANTI-PATTERNS.md (which itself aggregated tracking/ANTI-PATTERNS.md per-component data from 11 audit sub-agents) into a 19KB authoritative reference. It establishes "The Soul Test" — a single yes/no question that determines whether any component has lost its editorial identity — and provides the universal banned CSS properties list, component-specific enemy patterns, coexistence anti-patterns, and page composition violations. This is T1-locked authority; any implementation that passes the banned properties grep is not necessarily compliant, but any implementation that FAILS it is definitively non-compliant.
+
+## 2. The Question This Answers
+
+"What CSS properties, visual patterns, and compositional structures are explicitly banned in KortAI — and what does their presence in an implementation prove?"
+
+## 3. Status
+
+**ACTIVE / LOCKED** — T1 Synthesis (Phase 4A-E, 2026-02-04). Highest authority for anti-pattern enforcement. Modification requires Phase-level approval. Supersedes component-system/ANTI-PATTERNS.md (56KB root file, which now carries a SUPERSEDED header pointing here).
+
+**Verify:** `[ -f "design-extraction/component-system/perceptual-audit-v2/synthesis/ANTI-PATTERNS-REGISTRY.md" ] && wc -l < "design-extraction/component-system/perceptual-audit-v2/synthesis/ANTI-PATTERNS-REGISTRY.md"` — expect ~414 lines.
+
+## 4. Soul Alignment
+
+This file is the INVERSE expression of every soul piece. Each banned property maps directly to a soul piece violation:
+
+| Soul Piece (from MASTER-SOUL-SYNTHESIS.md) | Anti-Pattern This File Bans | Specific CSS |
+|--------------------------------------------|-----------------------------|--------------|
+| Rule 1: Sharp Edges | `border-radius > 0` | `border-radius: 4px/6px/8px/12px/50%` — ALL banned |
+| Rule 2: Flat Design | `box-shadow`, `transform: translateY()`, `gradients` | `box-shadow: 0 2px 4px ...` — ALL banned |
+| Rule 3: Limited Palette | Traffic light colors | `#28a745, #dc3545, #ffc107, #17a2b8` — ALL banned |
+| Rule 4: Typography Hierarchy | Icon/emoji usage, sans-serif in Essence body | `content: "warning-triangle"`, `content: "lightbulb"` — ALL banned |
+| Rule 5: Heavy Borders When Bordered | Thin borders, all-around borders | `border: 1px solid` on all sides — banned for callouts |
+
+This file does not implement soul — it defines the BOUNDARY of soul by enumerating everything outside it.
+
+## 5. Built On
+
+| Source | Role | Path |
+|--------|------|------|
+| tracking/ANTI-PATTERNS.md | Per-component anti-pattern raw data from 11 audit sub-agents (7 full ANTI-PATTERN-ANALYSIS.md files + 4 minimal) | `design-extraction/component-system/perceptual-audit-v2/tracking/ANTI-PATTERNS.md` |
+| component-system/ANTI-PATTERNS.md (root, 55,870 bytes) | Comprehensive 56KB consolidated anti-pattern document with CSS examples and enemy code; SUPERSEDED by this file | `design-extraction/component-system/ANTI-PATTERNS.md` |
+| Component-specific audit findings | Soul extractions and anti-pattern analyses from code-snippet, callout family, file-tree, decision-matrix, core-abstraction, task, reasoning components | `design-extraction/component-system/perceptual-audit-v2/components/*/sub-agent-analyses/ANTI-PATTERN-ANALYSIS.md` |
+| Phase 4 re-audit findings | Cross-component consistency verification and re-audit results | `design-extraction/component-system/perceptual-audit-v2/re-audit/` |
+
+**Key values extracted from sources:**
+- `border-radius: 0` (ALWAYS, no exceptions) — from Rule 1
+- `box-shadow: none` (ALWAYS, no exceptions) — from Rule 2
+- 8 banned CSS color values (Bootstrap traffic lights)
+- 12 component "enemy patterns" with CSS code blocks
+- 8 coexistence pair violations
+- 7 page composition violations
+
+## 6. Must Honor
+
+**ESTABLISHES** (this file is a constraint ORIGIN):
+
+| Constraint | Value | Why | Consequence of Violation |
+|------------|-------|-----|--------------------------|
+| Universal banned: `border-radius` | Must be `0` for ALL components | Sharp = editorial precision; rounded = generic "friendly" web app | Soul Piece 1 violation; fails Soul Test |
+| Universal banned: `box-shadow` | Must be `none` for ALL components | Flat = honest print heritage; shadows = fake 3D depth | Soul Piece 2 violation; fails Soul Test |
+| Universal banned: traffic light colors | Never `#28a745`, `#dc3545`, `#ffc107`, `#17a2b8` or pastel variants | Kindergarten-level visual coding; zero brand identity | Soul Piece 3 violation; fails Soul Test |
+| Universal banned: hover lift | Never `transform: translateY(-2px)` or `scale()` on hover | Treats content like buttons; fake 3D | Soul Piece 2 violation |
+| Universal banned: icons/emojis in callouts | Never warning triangles, info circles, checkmarks, lightbulbs | Typography creates hierarchy, not decoration | Soul Piece 4 violation |
+| Universal banned: zebra striping | Never `:nth-child(even) { background }` | Patronizes reader; assumes they cannot track rows | Spreadsheet feel vs editorial |
+| The Soul Test | "Could this exist in a Bootstrap/Tailwind/Material project?" — if yes, FAIL | Components must be unmistakably editorial | Entire design system loses identity |
+| Coexistence: 24px gap rule | 24px between ALL component pairs | Structural orthogonality between zones | Visual chaos if violated |
+| Coexistence: prose between same-type | Same-type components (callout+callout, matrix+matrix) need prose break | Monotony without rhythmic break | Reader fatigue |
+| Page density rhythm | Every page needs LOW-HIGH-LOW breathing pattern | No density valleys = exhausting experience | Monotonous reading |
+
+Also establishes: 7 component-specific enemy patterns (VS Code clone, Bootstrap alert, terminal dump, spreadsheet table, disconnected boxes, gamified todo, green/red pro-con).
+
+## 7. What Breaks If This Changes
+
+**BLAST RADIUS: CATASTROPHIC**
+
+This file is referenced by 27 files across the repository (63 total occurrences). Modifying banned properties would invalidate:
+
+| Consumer Category | Files Affected | Impact |
+|-------------------|----------------|--------|
+| T1 sibling files | PRODUCTION-RULES.md, CONSISTENCY-VERIFICATION.md | Rules and verification checklists become inconsistent with anti-pattern definitions |
+| Downstream derivative | `showcase/DESIGN-SYSTEM/anti-patterns/registry.md` | Condensed public-facing registry becomes stale; it was reorganized FROM this file |
+| Source of Truth Registry | `showcase/knowledge-architecture/SOURCE-OF-TRUTH-REGISTRY.md` | Authority declarations broken |
+| FINDINGS-INDEX | `showcase/FINDINGS-INDEX.md` (line 351) | Explicit source citation becomes invalid |
+| Component CSS implementations | `component-system/css/` (9 files) | All CSS files were written to comply with these bans; relaxing bans does not retroactively fix implementations |
+| Playwright tests | `component-system/tests/anti-pattern.spec.ts` | Tests verify absence of banned properties; changing bans breaks assertions |
+| KA Decisions | `showcase/knowledge-architecture/KA-DECISIONS.md` | Supersession chain (3B-anti-patterns.md -> ANTI-PATTERNS.md -> ANTI-PATTERNS-REGISTRY.md) becomes incorrect |
+| Dependency trace | 11+ files in `showcase/dependency-trace/` | Relationship maps, reachability reports, integrity reports all cite this file |
+
+**Specific risk:** If `border-radius: 0` is relaxed here but not in DESIGN-TOKEN-SUMMARY.md and PRODUCTION-RULES.md, the T1 files become internally contradictory — a state with no recovery path short of full re-audit.
+
+## 8. Consumed By
+
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| `showcase/DESIGN-SYSTEM/anti-patterns/registry.md` | Condensed + reorganized derivative for public-facing design system docs. Reorganizes by category (Geometry, Color, Layout, Typography, Interaction, Component) rather than by source structure. |
+| `showcase/FINDINGS-INDEX.md` (line 351) | Explicitly cites as source for Section 5 "Anti-Patterns — What NOT to Do" |
+| `showcase/knowledge-architecture/SOURCE-OF-TRUTH-REGISTRY.md` | Declares this file as T1 authority for "Complete what NOT to do" |
+| `component-system/tests/anti-pattern.spec.ts` | Playwright tests enforce banned properties programmatically via grep-like assertions |
+| `component-system/css/*.css` (9 files) | All production CSS was written to comply with the bans defined here |
+| `showcase/DESIGN-SYSTEM/guides/migration-guide.md` | Migration checklist references anti-patterns registry as mandatory pre-read |
+| PRODUCTION-RULES.md (sibling T1) | References banned properties in enforcement rules and new component checklist |
+| CONSISTENCY-VERIFICATION.md (sibling T1) | Verification protocol includes checks derived from banned property list |
+| All future OD/AD/CD explorations | "The Soul Test" must be applied to every exploration; pre-implementation checklist references this file |
+
+## 9. Research Debt
+
+| Gap | Description | Impact | Suggested Resolution |
+|-----|-------------|--------|----------------------|
+| No OD/AD/CD stage anti-patterns | File was created during T1 synthesis (pre-DD completion). Anti-patterns specific to Organization Dimension, Axis Dimension, and Combination Dimension explorations are not documented. DD explorations revealed new anti-patterns (e.g., traffic-light adjacency DD-F-015) that are captured in DESIGN-SYSTEM but not traced back here. | Future stages may produce violations that don't appear in this registry | After OD/AD/CD completion, a Phase 5 update pass should extend this registry with stage-specific anti-patterns |
+| No density pattern anti-patterns | R3 research identified 51 density findings; DESIGN-SYSTEM/anti-patterns/registry.md adds "Same Density Throughout" and "Same-Velocity Stacking" that don't exist in this T1 source | Derivative is MORE comprehensive than source (inversion of authority) | Either: (a) backport DD/research anti-patterns here, or (b) declare DESIGN-SYSTEM registry as the forward-authority for stage-level anti-patterns |
+| No accessibility anti-patterns | All banned properties are visual CSS. No mention of ARIA anti-patterns, keyboard interaction anti-patterns, or screen reader anti-patterns | Accessibility violations could pass the Soul Test while still being fundamentally wrong | Future audit: define accessibility anti-patterns for editorial components |
+| Responsive/mobile anti-patterns absent | All anti-patterns assume desktop viewport. No mention of touch-target sizes, mobile density adjustments, or responsive breakpoint violations | Mobile implementations have no anti-pattern guardrails | Define responsive anti-patterns when mobile exploration begins |
+| "Enemy Pattern" coverage gap | 12 enemy patterns documented but only for 7 components. ASCII Art enemy is listed in the summary table but has no detailed CSS block in the component section | Inconsistent coverage depth across components | Add detailed enemy pattern for ASCII Art, Info Callout, Tip Callout, and Challenge Box |
+
+## 10. Diagnostic Questions
+
+1. Does `grep -E "border-radius|box-shadow|#28a745|#dc3545|#007bff" component.css` return 0 matches for every CSS file in `component-system/css/`?
+2. Does the "Enemy Code Summary" table (12 entries) match the component-specific anti-pattern sections (currently 7 detailed sections) — and if not, which components lack detailed enemy patterns?
+3. Does `showcase/DESIGN-SYSTEM/anti-patterns/registry.md` contain any anti-patterns NOT present in this T1 source — and if so, is the authority relationship inverted?
+4. Are the 8 coexistence anti-patterns (Code+Callout, Code+Code, Callout+Callout, FileTree+Code, Matrix+Matrix, Task+Task, Reasoning+Reasoning, Heavy+Heavy) enforced in any automated test?
+5. Has any DD/OD/AD/CD exploration ever failed "The Soul Test" — and if so, was the failure traceable to a specific banned property listed in this file?
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
+
 # ANTI-PATTERNS REGISTRY
 ## Complete KortAI Anti-Pattern Documentation
 

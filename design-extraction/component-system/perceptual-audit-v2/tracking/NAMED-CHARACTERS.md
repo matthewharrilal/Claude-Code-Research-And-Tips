@@ -1,3 +1,80 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/tracking/NAMED-CHARACTERS.md
+     Tier: B | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+This file is the canonical registry of all named component characters in
+the KORTAI design system. It defines the master character ("The Unhurried
+Editor") and 11 component-level characters, each with soul score, soul
+role, archetype, mantras, structural role, zone structure, density
+contribution, and axis behavior. It was populated from the 7 full
+NAMED-CHARACTER-DERIVATION.md sub-agent analyses and 4 minimal component
+character definitions. The file enforces a UNIQUENESS rule: all characters
+must be non-conflicting with distinct qualities, verified via the
+Character Uniqueness Matrix and Family Coherence Check at the bottom of
+the file.
+
+2. THE QUESTION THIS ANSWERS
+
+"What is the named character, structural role, and personality archetype
+for each of the 11 KORTAI components, and how do they relate to each
+other as a coherent family under the Unhurried Editor master character?"
+
+3. STATUS
+
+ACTIVE (locked data). All 11 components populated with characters,
+structural roles, and Phase 4-EPSILON family coherence verified at 5/5.
+Created during Phase 4 perceptual audit. This file is complete -- no
+further characters expected unless new components are added to KORTAI.
+
+5. BUILT ON
+
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| Code Snippet NAMED-CHARACTER-DERIVATION.md | Character derivation | "The Precise Transcriptionist" (49/60) | components/code-snippet/sub-agent-analyses/NAMED-CHARACTER-DERIVATION.md |
+| Info Callout NAMED-CHARACTER-DERIVATION.md | Character derivation | "The Senior Concierge" (53/60) | components/info-callout/sub-agent-analyses/NAMED-CHARACTER-DERIVATION.md |
+| Tip Callout NAMED-CHARACTER-DERIVATION.md | Character derivation | "The Seasoned Colleague" (49/60) | components/tip-callout/sub-agent-analyses/NAMED-CHARACTER-DERIVATION.md |
+| Gotcha Callout NAMED-CHARACTER-DERIVATION.md | Character derivation | "The Vigilant Sentinel" (51/60) | components/gotcha-callout/sub-agent-analyses/NAMED-CHARACTER-DERIVATION.md |
+| Essence Callout NAMED-CHARACTER-DERIVATION.md | Character derivation | "The Archivist of Axioms" (54/60) | components/essence-callout/sub-agent-analyses/NAMED-CHARACTER-DERIVATION.md |
+| Challenge Callout NAMED-CHARACTER-DERIVATION.md | Character derivation | "The Spirited Catalyst" (52/60) | components/challenge-callout/sub-agent-analyses/NAMED-CHARACTER-DERIVATION.md |
+| File Tree NAMED-CHARACTER-DERIVATION.md | Character derivation | "The Methodical Surveyor" (52/60) | components/file-tree/sub-agent-analyses/NAMED-CHARACTER-DERIVATION.md |
+| Decision Matrix minimal audit | Character definition | "The Impartial Cartographer" (48.5/60) | (minimal audit -- no sub-agent file) |
+| Core Abstraction minimal audit | Character definition | "The Sagacious Mentor" (50.5/60) | (minimal audit -- no sub-agent file) |
+| Task Component minimal audit | Character definition | "The Diligent Scribe" (51/60) | (minimal audit -- no sub-agent file) |
+| Reasoning Component minimal audit | Character definition | "The Deliberative Counselor" (54/60) | (minimal audit -- no sub-agent file) |
+
+6. MUST HONOR
+
+| # | Constraint | Rationale |
+|---|-----------|-----------|
+| 1 | All 12 characters (1 master + 11 components) must have unique, non-overlapping qualities | Uniqueness Matrix at line ~219 is the verification gate; duplicating qualities breaks character identity |
+| 2 | Values in this file were consolidated into T1 synthesis (CHARACTER-FAMILY-COMPLETE.md) | Do not modify without checking synthesis files for downstream impact |
+| 3 | Family coherence score must remain 5/5 | All characters serve under the Unhurried Editor's editorial philosophy; any new character must pass the 4-criterion coherence check |
+| 4 | Structural roles are Phase 4 additions and are authoritative | Zone structure, density, axis behavior data feeds token and production rule files |
+| 5 | Callout family DNA relationships are explicit | Tip/Gotcha/Challenge = "IDENTICAL to Info"; Essence = "UNIQUE exception" with serif italic body |
+
+8. CONSUMED BY
+
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| synthesis/CHARACTER-FAMILY-COMPLETE.md (T1) | Consolidates all named characters, archetypes, mantras, and structural roles into the authoritative character family specification |
+| synthesis/MASTER-SOUL-SYNTHESIS.md (T1) | References character names when describing the 5 soul pieces |
+| synthesis/PRODUCTION-RULES.md (T1) | Uses structural role definitions to enforce implementation constraints |
+
+10. DIAGNOSTIC QUESTIONS
+
+Q1: Does the Character Uniqueness Matrix contain exactly 12 rows (1 master + 11 components) with no duplicate "Core Quality" values? (Expected: YES)
+
+Q2: For each of the 5 callout components, does the "Zone Structure" field correctly identify family DNA relationships -- specifically, are Tip/Gotcha/Challenge marked "IDENTICAL to Info" and Essence marked with "UNIQUE" serif italic body? (Expected: YES)
+
+Q3: Does the sum of all soul scores divided by 11 match the documented average, and do individual scores here match those in PERCEPTUAL-TRUTHS.md? (Expected: YES -- cross-registry consistency)
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # NAMED CHARACTERS REGISTRY
 ## Phase 4 Re-Audit Tracking Sheet
 

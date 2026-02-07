@@ -1,3 +1,36 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-5-combination-cd/CLAUDE.md
+Tier: C | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Placeholder navigation file for agents entering the stage-5-combination-cd/
+directory. Provides identity, reading order, file inventory, connection map,
+and mindset framing for the CD stage. Auto-read by Claude Code on directory
+entry. CD work is PENDING — depends on AD (Stage 4) completion. This is the
+final exploration stage before Migration.
+
+3. STATUS
+ACTIVE (as placeholder navigation — CD work itself is PENDING)
+
+5. BUILT ON
+| Dependency                                          | Relationship                              |
+|-----------------------------------------------------|-------------------------------------------|
+| HANDOFF-AD-TO-CD.md (not yet created)               | Mandatory first-read referenced in HOW TO READ |
+| original-research/R5-COMBINATION-THEORY.md          | Primary research referenced in HOW TO READ |
+| DD-F-013                                            | Key constraint: density tolerance in combos |
+
+8. CONSUMED BY
+| Consumer                                            | How Used                                  |
+|-----------------------------------------------------|-------------------------------------------|
+| Claude Code agent                                   | Auto-read on stage-5-combination-cd/ entry |
+| CD exploration agents                               | Navigation and orientation                  |
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # CLAUDE.md — Stage 5: Combination Exploration (CD)
 
 ═══════════════════════════════════════════════════════════════════════════════

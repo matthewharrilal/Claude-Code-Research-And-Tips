@@ -1,3 +1,35 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-4-axis-ad/CLAUDE.md
+Tier: C | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Placeholder navigation file for agents entering the stage-4-axis-ad/ directory.
+Provides identity, reading order, file inventory, connection map, and mindset
+framing for the AD stage. Auto-read by Claude Code on directory entry. AD work
+is PENDING — depends on OD (Stage 3) completion.
+
+3. STATUS
+ACTIVE (as placeholder navigation — AD work itself is PENDING)
+
+5. BUILT ON
+| Dependency                                          | Relationship                              |
+|-----------------------------------------------------|-------------------------------------------|
+| HANDOFF-OD-TO-AD.md (not yet created)               | Mandatory first-read referenced in HOW TO READ |
+| original-research/R4-AXIS-INNOVATIONS.md            | Primary research referenced in HOW TO READ |
+| DD-F-012                                            | Key constraint: axis serves density pattern |
+
+8. CONSUMED BY
+| Consumer                                            | How Used                                  |
+|-----------------------------------------------------|-------------------------------------------|
+| Claude Code agent                                   | Auto-read on stage-4-axis-ad/ entry        |
+| AD exploration agents                               | Navigation and orientation                  |
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # CLAUDE.md — Stage 4: Axis Exploration (AD)
 
 ═══════════════════════════════════════════════════════════════════════════════

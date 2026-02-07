@@ -1,3 +1,51 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/patterns/combination-rules.md
+Tier: B | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Defines the rules for combining KortAI components — velocity sequencing,
+temperature flow, and weight balance. Without these rules, components
+placed adjacently can create jarring or monotonous experiences even when
+each individual component is soul-compliant.
+
+2. THE QUESTION THIS ANSWERS
+"When placing KortAI components next to each other, what ordering rules
+prevent visual monotony, jarring transitions, and weight overload?"
+
+3. STATUS
+COMPLETE for core 4 rules (velocity, temperature, weight, density).
+Derived from R5-COMBINATION-THEORY.md. Awaiting future CD (Combination
+Dimension) stage exploration for empirical validation.
+
+5. BUILT ON
+- R5-COMBINATION-THEORY.md (pattern combination methodology)
+- Component velocity/temperature/weight properties from OVERVIEW.md
+- Density pattern interaction principles
+
+6. MUST HONOR
+- Component property values (velocity, temperature, weight) must match
+  OVERVIEW.md exactly
+- Rules are derived from R5 research — changes require R5 re-validation
+- Temperature flow direction (Warm → Neutral → Cold) is not arbitrary
+
+8. CONSUMED BY
+- QUICK-START.md (combination methodology reference)
+- STAGE-HEADER (CD) — future combination dimension exploration
+- density-patterns.md (indirect — density rhythms interact with
+  component combination rules)
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Do the velocity/temperature/weight values in the properties table
+    match OVERVIEW.md component catalog exactly?
+Q2: Are the 4 combination rules internally consistent (no rule
+    contradicts another)?
+Q3: Do the "Wrong/Right" examples correctly demonstrate each rule
+    violation and fix?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════ -->
+
 # Component Combination Rules
 ## How Components Work Together
 

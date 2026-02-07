@@ -1,3 +1,32 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/explorations/organizational/CLAUDE.md
+Tier: C | Batch: 5 | Date: 2026-02-06
+═══════════════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+Placeholder navigation file for the organizational explorations directory.
+Documents planned OD-001 through OD-006 explorations with pattern names and
+density pairings. OD work is pending — directory is currently empty.
+
+3. STATUS
+ACTIVE (placeholder — OD work pending)
+
+5. BUILT ON
+- DD-F-006 (mandatory constraint: fractal applies to ALL OD work)
+- HANDOFF-DD-TO-OD.md (transition requirements from DD to OD)
+- R1-DOCUMENTATION-PATTERNS.md (primary research for OD)
+
+8. CONSUMED BY
+- HANDOFF-DD-TO-OD.md (cited)
+- Future OD exploration work (mandatory pre-read)
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+ -->
+
 # CLAUDE.md — Organizational Explorations (OD)
 
 ═══════════════════════════════════════════════════════════════════════════════

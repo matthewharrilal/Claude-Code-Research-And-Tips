@@ -1,3 +1,45 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/original-research/R1-DOCUMENTATION-PATTERNS.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Provenance chain copy of R-1 research (28 findings on documentation design
+patterns from Stripe, Vercel, Linear, Notion, etc.). Preserved here for
+chain integration alongside other original research copies.
+
+2. THE QUESTION THIS ANSWERS
+What documentation design patterns from premium sites inform the KortAI
+component showcase layout and density decisions?
+
+3. STATUS
+SYNCED DUPLICATE of showcase/research/R1-DOCUMENTATION-PATTERNS.md.
+Sync protocol: operational edits go in research/, archival copies here.
+
+5. BUILT ON
+See original at showcase/research/R1-DOCUMENTATION-PATTERNS.md.
+
+6. MUST HONOR
+Keep in sync with source at showcase/research/R1-DOCUMENTATION-PATTERNS.md.
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| PIPELINE-MANIFEST.md                    | R1 finding registry entries            |
+| RESEARCH-SYNTHESIS.md                   | Cross-research principle synthesis     |
+| RESEARCH-ACTIVE.md                      | Application status tracking            |
+
+10. DIAGNOSTIC QUESTIONS
+- Is this file in sync with showcase/research/R1-DOCUMENTATION-PATTERNS.md?
+- Are all 28 findings present and numbered consistently?
+- Do finding IDs here match those referenced in PIPELINE-MANIFEST.md?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # R1: Documentation Design Patterns Research
 
 **Research Agent:** R-1

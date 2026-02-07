@@ -6,6 +6,58 @@ backbone_ref: DESIGN-SYSTEM/BACKBONE.md
 last_updated: 2026-02-05
 ---
 
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Master registry tracking every finding in the design system pipeline from
+identification through application. Links all COMP-F, DD-F, Soul pieces,
+and R1-R5 research findings to their lifecycle status and consumers.
+
+2. THE QUESTION THIS ANSWERS
+Where was a specific finding identified, what is its current status, and
+where has it been applied across the pipeline stages?
+
+3. STATUS
+ACTIVE — updated as findings move through pipeline stages
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| COMP-F-001 through COMP-F-021          | Component foundation findings          |
+| DD-F-001 through DD-F-018              | Density exploration findings           |
+| Soul pieces #1-5                        | Perceptual soul discoveries            |
+| R1-R5 research (337 findings)           | All original research with status      |
+| Pattern-to-finding linkage              | Cross-reference mapping                |
+
+6. MUST HONOR
+- Every finding must trace to its original research source
+- Status transitions must be documented (PENDING -> APPLIED -> VALIDATED)
+- Finding IDs are immutable once assigned
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| DESIGN-SYSTEM/CLAUDE.md                 | Referenced as finding lookup           |
+| BACKBONE.md                             | Master narrative references findings   |
+| Multiple STAGE-HEADERs                  | Stage-specific finding subsets         |
+| DD-outbound-findings.md                 | DD finding cross-reference             |
+| density-patterns.md                     | Pattern-to-finding validation          |
+| 10+ inbound references total            | Central finding registry               |
+
+10. DIAGNOSTIC QUESTIONS
+- Can every finding ID in the manifest be traced to its original R-file source?
+- Are all status transitions (PENDING/APPLIED/VALIDATED) accurately reflected?
+- Do consumer files reference finding IDs that actually exist in this manifest?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # PIPELINE MANIFEST
 ## Complete Finding Registry and Lifecycle Tracking
 

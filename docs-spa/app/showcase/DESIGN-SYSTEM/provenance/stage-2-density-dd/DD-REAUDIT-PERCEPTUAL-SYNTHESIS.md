@@ -1,3 +1,44 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-2-density-dd/DD-REAUDIT-PERCEPTUAL-SYNTHESIS.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Archival synced copy of the DD Re-Audit Perceptual Deepening Synthesis.
+Preserves the full perceptual audit results for all 6 DD explorations within
+the provenance chain.
+
+2. THE QUESTION THIS ANSWERS
+"What were the perceptual deepening audit results for each DD exploration,
+and did all pass soul compliance?"
+
+3. STATUS
+SYNCED DUPLICATE of checkpoints/DD-REAUDIT-PERCEPTUAL-SYNTHESIS.md
+
+5. BUILT ON
+See original (checkpoints/DD-REAUDIT-PERCEPTUAL-SYNTHESIS.md) — 6 DD audits,
+soul piece verification, CSS token verification, score improvements.
+
+6. MUST HONOR
+Keep in sync with checkpoints/DD-REAUDIT-PERCEPTUAL-SYNTHESIS.md.
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| Per archival sync protocol              | Provenance chain completeness         |
+| Agents needing DD perceptual audit detail| Read without leaving provenance dir  |
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does this file match checkpoints/DD-REAUDIT-PERCEPTUAL-SYNTHESIS.md?
+Q2: Are all 6 DD audit sections (DD-001 through DD-006) present?
+Q3: Does the executive summary confirm all 6 DDs pass soul compliance?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # DD RE-AUDIT — PERCEPTUAL DEEPENING SYNTHESIS
 ## 6 Density Explorations Audited with Soul Piece Verification
 

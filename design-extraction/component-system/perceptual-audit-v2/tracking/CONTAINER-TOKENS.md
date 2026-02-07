@@ -1,3 +1,70 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/tracking/CONTAINER-TOKENS.md
+     Tier: B | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+This file is the canonical tracking sheet for all container token values extracted
+during the Phase 4 perceptual re-audit of 11 KORTAI components. It documents border
+radius (locked at 0px), shadow behavior (locked at none), border styles (left-accent
+3px, outline 1px), and the container-to-zone relationship that defines how KORTAI
+components achieve structural compartmentalization. Each component's "Container Truth"
+captures the perceptual intent behind containment strategies — whitespace-first, not
+border-first.
+
+2. THE QUESTION THIS ANSWERS
+"What container strategies (borders, radii, shadows, backgrounds) does each KORTAI
+component use, and how do these create structural zones without falling into the
+'digital bento box' anti-pattern?"
+
+3. STATUS
+ACTIVE — Populated during Phase 4 re-audit (2026-02-04). Values consolidated into
+T1 DESIGN-TOKEN-SUMMARY.md. This file remains the detailed source record with
+per-component container analysis; the synthesis file is the locked authority.
+
+5. BUILT ON
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| Code Snippet zone-containers analysis | Container data for dark-inverted block | #1E1E1E bg, 0px radius, no shadow | components/code-snippet/sub-agent-analyses/ZONE-CONTAINERS-ANALYSIS.md |
+| Callout family zone-containers analysis | Container data for left-flagged asides | 4px left border, 0px radius, semantic bg | components/info-callout/sub-agent-analyses/ZONE-CONTAINERS-ANALYSIS.md |
+| File Tree zone-containers analysis | Container data for typography-as-structure | #FEFCF3 bg, optional 1px border | components/file-tree/sub-agent-analyses/ZONE-CONTAINERS-ANALYSIS.md |
+| Decision Matrix zone-containers analysis | Container data for open-grid pattern | 4px left #E83025, NO vertical lines | components/decision-matrix/sub-agent-analyses/ZONE-CONTAINERS-ANALYSIS.md |
+| Core Abstraction zone-containers analysis | Container data for bounded teaching unit | 1px frame, embedded dark code sub-zone | components/core-abstraction/sub-agent-analyses/ZONE-CONTAINERS-ANALYSIS.md |
+| Task Component zone-containers analysis | Container data for continuity stream | 1px borders, 0px task gap, 2px header underline | components/task-component/sub-agent-analyses/ZONE-CONTAINERS-ANALYSIS.md |
+| Reasoning Component zone-containers analysis | Container data for debate-brief frame | 1px frame, subtle column divider, amber summary bg | components/reasoning-component/sub-agent-analyses/ZONE-CONTAINERS-ANALYSIS.md |
+
+6. MUST HONOR
+| Constraint | Detail |
+|------------|--------|
+| Values are consolidated into T1 | Any modification here must be checked against synthesis/DESIGN-TOKEN-SUMMARY.md |
+| border-radius: 0px is soul-locked | Sharp edges are non-negotiable across all components — no exceptions |
+| box-shadow: none is soul-locked | Flat design is non-negotiable — shadows violate print heritage |
+| Compartmentalization hierarchy is authoritative | Whitespace > bg color > left border > full border > shadow (never) |
+| Container Truths are editorial | Prose summaries capture soul intent; do not reduce to pure CSS |
+| "No vertical lines" rule for matrices | Decision Matrix uses whitespace columns, never vertical cell borders |
+
+8. CONSUMED BY
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| synthesis/DESIGN-TOKEN-SUMMARY.md (T1) | Consolidated container tokens into locked :root block |
+| synthesis/ANTI-PATTERNS-REGISTRY.md (T1) | Container anti-patterns (rounded corners, shadows) drawn from this data |
+| MASTER-INDEX.md | References this as authoritative container tracking document |
+| Any future component implementation | Source data for container decisions and zone-creation rationale |
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does every component in this file confirm border-radius: 0px and box-shadow:
+    none, consistent with the soul-locked values in DESIGN-TOKEN-SUMMARY.md?
+Q2: Is the 5-level compartmentalization hierarchy (whitespace > bg color > left
+    border > full border > shadow) explicitly documented in the CONTAINER-ZONE
+    RELATIONSHIP table?
+Q3: Does the Decision Matrix section explicitly state "NO vertical lines" and
+    "whitespace columns" — and does ANTI-PATTERNS-REGISTRY.md cross-reference
+    this as a container anti-pattern?
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # CONTAINER TOKENS — Structural Focus
 ## Phase 4 Re-Audit Tracking Sheet
 

@@ -1,3 +1,45 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-1-components/FOUNDATION-REMEDIATION-SYNTHESIS.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Archival synced copy of the Foundation Remediation Perceptual Deepening
+Synthesis. Preserves the full audit record within the provenance chain so
+Stage 1 findings are self-contained.
+
+2. THE QUESTION THIS ANSWERS
+"What were the full audit results for all 11 components and 4 DD explorations
+during Foundation Remediation?"
+
+3. STATUS
+SYNCED DUPLICATE of checkpoints/FOUNDATION-REMEDIATION-SYNTHESIS.md
+
+5. BUILT ON
+See original (checkpoints/FOUNDATION-REMEDIATION-SYNTHESIS.md) — 5 soul pieces,
+COMP-F findings, globals.css fixes.
+
+6. MUST HONOR
+Keep in sync with checkpoints/FOUNDATION-REMEDIATION-SYNTHESIS.md. Any updates
+to the original must be mirrored here.
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| Per archival sync protocol              | Provenance chain completeness         |
+| Agents needing full Stage 1 audit detail| Read without leaving provenance dir   |
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does this file match checkpoints/FOUNDATION-REMEDIATION-SYNTHESIS.md?
+Q2: Are all 11 component rows present in the remediation results table?
+Q3: Are the three globals.css fixes (lines 175, 178, 206) documented?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # FOUNDATION REMEDIATION — PERCEPTUAL DEEPENING SYNTHESIS
 ## Final Summary and Deliverables
 

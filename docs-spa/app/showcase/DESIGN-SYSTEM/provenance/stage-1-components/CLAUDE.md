@@ -1,3 +1,34 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-1-components/CLAUDE.md
+Tier: C | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Navigation file for agents entering the stage-1-components/ directory. Provides
+reading order, file descriptions, and connection context for the Component
+Foundation provenance layer.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| COMP-F references                       | Finding IDs referenced in descriptions|
+| stage-1 directory structure             | Files listed and described            |
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| Claude Code agent                       | Auto-read on stage-1-components/ entry|
+| Agents entering Stage 1 provenance      | Orientation and reading order         |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # CLAUDE.md — Stage 1: Component Foundation
 
 ═══════════════════════════════════════════════════════════════════════════════

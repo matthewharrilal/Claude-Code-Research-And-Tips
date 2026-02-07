@@ -1,3 +1,114 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/research/RESEARCH-SYNTHESIS.md
+Tier: A | Batch: 4 | Generated: 2026-02-06
+═══════════════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+RESEARCH-SYNTHESIS.md is the cross-research unification document that distills
+the 337 findings from five parallel research agents (R1-R5) into a coherent
+set of design principles, implementation frameworks, and strategic insights.
+It was produced on 2026-02-04 after all five research streams completed. Its
+authority derives from being the ONLY file that synthesizes across all research
+dimensions (documentation patterns, creative layouts, density dimensions, axis
+innovations, combination theory) into unified actionable principles. It serves
+as the mandatory pre-read for any exploration or section build.
+
+2. THE QUESTION THIS ANSWERS
+
+"What unified design principles emerge when all five research dimensions are
+synthesized together, and how should these principles govern the KortAI
+showcase pipeline?"
+
+3. STATUS
+
+ACTIVE (locked data). Synthesis conclusions are stable. The underlying R1-R5
+data is immutable. This synthesis may be extended if new cross-research
+insights emerge during future exploration stages (AD, CD) but existing
+principles will not be modified.
+
+4. SOUL ALIGNMENT
+
+Soul-adjacent, not soul-implementing. This file synthesizes external research
+that feeds into soul-constrained work but does not itself implement or enforce
+soul tokens (border-radius: 0, box-shadow: none, KortAI color palette). The
+research principles it contains INFORM the soul-constrained design decisions
+made during explorations and section builds, but the soul enforcement happens
+at the exploration and build level, not at the research synthesis level.
+
+5. BUILT ON
+
+Source                          | Role                      | Key Values                                                    | Path
+R1-DOCUMENTATION-PATTERNS.md   | Research input (28 findings)  | Density rhythm, whitespace, typography hierarchy, viewport rule   | docs-spa/app/showcase/research/R1-DOCUMENTATION-PATTERNS.md
+R2-CREATIVE-LAYOUTS.md          | Research input (27 findings)  | Broken grid, pull quotes, editorial asymmetry, magazine layout    | docs-spa/app/showcase/research/R2-CREATIVE-LAYOUTS.md
+R3-DENSITY-DIMENSIONS.md        | Research input (51 findings)  | Six density dimensions (temporal, depth, semantic, cognitive, interaction, spatial) | docs-spa/app/showcase/research/R3-DENSITY-DIMENSIONS.md
+R4-AXIS-INNOVATIONS.md          | Research input (192 findings) | Z/F/Gutenberg patterns, bento grid, spiral/diagonal movement     | docs-spa/app/showcase/research/R4-AXIS-INNOVATIONS.md
+R5-COMBINATION-THEORY.md        | Research input (39 findings)  | Component harmony, tension, sequencing, grouping, nesting         | docs-spa/app/showcase/research/R5-COMBINATION-THEORY.md
+DD explorations (DD-001 to DD-006) | Validation source        | Exploration outcomes that tested R3 findings in practice          | docs-spa/app/showcase/explorations/DD-*/
+
+6. MUST HONOR
+
+#  | Constraint                                          | Rationale
+1  | Do not modify synthesis conclusions unilaterally     | 5-8 downstream files depend on these principles for scoping and checkpoint tracking
+2  | All principle attributions (R-X + R-Y) must be accurate | Traceability to source research streams must be maintained
+3  | Cross-research principle numbering must remain stable | FINDINGS-INDEX.md and checkpoint files reference principle numbers
+4  | Soul alignment is "adjacent" not "implementing"      | This file must not claim soul enforcement authority it does not have
+
+7. WHAT BREAKS IF THIS CHANGES
+
+Changing synthesis conclusions would affect:
+- showcase/checkpoints/ tracking files that reference synthesis principles
+- All future exploration scoping that uses synthesis as the strategic frame
+- FINDINGS-INDEX.md cross-references to unified principles
+- showcase/CLAUDE.md mandatory pre-read requirement (agents would load stale mental models)
+- Any checkpoint verification that tests whether explorations align with synthesis
+Blast radius: MEDIUM (5-8 inbound references). Changes would not break file integrity
+but would create semantic drift between strategy and execution.
+
+8. CONSUMED BY
+
+Consumer                                                          | How It Uses This File
+showcase/CLAUDE.md                                                | Mandates reading this file before ANY exploration, section build, or migration
+showcase/checkpoints/RESEARCH-ACTIVE.md                           | Cross-references synthesis insights when tracking finding application
+showcase/FINDINGS-INDEX.md                                        | Links unified principles back to source R-X findings
+showcase/checkpoints/DISCOVERIES-LOG.md                           | References synthesis as framework for logging new discoveries
+DESIGN-SYSTEM/provenance/stage-2-density-dd/STAGE-HEADER.md       | Uses synthesis principles to scope DD explorations
+DESIGN-SYSTEM/provenance/stage-3-organization-od/STAGE-HEADER.md  | Uses synthesis principles to scope OD explorations
+DESIGN-SYSTEM/provenance/stage-4-axis-ad/STAGE-HEADER.md          | Uses synthesis principles to scope AD explorations
+DESIGN-SYSTEM/provenance/stage-5-combination-cd/STAGE-HEADER.md   | Uses synthesis principles to scope CD explorations
+showcase/research/CLAUDE.md                                       | Lists RESEARCH-SYNTHESIS as the cross-research unified framework
+
+9. RESEARCH DEBT
+
+- R2 count discrepancy: CLAUDE.md claims 78 R2 findings but only 27 exist in R2 file.
+  This means the synthesis may reference R2 findings by number ranges that do not exist.
+  Impact: LOW (synthesis references R2 by theme, not by individual finding ID).
+- AD stage findings (192) are entirely unapplied. Synthesis principles derived from R4
+  are currently theoretical and unvalidated by exploration. Impact: MEDIUM (Principles 2
+  and related axis content have no exploration evidence yet).
+- CD stage findings (39) are also unapplied. R5-derived synthesis is unvalidated.
+  Impact: MEDIUM (Principle 3 on component combination lacks exploration evidence).
+
+10. DIAGNOSTIC QUESTIONS
+
+Q1: Does every unified principle in this file correctly attribute its source
+    research streams (e.g., "R-1 + R-3" for Density as Rhythm)?
+Q2: Can showcase/CLAUDE.md's mandatory pre-read list be satisfied — does this
+    file exist and contain the expected synthesis structure?
+Q3: Do the DD exploration outcomes (DD-001 through DD-006) align with the
+    density-related synthesis principles stated here?
+Q4: Are there any synthesis conclusions that reference R2 finding IDs above
+    R2-027 (which would be invalid given the actual count)?
+Q5: Is the soul alignment characterization ("adjacent, not implementing")
+    consistent with how downstream STAGE-HEADERs reference this file?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # RESEARCH-SYNTHESIS
 ## Unified Framework from All 5 Research Agents
 

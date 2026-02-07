@@ -1,3 +1,70 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/MASTER-INDEX.md
+     Tier: B | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+This file is the master navigation index for the entire perceptual-audit-v2 folder,
+which contains 176+ files across synthesis, tracking, foundation, components,
+coexistence, pages, soul-extractions, and process directories. It provides quick
+navigation tables for every document category, the complete component audit directory
+with soul scores and character names, phase history, archived work references, and
+the 6 Universal Rules quick reference. Without this file, navigating the audit's
+output is an exercise in directory archaeology.
+
+2. THE QUESTION THIS ANSWERS
+"Where is everything in the perceptual-audit-v2 folder, what is each file's purpose
+and status, and how do I navigate the 176-file audit output efficiently?"
+
+3. STATUS
+ACTIVE — Created 2026-02-04 during Phase 4-ZETA (file organization). Updated
+through Phase 4A-E synthesis work. This is a living navigation document that should
+be updated whenever files are added to or reorganized within perceptual-audit-v2/.
+
+5. BUILT ON
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| Audit methodology (master plan) | Defines phases 0-4 and sub-phases | 12 sub-agents per component, 48/60 pass threshold | ~/.claude/plans/woolly-riding-yeti.md |
+| All 6 T1 synthesis files | Top-level documents indexed here | MASTER-SOUL-SYNTHESIS, DESIGN-TOKEN-SUMMARY, etc. | synthesis/*.md |
+| All 7 tracking files | Mid-level documents indexed here | TYPOGRAPHY-TOKENS, SPACING-TOKENS, etc. | tracking/*.md |
+| All 11 component audit directories | Per-component audits indexed here | Scores ranging 48.5-54/60 | components/*/ |
+| Foundation documents | Core philosophy indexed here | KORTAI-ESSENCE-FOUNDATION, SOUL-TRANSLATION-GUIDE | foundation/*.md |
+| Process documents | State files indexed here | CONSISTENCY-REGISTRY, DECISION-LOG | *.md at root |
+| Component-system SOUL-DEFINITION.md | Locked root document referenced | 6 universal rules | ../SOUL-DEFINITION.md |
+
+6. MUST HONOR
+| Constraint | Detail |
+|------------|--------|
+| Audit methodology preserved | Phase structure (0-4 + sub-phases) is historical record, do not rewrite |
+| T1 synthesis files are locked | Index must reflect their locked status; do not imply editability |
+| Soul scores are final | 11 component scores are audit results, not targets to adjust |
+| 6 Universal Rules are soul-locked | border-radius: 0, box-shadow: none, red+cream+black, serif/sans/mono, 2-4px borders, 1.6+ line-height |
+| Phase history is append-only | New phases can be added; existing phases must not be modified |
+
+8. CONSUMED BY
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| Any new Claude session entering perceptual-audit-v2 | First-read orientation and navigation |
+| CLAUDE.md (perceptual-audit-v2) | References MASTER-INDEX.md as navigation index |
+| EXECUTION-STATE.md | Cross-references for file location lookups |
+| CONTEXT-RESTORATION.md | Points to this for "where is everything" orientation |
+| Downstream DD/OD/AD/CD work | Entry point for understanding T1 source structure |
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does the synthesis documents table list all 6 T1 files (MASTER-SOUL-SYNTHESIS,
+    CHARACTER-FAMILY-COMPLETE, DESIGN-TOKEN-SUMMARY, PRODUCTION-RULES,
+    ANTI-PATTERNS-REGISTRY, CONSISTENCY-VERIFICATION)?
+Q2: Does the component directory list all 11 components with their soul scores,
+    character names, and structural types — and do the scores match those in
+    EXECUTION-STATE.md?
+Q3: Is the phase history section current — does it reflect Phase 4A-E synthesis
+    as the latest work, and is Phase 4-ZETA (file organization) marked as the
+    organizational step?
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # MASTER INDEX — KortAI Soul Extraction
 ## Perceptual Audit v2: Complete Navigation
 

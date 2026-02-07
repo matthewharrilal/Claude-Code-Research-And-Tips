@@ -4,6 +4,83 @@ manifest_ref: DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md
 last_updated: 2026-02-05
 ---
 
+<!-- ═══════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/patterns/PATTERN-INDEX.md
+Tier: A | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Master pattern selection guide that maps content types to validated
+patterns, enforces the chain requirement (research → exploration →
+validation → application), and provides OD-to-density pairings. This
+is the decision point — where builders choose WHICH patterns to apply
+and WHY.
+
+2. THE QUESTION THIS ANSWERS
+"Given my content type, which validated pattern should I use, what
+research justifies it, and what constraints must I honor?"
+
+3. STATUS
+COMPLETE for density patterns (DD). Organizational patterns (OD) and
+combination/axis patterns are placeholders pending future exploration.
+
+4. SOUL ALIGNMENT
+Soul-adjacent — this file indexes validated patterns that implement
+the soul. It does not define soul values directly but enforces that
+pattern selection respects soul compliance (chain requirement).
+
+5. BUILT ON
+- DD-F-001 through DD-F-006 (6 validated density patterns)
+- COMP-F-001 through COMP-F-005 (component constraint findings)
+- DD-F-015 (density-component interaction rules)
+- R3-005, R3-023, R3-024, R3-029, R3-035, R3-036, R3-044, R3-045, R3-046
+- R4 references (axis innovations for future OD work)
+- BACKBONE.md (master narrative and pipeline structure)
+- DD exploration results
+
+6. MUST HONOR
+- The chain requirement is inviolable: no pattern applied without
+  understanding its research → exploration → validation lineage
+- DD-F-006 FRACTAL is the meta-pattern — all other patterns must
+  exhibit fractal self-similarity at multiple scales
+- Pattern scores from DD explorations are authoritative
+- OD-to-density pairings must respect validated combinations only
+
+7. WHAT BREAKS IF THIS CHANGES
+HIGH blast radius — referenced by BACKBONE.md, CLAUDE.md, and all
+downstream stage work. Changing pattern recommendations here cascades
+to density-patterns.md usage guidance, migration-guide.md content type
+mappings, and any future OD/CD stage explorations. Incorrect pairings
+would propagate soul violations downstream.
+
+8. CONSUMED BY
+- DESIGN-SYSTEM/CLAUDE.md (navigation: "Apply a pattern → PATTERN-INDEX.md")
+- BACKBONE.md (pipeline narrative references pattern selection)
+- density-patterns.md (backlink for provenance)
+- migration-guide.md (content type → pattern mapping)
+- Future OD/CD stage explorations
+
+9. RESEARCH DEBT
+- OD patterns (organizational) not yet validated — placeholder only
+- CD patterns (combination/axis) not yet validated — placeholder only
+- R4 findings (192 axis innovations) largely unapplied
+- Cross-pattern interaction rules need DD-F-015 expansion
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does every pattern listed here have a matching DD-F-XXX finding
+    ID with score in PIPELINE-MANIFEST.md?
+Q2: Is the fractal self-similarity requirement (DD-F-006) explicitly
+    referenced in every pattern's constraint section?
+Q3: Do the content-type-to-pattern mappings match the "Best For"
+    recommendations in density-patterns.md?
+Q4: Are all R3 finding IDs cited here (R3-005, R3-023, etc.) real
+    entries in R3-DENSITY-DIMENSIONS.md?
+Q5: Do the OD placeholder sections clearly indicate "not yet
+    validated" status to prevent premature application?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════ -->
+
 # PATTERN INDEX
 ## The Migration Entry Point
 

@@ -1,3 +1,36 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-3-organization-od/CLAUDE.md
+Tier: C | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Placeholder navigation file for agents entering the stage-3-organization-od/
+directory. Provides identity, reading order, file inventory, connection map,
+and mindset framing for the OD stage. Auto-read by Claude Code on directory
+entry. OD work is PENDING — all 5 output files are PENDING status.
+
+3. STATUS
+ACTIVE (as placeholder navigation — OD work itself is PENDING)
+
+5. BUILT ON
+| Dependency                                          | Relationship                              |
+|-----------------------------------------------------|-------------------------------------------|
+| DD-F-006 (fractal self-similarity)                  | Mandatory constraint for all OD work       |
+| stage-2-density-dd/HANDOFF-DD-TO-OD.md              | Mandatory first-read referenced in HOW TO READ |
+| original-research/R1-DOCUMENTATION-PATTERNS.md      | Primary research referenced in HOW TO READ |
+| Planned OD outputs (5 files)                        | Listed in WHAT'S HERE as PENDING           |
+
+8. CONSUMED BY
+| Consumer                                            | How Used                                  |
+|-----------------------------------------------------|-------------------------------------------|
+| Claude Code agent                                   | Auto-read on stage-3-organization-od/ entry |
+| OD exploration agents                               | Navigation and orientation                  |
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # CLAUDE.md — Stage 3: Organization Exploration (OD)
 
 ═══════════════════════════════════════════════════════════════════════════════

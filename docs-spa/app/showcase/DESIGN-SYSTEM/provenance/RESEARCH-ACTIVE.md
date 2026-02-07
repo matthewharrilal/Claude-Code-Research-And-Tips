@@ -1,3 +1,44 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/RESEARCH-ACTIVE.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Provenance chain copy of the research application tracker. Preserves the
+finding-to-application mapping within the provenance directory for chain
+integrity alongside stage-specific provenance files.
+
+2. THE QUESTION THIS ANSWERS
+What is the application status of all 337 research findings across the
+pipeline, and what percentage remains unapplied?
+
+3. STATUS
+SYNCED DUPLICATE of checkpoints/RESEARCH-ACTIVE.md. Sync protocol:
+operational edits go in checkpoints/, archival copies here.
+
+5. BUILT ON
+See original at showcase/checkpoints/RESEARCH-ACTIVE.md.
+
+6. MUST HONOR
+Keep in sync with source at checkpoints/RESEARCH-ACTIVE.md.
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| provenance/CLAUDE.md                    | Listed as provenance directory member  |
+| HANDOFF-DD-TO-OD.md                     | Application gap tracking               |
+
+10. DIAGNOSTIC QUESTIONS
+- Is this file in sync with checkpoints/RESEARCH-ACTIVE.md?
+- Do the application counts here match the PIPELINE-MANIFEST.md totals?
+- Has the sync been updated after the most recent operational edit?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # RESEARCH-ACTIVE — Comprehensive Research Tracking
 ## All 337 Findings with Application Status
 

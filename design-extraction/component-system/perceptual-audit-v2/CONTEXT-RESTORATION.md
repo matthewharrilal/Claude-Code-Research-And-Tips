@@ -1,3 +1,72 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/CONTEXT-RESTORATION.md
+     Tier: B | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+This 18.7KB file is the complete context restoration document designed to be pasted
+into a new Claude session to resume the perceptual audit. It contains a compressed
+but comprehensive summary of everything needed: the KORTAI soul (7 principles +
+anti-patterns), all Phase 1 results (11 components with scores and characters), the
+audit methodology (12 parallel sub-agents, 60-point scoring), Phase 2 coexistence
+results (8 pairs, 4.4/5 avg), Phase 3 page composition results (4 pages), design
+tokens, and key file locations. It is the "cold start" document that eliminates
+re-reading 150+ files.
+
+2. THE QUESTION THIS ANSWERS
+"If I am a new Claude session with zero context, what is the minimum I need to
+read to fully understand and continue the perceptual audit from where it left off?"
+
+3. STATUS
+ACTIVE (HISTORICAL) — Written 2026-02-04 after Phase 3 completion. Represents the
+audit state at that point. Phase 4 synthesis has since been completed, so a session
+restoring from this file would need to also check synthesis/ for the final T1
+outputs. Remains valuable as the most comprehensive single-file audit summary.
+
+5. BUILT ON
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| EXECUTION-STATE.md | Phase progress and component scores | Phases 0-3 complete, 11 scores | EXECUTION-STATE.md |
+| KORTAI-ESSENCE-FOUNDATION.md | Soul principles compressed here | 7 soul principles, anti-patterns | foundation/KORTAI-ESSENCE-FOUNDATION.md |
+| 11 soul extraction files | Component summaries compressed here | Character names, master truths, scores | soul-extractions/*-soul-extraction.md |
+| COEXISTENCE-TEST-RESULTS.md | Pair test summaries compressed here | 8 pairs, scores, pass status | coexistence/COEXISTENCE-TEST-RESULTS.md |
+| Page audit results | Page summaries compressed here | 4 pages, scores, findings | pages/*.md |
+| CONSISTENCY-REGISTRY.md | Design token snapshot included | Typography, color, spacing tokens | CONSISTENCY-REGISTRY.md |
+| Master plan (38 revisions) | Methodology summary compressed here | Sub-agent types A-L, scoring formula | ~/.claude/plans/woolly-riding-yeti.md |
+
+6. MUST HONOR
+| Constraint | Detail |
+|------------|--------|
+| Audit methodology preserved | The 12-sub-agent, 60-point scoring, 48/60 threshold is historical record |
+| Soul principles are compressed but complete | All 7 principles and anti-patterns must be present for valid restoration |
+| Component data is frozen | 11 component scores, characters, and master truths are audit outcomes |
+| File paths may reference moved locations | validation-sprint/ and perceptual-audit/ paths now point to archive |
+| HTTP server reference is session-specific | Port 8766 reference is historical; new sessions need their own server |
+| Phase 4 is marked NEXT but is now COMPLETE | A restoring session should verify synthesis/ exists before starting Phase 4 |
+
+8. CONSUMED BY
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| New Claude sessions needing audit context | Paste-in document for cold-start context recovery |
+| EXECUTION-STATE.md | References this as the full context restoration document |
+| MASTER-INDEX.md | Lists this under process documents |
+| CLAUDE.md (perceptual-audit-v2) | Lists this as context recovery instructions |
+| Future multi-session project planning | Template for how to build effective context restoration documents |
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does the KORTAI SOUL section contain all 7 soul principles (Typography,
+    Spacing, Containers, Hierarchy, Composition, Color, Layout) and the 6
+    anti-patterns (rounded corners, shadows, gradients, bold stacking, traffic
+    light colors, hover lift)?
+Q2: Does the PHASE 1 RESULTS table list all 11 components with scores, character
+    names, and master truth summaries — and do scores match EXECUTION-STATE.md?
+Q3: Does the file warn that Phase 4 is marked NEXT but may already be complete,
+    directing the restoring session to check synthesis/ before starting new work?
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # CONTEXT RESTORATION DOCUMENT
 ## Perceptual Audit v2 — Maximum Intensity Soul Extraction
 ## PASTE THIS INTO NEW CLAUDE SESSION TO CONTINUE

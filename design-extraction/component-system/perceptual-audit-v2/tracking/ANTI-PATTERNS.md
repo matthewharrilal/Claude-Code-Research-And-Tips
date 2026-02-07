@@ -1,3 +1,73 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/tracking/ANTI-PATTERNS.md
+     Tier: B | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+This file is the detailed anti-pattern tracking sheet cataloging what NOT to do
+across the KORTAI design system. It records violations organized in three tiers:
+master anti-patterns (zone, density, axis, container), component-specific
+anti-patterns discovered during Phase 4 re-audit of all 11 components, coexistence
+anti-patterns from Phase 4-Beta pair testing, and page composition anti-patterns
+from Phase 4-Gamma. Each entry includes the violation reason and the phase of
+discovery, making this the forensic evidence behind the T1 anti-patterns registry.
+
+2. THE QUESTION THIS ANSWERS
+"What specific design decisions violate the KORTAI soul at the component level,
+the pair-coexistence level, and the page-composition level — and why does each
+violation matter structurally?"
+
+3. STATUS
+ACTIVE — Fully populated during Phase 4 re-audit (2026-02-04). Findings
+consolidated into T1 synthesis/ANTI-PATTERNS-REGISTRY.md and T1
+synthesis/PRODUCTION-RULES.md. This file remains the detailed source record with
+per-component granularity; the T1 files are the locked authority for downstream.
+
+5. BUILT ON
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| Code Snippet anti-pattern analysis | 5 component-specific violations | No max-height, mobile scroll, no line wrap | components/code-snippet/sub-agent-analyses/ANTI-PATTERN-ANALYSIS.md |
+| Callout family anti-pattern analysis | 6 component-specific violations | No collapse, RTL, multi-callout gap, icons | components/info-callout/sub-agent-analyses/ANTI-PATTERN-ANALYSIS.md |
+| File Tree anti-pattern analysis | 6 component-specific violations | A11y, overflow, no expand/collapse | components/file-tree/sub-agent-analyses/ANTI-PATTERN-ANALYSIS.md |
+| Decision Matrix anti-pattern analysis | 7 component-specific violations | Vertical borders, mobile, sticky headers | components/decision-matrix/sub-agent-analyses/ANTI-PATTERN-ANALYSIS.md |
+| Core Abstraction anti-pattern analysis | 5 component-specific violations | Mobile, no collapse, a11y, focus states | components/core-abstraction/sub-agent-analyses/ANTI-PATTERN-ANALYSIS.md |
+| Task Component anti-pattern analysis | 7 component-specific violations | Touch targets, drag-reorder, gamification | components/task-component/sub-agent-analyses/ANTI-PATTERN-ANALYSIS.md |
+| Reasoning Component anti-pattern analysis | 6 component-specific violations | 3+ columns, unequal heights, color-coding | components/reasoning-component/sub-agent-analyses/ANTI-PATTERN-ANALYSIS.md |
+| Coexistence test results (Phase 4-Beta) | 8 pair anti-patterns + universals | Component gap rules, prose-break rules | coexistence/COEXISTENCE-TEST-RESULTS.md |
+| Page composition audits (Phase 4-Gamma) | 7 page anti-patterns + universals | Density rhythm rules, LOW zone requirements | pages/KITCHEN-SINK-AUDIT-RESULTS.md |
+
+6. MUST HONOR
+| Constraint | Detail |
+|------------|--------|
+| Values are consolidated into T1 | Any modification here must be checked against synthesis/ANTI-PATTERNS-REGISTRY.md |
+| Master anti-patterns are soul-locked | Rounded corners >6px, heavy shadows, borders on everything = permanent violations |
+| Component-specific anti-patterns are authoritative | These were discovered through parallel sub-agent analysis, not assumed |
+| Golden Rules are canonical | 24px gap between ALL component pairs; every page needs LOW-HIGH-LOW density rhythm |
+| Production Rules consumed these | synthesis/PRODUCTION-RULES.md encodes mandatory rules derived from these findings |
+
+8. CONSUMED BY
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| synthesis/ANTI-PATTERNS-REGISTRY.md (T1) | Consolidated all anti-patterns into "The Soul Test" verification system |
+| synthesis/PRODUCTION-RULES.md (T1) | Derived mandatory implementation rules from discovered violations |
+| MASTER-INDEX.md | References this as authoritative anti-pattern tracking document |
+| Any future component implementation | Source data for "what NOT to do" with per-component granularity |
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Are the 4 master anti-pattern categories (zone, density, axis, container)
+    all present, and does each entry include both "Why It Violates" and
+    "Alternative" columns?
+Q2: Do the coexistence anti-patterns (Phase 4-Beta section) include the golden
+    rule of 24px gap between ALL component pairs, and is this reflected in
+    PRODUCTION-RULES.md?
+Q3: Are all 11 components represented in the component-specific section, or are
+    any missing? (Count: Code Snippet, 5 Callouts, File Tree, Decision Matrix,
+    Core Abstraction, Task, Reasoning = 11 total)
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # ANTI-PATTERNS REGISTRY — Structural Focus
 ## Phase 4 Re-Audit Tracking Sheet
 

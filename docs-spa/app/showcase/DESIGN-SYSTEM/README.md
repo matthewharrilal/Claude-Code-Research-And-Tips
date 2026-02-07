@@ -1,3 +1,140 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: docs-spa/app/showcase/DESIGN-SYSTEM/README.md
+     Tier: A | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+This file — titled "THE KORTAI DESIGN MIND" — is the comprehensive
+philosophical anchor document for the entire KORTAI design system. It is
+not a style guide, not a token reference, and not a list of rules. It is
+the operating manual that teaches a reader (human or AI agent) HOW TO
+THINK the way the design system thinks, so they can make new decisions
+consistent with prior ones even when those decisions were never explicitly
+specified. Across 9 Parts and 109KB (2053 lines), it covers: why the
+system is discovery-based rather than decision-based (Part I), the 5-stage
+compounding research pipeline (Part II), the provenance chain with 7
+structures and 2 traversals (Part III), the digestion protocol with 4
+engagement levels (Part IV), the interception framework for external
+knowledge with sub-agent paradigm (Part V), reproduction methodology
+(Part VI), file structure as embodied knowledge (Part VII), the meta-
+insight that this is a transferable design mind (Part VIII), and the
+retroactive update bridge connecting philosophy to codebase (Part IX).
+
+2. THE QUESTION THIS ANSWERS
+"Can a system absorb the REASONING behind design decisions well enough to
+make NEW decisions that are consistent with the ones that came before —
+even when those new decisions were never explicitly specified?"
+
+3. STATUS
+ACTIVE | LOCKED | DO NOT TOUCH — 109KB (2053 lines). Prepend-only header.
+No modifications to existing content. This is the single most important
+document in the design system — the philosophical nucleus.
+
+4. SOUL ALIGNMENT
+This file is the comprehensive philosophical narrative that TRANSLATES
+the 5 soul pieces into reasoning, examples, and transferable understanding:
+- SP#1 Sharp Edges (border-radius: 0) — Explained as "identity truth
+  already encoded in the DNA," not a style choice. Traced through
+  COMP-F-001 → DD-006 fractal self-similarity → page-level mirroring.
+- SP#2 Archivist Speaks in Serif — Contextualized within typography
+  hierarchy as editorial confidence, not decoration.
+- SP#3 Callout Family DNA — Presented as structural consistency that
+  enables differentiation through color alone.
+- SP#4 Shadows Lie About Depth — Philosophically grounded in print
+  heritage honesty vs fake 3D.
+- SP#5 Squares Signal System — Connected to the broader sharp-edges
+  identity at the element level (checkboxes, borders).
+- The file bridges soul pieces to their causal chains: COMP findings →
+  DD findings → OD findings (hypothetical) → AD → CD → migration.
+
+5. BUILT ON
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| COMP-F-001 through COMP-F-008 | Component-level findings | Soul pieces, locked tokens | perceptual-audit-v2/synthesis/ (via findings) |
+| DD-F-001 through DD-F-018 | Density exploration findings | Fractal self-similarity, CRESCENDO/STACCATO/LEGATO patterns | showcase/explorations/density/ (via findings) |
+| OD-F-007/008/009 | HYPOTHETICAL organizational findings | Illustrative examples only — these do not represent completed work | N/A (hypothetical) |
+| R1 findings | Documentation pattern research | Content structure insights | showcase/research/R1-DOCUMENTATION-PATTERNS.md |
+| R3 findings | Density dimension research | Density analysis framework | showcase/research/R3-DENSITY-DIMENSIONS.md |
+| R5 findings | Combination theory research | Multi-pattern interaction | showcase/research/R5-COMBINATION-THEORY.md |
+| BACKBONE.md | Master narrative | Pipeline state, stage connections | DESIGN-SYSTEM/BACKBONE.md |
+| PIPELINE-MANIFEST.md | Finding registry | All finding IDs and provenance | DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md |
+| SOUL-DISCOVERIES.md | Soul discovery record | Original perceptual audit evidence | showcase/checkpoints/SOUL-DISCOVERIES.md |
+| density-patterns.md | Validated density patterns | CRESCENDO, STACCATO, LEGATO confidence levels | DESIGN-SYSTEM/patterns/density-patterns.md |
+| MASTER-SOUL-SYNTHESIS.md | T1 soul authority | 5 soul pieces, 6 universal rules | perceptual-audit-v2/synthesis/MASTER-SOUL-SYNTHESIS.md |
+| DESIGN-TOKEN-SUMMARY.md | T1 token authority | Locked :root CSS block | perceptual-audit-v2/synthesis/DESIGN-TOKEN-SUMMARY.md |
+
+6. MUST HONOR
+| Constraint | Source | Consequence of Violation |
+|------------|--------|--------------------------|
+| OD-F-007/008/009 are HYPOTHETICAL | Internal caveat (this file) | Treating these as completed work misrepresents system state |
+| Discovery-based, not decision-based | Core philosophy (Part I) | Framing soul pieces as arbitrary choices destroys provenance reasoning |
+| 5-stage pipeline order (T1→DD→OD→AD→CD) | Part II | Breaking stage ordering invalidates compounding research model |
+| Provenance chain = causal chain, not documentation | Part I, line ~161 | Reducing provenance to "nice documentation" misses the entire point |
+| 4 engagement levels (Application→Understanding→Extension→Validation) | Part IV / CLAUDE.md | Skipping levels produces mechanical application without reasoning |
+| 3 reading modes (First Read / Task Execution / Context Recovery) | How To Use section | Using wrong mode wastes time or produces shallow understanding |
+| 7 provenance structures | Part III | Missing any structure breaks the living system metaphor |
+
+7. WHAT BREAKS IF THIS CHANGES
+- **DESIGN-SYSTEM/CLAUDE.md** — Directly references README.md as
+  "READ FIRST" mandatory prerequisite. If README.md philosophy changes,
+  CLAUDE.md's framing becomes misaligned.
+- **All OD/AD/CD work** — Any future stage work must absorb this document
+  as part of its research gate. Changed philosophy = changed reasoning
+  foundation for all downstream stages.
+- **showcase/CLAUDE.md** — The refinement loop and research grounding
+  process assume the philosophical framework documented here.
+- **knowledge-architecture/** — Pipeline documentation references the
+  5-stage model described in Part II.
+- **Blast radius:** Potentially the entire design system. This is the
+  philosophical root node. Changes here propagate to every file that
+  depends on the reasoning framework.
+- **Files directly affected:**
+  - docs-spa/app/showcase/DESIGN-SYSTEM/CLAUDE.md
+  - docs-spa/app/showcase/CLAUDE.md
+  - docs-spa/app/showcase/DESIGN-SYSTEM/BACKBONE.md
+  - docs-spa/app/showcase/knowledge-architecture/ (multiple files)
+  - All future OD/AD/CD exploration work
+
+8. CONSUMED BY
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| DESIGN-SYSTEM/CLAUDE.md | Mandates this as first read; summarizes 9 Parts, 3 modes, 4 levels; gates all design system work behind absorbing this document |
+| showcase/CLAUDE.md | References philosophical framework for research grounding and refinement loop processes |
+| dependency-trace files | References for reachability analysis and relationship mapping |
+| Any new agent session | Context Recovery mode (Mode 3) provides 10-15 minute reorientation path |
+| Future OD/AD/CD stages | Must absorb as part of mandatory research gate before producing any exploration |
+
+9. RESEARCH DEBT
+- OD-F-007/008/009 are hypothetical examples used to illustrate the
+  compounding pipeline. When actual OD work is completed, these examples
+  should be validated or replaced with real finding IDs.
+- Part IX (Retroactive Bridge) describes execution sequences that have
+  not yet been fully implemented in the codebase.
+- The interception framework (Part V) and sub-agent paradigm describe
+  4 sub-agent types and 3 dimensions but these have not been exercised
+  in production OD work yet.
+- Reproduction methodology (Part VI) has not been tested by an
+  independent team — it is theoretically sound but empirically unproven.
+- The document is 109KB / 2053 lines — there is no condensed version
+  for quick philosophical refresh shorter than Mode 3's 10-15 minutes.
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does every finding ID referenced in this document (COMP-F-XXX,
+    DD-F-XXX) trace back to a real, existing file in the provenance
+    chain — and are OD-F-007/008/009 clearly marked as hypothetical?
+Q2: Are the 5 soul pieces described here identical (in name, number,
+    and meaning) to those in MASTER-SOUL-SYNTHESIS.md?
+Q3: Does the 5-stage pipeline described in Part II match the stage
+    structure in BACKBONE.md and PIPELINE-MANIFEST.md?
+Q4: Can a reader following Mode 3 (Context Recovery, 10-15 min path)
+    successfully re-ground without reading the full 109KB?
+Q5: Does DESIGN-SYSTEM/CLAUDE.md's summary of this document accurately
+    reflect the current content of all 9 Parts?
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # 🚀 START HERE: THE KORTAI DESIGN MIND
 
 ## A Reference Document for Understanding, Digesting, and Thinking With This Design System

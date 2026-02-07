@@ -10,6 +10,66 @@ last_updated: 2026-02-05
 status: IN_PROGRESS
 ---
 
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-3-organization-od/STAGE-HEADER.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Stage header for the Organization Exploration (OD) pipeline stage. Defines
+what OD will explore (cognitive rhythm — how information is ORGANIZED), lists
+the 6 planned explorations (OD-001 through OD-006), specifies mandatory inputs
+(HANDOFF-DD-TO-OD.md, DD-F-006 fractal self-similarity), and sets the scoring
+threshold (>=32 for INCLUDE). Part of the predecessor/successor stage chain.
+
+2. THE QUESTION THIS ANSWERS
+What is Stage 3 (OD), what will it consume, what will it produce, and what
+constraints must every OD exploration honor?
+
+3. STATUS
+PENDING — OD work has not begun. All 5 planned output files (OD-outbound-findings.md,
+HANDOFF-OD-TO-AD.md, OD-RESEARCH-GATE.md, OD-SYNTHESIS.md, and 6 OD explorations)
+are PENDING. The STAGE-HEADER itself exists as a planning document.
+
+5. BUILT ON
+| Dependency                                          | Relationship                              |
+|-----------------------------------------------------|-------------------------------------------|
+| stage-2-density-dd/STAGE-HEADER.md                  | Predecessor in stage chain                 |
+| stage-2-density-dd/HANDOFF-DD-TO-OD.md              | Mandatory first-read for OD work           |
+| stage-2-density-dd/DD-outbound-findings.md          | DD-F-### constraints consumed by OD        |
+| stage-1-components/component-findings.md            | COMP-F-### constraints consumed by OD      |
+| SOUL-DISCOVERIES.md                                 | 5 soul pieces — non-negotiable constraints |
+| original-research/R1-DOCUMENTATION-PATTERNS.md      | Primary research (28 findings)             |
+| original-research/R5-COMBINATION-THEORY.md          | Secondary research                         |
+| 6 OD explorations mapped to density pairings        | Planned work structure                     |
+
+6. MUST HONOR
+- Predecessor/successor chain format must be maintained (frontmatter links)
+- DD-F-006 (fractal self-similarity) is MANDATORY for all OD explorations
+- 5 soul pieces must be verified in every exploration
+- Scoring threshold: >=32 for INCLUDE
+- HANDOFF-DD-TO-OD.md must be read FIRST before any OD work
+
+8. CONSUMED BY
+| Consumer                                            | How Used                                  |
+|-----------------------------------------------------|-------------------------------------------|
+| stage-4-axis-ad/STAGE-HEADER.md                     | Successor in stage chain                   |
+| All OD explorations (OD-001 through OD-006)         | Planning and constraint reference           |
+| OD agents                                           | Stage execution guide                      |
+
+10. DIAGNOSTIC QUESTIONS
+- Are all 6 OD explorations still mapped to their recommended density pairings
+  from HANDOFF-DD-TO-OD.md?
+- Does the frontmatter predecessor/successor chain remain intact with stage-2
+  and stage-4 STAGE-HEADERs?
+- Are the mandatory inputs (HANDOFF, DD-outbound, SOUL-DISCOVERIES, R1, R5)
+  still correctly listed and accessible?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # STAGE 3: ORGANIZATION EXPLORATION (OD)
 ## ⏳ IN PROGRESS — Where Cognitive Rhythm Will Be Discovered
 

@@ -1,3 +1,161 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/foundation/KORTAI-ESSENCE-FOUNDATION.md
+     Tier: A | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+KORTAI-ESSENCE-FOUNDATION.md is the deep soul research document that produced the
+KortAI design system's philosophical identity through perceptual deepening analysis of
+the original Sanrok/KortAI reference screenshots. It was created during the perceptual
+audit (Phase 4, foundation stage) by deploying 7 sub-agents (A through G) to analyze
+typography, spacing, containers, hierarchy, composition, color, and layout infrastructure
+at the zone level. This file is the ORIGIN of "The Unhurried Editor" named character,
+the "editorial calm applied to digital interfaces" master perceptual truth, the
+magazine-as-interface root metaphor, and the internal zone map (6 zones with proportions).
+It also contains a complete SOUL TRANSLATION GUIDE section with design token tables for
+typography, spacing, containers, color, and hierarchy that directly fed into
+SOUL-TRANSLATION-GUIDE.md and MASTER-SOUL-SYNTHESIS.md.
+
+2. THE QUESTION THIS ANSWERS
+
+"What IS the KortAI soul at a perceptual and philosophical level — not as CSS rules,
+but as a named character with personality, principles, anti-patterns, and a root metaphor
+that any designer or agent can internalize before touching code?"
+
+3. STATUS
+
+ACTIVE — Foundation research (pre-synthesis). Lifecycle: COMPLETE (all 7 sub-agent zones
+analyzed, master soul statement synthesized, zone map produced, design token tables
+written). Authority: FOUNDATION — this feeds T1 synthesis (MASTER-SOUL-SYNTHESIS.md)
+but is not itself T1. The philosophical identity defined here ("The Unhurried Editor")
+is LOCKED and propagated through the entire T1 synthesis layer.
+
+4. SOUL ALIGNMENT
+
+This file is SOUL-ADJACENT — it defines the philosophical and perceptual underpinnings
+that the soul rules formalize. Key soul outputs with CSS implications:
+
+| Soul Dimension | Perceptual Truth | Design Token Implications |
+|---------------|-----------------|--------------------------|
+| Typography | "Authority through position, not emphasis stacking" | Serif 400 weight titles (20-28px), sans 400 body (14-16px), 3-4 sizes max |
+| Spacing | "Well-curated museum — each piece has room to be considered" | 20-24px component padding, graduated zone gaps (4-8px tight, 12-16px standard, 24-32px section) |
+| Containers | "Paper notes resting on a desk — present through shadow and position, not walls" | No visible borders, subtle shadow lift, 4-6px corners (NOTE: this is pre-soul-lock; soul-locked value is 0px) |
+| Hierarchy | "Confident speaker who knows important points don't need underlining" | SIZE primary, POSITION secondary; no emphasis stacking |
+| Composition | "Gallery wall — dominant image, supporting text as placard" | 55-60% image zone, top-heavy intentional balance |
+| Color | "Ink on quality paper — mostly black and white, red for margin notes" | Monochromatic base + single red accent (#E83025) |
+| Layout | "Turning magazine pages — sections flow, not rigidly boxed" | Whitespace compartmentalization, no visible dividers |
+
+NOTE FOR IMPLEMENTORS: Container corner values (4-6px) in this file's token tables
+were observed pre-soul-lock. The authoritative soul-locked value is `border-radius: 0`
+per SOUL-DEFINITION.md and DESIGN-TOKEN-SUMMARY.md. Always defer to T1 locked values.
+
+5. BUILT ON
+
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| card-system/SOUL-DEFINITION.md | Ancestor soul thinking (SUPERSEDED) | 10 soul principles, editorial vs Bootstrap philosophy | `design-extraction/card-system/SOUL-DEFINITION.md` |
+| archive/perceptual-audit-phase-2.5/ (SOUL-DISCOVERIES.md, etc.) | Previous perceptual work | 7 soul pieces from earlier audit phase | `design-extraction/component-system/archive/perceptual-audit-phase-2.5/` |
+| provided-kortai-card-detail.png | Visual reference (card close-up) | Zone proportions, typography measurements, spacing values | Screenshot in perceptual-audit-v2/screenshots/ |
+| provided-kortai-page-layout.png | Visual reference (full page) | Page composition, hero/nav/card layout, breathing room | Screenshot in perceptual-audit-v2/screenshots/ |
+| Sanrok reference screenshots | Design origin | Sanrok Studio editorial design language | `.playwright-mcp/sanrok-*.png` |
+
+6. MUST HONOR
+
+This file INHERITS constraints from card-system/SOUL-DEFINITION.md and ESTABLISHES
+philosophical foundations that downstream files must honor:
+
+| Constraint | Specification | Enforcement |
+|-----------|--------------|-------------|
+| "The Unhurried Editor" character | Named character: "A senior professional at a premium publication who has nothing to prove, makes confident decisions quickly, and trusts the reader's intelligence" | All component characters must be members of this character's "family" |
+| Root metaphor | "KortAI treats DIGITAL INTERFACES as EDITORIAL PUBLICATIONS" | Every design decision must pass the magazine/print test |
+| Master anti-pattern | "Anything that shouts, decorates without function, or uses emphasis stacking" | "The eager art school graduate" is the negative archetype |
+| 7 zone-level perceptual truths | Each zone (typography, spacing, containers, hierarchy, composition, color, layout) has a locked named character and truth statement | Zone truths cannot be redefined; new components must align |
+| SIZE as primary hierarchy method | "Position and proportion do the work" — not weight, not color, not decoration | Typography hierarchy: size first, position second, weight minimal, color functional only |
+| Restraint principle | 10-12 typography variations total (vs 20+ in typical systems) | New components cannot introduce additional font weights, sizes, or color roles |
+
+7. WHAT BREAKS IF THIS CHANGES
+
+BLAST RADIUS: HIGH (8+ direct consumers, all T1 synthesis indirectly)
+
+Direct breakage:
+- MASTER-SOUL-SYNTHESIS.md (T1) — extracted "The Unhurried Editor" and master soul
+  statement directly from this file's MASTER KORTAI SOUL section
+- CHARACTER-FAMILY-COMPLETE.md (T1) — 11 named characters are "family members" of
+  "The Unhurried Editor" defined here
+- SOUL-TRANSLATION-GUIDE.md — typography, spacing, container, color, and hierarchy
+  rules tables are derived from this file's sub-agent findings
+- DESIGN-TOKEN-SUMMARY.md (T1) — token values trace back to measurements in this file
+- All component soul-extractions (11 files) — per-component characters reference the
+  master soul character established here
+- tracking/PERCEPTUAL-TRUTHS.md — compiles perceptual truths that originate here
+- tracking/NAMED-CHARACTERS.md — character registry built from sub-agent extractions here
+
+Indirect breakage:
+- docs-spa/app/showcase/knowledge-architecture/PIPELINE-BACKBONE.md — lists this as
+  pipeline stage 1 ("Defines soul in 3 dimensions")
+- docs-spa/app/showcase/knowledge-architecture/SOURCE-OF-TRUTH-REGISTRY.md — lists as
+  "Core philosophy extraction"
+
+8. CONSUMED BY
+
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| MASTER-SOUL-SYNTHESIS.md (T1) | Extracts "The Unhurried Editor" character, master perceptual truth, root metaphor; synthesizes 5 soul pieces from 7 zone findings |
+| SOUL-TRANSLATION-GUIDE.md | Uses typography rules, spacing rules, container rules, color rules, and hierarchy rules tables as source for non-image component translation |
+| CHARACTER-FAMILY-COMPLETE.md (T1) | All 11 component characters derive their "family" membership from the master character defined here |
+| DESIGN-TOKEN-SUMMARY.md (T1) | Token values (font sizes, spacing values, color hex codes) trace to measurements in sub-agent findings |
+| tracking/PERCEPTUAL-TRUTHS.md | Compiles the 7 zone-level perceptual truths and master truth from this file |
+| tracking/NAMED-CHARACTERS.md | Registers the 7 zone-level named characters (Unhurried Librarian, Gallery Curator, Minimalist Architect, Senior Executive, Exhibition Designer, Newspaper of Record, Editorial Director) |
+| PIPELINE-BACKBONE.md | References as Stage 1 in the design pipeline ("Defines soul in 3 dimensions") |
+| SOURCE-OF-TRUTH-REGISTRY.md | Lists as foundation-tier source of truth for "Core philosophy extraction" |
+
+9. RESEARCH DEBT
+
+- Container corner values in the SOUL TRANSLATION GUIDE section specify 4-6px for cards
+  and code blocks, which CONFLICTS with the soul-locked value of `border-radius: 0` in
+  SOUL-DEFINITION.md and DESIGN-TOKEN-SUMMARY.md. This is a known pre-lock observation
+  that was later overridden, but the file itself has not been updated to note the
+  discrepancy — creating a trap for agents that read this file without also consulting T1.
+- Card shadow value (`0 2px 8px rgba(0,0,0,0.08)`) in the Container Rules table also
+  conflicts with the soul-locked `box-shadow: none`. Same pre-lock observation issue.
+- The file references source screenshots ("provided-kortai-card-detail.png",
+  "provided-kortai-page-layout.png") but does not specify their exact filesystem path;
+  agents may not be able to locate them for verification.
+- Sub-agent findings (A through G) were conducted on a single card reference. The degree
+  to which these findings generalize to all 11 component types was validated in
+  perceptual-audit-v2 but not explicitly documented in this file.
+- No formal reconciliation section explains which values from this file were overridden
+  by the soul-locking process and which were preserved.
+
+10. DIAGNOSTIC QUESTIONS
+
+Q1: Does the "Master KortAI Soul" statement at the end of this file match the master
+    soul statement in MASTER-SOUL-SYNTHESIS.md word-for-word? (Expected: YES or
+    intentional paraphrase — any material divergence is a synthesis error)
+
+Q2: Are the 7 zone-level named characters (Unhurried Librarian, Gallery Curator,
+    Minimalist Architect, Senior Executive, Exhibition Designer, Newspaper of Record,
+    Editorial Director) all registered in tracking/NAMED-CHARACTERS.md? (Expected: YES)
+
+Q3: Do the container rules in the SOUL TRANSLATION GUIDE section (border-radius: 4-6px,
+    box-shadow present) carry explicit warnings that they are PRE-LOCK observations
+    overridden by SOUL-DEFINITION.md? (Expected: NO — this is known research debt)
+
+Q4: Can an agent reading ONLY this file (without SOUL-DEFINITION.md or
+    DESIGN-TOKEN-SUMMARY.md) correctly implement a soul-compliant component?
+    (Expected: NO — the pre-lock token values would produce soul violations.
+    This file must be consumed with T1 overrides.)
+
+Q5: Does the root metaphor ("KortAI treats DIGITAL INTERFACES as EDITORIAL
+    PUBLICATIONS") appear consistently in MASTER-SOUL-SYNTHESIS.md,
+    CHARACTER-FAMILY-COMPLETE.md, and PRODUCTION-RULES.md?
+    (Expected: YES — metaphor should propagate unchanged through the synthesis chain)
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # KortAI Soul Extraction: Foundation for Component Library
 ## Non-Image Component Soul Translation Guide
 

@@ -9,6 +9,85 @@ manifest_ref: DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md
 last_updated: 2026-02-05
 ---
 
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-2-density-dd/HANDOFF-DD-TO-OD.md
+Tier: A | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Gate file between Stage 2 (Density Exploration) and Stage 3 (Organization
+Exploration). OD reads this FIRST at Phase 0 before building anything. Contains
+the complete transfer of DD findings, density pattern assignments per OD
+exploration, mandatory consumption checklist, and the DD-F-006 fractal
+constraint that applies to ALL subsequent work.
+
+2. THE QUESTION THIS ANSWERS
+"What must OD know, acknowledge, and plan for before it can begin work? What
+are the exact findings, patterns, and constraints transferred from DD?"
+
+3. STATUS
+ACTIVE — CRITICAL gate file. 8+ inbound references. HIGH blast radius.
+
+4. SOUL ALIGNMENT
+Soul-adjacent. Gates the soul-constrained transition between exploration stages.
+Forwards all 5 soul pieces plus DD-F-006 fractal mandate. OD cannot produce
+soul-compliant work without consuming this handoff first.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| DD-outbound-findings.md                 | All DD-F findings forwarded here      |
+| All DD-F findings (001-018)             | Mandatory consumption items           |
+| All COMP-F findings                     | Foundation findings forwarded here    |
+| R1, R3, R5 research                     | Research context transferred          |
+| 5 soul pieces                           | Soul constraints reiterated           |
+| DD-F-006 fractal constraint             | MANDATORY for all OD work             |
+
+6. MUST HONOR
+- OD cannot proceed without reading and acknowledging this handoff
+- DD-F-006 fractal constraint is NON-NEGOTIABLE for all OD explorations
+- Density pattern to OD pairing assignments must remain stable
+- Complete checklist of files OD must create must stay accurate
+- All mandatory consumption items must be listed
+
+7. WHAT BREAKS IF THIS CHANGES
+- provenance/CLAUDE.md navigation to OD entry point becomes wrong
+- stage-3-organization-od/STAGE-HEADER.md loses its predecessor context
+- explorations/organizational/CLAUDE.md loses its mandatory-read reference
+- DESIGN-SYSTEM/CLAUDE.md OD entry path breaks
+- OD explorations built without correct DD constraints
+- Any OD work lacking DD-F-006 compliance becomes invalid
+- 8+ inbound references across the system break or become stale
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| provenance/CLAUDE.md                    | "Want to start OD work? Read this"    |
+| stage-3-organization-od/STAGE-HEADER.md | Predecessor handoff reference         |
+| explorations/organizational/CLAUDE.md   | Mandatory read before OD exploration  |
+| DESIGN-SYSTEM/CLAUDE.md                 | OD entry point in navigation table    |
+| OD agent (Phase 0)                      | First file read before any OD work    |
+| BACKBONE.md                             | Handoff referenced in master narrative|
+
+9. RESEARCH DEBT
+- OD density-pattern pairings are RECOMMENDED not VALIDATED (no OD explorations
+  yet to confirm the pairings work in practice)
+- Checklist of files OD must create may need revision once OD actually starts
+- No formal verification that the handoff is complete (could miss a DD-F finding)
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Are all 6 density patterns listed with their OD pairing recommendations (PULSE->OD-001, CRESCENDO->OD-002, etc.)?
+Q2: Is DD-F-006 FRACTAL marked as mandatory for ALL OD explorations (not just one)?
+Q3: Is the "OD cannot proceed without" 3-step acknowledgment protocol present?
+Q4: Are all DD-F findings (001-018) listed as mandatory consumption items?
+Q5: Is the complete checklist of files OD must create present and actionable?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # HANDOFF: DD → OD
 ## OD Reads This FIRST at Phase 0
 

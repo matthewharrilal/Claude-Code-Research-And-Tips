@@ -1,3 +1,46 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/knowledge-architecture/KA-VERIFICATION.md
+Tier: B | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Verification framework for the knowledge architecture. Contains checklists for
+every KA phase, spot-check methodology, and results for validating that token
+values, patterns, and supersession tracking are accurate.
+
+2. THE QUESTION THIS ANSWERS
+"Has each phase of the knowledge architecture been verified, and do the documented
+tokens, patterns, and supersession chains match reality?"
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| CSS token verification methodology      | Verification approach for token values|
+| Pattern documentation checks            | Validation of documented patterns     |
+| SOURCE-OF-TRUTH-REGISTRY.md             | Defines what's authoritative          |
+
+6. MUST HONOR
+- Verification checklists define minimum quality gates for each KA phase
+- Token value spot-checks must use actual CSS/source values, not documented values
+- Supersession tracking must match the chains in KA-DECISIONS.md
+
+8. CONSUMED BY
+LEAF NODE — Not directly referenced by path from other files.
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Have the spot-check results been updated since the last file modification in
+    the knowledge architecture?
+Q2: Do the token values verified here match those in DESIGN-TOKEN-SUMMARY.md and
+    the actual CSS source files?
+Q3: Are all verification checklist items either checked or explicitly noted as
+    blocked/skipped with rationale?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════ -->
+
 # KA-VERIFICATION.md — Quality and Accuracy Checks
 ## Verification Checklists and Spot-Check Results
 

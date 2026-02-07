@@ -1,3 +1,73 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/research/R2-CREATIVE-LAYOUTS.md
+Tier: B | Batch: 4 | Generated: 2026-02-06
+═══════════════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+R2-CREATIVE-LAYOUTS.md captures 27 findings from external competitive analysis
+of creative layout patterns drawn from magazine editorial design, premium
+dashboard interfaces, design system showcases, and experimental web layouts.
+It was produced on 2026-02-04 by research sub-agent R-2 to inform layout
+innovation beyond standard documentation grids. Its findings feed into future
+layout explorations across multiple stages. Note: the showcase/CLAUDE.md
+claims 78 findings but the actual numbered findings in the tables run R2-001
+through R2-027; DISCOVERIES-LOG references R2-079, indicating a counting
+discrepancy that constitutes research debt.
+
+2. THE QUESTION THIS ANSWERS
+
+"What creative layout techniques from magazines, dashboards, and design
+showcases can be adapted for a KortAI component showcase that feels like
+premium editorial design rather than generic web layouts?"
+
+3. STATUS
+
+ACTIVE (locked data). 27 findings (R2-001 through R2-027) are complete and
+immutable. The discrepancy between the 78-count claim in CLAUDE.md and the
+actual 27 findings is documented research debt. No new findings will be added.
+
+5. BUILT ON
+
+Source                                      | Role               | Key Values                                          | Path
+Medium - Beyond the Grid (2026)             | External reference | Broken grid, intentional asymmetry, AI-era design   | https://medium.com/@zddalhoum/beyond-the-grid-7-radical-shifts-for-web-design-in-2026-6beb97bbb3a4
+Dashboard UI patterns                       | External reference | Overlapping elements, layered information display    | Various URLs (inline in findings)
+Design system showcase sites                | External reference | Component presentation, interactive demos            | Various URLs (inline in findings)
+Editorial/magazine layout theory            | External reference | Pull quotes, typographic rhythm, column breaking     | Various URLs (inline in findings)
+
+6. MUST HONOR
+
+#  | Constraint                                     | Rationale
+1  | Do not modify findings — this is locked data    | Downstream tracking in RESEARCH-ACTIVE.md depends on stable finding IDs
+2  | Finding IDs are R2-001 through R2-027           | Cross-references from FINDINGS-INDEX.md use these IDs
+3  | Copies in provenance/original-research/ must match | Chain integration requires identical content
+4  | Count discrepancy (78 vs 27) must be documented | CLAUDE.md and DISCOVERIES-LOG cite a higher count; reconciliation is pending
+
+8. CONSUMED BY
+
+Consumer                                                          | How It Uses This File
+showcase/checkpoints/RESEARCH-ACTIVE.md                           | Tracks which R2 findings have been applied and which remain unapplied
+showcase/checkpoints/COMPONENT-AUDIT-FOUNDATION.md                | References R2 findings for layout innovation decisions
+showcase/FINDINGS-INDEX.md                                        | Indexes R2 findings alongside R1, R3-R5 for unified lookup
+showcase/research/RESEARCH-SYNTHESIS.md                           | Synthesizes R2 layout insights into Principle 2 (Layout as Choreography)
+showcase/research/CLAUDE.md                                       | Lists R2 finding count and stage mapping for agent navigation
+
+10. DIAGNOSTIC QUESTIONS
+
+Q1: Can every R2-0XX ID referenced in RESEARCH-ACTIVE.md or FINDINGS-INDEX.md
+    be found as an actual finding in this file?
+Q2: Is the count discrepancy between CLAUDE.md (78) and actual findings (27)
+    still present and unresolved?
+Q3: Are all 27 findings present and numbered sequentially from R2-001
+    through R2-027?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # R2: Creative Layout Innovations Research
 
 **Research Agent:** R-2

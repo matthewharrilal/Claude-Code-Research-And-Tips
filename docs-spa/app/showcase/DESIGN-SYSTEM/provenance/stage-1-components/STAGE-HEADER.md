@@ -9,6 +9,58 @@ manifest_ref: DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md
 last_updated: 2026-02-05
 ---
 
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-1-components/STAGE-HEADER.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Stage 1 completion documentation and soul piece discovery narrative. Tells the
+story of how the 5 soul pieces were discovered during Component Foundation work,
+from the first rounded-corner insight (COMP-F-001) through the shape-shift
+epiphany (COMP-F-005). This is the origin story of the KortAI design soul.
+
+2. THE QUESTION THIS ANSWERS
+"How were the 5 soul pieces discovered, and what happened during Stage 1 that
+made the rest of the pipeline possible?"
+
+3. STATUS
+ACTIVE — Complete stage header for the foundation layer.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| SOUL-DISCOVERIES.md                     | Soul piece discovery narratives       |
+| COMPONENTS-REGISTRY.md                  | Component specifications referenced   |
+| COMP-F findings (001-021)               | Finding IDs narrated in story form    |
+| 5 Soul Pieces                           | Core discoveries documented here      |
+| Stage metrics (54% -> ~92%)             | Compliance progression tracked        |
+| Predecessor/successor chain metadata    | Pipeline stage linking (pred: null, succ: stage-2-density-dd) |
+
+6. MUST HONOR
+- Soul piece narratives must match SOUL-DISCOVERIES.md exactly
+- COMP-F finding IDs must remain stable (referenced downstream)
+- Predecessor/successor chain in YAML frontmatter must stay accurate
+- Soul piece #2 narrative (Archivist Speaks in Serif) is canonical here
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| stage-2-density-dd/STAGE-HEADER.md      | Predecessor chain reference           |
+| Any agent entering Stage 1              | Story context and orientation         |
+| BACKBONE.md                             | Stage 1 summary sourced from here     |
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does the predecessor field say null and successor point to stage-2-density-dd/STAGE-HEADER.md?
+Q2: Are all 5 soul pieces narrated with matching COMP-F IDs (001-005)?
+Q3: Does the compliance metric show the 54% -> ~92% progression?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # STAGE 1: COMPONENT FOUNDATION
 ## Where the Soul Was Discovered
 

@@ -1,3 +1,46 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/original-research/R3-DENSITY-DIMENSIONS.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Provenance chain copy of R-3 research (51 findings on multidimensional
+density beyond spatial arrangement -- temporal, depth, semantic, cognitive,
+interaction density). Preserved here for chain integration.
+
+2. THE QUESTION THIS ANSWERS
+How does density operate across six distinct dimensions, and what patterns
+emerge for documentation showcase pacing and rhythm?
+
+3. STATUS
+SYNCED DUPLICATE of showcase/research/R3-DENSITY-DIMENSIONS.md.
+Sync protocol: operational edits go in research/, archival copies here.
+
+5. BUILT ON
+See original at showcase/research/R3-DENSITY-DIMENSIONS.md.
+
+6. MUST HONOR
+Keep in sync with source at showcase/research/R3-DENSITY-DIMENSIONS.md.
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| PIPELINE-MANIFEST.md                    | R3 finding registry entries            |
+| RESEARCH-SYNTHESIS.md                   | Cross-research principle synthesis     |
+| RESEARCH-ACTIVE.md                      | Application status tracking            |
+| density-patterns.md                     | Pattern validation source              |
+
+10. DIAGNOSTIC QUESTIONS
+- Is this file in sync with showcase/research/R3-DENSITY-DIMENSIONS.md?
+- Are all 51 findings present and numbered consistently?
+- Do the ~76% applied findings match PIPELINE-MANIFEST.md status entries?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # R3: Density Dimensions Research
 
 ## Research Agent: R-3

@@ -1,3 +1,77 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/knowledge-architecture/PHASE-1B-MEGA-DEBRIEF.md
+Tier: A | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Historical record of the Phase 1B recursive dependency trace. Documents the
+complete analysis of 463 file connections across the entire repository, proving
+76% T1 reachability, zero broken references, and zero circular dependencies.
+This is a locked historical record — DO NOT modify for new work.
+
+2. THE QUESTION THIS ANSWERS
+"What did the full dependency trace reveal about how this system connects, what's
+reachable from T1, and what structural integrity issues exist?"
+
+3. STATUS
+ACTIVE (historical record, locked — do not update for new work)
+
+4. SOUL ALIGNMENT
+Soul-adjacent — Documents the architecture that carries the soul (provenance
+chains, T1 reachability, dependency structure) without implementing soul values
+directly. The 76% T1 reachability metric proves the soul propagates through the
+system.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| All showcase/ files                     | Traced as part of 463-file analysis   |
+| All design-extraction/ files            | Traced as part of 463-file analysis   |
+| All design-system/ files                | Traced as part of 463-file analysis   |
+| 17 output files from Phase 1B agents   | Raw data synthesized into debrief     |
+
+6. MUST HONOR
+- This is a LOCKED historical record — do not modify content for new work
+- The 76% T1 reachability figure is the canonical proof of system connectivity
+- Zero broken references and zero circular dependencies are integrity baselines
+- Threading data derived from this debrief must cite it as source
+
+7. WHAT BREAKS IF THIS CHANGES
+HIGH blast radius (10+ inbound references). Changing debrief conclusions would:
+- Invalidate threading data in Phase 2B headers that cite reachability/integrity stats
+- Undermine KA-DECISIONS.md tier assignments that used dependency trace results
+- Break the PIPELINE-BACKBONE.md narrative which references debrief findings
+- Require re-verification of SOURCE-OF-TRUTH-REGISTRY.md authority assignments
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| KA/CLAUDE.md                            | Referenced as key document             |
+| knowledge-architecture/ files           | Multiple references to debrief data    |
+| Phase 2B threading headers              | Source for reachability/integrity stats |
+
+9. RESEARCH DEBT
+- The 463-file trace was comprehensive at time of execution but new files added
+  since Phase 1B have not been traced
+- Some orphan files identified in the debrief may have been addressed or removed
+  during Phase 2A classification
+- The 76% T1 reachability figure should be re-verified after Phase 2A deletions
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Has any file been added to the repository since Phase 1B that is NOT covered
+    by the 463-file dependency trace?
+Q2: Do the orphan files listed in this debrief still exist, or were they addressed
+    during Phase 2A classification?
+Q3: Is the 76% T1 reachability figure still accurate after Phase 2A deleted 132
+    files and superseded 46 others?
+Q4: Are the zero broken references and zero circular dependencies still true after
+    subsequent file modifications?
+Q5: Do the threading data fields (source, built_on, cited, mandatory_for) populated
+    from this debrief match the current state of the files they describe?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════ -->
+
 PHASE 1B MEGA DEBRIEF — REVISED EXECUTION PLAN                                                                                                                                                                                                                                          │
 │                                                                                                                                                                                                                                                                                         │
 │ Context                                                                                                                                                                                                                                                                                 │

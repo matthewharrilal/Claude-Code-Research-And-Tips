@@ -1,3 +1,47 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/SOUL-DISCOVERIES.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Provenance chain copy of the 5 soul pieces discovered through perceptual
+deepening. Preserves the soul extraction record within the provenance
+directory for chain integrity alongside component and density findings.
+
+2. THE QUESTION THIS ANSWERS
+What are the core perceptual truths (soul pieces) that govern the design
+system, and how were they discovered?
+
+3. STATUS
+SYNCED DUPLICATE of checkpoints/SOUL-DISCOVERIES.md. Sync protocol:
+operational edits go in checkpoints/, archival copies here.
+
+5. BUILT ON
+See original at showcase/checkpoints/SOUL-DISCOVERIES.md.
+
+6. MUST HONOR
+Keep in sync with source at checkpoints/SOUL-DISCOVERIES.md.
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| provenance/CLAUDE.md                    | Listed as provenance directory member  |
+| STAGE-HEADERs                           | Soul piece references                 |
+| BACKBONE.md                             | Soul piece narrative integration       |
+| README.md                               | Soul documentation reference           |
+| HANDOFF-DD-TO-OD.md                     | Soul compliance requirements           |
+
+10. DIAGNOSTIC QUESTIONS
+- Is this file in sync with checkpoints/SOUL-DISCOVERIES.md?
+- Are all 5 soul pieces documented with perceptual truths (not just CSS)?
+- Do the locked design tokens match DESIGN-SYSTEM/tokens/ values?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # SOUL DISCOVERIES
 ## Perceptual Truths Extracted Through Iterative Visual Discovery
 

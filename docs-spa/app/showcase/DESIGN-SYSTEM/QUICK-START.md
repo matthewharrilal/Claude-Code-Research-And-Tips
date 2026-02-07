@@ -1,3 +1,50 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/QUICK-START.md
+Tier: B | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Copy-paste-ready CSS token definitions and base styles for getting
+KortAI running immediately. This is the practical on-ramp — everything
+a developer needs to start applying the design system without reading
+the full research chain.
+
+2. THE QUESTION THIS ANSWERS
+"What are the exact CSS variable values I need to copy into my
+stylesheet to be KortAI-compliant?"
+
+3. STATUS
+COMPLETE — all locked token values present (colors, typography,
+geometry, spacing). Values sourced from design-extraction T1 synthesis.
+
+5. BUILT ON
+- design-extraction/component-system/perceptual-audit-v2/synthesis/DESIGN-TOKEN-SUMMARY.md (CSS token values)
+- density-patterns.md (pattern references)
+- combination-rules.md (combination methodology)
+- anti-patterns/registry.md (what to avoid)
+
+6. MUST HONOR
+- Token values are LOCKED — border-radius: 0, box-shadow: none
+- Color values must match DESIGN-TOKEN-SUMMARY.md exactly
+- Font stack order (Instrument Serif, Inter, JetBrains Mono) is fixed
+- Spacing scale must use the defined 4px base unit
+
+8. CONSUMED BY
+- DESIGN-SYSTEM/CLAUDE.md (quick reference link)
+- guides/migration-guide.md (prerequisite — "load KortAI CSS variables")
+- Any downstream developer onboarding
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Do all CSS variable values here match DESIGN-TOKEN-SUMMARY.md
+    from design-extraction exactly?
+Q2: Does border-radius resolve to 0 and box-shadow to none with
+    no exceptions?
+Q3: Are the font family stacks identical to the locked typography
+    tokens in design-extraction T1?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════ -->
+
 # Quick Start Guide
 ## Get KortAI Running in 5 Minutes
 

@@ -1,3 +1,72 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/FINDINGS-INDEX.md
+Tier: A | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Master index of all research findings, component definitions, CSS tokens, and
+density patterns discovered during the showcase project. Structured for future
+infrastructure, deriving pipelines, migrations, and onboarding. This is the
+single lookup point for "what did we find and where is it documented?"
+
+2. THE QUESTION THIS ANSWERS
+"What findings, patterns, components, and concrete examples exist across all
+research phases, and where is the source documentation for each?"
+
+3. STATUS
+ACTIVE
+
+4. SOUL ALIGNMENT
+Soul-adjacent — Indexes all soul-implementing findings (token values, density
+patterns, component definitions) without implementing soul values directly.
+The research findings cataloged here are the evidence base that validates soul
+decisions in T1 synthesis files.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| R1-001 through R1-010                   | Documentation pattern findings         |
+| R2-001 through R2-010                   | Premium site analysis findings         |
+| R4 key findings                         | Component pattern findings             |
+| R5 key findings                         | Advanced pattern findings              |
+| COMPONENTS-REGISTRY.md (design-extraction) | 11 component definitions           |
+| DESIGN-TOKEN-SUMMARY.md (design-extraction) | CSS token block                   |
+
+6. MUST HONOR
+- All finding IDs (R1-001, R2-003, etc.) are canonical — do not renumber
+- Component definitions must match COMPONENTS-REGISTRY.md
+- CSS token values must match DESIGN-TOKEN-SUMMARY.md locked values
+- Density patterns must match validated explorations (DD-001 through DD-006)
+
+7. WHAT BREAKS IF THIS CHANGES
+LOW blast radius (standalone index, 0 direct inbound path references). However:
+- Renumbering finding IDs would break any file that references R-X-NNN IDs
+- Changing component definitions would create divergence with COMPONENTS-REGISTRY.md
+- Modifying CSS token values would contradict DESIGN-TOKEN-SUMMARY.md
+
+8. CONSUMED BY
+LEAF NODE — Consumed during research lookup but not referenced by path from other
+files. Standalone master index.
+
+9. RESEARCH DEBT
+- R3 (density research) findings are cataloged but some lack implementation status
+- Component registry section may not reflect components added after initial catalog
+- CSS token block should be cross-verified against DESIGN-TOKEN-SUMMARY.md for drift
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Do the CSS token values in this index exactly match the locked values in
+    DESIGN-TOKEN-SUMMARY.md?
+Q2: Are all 11 component definitions consistent with COMPONENTS-REGISTRY.md?
+Q3: Do the density pattern descriptions match the actual implementations in
+    DD-001 through DD-006 HTML files?
+Q4: Are there any research findings referenced elsewhere in the repository that
+    are NOT cataloged in this index?
+Q5: Has the "When to Apply" guidance for each finding been validated against
+    actual usage in exploration files?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════ -->
+
 # FINDINGS-INDEX — Complete Knowledge Architecture
 ## Structured for Future Infrastructure, Deriving Pipelines, and Migrations
 

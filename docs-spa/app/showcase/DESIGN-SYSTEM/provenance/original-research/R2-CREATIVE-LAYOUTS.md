@@ -1,3 +1,45 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/original-research/R2-CREATIVE-LAYOUTS.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Provenance chain copy of R-2 research (creative layout innovations from
+magazines, dashboards, and design system showcases). Preserved here for
+chain integration alongside other original research copies.
+
+2. THE QUESTION THIS ANSWERS
+What creative layout patterns from editorial design and premium dashboards
+can elevate the KortAI showcase beyond standard documentation grids?
+
+3. STATUS
+SYNCED DUPLICATE of showcase/research/R2-CREATIVE-LAYOUTS.md.
+Sync protocol: operational edits go in research/, archival copies here.
+
+5. BUILT ON
+See original at showcase/research/R2-CREATIVE-LAYOUTS.md.
+
+6. MUST HONOR
+Keep in sync with source at showcase/research/R2-CREATIVE-LAYOUTS.md.
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| PIPELINE-MANIFEST.md                    | R2 finding registry entries            |
+| RESEARCH-SYNTHESIS.md                   | Cross-research principle synthesis     |
+| RESEARCH-ACTIVE.md                      | Application status tracking            |
+
+10. DIAGNOSTIC QUESTIONS
+- Is this file in sync with showcase/research/R2-CREATIVE-LAYOUTS.md?
+- Are all findings present and numbered consistently?
+- Do finding IDs here match those referenced in PIPELINE-MANIFEST.md?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # R2: Creative Layout Innovations Research
 
 **Research Agent:** R-2

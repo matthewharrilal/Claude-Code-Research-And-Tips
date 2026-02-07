@@ -1,3 +1,74 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/research/R1-DOCUMENTATION-PATTERNS.md
+Tier: B | Batch: 4 | Generated: 2026-02-06
+═══════════════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+R1-DOCUMENTATION-PATTERNS.md captures 28 findings from external competitive
+analysis of premium documentation sites including Stripe, Vercel, Linear,
+Notion, Mintlify, Radix, Apple HIG, Tailwind, Docusaurus, and Storybook.
+It was produced on 2026-02-04 by research sub-agent R-1 as the PRIMARY
+research input for the Organizational Density (OD) stage (Stage 3) of the
+KortAI showcase pipeline. Its authority comes from being the only structured
+extraction of documentation-specific design patterns in this repository.
+
+2. THE QUESTION THIS ANSWERS
+
+"What documentation design patterns do premium sites use for density rhythm,
+whitespace, typography hierarchy, and component presentation — and how should
+KortAI's showcase adapt them?"
+
+3. STATUS
+
+ACTIVE (locked data). 28 findings (R1-001 through R1-028) are complete and
+immutable. No new findings will be added. Downstream consumption is ongoing
+via OD explorations and RESEARCH-ACTIVE.md tracking.
+
+5. BUILT ON
+
+Source                          | Role                  | Key Values                                     | Path
+Stripe Documentation            | External reference    | Density rhythm, code/explanation patterns       | https://docs.stripe.com/
+Linear UI Redesign              | External reference    | Density HIGH/LOW oscillation                    | https://linear.app/now/how-we-redesigned-the-linear-ui
+Loop11 UX Research              | External reference    | 38% retention rule, whitespace ROI               | https://www.loop11.com/the-power-of-white-space-in-ux-design/
+Apple HIG                       | External reference    | One concept per viewport, viewport principle     | https://developer.apple.com/design/human-interface-guidelines/
+Vercel, Notion, Mintlify et al. | External reference    | Typography hierarchy, navigation, progressive disclosure | Various URLs (inline in findings)
+
+6. MUST HONOR
+
+#  | Constraint                                     | Rationale
+1  | Do not modify findings — this is locked data    | Downstream tracking in RESEARCH-ACTIVE.md depends on stable finding IDs
+2  | Finding IDs are R1-001 through R1-028           | Cross-references from RETROACTIVE-AUDIT, STAGE-HEADER (OD), HANDOFF use these IDs
+3  | Copies in provenance/original-research/ must match | Chain integration requires identical content
+
+8. CONSUMED BY
+
+Consumer                                                                          | How It Uses This File
+showcase/checkpoints/RESEARCH-ACTIVE.md                                           | Tracks which R1 findings have been applied and which remain unapplied
+showcase/checkpoints/COMPONENT-AUDIT-FOUNDATION.md                                | References R1 findings for component documentation pattern decisions
+showcase/checkpoints/RETROACTIVE-AUDIT-DD-001-006.md                              | Cross-references R1 density findings applied during DD explorations
+DESIGN-SYSTEM/provenance/stage-3-organization-od/STAGE-HEADER.md                  | Lists R1 as PRIMARY research input for OD stage
+DESIGN-SYSTEM/provenance/stage-2-density-dd/HANDOFF-DD-TO-OD.md                   | Transfers applicable R1 findings from DD to OD scope
+showcase/CLAUDE.md                                                                | Mandates reading R1 before any OD exploration
+showcase/research/CLAUDE.md                                                       | Lists R1 finding count and stage mapping for agent navigation
+showcase/research/RESEARCH-SYNTHESIS.md                                           | Synthesizes R1 insights with R2-R5 into unified principles
+
+10. DIAGNOSTIC QUESTIONS
+
+Q1: Can every R1-0XX ID referenced in RESEARCH-ACTIVE.md be found as an
+    actual finding in this file?
+Q2: Does STAGE-HEADER.md for OD (Stage 3) list R1 as its primary research
+    input?
+Q3: Are all 28 findings present and numbered sequentially from R1-001
+    through R1-028?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # R1: Documentation Design Patterns Research
 
 **Research Agent:** R-1

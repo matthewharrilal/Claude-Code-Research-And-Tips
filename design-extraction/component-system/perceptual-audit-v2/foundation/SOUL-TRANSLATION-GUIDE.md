@@ -1,3 +1,164 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/foundation/SOUL-TRANSLATION-GUIDE.md
+     Tier: A | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+SOUL-TRANSLATION-GUIDE.md is the bridge document that translates KortAI's soul
+philosophy into concrete CSS implementation rules for non-image components. The core
+problem it solves: the KortAI soul was originally extracted from image-heavy card
+references where halftone/duotone image treatment carried significant visual weight.
+Non-image components (callouts, code blocks, decision matrices, file trees, etc.) cannot
+inherit halftone. This file defines HOW they inherit soul through five alternate channels:
+typography confidence, spacing generosity, container materiality, color discipline, and
+hierarchical clarity. It provides specification tables for typography (5 tiers: title,
+body, label, metadata, code), spacing (internal padding, zone gaps, external margins),
+containers (standard, tinted, inverted), color (primary + background + functional accent
+palettes), hierarchy rules, 9 component-specific translations, 5 perceptual tests, and
+a 12-point anti-pattern checklist.
+
+2. THE QUESTION THIS ANSWERS
+
+"When a KortAI component has no image, how exactly does it still FEEL like KortAI — what
+specific typography, spacing, container, color, and hierarchy rules must it follow to
+inherit the editorial soul without the halftone visual anchor?"
+
+3. STATUS
+
+ACTIVE — Foundation reference document. Lifecycle: COMPLETE (all non-image translation
+rules defined, 9 component-specific translations written, perceptual tests and
+anti-pattern checklist finalized). Authority: FOUNDATION — this is consumed by T1
+synthesis (PRODUCTION-RULES.md) and referenced by pipeline architecture documents.
+Not itself T1, but actively cited by knowledge-architecture files.
+
+4. SOUL ALIGNMENT
+
+This file TRANSLATES soul to CSS. It bridges KORTAI-ESSENCE-FOUNDATION.md's philosophical
+findings and SOUL-DEFINITION.md's locked rules into implementable specifications:
+
+| Soul Channel | From Philosophy | To CSS |
+|-------------|----------------|--------|
+| Typography confidence | "Authority through position, not emphasis stacking" | Instrument Serif 400 titles (18-24px), Inter 400 body (14-16px, line-height 1.5-1.7), uppercase labels 600 (11-12px) |
+| Spacing generosity | "Well-curated museum" | 16-24px card padding, 8px tight coupling, 12px title-body gap, 16px zone-zone gap |
+| Container materiality | "Paper notes on a desk" | Cream (#FEFCF3) or white bg, 0-4px radius, optional 1px subtle border (#e0d5c5), soft shadow 0 2px 4px rgba(0,0,0,0.05) |
+| Color discipline | "Ink on quality paper" | Near-black text (#1a1a1a), dark gray body (#3d3d3d), muted labels (#999), KortAI Red (#E83025) as functional accent only |
+| Hierarchical clarity | "Confident speaker" | SIZE primary, POSITION secondary, WEIGHT minimal (400 vs 600), COLOR functional only |
+
+NOTE FOR IMPLEMENTORS: Container radius (0-4px) and shadow values in this file
+represent the translation guide's original specifications. The soul-locked authoritative
+values are `border-radius: 0` and `box-shadow: none` per SOUL-DEFINITION.md and
+DESIGN-TOKEN-SUMMARY.md. When this file's values conflict with T1 locked values,
+T1 ALWAYS wins.
+
+5. BUILT ON
+
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| KORTAI-ESSENCE-FOUNDATION.md | Primary philosophical source | "The Unhurried Editor" character, 7 zone-level perceptual truths, typography/spacing/container/color/hierarchy findings, root metaphor | `design-extraction/component-system/perceptual-audit-v2/foundation/KORTAI-ESSENCE-FOUNDATION.md` |
+| SOUL-DEFINITION.md (component-system) | 6 Universal Rules authority | Locked :root CSS block, border-radius: 0, box-shadow: none, font stacks, color palette, spacing scale | `design-extraction/component-system/SOUL-DEFINITION.md` |
+| card-system/SOUL-DEFINITION.md | Ancestor soul (SUPERSEDED) | Original editorial vs Bootstrap philosophy, halftone as soul carrier concept | `design-extraction/card-system/SOUL-DEFINITION.md` |
+| Per-component audit findings | Component-specific behaviors | How each of the 9 listed components (callouts, essence, core abstraction, code snippet, file tree, decision matrix, task, reasoning, challenge) expresses soul | `design-extraction/component-system/perceptual-audit-v2/components/` |
+
+6. MUST HONOR
+
+This file INHERITS and TRANSLATES constraints from upstream:
+
+| Constraint | Specification | Enforcement |
+|-----------|--------------|-------------|
+| "Halftone is ONLY for images" | Non-image components CANNOT use halftone/duotone treatment | Fundamental principle stated in line 1 of content |
+| "Soul transfers through RESTRAINT, not decoration" | The 5 channels (typography, spacing, container, color, hierarchy) replace halftone | Design review gate: any component that uses decoration for visual interest instead of restraint fails |
+| Typography weight ceiling | Maximum 2 weights: Regular (400) and SemiBold (600); NO bold (700+) | Anti-pattern checklist item: "Bold + italic stacking" |
+| Color functional-only rule | Accent colors ONLY on borders, icons, small UI; NEVER on large backgrounds or text emphasis | Anti-pattern checklist item: "Colored text for emphasis" |
+| Hierarchy method precedence | SIZE > POSITION > WEIGHT > COLOR (never reverse) | Anti-pattern checklist item: "Color used for hierarchy (not function)" |
+| 5 Perceptual Tests | Paper Test, Magazine Test, Volume Test, Color Test, Hierarchy Test — all must pass | Each test has a pass/fail criterion documented in the PERCEPTUAL TESTS section |
+| 12-point anti-pattern checklist | Rounded corners > 4px, multiple accents, gradient backgrounds, heavy shadows, centered composition, etc. — all banned | Checklist must be verified before component approval |
+
+7. WHAT BREAKS IF THIS CHANGES
+
+BLAST RADIUS: MODERATE-HIGH (6+ direct consumers, pipeline-level reference)
+
+Direct breakage:
+- PRODUCTION-RULES.md (T1) — component-specific implementation templates derive from
+  the COMPONENT-SPECIFIC TRANSLATIONS section here
+- MASTER-SOUL-SYNTHESIS.md (T1) — references this file for soul-to-CSS translation
+  methodology
+- All component CSS files (9 in component-system/css/) — implementors use this guide
+  as the bridge between soul philosophy and CSS code
+- Per-component audits (11 in perceptual-audit-v2/components/) — each audit validates
+  against translation rules defined here
+
+Pipeline-level breakage:
+- PIPELINE-BACKBONE.md — lists this as Stage 2 ("Maps print to digital") in the
+  design pipeline; removing or renaming breaks the pipeline documentation
+- SOURCE-OF-TRUTH-REGISTRY.md — lists as foundation-tier source of truth for
+  "Soul-to-CSS translation rules"
+- docs-spa/app/showcase/dependency-trace/ — multiple files reference this as an
+  external dependency for showcase explorations
+
+8. CONSUMED BY
+
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| PRODUCTION-RULES.md (T1) | Codifies the 9 component-specific translations into mandatory implementation templates with correct/wrong CSS examples |
+| MASTER-SOUL-SYNTHESIS.md (T1) | References as the translation methodology that bridges philosophy to implementation |
+| component-system/css/*.css (9 files) | Implementors consult typography, spacing, container, and color rules tables when writing component CSS |
+| perceptual-audit-v2/components/ (11 audits) | Each component audit validates against translation rules; uses perceptual tests as verification gates |
+| PIPELINE-BACKBONE.md | Listed as pipeline Stage 2 — "Maps print to digital" |
+| SOURCE-OF-TRUTH-REGISTRY.md | Registered as foundation-tier authority for soul-to-CSS translation |
+| showcase/dependency-trace/02-threading-data/ | Referenced as external dependency for showcase exploration threading |
+| showcase/explorations/density/ | DD work consumes soul-to-CSS mapping for density exploration decisions |
+
+9. RESEARCH DEBT
+
+- Container radius specification ("0-4px") is inconsistent with the soul-locked value
+  of `border-radius: 0`. The file should carry an explicit warning or be updated to
+  reflect the locked value. Currently, an agent reading this file alone could implement
+  4px radius and believe it is compliant.
+- Container shadow specification ("0 2px 4px rgba(0,0,0,0.05)") conflicts with
+  soul-locked `box-shadow: none`. Same pre-lock issue as KORTAI-ESSENCE-FOUNDATION.md.
+- The COMPONENT-SPECIFIC TRANSLATIONS section covers 9 components but the full system
+  has 11 (missing: ASCII Dithered Art and Info Callout as distinct entries, though
+  Info Callout may be covered under "Callouts (Info, Tip, Gotcha)").
+- The anti-pattern checklist includes "Rounded corners > 4px" — but the soul-locked
+  value is `border-radius: 0`, meaning ANY rounded corners (including 1-4px) are
+  violations. The threshold should be "Rounded corners > 0px."
+- No explicit guidance for dark mode or theme switching — all translations assume the
+  light editorial theme.
+- The hierarchy levels table (H1: 24-32px, H2: 20-24px, etc.) does not perfectly align
+  with the type scale in SOUL-DEFINITION.md's :root block (text-h1: 40px, text-h2: 32px),
+  suggesting the translation guide uses component-internal sizing rather than the global
+  type scale. This distinction is not documented.
+
+10. DIAGNOSTIC QUESTIONS
+
+Q1: Does every CSS value in the typography, spacing, container, and color rules tables
+    align with the locked :root values in DESIGN-TOKEN-SUMMARY.md? (Expected: PARTIAL
+    NO — container radius and shadow values are known pre-lock divergences)
+
+Q2: Can an agent use the COMPONENT-SPECIFIC TRANSLATIONS section to implement all 11
+    KortAI components without consulting PRODUCTION-RULES.md? (Expected: NO — only 9
+    components are covered, and the guide provides direction but not the
+    correct/wrong CSS examples that PRODUCTION-RULES.md adds)
+
+Q3: Do the 5 perceptual tests (Paper, Magazine, Volume, Color, Hierarchy) appear in
+    PRODUCTION-RULES.md or ANTI-PATTERNS-REGISTRY.md as enforcement gates?
+    (Expected: YES — tests should be propagated to enforcement layer)
+
+Q4: Does the 12-point anti-pattern checklist fully subsume the anti-patterns in
+    ANTI-PATTERNS-REGISTRY.md (T1), or does the T1 registry contain additional
+    anti-patterns? (Expected: T1 registry is a SUPERSET — it adds anti-patterns
+    discovered during per-component audits)
+
+Q5: If the "Halftone is ONLY for images" principle were relaxed (e.g., CSS halftone
+    effects on text), which downstream files would need updates? (Expected: This file's
+    fundamental principle section, PRODUCTION-RULES.md component templates, and any
+    component CSS file that would gain halftone treatment)
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # Soul Translation Guide
 ## How Non-Image Components Inherit KortAI's Soul
 

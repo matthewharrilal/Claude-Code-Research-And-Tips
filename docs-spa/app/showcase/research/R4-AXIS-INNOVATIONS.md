@@ -1,3 +1,73 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/research/R4-AXIS-INNOVATIONS.md
+Tier: B | Batch: 4 | Generated: 2026-02-06
+═══════════════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+R4-AXIS-INNOVATIONS.md captures 192 findings cataloging reading patterns
+(Z, F, Gutenberg), grid innovations (bento, modular, broken grid), movement
+choreography (spiral, diagonal), and non-linear layout approaches for
+documentation design. It was produced on 2026-02-04 by research sub-agent
+R-4 and is the largest research stream by finding count. It serves as the
+PRIMARY research input for the Axis Dimension (AD) stage (Stage 4) of the
+KortAI showcase pipeline. Critically, ALL 192 findings remain UNAPPLIED as
+of the current pipeline state — no AD explorations have been executed yet.
+
+2. THE QUESTION THIS ANSWERS
+
+"What eye movement patterns, reading gravity principles, and axis innovations
+can be harnessed to create documentation layouts that feel intuitive rather
+than demanding, while adding controlled visual interest?"
+
+3. STATUS
+
+ACTIVE (locked data). 192 findings (R4-001 through R4-192) are complete and
+immutable. ALL findings are currently UNAPPLIED — the AD stage has not yet
+begun. This represents the largest block of unapplied research in the system.
+
+5. BUILT ON
+
+Source                                  | Role               | Key Values                                              | Path
+Oracle Design Guidelines                | External reference | Grid systems, structured reading patterns                | Various URLs (inline in findings)
+Landing Page Flow research              | External reference | Conversion-oriented eye movement, CTA placement          | Various URLs (inline in findings)
+Ying Design                             | External reference | Experimental layouts, diagonal movement                  | Various URLs (inline in findings)
+Eye tracking research                   | External reference | Z-pattern, F-pattern, Gutenberg diagram science          | Various URLs (inline in findings)
+Bento grid case studies                 | External reference | Modular grid, asymmetric bento, responsive grid systems  | Various URLs (inline in findings)
+
+6. MUST HONOR
+
+#  | Constraint                                     | Rationale
+1  | Do not modify findings — this is locked data    | Future AD explorations will reference these IDs; stability is mandatory
+2  | Finding IDs are R4-001 through R4-192           | Cross-references from FINDINGS-INDEX.md and STAGE-HEADER (AD) use these IDs
+3  | Copies in provenance/original-research/ must match | Chain integration requires identical content
+4  | All 192 findings are UNAPPLIED                  | RESEARCH-ACTIVE.md must reflect zero application until AD begins
+
+8. CONSUMED BY
+
+Consumer                                                                          | How It Uses This File
+showcase/checkpoints/RESEARCH-ACTIVE.md                                           | Tracks R4 findings as fully unapplied pending AD stage
+showcase/checkpoints/COMPONENT-AUDIT-FOUNDATION.md                                | References R4 findings for axis-aware component layout decisions
+showcase/FINDINGS-INDEX.md                                                        | Indexes all 192 R4 findings for unified lookup
+DESIGN-SYSTEM/provenance/stage-4-axis-ad/STAGE-HEADER.md                          | Lists R4 as PRIMARY research input for AD stage
+showcase/research/RESEARCH-SYNTHESIS.md                                           | Synthesizes R4 into Principle 2 (Layout as Choreography)
+showcase/research/CLAUDE.md                                                       | Lists R4 finding count (192) and stage mapping for agent navigation
+
+10. DIAGNOSTIC QUESTIONS
+
+Q1: Does RESEARCH-ACTIVE.md show all 192 R4 findings as UNAPPLIED?
+Q2: Does STAGE-HEADER.md for AD (Stage 4) list R4 as its primary research
+    input?
+Q3: Are all 192 findings present and numbered sequentially from R4-001
+    through R4-192?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # R4: AXIS INNOVATIONS - Reading Patterns and Layout Flow Research
 
 **Sub-Agent:** R-4 - Axis Innovations Research

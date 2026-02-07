@@ -1,3 +1,71 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/EXECUTION-STATE.md
+     Tier: B | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+This file is the 29KB state machine that tracked the entire perceptual audit from
+inception to completion. It records phase progress (0 through 4), all 11 component
+audit statuses with scores and character assignments, sub-agent deployment statistics
+(157 deployed of 202 planned), file creation counts (150+ files), context restoration
+instructions, and per-component completion summaries. It was the single source of
+truth for session resumption during the multi-day audit, ensuring no work was lost
+or duplicated across Claude context compactions.
+
+2. THE QUESTION THIS ANSWERS
+"What is the current state of the perceptual audit — which phases are complete,
+which components have been audited, what scores did they receive, and how do I
+resume work if context is lost?"
+
+3. STATUS
+ACTIVE (HISTORICAL) — Final state recorded 2026-02-04 after Phase 3 completion.
+All phases 0-3 marked complete; Phase 4 (Master Synthesis) was marked as NEXT
+and has since been completed separately in synthesis/. This file preserves the
+audit state machine as a historical record and remains useful for context recovery.
+
+5. BUILT ON
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| Audit master plan (38 revisions) | Methodology definition | 12 sub-agents, 48/60 threshold, 25 rules | ~/.claude/plans/woolly-riding-yeti.md |
+| Checkpoint protocol | Session preservation rules | Read EXECUTION-STATE first on compaction | Internal convention |
+| 11 soul extraction files | Component completion data | Scores, characters, truths | soul-extractions/*-soul-extraction.md |
+| 8 coexistence test results | Phase 2 pair data | 4.4/5 average, 100% pass | coexistence/COEXISTENCE-TEST-RESULTS.md |
+| 4 page audit results | Phase 3 page data | 90%, 97.5%, 97.5%, 78.5% | pages/*.md |
+| KORTAI-ESSENCE-FOUNDATION.md | Foundation reference for restoration | Soul principles, 7 pillars | foundation/KORTAI-ESSENCE-FOUNDATION.md |
+
+6. MUST HONOR
+| Constraint | Detail |
+|------------|--------|
+| Audit methodology preserved | Phase structure and scoring are historical record, not editable |
+| State data is historical | Component scores, sub-agent counts, file counts are frozen facts |
+| Context restoration protocol is authoritative | The "read this file first" instruction is battle-tested across multiple compactions |
+| Named characters are final | 11 character names and archetypes were assigned during audit and are locked |
+| Sub-agent deployment stats are approximate | 157 deployed vs 202 planned reflects efficiency optimizations, not failures |
+| Linked files may have moved | Paths to validation-sprint/ and perceptual-audit/ reference archive locations |
+
+8. CONSUMED BY
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| Any new Claude session in perceptual-audit-v2 | First file to read for state recovery (per compaction protocol) |
+| CONTEXT-RESTORATION.md | Directs readers to this file as step 1 of context recovery |
+| MASTER-INDEX.md | References this as the process tracking document |
+| CLAUDE.md (perceptual-audit-v2) | Lists this as the execution state file |
+| Future audit methodology documentation | Historical record of how the 4-phase audit executed in practice |
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does the PHASE PROGRESS table show all 5 phases (0-4) with phases 0-3 marked
+    COMPLETE and Phase 4 marked PENDING — and does this match the reality that
+    synthesis/ files now exist?
+Q2: Does the COMPONENT AUDIT STATUS table list all 11 components with scores
+    matching those in MASTER-INDEX.md (range: 48.5/60 to 54/60)?
+Q3: Does the CONTEXT RESTORATION NOTES section include the 5-step recovery
+    protocol (read EXECUTION-STATE, read plan, read foundation, check
+    soul-extractions, check task list)?
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # Perceptual Audit Execution State
 ## Session Tracking for Context Preservation
 

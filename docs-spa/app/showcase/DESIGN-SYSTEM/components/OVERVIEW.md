@@ -1,3 +1,56 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/components/OVERVIEW.md
+Tier: B | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Provides the complete catalog of all 11 KortAI components with their
+character names, soul scores, and velocity/temperature/weight properties.
+This is the enriched overview — it goes beyond design-extraction by
+adding the behavioral properties (velocity, temperature, weight) that
+drive combination-rules.md.
+
+2. THE QUESTION THIS ANSWERS
+"What are the 11 KortAI components, what are their soul compliance
+scores, and what behavioral properties govern how they combine?"
+
+3. STATUS
+COMPLETE — all 11 components cataloged with character names, soul
+scores (81%-90%), families (Callout, Technical, Structural), and
+behavioral properties. Condensed from CHARACTER-FAMILY-COMPLETE.md
+with enrichment (velocity/temperature/weight not in source).
+
+5. BUILT ON
+- design-extraction/component-system/perceptual-audit-v2/synthesis/CHARACTER-FAMILY-COMPLETE.md (11 characters, soul scores)
+- COMPONENTS-REGISTRY.md (component specifications)
+- Velocity/temperature/weight properties (enrichment layer added
+  during DESIGN-SYSTEM creation, not in design-extraction source)
+
+6. MUST HONOR
+- Soul scores must match CHARACTER-FAMILY-COMPLETE.md
+- Character names are canonical (Precise Transcriptionist, Senior
+  Concierge, etc.)
+- Component families (Callout, Technical, Structural) are structural
+  groupings, not arbitrary
+- Accent colors and background values must match locked tokens
+
+8. CONSUMED BY
+- DESIGN-SYSTEM/CLAUDE.md (navigation: "Understand components → OVERVIEW.md")
+- component-findings.md (references component catalog)
+- combination-rules.md (consumes velocity/temperature/weight values)
+- Individual component spec files (./code-snippet.md, etc.)
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Do all 11 soul scores match the values in CHARACTER-FAMILY-COMPLETE.md
+    from design-extraction?
+Q2: Are the velocity/temperature/weight values consistent with how
+    combination-rules.md uses them?
+Q3: Do the accent colors and background hex values in the family
+    tables match the locked token values in QUICK-START.md?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════ -->
+
 # Component Overview
 ## All 11 KortAI Components
 

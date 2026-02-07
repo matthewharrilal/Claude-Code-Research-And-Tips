@@ -1,3 +1,45 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/original-research/RESEARCH-SYNTHESIS.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Provenance chain copy of the unified research synthesis that distills
+cross-cutting principles from all 5 research agents (R1-R5) into a
+coherent design framework. Preserved here for chain integration.
+
+2. THE QUESTION THIS ANSWERS
+What unified design principles emerge when all 5 research streams are
+synthesized, and how do they interact to form a coherent system?
+
+3. STATUS
+SYNCED DUPLICATE of showcase/research/RESEARCH-SYNTHESIS.md.
+Sync protocol: operational edits go in research/, archival copies here.
+
+5. BUILT ON
+See original at showcase/research/RESEARCH-SYNTHESIS.md.
+
+6. MUST HONOR
+Keep in sync with source at showcase/research/RESEARCH-SYNTHESIS.md.
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| PIPELINE-MANIFEST.md                    | Cross-research synthesis reference     |
+| RESEARCH-ACTIVE.md                      | Synthesis-level tracking               |
+| CLAUDE.md (showcase root)               | Mandatory pre-read for all work        |
+
+10. DIAGNOSTIC QUESTIONS
+- Is this file in sync with showcase/research/RESEARCH-SYNTHESIS.md?
+- Do the unified principles accurately reflect all 5 research streams?
+- Are cross-references to R1-R5 finding IDs still valid?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # RESEARCH-SYNTHESIS
 ## Unified Framework from All 5 Research Agents
 

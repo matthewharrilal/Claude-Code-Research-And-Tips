@@ -1,3 +1,82 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/perceptual-audit-v2/tracking/PERCEPTUAL-TRUTHS.md
+     Tier: B | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+This file is the master registry of all perceptual truths extracted during
+the Phase 1 soul extractions and Phase 4 structural re-audit for all 11
+KORTAI components. It preserves verbatim the "Master Soul Truth" and 7
+zone-level truths (Typography, Spacing, Container, Hierarchy, Composition,
+Color, Layout) from Phase 1, plus new "Structural Truth" findings added
+during Phase 4. The file exists because perceptual truths are the raw
+observational data that the T1 MASTER-SOUL-SYNTHESIS.md was built from --
+they are the evidence trail. The preservation rule is strict: Phase 1
+truths are VERBATIM and IMMUTABLE; Phase 4 truths are ADDITIVE only.
+
+2. THE QUESTION THIS ANSWERS
+
+"What does each KORTAI component feel like perceptually -- what are the
+exact metaphorical descriptions of its soul, zone behaviors, and
+structural character, as captured during original audits?"
+
+3. STATUS
+
+ACTIVE (locked data). All 11 components populated with Phase 1 truths
+plus Phase 4 structural truths. Created 2026-02-04. Update frequency:
+after each component re-audit. Preservation rule: Phase 1 truths are
+immutable; new truths are additive only. This file is a completed
+tracking artifact -- no further population expected unless a new audit
+phase is initiated.
+
+5. BUILT ON
+
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| Code Snippet SOUL-EXTRACTION-COMPLETE.md | Soul truth source (49/60) | Master + 7 zone truths | components/code-snippet/soul-extractions/SOUL-EXTRACTION-COMPLETE.md |
+| Info Callout SOUL-EXTRACTION-COMPLETE.md | Soul truth source (53/60) | Master + 7 zone truths | components/info-callout/soul-extractions/SOUL-EXTRACTION-COMPLETE.md |
+| Tip Callout SOUL-EXTRACTION-COMPLETE.md | Soul truth source (49/60) | Master + 7 zone truths | components/tip-callout/soul-extractions/SOUL-EXTRACTION-COMPLETE.md |
+| Gotcha Callout SOUL-EXTRACTION-COMPLETE.md | Soul truth source (51/60) | Master + 7 zone truths | components/gotcha-callout/soul-extractions/SOUL-EXTRACTION-COMPLETE.md |
+| Essence Callout SOUL-EXTRACTION-COMPLETE.md | Soul truth source (54/60) | Master + 7 zone truths | components/essence-callout/soul-extractions/SOUL-EXTRACTION-COMPLETE.md |
+| Challenge Callout SOUL-EXTRACTION-COMPLETE.md | Soul truth source (52/60) | Master + 7 zone truths | components/challenge-callout/soul-extractions/SOUL-EXTRACTION-COMPLETE.md |
+| File Tree SOUL-EXTRACTION-COMPLETE.md | Soul truth source (52/60) | Master + 7 zone truths | components/file-tree/soul-extractions/SOUL-EXTRACTION-COMPLETE.md |
+| Decision Matrix soul extraction | Soul truth source (48.5/60) | Master + 7 zone truths | (minimal audit) |
+| Core Abstraction soul extraction | Soul truth source (50.5/60) | Master + 7 zone truths | (minimal audit) |
+| Task Component soul extraction | Soul truth source (51/60) | Master + 7 zone truths | (minimal audit) |
+| Reasoning Component soul extraction | Soul truth source (54/60) | Master + 7 zone truths | (minimal audit) |
+| 84 sub-agent analysis files | Phase 4 structural truths | Structural Character data | components/*/sub-agent-analyses/ |
+
+6. MUST HONOR
+
+| # | Constraint | Rationale |
+|---|-----------|-----------|
+| 1 | Phase 1 truths are VERBATIM and IMMUTABLE | Original perceptual observations are primary evidence; altering them destroys provenance |
+| 2 | Phase 4 truths are ADDITIVE only | New structural findings supplement, never replace, original soul observations |
+| 3 | Values in this file were consolidated into T1 synthesis (MASTER-SOUL-SYNTHESIS.md) | Do not modify without checking synthesis files for downstream impact |
+| 4 | Each component entry must include soul score | Scores are locked from original audit and feed into character family rankings |
+| 5 | Callout family DNA must be explicitly noted | Tip, Gotcha, Challenge share Info Callout structural DNA -- this relationship is authoritative |
+
+8. CONSUMED BY
+
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| synthesis/MASTER-SOUL-SYNTHESIS.md (T1) | Distills the 5 soul pieces from the raw perceptual truths collected here; this file is its primary evidence source |
+| synthesis/CHARACTER-FAMILY-COMPLETE.md (T1) | References soul scores and truth metaphors for character naming |
+| Any future re-audit phase | Uses existing truths as baseline for comparison and additive expansion |
+
+10. DIAGNOSTIC QUESTIONS
+
+Q1: Does every component section contain exactly one "Master Soul Truth (Phase 1)" and one "Phase 4 Structural Truth (NEW)" entry? (Expected: YES for all 11 components)
+
+Q2: Are the 5 callout components (Info, Tip, Gotcha, Essence, Challenge) correctly annotated for family DNA relationships, with Tip/Gotcha/Challenge marked as "IDENTICAL to Info Callout" and Essence marked as "UNIQUE exception"? (Expected: YES)
+
+Q3: Do all soul scores in this file match the scores listed in NAMED-CHARACTERS.md for the same 11 components? (Expected: YES -- scores are cross-registered)
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # PERCEPTUAL TRUTHS — Master Registry
 ## Phase 4 Re-Audit Tracking Sheet
 

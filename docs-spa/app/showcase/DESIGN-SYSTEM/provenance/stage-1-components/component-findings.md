@@ -9,6 +9,60 @@ manifest_ref: DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md
 last_updated: 2026-02-05
 ---
 
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-1-components/component-findings.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Defines all COMP-F-### finding IDs from Stage 1 Component Foundation. This is
+the CRITICAL provenance file where soul piece findings (COMP-F-001 through
+COMP-F-005), remediation findings (COMP-F-006 through COMP-F-008), and
+component-specific findings (COMP-F-009 through COMP-F-021) are formally
+declared with discovery context, consumption targets, and chain impact.
+
+2. THE QUESTION THIS ANSWERS
+"What are the exact COMP-F finding definitions, and how does each one flow
+forward through the pipeline?"
+
+3. STATUS
+ACTIVE — CRITICAL for provenance chain. All COMP-F IDs defined here.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| design-extraction/component-system/perceptual-audit-v2/ | Component characterization source |
+| COMP-F-001 through COMP-F-021           | Finding IDs declared here             |
+| COMP-F-013                              | Component characters documented       |
+| COMPONENTS-REGISTRY.md                  | Component specs referenced            |
+| OVERVIEW.md                             | Component overview referenced         |
+
+6. MUST HONOR
+- COMP-F IDs are immutable once declared (downstream references depend on them)
+- Soul piece findings (001-005) must match SOUL-DISCOVERIES.md
+- Chain Impact column must accurately reflect downstream consumption
+- Finding definitions must be precise enough for citation
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| BACKBONE.md                             | Finding summary referenced            |
+| provenance/CLAUDE.md                    | Navigation to findings                |
+| stage-2-density-dd/STAGE-HEADER.md      | COMP-F findings consumed by Stage 2   |
+| HANDOFF-DD-TO-OD.md                     | COMP-F findings forwarded to OD       |
+| All downstream stages (DD, OD, AD, CD)  | COMP-F citation in explorations       |
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Are COMP-F-001 through COMP-F-005 present with soul piece mappings (#1-#5)?
+Q2: Does each finding row include How Discovered, Consumed By, and Chain Impact?
+Q3: Is COMP-F-013 (component characters) present and documented?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # COMPONENT FINDINGS (COMP-F-###)
 ## Outbound Research from Stage 1
 

@@ -1,3 +1,52 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/guides/migration-guide.md
+Tier: B | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Step-by-step guide for converting existing documentation pages to
+KortAI compliance. This is the practical bridge between "understanding
+the design system" and "actually using it" — covering style auditing,
+callout conversion, density pattern application, and component mapping.
+
+2. THE QUESTION THIS ANSWERS
+"I have an existing documentation page — what exact steps do I follow
+to make it KortAI-compliant?"
+
+3. STATUS
+COMPLETE — covers pre-migration checklist, style audit, callout
+conversion, density pattern selection, and component replacement.
+Prerequisites link to QUICK-START.md and anti-patterns/registry.md.
+
+5. BUILT ON
+- QUICK-START.md (CSS variable prerequisite)
+- anti-patterns/registry.md (pre-migration reading requirement)
+- density-patterns.md (content type → pattern mappings)
+- Locked token values (what "correct" looks like)
+
+6. MUST HONOR
+- Pre-migration checklist is a gate — all items must be checked
+  before proceeding
+- "Remove These Immediately" list must match anti-patterns/registry.md
+- "Replace With" values must match locked tokens exactly
+- Callout conversion HTML must match component specifications
+
+8. CONSUMED BY
+- DESIGN-SYSTEM/CLAUDE.md (navigation: "Migrate a page → migration-guide.md")
+- Any future page migration work
+- Onboarding documentation for new contributors
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does the pre-migration checklist correctly reference QUICK-START.md
+    and anti-patterns/registry.md with working relative links?
+Q2: Do the "Replace With" CSS values (border-radius: 0, box-shadow:
+    none, #FEF9F5) match the locked tokens exactly?
+Q3: Does the callout conversion HTML match the component specifications
+    in components/OVERVIEW.md and individual component files?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════ -->
+
 # Migration Guide
 ## Converting Existing Documentation to KortAI
 

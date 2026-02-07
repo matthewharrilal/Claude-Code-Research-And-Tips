@@ -9,6 +9,57 @@ manifest_ref: DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md
 last_updated: 2026-02-05
 ---
 
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-2-density-dd/STAGE-HEADER.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Stage 2 completion documentation covering all 6 density explorations (DD-001
+through DD-006). Tells the story of how visual rhythm vocabulary was discovered,
+from PULSE breathing through FRACTAL self-similarity. Documents the breakthrough
+that DD-006 Fractal scored highest and became the meta-pattern.
+
+2. THE QUESTION THIS ANSWERS
+"What did Stage 2 explore, what did it discover, and how does the DD-F-006
+fractal principle emerge as the governing meta-pattern?"
+
+3. STATUS
+ACTIVE — Complete stage header with full file listing for Stage 2.
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| COMP-F-001 through COMP-F-008           | Foundation findings consumed by DD    |
+| R3 (51 findings)                        | Density research that DD validated    |
+| DD-F findings (001-018)                 | Finding IDs produced by this stage    |
+| stage-1-components/STAGE-HEADER.md      | Predecessor in chain                  |
+| Predecessor/successor chain             | Links stage-1 -> here -> stage-3-organization-od |
+
+6. MUST HONOR
+- Predecessor must point to stage-1-components/STAGE-HEADER.md
+- Successor must point to stage-3-organization-od/STAGE-HEADER.md
+- DD-006 Fractal must be identified as highest-scoring (36/40)
+- All 6 DD exploration summaries must be present with scores
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| stage-1-components/STAGE-HEADER.md      | Successor chain reference             |
+| HANDOFF-DD-TO-OD.md                     | Stage 2 summary consumed by handoff   |
+| Any agent entering Stage 2              | Story context and orientation         |
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does predecessor point to stage-1-components/STAGE-HEADER.md and successor to stage-3-organization-od/STAGE-HEADER.md?
+Q2: Are all 6 DD explorations (001-006) summarized with scores?
+Q3: Is DD-006 Fractal marked as HIGHEST scoring (36/40)?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # STAGE 2: DENSITY EXPLORATION (DD)
 ## Where Visual Rhythm Was Discovered
 

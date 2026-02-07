@@ -1,3 +1,43 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/research/CLAUDE.md
+Tier: C | Batch: 4 | Generated: 2026-02-06
+═══════════════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+This CLAUDE.md serves as the navigation and orientation file for agents
+entering the research/ directory. It maps research streams to finding counts,
+stage assignments, and connection points. It is read automatically by Claude
+Code at session start when working within this directory.
+
+3. STATUS
+
+ACTIVE. Maintained as a living navigation document. Contains a known
+discrepancy: Section 3 lists R2 finding count as 78 (matching earlier
+estimates) but actual R2 findings number 27. DISCOVERIES-LOG references
+R2-079. This count inconsistency is documented research debt per the R3-023
+to DD-F-006 chain documentation pattern.
+
+5. BUILT ON
+
+Source                                  | Role                    | Key Values                                    | Path
+R1-R5 research files                    | Content being indexed   | Finding counts, stage mappings, status         | docs-spa/app/showcase/research/R1-R5*.md
+R3-023 / DD-F-006 chain                 | Duplication reference   | Documents known count discrepancy pattern      | docs-spa/app/showcase/research/R3-DENSITY-DIMENSIONS.md
+RESEARCH-SYNTHESIS.md                   | Sibling synthesis       | Cross-research unified framework               | docs-spa/app/showcase/research/RESEARCH-SYNTHESIS.md
+
+8. CONSUMED BY
+
+Consumer                                                          | How It Uses This File
+Any agent entering research/ directory                            | Auto-loaded as CLAUDE.md for directory orientation and research stream mapping
+showcase/CLAUDE.md                                                | References this as the research-level navigation file
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # CLAUDE.md — Research Directory
 
 ═══════════════════════════════════════════════════════════════════════════════

@@ -1,3 +1,49 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/knowledge-architecture/KA-DECISIONS.md
+Tier: B | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Classification framework for the knowledge architecture. Defines tier assignments
+(T1-T4, S, O), confidence levels (0-4), SUPERSEDED status definitions, and all
+structural decisions with documented rationale.
+
+2. THE QUESTION THIS ANSWERS
+"How was each file classified, what tier does it belong to, and what decisions
+shaped the knowledge architecture's structure?"
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| Tier system (T1-T4, S, O)              | Classification framework              |
+| DD audit scores                         | Input data for tier assignments        |
+| Confidence levels (0-4)                 | Scoring methodology                   |
+| MASTER-SOUL-SYNTHESIS.md (design-extraction) | External: soul definition source  |
+
+6. MUST HONOR
+- Knowledge architecture classification methodology
+- SUPERSEDED status definitions (files marked SUPERSEDED must not be treated as authoritative)
+- Tier assignments are the canonical source for file importance ranking
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| showcase/CLAUDE.md (knowledge-architecture/) | Referenced for classification rules |
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Do the tier assignments in this file match the actual tier labels used in
+    SOURCE-OF-TRUTH-REGISTRY.md and PIPELINE-BACKBONE.md?
+Q2: Are all SUPERSEDED files also marked as superseded in their own headers or
+    in the relevant tracking documents?
+Q3: Does the confidence scoring (0-4) align with the evidence documented in
+    KA-VERIFICATION.md spot-check results?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════ -->
+
 # KA-DECISIONS.md — Structure and Provenance Decisions
 ## All Decisions Documented with Rationale
 

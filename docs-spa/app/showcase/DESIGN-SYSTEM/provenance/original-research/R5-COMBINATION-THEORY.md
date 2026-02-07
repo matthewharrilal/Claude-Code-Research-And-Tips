@@ -1,3 +1,45 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/original-research/R5-COMBINATION-THEORY.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Provenance chain copy of R-5 research (39 findings on component combination
+theory -- harmony, tension, sequence, grouping, nesting, meta-relationships).
+Preserved here for chain integration.
+
+2. THE QUESTION THIS ANSWERS
+How should KortAI's 11 documentation components combine, and what principles
+govern harmony, tension, and choreography between component pairings?
+
+3. STATUS
+SYNCED DUPLICATE of showcase/research/R5-COMBINATION-THEORY.md.
+Sync protocol: operational edits go in research/, archival copies here.
+
+5. BUILT ON
+See original at showcase/research/R5-COMBINATION-THEORY.md.
+
+6. MUST HONOR
+Keep in sync with source at showcase/research/R5-COMBINATION-THEORY.md.
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| PIPELINE-MANIFEST.md                    | R5 finding registry entries            |
+| RESEARCH-SYNTHESIS.md                   | Cross-research principle synthesis     |
+| RESEARCH-ACTIVE.md                      | Application status tracking            |
+
+10. DIAGNOSTIC QUESTIONS
+- Is this file in sync with showcase/research/R5-COMBINATION-THEORY.md?
+- Are all 39 findings present and numbered consistently?
+- Do finding IDs here match those referenced in PIPELINE-MANIFEST.md?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # R5-COMBINATION-THEORY
 ## Component Combination Principles for KortAI Documentation
 

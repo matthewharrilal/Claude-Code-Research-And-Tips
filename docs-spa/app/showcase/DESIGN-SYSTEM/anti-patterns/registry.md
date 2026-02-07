@@ -1,3 +1,54 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/anti-patterns/registry.md
+Tier: B | Batch: 5 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Defines what MUST NOT appear in KortAI implementations — the soul
+violations that break the design identity. This is the negative space
+of the design system: knowing what to avoid is as important as knowing
+what to apply. Contains "The Soul Test" for quick compliance checks.
+
+2. THE QUESTION THIS ANSWERS
+"What specific CSS properties, color combinations, and structural
+patterns are forbidden in KortAI, and what should replace them?"
+
+3. STATUS
+COMPLETE — covers geometry (rounded corners, shadows), color (traffic
+lights, cool grays), typography (wrong fonts, wrong weights), and
+structural (density monotony, component stacking) anti-patterns.
+Condensed and reorganized from design-extraction T1 source.
+
+5. BUILT ON
+- design-extraction/component-system/perceptual-audit-v2/synthesis/ANTI-PATTERNS-REGISTRY.md (T1 source, condensed + reorganized)
+- DD exploration findings (empirical violations discovered)
+- Soul token locked values (what makes something "wrong")
+
+6. MUST HONOR
+- Every anti-pattern must have: What, Why it fails, Alternative
+- CSS "WRONG/RIGHT" examples must use actual token values
+- Anti-patterns derive from soul tokens — if tokens change (they
+  shouldn't), anti-patterns must update
+- "The Soul Test" must remain a quick binary check
+
+8. CONSUMED BY
+- showcase/CLAUDE.md (mandatory reading, Step 1 research context)
+- QUICK-START.md (anti-pattern awareness before building)
+- guides/migration-guide.md ("read anti-patterns registry" prerequisite)
+- DESIGN-SYSTEM/CLAUDE.md (navigation table)
+- Any future exploration or section build (pre-build checklist)
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does every "RIGHT" example use the exact locked token values
+    (border-radius: 0, box-shadow: none, #FEF9F5, etc.)?
+Q2: Is every anti-pattern traceable to a specific soul token or
+    design-extraction finding?
+Q3: Does "The Soul Test" produce correct pass/fail results for
+    known-good and known-bad implementations?
+
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════ -->
+
 # Anti-Patterns Registry
 ## What NOT to Do in KortAI
 

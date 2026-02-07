@@ -1,3 +1,33 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: design-extraction/CLAUDE.md
+Tier: C | Batch: 5 | Date: 2026-02-06
+═══════════════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+Navigation and process documentation file for agents entering design-extraction/.
+Explains the philosophy ("extract soul, not CSS"), the Sanrok reference, and
+Phase 1-3 history (font research, typography system, card system).
+
+3. STATUS
+ACTIVE (but STALE: does not cover Phase 4 perceptual-audit-v2 or T1 synthesis files)
+
+5. BUILT ON
+- typography-system/ files (Phase 2 implementation)
+- card-system/ files (Phase 3 implementation, now SUPERSEDED)
+- font-research/ results (Instrument Serif decision)
+- 10 soul principles (design philosophy)
+
+8. CONSUMED BY
+- All agents entering design-extraction/ read this first
+- Provides institutional memory for WHY decisions were made
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+ -->
+
 # Design Extraction System - Process Documentation
 
 This document explains the philosophy, methodology, and journey behind the design extraction work in this directory. It serves as institutional memory for understanding WHY decisions were made, not just WHAT was built.

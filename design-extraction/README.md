@@ -1,3 +1,50 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: design-extraction/README.md
+Tier: B | Batch: 5 | Date: 2026-02-06
+═══════════════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+External-facing entry point for the design-extraction/ directory. Provides
+a high-level overview of current work (font-research, typography-system),
+phase status table, and locked CSS values for quick reference.
+
+2. THE QUESTION THIS ANSWERS
+"What is in design-extraction/, what phase are we in, and how do I use the
+outputs?" — Oriented toward external readers and first-time visitors.
+
+3. STATUS
+ACTIVE (but stale phase table: "Phase 3: Color System" listed as NEXT is outdated;
+perceptual-audit-v2 and T1 synthesis work are not reflected)
+
+5. BUILT ON
+- Phase progress documentation (font-research, typography-system, card-system)
+- typography-system/ overview (locked CSS values, file table)
+- archive/ supersession markers (Phase 3 card system documented as complete)
+
+6. MUST HONOR
+- Locked token values documented in this file must match T1 authority
+  (component-system/perceptual-audit-v2/synthesis/DESIGN-TOKEN-SUMMARY.md)
+- Phase status claims must be accurate to current state
+
+8. CONSUMED BY
+- External readers (primary entry point)
+- design-extraction/CLAUDE.md (references this for directory overview)
+
+10. DIAGNOSTIC QUESTIONS
+Q1: Does the phase status table reflect the actual current phase (Phase 2B
+    inline threading), or is it stuck at an outdated "Phase 3: Color System NEXT"?
+Q2: Do the locked CSS values in the "Locked Values" code block match the
+    authoritative T1 values in DESIGN-TOKEN-SUMMARY.md?
+Q3: Is the card-system/ section still listed as active work when it has been
+    SUPERSEDED by perceptual-audit-v2?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+ -->
+
 # Design Extraction - Sanrok-Inspired Design System
 
 This directory contains the complete design system extraction based on Sanrok Studio's aesthetic.

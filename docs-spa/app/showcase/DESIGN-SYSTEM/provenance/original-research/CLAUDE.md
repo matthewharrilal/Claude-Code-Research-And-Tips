@@ -1,3 +1,34 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/original-research/CLAUDE.md
+Tier: C | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Navigation file for agents entering the original-research/ directory. Maps
+the 6 research files (R1-R5 + synthesis), their finding counts, and their
+relationship to pipeline stages.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+| Dependency                              | Relationship                          |
+|-----------------------------------------|---------------------------------------|
+| R1-R5 file listing                      | Directory contents inventory           |
+| DD-F-006                                | Referenced finding example             |
+| Finding counts (28+78+51+192+39=337)    | Aggregate totals from each R-file      |
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| No direct inbound references            | Read automatically on directory entry  |
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # CLAUDE.md — Original Research
 
 ═══════════════════════════════════════════════════════════════════════════════

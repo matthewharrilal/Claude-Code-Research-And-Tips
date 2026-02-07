@@ -1,3 +1,31 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/explorations/density/CLAUDE.md
+Tier: C | Batch: 5 | Date: 2026-02-06
+═══════════════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+Navigation file for agents entering the density/ directory. Catalogs all 6
+DD explorations (DD-001 through DD-006) with scores, pattern names, and
+best-use recommendations. All 6 are INCLUDE status.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+- DD-F-006 (fractal finding — highest-scored exploration)
+- DD-001 through DD-006 scores and pattern assessments
+
+8. CONSUMED BY
+- Read as directory navigation (no direct inbound references)
+- Agents entering explorations/density/ read this first
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+ -->
+
 # CLAUDE.md — Density Explorations (DD)
 
 ═══════════════════════════════════════════════════════════════════════════════

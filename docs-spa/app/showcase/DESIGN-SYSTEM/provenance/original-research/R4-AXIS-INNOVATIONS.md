@@ -1,3 +1,45 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/original-research/R4-AXIS-INNOVATIONS.md
+Tier: B | Batch: 6 | Generated: 2026-02-06
+
+1. WHY THIS EXISTS
+Provenance chain copy of R-4 research (192 findings on axis patterns,
+reading gravity, eye movement innovations for documentation layout).
+Preserved here for chain integration.
+
+2. THE QUESTION THIS ANSWERS
+How do classic reading patterns (Z, F, Gutenberg) and modern innovations
+(bento, spiral, diagonal) inform documentation layout choreography?
+
+3. STATUS
+SYNCED DUPLICATE of showcase/research/R4-AXIS-INNOVATIONS.md.
+Sync protocol: operational edits go in research/, archival copies here.
+
+5. BUILT ON
+See original at showcase/research/R4-AXIS-INNOVATIONS.md.
+
+6. MUST HONOR
+Keep in sync with source at showcase/research/R4-AXIS-INNOVATIONS.md.
+
+8. CONSUMED BY
+| Consumer                                | How Used                              |
+|-----------------------------------------|---------------------------------------|
+| PIPELINE-MANIFEST.md                    | R4 finding registry entries            |
+| RESEARCH-SYNTHESIS.md                   | Cross-research principle synthesis     |
+| RESEARCH-ACTIVE.md                      | Application status tracking            |
+
+10. DIAGNOSTIC QUESTIONS
+- Is this file in sync with showcase/research/R4-AXIS-INNOVATIONS.md?
+- Are all 192 findings present and numbered consistently?
+- Do finding IDs here match those referenced in PIPELINE-MANIFEST.md?
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # R4: AXIS INNOVATIONS - Reading Patterns and Layout Flow Research
 
 **Sub-Agent:** R-4 - Axis Innovations Research

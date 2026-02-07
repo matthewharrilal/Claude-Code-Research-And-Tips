@@ -1,3 +1,32 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+INLINE THREADING HEADER — Phase 2B
+File: docs-spa/app/showcase/DESIGN-SYSTEM/CLAUDE.md
+Tier: C | Batch: 5 | Date: 2026-02-06
+═══════════════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+Navigation file for agents entering the DESIGN-SYSTEM/ directory. Identifies
+README.md (109K) as "THE KORTAI DESIGN MIND" that must be read first.
+Describes tokens, patterns, provenance, and the transferable reasoning model.
+
+3. STATUS
+ACTIVE
+
+5. BUILT ON
+- README.md (109K — the KortAI Design Mind)
+- BACKBONE.md (structural backbone)
+- Directory structure knowledge (tokens/, patterns/, provenance/, anti-patterns/)
+
+8. CONSUMED BY
+- No direct inbound references (read automatically on directory entry)
+- All agents entering DESIGN-SYSTEM/ read this first
+
+═══════════════════════════════════════════════════════════════════════════════
+END INLINE THREADING HEADER
+═══════════════════════════════════════════════════════════════════════════════
+ -->
+
 # CLAUDE.md — KortAI Design System
 
 ═══════════════════════════════════════════════════════════════════════════════

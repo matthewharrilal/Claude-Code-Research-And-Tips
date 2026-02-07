@@ -1,3 +1,159 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE THREADING HEADER — Phase 2B
+     File: design-extraction/component-system/SOUL-DEFINITION.md
+     Tier: A | Batch: 2 | Generated: 2026-02-06
+     ═══════════════════════════════════════════════════════════════════════
+
+1. WHY THIS EXISTS
+
+SOUL-DEFINITION.md is the exhaustive (58KB, 800+ line) master soul authority for the
+KortAI editorial component system. It was created during Phase 3-4 by expanding the
+original card-system/SOUL-DEFINITION.md (10 card-scope principles) into 6 Universal Rules
+that apply to ALL 12 components, backed by locked CSS :root values, per-component
+specifications with correct/wrong code examples, and "Soul Impact" rationale for every
+decision. This file is the ORIGIN of the 6 Universal Rules — sharp edges, flat design,
+limited palette, typography hierarchy, heavy borders, and whitespace as design element —
+and provides the definitive locked CSS variable block (:root) that downstream synthesis
+and implementation must honor. MASTER-SOUL-SYNTHESIS.md (T1, 16KB) distills this
+document's essence but does not replace its exhaustive per-component specifications.
+
+2. THE QUESTION THIS ANSWERS
+
+"What are the exact, enforceable CSS rules — with correct and wrong examples for every
+component — that make this design system feel like editorial magazine design rather than
+Bootstrap/Tailwind/Material, and why does each rule matter to the soul?"
+
+3. STATUS
+
+ACTIVE / DO-NOT-TOUCH (LOCKED) — This file is frozen as the comprehensive soul authority.
+Lifecycle: COMPLETE (all 12 components specified, all 6 Universal Rules defined, locked
+:root block established). Authority: ROOT — this is where the 6 Universal Rules originate.
+MASTER-SOUL-SYNTHESIS.md (T1) distills it into 16KB; PRODUCTION-RULES.md enforces it.
+Prepend-only: new content (including this header) may be prepended but existing content
+MUST NOT be modified.
+
+4. SOUL ALIGNMENT
+
+This file ESTABLISHES the soul. It defines the following locked CSS values that all
+other files must inherit:
+
+| Rule | CSS Enforcement | Soul Meaning |
+|------|----------------|--------------|
+| Rule 1: Sharp Edges | `border-radius: 0;` | Decisiveness, editorial confidence |
+| Rule 2: Flat Design | `box-shadow: none;` | Print heritage honesty, medium truth |
+| Rule 3: Limited Palette | `--color-primary: #E83025; --color-background: #FEF9F5; --color-text: #1A1A1A;` | Restraint makes each color meaningful |
+| Rule 4: Typography Hierarchy | `--font-display: 'Instrument Serif'; --font-body: 'Inter'; --font-mono: 'JetBrains Mono';` | Serif/sans tension creates editorial rhythm |
+| Rule 5: Heavy Borders | `border: 3px solid` minimum | Confident commitment, not timid |
+| Rule 6: Whitespace as Design | `padding: 24px 32px; line-height: 1.6;` | Content breathes; restraint signals care |
+
+5. BUILT ON
+
+| Source | Role | Key Values | Path |
+|--------|------|------------|------|
+| card-system/SOUL-DEFINITION.md | Origin ancestor (SUPERSEDED) | 10 soul principles (No Container Chrome, Outline Tags, Duotone Images, Typography Hierarchy, Flat Design, Sharp Edges, Limited Palette, Tight Spacing, Grid Alignment, Left-Heavy Alignment) | `design-extraction/card-system/SOUL-DEFINITION.md` |
+| 3A Card Anatomy Research | Card structure analysis | Cards are typographic rows, not containers | `design-extraction/card-system/research/3A-card-anatomy.md` |
+| 3B Anti-Patterns Research | What to avoid | Bootstrap/Tailwind/Material generic patterns | `design-extraction/card-system/research/3B-anti-patterns.md` |
+| 3C Halftone Techniques | Image treatment research | Duotone via CSS blend modes | `design-extraction/card-system/research/3C-halftone-techniques.md` |
+| 3D Editorial Patterns | Design theory | Swiss International Typographic Style, magazine heritage | `design-extraction/card-system/research/3D-editorial-patterns.md` |
+| 11 component analyses | Per-component soul questions | Specifications for ASCII art, code block, callouts, decision matrix, core abstraction, reasoning, file tree, challenge, task progression | `design-extraction/component-system/` (Phase 3-4 work) |
+| perceptual-audit-v2 results | Validation/deepening | Verified locked values, identified 5 soul pieces | `design-extraction/component-system/perceptual-audit-v2/` |
+
+6. MUST HONOR
+
+This file ESTABLISHES the following constraints (it is the origin authority):
+
+| Constraint | Specification | Enforcement |
+|-----------|--------------|-------------|
+| `border-radius: 0` | ALL components, no exceptions | LOCKED CSS value in :root block |
+| `box-shadow: none` | ALL components, no exceptions | LOCKED CSS value in :root block |
+| Color palette: red + cream + black only | `--color-primary: #E83025`, `--color-background: #FEF9F5`, `--color-text: #1A1A1A`, `--color-text-secondary: #666666`, `--color-border: #E0D5C5` | LOCKED CSS values in :root block |
+| Font stack: Serif/Sans/Mono | `--font-display: 'Instrument Serif'`, `--font-body: 'Inter'`, `--font-mono: 'JetBrains Mono'` | LOCKED CSS values in :root block |
+| Border weight minimum | 2-4px solid when bordered; 1px = soul violation | Per-component specification with correct/wrong examples |
+| Spacing generosity | 8px base unit, padding 24px+, line-height 1.6+ | LOCKED spacing scale in :root block |
+| Type scale (16px base) | 12px (xs) through 48px (display) | LOCKED scale in :root block |
+| No additional accents | Bootstrap blue (#007bff), green (#28a745), etc. are banned | Anti-pattern examples in each rule section |
+
+7. WHAT BREAKS IF THIS CHANGES
+
+BLAST RADIUS: CRITICAL (30+ downstream files)
+
+Direct breakage:
+- ALL 9 CSS files in component-system/css/ consume the :root values defined here
+  (variables.css, ascii-dither.css, code-block.css, callouts.css, decision-matrix.css,
+  core-abstraction.css, file-tree.css, progression.css, components.css)
+- MASTER-SOUL-SYNTHESIS.md (T1) distills this document — soul statement changes
+  invalidate the 16KB synthesis
+- PRODUCTION-RULES.md (T1) enforces rules originating here — rule changes require
+  rewriting the enforcement bridge
+- DESIGN-TOKEN-SUMMARY.md (T1) locked :root block mirrors values from here
+- CHARACTER-FAMILY-COMPLETE.md (T1) 11 named characters reference soul rules from here
+- ANTI-PATTERNS-REGISTRY.md (T1) "Soul Test" is derived from Universal Rules here
+- CONSISTENCY-VERIFICATION.md (T1) verification checklist validates against these rules
+- All SOUL-EXTRACTION-COMPLETE.md files reference Universal Rules
+- component-system/tests/soul-principles.spec.ts programmatically enforces these values
+
+Indirect breakage:
+- docs-spa/app/showcase/DESIGN-SYSTEM/ public documentation references these rules
+- docs-spa/app/showcase/explorations/density/ DD work consumes soul constraints
+- docs-spa/app/showcase/knowledge-architecture/ pipeline docs cite this as root authority
+
+8. CONSUMED BY
+
+| Consumer | How It Uses This File |
+|----------|----------------------|
+| MASTER-SOUL-SYNTHESIS.md (T1) | Distills 58KB into 16KB authoritative soul statement; extracts 6 Universal Rules and 5 soul pieces |
+| PRODUCTION-RULES.md (T1) | Translates philosophical rules into enforceable CSS constraints with component templates |
+| DESIGN-TOKEN-SUMMARY.md (T1) | Mirrors locked :root block as canonical token reference |
+| ANTI-PATTERNS-REGISTRY.md (T1) | Derives "The Soul Test" from Universal Rules; builds banned-property lists |
+| component-system/css/variables.css | Implements the locked :root CSS custom properties |
+| component-system/css/*.css (8 files) | Each component CSS file implements per-component specifications from Section 3 |
+| KORTAI-ESSENCE-FOUNDATION.md | References soul rules as validation baseline for perceptual deepening |
+| SOUL-TRANSLATION-GUIDE.md | Translates soul rules for non-image components |
+| soul-principles.spec.ts | Programmatic enforcement of border-radius: 0, box-shadow: none, color palette |
+| showcase/knowledge-architecture/SOURCE-OF-TRUTH-REGISTRY.md | Lists as authoritative source for soul definition |
+| PIPELINE-BACKBONE.md | References as root authority in pipeline architecture |
+
+9. RESEARCH DEBT
+
+- The 12 component specifications (Section 3) were written before perceptual-audit-v2
+  deepening; some component specifications may have subtle value drifts from the locked
+  tokens in DESIGN-TOKEN-SUMMARY.md (e.g., padding values, exact color hex codes for
+  tinted backgrounds).
+- The file references "11 components" in the overview table but calls it "12 components"
+  in the header — the ASCII Dithered Art / Tip Callout distinction needs clarification.
+- No explicit versioning protocol — if soul rules need evolution, the relationship between
+  this file (ESTABLISHES) and MASTER-SOUL-SYNTHESIS.md (DISTILLS) has no defined
+  amendment procedure.
+- The file does not explicitly address dark mode / theme variants — soul rules assume
+  a single light editorial theme.
+- Coexistence rules (how components interact when adjacent) are touched on briefly but
+  the authoritative coexistence specification lives in PRODUCTION-RULES.md, creating a
+  split-authority situation.
+
+10. DIAGNOSTIC QUESTIONS
+
+Q1: Does the :root block in this file exactly match the :root block in
+    DESIGN-TOKEN-SUMMARY.md for all shared variables? (Expected: YES for all locked values)
+
+Q2: For each of the 12 component specifications in Section 3, does the component's
+    CSS file in component-system/css/ implement the exact values specified here without
+    deviation? (Expected: YES — any drift is a soul violation)
+
+Q3: Can every "WRONG" code example in the 6 Universal Rules be detected by the
+    soul-principles.spec.ts test suite? (Expected: YES — tests should catch all anti-patterns)
+
+Q4: Does MASTER-SOUL-SYNTHESIS.md's "5 soul pieces" section accurately reflect the
+    philosophical rationale from the "Soul Impact" paragraphs in this file's 6 Universal
+    Rules? (Expected: YES — synthesis should not introduce new philosophy)
+
+Q5: If a new component (Component #13) were added, does this file provide sufficient
+    specification guidance for an implementor to produce a soul-compliant component without
+    referencing any other document? (Expected: YES — the 6 Universal Rules + locked :root
+    + per-component template pattern should be self-sufficient)
+
+     ═══════════════════════════════════════════════════════════════════════
+     END INLINE THREADING HEADER
+     ═══════════════════════════════════════════════════════════════════════ -->
 # SOUL DEFINITION: Editorial Component System
 ## The Master Source of Truth
 
