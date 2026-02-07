@@ -1,3 +1,12 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+LIGHT SECTION PROVENANCE — Group D1b
+File: design-extraction/archive/variations/research/textures.md
+Part Of: archive/variations — Design variation research
+Contributed To: Editorial pattern exploration; fed into card-system soul principles
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # CSS Texture Techniques Research
 
 > Comprehensive guide to noise, grain, halftone, and paper textures using pure CSS and SVG

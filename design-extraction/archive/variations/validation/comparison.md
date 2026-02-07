@@ -1,3 +1,12 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+LIGHT SECTION PROVENANCE — Group D1b
+File: design-extraction/archive/variations/validation/comparison.md
+Part Of: archive/variations — Validation records
+Contributed To: Historical validation comparison data
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # Design Variation Comparison Document
 
 A systematic comparison of all visual variations to verify distinctiveness and prevent confusion.

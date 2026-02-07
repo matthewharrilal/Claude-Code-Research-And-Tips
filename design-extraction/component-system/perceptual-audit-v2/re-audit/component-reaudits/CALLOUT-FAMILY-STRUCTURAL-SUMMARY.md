@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: perceptual-audit-v2/re-audit — Component structural re-audits
+Contributed To: Verified accuracy of CHARACTER-FAMILY-COMPLETE.md character specs
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Callout Family — Structural Summary
 ## Phase 4-ALPHA | Components 2-6 (5 callouts)
 

@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: perceptual-audit-v2/re-audit — Coexistence structural verification
+Contributed To: PRODUCTION-RULES.md coexistence constraints
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Phase 4-BETA: Coexistence Structural Re-Audit
 ## 8 Component Pair Combinations
 

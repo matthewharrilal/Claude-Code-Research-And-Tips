@@ -24,6 +24,28 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!-- LIGHT SECTION
+Full Context For ALL Files: perceptual-audit-v2/synthesis/
+
+File: component-system/archive/research-phase-3/4A-ascii-dither-techniques.md
+Scope: LIGHT — Minimal context for quick lookup
+Part Of: component-system/archive — Phase 3 research (superseded)
+Contributed To: Component research methodology; superseded by perceptual-audit-v2/
+
+What this file does:
+Comprehensive research guide to ASCII/text-based dithered art techniques for
+achieving editorial halftone aesthetic in design systems.
+
+Who uses this:
+- Agents researching design technique evolution (historical context)
+- Designers understanding dithering and halftone methodology
+- Archival/historical reference for Phase 3 technique research
+
+Status: SUPERSEDED — Phase 3 research consumed into production CSS
+Superseded By: component-system/css/ascii-dither.css (implementation)
+Links to: perceptual-audit-v2/synthesis/ for current component definitions
+-->
+
 # 4A: ASCII Dithered Art Techniques Research
 
 **Sub-Agent 4A Research Document**

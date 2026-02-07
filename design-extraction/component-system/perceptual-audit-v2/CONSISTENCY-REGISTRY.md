@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: perceptual-audit-v2 — Audit tracking and state management
+Contributed To: Audit process documentation; supports synthesis verification
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Design Token Consistency Registry
 ## Perceptual Audit v2 — Token Tracking
 

@@ -1,3 +1,9 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: knowledge-architecture — Phase 2B process documentation
+Contributed To: PHASE-2B-HANDOFF.md; procedural reference for threading execution
+Full Context: knowledge-architecture/PIPELINE-BACKBONE.md
+-->
 # Phase 2B — Master Execution Prompt (Source of Truth)
 
 **Generated:** 2026-02-06

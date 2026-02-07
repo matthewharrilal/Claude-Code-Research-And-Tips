@@ -1,3 +1,12 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+LIGHT SECTION PROVENANCE HEADER — Phase 2B
+File: design-extraction/component-system/tests/decision-matrix.spec.ts
+Part Of: component-system/tests — Automated soul verification tests
+Contributed To: Programmatic enforcement of soul constraints
+═══════════════════════════════════════════════════════════════════════════════
+*/
+
 import { test, expect } from '@playwright/test';
 
 /**

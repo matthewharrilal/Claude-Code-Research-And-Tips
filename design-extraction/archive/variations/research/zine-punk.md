@@ -1,3 +1,12 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+LIGHT SECTION PROVENANCE — Group D1b
+File: design-extraction/archive/variations/research/zine-punk.md
+Part Of: archive/variations — Design variation research
+Contributed To: Editorial pattern exploration; fed into card-system soul principles
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # Zine/Punk Aesthetic CSS Research
 
 > **Reference Images:** Nous Research spread (zine collage layout), Decentralize AI Summit (punk/DIY poster aesthetic)

@@ -1,3 +1,9 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: knowledge-architecture — Phase 2B process documentation
+Contributed To: PHASE-2B-HANDOFF.md; batch assignment reference for threading execution
+Full Context: knowledge-architecture/PIPELINE-BACKBONE.md
+-->
 # Phase 2B -- Batch Manifest
 ## 253 KEEP+FULL Files -> Tier + Batch Assignment
 

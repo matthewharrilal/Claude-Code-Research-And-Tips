@@ -25,6 +25,13 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: card-system — Original 10 soul principles (superseded)
+Contributed To: Soul evolution: 10 card principles → 6 universal rules → 5 soul pieces
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Card Component Soul Definition
 ## Phase 3 Synthesis Document
 ## Timestamp: 2026-02-03

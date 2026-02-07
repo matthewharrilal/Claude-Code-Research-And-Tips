@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: font-research/specimens — Individual typeface specimen analysis
+Contributed To: Detailed font evaluation data for selection decision
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Domaine Display - Specimen Analysis
 
 ## Source

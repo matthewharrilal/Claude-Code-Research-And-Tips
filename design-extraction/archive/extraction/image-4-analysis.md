@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: archive/extraction — Pre-audit image analysis
+Contributed To: Initial design token identification
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Image 4 Analysis: Decentralize AI Summit
 
 ## Overview

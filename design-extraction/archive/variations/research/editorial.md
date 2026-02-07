@@ -1,3 +1,12 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+LIGHT SECTION PROVENANCE — Group D1b
+File: design-extraction/archive/variations/research/editorial.md
+Part Of: archive/variations — Design variation research
+Contributed To: Editorial pattern exploration; fed into card-system soul principles
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # Editorial Web Design Research
 
 > CSS techniques for publication-quality typography, magazine layouts, and elegant styling

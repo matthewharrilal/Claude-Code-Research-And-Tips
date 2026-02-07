@@ -24,6 +24,28 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!-- LIGHT SECTION
+Full Context For ALL Files: perceptual-audit-v2/synthesis/
+
+File: component-system/archive/research-phase-3/4E-brutalist-ui-patterns.md
+Scope: LIGHT — Minimal context for quick lookup
+Part Of: component-system/archive — Phase 3 research (superseded)
+Contributed To: Component research methodology; superseded by perceptual-audit-v2/
+
+What this file does:
+Research on brutalist UI component patterns and design philosophy for creating
+honest, stripped-down, content-focused design systems.
+
+Who uses this:
+- Agents researching component design philosophy (historical context)
+- Designers understanding brutalist design patterns
+- Archival/historical reference for Phase 3 brutalist research
+
+Status: SUPERSEDED — Phase 3 research consumed into production CSS
+Superseded By: component-system/css/components.css (implementation)
+Links to: perceptual-audit-v2/synthesis/ for current component definitions
+-->
+
 # Brutalist UI Component Patterns Research
 
 **Sub-Agent 4E Research Document**

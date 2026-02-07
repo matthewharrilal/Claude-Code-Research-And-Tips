@@ -24,6 +24,28 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!-- LIGHT SECTION
+Full Context For ALL Files: perceptual-audit-v2/synthesis/
+
+File: component-system/archive/research-phase-3/4H-decision-matrix-design.md
+Scope: LIGHT — Minimal context for quick lookup
+Part Of: component-system/archive — Phase 3 research (superseded)
+Contributed To: Component research methodology; superseded by perceptual-audit-v2/
+
+What this file does:
+Research on editorial table design for decision matrices and "When to Use"
+patterns that feel like magazine content instead of spreadsheets.
+
+Who uses this:
+- Agents researching component design evolution (historical context)
+- Designers understanding decision matrix and table methodology
+- Archival/historical reference for Phase 3 table design research
+
+Status: SUPERSEDED — Phase 3 research consumed into production CSS
+Superseded By: component-system/css/decision-matrix.css (implementation)
+Links to: perceptual-audit-v2/synthesis/ for current component definitions
+-->
+
 # 4H: Decision Matrix Design Research
 
 ## Sub-Agent Mission

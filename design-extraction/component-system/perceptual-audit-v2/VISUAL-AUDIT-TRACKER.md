@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: perceptual-audit-v2 — Audit tracking and state management
+Contributed To: Audit process documentation; supports synthesis verification
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # VISUAL AUDIT TRACKER
 ## Perceptual Depth Audit — Visual Verification
 

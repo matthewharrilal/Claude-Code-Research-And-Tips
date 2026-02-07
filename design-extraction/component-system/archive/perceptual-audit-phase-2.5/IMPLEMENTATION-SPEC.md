@@ -24,6 +24,28 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!-- LIGHT SECTION
+Full Context For ALL Files: perceptual-audit-v2/synthesis/
+
+File: component-system/archive/perceptual-audit-phase-2.5/IMPLEMENTATION-SPEC.md
+Scope: LIGHT — Minimal context for quick lookup
+Part Of: component-system/archive — Phase 2.5 perceptual audit (superseded)
+Contributed To: Early perceptual audit methodology; superseded by perceptual-audit-v2/
+
+What this file does:
+Implementation specification for closing soul gaps identified in Phase 2.5 gap analysis.
+Documents specification for bringing current system into alignment with soul ideals.
+
+Who uses this:
+- Agents researching perceptual audit evolution (historical context)
+- Designers understanding implementation planning methodology
+- Archival/historical reference for Phase 2.5 implementation thinking
+
+Status: SUPERSEDED — Phase 2.5 work consumed into perceptual-audit-v2/
+Superseded By: perceptual-audit-v2/synthesis/ (T1 authority)
+Links to: component-system/perceptual-audit-v2/ for current soul definition
+-->
+
 # IMPLEMENTATION SPEC
 ## Closing the Soul Gaps
 

@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: perceptual-audit-v2/re-audit — Component structural re-audits
+Contributed To: Verified accuracy of CHARACTER-FAMILY-COMPLETE.md character specs
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Decision Matrix — Structural Re-Audit
 ## Phase 4-ALPHA | Component 8/11
 

@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: perceptual-audit-v2/pages — Page-level audit specimens and soul extractions
+Contributed To: Page composition patterns in PRODUCTION-RULES.md
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Documentation Page — Soul Extraction
 ## Phase 3: Page Composition Audit
 

@@ -1,3 +1,24 @@
+/* LIGHT SECTION
+Full Context For ALL Files: perceptual-audit-v2/synthesis/
+
+File: archive/variations/tests/component-variations.spec.ts
+Scope: LIGHT — Minimal context for quick lookup
+Part Of: archive/variations/tests — Variation test infrastructure
+Contributed To: Automated variation verification (historical)
+
+What this file does:
+Playwright test suite for visual/CSS property verification of design system variations.
+Tests validate specific CSS properties and ensure design consistency across variations.
+
+Who uses this:
+- CI/CD pipelines for automated verification (historical)
+- Agents reviewing test methodology
+- Visual regression test execution
+
+Status: ARCHIVED — Historical test infrastructure from variation experiments
+Links to: perceptual-audit-v2/synthesis/ for current component specifications
+*/
+
 /**
  * Component Variations Test Suite
  *

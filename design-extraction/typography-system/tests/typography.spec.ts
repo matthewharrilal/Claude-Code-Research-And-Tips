@@ -1,3 +1,10 @@
+/*
+LIGHT SECTION — Phase 2D
+Part Of: typography-system — Typography CSS implementation
+Contributed To: DESIGN-TOKEN-SUMMARY.md typography tokens; production CSS foundation
+Full Context: perceptual-audit-v2/synthesis/
+*/
+
 import { test, expect } from '@playwright/test';
 import path from 'path';
 

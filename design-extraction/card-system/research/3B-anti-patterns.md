@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: card-system/research — Deep research on card patterns
+Contributed To: Soul principles foundation; 3A-3D research fed into SOUL-DEFINITION.md
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Anti-Patterns: What Makes Cards Generic
 
 ## Research Document 3B

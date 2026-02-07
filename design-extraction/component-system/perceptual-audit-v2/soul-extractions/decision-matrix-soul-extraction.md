@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: perceptual-audit-v2/soul-extractions — Per-component soul extraction work
+Contributed To: MASTER-SOUL-SYNTHESIS.md and CHARACTER-FAMILY-COMPLETE.md
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Decision Matrix Soul Extraction
 ## Summary Document
 

@@ -1,3 +1,10 @@
+/*
+LIGHT SECTION — Phase 2D
+Part Of: card-system/tests — Card test infrastructure
+Contributed To: Automated soul verification methodology
+Full Context: perceptual-audit-v2/synthesis/
+*/
+
 import { test, expect } from '@playwright/test';
 import * as path from 'path';
 

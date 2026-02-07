@@ -1,3 +1,12 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+LIGHT SECTION PROVENANCE — Group D1b
+File: design-extraction/archive/variations/research/brutalist.md
+Part Of: archive/variations — Design variation research
+Contributed To: Editorial pattern exploration; fed into card-system soul principles
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # Brutalist Web Design: CSS Research
 
 > Research compiled 2026-02-02 for documentation component styling.

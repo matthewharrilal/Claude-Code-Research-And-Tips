@@ -24,6 +24,28 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!-- LIGHT SECTION
+Full Context For ALL Files: perceptual-audit-v2/synthesis/
+
+File: component-system/archive/validation-sprint/REFERENCE-A-PROVIDED-ANALYSIS.md
+Scope: LIGHT — Minimal context for quick lookup
+Part Of: component-system/archive — Validation sprint (superseded)
+Contributed To: Soul validation methodology; superseded by perceptual-audit-v2/
+
+What this file does:
+Validation sprint experimental work and findings consumed into SOUL-DEFINITION.md.
+Historical record of design exploration, testing, and validation methodology.
+
+Who uses this:
+- Agents researching soul validation methodology (historical context)
+- Designers understanding validation and experiment process
+- Archival/historical reference for validation sprint work
+
+Status: SUPERSEDED — Validation sprint work consumed into perceptual-audit-v2/
+Superseded By: component-system/SOUL-DEFINITION.md (T1 authority)
+Links to: perceptual-audit-v2/synthesis/ for current soul definition
+-->
+
 # REFERENCE A: KortAI Page Layout — Perceptual Analysis
 
 **Source:** User-provided screenshot (REFERENCE-IMAGE-KORTAI-PAGE-LAYOUT.png)

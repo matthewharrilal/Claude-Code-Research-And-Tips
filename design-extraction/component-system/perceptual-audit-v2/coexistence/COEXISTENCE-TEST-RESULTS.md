@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: perceptual-audit-v2/coexistence — Cross-component coexistence testing
+Contributed To: PRODUCTION-RULES.md coexistence constraints
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Coexistence Test Results
 ## Phase 2: Visual Harmony Testing
 

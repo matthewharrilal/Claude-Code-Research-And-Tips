@@ -1,3 +1,12 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+LIGHT SECTION PROVENANCE — Group D1b
+File: design-extraction/archive/PROGRESS-variations.md
+Part Of: archive — Variation progress tracking
+Contributed To: Historical record of variation experiment phases
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # Component Variation Progress Tracker
 
 ══════════════════════════════════════════════════════════════════

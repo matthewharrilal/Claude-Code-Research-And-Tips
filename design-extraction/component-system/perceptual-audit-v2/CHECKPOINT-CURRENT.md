@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: perceptual-audit-v2 — Audit tracking and state management
+Contributed To: Audit process documentation; supports synthesis verification
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # CHECKPOINT: Phase 4-ZETA + 4A-E Complete
 ## Project Status: COMPLETE
 

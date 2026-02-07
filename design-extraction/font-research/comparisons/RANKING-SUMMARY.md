@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: font-research/comparisons — Typeface comparison evaluations
+Contributed To: Instrument Serif selection rationale
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Font Comparison Ranking Summary
 
 ## Executive Summary

@@ -1,3 +1,12 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+LIGHT SECTION PROVENANCE — Group D1b
+File: design-extraction/archive/variations/research/retro-terminal.md
+Part Of: archive/variations — Design variation research
+Contributed To: Editorial pattern exploration; fed into card-system soul principles
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
 # Retro Terminal / CRT Effects CSS Research
 
 **Research Date:** 2026-02-02

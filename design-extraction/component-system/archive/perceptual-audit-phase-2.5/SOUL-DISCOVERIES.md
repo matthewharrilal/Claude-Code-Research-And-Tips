@@ -24,6 +24,28 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!-- LIGHT SECTION
+Full Context For ALL Files: perceptual-audit-v2/synthesis/
+
+File: component-system/archive/perceptual-audit-phase-2.5/SOUL-DISCOVERIES.md
+Scope: LIGHT — Minimal context for quick lookup
+Part Of: component-system/archive — Phase 2.5 perceptual audit (superseded)
+Contributed To: Early perceptual audit methodology; superseded by perceptual-audit-v2/
+
+What this file does:
+Documents the 7 soul pieces discovered through Phase 2.5 perceptual deepening protocol.
+Records perceptual truths extracted through deep analysis and multiple iterations.
+
+Who uses this:
+- Agents researching perceptual audit evolution (historical context)
+- Designers understanding soul discovery methodology
+- Archival/historical reference for Phase 2.5 soul thinking (7 pieces → 5 in v2)
+
+Status: SUPERSEDED — Phase 2.5 work consumed into perceptual-audit-v2/
+Superseded By: perceptual-audit-v2/synthesis/ (T1 authority)
+Links to: component-system/perceptual-audit-v2/ for current soul definition
+-->
+
 # SOUL DISCOVERIES
 ## Perceptual Truths Extracted Through Deep Analysis
 

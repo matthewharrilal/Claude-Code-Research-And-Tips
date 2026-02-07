@@ -24,6 +24,28 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!-- LIGHT SECTION
+Full Context For ALL Files: perceptual-audit-v2/synthesis/
+
+File: component-system/archive/research-phase-3/4C-callout-taxonomy.md
+Scope: LIGHT — Minimal context for quick lookup
+Part Of: component-system/archive — Phase 3 research (superseded)
+Contributed To: Component research methodology; superseded by perceptual-audit-v2/
+
+What this file does:
+Taxonomy research documenting 6 callout component types designed with editorial
+soul, rejecting generic notification patterns.
+
+Who uses this:
+- Agents researching component design evolution (historical context)
+- Designers understanding callout design methodology
+- Archival/historical reference for Phase 3 callout taxonomy research
+
+Status: SUPERSEDED — Phase 3 research consumed into production CSS
+Superseded By: component-system/css/callouts.css (implementation)
+Links to: perceptual-audit-v2/synthesis/ for current component definitions
+-->
+
 # Callout Taxonomy: 6 Types with Editorial Soul
 ## Research Document 4C
 **Sub-Agent:** 4C

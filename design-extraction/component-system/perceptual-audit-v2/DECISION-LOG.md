@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: perceptual-audit-v2 — Audit tracking and state management
+Contributed To: Audit process documentation; supports synthesis verification
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Perceptual Audit Decision Log
 ## All Decisions Tracked for Audit Trail
 

@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: font-research/comparisons — Typeface comparison evaluations
+Contributed To: Instrument Serif selection rationale
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Comparison: Libre Bodoni vs Sanrok Reference
 
 ## Overall Match Score: 24/40 (3.0/5 average across 8 letters)

@@ -24,6 +24,28 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!-- LIGHT SECTION
+Full Context For ALL Files: perceptual-audit-v2/synthesis/
+
+File: component-system/archive/perceptual-audit-phase-2.5/INSIGHT-JOURNAL.md
+Scope: LIGHT — Minimal context for quick lookup
+Part Of: component-system/archive — Phase 2.5 perceptual audit (superseded)
+Contributed To: Early perceptual audit methodology; superseded by perceptual-audit-v2/
+
+What this file does:
+Active documentation of the perceptual deepening discovery journey during Phase 2.5.
+Records insights, decisions, and evolving understanding of card system soul.
+
+Who uses this:
+- Agents researching perceptual audit evolution (historical context)
+- Designers understanding discovery process and thinking methodology
+- Archival/historical reference for Phase 2.5 insights
+
+Status: SUPERSEDED — Phase 2.5 work consumed into perceptual-audit-v2/
+Superseded By: perceptual-audit-v2/synthesis/ (T1 authority)
+Links to: component-system/perceptual-audit-v2/ for current soul definition
+-->
+
 # INSIGHT JOURNAL
 ## Perceptual Deepening Protocol — Card System Soul Extraction
 

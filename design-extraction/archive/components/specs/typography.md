@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: archive/components/specs — Pre-audit component specifications
+Contributed To: Early component structure thinking; superseded by CHARACTER-FAMILY-COMPLETE.md
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Typography Component Specifications
 
 ## Overview

@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: perceptual-audit-v2/checkpoints — Audit session state preservation
+Contributed To: Audit continuity; historical checkpoint records
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # CHECKPOINT-CURRENT.md
 ## Perceptual Audit v2 — Real-Time State Tracker
 

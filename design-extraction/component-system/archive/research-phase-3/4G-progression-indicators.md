@@ -24,6 +24,28 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!-- LIGHT SECTION
+Full Context For ALL Files: perceptual-audit-v2/synthesis/
+
+File: component-system/archive/research-phase-3/4G-progression-indicators.md
+Scope: LIGHT — Minimal context for quick lookup
+Part Of: component-system/archive — Phase 3 research (superseded)
+Contributed To: Component research methodology; superseded by perceptual-audit-v2/
+
+What this file does:
+Research on progress and step indicator component design for documenting
+journeys and workflows with editorial sensibility.
+
+Who uses this:
+- Agents researching component design evolution (historical context)
+- Designers understanding progression indicator methodology
+- Archival/historical reference for Phase 3 indicator research
+
+Status: SUPERSEDED — Phase 3 research consumed into production CSS
+Superseded By: component-system/css/progression.css (implementation)
+Links to: perceptual-audit-v2/synthesis/ for current component definitions
+-->
+
 # 4G: Progress/Step Indicator Design Research
 
 ## Mission Statement

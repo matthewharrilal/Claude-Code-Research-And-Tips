@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: font-research — Typeface selection research
+Contributed To: Instrument Serif decision; fed into DESIGN-TOKEN-SUMMARY.md typography tokens
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Font Feasibility Analysis
 
 ## Executive Summary

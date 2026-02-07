@@ -24,6 +24,28 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!-- LIGHT SECTION
+Full Context For ALL Files: perceptual-audit-v2/synthesis/
+
+File: component-system/archive/research-phase-3/4I-core-abstraction-design.md
+Scope: LIGHT — Minimal context for quick lookup
+Part Of: component-system/archive — Phase 3 research (superseded)
+Contributed To: Component research methodology; superseded by perceptual-audit-v2/
+
+What this file does:
+Research on core abstraction component design exploring the relationship between
+philosophy and code implementation.
+
+Who uses this:
+- Agents researching component design philosophy (historical context)
+- Designers understanding core abstraction methodology
+- Archival/historical reference for Phase 3 abstraction research
+
+Status: SUPERSEDED — Phase 3 research consumed into production CSS
+Superseded By: component-system/css/core-abstraction.css (implementation)
+Links to: perceptual-audit-v2/synthesis/ for current component definitions
+-->
+
 # Core Abstraction Component Design Research
 ## Sub-Agent 4I: Philosophy-Code Relationship Design
 ## Timestamp: 2026-02-03

@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: font-research/comparisons — Typeface comparison evaluations
+Contributed To: Instrument Serif selection rationale
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Comparison: Abril Fatface vs Sanrok Reference
 
 ## Overall Match Score: 26/40 (3.25/5 average across 8 letters)

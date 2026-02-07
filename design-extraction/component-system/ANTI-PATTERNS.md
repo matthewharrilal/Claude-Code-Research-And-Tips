@@ -24,6 +24,13 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: component-system — Anti-patterns collection (superseded)
+Contributed To: Anti-pattern thinking; superseded by ANTI-PATTERNS-REGISTRY.md
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Component System Anti-Patterns
 
 ## What NOT to Build: A Comprehensive Guide to Generic Design

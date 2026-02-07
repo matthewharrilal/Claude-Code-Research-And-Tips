@@ -24,6 +24,28 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!-- LIGHT SECTION
+Full Context For ALL Files: perceptual-audit-v2/synthesis/
+
+File: component-system/archive/research-phase-3/4B-code-block-anatomy.md
+Scope: LIGHT — Minimal context for quick lookup
+Part Of: component-system/archive — Phase 3 research (superseded)
+Contributed To: Component research methodology; superseded by perceptual-audit-v2/
+
+What this file does:
+Deep analysis of code block component anatomy and structure for achieving
+editorial typography feel versus generic IDE clones.
+
+Who uses this:
+- Agents researching component design evolution (historical context)
+- Designers understanding code block methodology
+- Archival/historical reference for Phase 3 code block research
+
+Status: SUPERSEDED — Phase 3 research consumed into production CSS
+Superseded By: component-system/css/code-block.css (implementation)
+Links to: perceptual-audit-v2/synthesis/ for current component definitions
+-->
+
 # Code Block Editorial Anatomy Research
 
 > **Sub-Agent 4B**: Deep analysis of what makes code blocks feel "editorial" vs "generic IDE clone"

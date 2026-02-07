@@ -24,6 +24,28 @@ Last verified: 2026-02-06
 ═══════════════════════════════════════════════════════════════
 -->
 
+<!-- LIGHT SECTION
+Full Context For ALL Files: perceptual-audit-v2/synthesis/
+
+File: component-system/archive/perceptual-audit-phase-2.5/CURRENT-SYSTEM-BASELINE.md
+Scope: LIGHT — Minimal context for quick lookup
+Part Of: component-system/archive — Phase 2.5 perceptual audit (superseded)
+Contributed To: Early perceptual audit methodology; superseded by perceptual-audit-v2/
+
+What this file does:
+Perceptual analysis of existing card system as Phase 0 baseline for the
+perceptual deepening protocol. Documents baseline soul characteristics before audit.
+
+Who uses this:
+- Agents researching perceptual audit evolution (historical context)
+- Designers understanding baseline analysis methodology
+- Archival/historical reference for Phase 2.5 baseline thinking
+
+Status: SUPERSEDED — Phase 2.5 work consumed into perceptual-audit-v2/
+Superseded By: perceptual-audit-v2/synthesis/ (T1 authority)
+Links to: component-system/perceptual-audit-v2/ for current soul definition
+-->
+
 # CURRENT SYSTEM BASELINE
 ## Perceptual Analysis of Existing Card System
 

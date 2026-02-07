@@ -1,3 +1,10 @@
+<!--
+LIGHT SECTION — Phase 2D
+Part Of: perceptual-audit-v2/re-audit — Page composition re-audit
+Contributed To: Page-level composition rules in PRODUCTION-RULES.md
+Full Context: perceptual-audit-v2/synthesis/
+-->
+
 # Phase 4-GAMMA: Page Composition Structural Re-Audit
 ## 4 Full-Page Density and Axis Analysis
 
