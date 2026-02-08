@@ -143,3 +143,83 @@ status: PASSED
 - DD constraints inherited and mapped ✓
 - Application target ≥80% is achievable ✓
 - Gate file is a DELIVERABLE, not a checkbox ✓
+
+---
+
+## Section 3: POST-BUILD VERIFICATION
+
+### R-1 Finding Application Status (Post-OD Completion)
+
+| Finding ID | Finding Name | Status | Evidence (OD Consumer) |
+|------------|-------------|--------|------------------------|
+| R1-001 | Density Rhythm Principle | APPLIED | OD-001 (PULSE Q&A), OD-002 (CRESCENDO arc), OD-003 (ISLANDS clusters), OD-004 (GEOLOGICAL strata), OD-005 (WAVE oscillation), OD-006 (ALL patterns) |
+| R1-002 | 38% Retention Rule | APPLIED | OD-001 (64-80px breathing between Q&A cycles), OD-006 (whitespace as organizational tool) |
+| R1-003 | Viewport Principle | APPLIED | OD-001 (1 Q&A pair per viewport), OD-002 (1 narrative beat per viewport), OD-003 (1 task per viewport), OD-004 (1 certainty level per viewport), OD-005 (hub in initial viewport) |
+| R1-004 | Three-Column Doctrine | APPLIED | OD-004 (certain/uncertain paths as separate columns), OD-005 (hub center, navigation spokes on sides) |
+| R1-005 | Responsive Collapse | APPLIED | OD-005 (map collapses to list on mobile) |
+| R1-006 | Horizontal Comparison Break | APPLIED | OD-004 (compare certain vs uncertain approaches) |
+| R1-007 | Callout Positioning Doctrine | APPLIED | OD-001 (callouts follow answers), OD-003 (warning before task steps, tip after) |
+| R1-008 | Callout Scarcity Principle | APPLIED | OD-001 (max 2 callouts in conversational flow), OD-003 (max 1 per task island) |
+| R1-009 | Code-Adjacent Callout | APPLIED | OD-003 (warning BEFORE code, tip AFTER) |
+| R1-010 | Grouping Proximity Law | APPLIED | OD-001 (Q&A tight 16px, between pairs 48px), OD-003 (steps tight 8px, tasks separated 48px) |
+| R1-011 | Default Story Pattern | APPLIED | OD-003 (each task starts with minimal required state) |
+| R1-013 | Do/Don't Grid | APPLIED | OD-005 (good vs bad navigation patterns) |
+| R1-015 | Recipe Pattern | APPLIED | OD-003 (tasks show components in combination) |
+| R1-016 | Typography-First Hierarchy | APPLIED | ALL 6 ODs (all headers cite R1-016). OD-002: heading size reduces 28px->20px with arc. OD-006: editorial mastery. |
+| R1-017 | Monospace Differentiation | APPLIED | OD-002 (code appears at conflict/resolution, not setup), OD-004 (code presence signals density) |
+| R1-018 | Inline Code Emphasis | APPLIED | OD-001, OD-002, OD-004, OD-005, OD-006 (inline code within prose) |
+| R1-019 | Code Block Density Contribution | APPLIED | OD-001, OD-002, OD-003, OD-004, OD-005 (code blocks contribute to section density) |
+| R1-022 | [Applied in OD-006] | APPLIED | OD-006 (20/28 R-1 findings applied, including R1-022) |
+| R1-025 | [Applied in OD-006] | APPLIED | OD-006 (per OD-CHECKPOINT line 115) |
+| R1-026 | [Applied in OD-006] | APPLIED | OD-001 (declared not implemented in build audit), OD-006 (applied) |
+| R1-012 | [Not applied] | NOT APPLIED | Not specifically targeted to any OD hypothesis |
+| R1-014 | [Not applied] | NOT APPLIED | Not specifically targeted to any OD hypothesis |
+| R1-020 | [Not applied] | NOT APPLIED | Not specifically targeted to any OD hypothesis |
+| R1-021 | [Not applied] | NOT APPLIED | Not specifically targeted to any OD hypothesis |
+| R1-023 | [Not applied] | NOT APPLIED | Not specifically targeted to any OD hypothesis |
+| R1-024 | [Not applied] | NOT APPLIED | Not specifically targeted to any OD hypothesis |
+| R1-027 | [Not applied] | NOT APPLIED | Not specifically targeted to any OD hypothesis |
+| R1-028 | [Not applied] | NOT APPLIED | Not specifically targeted to any OD hypothesis |
+
+### Summary
+
+- **R-1 Applied:** 20/28 (~71%)
+- **R-1 Target:** >=80%
+- **Gap:** -9 percentage points (8 unapplied findings)
+- **Reason for gap:** Unapplied findings were not specifically targeted to OD hypotheses. The bespoke EXT-* research model achieved ~85% by targeting research to specific exploration hypotheses.
+- **Final R-1 Application Rate:** ~71%
+
+### Per-OD Scores
+
+| OD | Score | Decision | External Research | R-1 Findings Applied |
+|----|-------|----------|-------------------|---------------------|
+| OD-001 Conversational | ~35/40 (I:8 U:9 S:9 E:9) | INCLUDE | EXT-CONV (5) + EXT-DENSITY (3) | R1-001, R1-002, R1-003, R1-007, R1-008, R1-010, R1-016, R1-018, R1-019, R1-026 |
+| OD-002 Narrative | ~33/40 | INCLUDE | None (no external research) | R1-001, R1-003, R1-007, R1-008, R1-016, R1-017, R1-018, R1-019 |
+| OD-003 Task-Based | ~33/40 | INCLUDE | EXT-TASK (12, 8 applied) | R1-001, R1-003, R1-007, R1-008, R1-009, R1-010, R1-011, R1-015, R1-016, R1-019 |
+| OD-004 Confidence | INCLUDE | INCLUDE | EXT-CONF (12, all applied) | R1-001, R1-003, R1-004, R1-006, R1-016, R1-017, R1-018, R1-019 |
+| OD-005 Spatial | INCLUDE | INCLUDE | EXT-SPAT (12, 10 applied) | R1-001, R1-003, R1-004, R1-005, R1-007, R1-008, R1-013, R1-016, R1-018, R1-019 |
+| OD-006 Creative | INCLUDE (crown jewel, >=36/40) | INCLUDE | EXT-CREATIVE (9 of 12) | 20 of 28 R-1 findings (see OD-CHECKPOINT line 115) |
+
+### Findings Generated
+
+| Category | Count | ID Range |
+|----------|-------|----------|
+| Pattern findings (core) | 13 | OD-F-001 through OD-F-013 |
+| Meta-pattern findings | 1 | OD-F-MP-001 |
+| Process findings | 1 | OD-F-PR-001 |
+| Forward-looking findings | 1 | OD-F-FL-001 |
+| Anti-pattern findings | 1 | OD-F-AP-001 |
+| **Total OD-F findings** | **17** | |
+
+### Audit Findings Generated
+
+| Severity | Count |
+|----------|-------|
+| Critical | 8 |
+| High | 6 |
+| Medium | 16 |
+| Low | 8 |
+| Notes | ~51 |
+| **Total** | **89** |
+
+16/16 actionable fixes applied. 2 false positives disproved. 0 soul violations.

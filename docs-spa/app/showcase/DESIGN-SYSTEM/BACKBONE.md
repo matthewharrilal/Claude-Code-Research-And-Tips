@@ -15,8 +15,8 @@ hangs off the structure and provenance chain documented here.
 and what is the exact chain of evidence?"
 
 3. STATUS
-COMPLETE — covers full pipeline from original research through Stage 2
-(DD). Stage 3 (OD/CD) sections are placeholders awaiting future work.
+COMPLETE — covers full pipeline from original research through Stage 3
+(OD). Stage 4 (AD) and Stage 5 (CD) sections are placeholders awaiting future work.
 
 5. BUILT ON
 - COMP-F-001 to COMP-F-021 (component findings)
@@ -107,13 +107,14 @@ folder — it links back here for provenance.
 │         │ GENERATED (DD-F-### outbound findings)                            │
 │         ▼                                                                   │
 │                                                                             │
-│   STAGE 3: ORGANIZATION (OD) — ⏳ IN PROGRESS                               │
-│   └── 6 patterns to explore                                                 │
-│   └── R-1 as primary research                                               │
-│   └── Must apply DD-F-006 (fractal)                                         │
+│   STAGE 3: ORGANIZATION (OD) — ✅ COMPLETE (~34.8/40 avg)                    │
+│   └── 6 patterns validated (CONVERSATIONAL, NARRATIVE, TASK-BASED,          │
+│       CONFIDENCE, SPATIAL, CREATIVE)                                        │
+│   └── OD-F-001 to OD-F-013 + OD-F-MP-001 documented                        │
+│   └── OD-F-005 crown jewel: Organization IS Density                         │
 │                                                                             │
-│         │ CONSTRAINED (org serves density)                                  │
-│         │ GENERATED (OD-F-### outbound findings)                            │
+│         │ CONSTRAINED (org IS density + quality bar + OD-F-MP-001)           │
+│         │ GENERATED (OD-F-### 17 outbound findings)                         │
 │         ▼                                                                   │
 │                                                                             │
 │   STAGE 4: AXIS (AD) — ⏳ PENDING                                           │
@@ -218,39 +219,67 @@ Self-similarity creates coherence that variety cannot. DD-006 scored highest
 5. **Layers for expert/novice paths** — Geological model from DD-004
 
 ═══════════════════════════════════════════════════════════════════════════════
-## 4. STAGE 3: ORGANIZATION (OD) — IN PROGRESS
+## 4. STAGE 3: ORGANIZATION (OD) — ✅ COMPLETE (~34.8/40 avg)
 ═══════════════════════════════════════════════════════════════════════════════
 
-### The Story (Unfolding)
+### The Story
 
-DD explored visual rhythm. OD explores cognitive rhythm — how information should
-be ORGANIZED, not just spaced.
+DD explored visual rhythm. OD explored cognitive rhythm — how information should
+be ORGANIZED, not just spaced. Six explorations tested six hypotheses about
+organizational patterns, and the crown jewel discovery was that organization and
+density are not two layers but ONE phenomenon.
 
-Six explorations planned:
-- OD-001 Conversational: Q&A dialogue patterns
-- OD-002 Narrative Arc: Setup → Conflict → Resolution
-- OD-003 Task-Based: "I want to..." goal structures
-- OD-004 Confidence-Based: Certain → Uncertain flow
-- OD-005 Spatial/Map: Hub-and-spoke navigation
-- OD-006 Creative: TBD
+Six explorations completed:
+- OD-001 Conversational (~35/40): Q&A dialogue creates natural PULSE rhythm
+- OD-002 Narrative Arc (~33/40): Three-act structure creates CRESCENDO
+- OD-003 Task-Based (~35/40): Discrete task clusters create ISLANDS
+- OD-004 Confidence-Based (INCLUDE): Certainty stratification creates GEOLOGICAL layers
+- OD-005 Spatial/Map (INCLUDE): Hub-and-spoke creates WAVE pattern
+- OD-006 Creative (INCLUDE, crown jewel, >=36/40): Meta-documentation proved
+  organization IS density — cycling through all 5 modes with zero explicit density
+  manipulation, each section's density shifted automatically
 
-### What It Will Consume
+### What It Consumed
 
-| Input | What Will Be Extracted |
-|-------|------------------------|
-| DD-F-### findings | Density constraints |
-| HANDOFF-DD-TO-OD | Mandatory gate file |
-| R-1 Documentation Patterns | Primary research (28 findings) |
-| 5 Soul Pieces | Non-negotiable constraints |
+| Input | What Was Extracted |
+|-------|-------------------|
+| HANDOFF-DD-TO-OD | Mandatory gate file — density-org pairings enforced |
+| DD-F-001 through DD-F-018 | Density constraints (all consumed, DD-F-016 initially violated) |
+| COMP-F-001 through COMP-F-021 | Component decisions enforced |
+| R-1 Documentation Patterns (28) | Primary research — 71% application rate (20/28 applied in OD-006) |
+| R-5 Combination Theory (39) | Secondary research — anti-patterns enforced |
+| EXT-* bespoke research | 45+ external findings created during OD (EXT-TASK, EXT-CONF, EXT-SPAT, EXT-CREATIVE) |
+| 5 Soul Pieces | Non-negotiable constraints — 100% compliance across all 6 ODs |
 
-### What It Will Produce
+### What It Produced
 
-| Output | Why It Will Matter |
-|--------|-------------------|
-| 6 Organizational Patterns | Validated structures |
-| OD-F-### findings | Outbound findings for AD/CD |
+| Output | Why It Matters |
+|--------|----------------|
+| 6 Organizational Patterns | Validated cognitive rhythms for documentation |
+| OD-F-001 through OD-F-013 | 13 pattern findings for AD/CD |
+| OD-F-MP-001 (Organization = Density) | Meta-pattern governing ALL organizational work |
+| OD-F-AP-001 (2px border epidemic) | #1 systemic anti-pattern — 108 CSS declarations, fixed |
+| OD-F-PR-001 (Bespoke research) | Process finding — external research is high-leverage |
+| OD-F-FL-001 (Org implies axis) | Forward-looking — transitive chain: org→density→axis |
+| EXT-RESEARCH-REGISTRY | Registry of all bespoke research created during OD |
+| organizational-patterns.md | Pattern reference for AD/CD consumption |
 | HANDOFF-OD-TO-AD | Gate file for next stage |
-| Potential cognitive soul pieces | New DNA for the body |
+
+### Key Decisions
+
+1. **OD-006 as emergent synthesis** — Meta-documentation page proved org=density identity
+2. **2px→3px border fix** — 3-category system: structural borders upgraded, table/micro borders left
+3. **No new soul piece** — OD-F-005 is META-PATTERN, not perceptual soul piece; cognitive soul remains theoretical
+4. **Bespoke research approach** — EXT-* findings (85% consumption) outperformed pre-existing R-1 (71%) and R-2 (0%)
+5. **R-2 deferred to AD** — 27 Creative Layout findings at 0% consumption; AD should explicitly evaluate
+
+### Quality Metrics
+
+- **Average score:** ~34.8/40 across 6 explorations
+- **Soul compliance:** 100% (0 border-radius violations, 0 box-shadow violations across 3,479+ elements)
+- **Granular audit:** 89 findings (8 Critical, 6 High, 16 Medium, 8 Low, ~51 Notes) from 17-agent adversarial audit
+- **Fixes applied:** 16/16 (2 additional findings were false positives from font-loading timing + scroll animation)
+- **3 quality dialects:** Polished (OD-001/002), Functional (OD-003/004/005), Editorial (OD-006)
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## 5. STAGE 4: AXIS (AD) — PENDING
@@ -294,7 +323,7 @@ CD produces: CD-F-### findings + combination rules
 |-------|-----------|-------|-------------|
 | Stage 1 | COMP-F-### | 21 | DD, OD, AD, CD, Migration |
 | Stage 2 | DD-F-### | 18 | OD, AD, CD, Migration |
-| Stage 3 | OD-F-### | TBD | AD, CD, Migration |
+| Stage 3 | OD-F-### | 17 (OD-F-001 through OD-F-013 + OD-F-MP-001 + OD-F-PR-001 + OD-F-FL-001 + OD-F-AP-001) | AD, CD, Migration |
 | Stage 4 | AD-F-### | TBD | CD, Migration |
 | Stage 5 | CD-F-### | TBD | Migration |
 
@@ -302,15 +331,16 @@ CD produces: CD-F-### findings + combination rules
 ## 9. SOUL PIECES CUMULATIVE MATRIX
 ═══════════════════════════════════════════════════════════════════════════════
 
-| # | Soul Piece | Stage 1 | DD-001 | DD-002 | DD-003 | DD-004 | DD-005 | DD-006 |
-|---|------------|---------|--------|--------|--------|--------|--------|--------|
-| 1 | Sharp Edges | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 2 | Archivist Serif | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 3 | Family DNA | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 4 | No Shadows | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 5 | Squares Signal | ✅ | N/A | ✅ | N/A | N/A | N/A | N/A |
+| # | Soul Piece | Stage 1 | DD-001 | DD-002 | DD-003 | DD-004 | DD-005 | DD-006 | OD-001 | OD-002 | OD-003 | OD-004 | OD-005 | OD-006 |
+|---|------------|---------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
+| 1 | Sharp Edges | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 2 | Archivist Serif | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 3 | Family DNA | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 4 | No Shadows | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 5 | Squares Signal | ✅ | N/A | ✅ | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
 
-**Soul compliance: 100% across all completed work.**
+**Soul compliance: 100% across all completed work (Stage 1, DD-001 through DD-006, OD-001 through OD-006).**
+**OD audit verified: 0 border-radius violations, 0 box-shadow violations across 3,479+ DOM elements.**
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## 10. THE CAUSAL CHAIN
@@ -328,13 +358,13 @@ DD density explorations (6 patterns, 34.5/40 avg)
   │ GENERATED (DD-F-### outbound findings)
   │
   ▼
-OD organizational explorations (⏳ in progress)
+OD organizational explorations (✅ COMPLETE, 6 patterns, ~34.8/40 avg)
   │
-  │ CONSTRAINED (org patterns must SERVE density)
-  │ GENERATED (OD-F-### outbound findings)
+  │ CONSTRAINED (org IS density + OD-F-MP-001 meta-pattern + quality bar)
+  │ GENERATED (OD-F-### 17 outbound findings)
   │
   ▼
-AD axis explorations (⏳ pending)
+AD axis explorations (⏳ pending — consumes OD-F-### + DD-F-### + COMP-F-###)
   │
   ▼
 CD combination explorations (⏳ pending)
@@ -361,7 +391,8 @@ Migration
 | Apply a pattern | `patterns/PATTERN-INDEX.md` |
 | Find a COMP-F-### finding | `provenance/stage-1-components/component-findings.md` |
 | Find a DD-F-### finding | `provenance/stage-2-density-dd/DD-outbound-findings.md` |
-| Start OD work | `provenance/stage-2-density-dd/HANDOFF-DD-TO-OD.md` |
+| Find an OD-F-### finding | `provenance/stage-3-organization-od/OD-outbound-findings.md` |
+| Start AD work | `provenance/stage-3-organization-od/HANDOFF-OD-TO-AD.md` |
 | Read original research | `provenance/original-research/` |
 | Verify soul compliance | `checkpoints/SOUL-DISCOVERIES.md` |
 | See exploration artifacts | `explorations/density/`, `explorations/organizational/` |
@@ -410,9 +441,12 @@ Result: 36/40 — HIGHEST score. R3-023 validated as DD-F-006.
 Status: APPLIED, EXEMPLARY
 
 **Stage 3 (OD):**
-DD-F-006 is MANDATORY for all OD explorations (per HANDOFF-DD-TO-OD.md).
-OD patterns must apply fractal self-similarity regardless of org structure.
-Status: PENDING (OD not started)
+DD-F-006 was MANDATORY for all OD explorations (per HANDOFF-DD-TO-OD.md).
+All 6 ODs verified fractal self-similarity at 4 scales. OD-006 was the MOST
+fractal — cycling through all 5 organizational modes with zero density
+manipulation, each section's density shifted automatically.
+cross-od-consistency.md confirmed 4-scale fractal verified in every exploration.
+Status: APPLIED, VERIFIED (100% compliance)
 
 **Stage 4 (AD):**
 Axis layouts must SERVE the fractal pattern.

@@ -3,7 +3,7 @@ pipeline_stage: ALL
 stage_name: Pipeline Manifest
 file_type: manifest
 backbone_ref: DESIGN-SYSTEM/BACKBONE.md
-last_updated: 2026-02-05
+last_updated: 2026-02-08
 ---
 
 <!--
@@ -88,7 +88,7 @@ to application.
 | R1-003 | Viewport Principle: One major concept per viewport height | APPLIED | DD (most) | Section structure |
 | R1-004-028 | Additional findings | PENDING | OD (primary research) | — |
 
-**R-1 Status:** ~10% applied in DD, PRIMARY source for OD
+**R-1 Status:** ~71% applied in OD (20/28 in OD-006), PRIMARY source for OD ✅ CONSUMED
 
 ### R-2 Creative Layouts (78 findings)
 
@@ -168,21 +168,45 @@ to application.
 
 | ID | Finding | Type | Consumed By | Status |
 |----|---------|------|-------------|--------|
-| DD-F-001 | PULSE for alternating | Pattern | OD-001 | PENDING |
-| DD-F-002 | CRESCENDO for progressive | Pattern | OD-002, OD-004 | PENDING |
-| DD-F-003 | ISLANDS for task groups | Pattern | OD-003 | PENDING |
-| DD-F-004 | GEOLOGICAL for hierarchy | Pattern | OD-004 | PENDING |
-| DD-F-005 | TIDAL/RIVERS width signal | Pattern | OD-001 | PENDING |
-| DD-F-006 | FRACTAL meta-pattern | META | ALL ODs, AD, CD | PENDING |
+| DD-F-001 | PULSE for alternating | Pattern | OD-001 | APPLIED — Consumed by OD (Q&A creates PULSE) |
+| DD-F-002 | CRESCENDO for progressive | Pattern | OD-002, OD-004 | APPLIED — Consumed by OD (narrative arc + confidence) |
+| DD-F-003 | ISLANDS for task groups | Pattern | OD-003 | APPLIED — Consumed by OD (task clusters as archipelagos) |
+| DD-F-004 | GEOLOGICAL for hierarchy | Pattern | OD-004 | APPLIED — Consumed by OD (certainty stratification) |
+| DD-F-005 | TIDAL/RIVERS width signal | Pattern | OD-001 | APPLIED — Consumed by OD (Q 60%/A 100% width) |
+| DD-F-006 | FRACTAL meta-pattern | META | ALL ODs, AD, CD | APPLIED — Consumed by OD (MANDATORY, all 6 verified) |
 | DD-F-007-009 | Process learnings | Process | Methodology | ACTIVE |
-| DD-F-010-014 | Forward-looking | Forward | OD, AD, CD | PENDING |
-| DD-F-015-018 | Anti-patterns | Constraint | All stages | ACTIVE |
+| DD-F-010 | Org must serve density | Forward | OD (GATE), AD, CD | APPLIED — Consumed by OD, ELEVATED to identity by OD-F-005 |
+| DD-F-011 | Cognitive soul may emerge | Forward | OD | APPLIED — OD-F-005/OD-F-MP-001 ARE the cognitive emergence |
+| DD-F-012 | Density implies axis | Forward | AD, CD | ACTIVE — Extended by OD-F-FL-001 (transitive chain: org→density→axis) |
+| DD-F-013 | Component tolerance | Forward | CD | ACTIVE — Carried forward |
+| DD-F-014 | Callout stacking fatigue | Constraint | All stages | ACTIVE — Enforced across all 6 ODs |
+| DD-F-015-018 | Anti-patterns | Constraint | All stages | ACTIVE — DD-F-016 initially VIOLATED (2px epidemic, fixed) |
 
 **Total DD-F-###:** 18 findings
 
-### Stage 3 (OD-F-###) — Organization ⏳ PENDING
+### Stage 3 (OD-F-###) — Organization ✅ COMPLETE
 
-TBD — OD explorations not yet complete.
+| ID | Finding | Type | Consumed By | Status |
+|----|---------|------|-------------|--------|
+| OD-F-001 | Conversational width variation (60%/100%) creates natural TIDAL rhythm | Pattern | AD, CD, Migration | ACTIVE |
+| OD-F-002 | Fractal nesting via follow-ups satisfies DD-F-006 at section scale | Pattern | AD, CD, Migration | ACTIVE |
+| OD-F-003 | Q&A pairs are inherent PULSE generators (question=LOW, answer=HIGH) | Pattern | AD, CD, Migration | ACTIVE |
+| OD-F-004 | Chapter dividers as breathing zones for density debt recovery | Pattern | AD, CD, Migration | ACTIVE |
+| OD-F-005 | Organization IS Density — same phenomenon, two perspectives (CROWN JEWEL) | Pattern | AD (MANDATORY), CD, Migration | ACTIVE |
+| OD-F-006 | Meta-documentation as purest density test | Pattern | AD, CD, Migration | ACTIVE |
+| OD-F-007 | Mode-transition breathing between organizational modes | Pattern | AD, CD, Migration | ACTIVE |
+| OD-F-008 | Compound creative techniques — layered EXT-CREATIVE effects exceed sum | Pattern | AD, CD, Migration | ACTIVE |
+| OD-F-009 | Narrative arc creates CRESCENDO — story complexity mirrors density | Pattern | AD, CD, Migration | ACTIVE |
+| OD-F-010 | Typography size reduction mirrors density increase (28px→20px) | Pattern | AD, CD, Migration | ACTIVE |
+| OD-F-011 | Tension meters as narrative wayfinding without consuming content space | Pattern | AD, CD, Migration | ACTIVE |
+| OD-F-012 | Code absence in setup acts creates anticipation (R1-017 as narrative device) | Pattern | AD, CD, Migration | ACTIVE |
+| OD-F-013 | Decision matrices are natural climax components at peak tension | Pattern | AD, CD, Migration | ACTIVE |
+| OD-F-MP-001 | Organization = Density Identity — meta-pattern of entire OD stage | Meta-Pattern | ALL (AD, CD, Migration) | ACTIVE |
+| OD-F-PR-001 | External research enrichment elevates scores (+1.5, bespoke > broad) | Process | Methodology | ACTIVE |
+| OD-F-FL-001 | Organizational patterns imply axis preferences (transitive chain) | Forward | AD (GATE) | ACTIVE |
+| OD-F-AP-001 | 2px border epidemic — 108 CSS declarations, 1000+ instances | Anti-Pattern | AD, CD, Migration | ACTIVE |
+
+**Total OD-F-###:** 17 findings (13 pattern + 1 meta-pattern + 1 process + 1 forward + 1 anti-pattern)
 
 ### Stage 4 (AD-F-###) — Axis ⏳ PENDING
 
@@ -203,7 +227,7 @@ TBD — CD explorations not yet started.
 | 3 | Callouts Share Family DNA | COMP-F-003 | Visual | GotchaBox 6-zone broke family | R5-* (combination theory) |
 | 4 | Shadows Lie About Depth | COMP-F-004 | Visual | DesignDecision shadow created false elevation | R2-* (flat design) |
 | 5 | Squares Signal System | COMP-F-005 | Visual | PathOfTask circles felt casual | R1-* (procedure patterns) |
-| ? | TBD | OD-F-??? | Cognitive | May emerge from OD | R1-* (organization) |
+| — | None discovered in OD | — | — | OD-F-005 is META-PATTERN, not soul piece. Cognitive soul pieces remain theoretical. OD-F-MP-001 (Organization = Density Identity) governs all organizational work but does not qualify as a perceptual soul piece. | — |
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## SECTION D: PATTERN PROVENANCE
@@ -220,9 +244,19 @@ TBD — CD explorations not yet started.
 | TIDAL/RIVERS | R3-029, R4-VR* | DD-F-005 | DD-005 | 36/40 |
 | FRACTAL | R3-023 | DD-F-006 | DD-006 | 36/40 |
 
-### Organizational Patterns ⏳ PENDING
+### Organizational Patterns ✅ COMPLETE
 
-TBD — OD explorations not yet complete.
+| Pattern | Research | Generated Finding | Validated By | Score |
+|---------|----------|-------------------|--------------|-------|
+| CONVERSATIONAL | R1-001, R1-007, R1-008 | OD-F-001, OD-F-002, OD-F-003, OD-F-004 | OD-001 | ~35/40 |
+| NARRATIVE | R1-016, R1-017, R1-018, R1-019 | OD-F-009, OD-F-010, OD-F-011, OD-F-012, OD-F-013 | OD-002 | ~33/40 |
+| TASK-BASED | R1-001, R1-016, R1-019, EXT-TASK-* | — | OD-003 | ~35/40 |
+| CONFIDENCE | R1-016, R1-017, R1-018, EXT-CONF-* | — | OD-004 | INCLUDE |
+| SPATIAL | R1-016, R1-018, R1-019, EXT-SPAT-* | — | OD-005 | INCLUDE |
+| CREATIVE | R1-001 through R1-026, EXT-CREATIVE-* | OD-F-005, OD-F-006, OD-F-007, OD-F-008 | OD-006 | INCLUDE (crown jewel) |
+
+**Meta-pattern:** OD-F-MP-001 — Organization = Density Identity (governs all 6 patterns)
+**Quality: ~34.8/40 average across 6 explorations. Soul compliance: 100%.**
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## SECTION E: CROSS-REFERENCE INDEX
@@ -234,7 +268,11 @@ R3-023 (Fractal self-similarity):
 - **DD-006:** EXEMPLARY application, █░░█░░█░░ at all scales
 - **DD-F-006:** Generated finding for forward stages
 - **HANDOFF-DD-TO-OD:** Mandatory for all OD explorations
+- **ALL 6 ODs:** DD-F-006 enforced as MANDATORY constraint, verified in all explorations
+- **OD-006:** MOST fractal — all 5 organizational modes cycling with zero density manipulation
 - **BACKBONE.md Section 13:** Complete trace through all stages
+
+**DISAMBIGUATION NOTE:** R3-023 is the canonical ID for fractal self-similarity in this manifest. R3-036 in RESEARCH-ACTIVE.md and OD HTML headers refers to the CRESCENDO definition — a DIFFERENT finding. The OD HTML headers consistently cite "R3-036 / DD-F-006 (FRACTAL)" following the RESEARCH-ACTIVE.md convention where R3-036 = "Fractal Self-Similar Density." This manifest uses R3-023 per its original entry. Both IDs point to the same underlying concept (fractal density) but from different R-3 source categorizations. See finding-registry.md Collision 2 for full analysis.
 
 ### "Where was COMP-F-001 used?"
 
@@ -256,10 +294,10 @@ Traffic-light (DD-F-015):
 
 | State | Meaning | Count |
 |-------|---------|-------|
-| PENDING | Identified but not yet applied | ~260 |
-| APPLIED | Used in at least one stage | ~75 |
+| PENDING | Identified but not yet applied | ~245 |
+| APPLIED | Used in at least one stage | ~90 |
 | EXEMPLARY | Deeply applied as core concept | 6 |
-| ACTIVE | Constraint that applies to all work | ~25 |
+| ACTIVE | Constraint that applies to all work | ~42 (25 prior + 17 OD-F) |
 | CONSUMED | Used and no longer needs tracking | ~3 |
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -267,9 +305,9 @@ Traffic-light (DD-F-015):
 ═══════════════════════════════════════════════════════════════════════════════
 
 **Total Original Research:** 388 findings (R-1 to R-5)
-**Total Generated Findings:** 39 (COMP-F + DD-F, more pending)
-**Total Soul Pieces:** 5 visual (cognitive TBD)
-**Total Patterns:** 6 density (organizational, axis, combination TBD)
+**Total Generated Findings:** 56 (COMP-F: 21 + DD-F: 18 + OD-F: 17)
+**Total Soul Pieces:** 5 visual (no cognitive discovered in OD — OD-F-005 is meta-pattern, not soul piece)
+**Total Patterns:** 6 density + 6 organizational (axis, combination TBD)
 
 **Update Schedule:**
 - After each stage completion: Add generated findings

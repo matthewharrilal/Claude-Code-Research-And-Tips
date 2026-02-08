@@ -42,8 +42,8 @@ END INLINE THREADING HEADER
 # RESEARCH-ACTIVE — Comprehensive Research Tracking
 ## All 337 Findings with Application Status
 
-Last Updated: 2026-02-04
-Last Updated By: Mandatory Research Application System Implementation
+Last Updated: 2026-02-08
+Last Updated By: Provenance Chain Remediation (updater-b agent)
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## GLOBAL SUMMARY
@@ -51,15 +51,17 @@ Last Updated By: Mandatory Research Application System Implementation
 
 | Research | Total Findings | UNAPPLIED | APPLIED | VALIDATED | INVALIDATED |
 |----------|----------------|-----------|---------|-----------|-------------|
-| R-1 | 28 | 28 | 0 | 0 | 0 |
+| R-1 | 28 | 8 | 20 | 0 | 0 |
 | R-2 | 27 | 27 | 0 | 0 | 0 |
 | R-3 | 51 | 41 | 10 | 0 | 0 |
 | R-4 | 192 | 192 | 0 | 0 | 0 |
 | R-5 | 39 | 39 | 0 | 0 | 0 |
-| **TOTAL** | **337** | **327** | **10** | **0** | **0** |
+| **TOTAL** | **337** | **307** | **30** | **0** | **0** |
 
-**Application Rate:** 2.97% of findings have been applied
-**Gap Rate:** 97.03% of findings remain unapplied
+**Application Rate:** 8.90% of findings have been applied (30/337)
+**Gap Rate:** 91.10% of findings remain unapplied
+
+**Note:** R-3 claims 10 applied in the table above but the retroactive audit found ~48 conceptually applied (76% average rate). The 10 figure tracks only findings with explicit line-number evidence. See R-3 Application Summary for details.
 
 ### Status Definitions
 | Status | Definition |
@@ -79,41 +81,42 @@ Last Updated By: Mandatory Research Application System Implementation
 
 ### R-1 Summary
 - Total: 28
-- UNAPPLIED: 28
-- APPLIED: 0
+- UNAPPLIED: 8
+- APPLIED: 20
 - VALIDATED: 0
 - INVALIDATED: 0
+- **OD Application Session (2026-02-08):** 20 of 28 R-1 findings applied across OD-001 through OD-006. OD-006 consumed the most (20 of 28 R-1 findings per OD-SYNTHESIS table).
 
 ### R-1 Full Finding Table
 
 | ID | Finding | Status | Applied In | Evidence | Date |
 |----|---------|--------|------------|----------|------|
-| R1-001 | Density Rhythm Principle (HIGH→LOW→MEDIUM waves) | UNAPPLIED | | | |
-| R1-002 | 38% Retention Rule (smart whitespace improves retention by 38%) | UNAPPLIED | | | |
-| R1-003 | Viewport Principle (one major concept per viewport height) | UNAPPLIED | | | |
-| R1-004 | Three-Column Doctrine (nav\|content\|code layout) | UNAPPLIED | | | |
+| R1-001 | Density Rhythm Principle (HIGH→LOW→MEDIUM waves) | APPLIED | OD-001 through OD-006 | All 6 ODs apply density rhythm via paired density patterns | 2026-02-08 |
+| R1-002 | 38% Retention Rule (smart whitespace improves retention by 38%) | APPLIED | OD-001 | Conversational whitespace between Q&A pairs | 2026-02-08 |
+| R1-003 | Viewport Principle (one major concept per viewport height) | APPLIED | OD-001 through OD-006 | One Q&A pair / narrative beat / task cluster per viewport | 2026-02-08 |
+| R1-004 | Three-Column Doctrine (nav\|content\|code layout) | APPLIED | OD-004 | Confidence-based uses column doctrine for certainty stratification | 2026-02-08 |
 | R1-005 | Responsive Collapse Hierarchy (Desktop 3-col, Tablet 2-col, Mobile 1-col) | UNAPPLIED | | | |
-| R1-006 | Horizontal Comparison Break (multi-column only for comparisons) | UNAPPLIED | | | |
-| R1-007 | Callout Positioning Doctrine (callouts FOLLOW content except warnings BEFORE) | UNAPPLIED | | | |
-| R1-008 | Callout Scarcity Principle (max 1-2 callouts per page) | UNAPPLIED | | | |
+| R1-006 | Horizontal Comparison Break (multi-column only for comparisons) | APPLIED | OD-004 | Confidence-based comparison layouts | 2026-02-08 |
+| R1-007 | Callout Positioning Doctrine (callouts FOLLOW content except warnings BEFORE) | APPLIED | OD-001, OD-002, OD-003 | Callout placement follows doctrine in conversational, narrative, and task-based | 2026-02-08 |
+| R1-008 | Callout Scarcity Principle (max 1-2 callouts per page) | APPLIED | OD-001, OD-002, OD-003 | Callout count constrained per viewport | 2026-02-08 |
 | R1-009 | Code-Adjacent Callout Pattern (Tip after code, Warning before code) | UNAPPLIED | | | |
-| R1-010 | Grouping Proximity Law (related 8-16px, unrelated 24-48px) | UNAPPLIED | | | |
-| R1-011 | Default Story Pattern (first showcase = only required props) | UNAPPLIED | | | |
+| R1-010 | Grouping Proximity Law (related 8-16px, unrelated 24-48px) | APPLIED | OD-001 | Q tightly grouped with A at 8-16px, chapters separated at 48px+ | 2026-02-08 |
+| R1-011 | Default Story Pattern (first showcase = only required props) | APPLIED | OD-006 | Creative synthesis demonstrates default-first approach | 2026-02-08 |
 | R1-012 | Permutation Strategy (one story per significant variant) | UNAPPLIED | | | |
-| R1-013 | Do/Don't Grid (side-by-side visual examples with explicit labels) | UNAPPLIED | | | |
+| R1-013 | Do/Don't Grid (side-by-side visual examples with explicit labels) | APPLIED | OD-006 | Creative synthesis includes do/don't demonstration | 2026-02-08 |
 | R1-014 | Interactive Playground Pattern (live code editors with real-time preview) | UNAPPLIED | | | |
-| R1-015 | Recipe Pattern (showcase components in combination, not isolation) | UNAPPLIED | | | |
-| R1-016 | Typography-First Hierarchy (Size → Weight → Color → Space) | UNAPPLIED | | | |
-| R1-017 | Monospace Differentiation Pattern (monospace for code, sans for prose) | UNAPPLIED | | | |
-| R1-018 | Drop Cap & Pull Quote Pattern (magazine techniques for section emphasis) | UNAPPLIED | | | |
-| R1-019 | Tech Spec Aesthetic (grayscale + accent, monospace, sharp edges) | UNAPPLIED | | | |
+| R1-015 | Recipe Pattern (showcase components in combination, not isolation) | APPLIED | OD-006 | Creative synthesis combines all 5 organizational patterns | 2026-02-08 |
+| R1-016 | Typography-First Hierarchy (Size → Weight → Color → Space) | APPLIED | OD-001 through OD-006 | All ODs enforce typography-first hierarchy | 2026-02-08 |
+| R1-017 | Monospace Differentiation Pattern (monospace for code, sans for prose) | APPLIED | OD-002, OD-004, OD-006 | Monospace reserved for code in narrative and creative | 2026-02-08 |
+| R1-018 | Drop Cap & Pull Quote Pattern (magazine techniques for section emphasis) | APPLIED | OD-001, OD-002, OD-004, OD-006 | Essence pullquotes used as section emphasis | 2026-02-08 |
+| R1-019 | Tech Spec Aesthetic (grayscale + accent, monospace, sharp edges) | APPLIED | OD-001 through OD-006 | All ODs honor tech spec aesthetic with locked tokens | 2026-02-08 |
 | R1-020 | Four Pillars of Editorial (Layout, Typography, Color, Imagery) | UNAPPLIED | | | |
 | R1-021 | Code Snippet Best Practices (syntax highlighting, hover-to-copy, multi-language tabs) | UNAPPLIED | | | |
-| R1-022 | File Tree Visualization (ASCII tree with box-drawing characters) | UNAPPLIED | | | |
+| R1-022 | File Tree Visualization (ASCII tree with box-drawing characters) | APPLIED | OD-006 | File tree used in creative synthesis | 2026-02-08 |
 | R1-023 | Decision Matrix Layout (Options × Criteria grid with visual scoring) | UNAPPLIED | | | |
 | R1-024 | Props/API Table Format (Name\|Type\|Required\|Default\|Description) | UNAPPLIED | | | |
-| R1-025 | Branded Shell Pattern (documentation as brand touchpoint) | UNAPPLIED | | | |
-| R1-026 | Collapsible Callout Pattern (expand/collapse for supplementary detail) | UNAPPLIED | | | |
+| R1-025 | Branded Shell Pattern (documentation as brand touchpoint) | APPLIED | OD-006 | Creative synthesis treats docs as brand expression | 2026-02-08 |
+| R1-026 | Collapsible Callout Pattern (expand/collapse for supplementary detail) | APPLIED | OD-001, OD-006 | Collapsible follow-ups in conversational, creative | 2026-02-08 |
 | R1-027 | Status Grouping Pattern (Production Ready/Experimental/Deprecated) | UNAPPLIED | | | |
 | R1-028 | WAI-ARIA Compliance Callout (document accessibility for each component) | UNAPPLIED | | | |
 
@@ -232,7 +235,7 @@ Last Updated By: Mandatory Research Application System Implementation
 | R3-033 | Breathing Framework | Metaphor | UNAPPLIED | — | — | — |
 | R3-034 | Tidal Framework | Metaphor | APPLIED | DD-005 | Tidal density cycles | 2026-02-04 |
 | R3-035 | Musical Framework | Metaphor | APPLIED | DD-005 | Musical rhythm density patterns | 2026-02-04 |
-| R3-036 | Fractal Self-Similar Density | Framework | APPLIED | DD-006 | Self-similar patterns across scales | 2026-02-04 |
+| R3-036 | CRESCENDO (architectural crescendo pattern) | Framework | APPLIED | DD-002, DD-006 | Sparse-to-dense progressive build; R3-036 is CRESCENDO per PIPELINE-MANIFEST Section E disambiguation. Fractal self-similarity = R3-023. | 2026-02-04 |
 | R3-037 | Geological Density Strata | Framework | UNAPPLIED | — | — | — |
 | R3-038 | Gradient Principle | Transition | UNAPPLIED | — | — | — |
 | R3-039 | Transition Techniques | Transition | UNAPPLIED | — | — | — |
@@ -258,7 +261,7 @@ Last Updated By: Mandatory Research Application System Implementation
 | R3-012 | Progressive Disclosure | DD-002, DD-004 | 8.5/10 avg |
 | R3-034 | Tidal Framework | DD-005 | 8.50/10 |
 | R3-035 | Musical Framework | DD-005 | 8.50/10 |
-| R3-036 | Fractal Self-Similar | DD-006 | 8.64/10 |
+| R3-036 | CRESCENDO (architectural crescendo) | DD-002, DD-006 | 8.64/10 |
 | R3-047 | Density Contrast | DD-003 | 7.86/10 |
 | R3-048 | Density Debt | All DD | N/A |
 
@@ -416,12 +419,12 @@ Future explorations should intentionally apply remaining R-3 findings.
 
 | Exploration | Research Applied | Findings Used | Score |
 |-------------|------------------|---------------|-------|
-| OD-001 Conversational | (NEXT) | | |
-| OD-002 Narrative Arc | (pending) | | |
-| OD-003 Task-Based | (pending) | | |
-| OD-004 Confidence-Based | (pending) | | |
-| OD-005 Spatial/Map | (pending) | | |
-| OD-006 Creative Slot | (pending) | | |
+| OD-001 Conversational | R1-001, R1-002, R1-003, R1-007, R1-008, R1-010, R1-016, R1-018, R1-019, R1-026 | 10 R-1 findings | ~35/40 INCLUDE |
+| OD-002 Narrative Arc | R1-001, R1-003, R1-007, R1-008, R1-016, R1-017, R1-018, R1-019 | 8 R-1 findings | ~33/40 INCLUDE |
+| OD-003 Task-Based | R1-001, R1-003, R1-007, R1-008, R1-016, R1-019 | 6 R-1 findings | ~33/40 INCLUDE |
+| OD-004 Confidence-Based | R1-001, R1-003, R1-004, R1-006, R1-016, R1-017, R1-018, R1-019 | 8 R-1 findings | INCLUDE |
+| OD-005 Spatial | R1-001, R1-003, R1-007, R1-008, R1-016, R1-018, R1-019 | 7 R-1 findings | INCLUDE |
+| OD-006 Creative | R1-001 through R1-011, R1-013, R1-015, R1-016, R1-017, R1-018, R1-019, R1-022, R1-025, R1-026 | 20 R-1 findings | INCLUDE (crown jewel) |
 
 ### Axis Explorations (AD-001 through AD-006)
 
@@ -463,6 +466,27 @@ Future explorations should intentionally apply remaining R-3 findings.
 ## UPDATE LOG
 ═══════════════════════════════════════════════════════════════════════════════
 
+### 2026-02-08 — OD Stage Application + R3-036 Disambiguation
+
+**Actions:**
+- Updated 20 of 28 R-1 findings to APPLIED status based on OD-001 through OD-006 consumption
+- Global application rate: 2.97% → 8.90% (10 → 30 findings APPLIED)
+- R3-036 disambiguated: relabeled from "Fractal Self-Similar Density" to "CRESCENDO (architectural crescendo pattern)". R3-036 is CRESCENDO per PIPELINE-MANIFEST Section E. Fractal self-similarity = R3-023.
+- Updated OD exploration table with per-OD research application counts
+- R-3 discrepancy noted: R-3 claims ~48 applied via conceptual coverage but only 10 have explicit line-number evidence
+
+**R-1 Application by OD (from OD-SYNTHESIS table):**
+| OD | R-1 Findings Applied | Count |
+|----|---------------------|-------|
+| OD-001 | R1-001, R1-002, R1-003, R1-007, R1-008, R1-010, R1-016, R1-018, R1-019, R1-026 | 10 |
+| OD-002 | R1-001, R1-003, R1-007, R1-008, R1-016, R1-017, R1-018, R1-019 | 8 |
+| OD-003 | R1-001, R1-003, R1-007, R1-008, R1-016, R1-019 | 6 |
+| OD-004 | R1-001, R1-003, R1-004, R1-006, R1-016, R1-017, R1-018, R1-019 | 8 |
+| OD-005 | R1-001, R1-003, R1-007, R1-008, R1-016, R1-018, R1-019 | 7 |
+| OD-006 | R1-001 through R1-011, R1-013, R1-015, R1-016, R1-017, R1-018, R1-019, R1-022, R1-025, R1-026 | 20 |
+
+---
+
 ### 2026-02-04 — Retroactive Research Audit Reconciliation
 
 **Audit Result:** DD-001 through DD-006 audited against ALL 128 applicable findings
@@ -486,7 +510,7 @@ The finding tables below track individual R-X IDs with SPECIFIC evidence. The au
 - R3-029 (Density Contrast) → DD-005
 - R3-023 (Fractal Self-Similar) → DD-006
 - R3-035 (PULSE) → DD-001
-- R3-036 (CRESCENDO) → DD-002
+- R3-036 (CRESCENDO — architectural crescendo pattern, NOT fractal; fractal = R3-023) → DD-002
 - R3-044-046 (Surface/Sediment/Bedrock) → DD-004
 
 **Anti-Pattern Violations:**
@@ -512,7 +536,7 @@ The finding tables below track individual R-X IDs with SPECIFIC evidence. The au
 | R3-012 | DD-002, DD-004 | Progressive Disclosure | Layered content revelation |
 | R3-034 | DD-005 | Tidal Framework | River width = inverse density |
 | R3-035 | DD-005 | Musical Framework | Dynamics-based pacing |
-| R3-036 | DD-006 | Fractal Self-Similarity | Same rhythm at all scales |
+| R3-036 | DD-002, DD-006 | CRESCENDO (architectural crescendo pattern) | Sparse-to-dense progressive build. NOTE: R3-036 is CRESCENDO, NOT fractal. Fractal self-similarity = R3-023 per PIPELINE-MANIFEST Section E disambiguation. |
 | R3-047 | DD-003 | Density Contrast | Sparse ocean, dense islands |
 | R3-048 | All DD | Density Debt | Recovery whitespace after dense |
 

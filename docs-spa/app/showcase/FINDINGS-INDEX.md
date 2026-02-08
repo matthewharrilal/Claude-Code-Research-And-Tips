@@ -320,6 +320,44 @@ Essence Callout (key takeaway)
 | DD-005 | Rivers | - | PENDING | WAVE | Variable density channels |
 | DD-006 | Creative | - | PENDING | TBD | Density Manifold visualization? |
 
+### Organizational Explorations (OD-001 through OD-006)
+
+| ID | Name | Score | Status | Pattern | Key Learning |
+|----|------|-------|--------|---------|--------------|
+| OD-001 | Conversational | ~35/40 | INCLUDE | PULSE + TIDAL | Q&A pairs are inherent PULSE generators; width variation creates TIDAL secondary rhythm |
+| OD-002 | Narrative | ~33/40 | INCLUDE | CRESCENDO | Story arc NATURALLY creates CRESCENDO -- exposition sparse, climax dense |
+| OD-003 | Task-Based | ~33/40 | INCLUDE | ISLANDS + BOOKENDS | Procedural clusters are dense islands; BOOKENDS for orientation/verification |
+| OD-004 | Confidence | INCLUDE | INCLUDE | GEOLOGICAL + CRESCENDO | Certainty stratification IS geological density |
+| OD-005 | Spatial | INCLUDE | INCLUDE | WAVE + ISLANDS | Hub-and-spoke creates WAVE oscillation |
+| OD-006 | Creative | INCLUDE (crown) | INCLUDE | ALL (FRACTAL primary) | Organization IS Density (OD-F-005) |
+
+### OD-F Findings (Pattern Findings)
+
+| ID | Name | Type | Source Stage | Discovery Context | Status |
+|----|------|------|-------------|-------------------|--------|
+| OD-F-001 | Conversational Width Variation | Pattern | Stage 3 (OD) | OD-001: Q&A width difference (60%/100%) creates natural TIDAL rhythm | APPLIED |
+| OD-F-002 | Fractal Nesting via Follow-ups | Pattern | Stage 3 (OD) | OD-001: Follow-up questions create fractal nesting satisfying DD-F-006 | APPLIED |
+| OD-F-003 | Q&A as Natural PULSE Generator | Pattern | Stage 3 (OD) | OD-001: Q&A pairs inherently generate PULSE density | APPLIED |
+| OD-F-004 | Chapter Dividers as Breathing Zones | Pattern | Stage 3 (OD) | OD-001: Dense answer sections need recovery whitespace (R3-048) | APPLIED |
+| OD-F-005 | Organization IS Density | Meta-Pattern | Stage 3 (OD) | OD-006: Organizational pattern IS the density pattern -- same phenomenon, two perspectives | APPLIED |
+| OD-F-006 | Meta-Documentation as Purest Density Test | Pattern | Stage 3 (OD) | OD-006: Content about density principles creates the most natural density rhythm | APPLIED |
+| OD-F-007 | Mode-Transition Breathing | Pattern | Stage 3 (OD) | OD-006: Switching organizational modes requires breathing zones | APPLIED |
+| OD-F-008 | Compound Creative Techniques | Pattern | Stage 3 (OD) | OD-006: Multiple EXT-CREATIVE techniques compound when layered | APPLIED |
+| OD-F-009 | Narrative Arc as Natural CRESCENDO | Pattern | Stage 3 (OD) | OD-002: Story progression mirrors sparse-to-dense (renumbered from builder-log) | APPLIED |
+| OD-F-010 | Task Clusters as Natural ISLANDS | Pattern | Stage 3 (OD) | OD-003: Procedural task blocks form inherent dense islands | APPLIED |
+| OD-F-011 | Confidence as Natural GEOLOGICAL | Pattern | Stage 3 (OD) | OD-004: Certainty stratification maps to geological density layers | APPLIED |
+| OD-F-012 | Spatial as Natural WAVE | Pattern | Stage 3 (OD) | OD-005: Hub-and-spoke creates WAVE oscillation pattern | APPLIED |
+| OD-F-013 | OD-006 Mode Cycling Proof | Pattern | Stage 3 (OD) | OD-006: Cycling through all 5 organizational modes with zero density manipulation | APPLIED |
+
+### OD-F Special Findings
+
+| ID | Name | Type | Source Stage | Discovery Context | Status |
+|----|------|------|-------------|-------------------|--------|
+| OD-F-AP-001 | 2px Border Epidemic | Anti-Pattern | Stage 3 (OD) | OD audit: 108 CSS declarations, 1000+ computed instances of 2px borders | DOCUMENTED |
+| OD-F-MP-001 | Organization IS Density (Meta) | Meta-Pattern | Stage 3 (OD) | OD-006: The meta-pattern connecting all 6 org patterns to their density identities | APPLIED |
+| OD-F-PR-001 | Process Finding | Process | Stage 3 (OD) | OD process methodology finding | DOCUMENTED |
+| OD-F-FL-001 | Org Patterns Imply Axis Preferences | Forward-Looking | Stage 3 (OD) | Transitive chain: org->density->axis. AD must honor. | PENDING (AD) |
+
 ### Concrete Example Files
 
 | File | Pattern | Use Case | Components Used |

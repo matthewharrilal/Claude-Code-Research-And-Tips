@@ -265,3 +265,52 @@ h3 { font-style: italic; }
 > "Could this exist in a Bootstrap project? If yes, you've failed."
 
 Every implementation decision should pass this test. KortAI is opinionated and memorable, not generic and universally acceptable.
+
+═══════════════════════════════════════════════════════════════════════════════
+
+## OD Anti-Patterns
+
+Discovered during Stage 3 (Organization Exploration) adversarial audit.
+89 findings, 17 agents, 3,479+ DOM elements checked.
+
+### OD-F-AP-001: 2px Border Epidemic
+
+**What:** `border-width: 2px` used pervasively across structural borders
+**Scale:** 108 CSS declarations, 1000+ computed instances across OD-001 through OD-006
+**Why it fails:** 2px borders are structurally ambiguous -- too thin to be a strong
+architectural signal (like the 4px callout left-border), too thick to be a subtle
+separator (like 1px dividers). They create a "neither here nor there" quality that
+weakens the overall visual hierarchy.
+**Alternative:** Upgrade structural borders to 3px minimum. Reserve 4px for callout
+left-borders (Family DNA soul piece). Use 1px only for subtle horizontal rules.
+
+```css
+/* WRONG — the 2px epidemic */
+.section-header { border-bottom: 2px solid #E0D5C5; }
+.card-container { border: 2px solid #E0D5C5; }
+
+/* RIGHT — clear structural hierarchy */
+.section-header { border-bottom: 3px solid #E0D5C5; }
+.card-container { border: 3px solid #E0D5C5; }
+```
+
+**Discovery Context:** OD granular adversarial audit (2026-02-07), 17 agents.
+This was the #1 systemic issue identified. Does NOT constitute a soul violation
+but weakens visual hierarchy across all 6 OD explorations.
+
+---
+
+### OD-AP-002: Inconsistent Typography Scale
+
+**What:** OD-006 uses different `--type-page` / `--type-section` values than OD-001 through OD-005
+**Why it fails:** Creates a quality dialect split -- OD-006 (Editorial) has different
+typographic personality than OD-001/002 (Polished) and OD-003/004/005 (Functional).
+While intentional creative variation is acceptable, unintentional scale drift breaks
+cross-OD consistency.
+**Alternative:** Establish a single typographic scale for all ODs, with explicit
+creative overrides only where intentionally needed.
+
+**Discovery Context:** Fresh-eyes adversarial audit and cross-OD consistency agent
+identified three quality dialects: Polished (OD-001/002), Functional (OD-003/004/005),
+Editorial (OD-006). The typography scale divergence in OD-006 was confirmed as
+the primary driver of the Editorial dialect.

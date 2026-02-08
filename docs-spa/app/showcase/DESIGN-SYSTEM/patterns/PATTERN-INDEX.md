@@ -126,21 +126,23 @@ Follow these 5 steps:
 
 | Content Type | Organizational Pattern | Status |
 |--------------|----------------------|--------|
-| Q&A / Conversational | OD-001 Conversational | ⏳ Pending |
-| Story / Tutorial | OD-002 Narrative Arc | ⏳ Pending |
-| "How do I..." / Goals | OD-003 Task-Based | ⏳ Pending |
-| Reference with confidence levels | OD-004 Confidence-Based | ⏳ Pending |
-| Navigation / Overview | OD-005 Spatial/Map | ⏳ Pending |
+| Q&A / Conversational | OD-001 Conversational | VALIDATED (~35/40) |
+| Story / Tutorial | OD-002 Narrative Arc | VALIDATED (~33/40) |
+| "How do I..." / Goals | OD-003 Task-Based | VALIDATED (~33/40) |
+| Reference with confidence levels | OD-004 Confidence-Based | VALIDATED (INCLUDE) |
+| Navigation / Overview | OD-005 Spatial/Map | VALIDATED (INCLUDE) |
+| Creative / Multi-pattern synthesis | OD-006 Creative/Emergent | VALIDATED (INCLUDE, crown jewel) |
 
 ### Step 2: Apply the Paired Density Pattern (DD)
 
 | Organizational Pattern | Paired Density | Why |
 |------------------------|----------------|-----|
-| OD-001 Conversational | PULSE, TIDAL | Alternating Q&A pairs with alternating density |
-| OD-002 Narrative Arc | CRESCENDO | Story builds; density builds with it |
-| OD-003 Task-Based | ISLANDS | Tasks are clusters in sparse navigation |
-| OD-004 Confidence-Based | GEOLOGICAL | Certainty layers = depth layers |
-| OD-005 Spatial/Map | Custom | May need new density pattern |
+| OD-001 Conversational | PULSE + TIDAL | Q&A pairs are inherent PULSE generators; width variation creates TIDAL secondary rhythm |
+| OD-002 Narrative Arc | CRESCENDO | Story arc NATURALLY creates CRESCENDO -- exposition sparse, climax dense |
+| OD-003 Task-Based | ISLANDS + BOOKENDS | Discrete procedural clusters are dense islands; BOOKENDS for orientation/verification |
+| OD-004 Confidence-Based | GEOLOGICAL + CRESCENDO | Certainty stratification IS geological density; confidence correlates inversely with density |
+| OD-005 Spatial | WAVE + ISLANDS | Hub-and-spoke creates WAVE oscillation; each spoke is a self-contained ISLAND |
+| OD-006 Creative/Emergent | ALL PATTERNS (FRACTAL primary) | Organization IS Density -- each section's density shifts automatically with its organizational mode |
 
 ### Step 3: Apply FRACTAL Self-Similarity (MANDATORY)
 
@@ -325,19 +327,23 @@ Before finalizing, verify:
 **Visual Pattern:** █░░█░░█░░ at every scale
 
 ═══════════════════════════════════════════════════════════════════════════════
-## ORGANIZATIONAL PATTERNS ⏳ PENDING
+## ORGANIZATIONAL PATTERNS (Validated)
 ═══════════════════════════════════════════════════════════════════════════════
 
-OD explorations not yet complete. Patterns will be added after validation.
+All 6 organizational patterns validated through OD explorations with visual
+audit and adversarial review. Zero soul violations across 3,479+ DOM elements.
+Meta-insight: **Organization IS Density** (OD-F-005).
 
-| Pattern | Status | Expected Primary Density |
-|---------|--------|-------------------------|
-| OD-001 Conversational | ⏳ | PULSE, TIDAL |
-| OD-002 Narrative Arc | ⏳ | CRESCENDO |
-| OD-003 Task-Based | ⏳ | ISLANDS |
-| OD-004 Confidence-Based | ⏳ | GEOLOGICAL |
-| OD-005 Spatial/Map | ⏳ | Custom |
-| OD-006 Creative | ⏳ | FRACTAL (always) |
+| Pattern | Status | Score | Primary Density | Research Provenance | Finding IDs |
+|---------|--------|-------|-----------------|---------------------|-------------|
+| OD-001 Conversational | VALIDATED | ~35/40 | PULSE + TIDAL | R1-001, R1-002, R1-003, R1-007, R1-008, R1-010, R1-016, R1-018, R1-019, R1-026 | OD-F-001, OD-F-002, OD-F-003, OD-F-004 |
+| OD-002 Narrative Arc | VALIDATED | ~33/40 | CRESCENDO | R1-001, R1-003, R1-007, R1-008, R1-016, R1-017, R1-018, R1-019 | (validated DD-F-002) |
+| OD-003 Task-Based | VALIDATED | ~33/40 | ISLANDS + BOOKENDS | R1-001, R1-003, R1-007, R1-008, R1-016, R1-019 | (validated DD-F-003) |
+| OD-004 Confidence-Based | VALIDATED | INCLUDE | GEOLOGICAL + CRESCENDO | R1-001, R1-003, R1-004, R1-006, R1-016, R1-017, R1-018, R1-019 | (validated DD-F-004) |
+| OD-005 Spatial | VALIDATED | INCLUDE | WAVE + ISLANDS | R1-001, R1-003, R1-007, R1-008, R1-016, R1-018, R1-019 | (validated DD-F-005) |
+| OD-006 Creative/Emergent | VALIDATED | INCLUDE (crown jewel) | ALL PATTERNS (FRACTAL primary) | R1-001 through R1-011, R1-013, R1-015, R1-016, R1-017, R1-018, R1-019, R1-022, R1-025, R1-026 | OD-F-005, OD-F-006, OD-F-007, OD-F-008 |
+
+See `provenance/stage-3-organization-od/organizational-patterns.md` for full details.
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## AXIS PATTERNS ⏳ PENDING
@@ -401,5 +407,13 @@ When migrating a page to KortAI design system:
 | TIDAL/RIVERS density | DD-F-005 |
 | FRACTAL meta-pattern | DD-F-006 |
 | Traffic-light avoidance | DD-F-015 |
+| Conversational width variation | OD-F-001 |
+| Fractal nesting via follow-ups | OD-F-002 |
+| Q&A as natural PULSE generator | OD-F-003 |
+| Chapter dividers as breathing zones | OD-F-004 |
+| Organization IS Density | OD-F-005 |
+| Meta-documentation as density test | OD-F-006 |
+| Mode-transition breathing | OD-F-007 |
+| Compound creative techniques | OD-F-008 |
 
 ═══════════════════════════════════════════════════════════════════════════════

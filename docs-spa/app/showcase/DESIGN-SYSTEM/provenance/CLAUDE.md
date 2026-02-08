@@ -49,7 +49,10 @@ exist elsewhere. But the CHAIN that connects them lives here.
 
 **Quick Navigation:**
 - Want to trace a finding? → `PIPELINE-MANIFEST.md` Section E
-- Want to start OD work? → `stage-2-density-dd/HANDOFF-DD-TO-OD.md`
+- Want OD-F findings? → `stage-3-organization-od/OD-outbound-findings.md`
+- Want OD synthesis? → `stage-3-organization-od/OD-SYNTHESIS.md`
+- Want EXT-* research? → `EXT-RESEARCH-REGISTRY.md`
+- Want to start AD work? → `stage-3-organization-od/HANDOFF-OD-TO-AD.md`
 - Want original research? → `original-research/`
 - Want Stage 1 findings? → `stage-1-components/component-findings.md`
 - Want Stage 2 findings? → `stage-2-density-dd/DD-outbound-findings.md`
@@ -66,7 +69,7 @@ exist elsewhere. But the CHAIN that connects them lives here.
 | `original-research/` | ✅ | R-1 to R-5 research files |
 | `stage-1-components/` | ✅ | Component foundation chain |
 | `stage-2-density-dd/` | ✅ | DD exploration chain |
-| `stage-3-organization-od/` | ⏳ IN PROGRESS | OD exploration chain |
+| `stage-3-organization-od/` | ✅ COMPLETE | OD exploration chain (6 ODs, 17 OD-F findings, 89 audit findings) |
 | `stage-4-axis-ad/` | ⏳ PENDING | AD exploration chain |
 | `stage-5-combination-cd/` | ⏳ PENDING | CD exploration chain |
 

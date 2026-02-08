@@ -244,6 +244,29 @@ If casual → check if step indicators are circles.
 | 5 | Squares Signal System | PathOfTask | Square shapes = exactness required |
 
 ═══════════════════════════════════════════════════════════════════════════════
+## STAGE 3 DETERMINATION
+═══════════════════════════════════════════════════════════════════════════════
+
+OD explored cognitive rhythm. No new cognitive soul piece was discovered.
+The 5 visual soul pieces remain the complete set.
+
+Closest candidate: OD-F-005 ("Organization IS Density") -- this is a
+META-PATTERN finding, not a soul piece. Soul pieces are perceptual truths
+about how things LOOK; OD-F-005 is a structural truth about how things
+ORGANIZE. The distinction matters: soul pieces constrain CSS (border-radius: 0,
+box-shadow: none); OD-F-005 constrains information architecture (the
+organizational pattern IS the density pattern). Different levels of the system.
+
+**Evidence:** OD-001 through OD-006 visual audit -- zero soul violations
+across 3,479+ DOM elements. The 5 soul pieces were fully sufficient to
+constrain all 6 organizational explorations. No new perceptual truth
+emerged that would require a 6th soul piece.
+
+**Implication for AD:** AD (axis exploration) is the next opportunity for
+potential soul discovery. If axis geometry produces a new perceptual truth
+about how things LOOK (not how they organize), it could become Soul Piece #6.
+
+═══════════════════════════════════════════════════════════════════════════════
 ## APPLICATION GUIDE
 ═══════════════════════════════════════════════════════════════════════════════
 

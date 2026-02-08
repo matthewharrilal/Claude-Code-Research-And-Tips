@@ -30,11 +30,25 @@ END INLINE THREADING HEADER
 ═══════════════════════════════════════════════════════════════════════════════
 -->
 
-# CLAUDE.md — Stage 4: Axis Exploration (AD)
+# CLAUDE.md -- Stage 4: Axis Exploration (AD)
 
-═══════════════════════════════════════════════════════════════════════════════
+===============================================================================
+## 0. MANDATORY ENFORCEMENT GATE
+===============================================================================
+
+**DO NOT begin AD work until ALL conditions are met:**
+
+1. `../stage-3-organization-od/HANDOFF-OD-TO-AD.md` EXISTS and has been read completely
+2. `../stage-3-organization-od/OD-outbound-findings.md` EXISTS and all 17 OD-F findings acknowledged (OD-F-001 through OD-F-013, OD-F-MP-001, OD-F-PR-001, OD-F-FL-001, OD-F-AP-001)
+3. `../original-research/R4-AXIS-INNOVATIONS.md` (R-4 primary research) loaded
+4. R-2 Creative Layouts (27 findings at 0% OD consumption) explicitly evaluated for AD applicability
+5. OD-F-FL-001 (org implies axis) transitive chain understood: org->density->axis
+
+**If ANY condition is NOT met, STOP. Do not proceed.**
+
+===============================================================================
 ## 1. IDENTITY
-═══════════════════════════════════════════════════════════════════════════════
+===============================================================================
 
 **Name:** Stage 4: Axis Exploration (AD)
 **Status:** ⏳ PENDING
