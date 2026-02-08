@@ -13,6 +13,62 @@
 
 ---
 
+## DOCUMENT MAP — How This Prompt Is Organized
+
+This prompt is 2,000+ lines organized into **5 parts** that build on each other. Use this map to navigate.
+
+### Reading Order
+
+- **First-time read:** Go straight through from Section 0 to Closing. Each section builds on the previous.
+- **During audit execution:** Start with Section 7 (Execution Order) for the step-by-step sequence, then jump to specific sections as needed.
+- **Quick reference:** Use the Part headers below and Section 4's internal guide to locate specific checks.
+
+### Table of Contents
+
+| Part | Sections | Purpose |
+|------|----------|---------|
+| **I — Mindset & Foundation** | 0, 0.5, 1, 2 | Establish the adversarial lens, audit hierarchy, identity traversal, and research gate. Absorb fully before any audit work. |
+| **II — The Audit** | 3, 4 (4A–4Q) | The core audit work: visual-first (§3) then 17 programmatic sub-checks (§4). Section 4 is the largest — see its internal guide. |
+| **III — Verification & Principles** | 5, 6, 7, 8 | Post-audit verification: cross-OD consistency, soul squint test, execution order, and the foundational principle. |
+| **IV — Bias-Defeating Protocols** | 9, 10 | Deploy fresh-eyes sub-agents and open-ended discovery agents to catch what builder blindness hides. |
+| **V — Orchestration & Meta** | 11, 12, 13 | Sub-agent deployment architecture, research refinement chain, and the definition of true granularity. |
+| **Closing** | — | The adversary is the ally. |
+
+### Section Index
+
+| § | Title | Key Question It Answers |
+|---|-------|------------------------|
+| 0 | The Adversarial Operating Mode | How do I challenge every design decision constructively? |
+| 0.5 | The Hierarchy of Audit Methods | What's more important — looking or measuring? |
+| 1 | The Identity Traversal Protocol | How do I build identity from inline headers? |
+| 2 | The External Research Refinement Gate | How do I filter research through the soul? |
+| 3 | The Visual-First Audit | What does the page look like to fresh eyes? |
+| 4 | The Granular UI Audit Checklist | Is every CSS property intentional? (17 sub-checks: 4A–4Q) |
+| 5 | Cross-OD Consistency Audit | Do all 6 OD files feel like one design system? |
+| 6 | The Soul Squint Test | Does the page pass the blur test? |
+| 7 | Audit Execution Order | What do I do first, second, third? |
+| 8 | The Fundamental Principle | What is the deepest truth about this work? |
+| 9 | The Fresh Eyes Protocol | What would someone without builder context notice? |
+| 10 | The Unknown Unknowns | What am I not even thinking to check? |
+| 11 | Sub-Agent Deployment Architecture | How do I orchestrate parallel audit agents? |
+| 12 | The Research Refinement Chain | Why does unrefined research get applied, and how do we fix it? |
+| 13 | What "Granular" Actually Means | What are the 15 pixel-level checks most audits skip? |
+
+### Key Cross-References
+
+- **Adversarial review** — Introduced in §0, applied throughout §3 (visual layer), §4P (Red-Line Matrix), §4Q (Interrogation), §9 (Fresh Eyes)
+- **Research refinement** — Gated in §2 (what to filter), root-cause fixed in §12 (why it happens)
+- **Granularity** — Defined in §13 (the concept), operationalized in §4P–4Q (the practice)
+- **Sub-agent deployment** — Orchestrated in §11 (architecture), individual agents detailed in §9–10
+- **Identity traversal** (§1) — Prerequisite for ALL other sections. Do this first, always.
+
+---
+
+═══════════════════════════════════════════════════════════════════════════════
+# PART I — MINDSET & FOUNDATION
+*Absorb these four sections fully before starting any audit work. They establish the adversarial lens, the audit priority hierarchy, how to build identity from inline headers, and how to filter external research through the soul.*
+═══════════════════════════════════════════════════════════════════════════════
+
 ## SECTION 0: THE ADVERSARIAL OPERATING MODE
 
 ### This is not a section. This is the LENS through which you read EVERY other section.
@@ -133,6 +189,95 @@ The specific biases that adversarial review defeats:
 | **Anchoring bias** | "DD-005 did it this way, so we should too" | "DD-005 was a DENSITY exploration. This is an ORGANIZATIONAL exploration. Should the same visual treatment apply? Challenge the assumption." |
 | **Consistency bias** | "All callouts have 4px borders, so this one should too" | "Should this ELEMENT even be a callout? Maybe the content would be better as inline text. Challenge the component choice, not just the styling." |
 | **Expertise bias** | "I traversed all inline headers, so my judgment is reliable" | "Your traversal gave you knowledge, but knowledge creates blind spots too. What would someone who DIDN'T traverse see that you're missing?" |
+
+### The Structured Debate Protocol — How Adversarial Review Actually Works
+
+The adversarial review is NOT "look at something and say it's wrong." That's just criticism. The adversarial review is a **structured debate** where both sides argue with conviction, evidence, and specificity. The outcome is determined by the QUALITY of arguments, not by who's louder or who argues first.
+
+**For every element flagged during the visual audit, run this protocol:**
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    THE STRUCTURED DEBATE PROTOCOL                        │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  STEP 1: PROSECUTION OPENS                                               │
+│  The adversary states the case AGAINST the design choice.                │
+│  Must include:                                                           │
+│    - What specifically is being challenged                                │
+│    - WHY it's wrong (referencing accumulated identity, not opinion)       │
+│    - What HARM it causes (visual noise? hierarchy confusion? soul        │
+│      violation? cognitive load?)                                          │
+│    - What the ALTERNATIVE would be                                       │
+│                                                                          │
+│  Example: "This callout has a solid offset pseudo-element creating       │
+│  a depth illusion. Soul Piece 4 says 'nothing should float.' The        │
+│  offset makes this callout perceptually lift off the page. This harms   │
+│  the grounded editorial feel. Alternative: remove the offset and use    │
+│  a heavier single-side border instead."                                  │
+│                                                                          │
+│  STEP 2: DEFENSE RESPONDS                                                │
+│  The defender argues FOR the design choice.                              │
+│  Must include:                                                           │
+│    - WHY this choice was made (trace to research, identity, or DD        │
+│      lesson — not just "because I chose it")                             │
+│    - What VALUE it adds that the alternative wouldn't have               │
+│    - How it SERVES the accumulated identity's intent                     │
+│    - Evidence: specific inline header references, research finding       │
+│      IDs, soul piece alignment                                           │
+│                                                                          │
+│  Example: "EXT-CREATIVE-001 established the solid offset as a           │
+│  neobrutalist depth technique that avoids box-shadow. It adds visual    │
+│  weight to the Essence callout, distinguishing it from regular          │
+│  callouts. The offset is technically flat (same z-plane). It serves     │
+│  Soul Piece 3 by differentiating Essence from the callout family        │
+│  while sharing structural DNA."                                          │
+│                                                                          │
+│  STEP 3: CROSS-EXAMINATION                                              │
+│  The adversary challenges the SPECIFICS of the defense.                  │
+│  This is where genuine discussion happens:                               │
+│    - "You say it's technically flat — but does it LOOK flat? Squint     │
+│      at it. Does it feel grounded or floating?"                          │
+│    - "You say it differentiates Essence — but Soul Piece 3 says         │
+│      differentiation should be through COLOR ONLY, not structural       │
+│      changes. Isn't a border offset a structural change?"                │
+│    - "You cite EXT-CREATIVE-001 — but did that research pass the        │
+│      refinement gate in Section 2? Was it tested against all 5 soul     │
+│      pieces before application?"                                         │
+│                                                                          │
+│  STEP 4: DEFENSE REBUTS OR CONCEDES                                      │
+│  The defender either:                                                    │
+│    a) Rebuts with stronger evidence (and the adversary must accept      │
+│       if the rebuttal is genuinely convincing)                           │
+│    b) Partially concedes: "The offset may be too aggressive at 4px.     │
+│       2px would be more subtle while preserving the differentiation."   │
+│    c) Fully concedes: "You're right — the offset creates perceptual    │
+│       depth that violates Soul Piece 4. Remove it."                     │
+│                                                                          │
+│  STEP 5: VERDICT                                                         │
+│  Based on the QUALITY of arguments:                                      │
+│    - VALIDATED: Defense survived. Element stays as-is. Note WHY.         │
+│    - IMPROVE: Partial concession. Element needs refinement. Note HOW.    │
+│    - REJECT: Full concession. Element needs replacement. Note WITH WHAT. │
+│                                                                          │
+│  CRITICAL SAFEGUARDS:                                                    │
+│    - The adversary must NOT bully or gaslight. If the defense has        │
+│      genuine evidence, the adversary MUST acknowledge it.                │
+│    - The defender must NOT be stubborn. If the adversary's argument      │
+│      is stronger, conceding is STRENGTH, not weakness.                   │
+│    - Both sides must cite SPECIFIC references (soul pieces, research    │
+│      findings, inline header sections) — not vibes or opinions.          │
+│    - A finding of IMPROVE does not invalidate the accumulated context.  │
+│      It means: "The identity is right. This implementation can better   │
+│      express it."                                                        │
+│    - A finding of REJECT does not mean the whole thread is wrong.       │
+│      It means: "This specific choice needs to be reconsidered, and     │
+│      here's the constructive direction."                                 │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+**This debate happens for EVERY significant design element.** Not for every pixel — that would be paralytic. But for every CHOICE: every component, every layout decision, every typographic treatment, every border, every spacing decision. The minor pixel-level checks from Section 4 don't need full debates. But the things your eyes flag during visual audit — those get the full protocol.
 
 ---
 
@@ -317,7 +462,14 @@ For EVERY external research finding (EXT-CONV-###, EXT-CREATIVE-###, EXT-DENSITY
 ### The Principle:
 > **The Accumulated Identity is the JUDGE. External research is the DEFENDANT. The identity decides what gets in. Not the other way around.**
 
+> **See also:** §12 (The Research Refinement Chain) addresses the root cause — WHY unrefined research gets applied — and provides an architectural fix for the pipeline. This section (§2) defines the filter; §12 explains why the filter is needed and where to install it.
+
 ---
+
+═══════════════════════════════════════════════════════════════════════════════
+# PART II — THE AUDIT
+*The core work. Section 3 is the PRIMARY visual audit — eyes before code, screenshots before JavaScript. Section 4 is the SUPPLEMENTARY programmatic audit — 17 sub-checks covering every CSS property. Always run Section 3 first. Your visual impressions are the most important evidence; Section 4's code confirms or investigates what your eyes flagged.*
+═══════════════════════════════════════════════════════════════════════════════
 
 ## SECTION 3: THE VISUAL-FIRST AUDIT — Eyes Before Code
 
@@ -443,6 +595,32 @@ For each viewport slice:
 
 1. **"Is the spec being applied in the right CONTEXT?"** — A border might be 4px (correct value) but on an element that shouldn't have a border at all (wrong context). The value passes; the decision fails.
 2. **"Does this passing check create a FALSE sense of security?"** — All callout borders at 4px doesn't mean the callouts are GOOD. It means one dimension is correct. What about spacing, alignment, color temperature, content density, visual weight relative to neighbors? Passing one check is not passing the audit.
+
+### Section 4 Quick Reference — 17 Sub-Checks at a Glance
+
+*This section spans ~825 lines and contains 17 sub-checks. Use this guide to jump directly to specific audit areas.*
+
+| Sub-Check | Focus Area | Key Connection | Tolerance |
+|-----------|-----------|---------------|-----------|
+| **4A** | Borders | Rule 5 (heavy), DD-F-016 | 3–4px only |
+| **4B** | Border-Radius | Soul Piece 1 (sharp edges) | ZERO — any non-zero = violation |
+| **4C** | Box-Shadow | Soul Piece 4 (no depth) | ZERO — any shadow = violation |
+| **4D** | Fake Depth | Soul Piece 4 (spirit) | ZERO pseudo-element offsets |
+| **4E** | Colors | Rule 3 (limited palette) | Locked palette only |
+| **4F** | Typography | Rule 4, Soul Piece 2 | Locked type scale only |
+| **4G** | Spacing & Alignment | Gestalt spacing model | 8 / 32 / 64px three-level |
+| **4H** | Code Blocks | Craftsmanship fidelity | Character-level rendering |
+| **4I** | Callout System | Soul Piece 3 (family DNA) | Structural uniformity across types |
+| **4J** | Component Completeness | Half-baked detection | No stubs, placeholders, or missing states |
+| **4K** | Density Pattern | Per-OD pattern | Must be perceptually visible |
+| **4L** | Fractal (DD-F-006) | Mandatory self-similarity | All 4 scales present |
+| **4M** | Responsive | 768px + 1440px | No breakage at either width |
+| **4N** | Hover & Interaction | Interactive state coverage | All states present and soul-aligned |
+| **4O** | Scroll & Animations | Editorial calm | Subtle motion, `prefers-reduced-motion` |
+| **4P** | Red-Line Property Matrix | Identity Expression | Two-lens audit (Technical + Identity) |
+| **4Q** | Outside-the-Box Interrogation | Macro + Micro challenge | Includes the Nuclear Question |
+
+*Sub-checks 4A–4O are programmatic (Playwright JavaScript). Sub-checks 4P–4Q are interrogative (adversarial questions with structured debates). Run 4A–4O to gather data, then 4P–4Q to challenge decisions.*
 
 ### 4A: BORDERS — The Most Common Violation Area
 
@@ -1061,13 +1239,219 @@ const animatedEls = await page.evaluate(() => {
 - Are animations SUBTLE? The soul calls for "editorial calm" — dramatic bouncing, spinning, or large translate values violate the identity.
 - Maximum acceptable translate: 16px. Maximum acceptable opacity change: 0 → 1. No scale transforms. No rotations.
 
+### 4P: THE RED-LINE PROPERTY MATRIX — The Decisions Nobody Consciously Made
+
+These are the CSS properties that rarely appear in design specs but DEFINE how a page actually feels. They're the decisions nobody consciously made — which means they're browser defaults, copy-paste artifacts, or "close enough" guesses. Every one is a potential source of the vague "something feels off" impression.
+
+**For each property below, there are TWO complementary lenses. Both are mandatory.**
+
+```
+LENS 1 — TECHNICAL ADVERSARY: "Was this value CHOSEN, or did it happen by accident?"
+         Tests: correctness, intentionality, spec compliance, consistency
+
+LENS 2 — IDENTITY EXPRESSION: "What does this value SAY about our identity?"
+         Tests: Does this property, at this value, in this context, EXPRESS
+         the Unhurried Editor? What IMPRESSION does it create? What would
+         someone perceive about our design system from this single choice?
+         How could this value better EXPRESS the accumulated identity as
+         understood through traversing the inline headers?
+```
+
+Lens 1 catches bugs. Lens 2 catches soullessness. A margin can be technically correct (on the spacing scale, intentionally chosen) and still fail to express the identity (it's correct but it doesn't COMMUNICATE editorial calm, confident restraint, or trust in the reader). Both lenses must pass.
+
+#### Margins — The Invisible Architecture of Separation
+
+```javascript
+// Audit ALL margins on significant elements
+const marginAudit = await page.evaluate(() => {
+  const els = document.querySelectorAll('h1,h2,h3,h4,h5,h6,p,pre,code,.callout,.question,.answer,.qa-pair,.conversation-chapter,.code-block,.pattern-visualization,section,article,blockquote,ul,ol,li,table,details,summary,figure,figcaption,hr');
+  return Array.from(els).map(el => {
+    const cs = getComputedStyle(el);
+    return {
+      tag: el.tagName,
+      class: el.className,
+      text: el.textContent?.substring(0, 40),
+      marginTop: cs.marginTop,
+      marginRight: cs.marginRight,
+      marginBottom: cs.marginBottom,
+      marginLeft: cs.marginLeft,
+      // Check for margin collapse
+      parentMarginBottom: el.previousElementSibling ? getComputedStyle(el.previousElementSibling).marginBottom : 'N/A',
+      actualGapToPrevious: el.previousElementSibling ?
+        (el.getBoundingClientRect().top - el.previousElementSibling.getBoundingClientRect().bottom) + 'px' : 'N/A'
+    };
+  });
+});
+```
+
+**Adversarial questions for margins:**
+
+| Question | What the Adversary is Testing | Debate Example |
+|----------|------------------------------|----------------|
+| "Why is this margin 32px and not 24px or 48px?" | Was the value INTENTIONALLY chosen from the spacing scale, or is it a "felt about right" guess? | PROSECUTION: "This 32px margin between callout and paragraph is the same as the margin between Q&A pairs. But a callout WITHIN an answer zone should be CLOSER to its parent (24px) than BETWEEN top-level pairs (32px). Same value = wrong signal." DEFENSE: "32px is --space-8, our standard 'different sections' separator. The callout IS a different section within the answer." CROSS: "But is it a different SECTION, or a supporting aside? Supporting = closer. Different = farther." |
+| "Why does this element have margin-bottom but not margin-top?" | Asymmetric margins create unpredictable spacing when elements are reordered or removed | PROSECUTION: "If this callout is removed, the gap between the paragraph above and below it changes from 24px+32px to just the paragraph's own margin. The layout shouldn't depend on the callout existing." |
+| "Is CSS margin collapse making two margins look like one?" | margin-top: 32px and margin-bottom: 32px collapse to 32px, not 64px — but only under specific conditions | Check the `actualGapToPrevious` field against `marginTop`. If they differ, collapse is happening. Is that intentional? |
+| "Why do sibling elements have DIFFERENT margins between them?" | The gap between element A→B is 24px but B→C is 32px. Was that a conscious density decision or an accident? | Consistent gaps feel rhythmic. Variable gaps need justification (density pattern, section change, emphasis shift). |
+
+**IDENTITY EXPRESSION lens for margins:**
+
+| Identity Question | What You're Really Asking | How to Improve Based on Accumulated Identity |
+|-------------------|--------------------------|---------------------------------------------|
+| "Does the margin between these elements feel UNHURRIED?" | The Unhurried Editor gives content room to breathe. Tight margins (8px between major sections) feel rushed — like content is being crammed. Generous margins (48-64px between sections) feel like the editor trusts the reader to stay engaged without crowding. | If margins feel tight, increase toward the generous end of the spacing scale. The identity says "whitespace as design element" — it's not wasted space, it's editorial confidence. |
+| "Does the margin HIERARCHY communicate the content hierarchy?" | Different margins should signal different relationships. If everything has the same margin, the page reads as a flat list. The identity says "curated, intentional" — margins should CURATE the reading experience by signaling which things are tightly related (8px) vs. loosely related (32px) vs. separate thoughts entirely (64px). | Map the content hierarchy first. Then assign margins that MATCH: tightest margins for strongest relationships, widest for weakest. If you can't see the hierarchy in the spacing, the margins aren't communicating. |
+| "What IMPRESSION does this margin create about the relationship between these two elements?" | A 4px gap says "these are ONE thing." A 64px gap says "these have nothing to do with each other." Every margin in between communicates a specific degree of relatedness. Does the degree implied by the margin MATCH the actual content relationship? | If a callout feels disconnected from the text it supports, the margin is too large. If a chapter divider feels like part of the previous section, the margin is too small. The accumulated identity should inform what "appropriate distance" means for each content relationship. |
+| "If someone who only sees spacing (blur the text) scrolled this page — would the margin pattern communicate PULSE / CRESCENDO / ISLANDS / etc.?" | The density pattern should be visible THROUGH spacing alone. If you blur all text and just see blocks with varying gaps between them, can you identify the rhythm? | This tests whether margins are SERVING the density pattern or just following a uniform rule. In a PULSE pattern (OD-001), you should see alternating tight/loose margins. In CRESCENDO (OD-002), you should see margins getting tighter (denser) as you scroll down. |
+
+#### Padding — The Breath Inside Elements
+
+| Question | What the Adversary is Testing |
+|----------|------------------------------|
+| "Why does this element use padding instead of margin for its spacing?" | Padding is INSIDE the element (affects background area). Margin is OUTSIDE. The wrong choice creates incorrect visual boundaries. A callout with padding pushes content away from its border. A callout with margin pushes the ENTIRE callout away from neighbors. |
+| "Is the padding SYMMETRIC or does it favor one direction?" | `padding: 16px 24px` is wider than tall. For body text blocks, wider horizontal padding creates a magazine-column feel (soul-aligned). For code blocks, equal padding creates a contained terminal feel. Is the asymmetry INTENTIONAL? |
+| "Does the padding create enough BREATHING ROOM for the content inside?" | Dense text pressed against borders feels cramped. But TOO much padding wastes space and makes the element feel empty. The adversary asks: "Is this the MINIMUM padding that still feels unhurried?" |
+| "Is padding being used to ALIGN text across different elements?" | The answer's padding-left (28px) + border-left (4px) = 32px, matching the question's indent. Was this alignment CALCULATED or coincidental? If you change one, does the other break? |
+
+**IDENTITY EXPRESSION lens for padding:**
+
+| Identity Question | What You're Really Asking | How to Improve Based on Accumulated Identity |
+|-------------------|--------------------------|---------------------------------------------|
+| "Does the padding inside this element feel like the content has ROOM TO BREATHE, or does it feel CONFINED?" | The Unhurried Editor would never cram text against a border. Content should feel like it lives comfortably within its container — not pressed against the walls, not swimming in empty space. The exact amount depends on the element's nature: a callout needs enough padding to feel like a distinct zone, a code block needs enough to feel like a terminal window. | If text touches or nearly touches a border, increase padding. If there's so much padding the content looks lonely, reduce it. The goal is "comfortable" — the way text sits on a well-typeset magazine page. |
+| "Does the padding DIFFERENTIATE this element's importance from its neighbors?" | An Essence callout carrying accumulated wisdom deserves MORE internal space than an Info callout with a quick note. The padding should COMMUNICATE the content's significance. More padding = more gravitas. Less padding = more casual, more efficient. | Essence (Archivist's voice) → generous padding (24px 32px). Quick Tip → moderate padding (16px 20px). Inline code → minimal padding (2px 6px). The padding TELLS THE READER how much attention to give. |
+| "What does the RATIO of padding to content say about our identity?" | If an element is 60% padding and 40% content, it's prioritizing space over substance. If it's 90% content and 10% padding, it's prioritizing density over readability. The Unhurried Editor would aim for balance — enough space to signal editorial calm without wasting the reader's scroll. | Target roughly 25-35% padding-to-content ratio for major elements. This varies by element type, but if a callout is more padding than content, something is wrong. |
+| "Does the padding on the LEFT side create the impression of a DELIBERATE INDENT, or does it just look like arbitrary space?" | Left padding paired with a border-left creates an intentional editorial structure — like a blockquote indent in print. But left padding without a visual anchor (border, background change, etc.) just looks like the content was pushed over for no reason. | Every left padding should have a VISUAL REASON — a border it's offsetting from, an alignment it's matching, or a hierarchy it's expressing. Padding without purpose is padding without identity. |
+
+#### Alignment and Centering — The Grid Nobody Declared
+
+| Question | What the Adversary is Testing |
+|----------|------------------------------|
+| "Do these elements share a left edge, or are they ALMOST aligned?" | A 2px misalignment between body text and callout text is invisible to the builder but creates subconscious visual noise. Measure the actual x-position of the left edge of text content across all major elements on the page. |
+| "Is this element centered, or does it just LOOK centered?" | An element with `max-width: 860px; margin: 0 auto` is centered. But if its CONTENT is left-aligned within that centered container, is the visual center of mass actually at the page center? |
+| "Why is the header full-bleed but the body constrained to 860px?" | Is the header's visual width creating a jarring transition to the narrower body? Or does the header's inner content match the body width, creating continuity? |
+| "Are grid/card layouts creating equal visual weight, or is one cell heavier than others?" | In the territory card grid (from OD-005), do all 6 cards have roughly equal text content? Or does one card have 3 lines and another have 1 line, creating visual imbalance? |
+
+**IDENTITY EXPRESSION lens for alignment:**
+
+| Identity Question | What You're Really Asking | How to Improve Based on Accumulated Identity |
+|-------------------|--------------------------|---------------------------------------------|
+| "Does the alignment of elements create the impression of EDITORIAL PRECISION or CASUAL ARRANGEMENT?" | The Unhurried Editor's page should feel like a carefully typeset magazine spread — where every element aligns to an invisible grid with absolute precision. If elements are "close to aligned" but not exactly, the page feels casual — like a blog, not a publication. 1-2px misalignment is the difference. | Use Playwright to measure the actual x-position of the left edge of text across all major element types. They should share EXACT alignment (within 1px). If they don't, calculate the precise padding/margin/border math to make them align. |
+| "Does the CENTERING of the page container communicate 'curated space' or 'default layout'?" | A centered 860px container can feel either like a carefully chosen column width (curated) or like a generic `max-width` with `margin: auto` (default). The difference is whether surrounding elements REINFORCE the centering decision — whether the full-bleed header, the body, and the footer all create a coherent centered composition. | Check: does the centered container feel like a magazine column on a larger page, or does it feel like content floating in a void? The header and any full-bleed sections should create a visual FRAME that makes the centering feel intentional. |
+| "Does this layout ORGANIZE content the way the Unhurried Editor would organize it?" | The identity says "content defines its own space." A rigid 3-column grid imposes structure ON content. A flowing layout that responds to content length lets content define structure. Which is happening here? | For card grids: do the cards have roughly equal content? If not, a flowing layout might serve the content better. For section stacks: does the top-to-bottom flow match the intended reading order? For comparisons: does side-by-side layout serve the comparison, or would sequential presentation be clearer? |
+
+#### Text Properties Nobody Checks
+
+| Property | What to Check | Adversarial Question |
+|----------|--------------|---------------------|
+| `text-align` | Body text should be `left`. Headings may be `left` or `center`. Justified text creates rivers of whitespace. | "Is center-aligned text serving the content, or is it a lazy default? Left-aligned is the editorial standard." |
+| `text-indent` | Should be 0 in editorial design (paragraph breaks are created by margin, not indent) | "Is there an unexpected first-line indent from browser defaults?" |
+| `word-break` / `overflow-wrap` | Long URLs or code strings need `overflow-wrap: break-word` | "Does a long variable name or URL break the layout?" |
+| `text-decoration` on links | Underline? Color? Offset? Thickness? | "Are link underlines the same color as the text, or do they use the accent color? Is that consistent across ALL links?" |
+| `::selection` color | What happens when text is selected? | "Is the selection color the default blue, or is it styled to match the palette? A premium publication would style it." |
+| `text-rendering` | `optimizeLegibility` vs default | "Are ligatures and kerning optimized? On Instrument Serif, this makes a visible difference." |
+
+**IDENTITY EXPRESSION lens for text properties:**
+
+| Identity Question | What You're Really Asking |
+|-------------------|--------------------------|
+| "Does the text alignment create the impression of EDITORIAL AUTHORITY or WEB DEFAULT?" | Left-aligned body text reads as editorial (newspapers, magazines, books). Center-aligned body text reads as web (landing pages, marketing). Justified text reads as newspaper print (but creates rivers in digital). The Unhurried Editor uses left alignment — it's confident, readable, and doesn't try to LOOK fancy. |
+| "Does the typography at this point in the page FEEL like the right voice for this content?" | Instrument Serif italic for wisdom and titles. Inter for clear body text. JetBrains Mono for code and labels. If you see Inter being used for something that should carry editorial weight, or Instrument Serif for casual body text, the voice is miscast. What IMPRESSION does this typeface create HERE? |
+| "Does the link styling communicate 'trusted guide' or 'generic hyperlink'?" | The Unhurried Editor's links should feel like curated references — not like "click here" web conventions. Subtle underlines, refined hover states, and consistent treatment across all links create editorial trust. Default blue underlines create web generic. |
+
+#### Layout Properties That Shape the Page
+
+| Property | What to Check | Adversarial Question |
+|----------|--------------|---------------------|
+| `display` | Is this a `block`, `flex`, `grid`, or `inline` element? | "Is a flex container being used where a simple block would suffice? Over-engineering layout creates fragility." |
+| `flex-shrink` / `flex-grow` | How do flex children share space? | "If the viewport narrows, which element shrinks first? Is that the RIGHT element to shrink?" |
+| `gap` (in flex/grid) | Is `gap` used instead of margins for spacing? | "Is gap CONSISTENT with the spacing scale (8/16/24/32px)? Or is it an arbitrary value?" |
+| `max-width` on text | Prose constrained to 60-70ch? | "Is body text running to 100ch or beyond? That's hard to read. The soul says 'trust the reader' — that means formatting text for readability." |
+| `min-height` | Does any container have an implicit min-height? | "Is a section with little content stretching to fill a min-height that was set for a different content length? This creates awkward empty space." |
+| `position` | Is anything `absolute` or `fixed` that shouldn't be? | "Fixed elements (scroll witness) — do they overlap content on narrow viewports? Absolute elements — do they escape their containing block?" |
+| `z-index` | What's the stacking order? | "Are there z-index values beyond what's needed? A z-index: 100 suggests the builder was fighting stacking issues rather than solving them." |
+| `overflow` | Hidden content? Unexpected scrollbars? | "Is `overflow: hidden` silently clipping content? Is there a horizontal scrollbar on the page at any viewport width?" |
+| `cursor` | Pointer on interactive elements? | "Can you TELL what's clickable by looking at it? If the cursor doesn't change on hover, the element feels broken." |
+| `user-select` | Can text be selected where it should be? | "Is decorative text (labels, markers) selectable? It shouldn't be. Is body text un-selectable? It should be." |
+| `aspect-ratio` | Do images/diagrams maintain proportions? | "If a diagram's container is resized, does the diagram stretch or maintain its aspect ratio?" |
+
+**IDENTITY EXPRESSION lens for layout properties:**
+
+| Identity Question | What You're Really Asking |
+|-------------------|--------------------------|
+| "Does the layout feel INTENTIONAL or COMPUTED?" | The Unhurried Editor arranges content with PURPOSE — each element placed where it is because that's where it BELONGS, not because a grid algorithm put it there. A flex layout with `justify-content: space-between` distributes items evenly — but is even distribution what the CONTENT wants? Or should some items be closer to each other because they're more related? |
+| "Does the overflow behavior feel GRACEFUL or ABRUPT?" | When content exceeds its container, does it handle the situation with editorial grace (gentle scroll, subtle fade) or with technical harshness (clipped mid-word, ugly scrollbar)? The identity of "confident restraint" means overflow should be handled like a magazine handles a too-long article — with elegance, not with panic. |
+| "Does the z-index stacking feel like NATURAL LAYERING or FORCED HIERARCHY?" | In print, there's no z-axis — everything is on the same plane (Soul Piece 4). When elements DO stack in this digital context, it should feel minimal and purposeful — a fixed navigation that NATURALLY sits above scrolling content. Not elements competing for visual attention through stacking tricks. |
+| "Does the cursor behavior feel like CONFIDENT GUIDANCE or GENERIC AFFORDANCE?" | When you hover over different elements, does the cursor change TELL you something about the identity? A custom cursor on the brand elements? A clear pointer on actionable items? Or is it all browser defaults that could be any website? The micro-interactions communicate identity as much as the macro layout. |
+
+### 4Q: THE OUTSIDE-THE-BOX INTERROGATION — Macro and Micro
+
+These questions force thinking BEYOND the existing design decisions. They ask not "is this correct?" but "is this the RIGHT APPROACH?" — at both the macro level (why this component? why this layout?) and the micro level (why this margin? why this padding?).
+
+**Deploy these as adversarial prompts during the visual audit (Section 3). Each one is a potential debate trigger.**
+
+#### Macro-Level Interrogation (Component and Layout Choices)
+
+| Question | What It Challenges | How the Debate Flows |
+|----------|-------------------|---------------------|
+| "If you stripped ALL CSS and looked at the raw HTML, would the content structure still make sense?" | Whether the content organization is INHERENT or only legible through styling | If the HTML without CSS looks like gibberish, the structure is cosmetic, not semantic. The identity says "content defines its own space" — that implies structure should be content-driven, not CSS-driven. |
+| "Why is this a COMPONENT instead of plain text?" | Whether the component abstraction earns its complexity | Every component adds visual weight and cognitive load. A callout says "STOP and read this differently." Is the content actually worth stopping for? Or would it be better as a simple paragraph? |
+| "Why is this a GRID instead of a list?" | Whether the layout choice serves the content or the aesthetic | The territory cards in OD-005 are arranged in a 3x2 grid. But are the territories ACTUALLY equal in importance? Would a prioritized list with the most important territory first better serve the reader? The identity says "curated, intentional" — a grid implies equal weight. |
+| "What if this ENTIRE section were removed?" | Whether the section earns its place | Take a screenshot with and without the section. Does the page flow BETTER without it? Some sections exist because the builder felt obligated to include them, not because the reader needs them. |
+| "Is the reading flow LEFT-TO-RIGHT-TOP-TO-BOTTOM, or does the layout fight the natural reading direction?" | Whether the layout respects natural eye movement | Z-pattern for wide layouts, F-pattern for text-heavy. Does this page honor one of these, or does it scatter focal points randomly? |
+| "What is the RATIO of decoration to content in this viewport?" | Whether chrome and ornamentation are overwhelming substance | Measure: how many pixels are borders, backgrounds, markers, labels, dividers vs. actual readable content? If decoration > 30% of the viewport, the soul of "confident restraint" is compromised. |
+| "If this were a PRINT magazine page, how would you lay it out differently?" | Whether the digital layout is using the medium well or just simulating print badly | Print has fixed dimensions. Digital has scroll. Are we using scroll well, or are we creating a fixed-feeling page that just happens to scroll? |
+| "Does this page TEACH you how to read it, or do you need the inline header to understand the structure?" | Whether the visual language is self-documenting | A user will never see the inline header. If the density pattern (PULSE, CRESCENDO, etc.) is only visible because you KNOW to look for it, it's not working perceptually. |
+
+#### Micro-Level Interrogation (Individual Property Choices)
+
+| Question | What It Challenges | How the Debate Flows |
+|----------|-------------------|---------------------|
+| "Why is this margin 32px and not 24px?" | Whether the specific spacing value was intentional | PROSECUTION: "32px is used for EVERYTHING — section breaks, callout margins, Q&A pair gaps. If everything uses the same spacing, there's no RHYTHM. Different semantic levels deserve different spacing." DEFENSE: "32px is --space-between in the Gestalt spacing model. All of these ARE 'between distinct elements.'" CROSS: "But are they ALL the same LEVEL of distinction? A callout within an answer is less of a break than between Q&A pairs." |
+| "Why does this padding differ on the left vs. the right?" | Whether asymmetric padding was a design choice or an oversight | Asymmetric padding can be beautiful (more left padding to accommodate border + create text indent). But it can also be accidental (one side uses var(--space-5), the other uses var(--space-6) by mistake). |
+| "Why is this text 14px instead of 16px?" | Whether the size reduction was intentional hierarchy or accidental | Detail text at 14px in an answer zone can be intentional (reducing visual weight). But if SOME detail text is 14px and OTHER detail text is 16px in the same zone, that's inconsistency. |
+| "Why is this gap here at all? What if it were zero?" | Whether the whitespace is communicative or just habitual | Whitespace between a label and its content should be minimal (4-8px) to signal grouping. If it's 16px, the label and content feel disconnected. But the builder may have used 16px because it's the "standard" separator. |
+| "Does this border-left CREATE the left edge, or does padding ALSO contribute?" | Whether the visual left edge is precisely controlled | If an element has `border-left: 4px` + `padding-left: 20px`, the text starts at 24px from the container edge. If the next element has `padding-left: 24px` and no border, its text starts at 24px too — aligned. But did the builder CALCULATE this alignment or just eyeball it? |
+| "Is this 1px line a BORDER, a DIVIDER, or an OUTLINE? Which is semantically correct?" | Whether the visual separator uses the right CSS mechanism | A `border-top: 1px solid` on a container, an `<hr>`, and an `outline` all create lines — but they have different semantic meanings and different behavior during layout. |
+
+**IDENTITY EXPRESSION lens for micro-level choices:**
+
+For every micro-level finding, ask this complementary question:
+
+> **"If I showed ONLY this one element — this one margin, this one padding, this one border — to someone who knows the KortAI identity, would they say 'yes, that's the Unhurried Editor' or would they say 'that could be anything'?"**
+
+Every CSS value is a fingerprint. The specific combination of:
+- Sharp edges (border-radius: 0)
+- Heavy borders (4px, not 1px)
+- Warm palette (cream, not white; near-black, not black)
+- Generous but purposeful spacing (24-32px, not 8px or 80px)
+- Serif display type (Instrument Serif, not system fonts)
+
+...should be identifiable at ANY scale. A single callout, extracted from the page, should still LOOK like KortAI. If it looks generic, the identity isn't penetrating to the micro level.
+
+**The improvement question for every micro finding:**
+
+> **"How could this specific value better EXPRESS the accumulated identity? What would the Unhurried Editor choose here, given the full context of the inline headers, the research findings, and the soul pieces?"**
+
+This forces improvement to come FROM the identity rather than from generic "best practices." The answer isn't "24px is better than 32px because design guidelines say so." The answer is "24px is better here because the accumulated identity says a callout within an answer zone should feel INTIMATE with its parent content — it's a quiet aside, not a separate thought — and 24px communicates that intimacy better than 32px."
+
+#### The Nuclear Question (Ask Once Per OD File)
+
+> **"If this OD exploration were the ONLY page a user ever saw from the KortAI design system — would they understand the identity?"**
+
+This question tests whether the implementation is a faithful ambassador of the accumulated identity. Not whether it follows the rules — whether it EMBODIES the philosophy. Does it feel like the Unhurried Editor built it? Does it feel like a premium editorial publication? Does it feel like someone with nothing to prove?
+
+If the answer is "it feels like a well-made documentation page but not distinctively KortAI" — that's an adversarial finding. The implementation is competent but soulless. The identity isn't shining through.
+
 ---
+
+═══════════════════════════════════════════════════════════════════════════════
+# PART III — VERIFICATION & PRINCIPLES
+*After auditing individual OD files, zoom out. Section 5 checks consistency across all 6 OD files. Section 6 is the final perceptual gut-check. Section 7 gives you the step-by-step execution sequence. Section 8 grounds everything in the deepest philosophical truth of this work.*
+═══════════════════════════════════════════════════════════════════════════════
 
 ## SECTION 5: CROSS-OD CONSISTENCY AUDIT
 
 ### Every OD file must be consistent with every other OD file in these areas:
 
-**Run this across ALL OD files (OD-001 through OD-005):**
+**Run this across ALL OD files (OD-001 through OD-006):**
 
 | Property | Must Be IDENTICAL | Allowed to Differ |
 |----------|------------------|-------------------|
@@ -1131,11 +1515,33 @@ const rootTokens = await page.evaluate(() => {
 | Could this be a Bootstrap template? | ABSOLUTELY NOT | Soul is compromised — major rework needed |
 | Does the page feel hurried or calm? | Calm — unhurried editorial | Reduce visual noise, increase whitespace, simplify |
 
+### The Squint Methodology
+
+The "squint test" is not metaphorical. It is a literal perceptual technique:
+
+1. **Physical squint:** Narrow your eyes until details blur but shapes remain. You're looking at mass, rhythm, and contrast — not text or borders.
+2. **Distance method:** Hold the screenshot at arm's length (or zoom to 25%). What remains visible at that distance is what's perceptually dominant.
+3. **Programmatic blur:** Apply a 4–6px Gaussian blur to the full-page screenshot. The blurred version reveals what the page COMMUNICATES at the gestalt level — stripped of detail, showing pure visual structure.
+
+**What squinting REVEALS:**
+- Density rhythm (PULSE, CRESCENDO, etc.) becomes visible as alternating light/dark bands
+- Depth violations become obvious — anything that "pops" off the flat plane stands out
+- Color temperature inconsistencies emerge when text detail is removed
+- Visual weight imbalances (one side of the page heavier than the other) become apparent
+
+**What squinting HIDES (check these separately in §4 and §13):**
+- Typography details (font family, weight, style — invisible when blurred)
+- Exact border widths (3px vs 4px looks identical when blurred)
+- Code rendering quality (character-level issues vanish)
+- Text alignment precision (1–2px misalignment disappears)
+
+**ADVERSARIAL LAYER:** After squinting, ask: *"If this page passed the squint test but I KNOW there are issues — what kind of issues would be invisible to the squint?"* The answer: anything below ~8px in visual impact. The squint catches macro problems; §4 and §13 catch micro problems. Both are needed — neither is sufficient alone.
+
 ---
 
 ## SECTION 7: AUDIT EXECUTION ORDER
 
-### For each OD file (OD-001 through OD-005), execute in this order:
+### For each OD file (OD-001 through OD-006), execute in this order:
 
 1. **Serve the file** via HTTP (Playwright blocks `file://`)
    ```bash
@@ -1150,13 +1556,15 @@ const rootTokens = await page.evaluate(() => {
 
 3. **Run Section 3 VISUAL-FIRST audit (3-VISUAL-A through 3-VISUAL-C)** — LOOK at the page first, form impressions, note findings
 
-4. **Run Section 4 programmatic checks (4A through 4O)** — confirm/investigate visual findings with code
+4. **Run ADVERSARIAL DEBATES (Section 0 Structured Debate Protocol)** — for every visual finding, run prosecution → defense → cross-examination → verdict
 
-5. **Run Section 5 cross-OD comparison** — after all individual audits
+5. **Run Section 4 programmatic checks (4A through 4Q)** — confirm/investigate findings with code, including the Red-Line Property Matrix and Outside-the-Box Interrogation
 
-6. **Run Section 6 squint test** — final perceptual verification
+6. **Run Section 5 cross-OD comparison** — after all individual audits
 
-6. **Document ALL findings** in this format:
+7. **Run Section 6 squint test** — final perceptual verification
+
+8. **Document ALL findings** in this format:
 
 ```markdown
 ## OD-XXX Audit Results
@@ -1191,6 +1599,11 @@ const rootTokens = await page.evaluate(() => {
 - Pattern visible at squint test: [YES/NO]
 - Fractal at 4 scales: [YES/NO + which scales fail]
 
+### ADVERSARIAL DEBATE OUTCOMES
+| # | Element Challenged | Prosecution Argument | Defense Argument | Verdict | Action |
+|---|-------------------|---------------------|-----------------|---------|--------|
+| 1 | [element] | [case against] | [case for] | VALIDATED / IMPROVE / REJECT | [specific action if not validated] |
+
 ### RESPONSIVE ISSUES (768px)
 | # | Element | Issue at 768px |
 |---|---------|---------------|
@@ -1215,6 +1628,11 @@ The builder's job is not to apply every finding they receive. The builder's job 
 
 ---
 
+═══════════════════════════════════════════════════════════════════════════════
+# PART IV — BIAS-DEFEATING PROTOCOLS
+*Sections 0 through 8 are run by an auditor who shares the builder's accumulated context. That context is powerful — but it also creates blind spots. These two sections deploy INTENTIONALLY LESS-INFORMED agents who see what context-rich auditors miss. Section 9 deploys a fresh-eyes adversarial auditor. Section 10 deploys specialized discovery agents from completely different angles.*
+═══════════════════════════════════════════════════════════════════════════════
+
 ## SECTION 9: THE FRESH EYES PROTOCOL — Defeating Accumulated Bias
 
 ### The Problem: Builder Blindness
@@ -1225,20 +1643,26 @@ This is not a character flaw. This is how context works. When you've spent hours
 
 **The only cure is deploying a FRESH-EYES SUB-AGENT that has NOT been marinated in the builder's context.**
 
-### Deploy the Fresh-Eyes Auditor Sub-Agent
+### Deploy the Fresh-Eyes ADVERSARIAL Auditor Sub-Agent
 
 **Spawn a dedicated sub-agent** with this exact mandate:
 
 ```
-You are the FRESH-EYES AUDITOR. You have ZERO context about why anything
-was built the way it was. You do not care about research findings, density
-patterns, or external enrichments. You are looking at this HTML page the way
-a SENIOR DESIGNER at a premium editorial publication would look at a proof
-sheet — with exacting, unforgiving, detail-obsessed attention.
+You are the FRESH-EYES ADVERSARIAL AUDITOR. Your role is LOYAL OPPOSITION.
+
+You have the accumulated identity document — you understand and RESPECT
+the soul, the rules, the intent. You TRUST the foundation. But you have
+ZERO context about why specific implementation decisions were made. You
+don't know the research findings. You don't know the density pattern
+rationale. You don't know the builder's justifications.
+
+This is intentional. You are the adversary who tests whether implementation
+decisions are self-evident — whether they express the identity so clearly
+that they don't NEED justification.
 
 Your ONLY inputs are:
-1. The rendered page (via Playwright screenshots and snapshots)
-2. The accumulated identity document (what this design system IS)
+1. The rendered page (via Playwright screenshots and snapshots — LOOK at it)
+2. The accumulated identity document (what this design system IS and BELIEVES)
 
 You are NOT given:
 - The builder's research citations
@@ -1246,9 +1670,15 @@ You are NOT given:
 - The density pattern rationale
 - Any justification for any design choice
 
-This is intentional. If a design choice can only be understood by reading
-the research finding that motivated it, it's a BAD design choice. Good design
-is self-evident. The identity should be VISIBLE without annotation.
+Your job: LOOK at the page. COMPARE what you see to what the identity
+says it should be. For EVERY element, ask: "Does this express the identity?
+Or does it express something else — something generic, or something the
+builder imported from research without filtering?"
+
+When you find something that doesn't express the identity, that's a finding.
+But be precise: the identity is still CORRECT. The implementation is what
+needs to improve. You are helping the implementation live up to the identity
+it claims to serve.
 ```
 
 ### What the Fresh-Eyes Sub-Agent Checks (Open-Ended)
@@ -1259,17 +1689,17 @@ This is NOT a checklist. This is a MINDSET. The sub-agent looks at the page and 
 
 Specific vectors of wincing (but genuinely NOT limited to these — the sub-agent must be RECEPTIVE to anything that feels off):
 
-#### 8A: Visual Weight Distribution
+#### 9A: Visual Weight Distribution
 - Does any element feel "heavier" than it should be? (Too much border, too dark a background, too bold a font)
 - Does any element feel "lighter" than it should be? (Missing borders, washed-out text, insufficient contrast)
 - Is there a visual center of gravity on each viewport slice, or is weight scattered randomly?
 
-#### 8B: Rhythm Breaks
+#### 9B: Rhythm Breaks
 - Scan the page top to bottom. Does anything JOLT you out of the rhythm? A sudden change in spacing, a component that doesn't feel like it belongs, a color that appears once and never again?
 - Are there "dead zones" where nothing interesting happens visually for too long?
 - Are there "noisy zones" where too many visual signals compete?
 
-#### 8C: Craftsmanship Tells
+#### 9C: Craftsmanship Tells
 These are the micro-details that separate "student project" from "editorial publication":
 
 | Tell | What to Notice |
@@ -1285,7 +1715,7 @@ These are the micro-details that separate "student project" from "editorial publ
 | **Transition coherence** | If there are animations, do they all use the same easing? Same duration? Or is one 0.2s ease and another 0.5s ease-out? |
 | **Label/meta consistency** | Are all uppercase mono labels the SAME size, SAME letter-spacing, SAME weight? Or do they vary by 1-2px between contexts? |
 
-#### 8D: The "Would I Ship This?" Test
+#### 9D: The "Would I Ship This?" Test
 The fresh-eyes sub-agent must answer, for EACH OD file:
 
 > "If this page were going live on a premium design documentation site TOMORROW,
@@ -1293,7 +1723,7 @@ The fresh-eyes sub-agent must answer, for EACH OD file:
 
 If the answer is NO, the sub-agent must identify EXACTLY what would stop them. Not in terms of "it violates R3-012" — in terms of "the bottom callout's left border is 2px when everything else is 4px and it looks sloppy."
 
-#### 8E: The Stranger Scroll
+#### 9E: The Stranger Scroll
 The sub-agent scrolls through the entire page ONCE, at normal reading speed, without stopping. After one pass:
 - What do you REMEMBER? (These are the visual anchors — they should be intentional)
 - What felt CONFUSING? (These are design failures)
@@ -1301,7 +1731,7 @@ The sub-agent scrolls through the entire page ONCE, at normal reading speed, wit
 - What felt CROWDED? (These are violations of breathing space)
 - What did you NOT notice? (Invisible elements might be broken, hidden, or unnecessary)
 
-#### 8F: The Screenshot Diff Test
+#### 9F: The Screenshot Diff Test
 Take a full-page screenshot of each OD file. Place them side by side. Now ask:
 - Do they feel like they come from the SAME design system?
 - Or do they look like 5 different designers built 5 different pages?
@@ -1486,6 +1916,11 @@ This catches the failure mode where visual design is polished but content is fil
 
 ---
 
+═══════════════════════════════════════════════════════════════════════════════
+# PART V — ORCHESTRATION & META
+*How to deploy everything above at scale. Section 11 provides the 4-phase parallel sub-agent architecture. Section 12 fixes the root cause of unrefined research application. Section 13 defines what true pixel-level granularity means — the 15 checks that most audits would consider "too small to matter."*
+═══════════════════════════════════════════════════════════════════════════════
+
 ## SECTION 11: SUB-AGENT DEPLOYMENT ARCHITECTURE
 
 ### How to orchestrate all audit sub-agents for maximum efficacy:
@@ -1642,6 +2077,8 @@ This is the most important refinement concept:
 | `outline: 2px solid` on focus (with radius) | No `outline-radius` in token spec | Creates rounded visual on interaction ⚠️ (assess context) |
 | 4px border-left + 1px border-top/right/bottom | Left accent is correct ✅ | Other sides at 1px "signal uncertainty" per Rule 5 ❌ |
 
+> **See also:** §2 (The External Research Refinement Gate) provides the 5-question soul test that each research finding must pass before application. This section (§12) explains WHY the gate is needed and provides the pipeline architecture. Together: §2 defines the WHAT to filter, §12 defines the WHY and WHERE.
+
 ---
 
 ## SECTION 13: WHAT "GRANULAR" ACTUALLY MEANS
@@ -1692,12 +2129,25 @@ Here is what granularity means in THIS context. It means checking things that mo
 > The audit's job is to identify EVERY negligent decision and convert it
 > into an intentional one.
 
+> **See also:** §4P (The Red-Line Property Matrix) and §4Q (The Outside-the-Box Interrogation) operationalize these granular concepts into specific audit questions with both technical and identity expression lenses. This section defines what granularity IS; those sections put it into practice.
+
 ---
 
-## CLOSING: THE AUDIT IS NOT PUNISHMENT — IT IS LOVE
+═══════════════════════════════════════════════════════════════════════════════
+*The final word. Carry this with you into every audit.*
+═══════════════════════════════════════════════════════════════════════════════
 
-The builder put real effort into these OD files. External research was gathered. Inline headers were traversed. Density patterns were applied. That effort is REAL and VALUABLE.
+## CLOSING: THE ADVERSARY IS NOT THE ENEMY — THE ADVERSARY IS THE ALLY
 
-The audit doesn't diminish that effort. It COMPLETES it. A building is not finished when the last wall goes up — it's finished when the inspector verifies every joint, every wire, every pipe. The inspector is not the enemy of the builder. The inspector is the builder's final collaborator.
+The builder put real effort into these OD files. External research was gathered. Inline headers were traversed. Density patterns were applied. The accumulated identity was consulted. That effort is REAL and VALUABLE. The foundation it was built on — months of perceptual deepening, 337 research findings, 6 DD explorations, soul extraction from 11 components — is SOLID. Trust it.
 
-**Deploy every sub-agent. Run every check. Find every pixel out of place. And then fix it — with the same care and conviction that built it in the first place.**
+The adversarial audit doesn't question the foundation. It tests whether the implementation LIVES UP TO the foundation. The identity says "Unhurried Editor." Does this page FEEL unhurried? The identity says "sharp edges command authority." Do these edges ACTUALLY command authority, or are they sharp but visually tentative? The identity says "callouts share family DNA." Do these callouts ACTUALLY look like siblings when you put them side by side?
+
+When the adversary finds something that doesn't hold up, the response is:
+- **NOT** "The identity was wrong" (the identity holds)
+- **NOT** "The builder was careless" (the builder was working hard)
+- **YES** "This specific implementation can better express the identity it claims to serve"
+
+That's what adversarial review is: **pushing implementation to fully realize the intent it was built on.** Every challenge is an opportunity for the work to get STRONGER. Every finding is a place where the bridge between intent and execution can be tightened. Nothing goes to shit. Everything gets refined.
+
+**Deploy every sub-agent. Look with your eyes. Challenge with your accumulated understanding. Defend the foundation. Improve the implementation. Find every pixel that isn't living up to the identity — and then fix it with the same care and conviction that built the identity in the first place.**
