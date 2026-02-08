@@ -1,7 +1,7 @@
 # Provenance Chain Remediation — State Tracker
 
-## Current Wave: COMMIT
-## Status: VERIFICATION PASSED — 94/104 PASS (90.4%)
+## Current Wave: COMPLETE
+## Status: COMMITTED — b0e5185 — 27 files, 5,423 insertions, 336 deletions
 
 ## Wave Progress
 
