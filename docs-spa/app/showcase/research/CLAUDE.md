@@ -14,11 +14,11 @@ Code at session start when working within this directory.
 
 3. STATUS
 
-ACTIVE. Maintained as a living navigation document. Contains a known
-discrepancy: Section 3 lists R2 finding count as 78 (matching earlier
-estimates) but actual R2 findings number 27. DISCOVERIES-LOG references
-R2-079. This count inconsistency is documented research debt per the R3-023
-to DD-F-006 chain documentation pattern.
+ACTIVE. Maintained as a living navigation document. R-2 count discrepancy
+RESOLVED: actual finding count is 27 (R2-001 through R2-027). Earlier
+estimates of 78 were incorrect. Total across all streams is 337
+(28+27+51+192+39). DISCOVERIES-LOG reference to R2-079 is research debt
+(that finding does not exist in the actual file).
 
 5. BUILT ON
 
@@ -57,7 +57,7 @@ This is the ORIGINAL REFERENCE location. Copies exist in
 | Research | Count | Primary For |
 |----------|-------|-------------|
 | R-1 Documentation Patterns | 28 | OD (Stage 3) — **THE BIG ONE FOR OD** |
-| R-2 Creative Layouts | 78 | Secondary for multiple stages |
+| R-2 Creative Layouts | 27 | Secondary for multiple stages |
 | R-3 Density Dimensions | 51 | DD (Stage 2) — ~76% already applied |
 | R-4 Axis Innovations | 192 | AD (Stage 4) |
 | R-5 Combination Theory | 39 | CD (Stage 5) |
@@ -72,7 +72,7 @@ This is the ORIGINAL REFERENCE location. Copies exist in
 | File | Status | Finding Count |
 |------|--------|---------------|
 | `R1-DOCUMENTATION-PATTERNS.md` | ✅ | 28 |
-| `R2-CREATIVE-LAYOUTS.md` | ✅ | 78 |
+| `R2-CREATIVE-LAYOUTS.md` | ✅ | 27 |
 | `R3-DENSITY-DIMENSIONS.md` | ✅ | 51 |
 | `R4-AXIS-INNOVATIONS.md` | ✅ | 192 |
 | `R5-COMBINATION-THEORY.md` | ✅ | 39 |

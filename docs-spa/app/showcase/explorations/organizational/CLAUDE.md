@@ -79,12 +79,16 @@ END INLINE THREADING HEADER
 ## 5. MINDSET
 ═══════════════════════════════════════════════════════════════════════════════
 
-**DD explored visual rhythm. OD explores cognitive rhythm.**
+**DD explored visual rhythm. OD explored cognitive rhythm.**
 
-OD may discover COGNITIVE soul pieces (how information FLOWS) in addition to
-the VISUAL soul pieces discovered in Stage 1.
+OD confirmed that no new cognitive soul piece emerged. The 5 visual soul pieces
+(border-radius: 0, box-shadow: none, Instrument Serif, muted earth tones,
+generous whitespace) govern both density AND organization. This was a significant
+discovery — organizational patterns obey the same visual constraints as density
+patterns.
 
-Watch for patterns that feel like "soul" — cognitive rhythm patterns, reader
-expectations, attention management rules.
+OD further discovered that Organization IS Density (OD-F-005/OD-F-MP-001),
+meaning organizational patterns are a specific category of density patterns,
+not a separate dimension.
 
 ═══════════════════════════════════════════════════════════════════════════════

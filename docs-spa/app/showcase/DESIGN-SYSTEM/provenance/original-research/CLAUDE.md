@@ -17,7 +17,7 @@ ACTIVE
 |-----------------------------------------|---------------------------------------|
 | R1-R5 file listing                      | Directory contents inventory           |
 | DD-F-006                                | Referenced finding example             |
-| Finding counts (28+78+51+192+39=337)    | Aggregate totals from each R-file      |
+| Finding counts (28+27+51+192+39=337)    | Aggregate totals from each R-file      |
 
 8. CONSUMED BY
 | Consumer                                | How Used                              |
@@ -49,7 +49,7 @@ exist by design — originals for reference, copies for chain integration.
 | Research | Count | Primary For | When to Read |
 |----------|-------|-------------|--------------|
 | R-1 Documentation Patterns | 28 | OD (Stage 3) | Before OD work |
-| R-2 Creative Layouts | 78 | Secondary | When exploring layouts |
+| R-2 Creative Layouts | 27 | Secondary | When exploring layouts |
 | R-3 Density Dimensions | 51 | DD (Stage 2) | Already applied ~76% |
 | R-4 Axis Innovations | 192 | AD (Stage 4) | Before AD work |
 | R-5 Combination Theory | 39 | CD (Stage 5) | Before CD work |
@@ -64,7 +64,7 @@ exist by design — originals for reference, copies for chain integration.
 | File | Status | Finding Count |
 |------|--------|---------------|
 | `R1-DOCUMENTATION-PATTERNS.md` | ✅ | 28 findings |
-| `R2-CREATIVE-LAYOUTS.md` | ✅ | 78 findings |
+| `R2-CREATIVE-LAYOUTS.md` | ✅ | 27 findings |
 | `R3-DENSITY-DIMENSIONS.md` | ✅ | 51 findings (~76% applied) |
 | `R4-AXIS-INNOVATIONS.md` | ✅ | 192 findings |
 | `R5-COMBINATION-THEORY.md` | ✅ | 39 findings |
@@ -78,7 +78,7 @@ exist by design — originals for reference, copies for chain integration.
 
 ```
 R-1 (28) ──────────────────────────────► OD (Stage 3) PRIMARY
-R-2 (78) ────► Secondary for multiple stages
+R-2 (27) ────► Secondary for multiple stages
 R-3 (51) ──────► DD (Stage 2) PRIMARY (~76% applied)
 R-4 (192) ─────────────────────────────────────────► AD (Stage 4) PRIMARY
 R-5 (39) ──────────────────────────────────────────────────────► CD (Stage 5) PRIMARY

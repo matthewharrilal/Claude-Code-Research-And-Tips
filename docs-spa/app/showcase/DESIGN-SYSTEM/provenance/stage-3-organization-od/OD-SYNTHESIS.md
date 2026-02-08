@@ -17,9 +17,9 @@ were built, each pairing an organizational pattern with a density pattern from D
 The stage consumed HANDOFF-DD-TO-OD (the transition mandate from Stage 2), all 18
 DD-F findings, 21 COMP-F findings, 28 R-1 documentation pattern findings, 39 R-5
 combination theory findings, and bespoke external research (EXT-*) commissioned for
-4 of the 6 ODs. The stage produced 6 HTML exploration artifacts, 8 OD-F findings
-(with a known collision requiring resolution), the organizational-patterns catalog,
-the EXT-RESEARCH-REGISTRY, and HANDOFF-OD-TO-AD.
+4 of the 6 ODs. The stage produced 6 HTML exploration artifacts, 17 OD-F findings
+(13 core pattern findings + 4 categorical: 1 meta-pattern, 1 process, 1 forward-looking, 1 anti-pattern),
+the organizational-patterns catalog, the EXT-RESEARCH-REGISTRY, and HANDOFF-OD-TO-AD.
 
 OD-001 Conversational proved that Q&A structure IS PULSE density -- questions sparse,
 answers dense, the alternation automatic. OD-002 Narrative proved that story arc IS
@@ -73,7 +73,7 @@ Functional (OD-003/004/005), and Editorial (OD-006).
 | OD-004-confidence.html | Exploration artifact | Confidence + GEOLOGICAL/CRESCENDO |
 | OD-005-spatial.html | Exploration artifact | Spatial + WAVE/ISLANDS |
 | OD-006-creative.html | Exploration artifact | Emergent Synthesis + ALL PATTERNS |
-| OD-F-001 through OD-F-008 | Findings | 8 findings (4 from OD-001, 4 from OD-006) |
+| OD-F-001 through OD-F-013 + OD-F-MP-001, OD-F-PR-001, OD-F-FL-001, OD-F-AP-001 | Findings | 17 findings (13 core + 4 categorical) |
 | EXT-RESEARCH-REGISTRY | Research feed files | 4 research feed files for 4 ODs |
 | organizational-patterns.md | Pattern catalog | 6 validated organizational patterns |
 | OD-SYNTHESIS.md | Synthesis | This document |
@@ -188,7 +188,7 @@ is visible to a stranger scrolling through the series. The gap manifests primari
 | 4 | Bespoke research (EXT-*) commissioned for 4 of 6 ODs | OD-001 received creative enrichments; OD-003, OD-004, OD-005 received domain-specific UX research; OD-006 received creative techniques research. Only OD-002 received zero external research. | EXT-* research achieved ~85% application rate vs pre-existing R-1 at ~71%. Bespoke research is higher-leverage. |
 | 5 | OD-002 built without external research | OD-002 Narrative was built using only R-1 and DD sources, making it the only OD without bespoke research. Its score (~33/40) is the lowest alongside OD-003. | Validates that bespoke research correlates with quality. OD-002 has Research Debt RD-1: "Narrative pacing research not yet integrated." |
 | 6 | R-2 Creative Layouts deferred entirely | R-2 has 27 findings at 0% consumption by OD. The organizational stage focused on R-1 (documentation patterns) as primary research. R-2 is reserved for AD (axis) stage. | 27 findings remain untapped. HANDOFF-OD-TO-AD must flag R-2 as mandatory reading. |
-| 7 | OD-F collision (builder-log vs OD-CHECKPOINT) accepted temporarily | builder-log.md defines OD-F-005-009 for OD-002 findings. OD-CHECKPOINT redefines OD-F-005-008 for OD-006 findings. The OD-006 definitions have 10+ downstream citations; the builder-log definitions have 0. | Resolution pending: builder-log OD-002 findings should be renumbered to OD-F-009 through OD-F-013. The OD-CHECKPOINT/OD-006 definitions are canonical. |
+| 7 | OD-F collision (builder-log vs OD-CHECKPOINT) resolved | builder-log.md defined OD-F-005-009 for OD-002 findings. OD-CHECKPOINT defined OD-F-005-008 for OD-006 findings. The OD-006 definitions had 10+ downstream citations; the builder-log definitions had 0. | RESOLVED: Source A (OD-CHECKPOINT) is canonical. builder-log OD-002 findings renumbered to OD-F-009 through OD-F-013 per OD-outbound-findings.md. |
 | 8 | All 6 ODs marked INCLUDE despite quality dialect gap | Every OD demonstrates its organizational hypothesis validly. The dialect gap is a craftsmanship issue, not a validity issue. Each OD adds evidence to the "Organization IS Density" meta-thesis. | All 6 patterns are VALIDATED. The AD stage inherits all 6 organizational patterns as available vocabulary. |
 
 ---
@@ -484,7 +484,8 @@ OD-002 consumed the fewest sources (3 DD files + 2 locked T1 files + OD-001 less
 | Per-OD scores and decisions | OD-CHECKPOINT.md | 47-117 | Innovation/Utility/Soul/Execution breakdown, INCLUDE decisions |
 | OD-F-001 through OD-F-004 | OD-CHECKPOINT.md | 140-157 | OD-001 finding definitions |
 | OD-F-005 through OD-F-008 | OD-CHECKPOINT.md | 149-156 | OD-006 finding definitions (canonical) |
-| OD-F collision | finding-registry.md | 31-61 | builder-log vs OD-CHECKPOINT collision details |
+| OD-F-009 through OD-F-013 | OD-outbound-findings.md | renumbered | OD-002 findings (renumbered from builder-log) |
+| OD-F collision (RESOLVED) | OD-outbound-findings.md | 51-68 | Source A canonical, builder-log renumbered |
 | R3-023/036 collision | finding-registry.md | 65-93 | PIPELINE-MANIFEST mislabeling |
 | Locked token consistency | cross-od-consistency.md | 12-29 | 12/12 PASS across all 6 ODs |
 | Type scale divergences | cross-od-consistency.md | 59-73 | OD-006 uses 3rem vs 2.5rem |

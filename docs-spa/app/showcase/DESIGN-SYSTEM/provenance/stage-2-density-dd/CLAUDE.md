@@ -91,10 +91,10 @@ Look up the DD-F-### in `DD-outbound-findings.md`.
 - Quality bar: 34.5/40 average
 
 ### FEEDS INTO
-- **Stage 3 (OD):** Must consume DD-F-006 (fractal) for ALL explorations
+- **Stage 3 (OD):** CONSUMED DD-F-006 (fractal) in all 6 explorations (verified). DD-F-012 (density implies axis) combined with OD-F-005 (Organization IS Density) to establish the transitive chain: organizational patterns imply axis preferences.
 - **Stage 4 (AD):** Must consume DD-F-012 (density implies axis)
 - **Stage 5 (CD):** Must consume DD-F-013 (component density tolerance)
-- **Migration:** Must pair org patterns with density patterns
+- **Migration:** Org patterns now validated (organizational-patterns.md) and paired with density patterns
 
 ### WHAT WOULD BREAK IF THIS DIDN'T EXIST
 - OD would explore organization without density vocabulary
