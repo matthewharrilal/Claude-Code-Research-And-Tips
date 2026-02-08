@@ -113,10 +113,10 @@ Let me trace ONE finding through the entire chain to show how provenance works:
 - Status: APPLIED, EXEMPLARY
 
 **Stage 3 (OD):**
-- Location: `stage-2-density-dd/HANDOFF-DD-TO-OD.md`
+- Location: `stage-3-organization-od/OD-outbound-findings.md`, `stage-3-organization-od/OD-SYNTHESIS.md`
 - Constraint: DD-F-006 is MANDATORY for all OD explorations
-- OD-001 through OD-006 must apply fractal self-similarity
-- Status: PENDING (OD not started)
+- OD-001 through OD-006 applied fractal self-similarity
+- Status: COMPLETE — applied in all 6 OD explorations, verified in 17-agent adversarial audit (89 findings, 0 soul violations)
 
 **Stage 4 (AD):**
 - Will consume DD-F-006 through OD
@@ -136,5 +136,53 @@ Let me trace ONE finding through the entire chain to show how provenance works:
 **THIS is how the chain works.** One finding, accumulated through every stage.
 When you apply DD-F-006, you're not just applying a pattern — you're applying
 the accumulated research behind it.
+
+═══════════════════════════════════════════════════════════════════════════════
+## 6. THE THREE LAYERS OF PROVENANCE
+═══════════════════════════════════════════════════════════════════════════════
+
+Provenance in this system operates at three distinct layers:
+
+### Layer 1: Inline Threading Headers (490 files)
+Per-file metadata embedded in comments at the top of every source file.
+Sections: WHY THIS EXISTS, STATUS, BUILT ON (dependencies), CONSUMED BY (consumers).
+Every source file is a node in a traversal graph. Created in Phase 2B.
+
+### Layer 2: Light Provenance Sections (244 files)
+Lighter metadata linking files to their parent phase and T1 synthesis.
+Acts as a bridge between the distributed per-file graph and the formal chain.
+Created in Phase 2D.
+
+### Layer 3: Formal Chain Documents (this directory)
+Curated narrative documents per pipeline stage:
+- **STAGE-HEADER** — What the stage did
+- **outbound-findings** — Formal finding declarations (e.g., OD-F-001 through OD-F-013)
+- **SYNTHESIS** — Cross-exploration analysis
+- **AUDIT-SYNTHESIS** — Quality gate results
+- **HANDOFF** — Briefing for the next stage
+- **RESEARCH-GATE** — Research filtering decisions
+
+**How they relate:** Inline headers are the distributed dependency graph (who
+depends on whom). Formal chain documents are the authoritative narrative (what
+happened, why, what it means). Light sections are the bridge connecting
+individual files to the larger story.
+
+**Zoom levels:** Pipeline (BACKBONE.md) -> Stage (STAGE-HEADER) -> Finding
+(outbound-findings) -> File (inline headers) -> Forward guidance (HANDOFF)
+
+═══════════════════════════════════════════════════════════════════════════════
+## 7. ACCUMULATED IDENTITY
+═══════════════════════════════════════════════════════════════════════════════
+
+Each pipeline stage inherits ALL prior soul pieces, findings, constraints, and
+decisions from every preceding stage. This accumulated context is formalized in
+`ACCUMULATED-IDENTITY-v1.md` (539 lines), which lives at the pipeline level.
+
+- AD must consume ACCUMULATED-IDENTITY-v1.md and produce v2
+- CD must consume v2 and produce v3
+- The identity grows with each stage — it never shrinks
+
+This ensures no stage works in isolation. Every decision carries the full
+weight of prior research.
 
 ═══════════════════════════════════════════════════════════════════════════════

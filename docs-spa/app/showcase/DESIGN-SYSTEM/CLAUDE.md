@@ -88,7 +88,7 @@ This is NOT a component library. It's a system with:
 | Apply a pattern | `patterns/PATTERN-INDEX.md` |
 | Look up token values | `tokens/*.md` |
 | Trace a finding | `provenance/PIPELINE-MANIFEST.md` |
-| Start OD work | `provenance/stage-2-density-dd/HANDOFF-DD-TO-OD.md` |
+| Start AD work | `provenance/stage-3-organization-od/HANDOFF-OD-TO-AD.md` |
 | Understand components | `components/OVERVIEW.md` |
 | Avoid anti-patterns | `anti-patterns/registry.md` |
 | Migrate a page | `guides/migration-guide.md` |
@@ -103,11 +103,11 @@ This is NOT a component library. It's a system with:
 | `BACKBONE.md` | ✅ | Master narrative of the pipeline |
 | `QUICK-START.md` | ✅ | Quick reference |
 | `tokens/` | ✅ | Locked design values |
-| `patterns/` | ✅ | Validated rhythms (density complete, org pending) |
+| `patterns/` | ✅ | Validated rhythms (density complete, org complete) |
 | `components/` | ✅ | Component specifications |
 | `anti-patterns/` | ✅ | What to avoid |
 | `guides/` | ✅ | Migration and usage guides |
-| `provenance/` | ✅ | **The research chain** |
+| `provenance/` | ✅ | **The research chain** — 3-layer architecture: inline headers (490 files), light sections (244 files), formal chain documents |
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## 4. HOW THIS CONNECTS

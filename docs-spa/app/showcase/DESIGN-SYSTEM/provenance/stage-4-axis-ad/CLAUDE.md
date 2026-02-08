@@ -16,7 +16,7 @@ ACTIVE (as placeholder navigation — AD work itself is PENDING)
 5. BUILT ON
 | Dependency                                          | Relationship                              |
 |-----------------------------------------------------|-------------------------------------------|
-| HANDOFF-OD-TO-AD.md (not yet created)               | Mandatory first-read referenced in HOW TO READ |
+| HANDOFF-OD-TO-AD.md                                 | Mandatory first-read referenced in HOW TO READ |
 | original-research/R4-AXIS-INNOVATIONS.md            | Primary research referenced in HOW TO READ |
 | DD-F-012                                            | Key constraint: axis serves density pattern |
 
@@ -38,11 +38,12 @@ END INLINE THREADING HEADER
 
 **DO NOT begin AD work until ALL conditions are met:**
 
-1. `../stage-3-organization-od/HANDOFF-OD-TO-AD.md` EXISTS and has been read completely
-2. `../stage-3-organization-od/OD-outbound-findings.md` EXISTS and all 17 OD-F findings acknowledged (OD-F-001 through OD-F-013, OD-F-MP-001, OD-F-PR-001, OD-F-FL-001, OD-F-AP-001)
+1. `../stage-3-organization-od/HANDOFF-OD-TO-AD.md` EXISTS and has been read completely -- SATISFIED
+2. `../stage-3-organization-od/OD-outbound-findings.md` EXISTS and all 17 OD-F findings acknowledged (OD-F-001 through OD-F-013, OD-F-MP-001, OD-F-PR-001, OD-F-FL-001, OD-F-AP-001) -- SATISFIED
 3. `../original-research/R4-AXIS-INNOVATIONS.md` (R-4 primary research) loaded
 4. R-2 Creative Layouts (27 findings at 0% OD consumption) explicitly evaluated for AD applicability
 5. OD-F-FL-001 (org implies axis) transitive chain understood: org->density->axis
+6. `../ACCUMULATED-IDENTITY-v1.md` loaded (539 lines — full accumulated soul, findings, constraints from all prior stages)
 
 **If ANY condition is NOT met, STOP. Do not proceed.**
 
@@ -62,8 +63,9 @@ END INLINE THREADING HEADER
 
 When AD begins:
 1. Read `../stage-3-organization-od/HANDOFF-OD-TO-AD.md` — **MANDATORY**
-2. Read `STAGE-HEADER.md` — What AD will do
-3. Read `../original-research/R4-AXIS-INNOVATIONS.md` — PRIMARY research
+2. Read `../ACCUMULATED-IDENTITY-v1.md` — **MANDATORY** (full accumulated context from all prior stages)
+3. Read `STAGE-HEADER.md` — What AD will do
+4. Read `../original-research/R4-AXIS-INNOVATIONS.md` — PRIMARY research
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## 3. WHAT'S HERE

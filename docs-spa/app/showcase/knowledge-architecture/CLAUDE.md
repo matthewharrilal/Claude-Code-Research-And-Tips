@@ -34,13 +34,29 @@ This folder contains the meta-documentation for the KORTAI design system's knowl
 
 ## What This Folder Contains
 
-6 documents about the design system's **provenance chain**, including:
+Core documents about the design system's **provenance chain**, including:
 - **Phase 1B Mega Debrief** — Complete analysis of 463 file connections
-- **Pipeline Backbone** — The Research → T1 → DD → OD → AD → CD flow
+- **Pipeline Backbone** — The Research -> T1 -> DD -> OD -> AD -> CD flow
 - **Source of Truth Registry** — What's authoritative for what
 - **KA Decision Documents** — Why we structured things this way
+- **OD Granular Audit Results** — 89 findings from 17-agent adversarial audit
+- **Workflow Metacognition Analysis** — Deep analysis of agent team workflows
+- **OD Audit Retrospective and Protocol v3** — Lessons learned and protocol evolution
+- **OD Fix Execution Prompt** — Agent team prompt for fix execution phase
+- **Provenance Chain Remediation Handoff** — Handoff for provenance gap remediation
+- **Provenance Comprehension Prompt** — Agent team prompt for chain analysis
+- **Provenance Remediation Plan Prompt** — Agent team prompt for plan revision
+
+Subdirectories with working artifacts:
+- `_od-audit-scratchpad/` — 22 files from 17-agent audit (per-agent reports, screenshots)
+- `_provenance-gap-analysis/` — Gap analysis and remediation artifacts
+- `_provenance-deep-dive/` — 9 files from deep provenance analysis teams
+- `_workflow-metacognition/` — 9 files from workflow analysis agents
+- `_remediation/` — Remediation execution artifacts
 
 This is where you go to understand the SYSTEM, not the DESIGN.
+
+**Provenance architecture:** 3-layer system — inline threading headers (490 files), light sections (244 files), and formal chain documents (in DESIGN-SYSTEM/provenance/).
 
 ## Why This Exists
 
@@ -120,6 +136,7 @@ Note: `dependency-trace/` is a sibling directory at `../dependency-trace/`, not 
 ## For Context Recovery
 
 **Phase 1B status:** COMPLETE (463 files traced, 76% T1 reachable)
-**Phase 2A status:** Part 1 COMPLETE, Part 2 COMPLETE, Part 3 IN PROGRESS
+**Phase 2A status:** Part 1 COMPLETE, Part 2 COMPLETE, Part 3 COMPLETE
 **What to check:** `../dependency-trace/PHASE-2A-CLASSIFICATION.md` for current state
+**OD Provenance Chain Remediation:** COMPLETE (94/104 verification items pass, 17 OD-F findings, 47 EXT-* findings)
 **Read first:** `PIPELINE-BACKBONE.md` to understand where you are
