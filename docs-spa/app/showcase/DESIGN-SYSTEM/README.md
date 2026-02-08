@@ -46,14 +46,14 @@ the 5 soul pieces into reasoning, examples, and transferable understanding:
 - SP#5 Squares Signal System — Connected to the broader sharp-edges
   identity at the element level (checkboxes, borders).
 - The file bridges soul pieces to their causal chains: COMP findings →
-  DD findings → OD findings (hypothetical) → AD → CD → migration.
+  DD findings → OD findings → AD → CD → migration.
 
 5. BUILT ON
 | Source | Role | Key Values | Path |
 |--------|------|------------|------|
 | COMP-F-001 through COMP-F-008 | Component-level findings | Soul pieces, locked tokens | perceptual-audit-v2/synthesis/ (via findings) |
 | DD-F-001 through DD-F-018 | Density exploration findings | Fractal self-similarity, CRESCENDO/STACCATO/LEGATO patterns | showcase/explorations/density/ (via findings) |
-| OD-F-007/008/009 | HYPOTHETICAL organizational findings | Illustrative examples only — these do not represent completed work | N/A (hypothetical) |
+| OD-F-001 through OD-F-013, OD-F-MP-001 | OD outbound findings | 17 organizational findings (organization IS density, transitive chain, 2px epidemic) | provenance/stage-3-organization-od/OD-outbound-findings.md |
 | R1 findings | Documentation pattern research | Content structure insights | showcase/research/R1-DOCUMENTATION-PATTERNS.md |
 | R3 findings | Density dimension research | Density analysis framework | showcase/research/R3-DENSITY-DIMENSIONS.md |
 | R5 findings | Combination theory research | Multi-pattern interaction | showcase/research/R5-COMBINATION-THEORY.md |
@@ -67,7 +67,7 @@ the 5 soul pieces into reasoning, examples, and transferable understanding:
 6. MUST HONOR
 | Constraint | Source | Consequence of Violation |
 |------------|--------|--------------------------|
-| OD-F-007/008/009 are HYPOTHETICAL | Internal caveat (this file) | Treating these as completed work misrepresents system state |
+| OD findings are REAL; doc body examples are ILLUSTRATIVE | Internal caveat (this file) | The doc body (Parts I-IX) was written pre-OD and uses OD-F-007/008/009 as illustrative examples. Real OD-F findings (17 total) live in OD-outbound-findings.md |
 | Discovery-based, not decision-based | Core philosophy (Part I) | Framing soul pieces as arbitrary choices destroys provenance reasoning |
 | 5-stage pipeline order (T1→DD→OD→AD→CD) | Part II | Breaking stage ordering invalidates compounding research model |
 | Provenance chain = causal chain, not documentation | Part I, line ~161 | Reducing provenance to "nice documentation" misses the entire point |
@@ -106,16 +106,18 @@ the 5 soul pieces into reasoning, examples, and transferable understanding:
 | Future OD/AD/CD stages | Must absorb as part of mandatory research gate before producing any exploration |
 
 9. RESEARCH DEBT
-- OD-F-007/008/009 are hypothetical examples used to illustrate the
-  compounding pipeline. When actual OD work is completed, these examples
-  should be validated or replaced with real finding IDs.
+- RESOLVED: OD is COMPLETE. OD-F-007/008/009 in the doc body (Parts III-IX)
+  are pre-OD illustrative examples. Real OD findings (17 total: OD-F-001
+  through OD-F-013, OD-F-MP-001, OD-F-PR-001, OD-F-FL-001, OD-F-AP-001)
+  are documented in provenance/stage-3-organization-od/OD-outbound-findings.md.
 - Part IX (Retroactive Bridge) execution sequences are now partially
   implemented via Phase 2B inline sections (7 of 10 structures exist).
   Remaining: Question Generator formalization, HANDOFF documents for
-  stages 3-5, CONSUMPTION-RECEIPT files.
-- The interception framework (Part V) and sub-agent paradigm describe
-  4 sub-agent types and 3 dimensions but these have not been exercised
-  in production OD work yet.
+  stages 4-5, CONSUMPTION-RECEIPT files.
+- The interception framework (Part V) sub-agent paradigm was exercised
+  during OD via multi-agent teams (17-agent adversarial audit, 7-agent
+  fix execution). The 4 sub-agent types and 3 dimensions model in Part V
+  is conceptually validated but the specific templates remain untested.
 - Reproduction methodology (Part VI) has not been tested by an
   independent team — it is theoretically sound but empirically unproven.
 
@@ -138,6 +140,8 @@ Q5: Does DESIGN-SYSTEM/CLAUDE.md's summary of this document accurately
 # 🚀 START HERE: THE KORTAI DESIGN MIND
 
 ## A Reference Document for Understanding, Digesting, and Thinking With This Design System
+
+> **What is KortAI?** KortAI is an AI-powered knowledge platform. This design system was extracted from its existing codebase through perceptual auditing -- discovering what the product's visual identity was already communicating, rather than imposing external decisions. The domain (knowledge, precision, authority) shapes every design decision documented here.
 
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -165,6 +169,11 @@ Q5: Does DESIGN-SYSTEM/CLAUDE.md's summary of this document accurately
 4. Skim PART IV-VIII — Get a sense of operations
 **After:** You understand the DESIGN-MIND. You're ready for specific tasks.
 
+**Next Steps After Mode 1:**
+- For building: Read `BACKBONE.md` → relevant stage `CLAUDE.md`
+- For understanding provenance in practice: Read `provenance/CLAUDE.md` (includes R3-023 chain walkthrough)
+- For understanding accumulated context: Read `ACCUMULATED-IDENTITY-v1.md` (539 lines of inherited soul, findings, constraints)
+
 ### Mode 2: TASK EXECUTION (Reference → Action)
 **You are:** Building an exploration, need operational guidance
 **Time:** 15-20 minutes per task
@@ -172,17 +181,18 @@ Q5: Does DESIGN-SYSTEM/CLAUDE.md's summary of this document accurately
 
 | If You're Doing... | Start Here | Then Go To |
 |--------------------|------------|------------|
-| Building an OD exploration | PART IV: Digestion | RESEARCH-ACTIVATION-OD.md |
+| Building an OD exploration (COMPLETE) | PART IV: Digestion | OD-SYNTHESIS.md + OD-outbound-findings.md |
 | Understanding why a pattern exists | PART III: Backward Traversal | Pattern's DERIVATION CHAIN |
 | Figuring out what to consume | PART III: Forward Traversal | HANDOFF-[FROM]-TO-[TO].md |
 | Deploying sub-agents | PART V: Interception | Sub-agent prompt templates |
+| Building an AD exploration | PART IV: Digestion | stage-4-axis-ad/CLAUDE.md → HANDOFF-OD-TO-AD.md → ACCUMULATED-IDENTITY-v1.md |
 | Creating retroactive updates | PART IX: Retroactive Bridge | Retroactive Update Checklist |
 
 ### Mode 3: CONTEXT RECOVERY (Reset → Reorientation)
 **You are:** Returning after context loss, need to re-ground
 **Time:** 5-10 minutes
 **Path:**
-1. Read FOLDER-MAP.md — Understand codebase structure, find current phase
+1. Read DESIGN-SYSTEM/CLAUDE.md — Understand system structure and navigation
 2. Read the **inline threading section** of your target file — Extract constraints, dependencies, blast radius
 3. Read BACKBONE.md — Current state snapshot
 4. Read this document's PART II — Refresh pipeline understanding
@@ -252,6 +262,27 @@ Every PART follows this internal structure:
 
 ---
 
+## Glossary
+
+| Term | Meaning |
+|------|---------|
+| DD | Density Dimensions -- Stage 2 (visual rhythm patterns) |
+| OD | Organizational Dimensions -- Stage 3 (cognitive flow patterns) |
+| AD | Axis Dimensions -- Stage 4 (spatial layout geometry) |
+| CD | Combination Dimensions -- Stage 5 (multi-pattern interaction) |
+| COMP-F | Component Finding (Stage 1 output) |
+| DD-F / OD-F / AD-F | Stage-specific outbound findings |
+| R-1 through R-5 | Research streams: Documentation Patterns, Creative Layouts, Density Dimensions, Axis Innovations, Combination Theory |
+| T1 | Primary synthesis documents (crown jewels in perceptual-audit-v2/synthesis/) |
+| CRESCENDO | Density pattern: sparse-to-dense build (narrative arc) |
+| PULSE | Density pattern: rhythmic dense/sparse alternation (Q&A) |
+| ISLANDS | Density pattern: dense clusters in sparse space (task groups) |
+| GEOLOGICAL | Density pattern: horizontal strata layers (confidence tiers) |
+| TIDAL / WAVE | Density pattern: flowing width variation (spatial mapping) |
+| FRACTAL | Density pattern: self-similarity at all scales (highest-scoring) |
+
+---
+
 ## If You Get Lost
 
 At any point, ask yourself:
@@ -299,7 +330,7 @@ And then that evidence became fuel.
 
 DD didn't just know "border radius is 0" as a rule to follow. DD consumed COMP-F-001 (the finding that sharp edges = authority = precision) as a validated input, and every DD exploration was built with that finding active — verified every iteration, not assumed. When DD-006 scored 36/40 on fractal self-similarity, part of why it scored that high is because the sharp edges at the page level mirrored the sharp edges at the component level mirrored the sharp edges at the element level. The fractal principle WORKED because the soul piece was consistent across scales.
 
-That's not two markdown files sitting next to each other. That's a **CAUSAL CHAIN**. COMP-F-001 enabled DD-006's high score. DD-006's high score validated the fractal principle. The fractal principle became DD-F-006 (an outbound finding). DD-F-006 flows into OD's research gate as a mandatory input. OD will build explorations that apply fractal self-similarity to cognitive flow. If those OD explorations score well, that validates the principle AGAIN at a new level. And that validated principle becomes a constraint for AD, then CD, then migration.
+That's not two markdown files sitting next to each other. That's a **CAUSAL CHAIN**. COMP-F-001 enabled DD-006's high score. DD-006's high score validated the fractal principle. The fractal principle became DD-F-006 (an outbound finding). DD-F-006 flowed into OD's research gate as a mandatory input. OD built 6 explorations that applied fractal self-similarity to cognitive flow, and the meta-discovery OD-F-005 revealed that organization IS density -- organizational patterns and density patterns are the SAME phenomenon observed from two perspectives. Those OD explorations scored well, validating the principle AGAIN at a new level. And that validated principle becomes a constraint for AD, then CD, then migration.
 
 The muscle, tissue, and blood is that causal chain — the compounding research pipeline where every stage consumes everything before it and generates new knowledge for everything after it. The chain doesn't just accumulate. It compounds.
 
@@ -342,12 +373,12 @@ The design system was built through a 5-stage research pipeline. Each stage has 
 
 Before each stage, a **Research Activation Table** maps which prior findings apply to which exploration:
 
-| ID | Finding Summary | OD-001 | OD-002 | OD-003 | OD-004 | Activation Notes |
-|----|-----------------|--------|--------|--------|--------|------------------|
-| R1-007 | Q&A format reduces cognitive load | ✓ | | | | Conversational = PULSE density |
-| R1-015 | Task-based organization outperforms feature-based | | | ✓ | | Task clustering primary |
-| DD-F-003 | ISLANDS: clusters surrounded by sparse space | | | ✓ | | Spacing between clusters |
-| DD-F-006 | Fractal self-similarity at all scales | ✓ | ✓ | ✓ | ✓ | ALL explorations — non-negotiable |
+| ID | Finding Summary | OD-001 | OD-002 | OD-003 | OD-004 | OD-005 | OD-006 | Activation Notes |
+|----|-----------------|--------|--------|--------|--------|--------|--------|------------------|
+| R1-007 | Q&A format reduces cognitive load | ✓ | | | | | ✓ | Conversational = PULSE density |
+| R1-015 | Task-based organization outperforms feature-based | | | ✓ | | | ✓ | Task clustering primary |
+| DD-F-003 | ISLANDS: clusters surrounded by sparse space | | | ✓ | | ✓ | ✓ | Spacing between clusters |
+| DD-F-006 | Fractal self-similarity at all scales | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ALL explorations — non-negotiable |
 
 ⬇️ After reading your column → Go to EXPLORATION-PROTOCOL-[PHASE].md
 
@@ -395,7 +426,7 @@ Questions don't disappear — they ACCUMULATE and FORWARD until answered:
   - GEOLOGICAL (strata layers) — DD-004, 35/40
   - TIDAL (river flow) — DD-005, 36/40
   - FRACTAL (self-similarity) — DD-006, 36/40 ★★ BEST
-- 12+ DD outbound findings (DD-F-001 through DD-F-[N]) — insights generated DURING DD that apply to OD, AD, CD, and migration
+- 18 DD outbound findings (DD-F-001 through DD-F-018) — insights generated DURING DD that apply to OD, AD, CD, and migration
 - The quality bar: 34.5/40 average. Future stages must meet this.
 - DD-001/003 scored lowest — those iteration lessons carry forward
 
@@ -403,21 +434,41 @@ Questions don't disappear — they ACCUMULATE and FORWARD until answered:
 
 **Why it matters:** DD proved that the soul pieces work under pressure. Sharp edges at every scale (fractal) produced the highest scores. This validated the soul pieces as UNIVERSAL principles, not just component-level rules. DD also established that density is a CONSTRAINT for all future stages — organizational patterns, axis patterns, and combination patterns all operate within the density vocabulary established here.
 
-### Stage 3 — Organization (OD) — IN PROGRESS
+### Stage 3 — Organization (OD) — COMPLETE
 
-**What it will do:** Build 6 organizational explorations testing how information should be sequenced, grouped, and cognitively navigated. Patterns like CONVERSATIONAL, NARRATIVE ARC, TASK-BASED, CONFIDENCE-BASED, SPATIAL/MAP, CREATIVE.
+**What it did:** Built 6 organizational explorations testing how information should be sequenced, grouped, and cognitively navigated:
+  - **CONVERSATIONAL** (Q&A) — OD-001: Natural PULSE generator via width variation (~35/40)
+  - **NARRATIVE ARC** (storytelling) — OD-002: CRESCENDO through progressive revelation
+  - **TASK-BASED** (action clusters) — OD-003: ISLANDS via task grouping
+  - **CONFIDENCE-BASED** (certainty strata) — OD-004: GEOLOGICAL through confidence tiers
+  - **SPATIAL/MAP** (geographic navigation) — OD-005: WAVE through spatial flow
+  - **CREATIVE** (meta-documentation) — OD-006: Crown jewel -- demonstrated all 5 patterns, proved OD-F-005
 
-**What it consumes:** ALL of Stage 1's output (soul pieces, component findings), ALL of Stage 2's output (density patterns AS CONSTRAINTS — you don't choose a density pattern during OD, you build WITHIN the density vocabulary already established), ALL DD outbound findings, plus R-1 Documentation Patterns (PRIMARY — this is where R-1's 337 findings finally get applied after being <3% utilized through DD).
+**What it consumed:** ALL of Stage 1's output (soul pieces, component findings), ALL of Stage 2's output (density patterns AS CONSTRAINTS -- you don't choose a density pattern during OD, you build WITHIN the density vocabulary already established), ALL 18 DD outbound findings (100% consumed), plus R-1 Documentation Patterns (PRIMARY -- 28 findings, ~71% application rate).
 
-**⬇️ Forward:** OD findings flow to AD and CD. Questions OD can't answer forward to AD.
+**What it produced:**
+- 6 validated organizational patterns with density identities:
+  - Conversational = PULSE, Narrative = CRESCENDO, Task = ISLANDS, Confidence = GEOLOGICAL, Spatial = WAVE
+- 17 OD outbound findings (OD-F-001 through OD-F-013, OD-F-MP-001, OD-F-PR-001, OD-F-FL-001, OD-F-AP-001)
+- HANDOFF-OD-TO-AD.md (mandatory gate for Stage 4)
+- OD-SYNTHESIS.md (514 lines, cross-OD analysis)
+- OD-AUDIT-SYNTHESIS.md (388 lines, quality gate record)
+- EXT-RESEARCH-REGISTRY.md (244 lines, external research registry)
+- organizational-patterns.md (383 lines, validated pattern definitions)
 
-**What it will produce:** 6 validated organizational patterns, OD outbound findings, HANDOFF-OD-TO-AD.md, and the critical insight of how cognitive flow interacts with density.
+**Quality:** 17-agent adversarial audit produced 89 findings. 16 fixes applied. 0 soul violations across all 6 explorations and 3,479+ elements.
 
-### Stage 4 — Axis (AD) — FUTURE
+**Crown jewel: OD-F-005 / OD-F-MP-001 -- Organization IS Density.** The organizational pattern does not "create" density -- it IS density. Same phenomenon, two perspectives. When the organizational mode shifts, density shifts automatically with zero explicit manipulation. This elevates DD-F-010 from a constraint to an identity.
 
-**What it will consume:** ALL prior stages' output + R-2 Creative Layouts + R-4 Axis Innovations
+**The transitive chain (OD-F-FL-001):** org -> density -> axis. When you choose an axis layout, you are simultaneously choosing an organizational-density configuration. The three cannot be separated.
 
-**What it will produce:** Spatial layout geometry patterns, axis outbound findings
+**⬇️ Forward:** 17 OD-F findings flow to AD and CD. HANDOFF-OD-TO-AD.md gates Stage 4 entry. R-2 Creative Layouts (27 findings at 0% OD consumption) must be evaluated for AD.
+
+### Stage 4 — Axis (AD) — PENDING
+
+**What it will consume:** ALL prior stages' output + R-2 Creative Layouts (27 findings, 0% consumed by OD) + R-4 Axis Innovations (192 findings). HANDOFF-OD-TO-AD.md exists with mandatory enforcement gate (6 preconditions). ACCUMULATED-IDENTITY-v1.md (539 lines) carries all prior soul, findings, and constraints.
+
+**What it will produce:** Spatial layout geometry patterns, axis outbound findings, ACCUMULATED-IDENTITY-v2.md
 
 ### Stage 5 — Combination (CD) — FUTURE
 
@@ -430,9 +481,11 @@ Questions don't disappear — they ACCUMULATE and FORWARD until answered:
 This compounding is what makes this design system different from one that was decided top-down. Each stage doesn't just pass one thing forward. It passes forward EVERYTHING it received plus EVERYTHING it generated.
 
 Stage 1 produced 5 soul pieces and 8 findings.
-Stage 2 consumed all 13 of those, plus R-3, and produced 6 patterns and 12+ findings.
-Stage 3 consumes all 31+ of those, plus R-1, and will produce patterns and findings.
+Stage 2 consumed all 13 of those, plus R-3, and produced 6 patterns and 18 findings.
+Stage 3 consumed all 31 of those, plus R-1 (28 findings, ~71% applied), and produced 6 patterns and 17 findings.
 By Stage 5, the research gate will reference 100+ findings across all stages.
+
+The accumulated state is formalized in `ACCUMULATED-IDENTITY-v1.md` (539 lines), which carries ALL prior soul pieces, findings, constraints, and decisions forward as a single inheritable document. Each stage inherits this identity and produces the next version.
 
 This is why the provenance chain matters. Without it, Stage 5 would only know its immediate predecessor (CD inherits from AD). With it, Stage 5 can trace ANY finding back through the entire pipeline to its origin. The chain makes the compounding VISIBLE and NAVIGABLE.
 
@@ -487,19 +540,30 @@ The provenance chain makes the connection VISIBLE — not in prose, not in a nar
 
 The provenance chain operates through seven concrete structures. Each has an exact format. Each serves a specific transmission purpose.
 
-> ### How Inline Sections Embody the Seven Structures
+> **Note on template examples:** The templates below use illustrative finding IDs (OD-F-007, OD-F-008, OD-F-009) to demonstrate the FORMAT of each structure. These were written as hypothetical examples before OD was completed. The actual OD findings (17 total: OD-F-001 through OD-F-013, plus OD-F-MP-001, OD-F-PR-001, OD-F-FL-001, OD-F-AP-001) are documented in `provenance/stage-3-organization-od/OD-outbound-findings.md`. The templates remain valid as FORMAT specifications.
+
+> ### The 3-Layer Provenance Architecture
 >
-> As of Phase 2B (2026-02-06), 253 files have **inline threading sections** that EMBODY the seven structures described below. Rather than creating separate provenance files, the provenance is embedded IN each file.
+> The provenance chain is implemented through **three complementary layers**, each serving a different scope and purpose:
+>
+> | Layer | What It Is | Scope | Files |
+> |-------|-----------|-------|-------|
+> | **Layer 1: Inline Threading Headers** | Machine-readable metadata embedded in each file (HTML/block comments) | Per-file | 246 files (Phase 2B) |
+> | **Layer 2: Light Provenance Sections** | Human-readable provenance context after the inline header | Per-file | 244 files (Phase 2D) |
+> | **Layer 3: Formal Chain Documents** | Standalone provenance files (STAGE-HEADERs, HANDOFFs, outbound findings, synthesis) | Per-stage | provenance/ directory |
+>
+> **490 files** across the codebase now carry provenance metadata (Layers 1 + 2). Layer 3 provides the cross-stage connective tissue.
 >
 > **What this means for you:**
-> - To find **Research Activation:** Read the BUILT ON table in your target file's inline section
-> - To trace **Derivation:** Follow the BUILT ON chain backward through inline sections
-> - To understand **Constraints:** Read the MUST HONOR section in the inline section
-> - To see **Consumers:** Read the CONSUMED BY table in the inline section
-> - To find **Research Debt:** Read the RESEARCH DEBT section (Tier A files)
-> - To **verify before modifying:** Answer the DIAGNOSTIC QUESTIONS
+> - To find **Research Activation:** Read the BUILT ON table in your target file's inline section (Layer 1)
+> - To trace **Derivation:** Follow the BUILT ON chain backward through inline sections (Layer 1)
+> - To understand **Constraints:** Read the MUST HONOR section in the inline section (Layer 1, Tier A/B files)
+> - To see **Consumers:** Read the CONSUMED BY table in the inline section (Layer 1)
+> - To understand **stage context:** Read the light provenance section after the inline header (Layer 2)
+> - To trace **cross-stage flow:** Read HANDOFF and outbound-findings documents (Layer 3)
+> - To **verify before modifying:** Answer the DIAGNOSTIC QUESTIONS (Layer 1, Tier A/B files)
 >
-> The structures below remain the **SPECIFICATION**. The inline sections are the **IMPLEMENTATION**. Understanding the structures helps you understand what the inline sections contain and why.
+> The seven structures below remain the **SPECIFICATION**. The 3 layers are the **IMPLEMENTATION**. Understanding the structures helps you understand what the layers contain and why.
 
 ### Structure 1: Research Activation Table
 
@@ -538,7 +602,7 @@ The provenance chain operates through seven concrete structures. Each has an exa
 - No way to verify "did they actually read the research?"
 ```
 
-**RETROACTIVE UPDATE:** Create RESEARCH-ACTIVATION-DD.md, RESEARCH-ACTIVATION-OD.md
+**STATUS:** ✅ Research activation is now implemented via inline BUILT ON sections (Layer 1) in all DD and OD files. Standalone activation matrix files are optional supplements.
 
 ---
 
@@ -587,7 +651,7 @@ CRESCENDO (progressive density builds)
 - Future work can accidentally violate the logic
 ```
 
-**RETROACTIVE UPDATE:** Add DERIVATION CHAIN section to every pattern
+**STATUS:** ⏳ Derivation chains are partially implemented via inline BUILT ON sections (Layer 1). Formal narrative derivation chains in pattern descriptions are still needed for density-patterns.md and organizational-patterns.md.
 
 ---
 
@@ -623,7 +687,7 @@ Every OD exploration pairs with a DD density pattern:
 ### Step 3: Load Your Soul Constraints (1 min)
 All 5 soul pieces verified EVERY iteration. No exceptions.
 - #1 Sharp Edges (border-radius: 0)
-- #2 Archivist Serif (Cormorant Garamond for wisdom display)
+- #2 Archivist Serif (Instrument Serif for wisdom display)
 - #3 2-Zone Callout (family structure header/body)
 - #4 No Shadows (light as information, not decoration)
 - #5 Squares (square indicators, not circles)
@@ -686,7 +750,7 @@ For OD-003 (Task-Based), the research tells you to explore:
 - Exploration is isolated, not part of the chain
 ```
 
-**RETROACTIVE UPDATE:** Create EXPLORATION-PROTOCOL-OD.md
+**STATUS:** ✅ OD Execution Protocol v2.0 exists in `provenance/stage-3-organization-od/`. OD phase is COMPLETE with 6 explorations built and audited.
 
 ---
 
@@ -726,7 +790,7 @@ For OD-003 (Task-Based), the research tells you to explore:
 | Piece | What I Checked | Result | Evidence |
 |-------|---------------|--------|----------|
 | #1 Sharp Edges | border-radius: 0 everywhere | ✅ PASS | CSS lines 12, 34, 56 |
-| #2 Archivist Serif | Cormorant Garamond for wisdom text | ✅ PASS | Typography section |
+| #2 Archivist Serif | Instrument Serif for wisdom text | ✅ PASS | Typography section |
 | #3 2-Zone Callout | Family structure (header + body) | ✅ PASS | Callout components |
 | #4 No Shadows | box-shadow: none everywhere | ✅ PASS | CSS audit complete |
 | #5 Squares | Square indicators, not circles | ✅ PASS | Icon audit complete |
@@ -769,7 +833,7 @@ For OD-003 (Task-Based), the research tells you to explore:
 - Future stages can't trust what was "consumed"
 ```
 
-**RETROACTIVE UPDATE:** Create CONSUMPTION-RECEIPT for DD-001 through DD-006
+**STATUS:** ✅ Consumption tracking is now implemented via inline CONSUMED BY sections (Layer 1) in all DD and OD files.
 
 ---
 
@@ -840,7 +904,7 @@ When a question is assigned:
 - No accountability for what's NOT been explored
 ```
 
-**RETROACTIVE UPDATE:** Add QUESTIONS section to PIPELINE-MANIFEST.md
+**STATUS:** ⏳ Partial — RESEARCH DEBT sections in inline headers capture known gaps. Formal per-stage question inheritance in PIPELINE-MANIFEST.md is still needed.
 
 ---
 
@@ -953,7 +1017,7 @@ These DD constraints were NOT "used up" — they still apply to future stages:
 - Same mistakes repeated — no iteration lessons captured
 ```
 
-**RETROACTIVE UPDATE:** Run REFLECTION-PROTOCOL retroactively on DD-001 through DD-006
+**STATUS:** ✅ Reflection is partially implemented via DIAGNOSTIC QUESTIONS in inline sections (Layer 1). OD phase completed full reflection via OD-SYNTHESIS.md and OD-AUDIT-SYNTHESIS.md.
 
 ---
 
@@ -1022,7 +1086,7 @@ Lesson: Rhythm-based patterns (PULSE) and spatial patterns (ISLANDS) need more i
 - No strengths/weaknesses — future stages can't learn from my experience
 ```
 
-**RETROACTIVE UPDATE:** Add IDENTITY SIGNATURE to every CLAUDE.md
+**STATUS:** ✅ Identity is implemented via WHY THIS EXISTS sections in inline headers (Layer 1) and folder CLAUDE.md files. All stage folders have identity sections.
 
 ---
 
@@ -1144,7 +1208,7 @@ AD-003: Axis Geometry for Task-Based Layouts
         │   │   Soul pieces constrain EVERY exploration, EVERY iteration.
         │   │
         │   ├─→ #1 Sharp Edges: border-radius: 0 on axis lines
-        │   ├─→ #2 Archivist Serif: If axis has labels, use Cormorant Garamond
+        │   ├─→ #2 Archivist Serif: If axis has labels, use Instrument Serif
         │   ├─→ #3 2-Zone Callout: Any callouts on axis follow family structure
         │   ├─→ #4 No Shadows: No drop shadows on axis elements
         │   └─→ #5 Squares: Any axis markers are square, not circular
@@ -1378,6 +1442,8 @@ When a system encounters this design system for the first time — or returns to
 
 **Step 7: Read the HANDOFF note for the relevant transition** — Understand what constraints the previous stage established and what the current stage is responsible for producing. The handoff is the bridge. It tells you what you MUST consume, not just what's available.
 
+**Step 8: Load the Accumulated Identity** — For stages that build on completed prior work, read `ACCUMULATED-IDENTITY-v1.md` (currently in `provenance/stage-4-axis-ad/`). This document carries forward ALL soul pieces, ALL active constraints, ALL outbound findings from completed stages into a single consolidated context. It is the "everything you inherit" document. Without it, you must reconstruct accumulated context from multiple files. With it, you start with the full weight of prior work already loaded.
+
 **The system that does all seven steps doesn't just APPLY the design system. It THINKS WITH the design system.** It can make decisions the patterns don't cover because it's absorbed the reasoning that generated the patterns. It can validate new work against the deep criteria because it understands what made DD-006 score 36/40, not just that it did.
 
 ### 📋 After Building: Create Consumption Receipt
@@ -1427,14 +1493,16 @@ With interception: "The design system says border-radius: 0. The provenance chai
 
 ## The Sub-Agent Paradigm: External Knowledge Integration
 
-> ### Critical: Sub-Agents Carry Accumulated Context from Inline Sections
+> ### Critical: Sub-Agents Carry Accumulated Context from the 3-Layer Architecture
 >
-> When deploying sub-agents for external research, the prompt MUST include context accumulated from **inline threading sections**. This is what makes the research COMPOUND rather than just accumulate.
+> When deploying sub-agents for external research, the prompt MUST include context accumulated from the **3-layer provenance architecture**. This is what makes the research COMPOUND rather than just accumulate.
 >
-> **Before deploying a sub-agent, traverse the relevant inline sections and extract:**
-> - What you **KNOW** (from BUILT ON, MUST HONOR)
-> - What you're **UNCERTAIN** about (from RESEARCH DEBT)
-> - What **CONSTRAINTS** are active (from MUST HONOR)
+> **Before deploying a sub-agent, traverse the relevant provenance layers and extract:**
+> - What you **KNOW** (from Layer 1 BUILT ON + Layer 2 provenance context + Layer 3 synthesis docs)
+> - What you're **UNCERTAIN** about (from Layer 1 RESEARCH DEBT + Layer 3 outbound-findings)
+> - What **CONSTRAINTS** are active (from Layer 1 MUST HONOR + ACCUMULATED-IDENTITY-v1.md)
+>
+> For stages with completed prior work, start with `ACCUMULATED-IDENTITY-v1.md` — it consolidates all inherited context into one document, saving you from traversing dozens of inline sections manually.
 >
 > Then embed this in the sub-agent prompt. A sub-agent searching with accumulated context will find research that INTEGRATES into our provenance chain. A sub-agent searching generically will find disconnected articles that can't be threaded.
 
@@ -1770,6 +1838,18 @@ This is what makes the compounding real. Stage 3's research gate doesn't just sa
 
 If you do all eight steps above from the start, you never need a retroactive activation protocol. The backbone exists from day one. The activation protocol only exists because we didn't do steps 3, 6, and 7 from the beginning — we discovered their importance THROUGH the process. That discovery is itself a finding worth capturing.
 
+## The Three Build Modes (Observed, Not Prescribed)
+
+Three distinct modes emerged during execution. Each is valid. Understanding which was used helps interpret the provenance chain for each stage:
+
+| Mode | Description | Used By | Provenance Pattern |
+|------|------------|---------|-------------------|
+| **Mode A: Build First** | Build explorations, THEN formalize provenance retroactively | DD (Stage 2) | Explorations existed before chain documents. Phase 2B added inline headers retroactively. |
+| **Mode B: Build + Document** | Build explorations with documentation, THEN remediate provenance gaps | OD (Stage 3) | Explorations had some documentation during building. Provenance chain remediation (18-agent team, 5 waves) formalized the chain afterward. |
+| **Mode C: Incremental** | Write provenance AS you build, incrementally | AD (Stage 4, planned) | HANDOFF-OD-TO-AD.md + ACCUMULATED-IDENTITY-v1.md provide the starting context. Provenance should be written alongside each exploration. |
+
+**The lesson:** Mode C (incremental) is ideal. Modes A and B work but require expensive retroactive effort. The chain documents now exist from DD through OD, so AD can start with Mode C from day one — the infrastructure is in place.
+
 ---
 
 # PART VII — THE FILE STRUCTURE AS EMBODIED KNOWLEDGE
@@ -1826,8 +1906,8 @@ This is the nervous system during active work. After a stage completes, key file
 ```
 showcase/explorations/
 ├── density/          ← 6 DD HTML explorations (complete)
-├── organizational/   ← 6 OD HTML explorations (in progress)
-├── axis/             ← 6 AD HTML explorations (future)
+├── organizational/   ← 6 OD HTML explorations (complete — audited, fixed, provenance chain remediated)
+├── axis/             ← 6 AD HTML explorations (pending — HANDOFF-OD-TO-AD.md + ACCUMULATED-IDENTITY-v1.md ready)
 └── combination/      ← 6 CD HTML explorations (future)
 ```
 
@@ -1839,8 +1919,7 @@ In addition to the Output, Provenance, Operational, and Artifacts layers, Phase 
 
 ```
 showcase/
-├── FOLDER-MAP.md          ← Single-file codebase map with T1/T2 classification
-├── CLAUDE.md              ← Lab-level navigation and process enforcement
+├── CLAUDE.md              ← Lab-level navigation and process enforcement (also serves as folder map)
 ├── DESIGN-SYSTEM/
 │   └── CLAUDE.md          ← Design system navigation and identity
 ├── checkpoints/
@@ -1855,11 +1934,11 @@ showcase/
     └── CLAUDE.md          ← KA folder navigation
 ```
 
-**FOLDER-MAP.md** provides:
-- Complete codebase structure at a glance
-- T1 (authoritative) vs T2 (derivative) classification
-- Context Recovery section showing current phase state
-- Cross-references to detailed CLAUDE.md files
+**CLAUDE.md files** (per-directory) provide the same navigational purpose originally planned for a standalone FOLDER-MAP.md:
+- Per-folder file listings with purpose and status
+- T1 (authoritative) vs T2 (derivative) classification via inline threading sections
+- Context recovery via identity signatures and status fields
+- Cross-references to related directories and files
 
 **CLAUDE.md files** provide:
 - Per-folder navigation with identity signatures
@@ -1867,11 +1946,11 @@ showcase/
 - How the folder connects to the pipeline
 - What to read first and in what order
 
-This layer enables faster **Context Recovery** (Mode 3) — instead of reading multiple files to understand structure, read FOLDER-MAP.md first, then the CLAUDE.md in your target directory.
+This layer enables faster **Context Recovery** (Mode 3) — instead of reading multiple files to understand structure, read DESIGN-SYSTEM/CLAUDE.md first, then the CLAUDE.md in your target directory.
 
 ### Inline Threading Sections (Added Phase 2B)
 
-Every file in the system now carries its own provenance metadata as an inline threading section. These sections are invisible in rendered views (HTML comments for .md, block comments for .css/.tsx) but visible in source. They contain:
+490 files across the codebase now carry provenance metadata through the 3-layer architecture. Layer 1 (inline threading headers, 246 files) and Layer 2 (light provenance sections, 244 files) are invisible in rendered views but visible in source. Layer 1 headers contain:
 
 - **WHY THIS EXISTS** — file identity and authority
 - **BUILT ON** — upstream dependencies (backward traversal)
@@ -1890,17 +1969,18 @@ This means the provenance chain is no longer only in the folder structure — it
 | File | Location | Purpose | Status |
 |------|----------|---------|--------|
 | RESEARCH-ACTIVATION-DD.md | provenance/stage-2-density-dd/ | Maps R-3 findings → DD explorations | ✅ Via inline BUILT ON in DD-001 through DD-006 |
-| RESEARCH-ACTIVATION-OD.md | provenance/stage-3-organization-od/ | Maps R-1 + DD-F findings → OD explorations | ⏳ Consolidated matrix still useful for OD planning |
+| RESEARCH-ACTIVATION-OD.md | provenance/stage-3-organization-od/ | Maps R-1 + DD-F findings → OD explorations | ✅ OD-RESEARCH-GATE.md + inline BUILT ON sections serve this purpose. OD is COMPLETE. |
 | EXPLORATION-PROTOCOL-OD.md | provenance/stage-3-organization-od/ | OD building instructions | ✅ OD Execution Protocol v2.0 exists |
 | CONSUMPTION-RECEIPT-DD-001.md | provenance/stage-2-density-dd/ | Proof of DD-001 consumption | ✅ Via inline CONSUMED BY in DD files |
 | ... (DD-002 through DD-006) | ... | ... | ✅ Via inline CONSUMED BY |
+| CONSUMPTION-RECEIPT-OD-*.md | provenance/stage-3-organization-od/ | Proof of OD consumption | ✅ Via inline CONSUMED BY + OD-SYNTHESIS.md |
 
 ### Sections to Add
 
 | Section | Add To | Purpose | Status |
 |---------|--------|---------|--------|
-| QUESTIONS | PIPELINE-MANIFEST.md | Per-stage question inheritance | ⏳ RESEARCH DEBT in inline sections captures gaps, but formal question inheritance needed |
-| DERIVATION CHAIN | Every pattern in density-patterns.md | Backward traversal | ⏳ Inline BUILT ON shows upstream, but narrative derivation chains not yet in pattern descriptions |
+| QUESTIONS | PIPELINE-MANIFEST.md | Per-stage question inheritance | ⏳ RESEARCH DEBT in inline sections captures gaps. OD forwarded questions via HANDOFF-OD-TO-AD.md. Formal inheritance in PIPELINE-MANIFEST still needed. |
+| DERIVATION CHAIN | density-patterns.md + organizational-patterns.md | Backward traversal | ⏳ Inline BUILT ON shows upstream. organizational-patterns.md now exists (from provenance chain remediation). Formal derivation chains in pattern descriptions still needed. |
 | IDENTITY SIGNATURE | Every CLAUDE.md | Folder personality | ✅ Via WHY THIS EXISTS + CLAUDE.md inline sections |
 | `source:` field | Every finding | Which exploration created it | ✅ Via inline BUILT ON tables |
 | `built_on:` field | Every finding | Prior findings it builds on | ✅ Via inline BUILT ON tables |
@@ -1989,7 +2069,7 @@ This is what "transferable" means. The mind doesn't live in one person's head or
 
 ## The Bridge: From Document to Codebase
 
-This document describes the structures. As of Phase 2B (2026-02-06), most structures now EXIST via inline threading sections embedded in 253 files. The remaining work focuses on formalizing the Question Generator, creating HANDOFF documents for stages 3-5, and running the full Reflection Protocol retroactively on completed explorations.
+This document describes the structures. As of the OD provenance chain remediation (2026-02-08), most structures EXIST through the 3-layer provenance architecture: 490 files carry inline metadata (Layers 1 + 2), and the formal chain documents (Layer 3) cover Stages 1-3 completely. The remaining work focuses on formalizing the Question Generator in PIPELINE-MANIFEST.md, adding formal derivation chains to pattern files, and executing AD (Stage 4) with Mode C incremental provenance.
 
 ---
 
@@ -2006,14 +2086,14 @@ This document describes the structures. As of Phase 2B (2026-02-06), most struct
 | Identity Signatures | ✅ YES (via WHY THIS EXISTS + STATUS) | Phase 2B inline sections + CLAUDE.md files | Each file's inline section + folder CLAUDE.md files |
 | `source:` fields | ✅ YES (via inline BUILT ON) | Phase 2B inline threading sections | Each file's BUILT ON table |
 | `built_on:` fields | ✅ YES (via inline BUILT ON) | Phase 2B inline threading sections | Each file's BUILT ON table |
-| HANDOFF documents | ⚠️ PARTIAL | HANDOFF-DD-TO-OD.md exists, others needed | provenance/ folders |
+| HANDOFF documents | ✅ (Stages 2-3) ⏳ (Stages 4-5) | HANDOFF-DD-TO-OD.md + HANDOFF-OD-TO-AD.md exist. Stages 4→5 and 5→migration needed after those stages complete. | provenance/ folders |
 
-> **Phase 2B Update (2026-02-06):** The inline threading sections added to 253 files embody the 7 provenance structures described above. Rather than creating separate files for each structure, the structures are embedded IN each file's inline section. This approach has two advantages:
+> **Provenance Architecture Update (2026-02-08):** The 3-layer provenance architecture now covers 490 files:
+> - **Layer 1** (246 files, Phase 2B): Inline threading headers with BUILT ON, CONSUMED BY, MUST HONOR
+> - **Layer 2** (244 files, Phase 2D): Light provenance sections with human-readable context
+> - **Layer 3** (Stages 1-3 complete): Formal chain documents (STAGE-HEADERs, HANDOFFs, outbound findings, synthesis, audit reports)
 >
-> 1. **The provenance travels WITH the file** — not in a separate location that can become desynchronized
-> 2. **Modification guards are visible immediately** when opening any file — no need to consult an external document
->
-> The structures exist. The retroactive work below focuses on USING them (for OD/AD/CD stages), not creating them from scratch.
+> The OD provenance chain remediation (18-agent team, 5 waves) created 6 new formal chain files and updated 13 infrastructure documents. The retroactive work below reflects current status — most Stage 1-3 items are ✅ DONE.
 
 ---
 
@@ -2210,7 +2290,7 @@ The person executing retroactive updates should produce:
 |-------|-------------|-------------------|---------|
 | 1 - Components | provenance/stage-1-components/STAGE-HEADER.md | component-findings.md | N/A (origin) |
 | 2 - Density DD | provenance/stage-2-density-dd/STAGE-HEADER.md | DD-outbound-findings.md | HANDOFF-DD-TO-OD.md |
-| 3 - Organization OD | provenance/stage-3-organization-od/STAGE-HEADER.md | [after OD] | [after OD] |
+| 3 - Organization OD | provenance/stage-3-organization-od/STAGE-HEADER.md | OD-outbound-findings.md | HANDOFF-OD-TO-AD.md |
 | 4 - Axis AD | provenance/stage-4-axis-ad/STAGE-HEADER.md | [after AD] | [after AD] |
 | 5 - Combination CD | provenance/stage-5-combination-cd/STAGE-HEADER.md | [after CD] | [after CD] |
 
@@ -2223,6 +2303,10 @@ The person executing retroactive updates should produce:
 | CLAUDE.md (showcase) | showcase/CLAUDE.md | Lab navigation |
 | CLAUDE.md (DESIGN-SYSTEM) | showcase/DESIGN-SYSTEM/CLAUDE.md | System navigation |
 | CLAUDE.md (provenance) | showcase/DESIGN-SYSTEM/provenance/CLAUDE.md | Chain navigation |
+| ACCUMULATED-IDENTITY-v1.md | provenance/stage-4-axis-ad/ACCUMULATED-IDENTITY-v1.md | Consolidated inherited context for AD |
+| OD-outbound-findings.md | provenance/stage-3-organization-od/OD-outbound-findings.md | 17 OD findings for downstream stages |
+| OD-SYNTHESIS.md | provenance/stage-3-organization-od/OD-SYNTHESIS.md | OD exploration synthesis |
+| HANDOFF-OD-TO-AD.md | provenance/stage-3-organization-od/HANDOFF-OD-TO-AD.md | Bridge document: OD → AD |
 
 ## Known Issues
 
@@ -2230,7 +2314,7 @@ The person executing retroactive updates should produce:
 |-------|--------|---------|
 | Color sync | PENDING | globals.css uses teal/white (#0D9373, #fff). DESIGN-SYSTEM/tokens/colors.md has KortAI (#E83025, #FEF9F5). DD explorations use correct inline KortAI colors. |
 | poc/ deprecation | DOCUMENTED | 27 POC directories mostly superseded by showcase/. See app/poc/CLAUDE.md. |
-| README.md outdated | ✅ RESOLVED | Updated 2026-02-07 to reflect Phase 2B inline sections, navigation layer, and context recovery improvements. |
+| README.md outdated | ✅ RESOLVED | Updated 2026-02-08 to reflect 3-layer provenance architecture, OD COMPLETE status, Instrument Serif correction, accumulated identity concept, and build modes. |
 
 ---
 
