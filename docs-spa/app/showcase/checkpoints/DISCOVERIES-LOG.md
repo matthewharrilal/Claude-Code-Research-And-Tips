@@ -361,6 +361,57 @@ Each exploration is scored on 4 dimensions (1-10 each):
 **Screenshots:** screenshots/explorations/DD-006-fractal-full.png
 
 ═══════════════════════════════════════════════════════════════════════════════
+## COMPREHENSIVE HIERARCHICAL AUDIT LEARNINGS (2026-02-09)
+═══════════════════════════════════════════════════════════════════════════════
+
+### Audit Scope and Execution
+
+**Comprehensive Hierarchical Audit (2026-02-09):** ~58 agents across 4 pillars (visual, structural, provenance, triage) + fresh-eyes adversarial review + fix execution. 58 findings (5 Critical, 10 High, 17 Medium, 8 Low, 18 Notes) + 7 unique fresh-eyes findings. 10 Critical/High fixes applied across 18 files. Reports in `knowledge-architecture/_comprehensive-audit/`.
+
+### Key Learning 1: rgba() Opacity Epidemic
+
+**Discovery:** ~102 rgba() semi-transparent background instances found across 10/12 HTML pages (OD-001, OD-002, OD-003, OD-005 affected; OD-004 and OD-006 already clean).
+**Impact:** Semi-transparent callout/zone backgrounds violate the ANTI-PHYSICAL identity -- opacity must be absolute (=== 1.0).
+**Resolution:** All rgba() backgrounds replaced with opaque var(--color-border-subtle) equivalents. OD-004 used as reference implementation.
+**Rule:** All backgrounds MUST be opaque. rgba() < 1 on backgrounds is a soul-adjacent violation of the solid offsets binary rule.
+
+### Key Learning 2: Soul Lock Confirmation (0/~13,000 Violations)
+
+**Discovery:** Three independent verification processes confirmed zero soul violations across ~13,000 DOM elements.
+- Visual audit: ~5,000 elements checked
+- Structural audit: 4,876 elements checked
+- Prior granular audit: 3,479 elements checked
+**Significance:** The ANTI-PHYSICAL identity (border-radius: 0, box-shadow: none, filter: none) is absolute. Not a single violation found despite 3 independent audit methodologies. This is the strongest soul compliance evidence in the pipeline.
+
+### Key Learning 3: DD Pre-Convention Gap
+
+**Discovery:** DD files (DD-001 through DD-006) were built before the OD Convention Spec existed, creating systematic gaps:
+- VS Code default syntax highlighting colors instead of locked palette
+- Missing skip-link navigation and focus-visible CSS rules
+- Missing reduced-motion media query
+- Code block backgrounds at #1E1E1E instead of convention #1A1A1A
+**Resolution:** All 6 DD files received DD-BACKPORT treatment with CSS comments tagging each change as `/* DD-BACKPORT: ... */`. Full color mapping applied (VS Code defaults -> convention palette). Accessibility features added (skip-link, focus-visible, selection styles, reduced-motion).
+**Rule:** When convention specs are created AFTER artifacts exist, backport must be explicit and tagged. DD-BACKPORT pattern is the reference model.
+
+### Key Learning 4: Post-Re-Enrichment Metadata Drift
+
+**Discovery:** Chain documents drifted after re-enrichment due to count updates not propagating:
+- PIPELINE-MANIFEST R-2 listed "78 findings" when only 27 exist (phantom IDs R2-024-078)
+- EXT-RESEARCH-REGISTRY header said 69 unique EXT-*, summary said 72, actual was 94
+- organizational/CLAUDE.md had pre-re-enrichment OD scores
+- ACCUMULATED-IDENTITY-v1.md missing SUPERSEDED marker pointing to v1.1
+**Resolution:** All stale counts corrected. Supersession marker added. Scores updated.
+**Rule:** After any enrichment/re-enrichment process that changes counts, ALL downstream chain documents must be verified for count propagation. Metadata drift is a systemic risk of multi-wave processes.
+
+### Key Learning 5: Fresh-Eyes Methodology Value
+
+**Discovery:** Fresh-eyes agents (no convention access, no prior audit knowledge) produced 7 unique findings INVISIBLE to convention-aware auditors:
+- Excessive vertical whitespace (150-200px gaps) -- spec-aware agents verified spacing against convention values but missed the perceptual impact
+- Cross-page collection coherence -- each OD felt like a different product
+- Score badge inconsistency across ODs
+**Rule:** Always include at least one fresh-eyes adversarial pass in comprehensive audits. Convention-awareness creates blind spots.
+
+═══════════════════════════════════════════════════════════════════════════════
 ## ORGANIZATIONAL EXPLORATIONS (OD-001 through OD-006+)
 ═══════════════════════════════════════════════════════════════════════════════
 

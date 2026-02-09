@@ -17,6 +17,7 @@ ACTIVE (all 6 OD explorations COMPLETE — visual audit PASSED)
 - DD-F-006 (mandatory constraint: fractal applies to ALL OD work)
 - HANDOFF-DD-TO-OD.md (transition requirements from DD to OD)
 - R1-DOCUMENTATION-PATTERNS.md (primary research for OD)
+- COMPREHENSIVE-AUDIT-SPECIFICATION.md (Comprehensive hierarchical audit fix)
 
 8. CONSUMED BY
 - HANDOFF-DD-TO-OD.md (cited)
@@ -43,12 +44,12 @@ END INLINE THREADING HEADER
 
 | File | Pattern | Density Pairing | Status |
 |------|---------|-----------------|--------|
-| `OD-001-conversational.html` | Q&A dialogue | PULSE, TIDAL | ✅ INCLUDE (~35/40) |
-| `OD-002-narrative.html` | Story arc | CRESCENDO | ✅ INCLUDE (~33/40) |
-| `OD-003-task-based.html` | Goal structure | ISLANDS, BOOKENDS | ✅ INCLUDE |
-| `OD-004-confidence.html` | Certainty flow | GEOLOGICAL, CRESCENDO | ✅ INCLUDE |
-| `OD-005-spatial.html` | Hub-spoke | WAVE, ISLANDS | ✅ INCLUDE |
-| `OD-006-creative.html` | Emergent synthesis | ALL PATTERNS (FRACTAL primary) | ✅ INCLUDE (crown jewel) |
+| `OD-001-conversational.html` | Q&A dialogue | PULSE, TIDAL | ✅ INCLUDE (37/40) |
+| `OD-002-narrative.html` | Story arc | CRESCENDO | ✅ INCLUDE (35/40) |
+| `OD-003-task-based.html` | Goal structure | ISLANDS, BOOKENDS | ✅ INCLUDE (35/40) |
+| `OD-004-confidence.html` | Certainty flow | GEOLOGICAL, CRESCENDO | ✅ INCLUDE (34/40) |
+| `OD-005-spatial.html` | Hub-spoke | WAVE, ISLANDS | ✅ INCLUDE (35/40) |
+| `OD-006-creative.html` | Emergent synthesis | ALL PATTERNS (FRACTAL primary) | ✅ INCLUDE (37/40, crown jewel) |
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## 3. WHAT'S HERE

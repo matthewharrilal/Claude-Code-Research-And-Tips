@@ -15,7 +15,7 @@ sources:
 
 # EXT-* External Research Registry
 
-**Total EXT Findings:** 69 unique (77 citations across ODs, with shared findings counted once)
+**Total EXT Findings:** 94 unique (post-re-enrichment count; 77 citations across original ODs + 17 discovered during re-enrichment)
 **Categories:** 7 (EXT-CONV, EXT-NARR, EXT-DENSITY, EXT-TASK, EXT-CONF, EXT-SPAT, EXT-CREATIVE)
 **Source Files Scanned:** 7 primary + 6 OD HTML headers
 

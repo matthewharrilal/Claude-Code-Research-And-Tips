@@ -395,3 +395,24 @@ Execute the task described in "NEXT ACTION" section.
 **Purpose:** Compaction survival - position, quality, recovery
 **Update Frequency:** After EVERY action
 **Critical:** This is the FIRST file to read after compaction
+
+═══════════════════════════════════════════════════════════════════════════════
+## 2026-02-09 — Comprehensive Hierarchical Audit Note
+═══════════════════════════════════════════════════════════════════════════════
+
+**Pipeline Position:** Post-comprehensive-audit. All Critical/High findings have fix assignments.
+
+**Audit Summary (58 findings + 90 fresh-eyes):**
+- CRITICAL: 5 (all assigned) — includes PIPELINE-MANIFEST R-2 count error (78->27), rgba() opacity epidemic
+- HIGH: 10 (all assigned) — includes EXT-* stale counts (69->94), DD code block off-palette, skip-link missing
+- MEDIUM: 17, LOW: 8, NOTE: 18
+- Soul compliance: DEFINITIVE 0/~13,000 violations (confirmed by 3 independent processes)
+
+**Key Corrections:**
+- PIPELINE-MANIFEST R-2 finding count: 78 -> 27 (51 phantom IDs removed)
+- EXT-RESEARCH-REGISTRY header: 69 -> 94 unique EXT-* findings
+- ACCUMULATED-IDENTITY v1 will receive supersession marker pointing to v1.1
+
+**Fix allocation:** 7 fixers (fixer-od-001-003, fixer-od-004-006, fixer-dd-001-003, fixer-dd-004-006, fixer-tsx, fixer-provenance, fixer-archival)
+
+**Next:** AD phase (after fixes complete). Read HANDOFF-OD-TO-AD.md first.

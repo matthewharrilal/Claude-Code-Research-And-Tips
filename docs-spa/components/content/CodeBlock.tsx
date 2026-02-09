@@ -18,6 +18,7 @@ ACTIVE
 |-----------------------------------------|---------------------------------------|
 | react (useState)                        | Tracks copied state for button feedback |
 | lucide-react (Check, Copy)              | Icons for copy button states          |
+| COMPREHENSIVE-AUDIT-SPECIFICATION.md    | Comprehensive hierarchical audit fix   |
 
 6. MUST HONOR
 - border-radius: 0 on all elements (soul-locked)
@@ -89,6 +90,7 @@ export function CodeBlock({ children, language, filename }: CodeBlockProps) {
       )}
       <pre
         className="p-4 overflow-x-auto"
+        aria-label={filename ? `Code: ${filename}` : `Code block${language ? `: ${language}` : ''}`}
         style={{
           backgroundColor: '#1A1A1A',
           color: '#F0EBE3',

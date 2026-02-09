@@ -32,6 +32,7 @@ ACTIVE — updated as findings move through pipeline stages
 | Soul pieces #1-5                        | Perceptual soul discoveries            |
 | R1-R5 research (337 findings)           | All original research with status      |
 | Pattern-to-finding linkage              | Cross-reference mapping                |
+| COMPREHENSIVE-AUDIT-SPECIFICATION.md    | Comprehensive hierarchical audit fix   |
 
 6. MUST HONOR
 - Every finding must trace to its original research source
@@ -90,7 +91,7 @@ to application.
 
 **R-1 Status:** ~71% applied in OD (20/28 in OD-006), PRIMARY source for OD ✅ CONSUMED
 
-### R-2 Creative Layouts (78 findings)
+### R-2 Creative Layouts (27 findings)
 
 | ID | Finding | Status | Applied In | Evidence |
 |----|---------|--------|------------|----------|
@@ -98,7 +99,7 @@ to application.
 | R2-021 | Dense but Breathable | APPLIED | DD (all) | PULSE pattern |
 | R2-022 | 8px base unit | APPLIED | Components | spacing.md tokens |
 | R2-023 | 14px base typography | APPLIED | Components | typography.md tokens |
-| R2-024-078 | Additional findings | PENDING | AD/CD | — |
+| R2-024-027 | Additional findings | PENDING | AD/CD | — |
 
 **R-2 Status:** ~15% applied, Secondary source for multiple stages
 
@@ -312,6 +313,8 @@ Traffic-light (DD-F-015):
 **Total Soul Pieces:** 5 visual (no cognitive discovered in OD — OD-F-005 is meta-pattern, not soul piece)
 **Total Patterns:** 6 density + 6 organizational (axis, combination TBD)
 **OD Re-Enrichment:** 43 agents, 3 waves, all 6 ODs upgraded to v3. Average score: ~35.5/40 (up from ~34.8/40). Convention spec unified 3 quality dialects. 20/20 SOUL FAILs confirmed ANTI-PHYSICAL identity.
+
+**Comprehensive Hierarchical Audit (2026-02-09):** ~58 agents across 4 pillars (visual, structural, provenance, triage) + fresh-eyes adversarial + fix execution. 58 findings (5 Critical, 10 High, 17 Medium, 8 Low, 18 Notes) + 7 unique fresh-eyes findings. 10 Critical/High fixes applied across 18 files (6 OD, 6 DD, 4 provenance, 1 TSX, 1 CLAUDE.md). Soul compliance confirmed: 0 violations across ~13,000 elements (3 independent verification processes). DD files received DD-BACKPORT accessibility and palette alignment. PIPELINE-MANIFEST R-2 count corrected (78->27). rgba() opacity epidemic resolved across 4 OD files. All fixes verified via 187 programmatic DOM tests + 12 visual screenshots. Zero new soul violations introduced.
 
 **Update Schedule:**
 - After each stage completion: Add generated findings

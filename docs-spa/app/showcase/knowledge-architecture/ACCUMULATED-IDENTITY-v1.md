@@ -1,6 +1,8 @@
 # ACCUMULATED IDENTITY v1
 ## The Complete Inherited Mind of the KortAI Design System
 
+> **SUPERSEDED by ACCUMULATED-IDENTITY-v1.1.md** — v1.1 adds 5th fractal scale (navigation), zone token validation, re-enrichment summary, and updated EXT count (94 unique). Read v1.1 for current state.
+
 **Generated:** 2026-02-07
 **Method:** Full inline threading header traversal across 13 source files
 **Purpose:** Any agent reading ONLY this document can make decisions consistent with the full system
