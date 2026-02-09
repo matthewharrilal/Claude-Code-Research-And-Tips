@@ -11,8 +11,10 @@ framing for the OD stage. Auto-read by Claude Code on directory entry. OD work
 is COMPLETE -- all explorations built, audited, fixed, and synthesized.
 
 3. STATUS
-COMPLETE -- All 6 OD explorations built, 17 OD-F findings documented, audit
-complete (89 findings, 16 fixes, 0 soul violations), synthesis produced.
+COMPLETE -- All 6 OD explorations built, re-enriched (v3), 17 OD-F findings
+documented, audit complete (89 findings, 16 fixes, 0 soul violations),
+re-enrichment complete (43 agents, 94/94 EXT-* applied, convention spec unified),
+synthesis produced.
 
 5. BUILT ON
 | Dependency                                          | Relationship                              |
@@ -65,17 +67,28 @@ from two perspectives.
 2. **`OD-outbound-findings.md`** -- All 17 OD-F findings with full descriptions,
    chain impact, and validation evidence. This is what flows forward to AD/CD.
 
-3. **`OD-AUDIT-SYNTHESIS.md`** -- Quality record: 89 audit findings, 16 fixes
+3. **`OD-CONVENTION-SPEC.md`** -- Convention specification unifying 3 quality
+   dialects (468 lines). Defines dark headers, dark code blocks, zone tokens,
+   type scale, border system, and reduced-motion rules. Created in Wave 0 of
+   re-enrichment.
+
+4. **`OD-AUDIT-SYNTHESIS.md`** -- Quality record: 89 audit findings, 16 fixes
    applied, 0 soul violations, 3 quality dialects, verification results.
 
-4. **`HANDOFF-OD-TO-AD.md`** -- The gate file for Stage 4 (AD). Contains
+5. **`HANDOFF-OD-TO-AD.md`** -- The gate file for Stage 4 (AD). Contains
    mandatory consumption requirements and constraints for AD work.
 
-5. **`OD-RESEARCH-GATE.md`** -- R-1 finding-by-finding mapping with post-build
-   verification showing ~71% application rate.
+6. **`OD-RESEARCH-GATE.md`** -- R-1 finding-by-finding mapping with post-build
+   verification showing ~79% application rate (up from ~71% pre-re-enrichment).
 
-6. **`STAGE-HEADER.md`** -- Stage overview with all 8 sections: story, consumed,
+7. **`STAGE-HEADER.md`** -- Stage overview with all 8 sections: story, consumed,
    produced, quality, decisions, causal relationships, research weight, files.
+   Includes RE-ENRICHMENT subsection with before/after scores and identity deltas.
+
+**Working Artifacts:** `knowledge-architecture/_od-reenrichment/` contains all
+re-enrichment execution artifacts (research packages, verification reports,
+identity deltas, dark matter indexes, screenshots). See
+`_od-reenrichment/CLAUDE.md` for full file manifest.
 
 ===============================================================================
 ## 3. WHAT'S HERE
@@ -83,11 +96,12 @@ from two perspectives.
 
 | File | Status | When to Read |
 |------|--------|--------------|
-| `STAGE-HEADER.md` | COMPLETE | For stage overview and causal relationships |
+| `STAGE-HEADER.md` | COMPLETE | For stage overview, causal relationships, and re-enrichment summary |
 | `OD-outbound-findings.md` | COMPLETE | For 17 OD-F findings flowing to AD/CD |
 | `OD-SYNTHESIS.md` | COMPLETE | For cross-OD synthesis and 6-pattern analysis |
+| `OD-CONVENTION-SPEC.md` | COMPLETE | For convention specification unifying 3 quality dialects (468 lines) |
 | `OD-AUDIT-SYNTHESIS.md` | COMPLETE | For audit record (89 findings, 16 fixes) |
-| `OD-RESEARCH-GATE.md` | COMPLETE | For R-1 application verification |
+| `OD-RESEARCH-GATE.md` | COMPLETE | For R-1 application verification (~79% post-re-enrichment) |
 | `HANDOFF-OD-TO-AD.md` | COMPLETE | Gate file for Stage 4 (AD) |
 | `CLAUDE.md` | COMPLETE | This file -- navigation |
 

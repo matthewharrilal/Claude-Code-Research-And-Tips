@@ -244,19 +244,20 @@ TBD — CD explorations not yet started.
 | TIDAL/RIVERS | R3-029, R4-VR* | DD-F-005 | DD-005 | 36/40 |
 | FRACTAL | R3-023 | DD-F-006 | DD-006 | 36/40 |
 
-### Organizational Patterns ✅ COMPLETE
+### Organizational Patterns ✅ COMPLETE (v3 Re-Enriched)
 
-| Pattern | Research | Generated Finding | Validated By | Score |
-|---------|----------|-------------------|--------------|-------|
-| CONVERSATIONAL | R1-001, R1-007, R1-008 | OD-F-001, OD-F-002, OD-F-003, OD-F-004 | OD-001 | ~35/40 |
-| NARRATIVE | R1-016, R1-017, R1-018, R1-019 | OD-F-009, OD-F-010, OD-F-011, OD-F-012, OD-F-013 | OD-002 | ~33/40 |
-| TASK-BASED | R1-001, R1-016, R1-019, EXT-TASK-* | — | OD-003 | ~35/40 |
-| CONFIDENCE | R1-016, R1-017, R1-018, EXT-CONF-* | — | OD-004 | INCLUDE |
-| SPATIAL | R1-016, R1-018, R1-019, EXT-SPAT-* | — | OD-005 | INCLUDE |
-| CREATIVE | R1-001 through R1-026, EXT-CREATIVE-* | OD-F-005, OD-F-006, OD-F-007, OD-F-008 | OD-006 | INCLUDE (crown jewel) |
+| Pattern | Research | Generated Finding | Validated By | Score (v3) |
+|---------|----------|-------------------|--------------|------------|
+| CONVERSATIONAL | R1-001, R1-007, R1-008, EXT-CONV-006..011 | OD-F-001, OD-F-002, OD-F-003, OD-F-004 | OD-001 | 37/40 |
+| NARRATIVE | R1-016, R1-017, R1-018, R1-019, EXT-NARR-001..011 | OD-F-009 | OD-002 | 35/40 |
+| TASK-BASED | R1-001, R1-016, R1-019, EXT-TASK-013..019 | OD-F-010 | OD-003 | ~35/40 |
+| CONFIDENCE | R1-016, R1-017, R1-018, EXT-CONF-013..018 | OD-F-011 | OD-004 | 34/40 |
+| SPATIAL | R1-016, R1-018, R1-019, EXT-SPAT-013..018 | OD-F-012 | OD-005 | 35/40 |
+| CREATIVE | R1-001 through R1-026, EXT-CREATIVE-010..015 | OD-F-005, OD-F-006, OD-F-007, OD-F-008, OD-F-013 | OD-006 | 37/40 (crown jewel) |
 
 **Meta-pattern:** OD-F-MP-001 — Organization = Density Identity (governs all 6 patterns)
-**Quality: ~34.8/40 average across 6 explorations. Soul compliance: 100%.**
+**Re-enrichment:** 42 EXT findings applied, 27 builder discoveries, convention spec unified 3 dialects
+**Quality: ~35.5/40 average across 6 explorations (v3). Soul compliance: 100%. 20/20 SOUL FAILs = ANTI-PHYSICAL.**
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## SECTION E: CROSS-REFERENCE INDEX
@@ -299,15 +300,18 @@ Traffic-light (DD-F-015):
 | EXEMPLARY | Deeply applied as core concept | 6 |
 | ACTIVE | Constraint that applies to all work | ~42 (25 prior + 17 OD-F) |
 | CONSUMED | Used and no longer needs tracking | ~3 |
+| RESOLVED | Anti-pattern identified and fixed | 1 (OD-F-AP-001) |
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## DOCUMENT METADATA
 ═══════════════════════════════════════════════════════════════════════════════
 
-**Total Original Research:** 388 findings (R-1 to R-5)
+**Total Original Research:** 337 findings (R-1 to R-5)
 **Total Generated Findings:** 56 (COMP-F: 21 + DD-F: 18 + OD-F: 17)
+**Total EXT-* Findings:** 94 unique bespoke findings created during OD re-enrichment
 **Total Soul Pieces:** 5 visual (no cognitive discovered in OD — OD-F-005 is meta-pattern, not soul piece)
 **Total Patterns:** 6 density + 6 organizational (axis, combination TBD)
+**OD Re-Enrichment:** 43 agents, 3 waves, all 6 ODs upgraded to v3. Average score: ~35.5/40 (up from ~34.8/40). Convention spec unified 3 quality dialects. 20/20 SOUL FAILs confirmed ANTI-PHYSICAL identity.
 
 **Update Schedule:**
 - After each stage completion: Add generated findings

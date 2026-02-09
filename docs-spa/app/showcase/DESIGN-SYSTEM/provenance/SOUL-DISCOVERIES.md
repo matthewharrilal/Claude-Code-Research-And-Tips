@@ -262,9 +262,25 @@ across 3,479+ DOM elements. The 5 soul pieces were fully sufficient to
 constrain all 6 organizational explorations. No new perceptual truth
 emerged that would require a 6th soul piece.
 
+**ANTI-PHYSICAL Identity Confirmed (Re-Enrichment, 2026-02-09):**
+Three waves of re-enrichment tested 20 SOUL FAIL scenarios across all 6 ODs.
+Every single one confirmed the ANTI-PHYSICAL identity: the system rejects
+anything that makes flat screens pretend to be three-dimensional spaces.
+Categories: (a) decorative depth/shadows, (b) animated z-movement,
+(c) rounded shapes suggesting physical objects, (d) gradients suggesting
+light/material, (e) traffic-light color semantics implying material signals,
+(f) parallax implying z-space. 20/20 -- zero exceptions.
+
+This is not a new soul piece but a deepened understanding of Soul Pieces #1
+and #4 combined. The ANTI-PHYSICAL identity extends Soul Piece #4 ("Shadows
+Lie About Depth") into a comprehensive rejection of all physicality cues,
+not just shadows.
+
 **Implication for AD:** AD (axis exploration) is the next opportunity for
 potential soul discovery. If axis geometry produces a new perceptual truth
 about how things LOOK (not how they organize), it could become Soul Piece #6.
+AD must also specifically audit for semi-transparent backgrounds (rgba) as
+a systemic gap identified during re-enrichment.
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## APPLICATION GUIDE

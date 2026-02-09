@@ -320,16 +320,16 @@ Essence Callout (key takeaway)
 | DD-005 | Rivers | - | PENDING | WAVE | Variable density channels |
 | DD-006 | Creative | - | PENDING | TBD | Density Manifold visualization? |
 
-### Organizational Explorations (OD-001 through OD-006)
+### Organizational Explorations (OD-001 through OD-006) — v3 Re-Enriched
 
-| ID | Name | Score | Status | Pattern | Key Learning |
-|----|------|-------|--------|---------|--------------|
-| OD-001 | Conversational | ~35/40 | INCLUDE | PULSE + TIDAL | Q&A pairs are inherent PULSE generators; width variation creates TIDAL secondary rhythm |
-| OD-002 | Narrative | ~33/40 | INCLUDE | CRESCENDO | Story arc NATURALLY creates CRESCENDO -- exposition sparse, climax dense |
-| OD-003 | Task-Based | ~33/40 | INCLUDE | ISLANDS + BOOKENDS | Procedural clusters are dense islands; BOOKENDS for orientation/verification |
-| OD-004 | Confidence | INCLUDE | INCLUDE | GEOLOGICAL + CRESCENDO | Certainty stratification IS geological density |
-| OD-005 | Spatial | INCLUDE | INCLUDE | WAVE + ISLANDS | Hub-and-spoke creates WAVE oscillation |
-| OD-006 | Creative | INCLUDE (crown) | INCLUDE | ALL (FRACTAL primary) | Organization IS Density (OD-F-005) |
+| ID | Name | Score (v3) | Status | Pattern | Key Learning |
+|----|------|------------|--------|---------|--------------|
+| OD-001 | Conversational | 37/40 | INCLUDE | PULSE + TIDAL | Q&A pairs are inherent PULSE generators; zone tokens proved OD-F-005 at token level |
+| OD-002 | Narrative | 35/40 | INCLUDE | CRESCENDO | 5-beat Freytag structure; falling action as cognitive decompression |
+| OD-003 | Task-Based | ~35/40 | INCLUDE | ISLANDS + BOOKENDS | Dual-mode ISLANDS (static + interactive); compound ISLANDS+CRESCENDO |
+| OD-004 | Confidence | 34/40 | INCLUDE | GEOLOGICAL + CRESCENDO | GEOLOGICAL = border weight (flat 2D encoding), not physical depth |
+| OD-005 | Spatial | 35/40 | INCLUDE | WAVE + ISLANDS | WAVE self-documentation; keyboard spatial navigation validates hub-spoke |
+| OD-006 | Creative | 37/40 (crown) | INCLUDE | ALL (FRACTAL primary, 5 scales) | Organization IS Density (OD-F-005); 5th fractal scale (navigation) |
 
 ### OD-F Findings (Pattern Findings)
 

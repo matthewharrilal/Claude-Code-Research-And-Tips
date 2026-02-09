@@ -69,7 +69,7 @@ exist elsewhere. But the CHAIN that connects them lives here.
 | `original-research/` | ✅ | R-1 to R-5 research files |
 | `stage-1-components/` | ✅ | Component foundation chain |
 | `stage-2-density-dd/` | ✅ | DD exploration chain |
-| `stage-3-organization-od/` | ✅ COMPLETE | OD exploration chain (6 ODs, 17 OD-F findings, 89 audit findings) |
+| `stage-3-organization-od/` | ✅ COMPLETE (v3 re-enriched) | OD exploration chain (6 ODs, 17 OD-F findings, 89 audit findings, 94 EXT-* findings, convention spec, 43-agent re-enrichment) |
 | `stage-4-axis-ad/` | ⏳ PENDING | AD exploration chain |
 | `stage-5-combination-cd/` | ⏳ PENDING | CD exploration chain |
 
@@ -116,7 +116,8 @@ Let me trace ONE finding through the entire chain to show how provenance works:
 - Location: `stage-3-organization-od/OD-outbound-findings.md`, `stage-3-organization-od/OD-SYNTHESIS.md`
 - Constraint: DD-F-006 is MANDATORY for all OD explorations
 - OD-001 through OD-006 applied fractal self-similarity
-- Status: COMPLETE — applied in all 6 OD explorations, verified in 17-agent adversarial audit (89 findings, 0 soul violations)
+- Re-enrichment: 43 agents, 94/94 EXT-* findings applied, OD-006 demonstrates 5th fractal scale (navigation)
+- Status: COMPLETE (v3) — applied in all 6 OD explorations, verified in 17-agent adversarial audit (89 findings, 0 soul violations), re-enriched via 3-wave gate-based process
 
 **Stage 4 (AD):**
 - Will consume DD-F-006 through OD

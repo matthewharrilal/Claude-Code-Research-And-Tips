@@ -6,7 +6,7 @@ predecessor: provenance/stage-2-density-dd/STAGE-HEADER.md
 successor: provenance/stage-4-axis-ad/STAGE-HEADER.md
 backbone_ref: DESIGN-SYSTEM/BACKBONE.md
 manifest_ref: DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md
-last_updated: 2026-02-08
+last_updated: 2026-02-09
 status: COMPLETE
 ---
 
@@ -28,9 +28,11 @@ What did Stage 3 (OD) consume, what did it produce, what quality was achieved,
 and what constraints flow forward to Stage 4 (AD)?
 
 3. STATUS
-COMPLETE -- All 6 OD explorations built, audited, and fixed. All synthesis
-documents produced. All outbound findings documented. HANDOFF-OD-TO-AD
-produced. Stage is closed.
+COMPLETE -- All 6 OD explorations built, audited, fixed, and RE-ENRICHED (v3).
+All synthesis documents produced. All outbound findings documented.
+HANDOFF-OD-TO-AD produced. Re-enrichment: 43 agents, 7 waves, 94/94 EXT-*
+findings applied, 20/20 SOUL FAILs (ANTI-PHYSICAL), convention spec unified.
+Stage is closed.
 
 5. BUILT ON
 | Dependency                                          | Relationship                              |
@@ -150,23 +152,49 @@ significant: density and organization are governed by the same soul.
 ## 4. QUALITY ACHIEVED
 ===============================================================================
 
-| Metric | Target | Achieved |
+| Metric | Target | Achieved (v3 — post-re-enrichment) |
 |--------|--------|----------|
-| Average score | >=32/40 for INCLUDE | OD-001: ~35/40, OD-002: ~33/40, OD-003: ~33/40, OD-004: INCLUDE, OD-005: INCLUDE, OD-006: INCLUDE (crown jewel, targeting >=36/40) |
-| Soul compliance | 100% | 100% -- 0 border-radius violations, 0 box-shadow violations across 3,479+ DOM elements |
-| Anti-pattern violations | 0 | 0 soul violations. 2px border epidemic identified (108 CSS decls) but NOT a soul violation -- fixed via 3-category system |
+| Average score | >=32/40 for INCLUDE | OD-001: 37/40 (I:9 U:9 S:10 E:9), OD-002: 35/40 (I:8 U:8 S:10 E:9), OD-003: ~35/40, OD-004: 34/40 (I:8 U:9 S:9 E:8), OD-005: 35/40 (I:8 U:9 S:9 E:9), OD-006: 37/40 (I:9 U:10 S:9 E:9, crown jewel) |
+| Soul compliance | 100% | 100% -- 0 border-radius violations, 0 box-shadow violations across 3,479+ DOM elements. 20/20 SOUL FAILs across all 3 waves confirm ANTI-PHYSICAL identity |
+| Anti-pattern violations | 0 | 0 soul violations. 2px border epidemic identified (108 CSS decls) -- fixed via 3-category system. Additional 2px borders eliminated in re-enrichment (11 in Wave 2, 11 in Wave 3) |
 | Audit findings | -- | 89 total: 8 Critical, 6 High, 16 Medium, 8 Low, ~51 Notes |
 | Fixes applied | -- | 16/16 actionable fixes applied (commit f5357a7), 2 false positives disproved, 1 deferred |
-| R-1 application rate | >=80% | ~71% (20/28 applied) -- below target, bespoke EXT-* at ~85% |
-| R-2 application rate | -- | 0% (27 findings unconsumed -- AD WARNING) |
-| EXT-* application rate | -- | ~85% (bespoke research) |
+| R-1 application rate | >=80% | ~79% (22/28 applied) -- up from ~71% pre-re-enrichment. R1-020 + R1-028 newly applied via bespoke research |
+| R-2 application rate | -- | 0% (27 findings unconsumed -- AD WARNING remains active) |
+| EXT-* application rate | -- | 100% (94/94 unique findings applied across 3 waves of re-enrichment) |
 | Locked token consistency | 100% | 12/12 locked tokens IDENTICAL across all 6 ODs |
 | Post-fix verification | 100% PASS | 187 programmatic DOM tests PASS + 12 visual screenshots PASS |
+| Re-enrichment verification | 100% PASS | Wave 1: 14/14, Wave 2: 23/23, Wave 3: 23/23 gate checks PASS |
 
-**3 Quality Dialects:**
-- **Polished** (OD-001, OD-002): Dark code blocks, v2 enrichments, full-bleed headers
-- **Functional** (OD-003, OD-004, OD-005): Lighter code blocks, more thin borders, simpler headers
-- **Editorial** (OD-006): No code blocks, meta-documentary style, heaviest typography
+**3 Quality Dialects (unified by OD-CONVENTION-SPEC.md):**
+- **Polished** (OD-001, OD-002): Dark code blocks, v3 enrichments, full-bleed dark headers
+- **Functional** (OD-003, OD-004, OD-005): Dark code blocks (post-convention), 3-category borders, dark headers
+- **Editorial** (OD-006): No code blocks, meta-documentary style, heaviest typography, fractal annotation layer
+
+### RE-ENRICHMENT (2026-02-09)
+
+**Execution:** 43 agents across 7 waves (Wave 0: convention + dark matter + screenshots, Waves 1-3: researcher/builder/scribe/verifier per pair, Waves 4-6: synthesis + infrastructure + audit). Mode C (incremental) provenance -- each wave enriches 2 ODs and updates chain documents.
+
+**Before/After Scores:**
+
+| OD | Before | After | Delta | Wave |
+|----|--------|-------|-------|------|
+| OD-001 Conversational | ~35/40 | 37/40 (I:9 U:9 S:10 E:9) | +2 | 1 |
+| OD-002 Narrative | ~33/40 | 35/40 (I:8 U:8 S:10 E:9) | +2 | 1 |
+| OD-003 Task-Based | ~33/40 | ~35/40 | +2 | 2 |
+| OD-004 Confidence | INCLUDE (unscored) | 34/40 (I:8 U:9 S:9 E:8) | scored | 3 |
+| OD-005 Spatial | INCLUDE (unscored) | 35/40 (I:8 U:9 S:9 E:9) | scored | 2 |
+| OD-006 Creative | INCLUDE (>=36) | 37/40 (I:9 U:10 S:9 E:9) | +1 | 3 |
+
+**Convention Spec:** `OD-CONVENTION-SPEC.md` (468 lines) -- unified 3 quality dialects. Key conventions: dark headers, dark code blocks, zone token naming (`--color-zone-sparse/dense/breathing`), --type-meta at 0.75rem (12px), prophylactic reduced-motion rule, 3-category border system.
+
+**Identity Deltas (3 waves, cumulative):**
+- **3 identity refinements:** (1) Solid offsets binary rule (opacity === 1.0), (2) Zone token naming proves OD-F-005 at token level, (3) GEOLOGICAL = border weight, not physical depth
+- **27 builder discoveries:** Wave 1: 8 (4 per OD), Wave 2: 11 (5+6), Wave 3: 9 (5+4)
+- **ANTI-PHYSICAL pattern confirmed:** 20/20 SOUL FAILs across all 3 waves -- depth, motion, ornamentation, gradients, rounded shapes, traffic-light colors, parallax. Zero exceptions. The system identity is ANTI-PHYSICAL: it rejects anything that makes flat screens pretend to be three-dimensional spaces.
+- **5th fractal scale discovered:** OD-006 demonstrates navigation scale (emergent from enrichment technique combination), extending DD-F-006's 4-scale specification to 5.
+
+**Working Artifacts:** `knowledge-architecture/_od-reenrichment/` -- research packages (6), verification reports (3), identity deltas (3), dark matter indexes (4), screenshots (24), R-2 evaluation, convention violations audit. See `_od-reenrichment/CLAUDE.md` for full file manifest.
 
 ===============================================================================
 ## 5. KEY DECISIONS
@@ -233,17 +261,17 @@ The org->density->axis transitive chain means AD inherits not just OD-F findings
 ## 7. ACCUMULATED RESEARCH WEIGHT
 ===============================================================================
 
-| Research Stream | Total Findings | Consumed by OD | Application Rate |
-|-----------------|---------------|----------------|------------------|
-| R-1 Documentation Patterns | 28 | 20 | ~71% |
-| R-2 Creative Layouts | 27 | 0 | 0% (AD WARNING) |
-| R-5 Combination Theory | 39 | 2 | ~5% (secondary role) |
-| DD-F Outbound Findings | 18 | 18 | 100% |
-| COMP-F Component Findings | 21 | 21 | 100% (inherited) |
-| EXT-* Bespoke Research | 53 | ~45 | ~85% |
-| **TOTAL** | **186** | **~106** | **~57%** |
+| Research Stream | Total Findings | Consumed by OD | Application Rate | Notes |
+|-----------------|---------------|----------------|------------------|-------|
+| R-1 Documentation Patterns | 28 | 22 | ~79% | Up from ~71% pre-re-enrichment (+R1-020, R1-028) |
+| R-2 Creative Layouts | 27 | 0 | 0% (AD WARNING) | Evaluated in r2-evaluation.md -- none applicable to OD |
+| R-5 Combination Theory | 39 | 2 | ~5% (secondary role) | |
+| DD-F Outbound Findings | 18 | 18 | 100% | |
+| COMP-F Component Findings | 21 | 21 | 100% (inherited) | |
+| EXT-* Bespoke Research | 94 | 94 | 100% | Up from 53/~45 pre-re-enrichment. 42 new EXT-* findings across 3 waves |
+| **TOTAL** | **227** | **~157** | **~69%** | |
 
-**Key Insight (OD-F-PR-001):** Bespoke, targeted research (EXT-*) achieves ~85% consumption while pre-existing broad research (R-1) achieves only ~71%. R-2 at 0% confirms: research not specifically targeted to hypotheses is not consumed. Future stages should adopt the bespoke research model AND explicitly evaluate existing unconsumed streams.
+**Key Insight (OD-F-PR-001, refined):** Bespoke, targeted research (EXT-*) achieves 100% consumption (94/94) while pre-existing broad research (R-1) achieves ~79%. R-2 at 0% confirms: research not specifically targeted to hypotheses is not consumed. The re-enrichment process validated this across ALL 6 ODs -- every new EXT-* finding that passed SOUL gate was applied at 100%. Future stages should adopt the bespoke research model AND explicitly evaluate existing unconsumed streams.
 
 ===============================================================================
 ## 8. FILES IN THIS FOLDER
@@ -256,7 +284,10 @@ The org->density->axis transitive chain means AD inherits not just OD-F findings
 | `OD-SYNTHESIS.md` | COMPLETE | Cross-OD synthesis and analysis |
 | `OD-AUDIT-SYNTHESIS.md` | COMPLETE | Audit record (89 findings, 16 fixes, 0 soul violations) |
 | `OD-RESEARCH-GATE.md` | COMPLETE | R-1 finding-by-finding mapping + post-build verification |
+| `OD-CONVENTION-SPEC.md` | COMPLETE | Convention specification unifying 3 quality dialects (468 lines) |
 | `HANDOFF-OD-TO-AD.md` | COMPLETE | Gate file for Stage 4 (AD) |
 | `CLAUDE.md` | COMPLETE | Navigation file for this directory |
+
+**Working Artifacts (external):** `knowledge-architecture/_od-reenrichment/` -- 43-agent re-enrichment execution artifacts. See `_od-reenrichment/CLAUDE.md` for full file manifest.
 
 ===============================================================================

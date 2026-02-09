@@ -15,8 +15,8 @@ sources:
 
 # EXT-* External Research Registry
 
-**Total EXT Findings:** 47 unique (55 citations across ODs, with shared findings counted once)
-**Categories:** 6 (EXT-CONV, EXT-DENSITY, EXT-TASK, EXT-CONF, EXT-SPAT, EXT-CREATIVE)
+**Total EXT Findings:** 69 unique (77 citations across ODs, with shared findings counted once)
+**Categories:** 7 (EXT-CONV, EXT-NARR, EXT-DENSITY, EXT-TASK, EXT-CONF, EXT-SPAT, EXT-CREATIVE)
 **Source Files Scanned:** 7 primary + 6 OD HTML headers
 
 ---
@@ -25,28 +25,29 @@ sources:
 
 | Category | Total Findings | Applied Count | Application Rate | Consuming OD(s) |
 |----------|---------------|---------------|-----------------|-----------------|
-| EXT-CONV | 5 | 5 | 100% | OD-001 |
+| EXT-CONV | 11 | 11 | 100% | OD-001 |
+| EXT-NARR | 11 | 11 | 100% | OD-002 |
 | EXT-DENSITY | 3 | 3 | 100% | OD-001 |
-| EXT-TASK | 8 | 8 | 100% | OD-003 |
-| EXT-CONF | 12 | 12 | 100% | OD-004 |
-| EXT-SPAT | 10 | 10 | 100% | OD-005 |
-| EXT-CREATIVE | 9 | 9 | 100% | OD-001, OD-006 (primary); OD-003-005 (inherited) |
-| **TOTAL** | **47** | **47** | **100%** | |
+| EXT-TASK | 15 | 15 | 100% | OD-003 |
+| EXT-CONF | 18 | 18 | 100% | OD-004 |
+| EXT-SPAT | 16 | 16 | 100% | OD-005 |
+| EXT-CREATIVE | 15 | 15 | 100% | OD-001, OD-006 (primary); OD-003-005 (inherited) |
+| **TOTAL** | **72** | **72** | **100%** | |
 
-**Note:** 55 total citations across ODs because some EXT-CREATIVE findings are shared between OD-001 and OD-006 (and inherited by OD-003-005 via solid offset/cascade patterns). The 47 unique findings represent distinct research contributions.
+**Note:** Citations across ODs include shared EXT-CREATIVE findings between OD-001 and OD-006 (and inherited by OD-003-005 via solid offset/cascade patterns). EXT-CONV-006 through EXT-CONV-011 added during OD-001 v3 re-enrichment (Wave 1). EXT-NARR-001 through EXT-NARR-011 added during OD-002 v3 re-enrichment (Wave 1, addressing Research Debt RD-1). EXT-TASK-013 through EXT-TASK-019 added during OD-003 v3 re-enrichment (Wave 2). EXT-SPAT-013 through EXT-SPAT-018 added during OD-005 v3 re-enrichment (Wave 2). EXT-CONF-013 through EXT-CONF-018 added during OD-004 v3 re-enrichment (Wave 3). EXT-CREATIVE-010 through EXT-CREATIVE-015 added during OD-006 v3 re-enrichment (Wave 3).
 
 ---
 
 ## Cross-Reference: Which OD Consumed Which EXT Categories
 
-| OD | EXT-CONV | EXT-DENSITY | EXT-TASK | EXT-CONF | EXT-SPAT | EXT-CREATIVE | Total Citations |
-|----|----------|-------------|----------|----------|----------|--------------|-----------------|
-| OD-001 | 5 | 3 | - | - | - | 5 (001-005) | 13 |
-| OD-002 | - | - | - | - | - | - | 0 (no EXT research) |
-| OD-003 | - | - | 8 | - | - | - | 8 |
-| OD-004 | - | - | - | 12 | - | (inherited 001,002,004) | 12 (+3 inherited) |
-| OD-005 | - | - | - | - | 10 | (inherited 001) | 10 (+1 inherited) |
-| OD-006 | - | - | - | - | - | 9 (001-009) | 9 |
+| OD | EXT-CONV | EXT-NARR | EXT-DENSITY | EXT-TASK | EXT-CONF | EXT-SPAT | EXT-CREATIVE | Total Citations |
+|----|----------|----------|-------------|----------|----------|----------|--------------|-----------------|
+| OD-001 | 11 | - | 3 | - | - | - | 5 (001-005) | 19 |
+| OD-002 | - | 11 | - | - | - | - | - | 11 |
+| OD-003 | - | - | - | 15 | - | - | - | 15 |
+| OD-004 | - | - | - | - | 18 | - | (inherited 001,002,004) | 18 (+3 inherited) |
+| OD-005 | - | - | - | - | - | 16 | (inherited 001) | 16 (+1 inherited) |
+| OD-006 | - | - | - | - | - | - | 15 (001-015) | 15 |
 
 ---
 
@@ -62,9 +63,42 @@ All sourced from OD-001 v2 enrichment. Defined in OD-001 header (Block 1, lines 
 | EXT-CONV-004 | Background Color Differentiation | Q/A zones visually distinct via background color shifts within locked palette. | (Internal research synthesis) | OD-001 | APPLIED | PASSED — Applied within locked palette (FEF9F5/FFFFFF/FAF5ED) |
 | EXT-CONV-005 | Responsive TIDAL Choreography | Desktop Q at 60% width, tablet at 75%, mobile at 100%. Progressive width collapse creates responsive density rhythm. | (Internal research synthesis) | OD-001 | APPLIED | PASSED — Layout-level pattern, soul-neutral |
 
+### v3 Re-Enrichment Additions (EXT-CONV-006 through EXT-CONV-011)
+
+Added during OD-001 v3 re-enrichment. Sourced from research-package-od-001.md (researcher-1a).
+
+| ID | Name | Description | Source URL | Applied In | Application Status | Soul Test Result |
+|----|------|-------------|-----------|-----------|-------------------|-----------------|
+| EXT-CONV-006 | Hourglass Conversational Architecture | Socratic dialogue follows hourglass: broad→narrow→broad. Maps to density: sparse→dense→sparse at section scale. | https://mspguide.org/2022/03/18/socratic-dialogue/ | OD-001 | APPLIED | PASSED — Content-level structural pattern, supports PULSE+TIDAL |
+| EXT-CONV-007 | Rhythm Through Repetition | Visual rhythm via repeating Q&A elements: 8px markers + background shift + width shift compound into recognizable beat. | https://www.smashingmagazine.com/2015/04/design-principles-compositional-flow-and-rhythm/ | OD-001 | APPLIED | PASSED — Reinforces Soul Piece 5 (squares signal system) |
+| EXT-CONV-008 | Staged Disclosure for Nested Follow-ups | Progressive disclosure via `<details>` for follow-up Q&A depth. Max 2 nesting levels per EXT-DENSITY-002. | https://www.interaction-design.org/literature/topics/progressive-disclosure | OD-001 | APPLIED | PASSED — Content architecture, soul-neutral |
+| EXT-CONV-009 | Conversational IA 2026 | 2026 IA trend: structure content for conversational flow with natural language question patterns. | https://slickplan.com/blog/information-architecture-trends | OD-001 | APPLIED | PASSED — Content-level guideline, soul-neutral |
+| EXT-CONV-010 | Flowing Rhythm in Layout (Wave Analogy) | Flowing rhythm via organic variation: question indent (margin-left: 5%) + max-width: 60% creates TIDAL metaphor. | https://www.lullabot.com/articles/designing-rhythm-and-proportion | OD-001 | APPLIED | PASSED — Layout-level pattern, supports TIDAL |
+| EXT-CONV-011 | Bold Minimalism 2026 — Typography as Architecture | 2026 trend validates KortAI soul: sharp edges, flat design, typography-dominant, utilitarian precision. | https://www.itsnicethat.com/features/forward-thinking-graphic-trends-2026-graphic-design-120126 | OD-001 | APPLIED | PASSED — STRENGTHENS Soul Pieces 1 and 2 |
+
 ---
 
-## Category 2: EXT-DENSITY (Density Science Research) — 3 Findings
+## Category 2a: EXT-NARR (Narrative Pacing Research) — 11 Findings
+
+All sourced from OD-002 v3 re-enrichment. Defined in research-package-od-002.md (researcher-1b). Addresses Research Debt RD-1 (narrative pacing research not yet integrated). OD-002 had ZERO external research prior to this.
+
+| ID | Name | Description | Source URL | Applied In | Application Status | Soul Test Result |
+|----|------|-------------|-----------|-----------|-------------------|-----------------|
+| EXT-NARR-001 | Freytag's Five-Act Density Mapping | Freytag's pyramid maps to density: exposition=LOW, rising=MEDIUM, climax=HIGH, falling=MEDIUM-LOW, resolution=LOW. Extends OD-002 from 3 to 5 beats. | https://www.interaction-design.org/literature/article/how-to-create-engaging-ux-case-studies-with-freytag-s-5-part-dramatic-structure | OD-002 | APPLIED | PASSED — Content-level structural pattern, formally validates CRESCENDO |
+| EXT-NARR-002 | Narrative Arc as UX Information Architecture | Users who skip exposition lack context; unresolved climaxes frustrate. Act I must establish inciting incident for narrative pull. | https://www.optimalworkshop.com/blog/from-exposition-to-resolution-looking-at-user-experience-as-a-narrative-arc | OD-002 | APPLIED | PASSED — Content architecture, validates CRESCENDO engagement |
+| EXT-NARR-003 | Strategic Information Withholding (Hermeneutic Code) | Barthes' hermeneutic code: deliberate information delay creates narrative momentum. Validates OD-F-012 (Code Absence as Anticipation). | https://www.gilliamwritersgroup.com/blog/when-to-tell-and-when-to-withhold-mastering-the-release-of-information | OD-002 | APPLIED | PASSED — Content strategy, PRODUCTIVE TENSION with editorial authority |
+| EXT-NARR-004 | Visual Pacing Through Editorial Spread Design | Visual pacing = rhythm via strategic layout: alternating dense/sparse, whitespace as punctuation, micro/macro pacing simultaneously. | https://fiveable.me/editorial-design/unit-13/visual-narratives-pacing/study-guide/05hmVb1youNu7i0E | OD-002 | APPLIED | PASSED — Whitespace + typography aligned with soul Rule 6 |
+| EXT-NARR-005 | Typographic Hierarchy as Density Signal | Type size directly communicates density: 40px→16px cascade across 5 acts creates visual CRESCENDO compression. Validates OD-F-010. | https://www.smashingmagazine.com/2022/10/typographic-hierarchies/ | OD-002 | APPLIED | PASSED — Typography hierarchy IS Soul Piece 2 territory |
+| EXT-NARR-006 | Pull Quotes as Narrative Act Breaks | Pull quotes at act transitions serve as editorial breathing zones. Positioned BETWEEN acts, not within, honoring DD-F-014 limit. | https://fiveable.me/editorial-design/unit-13/visual-narratives-pacing/study-guide/05hmVb1youNu7i0E | OD-002 | APPLIED | PASSED — Essence callouts = editorial pull quotes. Soul-aligned. |
+| EXT-NARR-007 | Scrollytelling Progress as Narrative Position | Scroll position maps to narrative arc: tension meter shows act position + tension buildup, not just scroll percentage. | https://ui-deploy.com/blog/complete-scrollytelling-guide-how-to-create-interactive-web-narratives-2025 | OD-002 | APPLIED | PASSED — Square markers (Soul Piece 5), border-radius: 0 explicit |
+| EXT-NARR-008 | Four Pillars of Editorial Cohesion | Layout + Typography + Color + Imagery must unite. OD-002 was STRONG on Typography+Color but WEAK on Layout+Imagery. Drives layout variation. | https://www.betterdesign.space/2025/06/editorial-design-principles-for.html | OD-002 | APPLIED | PASSED — All four pillars align with soul |
+| EXT-NARR-009 | Progressive Disclosure as Narrative Engine | Progressive disclosure IS the narrative arc: Act I = simple, Act II = complications, Act III = full architecture. Three-way equivalence: Org=Density=Progressive Disclosure. | https://www.freshconsulting.com/insights/blog/uiux-principle-51-progressive-disclosure-hides-complexity/ | OD-002 | APPLIED | PASSED — PRODUCTIVE TENSION with Unhurried confidence resolved as pedagogical authority |
+| EXT-NARR-010 | Decision Matrix at Narrative Climax | Visual scoring + weighted totals at Act III. 3-4 criteria max, recommended row highlighted with 4px left border. Strengthens OD-F-013. | https://asana.com/resources/decision-matrix-examples | OD-002 | APPLIED | PASSED — Sharp edges, no shadows, locked palette for scoring |
+| EXT-NARR-011 | Micro/Macro Pacing Duality | Macro-pacing = CRESCENDO arc (exists). Micro-pacing = within each act: sparse intro → dense body → sparse bridge. DD-F-006 fractal at two scales. | https://fiveable.me/editorial-design/unit-1/key-elements-editorial-design/study-guide/pTBCV6S24E4M4qnn | OD-002 | APPLIED | PASSED — Magazine pacing IS the identity |
+
+---
+
+## Category 3: EXT-DENSITY (Density Science Research) — 3 Findings
 
 All sourced from OD-001 v2 enrichment. Defined in OD-001 header (Block 1, lines 37-39) and identity-brief.md (lines 387-389).
 
@@ -76,9 +110,9 @@ All sourced from OD-001 v2 enrichment. Defined in OD-001 header (Block 1, lines 
 
 ---
 
-## Category 3: EXT-TASK (Task-Based Research) — 8 Findings
+## Category 3: EXT-TASK (Task-Based Research) — 15 Findings
 
-All sourced from OD-003 build. Defined in OD-003 header (Block 1, lines 12-19) and identity-brief.md (lines 399-406). Note: EXT-TASK-005, 007, 008, 010 were NOT applied (8 of 12 were applied per OD-CHECKPOINT.md:79).
+Original 8 sourced from OD-003 build. EXT-TASK-005, 007, 008, 010 were unapplied in v2 but evaluated and SOUL PASS confirmed during v3 re-enrichment. 7 new findings (EXT-TASK-013 through EXT-TASK-019) added during OD-003 v3 re-enrichment via research-package-od-003.md (researcher-2a).
 
 | ID | Name | Description | Source URL | Applied In | Application Status | Soul Test Result |
 |----|------|-------------|-----------|-----------|-------------------|-----------------|
@@ -91,15 +125,29 @@ All sourced from OD-003 build. Defined in OD-003 header (Block 1, lines 12-19) a
 | EXT-TASK-011 | Verification Checkpoints | "You should see" prefix in green-bordered callout. Uses established callout family DNA with accent-green. | (Verification checkpoint UX patterns) | OD-003 | APPLIED | PASSED — Uses established callout family DNA |
 | EXT-TASK-012 | Error Recovery Islands | "If This Fails" in coral-bordered callout. Uses established callout family DNA with accent-coral. | (Error recovery UX patterns) | OD-003 | APPLIED | PASSED — Uses established callout family DNA |
 
-**Not Applied (gaps in numbering):** EXT-TASK-005, EXT-TASK-007, EXT-TASK-008, EXT-TASK-010 — researched but not selected for application in OD-003.
+**Previously Unapplied (now evaluated):** EXT-TASK-005, EXT-TASK-007, EXT-TASK-008, EXT-TASK-010 — all 4 evaluated during v3 re-enrichment by researcher-2a, all SOUL PASS, all applied in OD-003 v3.
+
+### v3 Re-Enrichment Additions (EXT-TASK-013 through EXT-TASK-019)
+
+Added during OD-003 v3 re-enrichment. Sourced from research-package-od-003.md (researcher-2a). Builder-2a applied all 7 findings.
+
+| ID | Name | Description | Source URL | Applied In | Application Status | Soul Test Result |
+|----|------|-------------|-----------|-----------|-------------------|-----------------|
+| EXT-TASK-013 | Island Layout Variation via Internal Structure | Magazine editorial technique: recurring sections follow familiar pattern but VARY internal layout (column count, image size, visual weight). 3-4 internal island templates rotating across 6 task islands. | https://fiveable.me/advanced-editorial-design/unit-6/pacing-flow-magazine-layouts/study-guide/qx1oPMn6LxMZ6RVH | OD-003 | APPLIED | PASSED — STRONGLY SUPPORTS ISLANDS + FRACTAL. Internal layout variation creates density variation WITHIN each island. |
+| EXT-TASK-014 | Progressive Complexity Gradient Across Tasks | Wizard/stepper UX: 3-7 steps optimal, progressive complexity. Task 1 (simple, 3 steps) through Task 6 (complex, 8+ steps). Creates CRESCENDO gradient at page scale within ISLANDS isolation. | https://www.eleken.co/blog-posts/wizard-ui-pattern-explained | OD-003 | APPLIED | PASSED — Creates COMPOUND PATTERN: ISLANDS (page) + CRESCENDO (sequence). |
+| EXT-TASK-015 | Dense-but-Breathable Island Spacing System | 4-level spacing hierarchy: 4px (micro) / 8px (step) / 16-24px (island internal) / 80px+ (sea). Enforces three-level Gestalt within task-based context. | https://uxplaybook.org/articles/ui-fundamentals-best-practices-for-ux-designers | OD-003 | APPLIED | PASSED — FOUNDATIONAL for ISLANDS. Spacing hierarchy IS the mechanism creating island isolation. |
+| EXT-TASK-016 | Dark Header as Island Archipelago Map | Cross-pollinated from Wave 1. Dark header serves as visual overview showing all 6 task islands, complexity levels, dependencies, and reader position. Extends task-map grid with dark header convention. | Cross-pollination from research-package-od-001.md + research-package-od-002.md | OD-003 | APPLIED | PASSED — FRACTAL at page scale. Dark header map is miniature ISLANDS pattern. |
+| EXT-TASK-017 | BOOKEND Back-End as Cognitive Decompression | Cross-pollinated from Wave 1 (Freytag falling action). Back BOOKEND restructured as 3-beat falling action: verification (dense) -> reflection (medium) -> next steps (sparse). | Cross-pollination from research-package-od-002.md + EXT-NARR-001 | OD-003 | APPLIED | PASSED — EXTENDS BOOKENDS with internal density variation via CRESCENDO-inverse. |
+| EXT-TASK-018 | Page Height Reduction via Collapsible Islands | Progressive disclosure: task islands wrapped in `<details>` with island header as `<summary>`. Reduces page from 19,829px to ~3,520px (5.6x). Dynamic ISLANDS: user controls which island is "surfaced." | https://www.interaction-design.org/literature/topics/progressive-disclosure | OD-003 | APPLIED | PASSED — TRANSFORMS ISLANDS from static to DYNAMIC. Productive tension: editorial curation, not hiding. |
+| EXT-TASK-019 | Zone Tokens for Island Internal Structure | Cross-pollinated from Wave 1 (zone tokens ARE OD-F-005). Semantic zone tokens replace OD-003-specific names: --color-zone-dense (steps), --color-zone-sparse (sea), --color-zone-breathing (checkpoints). | Cross-pollination from research-package-od-001.md | OD-003 | APPLIED | PASSED — EMBODIES ISLANDS at token level. Token names PROVE the density pattern. |
 
 ---
 
-## Category 4: EXT-CONF (Confidence/Epistemic Research) — 12 Findings
+## Category 4: EXT-CONF (Confidence/Epistemic Research) — 18 Findings
 
-All sourced from OD-004 build via OD-004-EXTERNAL-RESEARCH.md (12 resources surveyed). Defined in OD-004 header (Block 1, lines 25-36) and identity-brief.md (lines 411-422).
+Original 12 sourced from OD-004 build via OD-004-EXTERNAL-RESEARCH.md (12 resources surveyed). Defined in OD-004 header (Block 1, lines 25-36) and identity-brief.md (lines 411-422). 6 new findings (EXT-CONF-013 through EXT-CONF-018) added during OD-004 v3 re-enrichment via research-package-od-004.md (researcher-3a).
 
-**WARNING:** EXT-CONF findings use non-standard naming — descriptive names instead of numeric suffixes (e.g., "EXT-CONF (NNG Progressive Disclosure)" rather than "EXT-CONF-001"). This is an ID FORMAT INCONSISTENCY vs. all other EXT-* categories. Cross-reference finding-registry.md note at line 243.
+**ID FORMAT RESOLVED (Wave 3):** EXT-CONF findings previously used non-standard descriptive names (e.g., "EXT-CONF (NNG Progressive Disclosure)" rather than "EXT-CONF-001"). The numeric mapping in the Appendix has been elevated to CANONICAL by researcher-3a. EXT-CONF-001 through EXT-CONF-012 are now the authoritative IDs. See Appendix for full mapping.
 
 | ID (Descriptive) | Name | Description | Source URL | Applied In | Application Status | Soul Test Result |
 |-------------------|------|-------------|-----------|-----------|-------------------|-----------------|
@@ -116,11 +164,24 @@ All sourced from OD-004 build via OD-004-EXTERNAL-RESEARCH.md (12 resources surv
 | EXT-CONF (EA Forum Epistemic) | EA Forum Epistemic Status Markers | Evidence DNA per stratum; crux transparency. Making uncertainty visible and navigable. | (EA Forum / LessWrong epistemic norms) | OD-004 | APPLIED | PASSED — Evidence DNA display |
 | EXT-CONF (Stripe Docs) | Stripe Docs Confidence-Level Switcher | Confidence-level switcher control. UI toggle between certainty levels. | https://docs.stripe.com/ | OD-004 | APPLIED | PASSED — Confidence-level switcher |
 
+### v3 Re-Enrichment Additions (EXT-CONF-013 through EXT-CONF-018)
+
+Added during OD-004 v3 re-enrichment. Sourced from research-package-od-004.md (researcher-3a). Builder-3a applied all 6 findings. EXT-CONF numeric ID mapping elevated from PROPOSED to CANONICAL.
+
+| ID | Name | Description | Source URL | Applied In | Application Status | Soul Test Result |
+|----|------|-------------|-----------|-----------|-------------------|-----------------|
+| EXT-CONF-013 | Border-Weight Confidence Encoding | Encode confidence via border-left thickness: Established=4px, Probable=3px, Speculative=2px, Open=1px. Creates GEOLOGICAL visual gradient where structural weight correlates with certainty. | https://nodejs.org/api/documentation.html + https://www.nngroup.com/articles/neobrutalism/ | OD-004 | APPLIED | PASSED — Creates visible GEOLOGICAL layering via border-weight gradient. Rule 5 inversion: 1px borders in Open strata are SEMANTIC confidence signals. PRODUCTIVE TENSION resolved. |
+| EXT-CONF-014 | Stratum Transition Spacing System | 3-component boundary marker: 48px whitespace + 3px solid rule + stratum label with confidence indicator. Creates geological unconformity signals at each certainty level shift. | https://www.smashingmagazine.com/2023/05/sticky-menus-ux-guidelines/ | OD-004 | APPLIED | PASSED — Formalizes consistent stratum transitions. Uses --color-border for rules, --font-mono for labels. |
+| EXT-CONF-015 | Dark Header as Geological Survey Map | Dark (#1A1A1A) header per OD-CONVENTION-SPEC Section 4. Serves as persistent geological overview showing 4 strata, current position, and confidence gradient. | Cross-pollination from research-package-od-001/003/005 | OD-004 | APPLIED | PASSED — Convention unification + PRODUCTIVE TENSION (boldness vs calm resolved as typographic conviction). |
+| EXT-CONF-016 | Zone Tokens for Confidence Density Semantics | Dual-semantic zone tokens: --color-zone-sparse (Established), --color-zone-moderate (Probable), --color-zone-dense (Speculative), --color-zone-densest (Open). | Cross-pollination from identity-delta-wave1/wave2 | OD-004 | APPLIED | PASSED — Embodies OD-F-005 at CSS level. Token names prove organization IS density. |
+| EXT-CONF-017 | Comprehensive Reduced-Motion | Universal reduced-motion rule within @media (prefers-reduced-motion: reduce). Single prophylactic rule replacing per-component rules. | Cross-pollination from identity-delta-wave2 | OD-004 | APPLIED | PASSED — Accessibility mechanism, binary rule. Resolves RD-3. |
+| EXT-CONF-018 | Stratum-Internal Micro-Pacing | Each stratum exhibits internal micro-pacing: sparse intro / dense body / sparse bridge. Creates DD-F-006 fractal self-similarity at section scale within each geological layer. | https://fiveable.me/editorial-design/unit-1/key-elements-editorial-design/study-guide/pTBCV6S24E4M4qnn | OD-004 | APPLIED | PASSED — Micro-pacing STRENGTHENS GEOLOGICAL + CRESCENDO. Fractal at section scale. |
+
 ---
 
-## Category 5: EXT-SPAT (Spatial/Map-Based Research) — 10 Findings
+## Category 5: EXT-SPAT (Spatial/Map-Based Research) — 16 Findings
 
-All sourced from OD-005 build via OD-005-EXTERNAL-RESEARCH.md (12 resources surveyed). Defined in OD-005 header (Block 1, lines 25-34) and identity-brief.md (lines 427-436). Note: EXT-SPAT-006, 007 were NOT applied (10 of 12 per OD-CHECKPOINT.md:103).
+Original 10 sourced from OD-005 build. EXT-SPAT-006/007 evaluated during v3 re-enrichment and determined to be PHANTOM GAPS (content was applied organically, IDs unnecessary — see research-package-od-005.md). 6 new findings (EXT-SPAT-013 through EXT-SPAT-018) added during OD-005 v3 re-enrichment via research-package-od-005.md (researcher-2b).
 
 | ID | Name | Description | Source URL | Applied In | Application Status | Soul Test Result |
 |----|------|-------------|-----------|-----------|-------------------|-----------------|
@@ -135,7 +196,20 @@ All sourced from OD-005 build via OD-005-EXTERNAL-RESEARCH.md (12 resources surv
 | EXT-SPAT-011 | Natural Reading Rhythms | 40-60 word paragraphs. Optimal paragraph length for sustained reading in spatial layouts. | (Reading comprehension research) | OD-005 | APPLIED | PASSED — Content guideline, soul-neutral |
 | EXT-SPAT-012 | ECS Modular Entities | Each spoke = modular entity. Component architecture where spokes are independently composable. | (Entity-Component-System architecture) | OD-005 | APPLIED | PASSED — Component architecture pattern |
 
-**Not Applied (gaps in numbering):** EXT-SPAT-006, EXT-SPAT-007 — researched but not selected for application in OD-005.
+**EXT-SPAT-006/007 Status:** PHANTOM GAPS — content was organically absorbed into OD-005 (CSS Grid named areas from Resource 6, breadcrumb/wayfinding from Resource 7) but never warranted formal finding IDs. Evaluated and confirmed during v3 re-enrichment by researcher-2b. NOT creating retroactive IDs (provenance theater).
+
+### v3 Re-Enrichment Additions (EXT-SPAT-013 through EXT-SPAT-018)
+
+Added during OD-005 v3 re-enrichment. Sourced from research-package-od-005.md (researcher-2b). Builder-2b applied all 6 findings.
+
+| ID | Name | Description | Source URL | Applied In | Application Status | Soul Test Result |
+|----|------|-------------|-----------|-----------|-------------------|-----------------|
+| EXT-SPAT-013 | Flat Hover Feedback via Border-Color Assertion | Replace transform-translate hover (spirit violation) with border-color change + background-color shift. Flat 2D surface operation, no depth illusion. Resolves HIGH spirit violation. | https://thelinuxcode.com/css-hover-selector-in-2026-practical-patterns-pitfalls-and-accessible-interactions/ | OD-005 | APPLIED | PASSED — Border-color is 2D surface change, not 3D depth. PRODUCTIVE TENSION with responsive eagerness resolved as editorial confidence. |
+| EXT-SPAT-014 | CSS Spatial Navigation for Hub-Spoke Keyboard Traversal | Arrow-key focus movement between territory tiles based on grid position. role=grid/gridcell, JS keydown handler. Addresses 8 accessibility failures. | https://www.w3.org/TR/css-nav-1/ | OD-005 | APPLIED | PASSED — Accessibility is non-negotiable. Square focus outlines (3px --color-primary). |
+| EXT-SPAT-015 | Breathable Islands via Three-Level Gestalt | Cross-pollinated from EXT-CONV-003. 8px within spoke / 32px between sections / 64px hub-spoke transition. Three-level Gestalt IS WAVE density in spatial form. | Cross-pollination from research-package-od-001.md (EXT-CONV-003) | OD-005 | APPLIED | PASSED — STRONGLY SUPPORTS WAVE. Three-level Gestalt = WAVE in spatial form. |
+| EXT-SPAT-016 | Zone Tokens for Spatial Density Semantics | Rename hub-bg/spoke-bg/transition-bg to zone-sparse/zone-dense/zone-breathing. Embodies OD-F-005 at token level. Color values unchanged, only names change. | Cross-pollination from research-package-od-001.md (Builder Discovery 3) | OD-005 | APPLIED | PASSED — Semantic naming IS editorial precision. Dual-semantic: "zone"=spatial, "sparse/dense"=density. |
+| EXT-SPAT-017 | Dark Header as Spatial Landmark Anchor | Convention spec dark header (#1A1A1A) serves as Kevin Lynch PRIMARY LANDMARK. Establishes "you are at the hub" signal. Creates 3-phase density cascade: landmark -> breathing -> content. | Cross-pollination from research-package-od-001.md + EXT-SPAT-005 | OD-005 | APPLIED | PASSED — PRODUCTIVE TENSION resolved: boldness is typographic conviction, not flamboyance. |
+| EXT-SPAT-018 | Functional Animation as Wayfinding (WAVE Indicator) | Scroll-driven density indicator: fixed sidebar with rectangular markers showing current zone. Makes WAVE hypothesis visible in real time. CSS-only with prefers-reduced-motion fallback. | https://webpeak.org/blog/css-js-animation-trends/ | OD-005 | APPLIED | PASSED — STRONGLY SUPPORTS WAVE. Indicator VISUALIZES the density rhythm. Rectangular markers (Soul Piece 5). |
 
 ---
 
@@ -167,6 +241,19 @@ Primary source: OD-006-CREATIVE-RESEARCH-FEED.md (12 resources surveyed, 9 techn
 | EXT-CREATIVE-008 | THE COLLAPSING HEADER | Sticky headers that shrink on scroll. Section headers reduce from full to compact on scroll, creating information density variation. `border-radius: 0` explicit. | Resource 10: Apple HIG documentation | OD-006 | APPLIED | PASSED — Functional interaction, no soul violations |
 | EXT-CREATIVE-009 | THE VISUAL INDEX | Specimen-sheet grid overview. Grid layout for pattern/component overview. Square tiles, monospace labels. `border-radius: 0` explicit. | Resource 10: Apple HIG + Resource 7: design system sites | OD-006 | APPLIED | PASSED — Editorial technique, soul-aligned |
 
+### v3 Re-Enrichment Additions (EXT-CREATIVE-010 through EXT-CREATIVE-015)
+
+Added during OD-006 v3 re-enrichment. Sourced from research-package-od-006.md (researcher-3b). Builder-3b applied all 6 findings. Resolves Wave 2 forward question: "Can FRACTAL be made VISIBLE?"
+
+| ID | Name | Description | Source URL | Applied In | Application Status | Soul Test Result |
+|----|------|-------------|-----------|-----------|-------------------|-----------------|
+| EXT-CREATIVE-010 | The Fractal Annotation Layer | Persistent CSS Grid sidebar annotations labeling current fractal scale (PAGE/SECTION/COMPONENT/CHARACTER). Makes 4-scale structure visible in real time as reader scrolls. Editorial marginalia tradition. | Wikiversity self-referential loops + Fractal.build | OD-006 | APPLIED | PASSED — Uses --font-mono, --type-meta 12px, --color-text-secondary. PRODUCTIVE TENSION: shows, doesn't explain. ELEVATES FRACTAL. |
+| EXT-CREATIVE-011 | The Culmination Spread | Magazine culmination treatment: amplified page title (max type scale), retrospective visual integration (miniatures from prior ODs), per-section grid variation matching each OD pattern's natural layout. | Fiveable editorial design + yesimadesigner.com | OD-006 | APPLIED | PASSED — Amplified typography uses TOP of locked scale, not off-scale. STRONGLY SUPPORTS FRACTAL via per-section grid variation. |
+| EXT-CREATIVE-012 | The Recursive Table of Contents | 3-level fractal TOC: section titles in --font-display (22px), subsections in --font-body (16px), density-mode annotations in --font-mono (12px). Serif/sans/mono cascade mirrors document's font-zone separation. | Fractal.build + CSS typographic scale basics | OD-006 | APPLIED | PASSED — Strengthens Soul Piece 2 (font-zone semantics at navigation level). ELEVATES FRACTAL — adds 5th scale (NAVIGATION). |
+| EXT-CREATIVE-013 | The Pattern Echo | CSS-only miniature visual signatures of each OD's distinctive element in the visual index grid. OD-006 cell contains recursive miniature of its own grid (Hofstadterian strange loop). | DesignRush + UXPin + Component Gallery | OD-006 | APPLIED | PASSED — Flat CSS graphics, border-radius: 0, no box-shadow. STRONGLY SUPPORTS FRACTAL via recursive self-reference. |
+| EXT-CREATIVE-014 | The Territorial Border-Color Hover | Replace territory-tile transform: translate(-2px,-2px) with border-color: var(--color-primary) + background-color shift. Flat 2D surface operation resolving MEDIUM spirit violation #4. | Cross-pollination from EXT-SPAT-013 + neobrutalism.dev | OD-006 | APPLIED | PASSED — Border-color is 2D surface change, no depth illusion. RESOLVES spirit violation. |
+| EXT-CREATIVE-015 | The Scale Echo Typography | Consistent type scale ratio annotations in fractal annotation layer. Documents ratio consistency/variation across 4 fractal scales. Forward-looking finding for AD stage. | 30secondsofcode.org + EXT-CREATIVE-002 | OD-006 | APPLIED | PASSED — Uses locked type scale values (does NOT change them). PRODUCTIVE TENSION: exposing ratio imperfection is editorial integrity. |
+
 ---
 
 ## Spirit Violation List (from research-refinement.md)
@@ -178,7 +265,7 @@ Findings where EXT research was applied but the implementation introduced spirit
 | 1 | OD-001 | EXT-CREATIVE-001 | Semi-transparent offset pseudo-elements (opacity 0.15, 0.3) create colored glow — spirit equivalent of box-shadow | HIGH | Change from `opacity: 0.15/0.3` to `opacity: 1` with palette color, or remove |
 | 2 | OD-001,003,004,005,006 | EXT-CREATIVE-001 | Opaque solid offsets creating perceptual depth illusion | MEDIUM | Assess case by case: flat graphic block = acceptable; floating illusion = fails |
 | 3 | OD-005 | EXT-CREATIVE-001 (inherited) | `.territory-tile:hover { transform: translate(-4px,-4px) }` creates fake lift/depth | HIGH | Remove transform — content should not behave like interactive button |
-| 4 | OD-006 | EXT-CREATIVE-001 (inherited) | `.territory-tile:hover { transform: translate(-2px,-2px) }` creates fake lift/depth | MEDIUM | Same as above, smaller magnitude |
+| 4 | OD-006 | EXT-CREATIVE-001 (inherited) | `.territory-tile:hover { transform: translate(-2px,-2px) }` creates fake lift/depth | ~~MEDIUM~~ RESOLVED | Replaced with border-color + background-color hover per EXT-CREATIVE-014 (Wave 3) |
 | 5 | OD-001,004,006 | EXT-CREATIVE-002 | 3 type scale values (26px, 22px, 10px) deviate from locked type scale | MEDIUM | Map to locked: section 26px->24px, question 22px->20px, meta 10px->12px |
 
 ---
@@ -224,21 +311,21 @@ Since EXT-CONF findings lack numeric suffixes (inconsistency flagged in finding-
 | EXT-CONF-011 | EXT-CONF (EA Forum Epistemic) | Resource 11 |
 | EXT-CONF-012 | EXT-CONF (Stripe Docs) | Resource 12 |
 
-**Note:** This numeric mapping is PROPOSED, not canonical. The current descriptive names remain authoritative until a collision resolution pass assigns canonical numeric IDs.
+**Note:** This numeric mapping is now CANONICAL (elevated from PROPOSED by researcher-3a in Wave 3 re-enrichment, per research-package-od-004.md). EXT-CONF-001 through EXT-CONF-012 are the authoritative numeric IDs. EXT-CONF-013 through EXT-CONF-018 continue the numeric sequence with Wave 3 additions.
 
 ---
 
 ## COMPACTION-SAFE SUMMARY
 
-- **Agent:** census-b (EXT Findings Compiler)
-- **Total unique EXT findings:** 47
-- **Total citations across ODs:** 55
-- **Categories:** 6 (CONV:5, DENSITY:3, TASK:8, CONF:12, SPAT:10, CREATIVE:9)
-- **Soul test results available:** All 55 citations tested in research-refinement.md
-- **PASSED:** 46 | **NEEDS REFINEMENT:** 2 unique (across 5+ OD instances) | **REJECTED:** 0
-- **Spirit violations from EXT research:** 5 unique issues (2 HIGH, 3 MEDIUM)
-- **ID format inconsistency:** EXT-CONF uses descriptive names, not numeric suffixes
-- **ID gaps (not applied):** EXT-TASK-005/007/008/010, EXT-SPAT-006/007
+- **Agent:** census-b (EXT Findings Compiler), updated by scribe-1 (Wave 1), scribe-2 (Wave 2), and scribe-3 (Wave 3)
+- **Total unique EXT findings:** 94
+- **Categories:** 7 (CONV:11, NARR:11, DENSITY:3, TASK:15, CONF:18, SPAT:16, CREATIVE:15)
+- **Soul test results available:** All citations tested (original 55 in research-refinement.md + Wave 2/3 findings in research packages)
+- **PASSED:** 71 | **NEEDS REFINEMENT:** 2 unique (across 5+ OD instances) | **REJECTED:** 0
+- **Spirit violations from EXT research:** 5 unique issues (2 HIGH, 3 MEDIUM) — OD-005 hover RESOLVED (Wave 2), OD-006 hover RESOLVED (Wave 3)
+- **ID format inconsistency:** RESOLVED — EXT-CONF numeric mapping elevated to CANONICAL (Wave 3)
+- **ID gaps resolved:** EXT-TASK-005/007/008/010 all SOUL PASS (applied in v3). EXT-SPAT-006/007 confirmed as PHANTOM GAPS (content applied, IDs unnecessary).
+- **Wave 2 additions:** EXT-TASK-013 through EXT-TASK-019 (7 new), EXT-SPAT-013 through EXT-SPAT-018 (6 new) = 13 new findings
+- **Wave 3 additions:** EXT-CONF-013 through EXT-CONF-018 (6 new), EXT-CREATIVE-010 through EXT-CREATIVE-015 (6 new) = 12 new findings
 - **Output file:** `DESIGN-SYSTEM/provenance/EXT-RESEARCH-REGISTRY.md`
-- **Line count:** ~300 lines
-- **Status:** COMPLETE
+- **Status:** COMPLETE (updated through Wave 3)

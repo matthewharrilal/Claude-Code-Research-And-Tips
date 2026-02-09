@@ -219,7 +219,7 @@ Self-similarity creates coherence that variety cannot. DD-006 scored highest
 5. **Layers for expert/novice paths** — Geological model from DD-004
 
 ═══════════════════════════════════════════════════════════════════════════════
-## 4. STAGE 3: ORGANIZATION (OD) — ✅ COMPLETE (~34.8/40 avg)
+## 4. STAGE 3: ORGANIZATION (OD) — ✅ COMPLETE (~35.5/40 avg, v3 re-enriched)
 ═══════════════════════════════════════════════════════════════════════════════
 
 ### The Story
@@ -229,15 +229,13 @@ be ORGANIZED, not just spaced. Six explorations tested six hypotheses about
 organizational patterns, and the crown jewel discovery was that organization and
 density are not two layers but ONE phenomenon.
 
-Six explorations completed:
-- OD-001 Conversational (~35/40): Q&A dialogue creates natural PULSE rhythm
-- OD-002 Narrative Arc (~33/40): Three-act structure creates CRESCENDO
-- OD-003 Task-Based (~35/40): Discrete task clusters create ISLANDS
-- OD-004 Confidence-Based (INCLUDE): Certainty stratification creates GEOLOGICAL layers
-- OD-005 Spatial/Map (INCLUDE): Hub-and-spoke creates WAVE pattern
-- OD-006 Creative (INCLUDE, crown jewel, >=36/40): Meta-documentation proved
-  organization IS density — cycling through all 5 modes with zero explicit density
-  manipulation, each section's density shifted automatically
+Six explorations completed and re-enriched (v3) via 43-agent gate-based team:
+- OD-001 Conversational (37/40): Q&A dialogue creates natural PULSE rhythm. Zone tokens proved OD-F-005 at token level.
+- OD-002 Narrative Arc (35/40): Five-beat Freytag structure creates CRESCENDO with falling action as cognitive decompression.
+- OD-003 Task-Based (~35/40): Collapsible task clusters create dual-mode ISLANDS (static + interactive). Compound ISLANDS+CRESCENDO validated.
+- OD-004 Confidence-Based (34/40): Border-weight gradient (4px/3px/2px/1px) makes GEOLOGICAL layering visible without physical depth.
+- OD-005 Spatial/Map (35/40): Hub-and-spoke creates WAVE pattern. WAVE density self-documentation (scroll-driven indicator).
+- OD-006 Creative (37/40, crown jewel): Meta-documentation proved organization IS density. 5th fractal scale (navigation) emerged from compound enrichment techniques.
 
 ### What It Consumed
 
@@ -275,11 +273,13 @@ Six explorations completed:
 
 ### Quality Metrics
 
-- **Average score:** ~34.8/40 across 6 explorations
+- **Average score:** ~35.5/40 across 6 explorations (v3 re-enriched, up from ~34.8/40)
 - **Soul compliance:** 100% (0 border-radius violations, 0 box-shadow violations across 3,479+ elements)
+- **ANTI-PHYSICAL confirmation:** 20/20 SOUL FAILs across 3 waves — zero exceptions
 - **Granular audit:** 89 findings (8 Critical, 6 High, 16 Medium, 8 Low, ~51 Notes) from 17-agent adversarial audit
 - **Fixes applied:** 16/16 (2 additional findings were false positives from font-loading timing + scroll animation)
-- **3 quality dialects:** Polished (OD-001/002), Functional (OD-003/004/005), Editorial (OD-006)
+- **Re-enrichment:** 43 agents, 3 waves, 42 EXT findings applied, 27 builder discoveries, convention spec unified 3 quality dialects
+- **3 quality dialects (unified):** Polished (OD-001/002), Functional (OD-003/004/005), Editorial (OD-006) — unified via OD-CONVENTION-SPEC.md
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## 5. STAGE 4: AXIS (AD) — PENDING

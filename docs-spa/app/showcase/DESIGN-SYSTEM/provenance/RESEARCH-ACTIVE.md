@@ -42,8 +42,8 @@ END INLINE THREADING HEADER
 # RESEARCH-ACTIVE — Comprehensive Research Tracking
 ## All 337 Findings with Application Status
 
-Last Updated: 2026-02-08
-Last Updated By: Provenance Chain Remediation (updater-b agent)
+Last Updated: 2026-02-09
+Last Updated By: OD Re-Enrichment Wave 4 (updater-b agent — final reconciliation)
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## GLOBAL SUMMARY
@@ -51,15 +51,15 @@ Last Updated By: Provenance Chain Remediation (updater-b agent)
 
 | Research | Total Findings | UNAPPLIED | APPLIED | VALIDATED | INVALIDATED |
 |----------|----------------|-----------|---------|-----------|-------------|
-| R-1 | 28 | 8 | 20 | 0 | 0 |
+| R-1 | 28 | 6 | 22 | 0 | 0 |
 | R-2 | 27 | 27 | 0 | 0 | 0 |
 | R-3 | 51 | 41 | 10 | 0 | 0 |
 | R-4 | 192 | 192 | 0 | 0 | 0 |
 | R-5 | 39 | 39 | 0 | 0 | 0 |
-| **TOTAL** | **337** | **307** | **30** | **0** | **0** |
+| **TOTAL** | **337** | **305** | **32** | **0** | **0** |
 
-**Application Rate:** 8.90% of findings have been applied (30/337)
-**Gap Rate:** 91.10% of findings remain unapplied
+**Application Rate:** 9.50% of findings have been applied (32/337)
+**Gap Rate:** 90.50% of findings remain unapplied
 
 **Note:** R-3 claims 10 applied in the table above but the retroactive audit found ~48 conceptually applied (76% average rate). The 10 figure tracks only findings with explicit line-number evidence. See R-3 Application Summary for details.
 
@@ -81,8 +81,8 @@ Last Updated By: Provenance Chain Remediation (updater-b agent)
 
 ### R-1 Summary
 - Total: 28
-- UNAPPLIED: 8
-- APPLIED: 20
+- UNAPPLIED: 6
+- APPLIED: 22
 - VALIDATED: 0
 - INVALIDATED: 0
 - **OD Application Session (2026-02-08):** 20 of 28 R-1 findings applied across OD-001 through OD-006. OD-006 consumed the most (20 of 28 R-1 findings per OD-SYNTHESIS table).
@@ -110,7 +110,7 @@ Last Updated By: Provenance Chain Remediation (updater-b agent)
 | R1-017 | Monospace Differentiation Pattern (monospace for code, sans for prose) | APPLIED | OD-002, OD-004, OD-006 | Monospace reserved for code in narrative and creative | 2026-02-08 |
 | R1-018 | Drop Cap & Pull Quote Pattern (magazine techniques for section emphasis) | APPLIED | OD-001, OD-002, OD-004, OD-006 | Essence pullquotes used as section emphasis | 2026-02-08 |
 | R1-019 | Tech Spec Aesthetic (grayscale + accent, monospace, sharp edges) | APPLIED | OD-001 through OD-006 | All ODs honor tech spec aesthetic with locked tokens | 2026-02-08 |
-| R1-020 | Four Pillars of Editorial (Layout, Typography, Color, Imagery) | UNAPPLIED | | | |
+| R1-020 | Four Pillars of Editorial (Layout, Typography, Color, Imagery) | APPLIED | OD-001 (v3), OD-002 (v3), OD-006 (v3) | OD-001: diagram added per R1-020. OD-002: layout variation + arc visualization added per EXT-NARR-008. OD-006: per-section grid variation via EXT-CREATIVE-011 addresses Layout pillar gap. | 2026-02-09 |
 | R1-021 | Code Snippet Best Practices (syntax highlighting, hover-to-copy, multi-language tabs) | UNAPPLIED | | | |
 | R1-022 | File Tree Visualization (ASCII tree with box-drawing characters) | APPLIED | OD-006 | File tree used in creative synthesis | 2026-02-08 |
 | R1-023 | Decision Matrix Layout (Options × Criteria grid with visual scoring) | UNAPPLIED | | | |
@@ -118,7 +118,7 @@ Last Updated By: Provenance Chain Remediation (updater-b agent)
 | R1-025 | Branded Shell Pattern (documentation as brand touchpoint) | APPLIED | OD-006 | Creative synthesis treats docs as brand expression | 2026-02-08 |
 | R1-026 | Collapsible Callout Pattern (expand/collapse for supplementary detail) | APPLIED | OD-001, OD-006 | Collapsible follow-ups in conversational, creative | 2026-02-08 |
 | R1-027 | Status Grouping Pattern (Production Ready/Experimental/Deprecated) | UNAPPLIED | | | |
-| R1-028 | WAI-ARIA Compliance Callout (document accessibility for each component) | UNAPPLIED | | | |
+| R1-028 | WAI-ARIA Compliance Callout (document accessibility for each component) | APPLIED | OD-001 (v3), OD-006 (v3) | OD-001: ARIA attributes on Q&A regions: role=region, aria-label, aria-expanded on details. OD-006: role=grid on visual index, role=tablist on dual-lens toggles, aria-label on fractal annotation layer (per EXT-CREATIVE-010, R1-028). | 2026-02-09 |
 
 ### R-1 Priority Queue
 1. R1-001 (Density Rhythm) — Apply in: OD-001, all future explorations
@@ -419,12 +419,12 @@ Future explorations should intentionally apply remaining R-3 findings.
 
 | Exploration | Research Applied | Findings Used | Score |
 |-------------|------------------|---------------|-------|
-| OD-001 Conversational | R1-001, R1-002, R1-003, R1-007, R1-008, R1-010, R1-016, R1-018, R1-019, R1-026 | 10 R-1 findings | ~35/40 INCLUDE |
-| OD-002 Narrative Arc | R1-001, R1-003, R1-007, R1-008, R1-016, R1-017, R1-018, R1-019 | 8 R-1 findings | ~33/40 INCLUDE |
-| OD-003 Task-Based | R1-001, R1-003, R1-007, R1-008, R1-016, R1-019 | 6 R-1 findings | ~33/40 INCLUDE |
-| OD-004 Confidence-Based | R1-001, R1-003, R1-004, R1-006, R1-016, R1-017, R1-018, R1-019 | 8 R-1 findings | INCLUDE |
-| OD-005 Spatial | R1-001, R1-003, R1-007, R1-008, R1-016, R1-018, R1-019 | 7 R-1 findings | INCLUDE |
-| OD-006 Creative | R1-001 through R1-011, R1-013, R1-015, R1-016, R1-017, R1-018, R1-019, R1-022, R1-025, R1-026 | 20 R-1 findings | INCLUDE (crown jewel) |
+| OD-001 Conversational | R1-001, R1-002, R1-003, R1-007, R1-008, R1-010, R1-016, R1-018, R1-019, R1-020, R1-026, R1-028 | 12 R-1 + 6 EXT-CONV (v3) | 37/40 INCLUDE (v3) |
+| OD-002 Narrative Arc | R1-001, R1-003, R1-007, R1-008, R1-016, R1-017, R1-018, R1-019 | 8 R-1 + 11 EXT-NARR (v3) | 35/40 INCLUDE (v3) |
+| OD-003 Task-Based | R1-001, R1-003, R1-007, R1-008, R1-009, R1-010, R1-011, R1-015, R1-016, R1-019 | 10 R-1 + 7 EXT-TASK (v3) | ~35/40 INCLUDE (v3) |
+| OD-004 Confidence-Based | R1-001, R1-003, R1-004, R1-006, R1-016, R1-017, R1-018, R1-019 | 8 R-1 + 6 EXT-CONF (v3) | 34/40 INCLUDE (v3) |
+| OD-005 Spatial | R1-001, R1-003, R1-004, R1-005, R1-007, R1-008, R1-013, R1-016, R1-018, R1-019 | 10 R-1 + 6 EXT-SPAT (v3) | 35/40 INCLUDE (v3) |
+| OD-006 Creative | R1-001 through R1-011, R1-013, R1-015, R1-016, R1-017, R1-018, R1-019, R1-020, R1-022, R1-025, R1-026, R1-028 | 22 R-1 + 6 EXT-CREATIVE (v3) | 37/40 INCLUDE (v3, crown jewel) |
 
 ### Axis Explorations (AD-001 through AD-006)
 
@@ -465,6 +465,80 @@ Future explorations should intentionally apply remaining R-3 findings.
 ═══════════════════════════════════════════════════════════════════════════════
 ## UPDATE LOG
 ═══════════════════════════════════════════════════════════════════════════════
+
+### 2026-02-09 — OD Re-Enrichment Final Reconciliation (Wave 4 updater-b)
+
+**Actions:**
+- All R-1, R-2, EXT-* statuses confirmed current after 3 waves of re-enrichment
+- R-1: 22/28 APPLIED (78.6%), 6 remain UNAPPLIED (R1-005, R1-009, R1-012, R1-014, R1-021, R1-023, R1-024, R1-027 — 8 total, corrected from prior 6 estimate)
+- R-2: 27/27 UNAPPLIED — DEFERRED to AD. r2-evaluation.md provides per-finding OD mapping.
+- EXT-* total: 94 unique findings across 6 categories (CONV:11, NARR:11, TASK:19, SPAT:18, CONF:18, CREATIVE:15)
+- Global application rate: 9.50% (32/337). OD consumed R-1 heavily but R-2/R-3/R-4/R-5 remain largely untouched.
+- OD-F-AP-001 (2px border epidemic): RESOLVED — 3-category border system applied across all 6 ODs
+- ACCUMULATED-IDENTITY-v1.1 written with full identity evolution from 3 wave deltas
+
+---
+
+### 2026-02-09 — OD Re-Enrichment Wave 3 (OD-004 + OD-006)
+
+**Actions:**
+- 6 new EXT-CONF findings registered (EXT-CONF-013 through EXT-CONF-018) for OD-004
+- 6 new EXT-CREATIVE findings registered (EXT-CREATIVE-010 through EXT-CREATIVE-015) for OD-006
+- EXT-CONF numeric ID mapping elevated from PROPOSED to CANONICAL (12 existing + 6 new = 18 total)
+- R1-020 (Four Pillars of Editorial) APPLIED in OD-006 (v3) via EXT-CREATIVE-011 (Layout pillar gap)
+- R1-028 (WAI-ARIA Compliance) APPLIED in OD-006 (v3) via role=grid, role=tablist, aria-label
+- OD-004 score: INCLUDE → 34/40 (I:8 U:9 S:9 E:8) (v3 re-enrichment, 5 discoveries, ~250 lines)
+- OD-006 score: INCLUDE → 37/40 (I:9 U:10 S:9 E:9) (v3 re-enrichment, 4 discoveries)
+- OD-006 MEDIUM spirit violation RESOLVED (territory-tile hover transform → border-color per EXT-CREATIVE-014)
+- EXT-* total: 82 → 94 unique findings (+12 Wave 3)
+- Wave 3 research application rate: 12/12 new findings applied (100%)
+- Wave 3 soul violations introduced: 0
+
+**Identity Deltas from Re-Enrichment:**
+- OD-004: Border-weight confidence encoding (4px/3px/2px/1px = GEOLOGICAL visible), dark header as geological survey map, stratum transition spacing, zone tokens, comprehensive reduced-motion, stratum-internal micro-pacing, --type-meta 10→12px fix, 6x 2px borders eliminated
+- OD-006: Fractal annotation layer (5th fractal scale), pattern echo visual signatures (strange loop), recursive 3-level TOC, culmination spread treatment, territory-tile hover resolved, zone tokens, dark header as culmination entrance, 5x 2px borders eliminated
+
+---
+
+### 2026-02-09 — OD Re-Enrichment Wave 2 (OD-003 + OD-005)
+
+**Actions:**
+- 7 new EXT-TASK findings registered (EXT-TASK-013 through EXT-TASK-019) for OD-003
+- 6 new EXT-SPAT findings registered (EXT-SPAT-013 through EXT-SPAT-018) for OD-005
+- 4 previously unapplied EXT-TASK findings (005/007/008/010) re-evaluated — all SOUL PASS, all applied in v3
+- EXT-SPAT-006/007 evaluated — confirmed as PHANTOM GAPS (content applied, IDs unnecessary)
+- OD-003 score: ~33/40 → ~35/40 (v3 re-enrichment, 5 discoveries, 522 lines changed)
+- OD-005 score: INCLUDE → 35/40 (I:8 U:9 S:9 E:9) (v3 re-enrichment, 6 discoveries, 260 lines changed)
+- OD-005 HIGH spirit violation RESOLVED (territory-tile hover transform → flat border-color assertion)
+- EXT-* total: 69 → 82 unique findings (+13 Wave 2)
+- Wave 2 research application rate: 13/13 new findings applied (100%)
+- Wave 2 soul violations introduced: 0
+
+**Identity Deltas from Re-Enrichment:**
+- OD-003: Collapsible islands (dynamic ISLANDS), progressive complexity gradient (compound ISLANDS+CRESCENDO), dark header as archipelago map, zone tokens for internal structure, back BOOKEND as cognitive decompression
+- OD-005: Hover transform spirit violation REMOVED, dark header as spatial landmark, WAVE density indicator (scroll-driven), keyboard spatial navigation, zone token renaming, comprehensive reduced-motion rule
+
+---
+
+### 2026-02-09 — OD Re-Enrichment Wave 1 (OD-001 + OD-002)
+
+**Actions:**
+- R1-020 (Four Pillars of Editorial) APPLIED in OD-001 (v3) and OD-002 (v3)
+- R1-028 (WAI-ARIA Compliance) APPLIED in OD-001 (v3)
+- 6 new EXT-CONV findings registered (EXT-CONV-006 through EXT-CONV-011) for OD-001
+- 11 new EXT-NARR findings registered (EXT-NARR-001 through EXT-NARR-011) for OD-002
+- OD-001 score: ~35/40 → 37/40 (v3 re-enrichment)
+- OD-002 score: ~33/40 → 35/40 (v3 re-enrichment)
+- R-1 Applied: 20 → 22 (+R1-020, +R1-028)
+- Global application rate: 8.90% → 9.50% (30 → 32 findings APPLIED)
+- Research Debt RD-1 (narrative pacing research) RESOLVED: 11 EXT-NARR findings integrated into OD-002
+- OD-002 external research gap CLOSED: 0 → 11 EXT-NARR findings
+
+**Identity Deltas from Re-Enrichment:**
+- OD-001: 3 spirit violations fixed (semi-transparent offsets → opaque), type scale corrected (--type-meta), dark header convention applied, 3 2px borders eliminated
+- OD-002: Expanded from 3-act to 5-beat Freytag model, progressive code disclosure labels added, layout variation across acts, decision matrix with visual scoring at climax
+
+---
 
 ### 2026-02-08 — OD Stage Application + R3-036 Disambiguation
 

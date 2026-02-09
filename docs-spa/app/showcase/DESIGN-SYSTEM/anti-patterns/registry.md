@@ -313,4 +313,34 @@ creative overrides only where intentionally needed.
 **Discovery Context:** Fresh-eyes adversarial audit and cross-OD consistency agent
 identified three quality dialects: Polished (OD-001/002), Functional (OD-003/004/005),
 Editorial (OD-006). The typography scale divergence in OD-006 was confirmed as
-the primary driver of the Editorial dialect.
+the primary driver of the Editorial dialect. Unified via OD-CONVENTION-SPEC.md
+during re-enrichment.
+
+---
+
+### OD-AP-003: Semi-Transparent Backgrounds (Systemic Audit Gap)
+
+**What:** `rgba(0,0,0,0.04)` or any opacity < 1.0 on background colors, offset pseudo-elements, or inline code backgrounds
+**Scale:** Found in EVERY wave of re-enrichment (Wave 1: essence-pullquote::after at opacity 0.3, Wave 3: two independent OD-004 locations with rgba(0,0,0,0.04) on callout inline code and troubleshoot inline code)
+**Why it fails:** Any opacity < 1.0 on offset pseudo-elements creates the same visual
+effect as box-shadow — a depth illusion that violates the ANTI-PHYSICAL identity.
+Research catches obvious violations (box-shadow, filter, transform), but embedded
+rgba backgrounds survive multiple review layers.
+**Alternative:** Fully opaque backgrounds only. `opacity: 1` on all visual elements.
+
+```css
+/* WRONG — semi-transparent creates shadow illusion */
+.offset::after { background: rgba(0,0,0,0.04); }
+.callout code { background: rgba(0,0,0,0.04); }
+
+/* RIGHT — fully opaque, no depth illusion */
+.offset::after { background: #F5F0EB; opacity: 1; }
+.callout code { background: #F0EBE3; }
+```
+
+**Binary rule:** opacity === 1.0 on all visual elements. No exceptions.
+
+**Discovery Context:** OD re-enrichment Waves 1-3 (2026-02-09). Every builder
+in every wave found opacity < 1.0 violations not caught by prior audits or
+research packages. Confirmed as systemic audit gap requiring targeted `rgba(`
+and `opacity:` sweep in future stages.

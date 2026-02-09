@@ -6,10 +6,12 @@ predecessor: provenance/stage-2-density-dd/DD-outbound-findings.md
 successor: provenance/stage-4-axis-ad/AD-outbound-findings.md
 backbone_ref: DESIGN-SYSTEM/BACKBONE.md
 manifest_ref: DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md
-last_updated: 2026-02-08
+last_updated: 2026-02-09
 total_od_f_findings: 13
 total_findings_all_categories: 17
 finding_id_range: OD-F-001 through OD-F-013, OD-F-AP-001, OD-F-MP-001, OD-F-PR-001, OD-F-FL-001
+wave2_reenrichment: OD-003 (v3, 7 EXT-TASK, 5 discoveries), OD-005 (v3, 6 EXT-SPAT, 6 discoveries, 35/40)
+wave3_reenrichment: OD-004 (v3, 6 EXT-CONF, 5 discoveries, 34/40), OD-006 (v3, 6 EXT-CREATIVE, 4 discoveries, 37/40)
 ---
 
 # OD OUTBOUND FINDINGS (OD-F-###)
@@ -80,7 +82,7 @@ Priority (OD-CHECKPOINT > builder-log).
 | **Source** | OD-001-conversational.html |
 | **Discovery Context** | Built during OD-001 iteration 1-2; observed that question containers at 60% max-width and answer containers at 100% width create a visible rhythmic pattern |
 | **Status** | APPLIED |
-| **Score** | ~35/40 |
+| **Score** | 37/40 (v3) |
 | **Target Stages** | AD, CD, Migration |
 
 **Description:** During OD-001 construction, the conversational Q&A pattern revealed
@@ -115,7 +117,7 @@ Execution: 9).
 | **Source** | OD-001-conversational.html |
 | **Discovery Context** | Discovered during OD-001 build; follow-up questions at 6px markers (vs 8px top-level) create recursive conversational structure |
 | **Status** | APPLIED |
-| **Score** | ~35/40 |
+| **Score** | 37/40 (v3) |
 | **Target Stages** | AD, CD, Migration |
 
 **Description:** Within OD-001's conversational pattern, follow-up questions emerged
@@ -147,7 +149,7 @@ line 185 cites this finding as section-scale fractal nesting proof.
 | **Source** | OD-001-conversational.html |
 | **Discovery Context** | Core OD-001 hypothesis validation; the organizational pattern NATURALLY creates the density pattern, validating DD-F-010 |
 | **Status** | APPLIED |
-| **Score** | ~35/40 |
+| **Score** | 37/40 (v3) |
 | **Target Stages** | AD, CD, Migration |
 
 **Description:** The most fundamental OD-001 discovery: Q&A pairs are inherent PULSE
@@ -180,7 +182,7 @@ hypothesis that conversational organization naturally creates PULSE.
 | **Source** | OD-001-conversational.html |
 | **Discovery Context** | Observed during OD-001 refinement; dense answer sections need recovery zones to prevent reader fatigue |
 | **Status** | APPLIED |
-| **Score** | ~35/40 |
+| **Score** | 37/40 (v3) |
 | **Target Stages** | AD, CD, Migration |
 
 **Description:** During OD-001 refinement, a pattern emerged: after dense answer
@@ -360,7 +362,7 @@ with OD-006 canonical findings. See "OD-F-005 Disambiguation" section above.
 | **Source** | OD-002-narrative.html |
 | **Discovery Context** | Core OD-002 hypothesis validation; narrative arc from simple API concepts (Act I sparse) through complexity (Act II medium) to dense architecture (Act III) |
 | **Status** | APPLIED |
-| **Score** | ~33/40 |
+| **Score** | 35/40 (v3) |
 | **Target Stages** | AD, CD, Migration |
 
 **Description:** OD-002 validated that narrative arc organization naturally creates
@@ -391,7 +393,7 @@ OD-CHECKPOINT.md records ~33/40 score.
 | **Source** | OD-002-narrative.html |
 | **Discovery Context** | Discovered during OD-002 build; headings shrink with narrative arc, mirroring CRESCENDO density increase visually |
 | **Status** | APPLIED |
-| **Score** | ~33/40 |
+| **Score** | 35/40 (v3) |
 | **Target Stages** | AD, CD, Migration |
 
 **Description:** Within OD-002's narrative arc, heading typography progressively
@@ -422,7 +424,7 @@ All 6 OD headers cite R1-016 as applied.
 | **Source** | OD-002-narrative.html |
 | **Discovery Context** | OD-002 unique component; rising complexity visualization shows arc position without interrupting reading flow |
 | **Status** | APPLIED |
-| **Score** | ~33/40 |
+| **Score** | 35/40 (v3) |
 | **Target Stages** | AD, CD, Migration |
 
 **Description:** OD-002 introduced tension meters -- compact visual indicators that
@@ -452,7 +454,7 @@ line 146 (original OD-F-007, now renumbered).
 | **Source** | OD-002-narrative.html |
 | **Discovery Context** | Observed during OD-002 build that withholding code blocks from exposition creates narrative tension; first code appearance has greater impact |
 | **Status** | APPLIED |
-| **Score** | ~33/40 |
+| **Score** | 35/40 (v3) |
 | **Target Stages** | AD, CD, Migration |
 
 **Description:** In OD-002's narrative arc, code blocks are deliberately absent from
@@ -482,7 +484,7 @@ code appears in Act II. builder-log.md line 147 (original OD-F-008, now renumber
 | **Source** | OD-002-narrative.html |
 | **Discovery Context** | Discovered during OD-002 Act III; decision matrices placed at climax serve both narrative purpose (resolution) and density purpose (peak density) |
 | **Status** | APPLIED |
-| **Score** | ~33/40 |
+| **Score** | 35/40 (v3) |
 | **Target Stages** | AD, CD, Migration |
 
 **Description:** OD-002's Act III (climax) naturally culminated in a decision matrix
@@ -558,7 +560,7 @@ cycling with zero density manipulation). OD-CHECKPOINT.md line 112.
 | **ID** | OD-F-PR-001 |
 | **Finding** | OD-001 v2 enrichment with 13 external UX findings raised score from 34 to 35.5/40. External research is high-leverage. |
 | **Source** | OD-001 v1 vs v2 comparison |
-| **Score** | 34 -> 35.5 |
+| **Score** | 34 -> 35.5 -> 37 (v3) |
 | **Target Stages** | Methodology |
 
 **Description:** OD-001's first version scored 34/40. After enrichment with 13
@@ -583,6 +585,47 @@ Additionally, OD-002 received NO external research enrichment and scored lowest 
 33/40. All externally-enriched ODs scored higher. This correlation suggests that
 external research enrichment is not just high-leverage but may be necessary for
 scores above 33/40.
+
+**v3 Re-Enrichment Validation — Wave 1 (2026-02-09):** OD-001 v3 with 6 additional EXT-CONV
+findings raised score from ~35 to 37/40 (+2). OD-002 v3 with 11 EXT-NARR findings
+(its first-ever external research) raised score from ~33 to 35/40 (+2). This
+CONFIRMS OD-F-PR-001: bespoke external research is the highest-leverage enrichment
+technique. OD-002's +2 jump from zero-to-eleven external findings is the strongest
+validation yet.
+
+**v3 Re-Enrichment Validation — Wave 2 (2026-02-09):** OD-003 v3 with 7 new EXT-TASK
+findings (EXT-TASK-013 through EXT-TASK-019) plus re-evaluation of 4 previously
+unapplied findings. Builder-2a reported 5 discoveries and 522 lines changed. Primary
+deficit (structural monotony across 6 identical task islands) ADDRESSED via EXT-TASK-007
+(complexity indicators), EXT-TASK-013 (layout variation), EXT-TASK-014 (progressive
+complexity). OD-005 v3 with 6 new EXT-SPAT findings (EXT-SPAT-013 through EXT-SPAT-018)
+raised score to 35/40 (I:8 U:9 S:9 E:9). Builder-2b reported 6 discoveries and 260
+lines changed. HIGH spirit violation RESOLVED (territory-tile hover transform replaced
+with flat border-color assertion per EXT-SPAT-013). Research application rate: 6/6
+SOUL PASS findings applied (100%). Wave 2 CONFIRMS the Wave 1 pattern: bespoke
+research is the highest-leverage enrichment technique, now validated across 4 ODs.
+
+**v3 Re-Enrichment Validation — Wave 3 (2026-02-09):** OD-004 v3 with 6 new EXT-CONF
+findings (EXT-CONF-013 through EXT-CONF-018) raised score to 34/40 (I:8 U:9 S:9 E:8).
+Builder-3a reported 5 discoveries (B3A-001 through B3A-005) and ~250 CSS lines modified.
+EXT-CONF numeric ID mapping elevated from PROPOSED to CANONICAL (12 existing + 6 new =
+18 total EXT-CONF findings). Key enrichments: border-weight confidence encoding (4px/
+3px/2px/1px gradient makes GEOLOGICAL layering VISIBLE), dark header as geological survey
+map, stratum transition spacing system, zone tokens for confidence density semantics.
+Rule 5 inversion: 1px borders in Open/Speculative strata are SEMANTIC confidence signals,
+not anti-pattern violations. 6 instances of 2px border epidemic eliminated. Convention
+fixes: dark code blocks, dark header, --type-meta 10px->12px. Soul checklist: 10/10 PASS.
+OD-006 v3 with 6 new EXT-CREATIVE findings (EXT-CREATIVE-010 through EXT-CREATIVE-015)
+raised self-score to 37/40 (I:9 U:10 S:9 E:9). Builder-3b reported 4 discoveries
+(B3B-001 through B3B-004). Crown jewel meta-page demonstrating all 5 patterns. Key
+enrichments: fractal annotation layer (makes FRACTAL VISIBLE at 5th scale), pattern
+echo visual signatures with recursive self-reference, recursive 3-level TOC, culmination
+spread treatment, territory-tile hover spirit violation RESOLVED (transform replaced
+with border-color assertion per EXT-CREATIVE-014). 5 instances of 2px borders eliminated.
+Convention spec alignment: dark header, zone tokens, border 3-category system. Soul
+checklist: 10/10 PASS. Wave 3 application rate: 12/12 SOUL PASS findings applied (100%).
+Wave 3 CONFIRMS the pattern across all 6 ODs: bespoke research is the highest-leverage
+enrichment technique.
 
 **Chain Impact:** Future stages (AD, CD) should adopt the bespoke research model:
 generate targeted external research for each exploration's specific hypothesis, AND
@@ -771,6 +814,70 @@ OD verified ALL explorations against DD findings:
 DD-F-016 violation is the ONLY DD-F constraint that was not fully honored.
 The 2px border epidemic (OD-F-AP-001) is the #1 systemic finding from the
 OD Granular Adversarial Audit. See anti-patterns section above.
+
+===============================================================================
+## WAVE 5 POST-RE-ENRICHMENT AUDIT (2026-02-09)
+===============================================================================
+
+### Audit Summary
+
+Wave 5 adversarial audit executed with 8 agents (fresh-eyes, standards,
+visual-a/b/c, systematic-a/b/c) plus traverser and after-screenshot agents.
+Calibration test planted 3 intentional violations in OD-003; all detected
+(89% detection rate, PASS). All calibration violations removed post-audit.
+
+### OD-AP-003 Confirmed Systemic
+
+**OD-AP-003 (semi-transparent backgrounds via rgba/opacity) confirmed across
+ALL 6 ODs.** Total: ~27 rgba declarations with alpha < 1.0 + 5 sub-1.0 opacity
+values = ~32 violations. The pattern persists in the callout variant system
+(rgba at 0.04-0.06 alpha on callout backgrounds) and in decorative opacity
+(fractal annotations at 0.6-0.7 in OD-006, micro-labels at 0.6-0.7 in OD-001).
+
+- **OD-001:** 6 rgba callout bgs + 2 opacity (micro-labels at 0.7, 0.6)
+- **OD-002:** 6 rgba callout bgs
+- **OD-003:** 4 rgba (zone-emphasis, inline code, code line separator, troubleshoot)
+- **OD-004:** 0 violations (CLEANEST — zero rgba, zero sub-1.0 opacity)
+- **OD-005:** 5 rgba callout bgs
+- **OD-006:** 1 rgba (code highlight) + 3 opacity (fractal annotations 0.6/0.7, TOC 0.7)
+
+This confirms OD-AP-003 is the #1 remaining systemic issue after re-enrichment.
+The binary rule is clear: opacity === 1.0 everywhere. Every wave of work found
+new instances. A dedicated rgba/opacity sweep fix is recommended before AD phase.
+
+### No New Soul Violations Found
+
+Core soul compliance verified across all 6 ODs:
+- **border-radius: 0** — Zero violations (OD-006 has 33 explicit resets)
+- **box-shadow: none** — Zero violations
+- **filter: none** — Zero violations across all 6 files
+- **No hover z-depth** — All hover states use flat 2D (color/border changes only)
+
+### Standards Audit
+
+All 6 pages pass baseline WCAG 2.1 AA (skip-to-content, reduced-motion,
+focus-visible, lang, heading hierarchy, main landmark). Scores range 13-17/17.
+OD-005 scored highest (17/17). OD-002 and OD-003 scored lowest (13/17) due to
+missing `<nav>`, `<footer>`, `<article>` elements and minimal ARIA. No blocking
+issues found — all recommendations are enhancement-level.
+
+### Calibration Test
+
+3 violations planted in OD-003: border-radius:4px (toggle), #B8A080 (off-palette),
+2px structural border (callout). Detection rate: 89% (8/9 detections). PASS.
+Fresh-eyes missed only the subtle off-palette color — expected given zero design
+system context. Both targeted auditors (visual-b, systematic-b) achieved 100%.
+All 3 planted violations were removed after audit completion.
+
+**NOTE:** Calibration violations were intentionally planted and removed. They are
+NOT real findings and do NOT appear in the violation counts above.
+
+### Fresh-Eyes Ship Verdict
+
+**8/10 — SHIP.** Strong family resemblance via shared tokens, typography triad,
+and sharp-edge aesthetic. Three-dialect gap noted (Polished/Functional/Editorial)
+but assessed as purposeful variation. Key criticism: text-heavy with no imagery,
+860px max-width may feel narrow at 1440px, no inter-page navigation between ODs.
 
 ===============================================================================
 ## SOURCE EVIDENCE

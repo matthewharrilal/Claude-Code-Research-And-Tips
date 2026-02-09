@@ -334,14 +334,14 @@ All 6 organizational patterns validated through OD explorations with visual
 audit and adversarial review. Zero soul violations across 3,479+ DOM elements.
 Meta-insight: **Organization IS Density** (OD-F-005).
 
-| Pattern | Status | Score | Primary Density | Research Provenance | Finding IDs |
-|---------|--------|-------|-----------------|---------------------|-------------|
-| OD-001 Conversational | VALIDATED | ~35/40 | PULSE + TIDAL | R1-001, R1-002, R1-003, R1-007, R1-008, R1-010, R1-016, R1-018, R1-019, R1-026 | OD-F-001, OD-F-002, OD-F-003, OD-F-004 |
-| OD-002 Narrative Arc | VALIDATED | ~33/40 | CRESCENDO | R1-001, R1-003, R1-007, R1-008, R1-016, R1-017, R1-018, R1-019 | (validated DD-F-002) |
-| OD-003 Task-Based | VALIDATED | ~33/40 | ISLANDS + BOOKENDS | R1-001, R1-003, R1-007, R1-008, R1-016, R1-019 | (validated DD-F-003) |
-| OD-004 Confidence-Based | VALIDATED | INCLUDE | GEOLOGICAL + CRESCENDO | R1-001, R1-003, R1-004, R1-006, R1-016, R1-017, R1-018, R1-019 | (validated DD-F-004) |
-| OD-005 Spatial | VALIDATED | INCLUDE | WAVE + ISLANDS | R1-001, R1-003, R1-007, R1-008, R1-016, R1-018, R1-019 | (validated DD-F-005) |
-| OD-006 Creative/Emergent | VALIDATED | INCLUDE (crown jewel) | ALL PATTERNS (FRACTAL primary) | R1-001 through R1-011, R1-013, R1-015, R1-016, R1-017, R1-018, R1-019, R1-022, R1-025, R1-026 | OD-F-005, OD-F-006, OD-F-007, OD-F-008 |
+| Pattern | Status | Score (v3) | Primary Density | Research Provenance | Finding IDs |
+|---------|--------|------------|-----------------|---------------------|-------------|
+| OD-001 Conversational | VALIDATED | 37/40 | PULSE + TIDAL | R1-001, R1-002, R1-003, R1-007, R1-008, R1-010, R1-016, R1-018, R1-019, R1-020, R1-026, R1-028, EXT-CONV-006..011 | OD-F-001, OD-F-002, OD-F-003, OD-F-004 |
+| OD-002 Narrative Arc | VALIDATED | 35/40 | CRESCENDO | R1-001, R1-003, R1-007, R1-008, R1-016, R1-017, R1-018, R1-019, EXT-NARR-001..011 | OD-F-009 |
+| OD-003 Task-Based | VALIDATED | ~35/40 | ISLANDS + BOOKENDS | R1-001, R1-003, R1-007, R1-008, R1-016, R1-019, EXT-TASK-013..019 | OD-F-010 |
+| OD-004 Confidence-Based | VALIDATED | 34/40 | GEOLOGICAL + CRESCENDO | R1-001, R1-003, R1-004, R1-006, R1-016, R1-017, R1-018, R1-019, EXT-CONF-013..018 | OD-F-011 |
+| OD-005 Spatial | VALIDATED | 35/40 | WAVE + ISLANDS | R1-001, R1-003, R1-007, R1-008, R1-016, R1-018, R1-019, EXT-SPAT-013..018 | OD-F-012 |
+| OD-006 Creative/Emergent | VALIDATED | 37/40 (crown jewel) | ALL PATTERNS (FRACTAL primary, 5 scales) | R1-001 through R1-011, R1-013, R1-015, R1-016, R1-017, R1-018, R1-019, R1-020, R1-022, R1-025, R1-026, R1-028, EXT-CREATIVE-010..015 | OD-F-005, OD-F-006, OD-F-007, OD-F-008, OD-F-013 |
 
 See `provenance/stage-3-organization-od/organizational-patterns.md` for full details.
 
