@@ -15,8 +15,8 @@ hangs off the structure and provenance chain documented here.
 and what is the exact chain of evidence?"
 
 3. STATUS
-COMPLETE — covers full pipeline from original research through Stage 3
-(OD). Stage 4 (AD) and Stage 5 (CD) sections are placeholders awaiting future work.
+COMPLETE — covers full pipeline from original research through Stage 4
+(AD). Stage 5 (CD) section is a placeholder awaiting future work.
 
 5. BUILT ON
 - COMP-F-001 to COMP-F-021 (component findings)
@@ -82,7 +82,7 @@ folder — it links back here for provenance.
 │                                                                             │
 │   ORIGINAL RESEARCH (337 findings)                                          │
 │   └── R-1: Documentation Patterns (28)                                      │
-│   └── R-2: Creative Layouts (78)                                            │
+│   └── R-2: Creative Layouts (27)                                            │
 │   └── R-3: Density Dimensions (51) ★ Primary for DD                         │
 │   └── R-4: Axis Innovations (192)                                           │
 │   └── R-5: Combination Theory (39)                                          │
@@ -117,8 +117,16 @@ folder — it links back here for provenance.
 │         │ GENERATED (OD-F-### 17 outbound findings)                         │
 │         ▼                                                                   │
 │                                                                             │
-│   STAGE 4: AXIS (AD) — ⏳ PENDING                                           │
+│   STAGE 4: AXIS (AD) — ✅ COMPLETE (28 AD-F findings, 0 soul violations)    │
+│   └── 6 axis patterns validated (Z-PATTERN, F-PATTERN, BENTO GRID,         │
+│       SPIRAL, CHOREOGRAPHY, COMPOUND)                                       │
+│   └── AD-F-001 to AD-F-028 documented                                      │
+│   └── AD-F-023 crown jewel: ATTENTION TOPOLOGY meta-equivalence            │
+│   └── Axis IS Organization IS Density (3-way unification)                  │
 │                                                                             │
+│         │ CONSTRAINED (axis IS density + transition grammar + 5-scale)      │
+│         │ GENERATED (AD-F-### 28 outbound findings)                        │
+│         │ ELEVATED (DD-F-012: axis IS density, not "serves")               │
 │         ▼                                                                   │
 │                                                                             │
 │   STAGE 5: COMBINATION (CD) — ⏳ PENDING                                    │
@@ -282,14 +290,21 @@ Six explorations completed and re-enriched (v3) via 43-agent gate-based team:
 - **3 quality dialects (unified):** Polished (OD-001/002), Functional (OD-003/004/005), Editorial (OD-006) — unified via OD-CONVENTION-SPEC.md
 
 ═══════════════════════════════════════════════════════════════════════════════
-## 5. STAGE 4: AXIS (AD) — PENDING
+## 5. STAGE 4: AXIS (AD) — COMPLETE
 ═══════════════════════════════════════════════════════════════════════════════
 
-AD will explore axis layouts — how components are positioned on the page.
-Z-pattern, F-pattern, Bento grid, spiral reveal, axis choreography.
+AD explored spatial layout — how components are POSITIONED on the page. Six axis
+explorations built: Z-Pattern, F-Pattern, Bento Grid, Spiral, Choreography, Compound.
 
-AD consumes: OD-F-### findings + accumulated constraints
-AD produces: AD-F-### findings + validated axis patterns
+- **Consumed:** HANDOFF-OD-TO-AD, 17 OD-F findings, 18 DD-F findings, 21 COMP-F findings, 192 R-4 axis findings (PRIMARY), 27 R-2 creative layout findings (evaluated), 33 EXT-AXIS-* bespoke findings, ACCUMULATED-IDENTITY-v1.1
+- **Produced:** 28 AD-F findings (AD-F-001 through AD-F-028), 6 HTML explorations (~467KB), AD-CONVENTION-SPEC (822 lines), transition grammar (5x5 matrix), HANDOFF-AD-TO-CD, ACCUMULATED-IDENTITY-v2
+- **Crown jewel discovery:** **Axis IS Organization IS Density** — three names for one phenomenon validated through 5 equivalence mechanisms (temporal, spatial, proportional, kinetic, gravitational), unified under meta-equivalence: ATTENTION TOPOLOGY (AD-F-023)
+- **DD-F-012 elevated:** Axis does not "serve" density — axis IS density expressed spatially
+- **DD-F-006 fractal:** Verified at 5 scales; no 6th found (AD-F-028 bounds the model)
+- **Soul compliance:** 0 violations across all 6 explorations. No 6th soul piece.
+- **Audit:** ~47 de-duplicated findings, all fixed. 4 systemic + ~12 per-file fixes applied.
+- **R-2 consumption:** Rose from 0% to ~67% (25/27 mapped, ~18 directly applied)
+- **Convention spec pre-build:** Zero quality dialect divergence (lesson from OD)
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## 6. STAGE 5: COMBINATION (CD) — PENDING
@@ -308,7 +323,7 @@ CD produces: CD-F-### findings + combination rules
 | Research | Stage 1 | Stage 2 (DD) | Stage 3 (OD) | Stage 4 (AD) | Stage 5 (CD) |
 |----------|---------|--------------|--------------|--------------|--------------|
 | R-1 (28) | — | Partial | ★★★ PRIMARY | Secondary | Secondary |
-| R-2 (78) | — | Partial | Secondary | Secondary | Secondary |
+| R-2 (27) | — | Partial | Secondary | Secondary | Secondary |
 | R-3 (51) | Informed | ★★★ PRIMARY (~76%) | Reference | Reference | Reference |
 | R-4 (192) | — | Partial | Reference | ★★★ PRIMARY | Reference |
 | R-5 (39) | — | Partial | Secondary | Secondary | ★★★ PRIMARY |
@@ -324,23 +339,23 @@ CD produces: CD-F-### findings + combination rules
 | Stage 1 | COMP-F-### | 21 | DD, OD, AD, CD, Migration |
 | Stage 2 | DD-F-### | 18 | OD, AD, CD, Migration |
 | Stage 3 | OD-F-### | 17 (OD-F-001 through OD-F-013 + OD-F-MP-001 + OD-F-PR-001 + OD-F-FL-001 + OD-F-AP-001) | AD, CD, Migration |
-| Stage 4 | AD-F-### | TBD | CD, Migration |
+| Stage 4 | AD-F-### | 28 (AD-F-001 through AD-F-028) | CD, Migration |
 | Stage 5 | CD-F-### | TBD | Migration |
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## 9. SOUL PIECES CUMULATIVE MATRIX
 ═══════════════════════════════════════════════════════════════════════════════
 
-| # | Soul Piece | Stage 1 | DD-001 | DD-002 | DD-003 | DD-004 | DD-005 | DD-006 | OD-001 | OD-002 | OD-003 | OD-004 | OD-005 | OD-006 |
-|---|------------|---------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
-| 1 | Sharp Edges | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 2 | Archivist Serif | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 3 | Family DNA | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 4 | No Shadows | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 5 | Squares Signal | ✅ | N/A | ✅ | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
+| # | Soul Piece | Stage 1 | DD-001 | DD-002 | DD-003 | DD-004 | DD-005 | DD-006 | OD-001 | OD-002 | OD-003 | OD-004 | OD-005 | OD-006 | AD-001 | AD-002 | AD-003 | AD-004 | AD-005 | AD-006 |
+|---|------------|---------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
+| 1 | Sharp Edges | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 2 | Archivist Serif | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 3 | Family DNA | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 4 | No Shadows | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 5 | Squares Signal | ✅ | N/A | ✅ | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
 
-**Soul compliance: 100% across all completed work (Stage 1, DD-001 through DD-006, OD-001 through OD-006).**
-**OD audit verified: 0 border-radius violations, 0 box-shadow violations across 3,479+ DOM elements.**
+**Soul compliance: 100% across all completed work (Stage 1, DD-001 through DD-006, OD-001 through OD-006, AD-001 through AD-006).**
+**AD audit verified: 0 border-radius violations, 0 box-shadow violations, 0 filter: drop-shadow() violations across all 6 AD explorations.**
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## 10. THE CAUSAL CHAIN
@@ -364,10 +379,14 @@ OD organizational explorations (✅ COMPLETE, 6 patterns, ~34.8/40 avg)
   │ GENERATED (OD-F-### 17 outbound findings)
   │
   ▼
-AD axis explorations (⏳ pending — consumes OD-F-### + DD-F-### + COMP-F-###)
+AD axis explorations (✅ COMPLETE, 6 patterns, 28 AD-F findings, 0 soul violations)
+  │
+  │ CONSTRAINED (axis IS density IS org + 5x5 transition grammar + DD-F-006 5-scale model)
+  │ GENERATED (AD-F-### 28 outbound findings)
+  │ ELEVATED (DD-F-012: axis IS density, not "serves" density)
   │
   ▼
-CD combination explorations (⏳ pending)
+CD combination explorations (⏳ pending — consumes AD-F-### + transition grammar)
   │
   ▼
 Migration
@@ -392,7 +411,8 @@ Migration
 | Find a COMP-F-### finding | `provenance/stage-1-components/component-findings.md` |
 | Find a DD-F-### finding | `provenance/stage-2-density-dd/DD-outbound-findings.md` |
 | Find an OD-F-### finding | `provenance/stage-3-organization-od/OD-outbound-findings.md` |
-| Start AD work | `provenance/stage-3-organization-od/HANDOFF-OD-TO-AD.md` |
+| Find an AD-F-### finding | `provenance/stage-4-axis-ad/AD-outbound-findings.md` |
+| Start CD work | `provenance/stage-4-axis-ad/HANDOFF-AD-TO-CD.md` |
 | Read original research | `provenance/original-research/` |
 | Verify soul compliance | `checkpoints/SOUL-DISCOVERIES.md` |
 | See exploration artifacts | `explorations/density/`, `explorations/organizational/` |
@@ -449,11 +469,16 @@ cross-od-consistency.md confirmed 4-scale fractal verified in every exploration.
 Status: APPLIED, VERIFIED (100% compliance)
 
 **Stage 4 (AD):**
-Axis layouts must SERVE the fractal pattern.
-Status: PENDING
+DD-F-006 was MANDATORY for all AD explorations (carried from DD through OD).
+All 6 ADs verified fractal self-similarity at 5 scales (navigation, page, section,
+component, character). AD-006 Compound explicitly validated 5-scale compliance
+in compound context (AD-F-027). AD-F-028 formally bounds the model: no 6th scale
+exists. The "strategy" scale candidate collapsed into existing scales.
+Status: APPLIED, VERIFIED (100% compliance), BOUNDED (5 scales final)
 
 **Stage 5 (CD):**
-Component combinations must maintain fractal rhythm.
+Component combinations must maintain fractal rhythm at 5 scales.
+CD should verify existing scales hold under combination, not seek a 6th.
 Status: PENDING
 
 **Migration:**

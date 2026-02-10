@@ -209,9 +209,9 @@ to application.
 
 **Total OD-F-###:** 17 findings (13 pattern + 1 meta-pattern + 1 process + 1 forward + 1 anti-pattern)
 
-### Stage 4 (AD-F-###) — Axis ⏳ PENDING
+### Stage 4 (AD-F-###) — Axis COMPLETE
 
-TBD — AD explorations not yet started.
+28 findings produced across 6 explorations (AD-001 Z-Pattern, AD-002 F-Pattern, AD-003 Bento Grid, AD-004 Spiral, AD-005 Choreography, AD-006 Compound). See `stage-4-axis-ad/AD-outbound-findings.md` for full registry. Key findings: AD-F-004 (3-Way Unification Validated), AD-F-023 (Meta-Equivalence: all equivalence mechanisms converge on ATTENTION TOPOLOGY), AD-F-024 (Compound is sequential not simultaneous), AD-F-027 (DD-F-006 fractal validated at 5 scales).
 
 ### Stage 5 (CD-F-###) — Combination ⏳ PENDING
 
@@ -308,10 +308,10 @@ Traffic-light (DD-F-015):
 ═══════════════════════════════════════════════════════════════════════════════
 
 **Total Original Research:** 337 findings (R-1 to R-5)
-**Total Generated Findings:** 56 (COMP-F: 21 + DD-F: 18 + OD-F: 17)
+**Total Generated Findings:** 84 (COMP-F: 21 + DD-F: 18 + OD-F: 17 + AD-F: 28)
 **Total EXT-* Findings:** 94 unique bespoke findings created during OD re-enrichment
 **Total Soul Pieces:** 5 visual (no cognitive discovered in OD — OD-F-005 is meta-pattern, not soul piece)
-**Total Patterns:** 6 density + 6 organizational (axis, combination TBD)
+**Total Patterns:** 6 density + 6 organizational + 6 axis (combination TBD)
 **OD Re-Enrichment:** 43 agents, 3 waves, all 6 ODs upgraded to v3. Average score: ~35.5/40 (up from ~34.8/40). Convention spec unified 3 quality dialects. 20/20 SOUL FAILs confirmed ANTI-PHYSICAL identity.
 
 **Comprehensive Hierarchical Audit (2026-02-09):** ~58 agents across 4 pillars (visual, structural, provenance, triage) + fresh-eyes adversarial + fix execution. 58 findings (5 Critical, 10 High, 17 Medium, 8 Low, 18 Notes) + 7 unique fresh-eyes findings. 10 Critical/High fixes applied across 18 files (6 OD, 6 DD, 4 provenance, 1 TSX, 1 CLAUDE.md). Soul compliance confirmed: 0 violations across ~13,000 elements (3 independent verification processes). DD files received DD-BACKPORT accessibility and palette alignment. PIPELINE-MANIFEST R-2 count corrected (78->27). rgba() opacity epidemic resolved across 4 OD files. All fixes verified via 187 programmatic DOM tests + 12 visual screenshots. Zero new soul violations introduced.

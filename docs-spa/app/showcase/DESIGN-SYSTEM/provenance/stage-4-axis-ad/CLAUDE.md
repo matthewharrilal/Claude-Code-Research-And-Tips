@@ -1,98 +1,110 @@
 <!--
-═══════════════════════════════════════════════════════════════════════════════
-INLINE THREADING HEADER — Phase 2B
+===============================================================================
+INLINE THREADING HEADER -- Phase 2B
 File: docs-spa/app/showcase/DESIGN-SYSTEM/provenance/stage-4-axis-ad/CLAUDE.md
-Tier: C | Batch: 6 | Generated: 2026-02-06
+Tier: C | Batch: 6 | Generated: 2026-02-06 | Updated: 2026-02-10
 
 1. WHY THIS EXISTS
-Placeholder navigation file for agents entering the stage-4-axis-ad/ directory.
+Navigation file for agents entering the stage-4-axis-ad/ directory.
 Provides identity, reading order, file inventory, connection map, and mindset
-framing for the AD stage. Auto-read by Claude Code on directory entry. AD work
-is PENDING — depends on OD (Stage 3) completion.
+framing for the completed AD stage. Auto-read by Claude Code on directory entry.
 
 3. STATUS
-ACTIVE (as placeholder navigation — AD work itself is PENDING)
+COMPLETE -- AD stage fully executed. 6 explorations built, 28 findings produced,
+audited by 24+ agents, all fixes applied, synthesis written, handoff delivered.
 
 5. BUILT ON
 | Dependency                                          | Relationship                              |
 |-----------------------------------------------------|-------------------------------------------|
-| HANDOFF-OD-TO-AD.md                                 | Mandatory first-read referenced in HOW TO READ |
-| original-research/R4-AXIS-INNOVATIONS.md            | Primary research referenced in HOW TO READ |
-| DD-F-012                                            | Key constraint: axis serves density pattern |
+| HANDOFF-OD-TO-AD.md                                 | Mandatory first-read (gate file from OD)   |
+| original-research/R4-AXIS-INNOVATIONS.md            | Primary research (192 findings)            |
+| DD-F-012                                            | Key constraint: axis IS density (ELEVATED) |
+| AD-CONVENTION-SPEC.md                               | 822-line convention spec (pre-build)       |
+| ACCUMULATED-IDENTITY-v1.1.md                        | Input identity document                    |
 
 8. CONSUMED BY
 | Consumer                                            | How Used                                  |
 |-----------------------------------------------------|-------------------------------------------|
 | Claude Code agent                                   | Auto-read on stage-4-axis-ad/ entry        |
-| AD exploration agents                               | Navigation and orientation                  |
+| CD exploration agents                               | Navigation and orientation for next stage   |
+| HANDOFF-AD-TO-CD.md                                 | References all AD outputs                   |
 
 END INLINE THREADING HEADER
-═══════════════════════════════════════════════════════════════════════════════
+===============================================================================
 -->
 
 # CLAUDE.md -- Stage 4: Axis Exploration (AD)
 
 ===============================================================================
-## 0. MANDATORY ENFORCEMENT GATE
+## 0. STATUS
 ===============================================================================
 
-**DO NOT begin AD work until ALL conditions are met:**
+**Stage 4 (AD) is COMPLETE.** All gates passed, all explorations built, audited, fixed, and synthesized.
 
-1. `../stage-3-organization-od/HANDOFF-OD-TO-AD.md` EXISTS and has been read completely -- SATISFIED
-2. `../stage-3-organization-od/OD-outbound-findings.md` EXISTS and all 17 OD-F findings acknowledged (OD-F-001 through OD-F-013, OD-F-MP-001, OD-F-PR-001, OD-F-FL-001, OD-F-AP-001) -- SATISFIED
-3. `../original-research/R4-AXIS-INNOVATIONS.md` (R-4 primary research) loaded
-4. R-2 Creative Layouts (27 findings at 0% OD consumption) explicitly evaluated for AD applicability
-5. OD-F-FL-001 (org implies axis) transitive chain understood: org->density->axis
-6. `../ACCUMULATED-IDENTITY-v1.md` loaded (539 lines — full accumulated soul, findings, constraints from all prior stages)
-
-**If ANY condition is NOT met, STOP. Do not proceed.**
+- 6 axis explorations: AD-001 Z-Pattern, AD-002 F-Pattern, AD-003 Bento Grid, AD-004 Spiral, AD-005 Choreography, AD-006 Compound
+- 28 findings produced (AD-F-001 through AD-F-028)
+- Crown jewel: **Axis IS Organization IS Density** -- 3-way unification, meta-equivalence: ATTENTION TOPOLOGY (AD-F-023)
+- Soul compliance: 0 violations across all 6 explorations
+- Audit: ~47 de-duplicated findings from 24+ agents, all fixes applied
+- Convention spec: 822 lines, pre-build (zero quality dialect divergence)
 
 ===============================================================================
 ## 1. IDENTITY
 ===============================================================================
 
 **Name:** Stage 4: Axis Exploration (AD)
-**Status:** ⏳ PENDING
-**Anatomical Role:** The spatial skeleton — where axis layouts will be explored.
+**Status:** COMPLETE
+**Anatomical Role:** The spatial skeleton -- axis layouts explored and validated.
 
-═══════════════════════════════════════════════════════════════════════════════
-## 2. HOW TO READ
-═══════════════════════════════════════════════════════════════════════════════
+===============================================================================
+## 2. HOW TO READ (for CD agents starting Stage 5)
+===============================================================================
 
-**AD cannot start until OD (Stage 3) is complete.**
+**CD agents: Read HANDOFF-AD-TO-CD.md FIRST.** It contains everything you need.
 
-When AD begins:
-1. Read `../stage-3-organization-od/HANDOFF-OD-TO-AD.md` — **MANDATORY**
-2. Read `../ACCUMULATED-IDENTITY-v1.md` — **MANDATORY** (full accumulated context from all prior stages)
-3. Read `STAGE-HEADER.md` — What AD will do
-4. Read `../original-research/R4-AXIS-INNOVATIONS.md` — PRIMARY research
+For deeper context:
+1. Read `HANDOFF-AD-TO-CD.md` -- **MANDATORY** gate file for CD
+2. Read `AD-SYNTHESIS.md` -- Full 12-section synthesis of all AD work
+3. Read `AD-outbound-findings.md` -- All 28 AD-F findings with citations
+4. Read `AD-AUDIT-SYNTHESIS.md` -- Audit synthesis (47 actionable items, 23 reports)
+5. Read `../../knowledge-architecture/ACCUMULATED-IDENTITY-v2.md` -- Updated identity incorporating AD discoveries
 
-═══════════════════════════════════════════════════════════════════════════════
+===============================================================================
 ## 3. WHAT'S HERE
-═══════════════════════════════════════════════════════════════════════════════
+===============================================================================
 
-| File | Status |
-|------|--------|
-| `STAGE-HEADER.md` | ⏳ PLACEHOLDER |
-| All other files | ⏳ PENDING |
+| File | Status | Purpose |
+|------|--------|---------|
+| `STAGE-HEADER.md` | COMPLETE | Stage definition with frontmatter chain |
+| `CLAUDE.md` | COMPLETE | This file -- navigation and orientation |
+| `AD-outbound-findings.md` | COMPLETE | 28 AD-F findings (formal registry) |
+| `AD-SYNTHESIS.md` | COMPLETE | 12-section cross-exploration synthesis |
+| `AD-AUDIT-SYNTHESIS.md` | COMPLETE | Audit synthesis (47 items, 23 reports) |
+| `HANDOFF-AD-TO-CD.md` | COMPLETE | Gate file for Stage 5 (CD) |
 
-═══════════════════════════════════════════════════════════════════════════════
+===============================================================================
 ## 4. HOW THIS CONNECTS
-═══════════════════════════════════════════════════════════════════════════════
+===============================================================================
 
-**CONSUMES:** OD-F-###, DD-F-###, COMP-F-###, R-4
+**CONSUMED:** HANDOFF-OD-TO-AD, 17 OD-F findings, 18 DD-F findings, 21 COMP-F findings, 192 R-4 findings (PRIMARY), 27 R-2 findings (evaluated, ~67% applied), 33 EXT-AXIS-* bespoke findings, ACCUMULATED-IDENTITY-v1.1
 
-**PRODUCES:** AD-F-### for CD, HANDOFF-AD-TO-CD
+**PRODUCED:** 28 AD-F findings, 6 HTML explorations (~467KB), AD-CONVENTION-SPEC (822 lines), 5x5 transition grammar, HANDOFF-AD-TO-CD, ACCUMULATED-IDENTITY-v2
 
-═══════════════════════════════════════════════════════════════════════════════
-## 5. MINDSET
-═══════════════════════════════════════════════════════════════════════════════
+**SUCCESSOR:** `../stage-5-combination-cd/STAGE-HEADER.md`
 
-**AD explores spatial layout — how components are POSITIONED on the page.**
+===============================================================================
+## 5. MINDSET (for retrospective understanding)
+===============================================================================
 
-Key constraint (DD-F-012): Axis geometry must SERVE the density pattern.
-- CRESCENDO suggests vertical flow
-- ISLANDS suggests grid positioning
-- RIVERS suggests horizontal channels
+**AD explored spatial layout -- how components are POSITIONED on the page.**
 
-═══════════════════════════════════════════════════════════════════════════════
+Key discovery (DD-F-012 ELEVATED): Axis geometry does not merely "serve" the density pattern -- axis IS the density pattern expressed spatially. The 3-way identity (axis=organization=density) was validated through 5 distinct equivalence mechanisms:
+- Temporal (Z-Pattern: Z-sweep cycle IS one PULSE beat)
+- Spatial (Bento Grid: grid cells ARE dense islands)
+- Proportional (F-Pattern: typography compression IS CRESCENDO)
+- Kinetic (Choreography: axis direction change IS density state change)
+- Gravitational (Spiral: border-weight gradient IS geological encoding)
+
+Meta-equivalence: ATTENTION TOPOLOGY (AD-F-023) -- all mechanisms converge on how content arrangement shapes attention flow.
+
+===============================================================================

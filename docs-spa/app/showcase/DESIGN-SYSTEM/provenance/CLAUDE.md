@@ -70,7 +70,7 @@ exist elsewhere. But the CHAIN that connects them lives here.
 | `stage-1-components/` | ✅ | Component foundation chain |
 | `stage-2-density-dd/` | ✅ | DD exploration chain |
 | `stage-3-organization-od/` | ✅ COMPLETE (v3 re-enriched) | OD exploration chain (6 ODs, 17 OD-F findings, 89 audit findings, 94 EXT-* findings, convention spec, 43-agent re-enrichment) |
-| `stage-4-axis-ad/` | ⏳ PENDING | AD exploration chain |
+| `stage-4-axis-ad/` | ✅ COMPLETE | AD exploration chain (6 ADs, 28 AD-F findings, ~47 audit findings, 33 EXT-AXIS-* findings, convention spec, transition grammar, ATTENTION TOPOLOGY meta-equivalence) |
 | `stage-5-combination-cd/` | ⏳ PENDING | CD exploration chain |
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -120,13 +120,15 @@ Let me trace ONE finding through the entire chain to show how provenance works:
 - Status: COMPLETE (v3) — applied in all 6 OD explorations, verified in 17-agent adversarial audit (89 findings, 0 soul violations), re-enriched via 3-wave gate-based process
 
 **Stage 4 (AD):**
-- Will consume DD-F-006 through OD
-- Axis layouts must SERVE the fractal pattern
-- Status: PENDING
+- Location: `stage-4-axis-ad/AD-outbound-findings.md`
+- DD-F-006 verified at 5 scales across all 6 AD explorations (AD-F-027)
+- No 6th scale found (AD-F-028 bounds the model)
+- DD-F-012 ELEVATED: axis IS density, not "serves" density
+- Status: APPLIED, VERIFIED, BOUNDED (5 scales final)
 
 **Stage 5 (CD):**
 - Will consume DD-F-006 through AD
-- Combinations must maintain fractal rhythm
+- Combinations must maintain fractal rhythm at 5 scales
 - Status: PENDING
 
 **Migration:**

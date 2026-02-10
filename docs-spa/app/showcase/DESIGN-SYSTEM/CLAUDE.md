@@ -88,7 +88,8 @@ This is NOT a component library. It's a system with:
 | Apply a pattern | `patterns/PATTERN-INDEX.md` |
 | Look up token values | `tokens/*.md` |
 | Trace a finding | `provenance/PIPELINE-MANIFEST.md` |
-| Start AD work | `provenance/stage-3-organization-od/HANDOFF-OD-TO-AD.md` |
+| Find AD-F-### findings | `provenance/stage-4-axis-ad/AD-outbound-findings.md` |
+| Start CD work | `provenance/stage-4-axis-ad/HANDOFF-AD-TO-CD.md` |
 | Understand components | `components/OVERVIEW.md` |
 | Avoid anti-patterns | `anti-patterns/registry.md` |
 | Migrate a page | `guides/migration-guide.md` |
@@ -103,7 +104,7 @@ This is NOT a component library. It's a system with:
 | `BACKBONE.md` | ✅ | Master narrative of the pipeline |
 | `QUICK-START.md` | ✅ | Quick reference |
 | `tokens/` | ✅ | Locked design values |
-| `patterns/` | ✅ | Validated rhythms (density complete, org complete) |
+| `patterns/` | ✅ | Validated rhythms (density, org, axis complete) |
 | `components/` | ✅ | Component specifications |
 | `anti-patterns/` | ✅ | What to avoid |
 | `guides/` | ✅ | Migration and usage guides |
