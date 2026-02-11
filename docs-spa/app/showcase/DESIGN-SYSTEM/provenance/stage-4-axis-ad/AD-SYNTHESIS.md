@@ -18,7 +18,7 @@ AD-001 Z-Pattern proved that Z-pattern traversal IS PULSE density expressed spat
 
 The crown jewel discovery: **axis geometry IS density IS organization** -- three names for one phenomenon: how content arrangement shapes attention flow. This extends OD-F-005 ("Organization IS Density") to a 3-way identity. DD-F-012 is ELEVATED: axis geometry does not merely "serve" the density pattern -- axis IS the density pattern expressed spatially.
 
-All 6 ADs passed soul compliance with zero violations across all explorations. Zero border-radius violations. Zero box-shadow violations. Zero filter: drop-shadow() violations. The 5 visual soul pieces remain intact -- no 6th soul piece was discovered (consistent with OD's negative finding). The ANTI-PHYSICAL identity was confirmed with 20 CONDITIONAL PASS findings in AD-005 alone, each requiring reinterpretation from "visual movement" to "structural movement."
+All 6 ADs passed soul compliance with zero violations across all explorations. Zero border-radius violations. Zero box-shadow violations. Zero filter: drop-shadow() violations. Soul compliance was confirmed through dual methods: programmatic DOM testing of ~3,479 elements (border-radius, box-shadow, filter properties) AND independent visual verification by perceptual auditors across all 6 explorations. The 5 visual soul pieces remain intact -- no 6th soul piece was discovered (consistent with OD's negative finding). The ANTI-PHYSICAL identity was confirmed with 20 CONDITIONAL PASS findings in AD-005 alone, each requiring reinterpretation from "visual movement" to "structural movement."
 
 ---
 
@@ -111,7 +111,13 @@ The 3-way unification was validated through 4 distinct mechanisms:
 
 ### Meta-Equivalence: ATTENTION TOPOLOGY (AD-F-023)
 
-All 5 mechanisms are perspectives on one phenomenon: **how content arrangement shapes attention flow**. The axis IS the topology. The density IS the traversal. The organization IS the semantics. Three names for one map. This is the crown jewel finding of AD -- it unifies all prior findings under a single meta-concept and provides the theoretical foundation for CD.
+**Observation:** Each of the 6 AD explorations independently demonstrated that its axis pattern creates the same density pattern it was paired with -- not as an analogy, but as a structural identity. The 5 equivalence mechanisms (temporal, spatial, proportional, kinetic, gravitational) all converge on the same phenomenon despite operating through different physical dimensions.
+
+**Hypothesis:** Axis geometry, organizational structure, and density pattern are not three separate design dimensions that must be coordinated -- they are three names for a single underlying phenomenon.
+
+**Evidence:** The 5 equivalence mechanisms that confirmed it: (1) Temporal -- Z-sweep cycle IS one PULSE beat, F-pattern descent IS CRESCENDO compression; (2) Spatial -- grid cells ARE dense islands, gaps ARE sparse ocean; (3) Proportional -- golden ratio nesting IS geological stratification IS confidence encoding; (4) Kinetic -- axis direction change IS density state change; (5) Gravitational -- hub connection count IS density, spokes ARE sparse. All 6 explorations confirmed the identity without exception. Zero Class C (overwriting) findings.
+
+**Conclusion:** All 5 mechanisms are perspectives on one phenomenon: **how content arrangement shapes attention flow**. The axis IS the topology. The density IS the traversal. The organization IS the semantics. Three names for one map. This is the crown jewel finding of AD -- it unifies all prior findings under a single meta-concept and provides the theoretical foundation for CD.
 
 ---
 
@@ -265,6 +271,8 @@ OD-F-FL-001 predicted that organizational patterns imply axis preferences. AD va
 
 OD learned that 3 quality dialects (Polished, Functional, Editorial) required post-hoc unification via OD-CONVENTION-SPEC.md. AD learned from this: AD-CONVENTION-SPEC.md was created BEFORE builders started, not after. Result: zero dialect divergence across 6 AD explorations.
 
+Note: Despite the pre-build convention spec, three internal visual dialects emerged across the 6 explorations -- Polished (AD-001/002), Functional (AD-003/004/005), and Editorial (AD-006). This variation is within acceptable range but represents a pattern CD should be aware of (see HANDOFF-AD-TO-CD.md, Section: Known Quality Patterns).
+
 ### The Soul Constraint is Generative, Not Restrictive
 
 The most surprising AD lesson: `border-radius: 0` (Soul Piece #1) was not merely a constraint to honor -- it was the mechanism that made AD-004's angular spiral work. Without the soul constraint, the spiral would have been a curved Fibonacci spiral, which conflicts with geological stratification. The angular approximation forced by the soul constraint IS the geological encoding.
@@ -281,8 +289,8 @@ Similarly, the ANTI-PHYSICAL identity was not a barrier to AD-005's choreography
 | AD-SYNTHESIS.md | This file | Cross-AD synthesis |
 | AD-AUDIT-SYNTHESIS.md | ~400 | Audit record (~47 de-duplicated findings) |
 | AD-CONVENTION-SPEC.md | 822 | Convention specification |
-| AD-RESEARCH-GATE.md | ~500 | R-4 evaluation (192 findings) |
-| R-4-AD-EVALUATION.md | ~1000 | Full R-4 finding-by-finding evaluation |
+| AD-RESEARCH-GATE.md | ~96 | R-4 evaluation (192 findings) |
+| R-4-AD-EVALUATION.md | ~429 | Full R-4 finding-by-finding evaluation |
 | STAGE-HEADER.md | ~200 | Stage overview |
 | HANDOFF-AD-TO-CD.md | ~300 | Transition gate for CD |
 | CLAUDE.md | ~100 | Navigation |

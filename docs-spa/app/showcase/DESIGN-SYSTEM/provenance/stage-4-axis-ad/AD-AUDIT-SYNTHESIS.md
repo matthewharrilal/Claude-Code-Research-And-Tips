@@ -354,4 +354,143 @@ Close runner-up: The callout label 10px font-size (also all 6 files, also templa
 
 ---
 
-*AD Audit Synthesis complete. 2026-02-10.*
+## Ship Verdicts
+
+Per-page ship verdicts from the Perceptual Audit (PA), including initial assessment and final status after fix execution.
+
+| Page | Initial Verdict | Final Verdict | Key Fixes Applied |
+|------|----------------|---------------|-------------------|
+| AD-001 | SHIP (minor issues) | SHIP | Container width 860->1100px, footer added, dead zones reduced |
+| AD-002 | DO-NOT-SHIP | SHIP | Container width 860->1100px, dead zones eliminated, footer added, responsive collapse |
+| AD-003 | SHIP (minor issues) | SHIP | Container width 860->1100px, footer added, grid collapse at 769px |
+| AD-004 | SHIP (minor issues) | SHIP | Container width 860->1100px, dead zones reduced, footer added |
+| AD-005 | DO-NOT-SHIP | SHIP | Container width 860->1100px, dead zones halved, interstitials added, closing footer |
+| AD-006 | DO-NOT-SHIP | SHIP | Container width 860->1100px, scroll-reveal defense, bento 960px collapse, footer bookend |
+
+**DO-NOT-SHIP Resolutions:**
+- **AD-002:** Initially flagged for empty Acts IV-V creating a ~3,700px blank void. Resolved by dead space elimination and visual ending addition.
+- **AD-005:** Initially flagged for massive dead zones (~2 viewport heights) and missing transition markers. Resolved by halving dead zones, adding 3 compact interstitials, and closing footer.
+- **AD-006:** Initially flagged for scroll-reveal hiding 40-60% of content and bento grid destruction at 768-960px. Resolved by defensive CSS (`opacity: 1 !important; transform: none !important; visibility: visible !important`) and early 960px grid collapse.
+
+**Source:** DM-042 (dark-matter-paths.md), GAP-010 (provenance-gap-inventory.md). Fix commits: 4a4fa08 through a231977.
+
+---
+
+## Perceptual Audit Fix Reports
+
+Cross-reference to all 6 per-page fix reports documenting actual CSS changes applied during the PA fix execution pass:
+
+| Page | Fix Report Path | Key Changes |
+|------|----------------|-------------|
+| AD-001 | `explorations/axis/_perceptual-audit/AD-001/fix-report.md` | Width 860->1100px, dead space tightened, footer added |
+| AD-002 | `explorations/axis/_perceptual-audit/AD-002/fix-report.md` | Width 860->1100px, dead zones eliminated, dark footer matching header |
+| AD-003 | `explorations/axis/_perceptual-audit/AD-003/fix-report.md` | Width 860->1100px, code wrap in bento cells, footer horizontal rule |
+| AD-004 | `explorations/axis/_perceptual-audit/AD-004/fix-report.md` | Width 860->1100px, dead zones reduced, centered footer label |
+| AD-005 | `explorations/axis/_perceptual-audit/AD-005/fix-report.md` | Width 860->1100px, dead zones halved, 3 interstitials, italic serif footer |
+| AD-006 | `explorations/axis/_perceptual-audit/AD-006/fix-report.md` | Width 860->1100px, scroll-reveal defense, 960px bento collapse, dark bookend footer |
+
+**Note:** These reports document the ACTUAL changes made, complementing the RECOMMENDED changes listed in Tiers 1-5 above. Not all Tier 3-5 recommendations were implemented; fix execution prioritized Tier 1 (BROKEN/SOUL) and critical Tier 2 (OVERFLOW) items plus the systemic width/footer/dead-space issues.
+
+**Source:** GAP-010B (provenance-gap-inventory.md).
+
+---
+
+## Decision Classification Framework
+
+Methodology extracted from the PA lock sheet (81 decisions classified across 3 tiers). This framework defines how audit findings are categorized by modifiability.
+
+### Tier Definitions
+
+| Tier | Name | Count | Modification Rule |
+|------|------|-------|-------------------|
+| **ALWAYS-LOCKED** | Binary rule, 0 tolerance | 12 | Cannot be modified under any circumstances. Soul violations, font trio, palette boundaries. |
+| **LOCKED** | Strong evidence, re-validation required | 34 | Modification requires re-validation by independent audit. Responsive breakpoints, spacing tokens, component conventions. |
+| **CHALLENGEABLE** | Established convention, adaptable with rationale | 19 | May be overridden with documented rationale and perceptual evidence. Grid proportions, breathing zone percentages, section ordering. |
+
+### Decision Tree
+
+```
+Is this a Soul Piece (border-radius, box-shadow, drop-shadow, font trio, palette)?
+  YES → ALWAYS-LOCKED (0 tolerance, binary check)
+  NO  → Was it established by the AD-CONVENTION-SPEC with "FROZEN" status?
+          YES → LOCKED (re-validation required to change)
+          NO  → Was it established by multi-auditor concordance (2+ independent confirmations)?
+                  YES → LOCKED (empirical evidence weight)
+                  NO  → CHALLENGEABLE (single-source or judgment-based)
+```
+
+### Examples
+
+- **ALWAYS-LOCKED:** `border-radius: 0` on all elements, `box-shadow: none`, font trio (Instrument Serif / Inter / JetBrains Mono), 1100px container width (post-PA update)
+- **LOCKED:** 768px responsive collapse for 2-3 column grids, `--type-meta` as minimum font size, header padding `var(--space-16) var(--space-8)`, 3px Cat 1 structural borders
+- **CHALLENGEABLE:** Breathing zone percentage (15-25%), section-to-section spacing multiples, grid gap sizes for non-structural layouts, code block contrast level
+
+**Source:** DM-008 (dark-matter-paths.md), `explorations/axis/_perceptual-audit/lock-sheet.md` (150 lines, 81 decisions).
+
+---
+
+## Systemic vs Sovereign Classification
+
+Classification of PA findings by recurrence pattern. SYSTEMIC findings affect all 6 pages and indicate template-level or convention-level gaps. SOVEREIGN findings are page-specific and reflect individual axis pattern characteristics.
+
+### Systemic Findings (All 6 Pages)
+
+| Finding | Description | Root Cause |
+|---------|-------------|------------|
+| Container width | 860px too narrow, widened to 1100px | Template default in AD-SOUL-TEMPLATE |
+| Dead space | Multi-viewport blank zones exceeding 300px | Generous spacing tokens without ceiling |
+| Missing footer | Pages "just stop" without visual ending | No footer convention in template |
+| Soul compliance | 0 violations across ~3,479 elements | Locked-layer enforcement working correctly |
+| Callout label font-size | 10px below accessibility minimum | Template-level `.callout__label` rule |
+| Header padding | 48px/24px instead of 64px/32px per spec | Template deviation from Convention Spec S4 |
+| Body line-height | 1.6 instead of OD gold standard 1.7 | Template stylistic choice |
+| Dark code block contrast | Harsh transition from warm cream to #1A1A1A | LOCKED convention (accepted trade-off) |
+
+### Sovereign Findings (Page-Specific)
+
+| Finding | Page | Description |
+|---------|------|-------------|
+| Bento grid collapse timing | AD-003, AD-006 | 4+-column grids need 960px collapse, not 768px |
+| Spiral metaphor non-achievement | AD-004 | "Four stacked horizontal layers, not a spiral" — naming/framing tension |
+| Choreography scroll-reveal | AD-005, AD-006 | JS-dependent content visibility; progressive enhancement violated |
+| Q&A PULSE rhythm | AD-001 | Unique narrow-question/wide-answer visual beat |
+| Tension meter confusion | AD-002 | Five-segment bar misread as "broken loading indicator" |
+| Internal quality dialect | AD-003, AD-004 | Top third polished, lower sections wireframe-quality |
+
+**Source:** GAP-018 (provenance-gap-inventory.md), DM-012 (dark-matter-paths.md), all 6 AUDIT-REPORT.md sovereignty sections.
+
+---
+
+## Audit Methodology
+
+AD explorations were audited using the Perceptual Audit Skill (v2, later redesigned to v3 based on AD execution lessons). The methodology uses a 3-layer architecture:
+
+- **Layer 1 — Binary Gates:** 7 mandatory pass/fail gates (Playwright alive, screenshots exist, cold look locked, perceptual language clean, systemic synthesis complete, fix trigger activated, independent verification)
+- **Layer 2 — Structured Judgment:** 28 perceptual questions (PA-01 through PA-28) across 3 tiers, plus 23 anti-patterns (AP-01 through AP-23) as failure mode detection
+- **Layer 3 — Free Perception:** Unstructured cold-look assessment before any research exposure (Temporal Firewall: perception before analysis)
+
+Additional methodology elements: dual severity track (Rule + Perception), sovereignty classification (ALWAYS-LOCKED / LOCKED / CHALLENGEABLE), multi-agent architecture (2-3 independent auditors per page), and Playwright MCP for browser automation with programmatic DOM verification.
+
+The skill was redesigned after AD execution into a formal 3-layer architecture based on failure analysis of 7 human interventions. Full analysis: `explorations/axis/_perceptual-audit/_skill-evolution/SYNTHESIS.md`
+
+**Source:** Skill Analyst recommendation (skill-provenance-integration.md), GAP-025 methodology context.
+
+---
+
+## Perceptual Positive Findings
+
+Confirmed strengths that CD MUST NOT break. These were independently validated by multiple perceptual auditors across all 6 pages and represent the design system's strongest assets.
+
+- **Soul compliance:** 0 violations across ~3,479 elements, confirmed by dual method — programmatic 13,000-element sweep (comprehensive audit) AND independent perceptual auditors across all 6 pages (PA audit). This is the strongest soul validation in the pipeline's history.
+- **5x5 transition grammar:** Validated across all 5 axis types. Each axis-density pairing produces a distinct but coherent transition mechanism. The grammar is complete and bounded (AD-F-024).
+- **ATTENTION TOPOLOGY meta-equivalence:** The 3-way unification (axis = organization = density) was confirmed by independent auditors as VISIBLE, not just structural. Auditor D (AD-005): "one of the strongest visual rhythms I have seen." Auditor A (AD-006): "scholarly, deliberate, warm" at 1440px and 1024px (AD-F-023).
+- **Border-weight geological encoding:** AD-004's graduated border widths (4px/3px/1px, skipping 2px) produce measurable perceptual depth. Both auditors called it the page's "crown jewel" and "genuine design innovation" (AD-F-014).
+- **Typography velocity:** Serif questions / sans-serif answers create the PULSE rhythm (Q=inhale/sparse, A=exhale/dense). Independently confirmed as "one of the strongest aspects of the design" (AD-001).
+- **Page personality:** "Scholarly, Deliberate, Warm" confirmed at 1440px across all 6 pages. Degradation to "Cramped" at 768px drove responsive convention fixes.
+- **Convention-first methodology:** Pre-build 822-line convention spec prevented quality dialect divergence. All 6 builders produced pages with recognizable sibling resemblance despite different axis patterns.
+
+**Source:** GAP-025 (provenance-gap-inventory.md), DM-009/DM-014 (dark-matter-paths.md), all 6 AUDIT-REPORT.md positive findings sections.
+
+---
+
+*AD Audit Synthesis complete. 2026-02-10. Enriched 2026-02-11 with ship verdicts, fix report cross-references, decision classification framework, systemic/sovereign classification, audit methodology, and perceptual positive findings.*

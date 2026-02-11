@@ -206,17 +206,227 @@ CD should:
 ## FILES CD MUST READ (ORDERED)
 ===============================================================================
 
-| # | File | Purpose |
-|---|------|---------|
-| 1 | THIS FILE | Mandatory first read |
-| 2 | ACCUMULATED-IDENTITY-v2.md | Full accumulated context (all prior stages) |
-| 3 | SOUL-DISCOVERIES.md | 5 soul pieces (LOCKED) |
-| 4 | AD-outbound-findings.md | 28 AD-F findings |
-| 5 | AD-SYNTHESIS.md | Cross-exploration synthesis (12 sections) |
-| 6 | AD-CONVENTION-SPEC.md | Convention spec (base for CD locked layer) |
-| 7 | R-5 Combination Theory | PRIMARY research for CD |
-| 8 | PIPELINE-MANIFEST.md | Finding registry |
-| 9 | BACKBONE.md | Master narrative |
+| # | File | Path | Purpose |
+|---|------|------|---------|
+| 1 | THIS FILE | `provenance/stage-4-axis-ad/HANDOFF-AD-TO-CD.md` | Mandatory first read |
+| 2 | ACCUMULATED-IDENTITY-v2.md | `knowledge-architecture/ACCUMULATED-IDENTITY-v2.md` | Full accumulated context (all prior stages) |
+| 3 | SOUL-DISCOVERIES.md | `provenance/SOUL-DISCOVERIES.md` | 5 soul pieces (LOCKED) |
+| 4 | AD-outbound-findings.md | `provenance/stage-4-axis-ad/AD-outbound-findings.md` | 28 AD-F findings |
+| 5 | AD-SYNTHESIS.md | `provenance/stage-4-axis-ad/AD-SYNTHESIS.md` | Cross-exploration synthesis (12 sections) |
+| 6 | AD-CONVENTION-SPEC.md | `knowledge-architecture/_ad-execution/AD-CONVENTION-SPEC.md` | Convention spec (base for CD locked layer) |
+| 7 | AD-PA-CONVENTIONS.md | `provenance/stage-4-axis-ad/AD-PA-CONVENTIONS.md` | Convention ideology (WHY behind rules) |
+| 8 | R-5 Combination Theory | `provenance/original-research/R5-COMBINATION-THEORY.md` | PRIMARY research for CD |
+| 9 | PIPELINE-MANIFEST.md | `provenance/PIPELINE-MANIFEST.md` | Finding registry |
+| 10 | BACKBONE.md | `DESIGN-SYSTEM/BACKBONE.md` | Master narrative |
+
+All paths relative to `docs-spa/app/showcase/DESIGN-SYSTEM/`.
+
+===============================================================================
+## OPEN ESCALATIONS
+===============================================================================
+
+Two locked convention conflicts surfaced during perceptual audit and remain
+unresolved. CD must determine resolution before building compound layouts.
+
+| Escalation ID | Description | Convention Reference | Recommendation |
+|---------------|-------------|---------------------|----------------|
+| ESC-001 | **Lock-vs-lock conflict: responsive breakpoint vs bento pattern.** S12.5 mandates single-column collapse at 768px, but AD-F-009 (bento grid CONTAINS islands) requires multi-column to function. AD-006 bento zones broke destructively between 768-960px. | S12.5 (LOCKED) vs AD-F-009 (LOCKED) | Move collapse to ~960px for 4+-column grids. CD must validate whether 960px is the right threshold for compound layouts or if pattern-specific overrides are needed. |
+| ESC-002 | **Scroll-reveal interpretation: progressive enhancement vs content gate.** S15.3 requires content in DOM for progressive enhancement, but AD explorations used scroll-reveal that hid 40-60% of content when animations failed. Content was in the DOM (letter of S15.3 honored) but invisible (spirit violated). | S15.3 (LOCKED) | Initial CSS state MUST render content visible. JavaScript MAY add hidden state for reveal effect. AD-006 fix applied this resolution; CD should adopt as standard. |
+
+===============================================================================
+## SHIP STATUS
+===============================================================================
+
+Per-page verdicts after perceptual audit (PA) and fix execution:
+
+| AD | Pattern | Initial Verdict | Final Verdict | Notes |
+|----|---------|----------------|---------------|-------|
+| AD-001 | Z-Pattern | SHIP WITH CONCERNS | **SHIP** (post-fix) | Width 860->1100px, footer added, dead space reduced |
+| AD-002 | F-Pattern | **DO NOT SHIP** | **SHIP** (post-fix) | Empty Acts IV-V resolved, width 860->1100px (DM-042) |
+| AD-003 | Bento Grid | SHIP WITH CONCERNS | **SHIP** (post-fix) | Grid collapse fixed at 769px, width 860->1100px |
+| AD-004 | Spiral | SHIP WITH CONCERNS | **SHIP** (post-fix) | Blank zones reduced, footer added, width 860->1100px |
+| AD-005 | Choreography | **DO NOT SHIP** | **SHIP** (post-fix) | Dead zones halved, interstitials added, footer added (DM-042) |
+| AD-006 | Compound | **DO NOT SHIP** | **SHIP** (post-fix) | Scroll-reveal defense, bento 960px collapse, footer bookend (DM-042) |
+
+**3 pages were initially DO-NOT-SHIP:** AD-002 (empty Acts IV-V), AD-005
+(excessive dead zones, no ending), AD-006 (scroll-reveal content gate + bento
+collapse). All issues were resolved during PA fix execution (commits 315784d
+through a231977). Container width was universally updated from 860px to 1100px
+across all 6 pages based on unanimous perceptual evidence + user validation.
+
+===============================================================================
+## KNOWN QUALITY PATTERNS -- Internal Dialect Warning
+===============================================================================
+
+**DM-007: Internal quality dialect within pages.**
+
+The OD audit identified 3 quality dialects ACROSS pages (Polished: OD-001/002,
+Functional: OD-003/004/005, Editorial: OD-006). The perceptual audit discovered
+quality variation WITHIN individual pages as well:
+
+- AD-003: "I would put my name on the top third" but lower sections feel less
+  polished (CBB-1 finding)
+- AD-004: Comparison panels feel "borrowed" from a different design sensibility
+  (CBB-5 finding)
+
+CD should be aware this intra-page dialectal variation exists. Treat as
+acceptable range for AD explorations, not defect -- but compound pages at CD
+scale should maintain internal consistency. The convention spec was authored
+pre-build to prevent cross-page dialect drift, but within-page variation is a
+different phenomenon requiring visual review.
+
+===============================================================================
+## SYSTEMIC vs SOVEREIGN FINDINGS
+===============================================================================
+
+**DM-012: Classification of which AD findings recur across all pages (systemic)
+vs page-specific (sovereign).**
+
+### Systemic Findings (recur across multiple/all ADs -- CD WILL encounter these)
+
+| Finding | Pages Affected | CD Implication |
+|---------|---------------|----------------|
+| Container width too narrow (860px) | All 6 | RESOLVED: widened to 1100px. CD should use 1100px. |
+| No visual ending / footer | All 6 | RESOLVED: footers added. CD MUST include footer/capstone. |
+| Dead space / excessive whitespace | All 6 | Breathing zone budget: 15% minimum, 25% maximum ceiling. |
+| Responsive collapse at 768px | All 6 | Test at 768px AND 900px (bento breaks earlier). |
+| Dark code block contrast | 5 of 6 | Convention-compliant dark code blocks required. |
+| Soul compliance (0 violations) | All 6 | MAINTAINED through fixes. CD must match. |
+
+### Sovereign Findings (page-specific -- CD may not encounter)
+
+| Finding | Page | Nature |
+|---------|------|--------|
+| Z-sweep shallowness | AD-001 | Z-pattern specific diagonal perception |
+| Code block truncation | AD-003 | Bento cell sizing specific |
+| Invisible border at viewport edge | AD-004 | Spiral-specific border rendering |
+| Hub-spoke transition inconsistency | AD-005 | Choreography-specific navigation |
+| Internal quality dialect variation | AD-003, AD-004 | Per-page design consistency |
+
+===============================================================================
+## STRENGTHS TO PROTECT
+===============================================================================
+
+**DM-014: Confirmed positive findings that CD must not break.**
+
+These were independently confirmed by multiple perceptual auditors:
+
+| Strength | Source | Why It Matters |
+|----------|--------|---------------|
+| **Soul compliance** (0 violations across ~3,479 elements) | All 6 audit reports + comprehensive audit | The identity is real and enforced |
+| **Transition grammar** (5x5 matrix validated) | AD-F-025, AD-006 audit | Transitions between density zones follow validated grammar |
+| **ATTENTION TOPOLOGY meta-equivalence** | AD-F-023, AD-005/006 auditors | The 3-way unification is VISIBLE, not just structural |
+| **Border weight as geological encoding** (4px/3px/1px) | AD-F-014, AD-004 auditors (both called it "crown jewel" and "genuine design innovation") | Flat 2D encoding of depth WITHOUT depth cues |
+| **Typography velocity** (serif Q / sans A creates PULSE) | AD-001/002 auditors | The Q&A rhythm is perceptually confirmed |
+| **Header authority** (dark full-bleed + 3px red) | All auditors | Creates strongest LANDMARK regardless of axis pattern |
+| **"Scholarly, Deliberate, Warm" personality** | AD-006 auditors (at 1440px and 1024px) | The design intent IS perceived by independent observers |
+| **Warm palette cohesion** | All auditors | Muted earth tones create consistent environmental feel |
+
+===============================================================================
+## 768px VIEWPORT WARNING
+===============================================================================
+
+**DM-013: 768px is the consistent failure point across all AD explorations.**
+
+Across all 6 pages:
+- **1440px:** Consistently good -- design intent fully realized
+- **1024px:** Often the sweet spot -- content density optimizes naturally
+- **768px:** Where problems concentrate -- responsive collapse, bento
+  destruction, dead space multiplication, content truncation
+
+**Critical nuance:** Some layouts break BEFORE 768px. AD-006's bento zones
+broke at ~900px, not 768px. AD-003's grid collapses needed adjustment at 769px.
+
+**CD mandatory gate:** Test compound layouts at **900px, 768px, AND 480px**.
+The 768px breakpoint alone is insufficient -- compound layouts combining bento
+and other patterns may fail at higher viewports.
+
+===============================================================================
+## DEFERRED RESEARCH
+===============================================================================
+
+**GAP-016: 7 R-2 findings deferred from AD to CD, listed by finding ID.**
+
+AD consumed R-2 findings per-exploration but flagged 7 for CD-level re-evaluation,
+as combination contexts may change how they apply:
+
+| R-2 ID | Description | Why Deferred | CD Application |
+|--------|-------------|-------------|----------------|
+| R2-1.1 | Breaking the Grid (Intentional Mess) | AD consumed individually; CD must evaluate grid-breaking across COMBINED patterns | Evaluate whether intentional grid breaks in one axis pattern conflict with adjacent combined patterns |
+| R2-2.4 | Analytical Dashboard Storylines | AD consumed for AD-002/004/006; CD must evaluate cross-pattern storyline composition | When Z + F + Spiral combine, do their individual storylines merge or conflict? |
+| R2-3.3 | Experimental Namespace (Kitchen) | AD consumed for AD-006 only; CD must evaluate whether experimental combinations graduate | Does the "kitchen" concept apply to CD compound pages? |
+| R2-4.2 | Asymmetric / Broken Grid | AD consumed for 3 ADs; CD must evaluate asymmetry in COMBINED layouts | Asymmetric bento + F-pattern -- does asymmetry compound or cancel? |
+| R2-4.4 | Golden Ratio (PARTIAL PASS) | Layout proportions consumed; TYPOGRAPHY application REJECTED (deviates from locked type scale) | CD may find golden ratio layout proportions useful for combination page sectioning |
+| R2-6.1 | Split Screen Layouts | AD consumed for AD-001/004/005; CD must evaluate split-screen in compound layouts | Can split-screen serve as a combination container (left axis = A, right axis = B)? |
+| R2-6.3 | Scrollytelling for Documentation | AD consumed for AD-002/004/005; CD must evaluate scroll-driven reveal across combined pages | Does scrollytelling work when the reveal traverses multiple axis patterns? |
+
+**Full R-2 mapping:** `knowledge-architecture/_ad-execution/r2-ad-mapping.md` (200 lines)
+**Full R-4 evaluation:** `knowledge-architecture/_ad-execution/R-4-AD-EVALUATION.md` (429 lines)
+
+===============================================================================
+## AD EXPLORATION PATHS
+===============================================================================
+
+CD agents building combinations of axis patterns need to READ the validated
+HTML artifacts. Explicit file paths:
+
+```
+explorations/axis/AD-001-z-pattern.html       (Z-Pattern, 36/40)
+explorations/axis/AD-002-f-pattern.html       (F-Pattern, 35/40)
+explorations/axis/AD-003-bento-grid.html      (Bento Grid, 37/40)
+explorations/axis/AD-004-spiral.html          (Spiral, 36/40)
+explorations/axis/AD-005-choreography.html    (Choreography, 35/40)
+explorations/axis/AD-006-compound.html        (Compound, 38/40)
+```
+
+All paths relative to `docs-spa/app/showcase/`. Total ~467KB of validated HTML.
+Each exploration demonstrates one axis pattern integrated with its paired density
+pattern(s) and organizational pattern. CD must study these before combining them.
+
+===============================================================================
+## AUDIT METHODOLOGY NOTE
+===============================================================================
+
+AD explorations were audited using the Perceptual Audit Skill (v2, later
+redesigned to v3 based on AD execution lessons). The methodology uses a
+3-layer architecture:
+
+1. **Layer 1: Binary Gates** -- 7 mandatory pass/fail gates (Playwright alive,
+   screenshots exist, cold look locked, perceptual language clean, systemic
+   synthesis complete, fix trigger activated, independent verification)
+2. **Layer 2: Structured Judgment** -- 28 perceptual questions (PA-01 through
+   PA-28) across 3 tiers, organized by severity
+3. **Layer 3: Free Perception** -- Unconstrained auditor observations with
+   sovereignty classification (SYSTEMIC vs SOVEREIGN)
+
+Results: 6/6 pages SHIP after fixes. Multi-agent architecture: 2+ independent
+auditors per page, concordance tracking, adversarial cross-examination.
+
+**Skill reference:** `~/.claude/skills/perceptual-auditing/` (GATES.md,
+PROTOCOL.md, TEAM.md)
+**Skill evolution analysis:** `explorations/axis/_perceptual-audit/_skill-evolution/SYNTHESIS.md`
+
+===============================================================================
+## CONVENTION IDEOLOGY REFERENCE
+===============================================================================
+
+For the reasoning behind every AD convention, including perceptual evidence,
+authority levels (ALWAYS-LOCKED / LOCKED / CHALLENGEABLE), and the decision
+classification framework (81 decisions across 3 tiers), see:
+
+**AD-PA-CONVENTIONS.md** in this directory
+(`provenance/stage-4-axis-ad/AD-PA-CONVENTIONS.md`)
+
+This document captures the convention ideology -- not just WHAT the rules are
+(that is in AD-CONVENTION-SPEC.md) but WHY each rule exists, what perceptual
+evidence supports it, and under what conditions it may be challenged. CD agents
+should read this to understand the reasoning behind constraints they inherit.
+
+**AD-CONVENTION-SPEC.md** (822 lines, 16 sections):
+`knowledge-architecture/_ad-execution/AD-CONVENTION-SPEC.md`
+
+**Lock sheet** (81 decisions, 3 tiers):
+`explorations/axis/_perceptual-audit/lock-sheet.md`
 
 ===============================================================================
 ## OPEN QUESTIONS FOR CD
@@ -230,4 +440,8 @@ CD should:
 
 ===============================================================================
 
-*Handoff complete. 2026-02-10.*
+*Handoff complete. 2026-02-10. Enriched 2026-02-11 with 10 sections: Open
+Escalations, Ship Status, Known Quality Patterns, Systemic vs Sovereign,
+Strengths to Protect, 768px Viewport Warning, Deferred Research, AD Exploration
+Paths, Audit Methodology Note, Convention Ideology Reference. GAP-022 (explicit
+ACCUMULATED-IDENTITY path) and GAP-024 (AD-CONVENTION-SPEC reference) resolved.*
