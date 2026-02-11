@@ -39,3 +39,25 @@
 1. Does choreography introduce KINETIC equivalence?
 2. Does simultaneous density co-existence hold in compound?
 3. Is there a META-equivalence unifying temporal/spatial/proportional?
+
+---
+
+## AD IDENTITY EVOLUTION: WAVE 1C RESOLUTION (Post-Hoc)
+
+**Added:** 2026-02-11 (provenance remediation)
+**Context:** All 3 forward questions from Wave 1C were ANSWERED by the completed AD phase.
+
+### Wave 1C Answers (from AD-F-017 through AD-F-028)
+1. **Kinetic equivalence: YES** -- AD-F-017 (Choreography): axis direction change IS density state change. Kinetic energy is the 4th mechanism.
+2. **Simultaneous density co-existence: NO** -- AD-F-024 (Compound): compound is SEQUENTIAL through scrolling, not simultaneous within viewport. Cacophony results from co-existence.
+3. **Meta-equivalence: YES** -- AD-F-023 (ATTENTION TOPOLOGY): the crown jewel. Unifies all 5 mechanisms: temporal (AD-F-003), spatial (AD-F-009), proportional (AD-F-008), kinetic (AD-F-017), gravitational (AD-F-016). Axis IS Organization IS Density -- three names for one phenomenon.
+
+### Final AD Identity State (28 findings)
+- **Core hypothesis EVOLVED:** From "axis serves org-density" to "axis IS org-density IS density" (3-way unification, AD-F-004)
+- **Meta-equivalence discovered:** AD-F-023 ATTENTION TOPOLOGY subsumes all 5 axis mechanisms
+- **Fractal bounded:** 5 scales confirmed (AD-F-027), no 6th scale (AD-F-028)
+- **Transition grammar:** 5x5 matrix with 20 directed transitions, 3 types: smooth/bridge/breathing (AD-F-025)
+- **Soul compliance:** 0 violations across all 6 explorations
+
+### Relevance for CD
+AD-F-023 is the pipeline-level identity constraint for CD. All component combinations must maintain ATTENTION TOPOLOGY meta-equivalence. The identity checkpoint shows the EVOLUTION from hypothesis to validated principle across 6 explorations.

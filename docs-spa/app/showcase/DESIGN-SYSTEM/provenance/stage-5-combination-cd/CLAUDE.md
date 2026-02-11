@@ -137,6 +137,87 @@ For deeper understanding:
 **PRODUCES:** CD-F-### findings for Migration, Combination Rules, 6 HTML explorations
 
 ===============================================================================
+## 4A. AD HTML EXPLORATION PATHS (CD Surface Gap 1)
+===============================================================================
+
+CD agents MUST study the validated AD HTML artifacts to understand what they
+are combining. These paths are relative to the repository root
+(`docs-spa/app/showcase/`):
+
+### AD Explorations (Stage 4 -- Axis)
+- `explorations/axis/AD-001-z-pattern.html` (Z-Pattern -- temporal axis, AD-F-001-004)
+- `explorations/axis/AD-002-f-pattern.html` (F-Pattern -- tension axis, AD-F-005-008)
+- `explorations/axis/AD-003-bento-grid.html` (Bento Grid -- spatial axis, AD-F-009-012)
+- `explorations/axis/AD-004-spiral.html` (Spiral -- proportional axis, AD-F-013-016)
+- `explorations/axis/AD-005-choreography.html` (Choreography -- kinetic axis, AD-F-017-020)
+- `explorations/axis/AD-006-compound.html` (Compound -- gravitational axis, AD-F-021-028)
+
+### OD Explorations (Stage 3 -- Organizational)
+CD combines axis AND organizational patterns. These demonstrate the OD patterns:
+- `explorations/organizational/OD-001-conversational.html` (Conversational flow)
+- `explorations/organizational/OD-002-narrative.html` (Narrative arc)
+- `explorations/organizational/OD-003-task-based.html` (Task-based)
+- `explorations/organizational/OD-004-confidence.html` (Confidence gradient)
+- `explorations/organizational/OD-005-spatial.html` (Spatial hierarchy)
+- `explorations/organizational/OD-006-creative.html` (Creative research feed)
+
+### Per-Exploration Perceptual Audit Results (AD)
+- `explorations/axis/_perceptual-audit/AD-001/` through `AD-006/`
+- `explorations/axis/_perceptual-audit/lock-sheet.md` (AD lock sheet)
+
+===============================================================================
+## 4B. PERCEPTUAL AUDIT METHODOLOGY (CD Surface Gap 3)
+===============================================================================
+
+CD explorations MUST undergo perceptual audit. The skill package is located at:
+
+### Skill Definitions
+- `~/.claude/skills/perceptual-auditing/` (core auditing skill)
+- `~/.claude/skills/perceptual-deepening/` (extended deepening protocol)
+
+### In-Repo Skill Resources
+- `explorations/axis/_perceptual-research/MASTER-PERCEPTUAL-EXECUTION-PROMPT.md` (full audit prompt)
+- `explorations/axis/_perceptual-research/01-15*.md` + `AUXILIARY*.md` (17 research files)
+
+### Validation Record
+- AD stage: 6/6 pages SHIP after PA-guided fixes (avg 36.2/40)
+- 3 gates: readability, responsiveness, visual coherence
+- showcase/CLAUDE.md mandates "invoke the FULL Perceptual Depth Audit"
+
+===============================================================================
+## 4C. EXECUTION PROTOCOL REFERENCE (CD Surface Gap 2)
+===============================================================================
+
+These documents contain hard-won lessons about multi-agent phase execution.
+A CD team lead SHOULD read these before designing the CD execution plan:
+
+### Execution Architecture
+- `knowledge-architecture/OD-EXECUTION-AGENT-TEAM-ARCHITECTURE-v4.md` (team topology, wave execution)
+- `knowledge-architecture/OD-EXECUTION-PROTOCOL.md` (execution protocol patterns)
+- `knowledge-architecture/OD-AUDIT-RETROSPECTIVE-AND-PROTOCOL-v3.md` (protocol evolution, lessons learned)
+
+### Key Lessons (from OD/AD execution)
+- Binary rules achieve 100% agent compliance; judgment rules achieve ~0%
+- Hierarchical topology (Lead -> Captains -> Workers) validated over flat topology
+- Per-file ownership eliminates all contention
+- Workers MUST write output files (the critical failure mode)
+- Sequential verification (programmatic then visual) eliminates Playwright contention
+- Pre-build convention spec is the highest-leverage quality intervention
+
+===============================================================================
+## 4D. WORKFLOW METACOGNITION (CD Surface Gap 4)
+===============================================================================
+
+### Key Workflow Principles
+- Binary rules achieve 100% compliance; judgment rules achieve ~0% -- THE most important architectural principle
+- Convention-first methodology prevents quality dialect divergence (AD-PA-CONVENTIONS.md)
+- Pre-build convention spec is the highest-leverage quality intervention
+- Two-Instance pattern exploits continuation bias: builder instance cannot self-revise
+- 50:1 compression from agent output to behavioral constraint -- 99.8% information loss
+- See: `knowledge-architecture/WORKFLOW-METACOGNITION-ANALYSIS.md` (full analysis)
+- See: `knowledge-architecture/_workflow-metacognition/` (9 raw analysis files)
+
+===============================================================================
 ## 5. MINDSET
 ===============================================================================
 
