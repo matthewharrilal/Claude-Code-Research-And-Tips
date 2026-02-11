@@ -211,7 +211,24 @@ to application.
 
 ### Stage 4 (AD-F-###) — Axis COMPLETE
 
-28 findings produced across 6 explorations (AD-001 Z-Pattern, AD-002 F-Pattern, AD-003 Bento Grid, AD-004 Spiral, AD-005 Choreography, AD-006 Compound). See `stage-4-axis-ad/AD-outbound-findings.md` for full registry. Key findings: AD-F-004 (3-Way Unification Validated), AD-F-023 (Meta-Equivalence: all equivalence mechanisms converge on ATTENTION TOPOLOGY), AD-F-024 (Compound is sequential not simultaneous), AD-F-027 (DD-F-006 fractal validated at 5 scales).
+28 findings produced across 6 explorations (AD-001 Z-Pattern, AD-002 F-Pattern, AD-003 Bento Grid, AD-004 Spiral, AD-005 Choreography, AD-006 Compound). See `stage-4-axis-ad/AD-outbound-findings.md` for full registry.
+
+| ID | Finding | Type | Consumed By | Status |
+|----|---------|------|-------------|--------|
+| AD-F-004 | 3-Way Unification Validated — axis, org, density are ONE structure | Primary Finding | CD, Migration | ACTIVE |
+| AD-F-005 | Tension Meter as CRESCENDO Position Indicator in F-Pattern | Design Decision | CD, Migration | ACTIVE |
+| AD-F-008 | Decision Matrix Validates CRESCENDO Peak in F-Pattern | Validation | CD, Migration | ACTIVE |
+| AD-F-016 | Spiral Reading Order ENHANCES Geological Layering (stress-test answer) | Stress-test | CD, Migration | ACTIVE |
+| AD-F-017 | Kinetic Equivalence — axis direction change IS density state change (4th mechanism) | Extension | CD, Migration | ACTIVE |
+| AD-F-020 | Choreography is Reader Attention Movement, not CSS animation (identity clarification) | Identity | CD, Migration | ACTIVE |
+| AD-F-021 | Triple Equivalence Holds at Compound Scale — zero manual density manipulation | Validation | CD, Migration | ACTIVE |
+| AD-F-023 | Meta-Equivalence: ATTENTION TOPOLOGY unifies all 4 mechanisms (CROWN JEWEL) | Meta-Pattern | CD (MANDATORY), Migration | ACTIVE |
+| AD-F-024 | Compound Is Sequential, Not Simultaneous — one axis per viewport | Constraint | CD (MANDATORY), Migration | ACTIVE |
+| AD-F-025 | Transition Grammar Validated — 5x5 matrix (4 Smooth, 10 Bridge, 6 Breathing) | Constraint | CD (MANDATORY), Migration | ACTIVE |
+| AD-F-027 | DD-F-006 Fractal at 5 Scales Confirmed (navigation, page, section, component, character) | Validation | CD, Migration | ACTIVE |
+| AD-F-028 | No 6th Fractal Scale — 5-Scale Model Complete and bounded | Negative Finding | CD, Migration | ACTIVE |
+
+**Total AD-F-###:** 28 findings (14 Class A confirming + 14 Class B extending, 0 Class C overwriting, 0 Class D breaking)
 
 ### Stage 5 (CD-F-###) — Combination ⏳ PENDING
 
@@ -299,7 +316,7 @@ Traffic-light (DD-F-015):
 | PENDING | Identified but not yet applied | ~245 |
 | APPLIED | Used in at least one stage | ~90 |
 | EXEMPLARY | Deeply applied as core concept | 6 |
-| ACTIVE | Constraint that applies to all work | ~42 (25 prior + 17 OD-F) |
+| ACTIVE | Constraint that applies to all work | ~70 (25 prior + 17 OD-F + 28 AD-F) |
 | CONSUMED | Used and no longer needs tracking | ~3 |
 | RESOLVED | Anti-pattern identified and fixed | 1 (OD-F-AP-001) |
 

@@ -283,6 +283,41 @@ AD must also specifically audit for semi-transparent backgrounds (rgba) as
 a systemic gap identified during re-enrichment.
 
 ═══════════════════════════════════════════════════════════════════════════════
+## STAGE 4 DETERMINATION
+═══════════════════════════════════════════════════════════════════════════════
+
+AD explored spatial layout — axis geometry across 6 explorations. No new
+perceptual soul piece was discovered. The 5 visual soul pieces remain the
+complete set.
+
+Closest candidate: AD-F-023 ("Attention Topology" meta-equivalence) -- this
+is a STRUCTURAL discovery about how axis, organization, and density are one
+phenomenon, not a perceptual truth about how things LOOK. Like OD-F-005, it
+governs information architecture, not visual perception. The distinction
+holds: soul pieces constrain CSS; AD-F-023 constrains compositional logic.
+
+**Evidence:** AD-001 through AD-006 soul compliance verification -- zero
+violations across all 6 explorations (~3,479+ elements checked). Dual-method
+confirmation: programmatic DOM tests (border-radius, box-shadow, filter
+drop-shadow, 2px borders, backgrounds, font trio, version badges all PASS)
+plus visual auditor verification across all 6 exploration pages. The soul
+constraint (border-radius: 0) was not merely compatible with axis geometry
+-- it was the mechanism that ENABLED key discoveries (AD-F-013: angular spiral
+IS geological strata because sharp edges force the angular approximation).
+
+**ANTI-PHYSICAL Identity Maintained:** All 6 AD explorations maintained the
+ANTI-PHYSICAL identity established during OD re-enrichment. AD-F-020
+specifically clarifies: "choreography" means reader attention movement
+through static structure, not CSS-animated visual elements. The system
+continues to reject anything implying physical object behavior.
+
+**Implication for CD:** CD (combination exploration) is the final opportunity
+for potential soul discovery. The 5-scale fractal model is bounded (AD-F-028),
+the 3-way identity is confirmed, and the transition grammar constrains
+compound patterns. CD should verify soul compliance holds under component
+combination, not seek a 6th soul piece.
+
+═══════════════════════════════════════════════════════════════════════════════
 ## APPLICATION GUIDE
 ═══════════════════════════════════════════════════════════════════════════════
 

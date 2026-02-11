@@ -1,8 +1,9 @@
 ---
-pipeline_stage: 3
+pipeline_stage: 4
 file_type: external-research-registry
 generated: 2026-02-08
-agent: census-b
+updated: 2026-02-11
+agent: census-b (OD entries), agent-1c (AD entries)
 sources:
   - finding-registry.md (Wave 1 diagnostic)
   - OD-001 through OD-006 HTML headers (Block 1)
@@ -11,17 +12,22 @@ sources:
   - OD-006-CREATIVE-RESEARCH-FEED.md
   - identity-brief.md (55 EXT citations)
   - research-refinement.md (soul test results)
+  - research-package-ad-001.md through research-package-ad-006.md (AD EXT-AXIS-* findings)
+  - AD-outbound-findings.md (28 AD-F findings consuming EXT-AXIS-*)
+  - AD-SYNTHESIS.md (33 EXT-AXIS-* confirmed)
 ---
 
 # EXT-* External Research Registry
 
-**Total EXT Findings:** 94 unique (post-re-enrichment count; 77 citations across original ODs + 17 discovered during re-enrichment)
-**Categories:** 7 (EXT-CONV, EXT-NARR, EXT-DENSITY, EXT-TASK, EXT-CONF, EXT-SPAT, EXT-CREATIVE)
-**Source Files Scanned:** 7 primary + 6 OD HTML headers
+**Total EXT Findings:** 127 unique (94 OD-stage + 33 AD-stage)
+**Categories:** 13 (7 OD: EXT-CONV, EXT-NARR, EXT-DENSITY, EXT-TASK, EXT-CONF, EXT-SPAT, EXT-CREATIVE | 6 AD: EXT-AXIS-Z, EXT-AXIS-F, EXT-AXIS-B, EXT-AXIS-SP, EXT-AXIS-CH, EXT-AXIS-X)
+**Source Files Scanned:** 7 primary + 6 OD HTML headers + 6 AD research packages
 
 ---
 
 ## Summary Table
+
+### OD-Stage Findings (Stage 3)
 
 | Category | Total Findings | Applied Count | Application Rate | Consuming OD(s) |
 |----------|---------------|---------------|-----------------|-----------------|
@@ -32,13 +38,37 @@ sources:
 | EXT-CONF | 18 | 18 | 100% | OD-004 |
 | EXT-SPAT | 16 | 16 | 100% | OD-005 |
 | EXT-CREATIVE | 15 | 15 | 100% | OD-001, OD-006 (primary); OD-003-005 (inherited) |
-| **TOTAL** | **72** | **72** | **100%** | |
+| **OD TOTAL** | **94** | **94** | **100%** | |
 
 **Note:** Citations across ODs include shared EXT-CREATIVE findings between OD-001 and OD-006 (and inherited by OD-003-005 via solid offset/cascade patterns). EXT-CONV-006 through EXT-CONV-011 added during OD-001 v3 re-enrichment (Wave 1). EXT-NARR-001 through EXT-NARR-011 added during OD-002 v3 re-enrichment (Wave 1, addressing Research Debt RD-1). EXT-TASK-013 through EXT-TASK-019 added during OD-003 v3 re-enrichment (Wave 2). EXT-SPAT-013 through EXT-SPAT-018 added during OD-005 v3 re-enrichment (Wave 2). EXT-CONF-013 through EXT-CONF-018 added during OD-004 v3 re-enrichment (Wave 3). EXT-CREATIVE-010 through EXT-CREATIVE-015 added during OD-006 v3 re-enrichment (Wave 3).
 
+### AD-Stage Findings (Stage 4)
+
+| Category | Total Findings | Applied Count | Application Rate | Consuming AD(s) |
+|----------|---------------|---------------|-----------------|-----------------|
+| EXT-AXIS-Z | 5 | 5 | 100% | AD-001 |
+| EXT-AXIS-F | 5 | 5 | 100% | AD-002 |
+| EXT-AXIS-B | 5 | 5 | 100% | AD-003 |
+| EXT-AXIS-SP | 5 | 5 | 100% | AD-004 |
+| EXT-AXIS-CH | 5 | 5 | 100% | AD-005 |
+| EXT-AXIS-X | 8 | 8 | 100% | AD-006 |
+| **AD TOTAL** | **33** | **33** | **100%** | |
+
+**Note:** All 33 EXT-AXIS-* findings were bespoke research commissioned for each AD exploration. Each domain (Z, F, B, SP, CH) received exactly 5 findings; compound (X) received 8 as the crown jewel exploration. All findings passed soul test. Total citations across 6 ADs: 33 (see AD-SYNTHESIS.md Section 10). Source: 6 research packages (research-package-ad-001.md through research-package-ad-006.md).
+
+### Combined Totals
+
+| Stage | Categories | Findings | Application Rate |
+|-------|-----------|----------|-----------------|
+| OD (Stage 3) | 7 | 94 | 100% |
+| AD (Stage 4) | 6 | 33 | 100% |
+| **TOTAL** | **13** | **127** | **100%** |
+
 ---
 
-## Cross-Reference: Which OD Consumed Which EXT Categories
+## Cross-Reference: Which Exploration Consumed Which EXT Categories
+
+### OD Cross-Reference
 
 | OD | EXT-CONV | EXT-NARR | EXT-DENSITY | EXT-TASK | EXT-CONF | EXT-SPAT | EXT-CREATIVE | Total Citations |
 |----|----------|----------|-------------|----------|----------|----------|--------------|-----------------|
@@ -48,6 +78,17 @@ sources:
 | OD-004 | - | - | - | - | 18 | - | (inherited 001,002,004) | 18 (+3 inherited) |
 | OD-005 | - | - | - | - | - | 16 | (inherited 001) | 16 (+1 inherited) |
 | OD-006 | - | - | - | - | - | - | 15 (001-015) | 15 |
+
+### AD Cross-Reference
+
+| AD | EXT-AXIS-Z | EXT-AXIS-F | EXT-AXIS-B | EXT-AXIS-SP | EXT-AXIS-CH | EXT-AXIS-X | Total Citations |
+|----|-----------|-----------|-----------|------------|------------|-----------|-----------------|
+| AD-001 (Z-Pattern) | 5 | - | - | - | - | - | 5 |
+| AD-002 (F-Pattern) | - | 5 | - | - | - | - | 5 |
+| AD-003 (Bento Grid) | - | - | 5 | - | - | - | 5 |
+| AD-004 (Spiral) | - | - | - | 5 | - | - | 5 |
+| AD-005 (Choreography) | - | - | - | - | 5 | - | 5 |
+| AD-006 (Compound) | - | - | - | - | - | 8 | 8 |
 
 ---
 
@@ -256,6 +297,117 @@ Added during OD-006 v3 re-enrichment. Sourced from research-package-od-006.md (r
 
 ---
 
+---
+
+# AD-Stage External Research (Stage 4 — Axis Explorations)
+
+All 33 EXT-AXIS-* findings were bespoke external research commissioned for the 6 AD explorations. Each finding received a soul test during the research packaging phase. All 33 PASSED. Source: research-package-ad-001.md through research-package-ad-006.md, compiled by Research Packager agents (2026-02-09).
+
+---
+
+## Category 7: EXT-AXIS-Z (Z-Pattern Research) — 5 Findings
+
+All sourced from research-package-ad-001.md. Applied in AD-001 (Z-Pattern + Conversational + PULSE/TIDAL).
+
+| ID | Name | Description | Source | Applied In | Application Status | Soul Test Result |
+|----|------|-------------|--------|-----------|-------------------|-----------------|
+| EXT-AXIS-Z-001 | Z-Pattern Diagonal as Implicit Grid Line | Golden ratio (~38.2-degree angle) creates harmonic proportions between 4 Z-quadrants. `grid-template-rows: 1.618fr 1fr`. Diagonal is implied by content placement weight, not rendered as visible line. | Josef Muller-Brockmann grid systems + golden angle geometry | AD-001 | APPLIED | PASSED — Pure 2D geometric principle, no CSS depth/shadows/rounded corners |
+| EXT-AXIS-Z-002 | Z-Pattern Velocity Control via Typography Weight | Eye movement speed along Z-pattern controlled by typographic weight: bold/heavy type at Z-entry points slows eye (PULSE pauses), light body text at Z-traverse allows faster scanning. Maps to PULSE: heavy=dense(slow), light=sparse(fast). | Typography + reading physics research | AD-001 | APPLIED | PASSED — Typography-based hierarchy (IS-2), uses locked fonts |
+| EXT-AXIS-Z-003 | Z-Pattern Breakpoint Collapse Strategy | Z-pattern collapses to linear stack below 768px. PULSE preserved (Q/A alternation is vertical regardless). TIDAL transfers from width variation to background-color differentiation via zone tokens. | Responsive design principles | AD-001 | APPLIED | PASSED — Responsive design, soul-neutral. Zone tokens maintain density signals |
+| EXT-AXIS-Z-004 | Z-Pattern as Conversational Turn-Taking | Each Z-cycle maps to one conversational turn (Sacks, Schegloff & Jefferson 1974). Question = current speaker (left, narrow), answer = respondent (full-width). Z-diagonal = transition relevance place. | Conversational analysis (CA) turn-taking research | AD-001 | APPLIED | PASSED — Content-level structural pattern, soul-neutral |
+| EXT-AXIS-Z-005 | Z-Pattern Micro-Z at Component Scale (Fractal Echo) | Within answer sections, code + explanation pairs create micro-Z: code top-left (primary optical), explanation top-right. Satisfies DD-F-006 fractal at component scale. `grid-template-columns: 1fr 1fr`. | DD-F-006 fractal self-similarity requirement | AD-001 | APPLIED | PASSED — Fractal structural principle, uses existing grid layout (IS-3) |
+
+**AD-F findings sourced from EXT-AXIS-Z:** AD-F-001 (Z-001), AD-F-002 (Z-002, Z-004), AD-F-003 (Z-005), AD-F-004 (all 5)
+
+---
+
+## Category 8: EXT-AXIS-F (F-Pattern Research) — 5 Findings
+
+All sourced from research-package-ad-002.md. Applied in AD-002 (F-Pattern + Narrative Arc + CRESCENDO).
+
+| ID | Name | Description | Source | Applied In | Application Status | Soul Test Result |
+|----|------|-------------|--------|-----------|-------------------|-----------------|
+| EXT-AXIS-F-001 | F-Pattern as Freytag Scanner | F-pattern's three horizontal scans map to Freytag's first three acts. First scan (full-width) = exposition. Second scan (shorter) = rising action. Vertical descent = climax through denouement. F-degradation IS CRESCENDO compression. | F-pattern reading physics + Freytag dramatic structure | AD-002 | APPLIED | PASSED — Reading physics observation, pure 2D scanning path |
+| EXT-AXIS-F-002 | Editorial Spread Pacing for F-Pattern Sections | Each Freytag act is a "spread" with sparse-intro -> dense-body -> sparse-bridge internal structure. Creates EXT-NARR-011 micro/macro pacing within F-pattern axis. | Magazine editorial design (spread-level pacing) | AD-002 | APPLIED | PASSED — Editorial design principle, implements IS-7 |
+| EXT-AXIS-F-003 | Left-Spine Landmark Hierarchy | F-pattern vertical descent relies on multi-signal landmark differentiation: H2 (Instrument Serif + 4px red left border), H3 (Inter italic), H4 (Inter uppercase + letter-spacing 0.05em). Redundant signals ensure scanning at speed catches landmarks. | Typography hierarchy research + NNG F-pattern scanning | AD-002 | APPLIED | PASSED — Typography hierarchy (IS-2), SIZE/COLOR/POSITION (IS-1) |
+| EXT-AXIS-F-004 | CRESCENDO Exhale via Freytag Falling Action | F-pattern REVERSES after climax — reader reads more horizontally in Act IV as density decreases. Creates CRESCENDO with exhale. Act V matches Act I density (bookend). | Freytag dramatic structure + reading behavior research | AD-002 | APPLIED | PASSED — Structural pattern, no CSS soul implications |
+| EXT-AXIS-F-005 | F-Pattern Code Block Placement Strategy | Code blocks follow attention degradation: Act I = zero code, Act II = short inline, Act III = full blocks with annotations, Act IV = comparison code, Act V = reference summary. Code density itself follows CRESCENDO. | Content strategy + progressive disclosure research | AD-002 | APPLIED | PASSED — Content strategy, code blocks use locked styles |
+
+**AD-F findings sourced from EXT-AXIS-F:** AD-F-005 (F-001), AD-F-006 (F-002, F-003), AD-F-007 (F-003), AD-F-008 (F-005)
+
+---
+
+## Category 9: EXT-AXIS-B (Bento Grid Research) — 5 Findings
+
+All sourced from research-package-ad-003.md. Applied in AD-003 (Bento Grid + Task-Based + ISLANDS/BOOKENDS).
+
+| ID | Name | Description | Source | Applied In | Application Status | Soul Test Result |
+|----|------|-------------|--------|-----------|-------------------|-----------------|
+| EXT-AXIS-B-001 | Bento Grid as ISLANDS Spatial Encoding | Grid cells directly encode ISLANDS: large cells (2x2) = large islands (high density), small cells (1x1) = small islands (low density), grid gaps = ocean (zero density). Bento IS the ISLANDS pattern rendered as CSS Grid. | CSS Grid layout + ISLANDS density pattern | AD-003 | APPLIED | PASSED — Pure CSS Grid, border-radius: 0, hierarchy through SIZE (IS-1) |
+| EXT-AXIS-B-002 | Progressive Complexity via Grid Position | Grid position encodes complexity: simpler tasks (Beginner) in top-left (primary optical per Gutenberg), complex tasks (Advanced) in bottom-right (terminal). Creates CRESCENDO within ISLANDS. | Gutenberg diagram + EXT-TASK-014 progressive complexity | AD-003 | APPLIED | PASSED — Positional hierarchy (IS-1), no decoration needed |
+| EXT-AXIS-B-003 | Collapsible Bento — ISLANDS Dual Mode in Grid Form | `<details>`/`<summary>` wrapping each grid cell. Collapsed = task headers as visual TOC (hub). Expanded = full task content (spoke). Combines hub-spoke navigation (R4-064) with ISLANDS dual mode. | OD-003 v3 ISLANDS dual mode + semantic HTML | AD-003 | APPLIED | PASSED — Semantic HTML, binary transition (no animation/gradients) |
+| EXT-AXIS-B-004 | Bento Grid Internal Layout Variation (Anti-Monotony) | Each cell uses a DIFFERENT internal layout template (A: vertical steps, B: code-split 50/50, C: annotated diagram, D: comparison table). 3-4 templates rotating creates FRACTAL variation at component scale. Addresses OD-003 structural monotony deficit. | Magazine editorial design + EXT-TASK-013 | AD-003 | APPLIED | PASSED — Layout variation is STRUCTURAL not decorative, soul-aligned |
+| EXT-AXIS-B-005 | Grid Gap as Density Signal | Varying grid gaps between sections creates meta-ISLANDS: dense section groups (16px gap within related tasks) separated by sparse section gaps (48px+ between categories). Implements EXT-TASK-015's 4-level spacing hierarchy at grid level. | ISLANDS density pattern + Gestalt grouping | AD-003 | APPLIED | PASSED — CSS gap property, whitespace as design (Rule 6) |
+
+**AD-F findings sourced from EXT-AXIS-B:** AD-F-009 (B-001), AD-F-010 (B-001, B-002), AD-F-011 (B-004), AD-F-012 (B-005)
+
+---
+
+## Category 10: EXT-AXIS-SP (Spiral Layout Research) — 5 Findings
+
+All sourced from research-package-ad-004.md. Applied in AD-004 (Spiral + Confidence-Based + GEOLOGICAL/CRESCENDO).
+
+| ID | Name | Description | Source | Applied In | Application Status | Soul Test Result |
+|----|------|-------------|--------|-----------|-------------------|-----------------|
+| EXT-AXIS-SP-001 | Golden Ratio as Geological Proportion System | Golden ratio (1.618) provides harmonious spiral ring widths: core (flex: 1) = densest/smallest, Probable (flex: 1.618), Speculative (flex: 2.618). Inner rings denser, outer rings sparser — mirrors geological strata accumulation. Not decorative mathematics: creates PERCEPTUAL signal. | Golden ratio proportions + geological stratification metaphor | AD-004 | APPLIED | PASSED — Pure CSS proportion via flex, hierarchy through SIZE (IS-1) |
+| EXT-AXIS-SP-002 | Border-Weight Gradient as Flat Geological Encoding | Border-weight gradient (4px/3px/1px) encodes GEOLOGICAL strata as flat 2D signals. 4px = bedrock (heaviest, most certain), 3px = subsoil (subordinate), 1px = atmosphere (lightest, most speculative). Solves "depth without ANTI-PHYSICAL" challenge. Skips 2px to avoid epidemic anti-pattern. | OD-004 confidence encoding + DD-F-016 border system | AD-004 | APPLIED | PASSED — Border-left is flat CSS, no shadows/transforms/3D. Rule 5 inversion: 1px borders are SEMANTIC here |
+| EXT-AXIS-SP-003 | Spiral as Angular Approximation (Anti-Physical Spiral) | Implements spiral as polygonal/angular approximation: straight-line segments, right angles, nested rectangles. Soul constraint (border-radius: 0) forces this, which IS geological stratification. No curves, no rounded containers. | Fibonacci spiral adapted per Soul Piece 1 constraint | AD-004 | APPLIED | PASSED — Angular/polygonal spiral uses straight lines and right angles throughout |
+| EXT-AXIS-SP-004 | Confidence-Proportional Spacing System | Spacing within each ring correlates with confidence: Established (16px gap, 24px padding), Probable (24px, 32px), Speculative (32px, 48px), Open (48px, 64px). Creates CRESCENDO of whitespace from core to edge. CSS custom properties per stratum. | Confidence gradient + whitespace as design (Rule 6) | AD-004 | APPLIED | PASSED — Pure CSS spacing, whitespace as design element |
+| EXT-AXIS-SP-005 | Geological Survey Header as Spiral Map | Dark header (#1A1A1A) contains miniature angular spiral map: nested rectangles with border-weight gradient, active stratum highlighted with --color-primary. Creates DD-F-006 fractal at page scale. Stratum labels in --font-mono at --type-meta. | EXT-CONF-015 dark header + DD-F-006 fractal requirement | AD-004 | APPLIED | PASSED — CSS-only flat graphic, nested rectangles (border-radius: 0) |
+
+**AD-F findings sourced from EXT-AXIS-SP:** AD-F-013 (SP-003), AD-F-014 (SP-002), AD-F-015 (SP-004), AD-F-016 (SP-001, SP-003)
+
+---
+
+## Category 11: EXT-AXIS-CH (Choreography Research) — 5 Findings
+
+All sourced from research-package-ad-005.md. Applied in AD-005 (Choreography + Spatial Mapping + WAVE/ISLANDS).
+
+| ID | Name | Description | Source | Applied In | Application Status | Soul Test Result |
+|----|------|-------------|--------|-----------|-------------------|-----------------|
+| EXT-AXIS-CH-001 | Cinematic Shot Progression as Axis Choreography Model | Cinematic shot progression (establishing -> medium -> close-up -> wide) provides structural model. Hub overview = horizontal scanning (establishing shot), spoke intro = vertical reading (medium shot), spoke detail = deep vertical (close-up), spoke summary = return to horizontal (wide shot). Each shot transition is an AXIS CHANGE via spacing, typography, and density. | Cinematic language adapted to content structure | AD-005 | APPLIED | PASSED — Structural metaphor, flat CSS (spacing + typography changes) |
+| EXT-AXIS-CH-002 | Diagonal Clip-Path as Axis Direction Signal | `clip-path: polygon()` diagonals mark axis direction changes. Top-left to bottom-right = "descending into detail", bottom-left to top-right = "ascending to overview." Like diagonal rules in printed magazines. Max 2-3 per page (R4-134). | Editorial/magazine layout tradition + CSS clip-path | AD-005 | APPLIED | PASSED — Flat 2D CSS masking, straight line (not curved), no box-shadow |
+| EXT-AXIS-CH-003 | WAVE Density Oscillation via Hub-Spoke Navigation | Hub-spoke navigation creates natural WAVE: Hub = sparse (overview tiles, generous whitespace, horizontal scan), Spoke = dense (code blocks, vertical reading), Return-to-hub = sparse. Each hub-spoke-hub cycle = one complete wave. | WAVE density pattern + hub-spoke navigation | AD-005 | APPLIED | PASSED — Content architecture, density via content variation not visual effects |
+| EXT-AXIS-CH-004 | Flat Progress Indicator for Axis Position | CSS-only horizontal bar with rectangular segments (hub wide, transition narrow, spoke variable). Active segment highlighted with --color-primary. Square markers (Soul Piece 5). No rounded ends, no shadow, no gradient. | Progress indicator UX + Soul Piece 5 (squares) | AD-005 | APPLIED | PASSED — Flat rectangular bar, border-radius: 0, box-shadow: none |
+| EXT-AXIS-CH-005 | Responsive Axis Collapse Strategy | Desktop (1440px+): full choreography. Tablet (768-1440px): 4-col -> 2-col, split-screen -> full-width + breadcrumb. Mobile (<768px): all vertical, diagonals -> horizontal borders. WAVE preserved at all breakpoints via spacing tokens. | Responsive design + WAVE density preservation | AD-005 | APPLIED | PASSED — CSS media queries, axis simplification is functional |
+
+**AD-F findings sourced from EXT-AXIS-CH:** AD-F-017 (CH-002, CH-003), AD-F-018 (CH-002), AD-F-019 (CH-003, CH-005), AD-F-020 (CH-001)
+
+---
+
+## Category 12: EXT-AXIS-X (Compound Axis Research) — 8 Findings
+
+All sourced from research-package-ad-006.md. Applied in AD-006 (Compound + Creative + ALL density patterns, FRACTAL primary). AD-006 is the CROWN JEWEL of AD, receiving 8 findings (most of any AD domain).
+
+| ID | Name | Description | Source | Applied In | Application Status | Soul Test Result |
+|----|------|-------------|--------|-----------|-------------------|-----------------|
+| EXT-AXIS-X-001 | Compound Axis as Meta-Pattern Demonstration | Triple Equivalence: axis geometry, organizational pattern, and density pattern are THREE perspectives on ONE phenomenon. Visual proof: changing axis pattern changes perceived density AND organization automatically. | DD-F-006 FRACTAL meta-pattern + OD-F-MP-001 (Org=Density) | AD-006 | APPLIED | PASSED — Conceptual/structural principle, no CSS requirements |
+| EXT-AXIS-X-002 | Pattern Transition Grammar | 5x5 transition matrix: smooth transitions (Z-F, Bento-Choreography), bridge transitions (need intermediary), breathing transitions (all Spiral, cross-mechanism). Choreography = universal bridge. Spiral = most isolated (48px+ breathing per OD-F-007). | Information architecture + pattern compatibility theory | AD-006 | APPLIED | PASSED — IA principle, governs content structure not visual decoration |
+| EXT-AXIS-X-003 | Recursive Pattern Echo Grid | 5-cell pattern echo grid: each cell contains miniature CSS-only visualization of its axis pattern (Z diagonal, F scan, Bento grid, Angular spiral, Hub-spoke arrows). 6th cell = Hofstadterian strange loop (compound grid of itself). Creates DD-F-006 at navigation scale. | EXT-CREATIVE-013 pattern echo + Hofstadter self-reference | AD-006 | APPLIED | PASSED — Flat CSS graphics, border-radius: 0, no box-shadow, locked colors |
+| EXT-AXIS-X-004 | Compound Density Self-Documentation | Persistent annotation: "Current axis: Z-Pattern / Density: PULSE / Organization: Conversational" updates as reader scrolls through compound sections. Makes triple equivalence VISIBLE. --font-mono, --type-meta, intersection observer. | OD-005 WAVE indicator (EXT-SPAT-018) adapted for compound | AD-006 | APPLIED | PASSED — Uses --font-mono at --type-meta, no animation, square markers |
+| EXT-AXIS-X-005 | Compound Fractal Annotation Layer | Extends EXT-CREATIVE-010 to annotate BOTH fractal scale AND axis pattern simultaneously. Two-line annotation per section: Line 1 = fractal scale (PAGE/SECTION/COMPONENT), Line 2 = axis pattern. CSS Grid sidebar column (3rem). | EXT-CREATIVE-010 fractal annotation + DD-F-006 5-scale model | AD-006 | APPLIED | PASSED — --font-mono, --type-meta, editorial marginalia tradition |
+| EXT-AXIS-X-006 | Culmination Spread Treatment | Opening section uses maximum type scale (amplified --type-page). Miniature retrospective thumbnails of AD-001 through AD-005 as CSS-only pattern echoes. Per-section grid variation matching each source AD's natural layout. | EXT-CREATIVE-011 culmination spread adapted for compound | AD-006 | APPLIED | PASSED — Amplified typography at TOP of locked scale, flat CSS graphics |
+| EXT-AXIS-X-007 | Decision Matrix as Compound Climax | 5x5 decision matrix: rows = content types (landing, tutorial, reference, guide, creative), columns = axis patterns. Ratings as text labels ("Best fit" / "Acceptable" / "Avoid"). Featured cells with 4px left border. No traffic-light color (DD-F-015). | OD-F-013 decision matrices + compound synthesis | AD-006 | APPLIED | PASSED — Flat table, horizontal rules only, sharp corners, text ratings |
+| EXT-AXIS-X-008 | Compound Page as AD-F Finding Generator | Page structure designed to GENERATE findings (emergent behavior at pattern intersections). "Discovery Log" sidebar documenting AD-F findings as they emerge. Each transition point annotated. | OD-006 crown jewel methodology (OD-F-005 generation) | AD-006 | APPLIED | PASSED — Process principle, no CSS implications |
+
+**AD-F findings sourced from EXT-AXIS-X:** AD-F-021 (X-001), AD-F-022 (X-001, X-003), AD-F-023 (X-001, X-004), AD-F-024 (X-002), AD-F-025 (X-002), AD-F-026 (X-008), AD-F-027 (X-005), AD-F-028 (X-005)
+
+---
+
+# OD-Stage Supplementary Documentation
+
+---
+
 ## Spirit Violation List (from research-refinement.md)
 
 Findings where EXT research was applied but the implementation introduced spirit violations:
@@ -317,15 +469,17 @@ Since EXT-CONF findings lack numeric suffixes (inconsistency flagged in finding-
 
 ## COMPACTION-SAFE SUMMARY
 
-- **Agent:** census-b (EXT Findings Compiler), updated by scribe-1 (Wave 1), scribe-2 (Wave 2), and scribe-3 (Wave 3)
-- **Total unique EXT findings:** 94
-- **Categories:** 7 (CONV:11, NARR:11, DENSITY:3, TASK:15, CONF:18, SPAT:16, CREATIVE:15)
-- **Soul test results available:** All citations tested (original 55 in research-refinement.md + Wave 2/3 findings in research packages)
-- **PASSED:** 71 | **NEEDS REFINEMENT:** 2 unique (across 5+ OD instances) | **REJECTED:** 0
-- **Spirit violations from EXT research:** 5 unique issues (2 HIGH, 3 MEDIUM) — OD-005 hover RESOLVED (Wave 2), OD-006 hover RESOLVED (Wave 3)
+- **Agent:** census-b (OD EXT Findings Compiler), updated by scribe-1/2/3 (Waves 1-3), agent-1c (AD EXT-AXIS-* entries)
+- **Total unique EXT findings:** 127 (94 OD-stage + 33 AD-stage)
+- **OD Categories:** 7 (CONV:11, NARR:11, DENSITY:3, TASK:15, CONF:18, SPAT:16, CREATIVE:15)
+- **AD Categories:** 6 (AXIS-Z:5, AXIS-F:5, AXIS-B:5, AXIS-SP:5, AXIS-CH:5, AXIS-X:8)
+- **Soul test results:** All 127 findings tested — OD: 71 PASSED, 2 NEEDS REFINEMENT, 0 REJECTED | AD: 33/33 PASSED, 0 NEEDS REFINEMENT, 0 REJECTED
+- **Spirit violations from EXT research:** 5 unique issues in OD (2 HIGH, 3 MEDIUM) — OD-005 hover RESOLVED (Wave 2), OD-006 hover RESOLVED (Wave 3). Zero spirit violations from AD EXT-AXIS-* findings.
 - **ID format inconsistency:** RESOLVED — EXT-CONF numeric mapping elevated to CANONICAL (Wave 3)
-- **ID gaps resolved:** EXT-TASK-005/007/008/010 all SOUL PASS (applied in v3). EXT-SPAT-006/007 confirmed as PHANTOM GAPS (content applied, IDs unnecessary).
-- **Wave 2 additions:** EXT-TASK-013 through EXT-TASK-019 (7 new), EXT-SPAT-013 through EXT-SPAT-018 (6 new) = 13 new findings
-- **Wave 3 additions:** EXT-CONF-013 through EXT-CONF-018 (6 new), EXT-CREATIVE-010 through EXT-CREATIVE-015 (6 new) = 12 new findings
+- **ID gaps resolved:** EXT-TASK-005/007/008/010 all SOUL PASS (applied in v3). EXT-SPAT-006/007 confirmed as PHANTOM GAPS.
+- **OD Wave 2 additions:** EXT-TASK-013-019 (7 new), EXT-SPAT-013-018 (6 new) = 13 new findings
+- **OD Wave 3 additions:** EXT-CONF-013-018 (6 new), EXT-CREATIVE-010-015 (6 new) = 12 new findings
+- **AD additions:** EXT-AXIS-Z-001-005, EXT-AXIS-F-001-005, EXT-AXIS-B-001-005, EXT-AXIS-SP-001-005, EXT-AXIS-CH-001-005, EXT-AXIS-X-001-008 = 33 new findings
+- **AD sources:** 6 research packages (research-package-ad-001.md through research-package-ad-006.md), AD-SYNTHESIS.md Section 10
 - **Output file:** `DESIGN-SYSTEM/provenance/EXT-RESEARCH-REGISTRY.md`
-- **Status:** COMPLETE (updated through Wave 3)
+- **Status:** COMPLETE (updated through AD Stage 4)

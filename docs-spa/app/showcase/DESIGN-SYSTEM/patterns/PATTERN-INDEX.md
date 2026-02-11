@@ -1,7 +1,7 @@
 ---
 backbone_ref: DESIGN-SYSTEM/BACKBONE.md
 manifest_ref: DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md
-last_updated: 2026-02-05
+last_updated: 2026-02-11
 ---
 
 <!-- ═══════════════════════════════════════════════════════════════════════
@@ -21,8 +21,9 @@ and WHY.
 research justifies it, and what constraints must I honor?"
 
 3. STATUS
-COMPLETE for density patterns (DD). Organizational patterns (OD) and
-combination/axis patterns are placeholders pending future exploration.
+COMPLETE for density patterns (DD), organizational patterns (OD), and
+axis patterns (AD). Combination patterns (CD) are placeholders pending
+future exploration.
 
 4. SOUL ALIGNMENT
 Soul-adjacent — this file indexes validated patterns that implement
@@ -33,10 +34,13 @@ pattern selection respects soul compliance (chain requirement).
 - DD-F-001 through DD-F-006 (6 validated density patterns)
 - COMP-F-001 through COMP-F-005 (component constraint findings)
 - DD-F-015 (density-component interaction rules)
+- OD-F-001 through OD-F-013 (17 organizational pattern findings)
+- AD-F-001 through AD-F-028 (28 axis pattern findings)
 - R3-005, R3-023, R3-024, R3-029, R3-035, R3-036, R3-044, R3-045, R3-046
-- R4 references (axis innovations for future OD work)
+- R4-001 through R4-192 (192 axis innovation findings, 169 cited)
+- 33 EXT-AXIS-* bespoke external findings
 - BACKBONE.md (master narrative and pipeline structure)
-- DD exploration results
+- DD, OD, and AD exploration results
 
 6. MUST HONOR
 - The chain requirement is inviolable: no pattern applied without
@@ -61,10 +65,9 @@ would propagate soul violations downstream.
 - Future OD/CD stage explorations
 
 9. RESEARCH DEBT
-- OD patterns (organizational) not yet validated — placeholder only
-- CD patterns (combination/axis) not yet validated — placeholder only
-- R4 findings (192 axis innovations) largely unapplied
+- CD patterns (combination) not yet validated — placeholder only
 - Cross-pattern interaction rules need DD-F-015 expansion
+- Transition grammar (AD-F-025) needs CD-stage integration
 
 10. DIAGNOSTIC QUESTIONS
 Q1: Does every pattern listed here have a matching DD-F-XXX finding
@@ -75,8 +78,8 @@ Q3: Do the content-type-to-pattern mappings match the "Best For"
     recommendations in density-patterns.md?
 Q4: Are all R3 finding IDs cited here (R3-005, R3-023, etc.) real
     entries in R3-DENSITY-DIMENSIONS.md?
-Q5: Do the OD placeholder sections clearly indicate "not yet
-    validated" status to prevent premature application?
+Q5: Do the AD pattern entries reference correct AD-F-XXX finding IDs
+    matching those in AD-outbound-findings.md?
 
 END INLINE THREADING HEADER
 ═══════════════════════════════════════════════════════════════════════ -->
@@ -154,14 +157,16 @@ The same dense/sparse rhythm should appear at:
 - **Component level** (dense/sparse zones within components)
 - **Character level** (dense code / sparse comments)
 
-### Step 4: Choose Axis Layout (AD) ⏳ Pending
+### Step 4: Choose Axis Layout (AD) — VALIDATED
 
-| Content Type | Suggested Axis | Status |
-|--------------|---------------|--------|
-| Hero / Landing | Z-Pattern | ⏳ |
-| Text-heavy / Reference | F-Pattern | ⏳ |
-| Component catalog | Bento Grid | ⏳ |
-| Non-linear exploration | Spiral | ⏳ |
+| Organizational Pattern | Natural Axis | Why | Finding |
+|------------------------|-------------|-----|---------|
+| OD-001 Conversational | Z-Pattern | Q&A alternation naturally creates Z-sweep cycles; Z-sweep IS PULSE beat | AD-F-002 |
+| OD-002 Narrative Arc | F-Pattern | Progressive reading mirrors narrative arc; typography compression IS CRESCENDO | AD-F-006 |
+| OD-003 Task-Based | Bento Grid | Discrete tasks map to discrete grid cells; grid cells ARE islands | AD-F-009 |
+| OD-004 Confidence-Based | Spiral | Golden ratio nesting maps to confidence stratification; angular spiral IS geological | AD-F-013 |
+| OD-005 Spatial | Choreography | Hub-spoke topology maps to hub-spoke layout; direction change IS density change | AD-F-017 |
+| OD-006 Creative/Emergent | Compound | Multiple axis patterns sequentially through scrolling time; compound IS sequential, not simultaneous | AD-F-024 |
 
 ### Step 5: Verify Soul Compliance (ALWAYS)
 
@@ -346,10 +351,33 @@ Meta-insight: **Organization IS Density** (OD-F-005).
 See `provenance/stage-3-organization-od/organizational-patterns.md` for full details.
 
 ═══════════════════════════════════════════════════════════════════════════════
-## AXIS PATTERNS ⏳ PENDING
+## AXIS PATTERNS (Validated)
 ═══════════════════════════════════════════════════════════════════════════════
 
-AD explorations not yet started.
+All 6 axis patterns validated through AD explorations with visual audit,
+adversarial review, convention spec enforcement, and 3-wave builder execution.
+Zero soul violations across all 6 explorations. Crown jewel discovery:
+**Axis IS Organization IS Density** — three names for one phenomenon:
+how content arrangement shapes attention flow (AD-F-023: ATTENTION TOPOLOGY).
+
+DD-F-012 ELEVATED: Axis geometry does not merely "serve" the density pattern —
+axis IS the density pattern expressed spatially. The relationship is identity
+(equivalence), not servitude (subordination).
+
+| Pattern | Exploration | Score | Density Pairing | Org Pairing | Key Finding IDs | Equivalence Mechanism |
+|---------|-------------|-------|-----------------|-------------|-----------------|----------------------|
+| Z-PATTERN | AD-001 | VALIDATED | PULSE + TIDAL | Conversational | AD-F-001, AD-F-002, AD-F-003, AD-F-004 | Temporal |
+| F-PATTERN | AD-002 | VALIDATED | CRESCENDO | Narrative Arc | AD-F-005, AD-F-006, AD-F-007, AD-F-008 | Temporal |
+| BENTO GRID | AD-003 | VALIDATED | ISLANDS + BOOKENDS | Task-Based | AD-F-009, AD-F-010, AD-F-011, AD-F-012 | Spatial |
+| SPIRAL | AD-004 | VALIDATED | GEOLOGICAL + CRESCENDO | Confidence-Based | AD-F-013, AD-F-014, AD-F-015, AD-F-016 | Proportional |
+| CHOREOGRAPHY | AD-005 | VALIDATED | WAVE + ISLANDS | Spatial | AD-F-017, AD-F-018, AD-F-019, AD-F-020 | Kinetic |
+| COMPOUND | AD-006 | VALIDATED (crown jewel) | ALL (FRACTAL primary) | ALL | AD-F-021, AD-F-022, AD-F-023, AD-F-024, AD-F-025, AD-F-026, AD-F-027, AD-F-028 | Gravitational + META |
+
+**Total research provenance:** 169/192 R-4 findings cited (~88%), 33 EXT-AXIS-* bespoke findings, 28 AD-F findings produced.
+
+**To understand WHY a pattern works:** Read AD-SYNTHESIS.md and axis-patterns.md
+
+See `provenance/stage-4-axis-ad/AD-outbound-findings.md` for full finding details.
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## COMBINATION PATTERNS ⏳ PENDING
@@ -415,5 +443,17 @@ When migrating a page to KortAI design system:
 | Meta-documentation as density test | OD-F-006 |
 | Mode-transition breathing | OD-F-007 |
 | Compound creative techniques | OD-F-008 |
+| Z-PULSE equivalence | AD-F-002 |
+| 3-way unification (axis=org=density) | AD-F-004 |
+| Bento grid CONTAINS islands | AD-F-009 |
+| Angular spiral IS geological | AD-F-013 |
+| Border-weight gradient IS geological encoding | AD-F-014 |
+| Kinetic equivalence (direction = density) | AD-F-017 |
+| Choreography = reader attention movement | AD-F-020 |
+| Triple equivalence at compound scale | AD-F-021 |
+| ATTENTION TOPOLOGY meta-equivalence | AD-F-023 |
+| Compound is sequential, not simultaneous | AD-F-024 |
+| Transition grammar (5x5 matrix) | AD-F-025 |
+| No 6th fractal scale (5-scale complete) | AD-F-028 |
 
 ═══════════════════════════════════════════════════════════════════════════════

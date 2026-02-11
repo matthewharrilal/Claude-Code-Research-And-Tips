@@ -250,6 +250,30 @@ If casual → check if step indicators are circles.
 | 5 | Squares Signal System | PathOfTask | Square shapes = exactness required |
 
 ═══════════════════════════════════════════════════════════════════════════════
+## STAGE 4 DETERMINATION
+═══════════════════════════════════════════════════════════════════════════════
+
+AD explored spatial layout — axis geometry across 6 explorations. No new
+perceptual soul piece was discovered. The 5 visual soul pieces remain the
+complete set.
+
+**Evidence:** AD-001 through AD-006 soul compliance verification -- zero
+violations across all 6 explorations (~3,479+ elements checked). Dual-method
+confirmation: programmatic DOM tests plus visual auditor verification. The
+soul constraint (border-radius: 0) was the mechanism that ENABLED key
+discoveries (AD-F-013: angular spiral IS geological strata because sharp
+edges force the angular approximation).
+
+**ANTI-PHYSICAL Identity Maintained:** All 6 AD explorations maintained the
+ANTI-PHYSICAL identity. AD-F-020 clarifies: "choreography" means reader
+attention movement through static structure, not CSS-animated visual elements.
+
+**Implication for CD:** CD is the final opportunity for potential soul
+discovery. The 5-scale fractal model is bounded (AD-F-028), the 3-way
+identity is confirmed. CD should verify soul compliance holds under component
+combination, not seek a 6th soul piece.
+
+═══════════════════════════════════════════════════════════════════════════════
 ## APPLICATION GUIDE
 ═══════════════════════════════════════════════════════════════════════════════
 

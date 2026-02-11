@@ -358,6 +358,50 @@ Essence Callout (key takeaway)
 | OD-F-PR-001 | Process Finding | Process | Stage 3 (OD) | OD process methodology finding | DOCUMENTED |
 | OD-F-FL-001 | Org Patterns Imply Axis Preferences | Forward-Looking | Stage 3 (OD) | Transitive chain: org->density->axis. AD must honor. | PENDING (AD) |
 
+### Axis Explorations (AD-001 through AD-006)
+
+| ID | Name | Status | Pattern | Density Pairing | Key Learning |
+|----|------|--------|---------|-----------------|--------------|
+| AD-001 | Z-Pattern | INCLUDE | Z-Pattern | PULSE + TIDAL | Z-sweep cycle IS one PULSE beat; 3-way unification validated |
+| AD-002 | F-Pattern | INCLUDE | F-Pattern | CRESCENDO | Typography compression mirrors CRESCENDO; decision matrix IS peak |
+| AD-003 | Bento Grid | INCLUDE | Bento Grid | ISLANDS | Grid cells ARE dense islands; grid gaps ARE sparse ocean |
+| AD-004 | Spiral | INCLUDE | Spiral | GEOLOGICAL | Angular spiral IS geological strata; border-weight gradient IS encoding |
+| AD-005 | Choreography | INCLUDE | Choreography | WAVE + ISLANDS | Axis direction change IS density state change (kinetic equivalence) |
+| AD-006 | Compound | INCLUDE | Compound (all) | ALL (FRACTAL primary) | Meta-equivalence: ATTENTION TOPOLOGY unifies all mechanisms |
+
+### AD-F Findings (Pattern Findings)
+
+| ID | Name | Type | Source Stage | Discovery Context | Status |
+|----|------|------|-------------|-------------------|--------|
+| AD-F-001 | Z-Pattern Hero Establishes Axis Geometry | Discovery | Stage 4 (AD) | AD-001: Z-hero 4-quadrant grid maps to Gutenberg diagram, must appear before content | APPLIED |
+| AD-F-002 | Z-PULSE Equivalence | Validation | Stage 4 (AD) | AD-001: Z-pattern traversal IS PULSE rhythm — same phenomenon, two perspectives | APPLIED |
+| AD-F-003 | Micro-Z Grid at Component Scale | Validation | Stage 4 (AD) | AD-001: Micro-Z (code+explanation side-by-side) validates DD-F-006 fractal at component scale | APPLIED |
+| AD-F-004 | 3-Way Unification Validated | Primary Finding | Stage 4 (AD) | AD-001: Axis, organization, density are NOT independent — three names for one structure | APPLIED |
+| AD-F-005 | Tension Meter as CRESCENDO Position Indicator | Design Decision | Stage 4 (AD) | AD-002: Tension meter tracks CRESCENDO density position; tension leads density | APPLIED |
+| AD-F-006 | Typography Compression Mirrors CRESCENDO | Observation | Stage 4 (AD) | AD-002: Act-zone padding compresses 64px→32px across Freytag acts | APPLIED |
+| AD-F-007 | F-Pattern Vertical Descent Selects Left-Spine Landmarks | Observation | Stage 4 (AD) | AD-002: Vertical descent IS peak-density scanning behavior | APPLIED |
+| AD-F-008 | Decision Matrix Validates CRESCENDO Peak | Validation | Stage 4 (AD) | AD-002: Decision matrix at Act III is densest component, arrests F-pattern descent | APPLIED |
+| AD-F-009 | Bento Grid CONTAINS Islands | Discovery | Stage 4 (AD) | AD-003: Grid cells ARE dense islands; grid gaps ARE sparse ocean; rigidity prevents chaos | APPLIED |
+| AD-F-010 | Cell Size Hierarchy IS ISLANDS Hierarchy | Discovery | Stage 4 (AD) | AD-003: 2x2 cell = 4x area = proportionally larger island; size=density=importance | APPLIED |
+| AD-F-011 | Internal Layout Variation Creates Fractal ISLANDS | Discovery | Stage 4 (AD) | AD-003: Each bento cell uses different internal layout template — fractal ISLANDS at 4 scales | APPLIED |
+| AD-F-012 | Compound Bento Density | Discovery | Stage 4 (AD) | AD-003: BOOKENDS + ISLANDS simultaneously at different scales via grid structure | APPLIED |
+| AD-F-013 | Angular Spiral Resolves Geological-Radial Tension | Discovery | Stage 4 (AD) | AD-004: Soul constraint (border-radius: 0) forces angular approximation = geological strata | APPLIED |
+| AD-F-014 | Border-Weight Gradient IS Geological Encoding | Discovery | Stage 4 (AD) | AD-004: 4px/3px/1px border-weight = bedrock/subsoil/atmosphere; skips 2px (anti-pattern) | APPLIED |
+| AD-F-015 | Confidence-Proportional Spacing Creates CRESCENDO Whitespace | Observation | Stage 4 (AD) | AD-004: Spacing within spiral strata correlates with confidence level | APPLIED |
+| AD-F-016 | Spiral Reading Order ENHANCES Geological Layering | Stress-test | Stage 4 (AD) | AD-004: Angular spiral preserves geological sequence + adds golden-ratio sub-layout | APPLIED |
+| AD-F-017 | Kinetic Equivalence | Extension | Stage 4 (AD) | AD-005: Axis direction change IS density state change — 4th equivalence mechanism | APPLIED |
+| AD-F-018 | Diagonal as Dual Signal | Discovery | Stage 4 (AD) | AD-005: clip-path diagonal encodes both axis direction AND density phase simultaneously | APPLIED |
+| AD-F-019 | WAVE Preservation is Token-Dependent | Extension | Stage 4 (AD) | AD-005: Responsive collapse removes geometry but WAVE persists via spacing tokens | APPLIED |
+| AD-F-020 | Choreography is Reader Attention Movement | Identity Clarification | Stage 4 (AD) | AD-005: "Movement" = reader attention through static structure, not CSS animation | APPLIED |
+| AD-F-021 | Triple Equivalence Holds at Compound Scale | Validation | Stage 4 (AD) | AD-006: Changing axis auto-changes density+org with zero manual manipulation | APPLIED |
+| AD-F-022 | Fourth Equivalence Mechanism — Gravitational | Extension | Stage 4 (AD) | AD-006: Hub density = connection count (topological), not volume | APPLIED |
+| AD-F-023 | Meta-Equivalence: Attention Topology | Crown Jewel | Stage 4 (AD) | AD-006: All 4 mechanisms converge — axis IS topology, density IS traversal, org IS semantics | APPLIED |
+| AD-F-024 | Compound Is Sequential, Not Simultaneous | Constraint | Stage 4 (AD) | AD-006: Multiple axis patterns per viewport = cacophony; compound = temporal sequence | APPLIED |
+| AD-F-025 | Transition Grammar Validated | Constraint | Stage 4 (AD) | AD-006: 5x5 matrix — 4 Smooth, 10 Bridge, 6 Breathing transitions | APPLIED |
+| AD-F-026 | Meta-Documentation IS Purest Density Test | Validation | Stage 4 (AD) | AD-006: Page demonstrating own patterns is self-validating (confirms OD-F-006) | APPLIED |
+| AD-F-027 | DD-F-006 Fractal at 5 Scales Confirmed | Validation | Stage 4 (AD) | AD-006: Fractal verified at navigation, page, section, component, character scales | APPLIED |
+| AD-F-028 | No 6th Fractal Scale — 5-Scale Model Complete | Negative Finding | Stage 4 (AD) | AD-006: "Strategy" scale candidate collapsed into existing scales; 5-scale model is final | APPLIED |
+
 ### Concrete Example Files
 
 | File | Pattern | Use Case | Components Used |
@@ -548,6 +592,7 @@ component_pairing_rules:
 ═══════════════════════════════════════════════════════════════════════════════
 
 **Created:** 2026-02-04
+**Last Updated:** 2026-02-11 — AD-F entries added (28 axis findings from 6 explorations)
 **Purpose:** Master index for all findings, structured for future use
 **Update Frequency:** After each exploration completes
 **Critical:** This is the GO-TO document for "what exists and when to use it"

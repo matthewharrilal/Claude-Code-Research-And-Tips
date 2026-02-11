@@ -52,8 +52,8 @@ END INLINE THREADING HEADER
 # RESEARCH-ACTIVE — Comprehensive Research Tracking
 ## All 337 Findings with Application Status
 
-Last Updated: 2026-02-07
-Last Updated By: OD-006 Emergent Synthesis Threading (Weaver)
+Last Updated: 2026-02-11
+Last Updated By: AD Provenance Remediation (agent-1d — AD stage application update)
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## GLOBAL SUMMARY
@@ -62,14 +62,17 @@ Last Updated By: OD-006 Emergent Synthesis Threading (Weaver)
 | Research | Total Findings | UNAPPLIED | APPLIED | VALIDATED | INVALIDATED |
 |----------|----------------|-----------|---------|-----------|-------------|
 | R-1 | 28 | 8 | 20 | 0 | 0 |
-| R-2 | 27 | 27 | 0 | 0 | 0 |
+| R-2 | 27 | 0 | 25 | 0 | 2 |
 | R-3 | 51 | 40 | 11 | 0 | 0 |
-| R-4 | 192 | 192 | 0 | 0 | 0 |
+| R-4 | 192 | 42 | 150 | 0 | 0 |
 | R-5 | 39 | 37 | 2 | 0 | 0 |
-| **TOTAL** | **337** | **304** | **33** | **0** | **0** |
+| **TOTAL** | **337** | **127** | **208** | **0** | **2** |
 
-**Application Rate:** 9.79% of findings have been applied
-**Gap Rate:** 90.21% of findings remain unapplied
+**Application Rate:** 61.72% of findings have been applied (208/337)
+**Gap Rate:** 37.69% of findings remain unapplied (127/337)
+**Invalidated:** 0.59% of findings SOUL FAIL excluded (2/337)
+
+**Note:** R-2 was DEFERRED from OD to AD (per r2-evaluation.md). AD stage consumed 25/27 R-2 findings (92.6%) with 2 SOUL FAIL excluded (R2-024, R2-026). R-4 was the PRIMARY research stream for AD, with 150/192 findings usable (78.1%). See R-4-AD-EVALUATION.md and r2-ad-mapping.md for full classification.
 
 ### Status Definitions
 | Status | Definition |
@@ -144,42 +147,43 @@ Last Updated By: OD-006 Emergent Synthesis Threading (Weaver)
 
 ### R-2 Summary
 - Total: 27
-- UNAPPLIED: 27
-- APPLIED: 0
+- UNAPPLIED: 0
+- APPLIED: 25
 - VALIDATED: 0
-- INVALIDATED: 0
+- INVALIDATED: 2
+- **AD Application Session (2026-02-10):** 25 of 27 R-2 findings applied across AD-001 through AD-006 (92.6% application rate). 2 SOUL FAIL excluded (R2-024 overlapping/z-index, R2-026 card animation). Per r2-ad-mapping.md: AD-001=17, AD-002=16, AD-003=16, AD-004=16, AD-005=17, AD-006=20 findings each.
 
 ### R-2 Full Finding Table
 
 | ID | Finding | Status | Applied In | Evidence | Date |
 |----|---------|--------|------------|----------|------|
-| R2-001 | Breaking the Grid (strategic asymmetric storytelling) | UNAPPLIED | — | — | — |
-| R2-002 | Pull Quotes as Structural Elements (large typographic excerpts) | UNAPPLIED | — | — | — |
-| R2-003 | Multi-Column Text with Visual Interruptions (CSS column-span) | UNAPPLIED | — | — | — |
-| R2-004 | Running Headers and Section Markers (sticky breadcrumbs, progress bars) | UNAPPLIED | — | — | — |
-| R2-005 | White Space as Content (92px+ top margins, proportional spacing) | UNAPPLIED | — | — | — |
-| R2-006 | F-Pattern and Z-Pattern for Information Hierarchy | UNAPPLIED | — | — | — |
-| R2-007 | Card-Based Composition with Hierarchy Signals (size/whitespace priority) | UNAPPLIED | — | — | — |
-| R2-008 | Dense but Breathable Interfaces (reduce padding, increase information efficiency) | UNAPPLIED | — | — | — |
-| R2-009 | Analytical Dashboard Storylines (dashboards as narratives) | UNAPPLIED | — | — | — |
-| R2-010 | Maturity Badges and Component Status (Stable/Beta/Under Review/Deprecated) | UNAPPLIED | — | — | — |
-| R2-011 | Brand-Forward Documentation (Audi Pattern - marketing + education) | UNAPPLIED | — | — | — |
-| R2-012 | Development Kitchen / Experimental Namespace | UNAPPLIED | — | — | — |
-| R2-013 | Atomic Design Organization (Atoms → Molecules → Organisms) | UNAPPLIED | — | — | — |
-| R2-014 | Bento Grid Layout (Japanese-inspired modular layout) | UNAPPLIED | — | — | — |
-| R2-015 | Asymmetric / Broken Grid Layouts (+20% user engagement) | UNAPPLIED | — | — | — |
-| R2-016 | CSS Grid with Fractional Units (asymmetric columns via fr) | UNAPPLIED | — | — | — |
-| R2-017 | Golden Ratio Grid System (1:1.618 proportion) | UNAPPLIED | — | — | — |
-| R2-018 | Swiss Design Grid System (modular grid with asymmetric layouts) | UNAPPLIED | — | — | — |
-| R2-019 | Typography as Primary Design Element (72px+ display, tight line-height) | UNAPPLIED | — | — | — |
-| R2-020 | Whitespace for Hierarchy (Proximity Principle) | UNAPPLIED | — | — | — |
-| R2-021 | Typographic Hierarchy Techniques (font size, weight, color as differentiation) | UNAPPLIED | — | — | — |
-| R2-022 | Dramatic Typography as Content (96-200px bold text) | UNAPPLIED | — | — | — |
-| R2-023 | Split Screen Layouts (50/50, 60/40, 70/30 divisions) | UNAPPLIED | — | — | — |
-| R2-024 | Overlapping/Layered Elements with Z-Index | UNAPPLIED | — | — | — |
-| R2-025 | Scrollytelling for Documentation (scroll-driven narrative) | UNAPPLIED | — | — | — |
-| R2-026 | Card Manipulation and Animation (tactile shadows, drag-and-drop) | UNAPPLIED | — | — | — |
-| R2-027 | Copy-Paste Component Philosophy (shadcn/ui approach) | UNAPPLIED | — | — | — |
+| R2-001 | Breaking the Grid (strategic asymmetric storytelling) | APPLIED | AD-001, AD-003, AD-005, AD-006 | Grid-breaking as axis transition markers and Z-scan direction devices | 2026-02-10 |
+| R2-002 | Pull Quotes as Structural Elements (large typographic excerpts) | APPLIED | AD-001, AD-002, AD-004, AD-006 | Pull quotes as Z-pattern anchor points, CRESCENDO breathing pauses, spiral waypoints | 2026-02-10 |
+| R2-003 | Multi-Column Text with Visual Interruptions (CSS column-span) | APPLIED | AD-002, AD-003, AD-005 | F-pattern multi-column for sparse intro, bento internal multi-column, hub multi-column spoke summaries | 2026-02-10 |
+| R2-004 | Running Headers and Section Markers (sticky breadcrumbs, progress bars) | APPLIED | AD-001 through AD-006 | Universal axis-orientation wayfinding devices per axis pattern | 2026-02-10 |
+| R2-005 | White Space as Content (92px+ top margins, proportional spacing) | APPLIED | AD-001 through AD-006 | Universal axis-transition whitespace encoding (48px+ per OD-F-007) | 2026-02-10 |
+| R2-006 | F-Pattern and Z-Pattern for Information Hierarchy | APPLIED | AD-001, AD-002, AD-003, AD-006 | PRIMARY research source defining AD-001 Z and AD-002 F axis geometry | 2026-02-10 |
+| R2-007 | Card-Based Composition with Hierarchy Signals (size/whitespace priority) | APPLIED | AD-001, AD-003, AD-005, AD-006 | Z-pattern cards with size hierarchy, bento grid hierarchy via span, choreography spoke tiles | 2026-02-10 |
+| R2-008 | Dense but Breathable Interfaces (reduce padding, increase information efficiency) | APPLIED | AD-003, AD-004, AD-005, AD-006 | Bento islands dense internally (8px), breathable between; spiral dense core, breathable edge | 2026-02-10 |
+| R2-009 | Analytical Dashboard Storylines (dashboards as narratives) | APPLIED | AD-002, AD-004, AD-006 | F-pattern as narrative storyline, spiral as analytical journey, compound as meta-storyline | 2026-02-10 |
+| R2-010 | Maturity Badges and Component Status (Stable/Beta/Under Review/Deprecated) | APPLIED | AD-003, AD-004, AD-006 | Bento task complexity badges, spiral confidence badges (Established/Probable/Speculative/Open) | 2026-02-10 |
+| R2-011 | Brand-Forward Documentation (Audi Pattern - marketing + education) | APPLIED | AD-001 through AD-006 | Universal use-case-grounded axis demonstrations | 2026-02-10 |
+| R2-012 | Development Kitchen / Experimental Namespace | APPLIED | AD-006 | Compound creative axis includes experimental axis combinations in "Kitchen" section | 2026-02-10 |
+| R2-013 | Atomic Design Organization (Atoms → Molecules → Organisms) | APPLIED | AD-003, AD-004 | Bento tiles by complexity (Atoms/Molecules/Organisms), spiral rings map to atomic levels | 2026-02-10 |
+| R2-014 | Bento Grid Layout (Japanese-inspired modular layout) | APPLIED | AD-003, AD-005, AD-006 | PRIMARY research source defining AD-003 bento axis geometry | 2026-02-10 |
+| R2-015 | Asymmetric / Broken Grid Layouts (+20% user engagement) | APPLIED | AD-001, AD-005, AD-006 | Z-pattern inherent asymmetry, choreography asymmetric spoke sizing, compound mode-transition breaks | 2026-02-10 |
+| R2-016 | CSS Grid with Fractional Units (asymmetric columns via fr) | APPLIED | AD-001, AD-002, AD-003, AD-004, AD-005 | fr-based proportional axis geometry: Z=2fr 1fr, F=2fr 1fr 1fr, Bento=span, Spiral=golden ratio fr | 2026-02-10 |
+| R2-017 | Golden Ratio Grid System (1:1.618 proportion) | APPLIED | AD-002, AD-005 | PARTIAL PASS: layout proportions (61.8%/38.2%) applied; typography values excluded (locked type scale) | 2026-02-10 |
+| R2-018 | Swiss Design Grid System (modular grid with asymmetric layouts) | APPLIED | AD-003, AD-005, AD-006 | Swiss grid as structural backbone for bento, choreography, and compound pattern gallery | 2026-02-10 |
+| R2-019 | Typography as Primary Design Element (72px+ display, tight line-height) | APPLIED | AD-001, AD-002, AD-004, AD-006 | Z-pattern anchor points, F-pattern dramatic act headers, spiral ring labels, compound section titles | 2026-02-10 |
+| R2-020 | Whitespace for Hierarchy (Proximity Principle) | APPLIED | AD-001 through AD-006 | Universal proximity principle applied to axis-zone grouping; 1.5x rule for heading spacing | 2026-02-10 |
+| R2-021 | Typographic Hierarchy Techniques (font size, weight, color as differentiation) | APPLIED | AD-001 through AD-006 | Universal clamp-based responsive type scale across axis levels; font trio maintained | 2026-02-10 |
+| R2-022 | Dramatic Typography as Content (96-200px bold text) | APPLIED | AD-002, AD-004, AD-006 | F-pattern act titles at dramatic display sizes, spiral core label at largest size, compound mode titles | 2026-02-10 |
+| R2-023 | Split Screen Layouts (50/50, 60/40, 70/30 divisions) | APPLIED | AD-001, AD-004, AD-005 | Z-pattern top split (50/50 or 60/40), spiral established vs speculative split, hub/spoke split | 2026-02-10 |
+| R2-024 | Overlapping/Layered Elements with Z-Index | INVALIDATED | — | SOUL FAIL: z-index layering violates Soul Piece 4 (nothing floats, everything grounded on same plane) | 2026-02-10 |
+| R2-025 | Scrollytelling for Documentation (scroll-driven narrative) | APPLIED | AD-002, AD-004, AD-005 | F-pattern scrollytelling + CRESCENDO, spiral scroll-driven journey, choreography scroll transitions | 2026-02-10 |
+| R2-026 | Card Manipulation and Animation (tactile shadows, drag-and-drop) | INVALIDATED | — | SOUL FAIL: requires box-shadow, border-radius>0, opacity<1.0, filter:drop-shadow — fails ALL 5 soul gates | 2026-02-10 |
+| R2-027 | Copy-Paste Component Philosophy (shadcn/ui approach) | APPLIED | AD-001 through AD-006 | Universal extractable, reusable axis layout CSS for every AD | 2026-02-10 |
 
 ### R-2 Priority Queue
 1. R2-005 (White Space as Content) — Apply in: All explorations
@@ -289,28 +293,29 @@ Last Updated By: OD-006 Emergent Synthesis Threading (Weaver)
 
 ### R-4 Summary
 - Total: 192
-- UNAPPLIED: 192
-- APPLIED: 0
+- UNAPPLIED: 42
+- APPLIED: 150
 - VALIDATED: 0
 - INVALIDATED: 0
+- **AD Application Session (2026-02-10):** 150 of 192 R-4 findings applied across AD-001 through AD-006 (78.1% application rate). Classification: 98 SOUL PASS (51.0%), 52 CONDITIONAL PASS (27.1%), 18 CHALLENGE (9.4%), 12 CONDITIONAL FAIL (6.3%), 12 SOUL FAIL (6.3%). SOUL PASS + CONDITIONAL PASS = 150 usable findings applied. Per R-4-AD-EVALUATION.md: AD-001=18, AD-002=22, AD-003=34, AD-004=14, AD-005=38, AD-006=42 findings allocated. Total R-4 citations across all 6 ADs: 169.
 
 ### R-4 Findings by Category
 
 | ID Range | Pattern Category | Finding Count | Status |
 |----------|------------------|---------------|--------|
-| R4-001 to R4-015 | Classic Reading Patterns (Z, F, Gutenberg) | 15 | UNAPPLIED |
-| R4-016 to R4-028 | Bento Grid Patterns | 13 | UNAPPLIED |
-| R4-029 to R4-034 | Masonry Grid | 6 | UNAPPLIED |
-| R4-035 to R4-049 | Broken/Asymmetric Grid | 15 | UNAPPLIED |
-| R4-050 to R4-068 | Visual Rhythm | 19 | UNAPPLIED |
-| R4-069 to R4-076 | Cinematic Patterns | 8 | UNAPPLIED |
-| R4-077 to R4-092 | Axis Transitions | 16 | UNAPPLIED |
-| R4-093 to R4-103 | Golden Ratio | 11 | UNAPPLIED |
-| R4-104 to R4-115 | Hub and Spoke | 12 | UNAPPLIED |
-| R4-116 to R4-131 | Progressive Disclosure | 16 | UNAPPLIED |
-| R4-132 to R4-147 | Diagonal Patterns | 16 | UNAPPLIED |
-| R4-148 to R4-169 | Pattern Use Cases | 22 | UNAPPLIED |
-| R4-170 to R4-192 | Pattern Combinations | 23 | UNAPPLIED |
+| R4-001 to R4-015 | Classic Reading Patterns (Z, F, Gutenberg) | 15 | APPLIED (15 SOUL PASS) |
+| R4-016 to R4-028 | Bento Grid Patterns | 13 | APPLIED (13 SOUL PASS) |
+| R4-029 to R4-034 | Masonry Grid | 6 | APPLIED (5 SOUL PASS, 1 COND PASS) |
+| R4-035 to R4-049 | Broken/Asymmetric Grid | 15 | APPLIED (7 SOUL PASS, 8 COND PASS) |
+| R4-050 to R4-068 | Visual Rhythm | 19 | APPLIED (18 SOUL PASS, 1 COND PASS) |
+| R4-069 to R4-076 | Cinematic Patterns | 8 | APPLIED (8 SOUL PASS) |
+| R4-077 to R4-092 | Axis Transitions | 16 | APPLIED (16 SOUL PASS) |
+| R4-093 to R4-103 | Golden Ratio | 11 | APPLIED (10 SOUL PASS, 1 COND PASS) |
+| R4-104 to R4-115 | Hub and Spoke | 12 | MIXED (6 SOUL PASS, 6 COND PASS) |
+| R4-116 to R4-131 | Progressive Disclosure | 16 | MIXED (10 SOUL PASS, 4 COND PASS, 2 CHALLENGE) |
+| R4-132 to R4-147 | Diagonal Patterns | 16 | MIXED (2 SOUL PASS, 10 COND PASS, 4 CHALLENGE) |
+| R4-148 to R4-169 | Pattern Use Cases | 22 | MIXED (3 COND PASS, 12 CHALLENGE, 7 COND FAIL) |
+| R4-170 to R4-192 | Pattern Combinations | 23 | MIXED (3 COND PASS, 8 COND FAIL, 12 SOUL FAIL) |
 
 ### R-4 Key Findings Reference
 
@@ -437,12 +442,12 @@ Future explorations should intentionally apply remaining R-3 findings.
 
 | Exploration | Research Applied | Findings Used | Score |
 |-------------|------------------|---------------|-------|
-| AD-001 Z-Pattern | (pending) | | |
-| AD-002 F-Pattern | (pending) | | |
-| AD-003 Bento Grid | (pending) | | |
-| AD-004 Spiral Reveal | (pending) | | |
-| AD-005 Axis Choreography | (pending) | | |
-| AD-006 Creative Slot | (pending) | | |
+| AD-001 Z-Pattern | R4 (31 citations), R2 (10 citations), EXT-AXIS-Z (5), OD-F (5), DD-F (5) | 56 total citations; 18 R-4 allocated (14 SOUL PASS, 4 COND PASS), 17 R-2 mapped | INCLUDE (v1 enriched, 0 soul violations) |
+| AD-002 F-Pattern | R4 (24 citations), R2 (10 citations), EXT-AXIS-F (5) | 39 total citations; 22 R-4 allocated (16 SOUL PASS, 6 COND PASS), 16 R-2 mapped | INCLUDE (v1 enriched, 0 soul violations) |
+| AD-003 Bento Grid | R4 (18 citations), R2 (8 citations), EXT-AXIS-B (5) | 31 total citations; 34 R-4 allocated (20 SOUL PASS, 14 COND PASS), 16 R-2 mapped | INCLUDE (v1 enriched, 0 soul violations) |
+| AD-004 Spiral Reveal | R4 (16 citations), R2 (9 citations), EXT-AXIS-SP (5) | 30 total citations; 14 R-4 allocated (10 SOUL PASS, 4 COND PASS), 16 R-2 mapped | INCLUDE (v1 enriched, 0 soul violations) |
+| AD-005 Axis Choreography | R4 (38 citations), R2 (12 citations), EXT-AXIS-CH (5), OD-F (4), DD-F (6) | 65 total citations; 38 R-4 allocated (18 SOUL PASS, 20 COND PASS), 17 R-2 mapped | INCLUDE (v1 enriched, 0 soul violations) |
+| AD-006 Compound | R4 (42 citations), R2 (12 citations), EXT-AXIS-X (8), OD-F (7), DD-F (5) | 74 total citations; 42 R-4 allocated (28 SOUL PASS, 14 COND PASS), 20 R-2 mapped | INCLUDE (v1 enriched, crown jewel, 0 soul violations) |
 
 ### Combination Explorations (CD-001 through CD-006)
 
@@ -720,7 +725,7 @@ R1-001, R1-003, R1-007, R1-008, R1-010, R1-016, R1-017, R1-018, R1-019, R3-003, 
 ═══════════════════════════════════════════════════════════════════════════════
 
 **Created:** 2026-02-04
-**Last Updated:** 2026-02-07
+**Last Updated:** 2026-02-11
 **Purpose:** Track ALL 337 research findings and their application status
 **Update Frequency:**
 - After each research agent completes: Add findings
@@ -737,6 +742,31 @@ Every piece of work MUST update this file.
 - DISCOVERIES-LOG.md — Learnings from explorations
 
 ═══════════════════════════════════════════════════════════════════════════════
+
+### 2026-02-11 — AD Stage Application Update (AD Provenance Remediation)
+
+**Actions:**
+- R-4: 150 of 192 findings moved from UNAPPLIED to APPLIED (78.1% application rate)
+- R-2: 25 of 27 findings moved from UNAPPLIED to APPLIED (92.6% application rate)
+- R-2: 2 findings moved to INVALIDATED (R2-024 overlapping/z-index, R2-026 card animation — SOUL FAIL)
+- Global application rate: 9.79% → 61.72% (33 → 208 findings APPLIED out of 337)
+- AD-001 through AD-006 exploration table updated from "(pending)" to COMPLETE with citation counts
+- 28 AD-F findings produced (AD-F-001 through AD-F-028), 0 soul violations across all 6 explorations
+- R-4 classification per R-4-AD-EVALUATION.md: 98 SOUL PASS, 52 CONDITIONAL PASS, 18 CHALLENGE, 12 CONDITIONAL FAIL, 12 SOUL FAIL
+- R-2 mapping per r2-ad-mapping.md: 25 mapped, 2 excluded (SOUL FAIL), 7 universal findings, 6 synergy categories
+- Crown jewel discovery: ATTENTION TOPOLOGY meta-equivalence (AD-F-023) — axis IS organization IS density
+
+**R-4 Application by AD:**
+| AD | R-4 Allocated | R-4 Citations | R-2 Mapped | Total Citations |
+|----|---------------|---------------|------------|-----------------|
+| AD-001 Z-Pattern | 18 | 31 | 17 | 56 |
+| AD-002 F-Pattern | 22 | 24 | 16 | 39 |
+| AD-003 Bento Grid | 34 | 18 | 16 | 31 |
+| AD-004 Spiral Reveal | 14 | 16 | 16 | 30 |
+| AD-005 Choreography | 38 | 38 | 17 | 65 |
+| AD-006 Compound | 42 | 42 | 20 | 74 |
+
+---
 
 ### 2026-02-09 — Comprehensive Hierarchical Audit
 **Research Validated:** R-2 count corrected (78->27 in PIPELINE-MANIFEST). EXT-* count updated (69->94).
