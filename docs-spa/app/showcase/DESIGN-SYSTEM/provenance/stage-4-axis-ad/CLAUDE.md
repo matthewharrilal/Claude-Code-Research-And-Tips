@@ -77,10 +77,13 @@ For deeper context:
 |------|--------|---------|
 | `STAGE-HEADER.md` | COMPLETE | Stage definition with frontmatter chain |
 | `CLAUDE.md` | COMPLETE | This file -- navigation and orientation |
-| `AD-outbound-findings.md` | COMPLETE | 28 AD-F findings (formal registry) |
-| `AD-SYNTHESIS.md` | COMPLETE | 12-section cross-exploration synthesis |
+| `AD-outbound-findings.md` | COMPLETE | 28 AD-F findings (formal registry): AD-F-001 through AD-F-028 |
+| `AD-SYNTHESIS.md` | COMPLETE | 12-section cross-exploration synthesis (AD-F-023 ATTENTION TOPOLOGY as central principle) |
 | `AD-AUDIT-SYNTHESIS.md` | COMPLETE | Audit synthesis (47 items, 23 reports) |
-| `HANDOFF-AD-TO-CD.md` | COMPLETE | Gate file for Stage 5 (CD) |
+| `AD-CONVENTION-SPEC.md` | COMPLETE | 822-line convention spec (pre-build, zero dialect divergence) |
+| `AD-RESEARCH-GATE.md` | COMPLETE | Research filtering decisions for AD stage |
+| `AD-PA-CONVENTIONS.md` | COMPLETE | Convention ideology: methodology that prevented OD's 3-dialect problem |
+| `HANDOFF-AD-TO-CD.md` | COMPLETE | Gate file for Stage 5 (CD) -- references AD-F-023, AD-F-024, AD-F-025 as MANDATORY |
 
 ===============================================================================
 ## 4. HOW THIS CONNECTS
@@ -88,7 +91,22 @@ For deeper context:
 
 **CONSUMED:** HANDOFF-OD-TO-AD, 17 OD-F findings, 18 DD-F findings, 21 COMP-F findings, 192 R-4 findings (PRIMARY), 27 R-2 findings (evaluated, ~67% applied), 33 EXT-AXIS-* bespoke findings, ACCUMULATED-IDENTITY-v1.1
 
-**PRODUCED:** 28 AD-F findings, 6 HTML explorations (~467KB), AD-CONVENTION-SPEC (822 lines), 5x5 transition grammar, HANDOFF-AD-TO-CD, ACCUMULATED-IDENTITY-v2
+**PRODUCED:**
+- 28 AD-F findings (AD-F-001 through AD-F-028) -- see AD-outbound-findings.md
+- Crown jewels: AD-F-023 (ATTENTION TOPOLOGY), AD-F-024 (sequential constraint), AD-F-025 (transition grammar)
+- 6 HTML explorations (~467KB): AD-001 Z-Pattern, AD-002 F-Pattern, AD-003 Bento Grid, AD-004 Spiral, AD-005 Choreography, AD-006 Compound
+- AD-CONVENTION-SPEC.md (822 lines) -- reusable locked-layer convention base
+- AD-PA-CONVENTIONS.md -- convention ideology document
+- AD-RESEARCH-GATE.md -- research filtering decisions
+- 5x5 transition grammar (AD-F-025): 4 Smooth, 10 Bridge, 6 Breathing transitions
+- HANDOFF-AD-TO-CD.md -- gate file for Stage 5 (references AD-F-023, AD-F-024, AD-F-025 as MANDATORY)
+- ACCUMULATED-IDENTITY-v2.md -- updated identity incorporating AD-F-023 meta-equivalence
+
+**KEY AD-F CROSS-REFERENCES:**
+- AD-F-004 (3-way unification) validates OD-F-005 (org=density) and DD-F-012 (axis implies density)
+- AD-F-017 (kinetic equivalence) extends OD-F-FL-001 (org implies axis) with the 4th mechanism
+- AD-F-027 confirms DD-F-006 (fractal) at 5 scales; AD-F-028 bounds the model
+- AD-F-023 (ATTENTION TOPOLOGY) subsumes all prior equivalence findings into one meta-principle
 
 **SUCCESSOR:** `../stage-5-combination-cd/STAGE-HEADER.md`
 

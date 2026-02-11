@@ -286,9 +286,11 @@ a systemic gap identified during re-enrichment.
 ## STAGE 4 DETERMINATION
 ═══════════════════════════════════════════════════════════════════════════════
 
-AD explored spatial layout — axis geometry across 6 explorations. No new
-perceptual soul piece was discovered. The 5 visual soul pieces remain the
-complete set.
+AD explored spatial layout -- axis geometry across 6 explorations (AD-001
+Z-Pattern, AD-002 F-Pattern, AD-003 Bento Grid, AD-004 Spiral, AD-005
+Choreography, AD-006 Compound). 28 findings produced (AD-F-001 through
+AD-F-028). No new perceptual soul piece was discovered. The 5 visual soul
+pieces remain the complete set.
 
 Closest candidate: AD-F-023 ("Attention Topology" meta-equivalence) -- this
 is a STRUCTURAL discovery about how axis, organization, and density are one
@@ -296,26 +298,45 @@ phenomenon, not a perceptual truth about how things LOOK. Like OD-F-005, it
 governs information architecture, not visual perception. The distinction
 holds: soul pieces constrain CSS; AD-F-023 constrains compositional logic.
 
+Additional AD-F candidates considered and rejected:
+- AD-F-004 (3-way unification): structural, not perceptual
+- AD-F-020 (ANTI-PHYSICAL metaphor extension): deepens Soul Piece #4, not new
+- AD-F-013 (angular spiral = geological strata): consequence of Soul Piece #1
+  (border-radius: 0), not an independent perceptual truth
+
 **Evidence:** AD-001 through AD-006 soul compliance verification -- zero
 violations across all 6 explorations (~3,479+ elements checked). Dual-method
-confirmation: programmatic DOM tests (border-radius, box-shadow, filter
-drop-shadow, 2px borders, backgrounds, font trio, version badges all PASS)
-plus visual auditor verification across all 6 exploration pages. The soul
-constraint (border-radius: 0) was not merely compatible with axis geometry
--- it was the mechanism that ENABLED key discoveries (AD-F-013: angular spiral
-IS geological strata because sharp edges force the angular approximation).
+PA (perceptual audit) confirmation: programmatic DOM tests (border-radius,
+box-shadow, filter drop-shadow, 2px borders, backgrounds, font trio, version
+badges all PASS) plus visual auditor verification across all 6 exploration
+pages. AD-PA-CONVENTIONS.md documents the perceptual evidence behind each
+convention with auditor quotes. The soul constraint (border-radius: 0) was
+not merely compatible with axis geometry -- it was the mechanism that ENABLED
+key discoveries:
+- AD-F-013: angular spiral IS geological strata because sharp edges force
+  the angular approximation (Soul Piece #1 as generative constraint)
+- AD-F-002: Z-PULSE equivalence -- PULSE rhythm emerges naturally from
+  Z-pattern traversal, validated by PA across AD-001
+- AD-F-017: kinetic equivalence in Choreography -- direction change IS
+  density change, maintaining flat-plane honesty (Soul Piece #4)
 
 **ANTI-PHYSICAL Identity Maintained:** All 6 AD explorations maintained the
 ANTI-PHYSICAL identity established during OD re-enrichment. AD-F-020
 specifically clarifies: "choreography" means reader attention movement
-through static structure, not CSS-animated visual elements. The system
-continues to reject anything implying physical object behavior.
+through static structure, not CSS-animated visual elements. AD-F-024
+(compound = sequential) reinforces this: multiple axis patterns appear
+through scrolling time, not simultaneously within a viewport. The system
+continues to reject anything implying physical object behavior. PA auditors
+independently confirmed this across all 6 pages (see AD-PA-CONVENTIONS.md,
+universal conventions section).
 
 **Implication for CD:** CD (combination exploration) is the final opportunity
 for potential soul discovery. The 5-scale fractal model is bounded (AD-F-028),
-the 3-way identity is confirmed, and the transition grammar constrains
-compound patterns. CD should verify soul compliance holds under component
-combination, not seek a 6th soul piece.
+the 3-way identity is confirmed (AD-F-004 + AD-F-023), and the transition
+grammar constrains compound patterns (AD-F-025). CD should verify soul
+compliance holds under component combination, not seek a 6th soul piece.
+The strongest CD-relevant AD finding is AD-F-024 (compound = sequential):
+component combinations must respect the one-axis-per-section constraint.
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## APPLICATION GUIDE

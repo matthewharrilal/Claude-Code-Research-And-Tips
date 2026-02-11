@@ -61,6 +61,8 @@ END INLINE THREADING HEADER
 **Why it fails:** Signals "safe/generic" — could be any UI kit
 **Alternative:** `border-radius: 0` — sharp edges = decisive, confident
 
+> **AD Forward Reference:** [AD-F-013] — AD proved `border-radius: 0` is GENERATIVE, not just restrictive. In AD-004 (Spiral), the soul constraint forced the angular spiral approximation, which IS the mechanism that resolves the geological-radial tension. Sharp edges make the spiral work.
+
 ```css
 /* WRONG */
 .card { border-radius: 12px; }
@@ -75,6 +77,8 @@ END INLINE THREADING HEADER
 **What:** `box-shadow: 0 4px 6px rgba(0,0,0,0.1)`
 **Why it fails:** Fake 3D, dishonest, breaks flat design principle
 **Alternative:** `box-shadow: none` — use whitespace for separation
+
+> **AD Forward Reference:** [AD-F-014, AD-F-022] — AD validated 0 shadow violations across 6 explorations. AD-F-014 showed border-weight gradient (4px/3px/1px) encodes depth as a flat 2D property, no z-axis needed. AD-F-022 showed gravitational density (connection count) replaces shadow-based hierarchy cues.
 
 ```css
 /* WRONG */
@@ -229,6 +233,8 @@ h3 { font-style: italic; }
 **Why it fails:** Treats content like buttons, fake 3D
 **Alternative:** No transform — content, not interactive element
 
+> **AD Forward Reference:** [AD-F-020] — AD-005 (Choreography) clarified: "movement" in this system means choreography of READER's attention through static content structure, not CSS animation. 20 R-4 findings required reinterpretation from "visual movement" to "structural movement." 8 SOUL FAIL findings explicitly document the boundary.
+
 ═══════════════════════════════════════════════════════════════════════════════
 
 ## Component Anti-Patterns
@@ -297,6 +303,8 @@ left-borders (Family DNA soul piece). Use 1px only for subtle horizontal rules.
 **Discovery Context:** OD granular adversarial audit (2026-02-07), 17 agents.
 This was the #1 systemic issue identified. Does NOT constitute a soul violation
 but weakens visual hierarchy across all 6 OD explorations.
+
+> **AD Forward Reference:** [AD-F-014] — AD introduced 0 new 2px border violations. The border-weight gradient (4px/3px/1px) deliberately SKIPS 2px to avoid even the appearance of the epidemic. AD-CONVENTION-SPEC established the 3-category border system pre-build, preventing recurrence.
 
 ---
 

@@ -71,6 +71,18 @@ Every component has three properties:
 
 ═══════════════════════════════════════════════════════════════════════════════
 
+## AD Stage Validation
+
+AD-006 (Compound) validated that compound pattern application is SEQUENTIAL, not
+simultaneous (AD-F-024). Multiple axis patterns within a single viewport create
+visual cacophony. This extends to component combination: velocity sequencing creates
+temporal rhythm that parallels the compound sequential principle. The AD transition
+grammar (AD-F-025) classifies 20 directed pattern transitions into Smooth/Bridge/
+Breathing types — the same classification logic applies to component combination:
+same-velocity stacking is "monotone" (requires Bridge), while velocity alternation
+is "Smooth." See `provenance/stage-4-axis-ad/AD-PA-CONVENTIONS.md` for the
+convention ideology.
+
 ## The 4 Combination Rules
 
 ### Rule 1: Never Stack Same-Velocity
@@ -101,6 +113,10 @@ Every component has three properties:
 ```
 
 ### Rule 4: Semantic Proximity Spacing
+
+AD validated these spacing values through confidence-proportional spacing (AD-F-015):
+Established=24px, Probable=32px, Speculative=40px, Open=48px/64px. Spacing IS the
+semantic signal — same principle as component proximity.
 
 | Relationship | Spacing |
 |--------------|---------|

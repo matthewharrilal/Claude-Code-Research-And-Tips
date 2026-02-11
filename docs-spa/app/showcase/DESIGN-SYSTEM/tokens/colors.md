@@ -124,3 +124,10 @@ END INLINE THREADING HEADER
 2. **Semantic Colors** — Accents signal meaning, not decoration.
 3. **No Traffic Light** — Never place green (#4A9D6B) adjacent to red (#E83025).
 4. **Warm Over Cool** — Prefer cream (#FEF9F5) over pure white.
+
+**AD Validation:** All 6 AD explorations verified palette compliance with 0 color
+violations. Zone tokens (--color-zone-sparse/dense/breathing) — first introduced
+in OD-001 and validated as bookend pair in OD-006 — were confirmed across all AD
+explorations as encoding both spatial architecture and density dimension. AD-005
+(Choreography) proved the dark header (#1A1A1A) is a universal LANDMARK amplifier
+across all axis patterns (AD-F-017). See `provenance/stage-4-axis-ad/AD-PA-CONVENTIONS.md`.

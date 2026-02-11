@@ -90,6 +90,8 @@ When you create something new that COULD violate a finding, check here first.
 | COMP-F-004 | **Soul #4: No shadows = honesty about depth.** box-shadow: none everywhere. Hierarchy through size/color/position, not fake 3D. | Depth audit; DesignDecision had shadow-sm creating false elevation | DD, OD, AD, CD, Migration | Flatness is honesty. No component may introduce shadows. |
 | COMP-F-005 | **Soul #5: Squares signal system exactness.** Step indicators, checkboxes = square shapes. Circles suggest flexibility. | Shape audit of COMP-010 PathOfTask; round steps felt like suggestions | DD, OD, AD, CD, Migration | Sequential/procedural components use squares. This is non-negotiable. |
 
+> **AD Forward Reference (Stage 4):** AD confirmed 0 soul violations across all 6 axis explorations (~467KB HTML). COMP-F-001 (sharp edges), COMP-F-002 (serif italic), COMP-F-003 (2-zone callout), COMP-F-004 (no shadows) all verified. The soul constraint proved GENERATIVE in AD: `border-radius: 0` forced the angular spiral approximation (AD-F-013) that resolved the geological-radial tension; `box-shadow: none` required gravitational density encoding via connection count (AD-F-022) instead of depth cues. See AD-PA-CONVENTIONS.md for how AD's 822-line convention spec built on these soul pieces.
+
 ═══════════════════════════════════════════════════════════════════════════════
 ## REMEDIATION FINDINGS
 ═══════════════════════════════════════════════════════════════════════════════
@@ -140,12 +142,12 @@ When you create something new that COULD violate a finding, check here first.
 
 | Finding ID | DD-001 | DD-002 | DD-003 | DD-004 | DD-005 | DD-006 | OD | AD | CD | Migration |
 |------------|--------|--------|--------|--------|--------|--------|----|----|----|-----------|
-| COMP-F-001 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏳ | ⏳ | ⏳ | ⏳ |
-| COMP-F-002 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏳ | ⏳ | ⏳ | ⏳ |
-| COMP-F-003 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏳ | ⏳ | ⏳ | ⏳ |
-| COMP-F-004 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏳ | ⏳ | ⏳ | ⏳ |
-| COMP-F-005 | N/A | ✅ | N/A | N/A | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ |
-| COMP-F-010 | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ⏳ | ⏳ | ⏳ | ⏳ |
+| COMP-F-001 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ 0 violations | ✅ 0 violations (AD-F-013 generative) | ⏳ | ⏳ |
+| COMP-F-002 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ 0 violations | ✅ 0 violations | ⏳ | ⏳ |
+| COMP-F-003 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ 0 violations | ✅ 0 violations | ⏳ | ⏳ |
+| COMP-F-004 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ 0 violations | ✅ 0 violations (AD-F-022 generative) | ⏳ | ⏳ |
+| COMP-F-005 | N/A | ✅ | N/A | N/A | N/A | N/A | ✅ 0 violations | ✅ 0 violations | ⏳ | ⏳ |
+| COMP-F-010 | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ 0 violations | ✅ 0 violations (2px skipped per AD-F-014) | ⏳ | ⏳ |
 
 **Legend:** ✅ = Verified applied | ⚠️ = Initially violated, fixed | ⏳ = Pending | N/A = Not applicable
 
@@ -178,9 +180,10 @@ retroactive audit and informed DD-002+ to use 4px consistently.
 - [ ] No shadows introduced (COMP-F-004)
 - [ ] Procedural elements use squares (COMP-F-005)
 
-### AD Must Verify:
-- [ ] Axis layouts don't break soul pieces
-- [ ] Geometry tokens enforced
+### AD Must Verify: ✅ COMPLETE
+- [x] Axis layouts don't break soul pieces — 0 violations across 6 explorations
+- [x] Geometry tokens enforced — AD-CONVENTION-SPEC (822 lines) built on COMP-F tokens
+- [x] Soul constraint proved GENERATIVE: border-radius: 0 → angular spiral (AD-F-013); box-shadow: none → gravitational density (AD-F-022)
 
 ### CD Must Verify:
 - [ ] Component combinations don't violate individual soul pieces

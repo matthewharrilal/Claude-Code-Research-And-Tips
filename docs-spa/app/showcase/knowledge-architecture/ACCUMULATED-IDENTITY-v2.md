@@ -28,7 +28,7 @@ Each soul piece is a **way of seeing**, not a CSS rule. The perceptual truth is 
 | 4 | **Shadows Lie About Depth** | Shadows create FALSE DEPTH. In documentation, nothing should float. Everything is GROUNDED on the same plane. | `box-shadow: none` | Squint at the page. Do some elements "pop forward"? |
 | 5 | **Squares Signal System, Circles Signal Softness** | Squares suggest precision, exactness. Circles suggest flexibility, approximation. | `border-radius: 0` on step numbers, checkboxes, all indicators | Do numbered steps feel like "follow exactly" or "roughly do this"? |
 
-**No 6th soul piece was discovered in AD.** Consistent with OD's negative finding. The 5-piece model is complete across 4 stages.
+**No 6th soul piece was discovered in AD.** Consistent with OD's negative finding. The 5-piece model is complete across 4 stages. Dual-method PA validation (programmatic DOM tests + visual auditor review across all 6 pages) confirmed zero soul violations -- see AD-PA-CONVENTIONS.md for the perceptual evidence and auditor quotes behind each convention.
 
 ### The ANTI-PHYSICAL Identity (v2 -- Confirmed Across All 12 ODs + 6 ADs)
 
@@ -42,9 +42,9 @@ The identity rejects anything that makes flat screens pretend to be three-dimens
 | Gradients suggesting material | Gradient transitions, blur animations | Implies light/material interaction | 3 |
 | Traffic-light color semantics | Red/amber/green material signals | Implies physical signal devices | 2 |
 | Parallax/z-space | Parallax scrolling, layered movement | Implies spatial z-depth | 1 |
-| **Physical movement metaphors (v2)** | CSS animations implying object movement, choreography-as-animation | Implies objects move through space | 8 (AD-005) |
+| **Physical movement metaphors (v2, AD-F-020)** | CSS animations implying object movement, choreography-as-animation | Implies objects move through space | 8 (AD-005) |
 
-**AD-005 Extension:** "Choreography" means choreography of the READER's attention through static content structure, not CSS-animated visual elements. 20 CONDITIONAL PASS findings (highest of any AD) each required reinterpretation from "visual movement" to "structural movement." The ANTI-PHYSICAL identity extends to METAPHORS: even when a term implies motion, the implementation must be static structural arrangement.
+**AD-005 Extension (AD-F-020):** "Choreography" means choreography of the READER's attention through static content structure, not CSS-animated visual elements. 20 CONDITIONAL PASS findings (highest of any AD) each required reinterpretation from "visual movement" to "structural movement." The ANTI-PHYSICAL identity extends to METAPHORS: even when a term implies motion, the implementation must be static structural arrangement. PA validation confirmed: auditors across AD-005 independently flagged "movement" language as requiring this reinterpretation, reinforcing that the ANTI-PHYSICAL constraint is discoverable through pure perceptual observation (see AD-PA-CONVENTIONS.md, C-24 through C-27).
 
 **Binary rules:**
 - `opacity === 1.0` on ALL visual elements. No exceptions.
@@ -243,7 +243,7 @@ DD-F-010 (Org serves density) → OD-F-MP-001 (Org IS density) → AD META (ATTE
 | Cat 2: Separator | 1px | Subtle data dividers | Table rules, content-block top borders, horizontal rules |
 | Cat 3: Semantic | 4px/3px/1px gradient | Confidence/hierarchy encoding | Geological stratum left borders (AD-004). Note: 2px SKIPPED per OD-F-AP-001 |
 
-**v2 update:** AD-004 border-weight gradient is 4px/3px/1px (not 4px/3px/2px/1px). The 2px is skipped entirely to avoid the 2px epidemic anti-pattern. This answers open question #1 from v1.1: the 3-category system accommodates gradient semantics by skipping 2px (AD-F-014).
+**v2 update (AD-F-014):** AD-004 border-weight gradient is 4px/3px/1px (not 4px/3px/2px/1px). The 2px is skipped entirely to avoid the 2px epidemic anti-pattern. This answers open question #1 from v1.1: the 3-category system accommodates gradient semantics by skipping 2px. PA validation confirmed: auditors examining AD-004's spiral strata independently reported the border gradient as "legible" and "structurally clear," validating the skip-2px decision through perceptual evidence (AD-PA-CONVENTIONS.md, C-05).
 
 ### Process Constraints
 
@@ -267,6 +267,7 @@ DD-F-010 (Org serves density) → OD-F-MP-001 (Org IS density) → AD META (ATTE
 | Finding IDs (DD-F-###, OD-F-###, AD-F-###) are immutable | 12+ downstream references per finding |
 | R3-036 = CRESCENDO, R3-023 = fractal self-similarity | Per PIPELINE-MANIFEST Section E |
 | AD-F-023 (ATTENTION TOPOLOGY) is the unifying meta-concept | All future equivalence claims must reference it |
+| AD-PA-CONVENTIONS.md documents the WHY behind every convention | CD agents must read alongside AD-CONVENTION-SPEC.md |
 
 ---
 
@@ -285,8 +286,8 @@ DD-F-010 (Org serves density) → OD-F-MP-001 (Org IS density) → AD META (ATTE
 
 ### AD Techniques That Elevated Quality
 
-1. **Convention spec BEFORE building** -- AD-CONVENTION-SPEC.md created in Phase 0, before any builder started. Result: zero dialect divergence (vs OD's post-hoc unification).
-2. **Soul constraint as generative force** -- border-radius: 0 forced angular spiral (AD-004), which IS geological stratification. The constraint generated the insight.
+1. **Convention spec BEFORE building** -- AD-CONVENTION-SPEC.md created in Phase 0, before any builder started. Result: zero dialect divergence (vs OD's post-hoc unification). The subsequent PA (perceptual audit) then validated or refined each convention through adversarial evidence, producing the companion AD-PA-CONVENTIONS.md ideology document.
+2. **Soul constraint as generative force (AD-F-013)** -- border-radius: 0 forced angular spiral (AD-004), which IS geological stratification. The constraint generated the insight. PA auditors confirmed: "the angular approximation of the spiral IS geological strata" -- the soul constraint didn't limit the design, it produced a unique identity.
 3. **ANTI-PHYSICAL clarification** -- "choreography" = reader attention movement, not CSS animation. Generated AD-005's core identity (AD-F-020).
 4. **Transition grammar** -- 5x5 matrix classifying all 20 directed pattern transitions before CD needs them.
 5. **Wave-based building** -- 3 waves of 2 builders each, with scribe and identity checkpoint between waves. Prevents information loss.

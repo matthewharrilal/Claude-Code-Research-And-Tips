@@ -112,6 +112,14 @@ with perceptual deepening audit. See `provenance/stage-2-density-dd/` for full c
 
 **To understand WHY a pattern works:** Read its provenance in PATTERN-INDEX.md
 
+**AD Stage Validation (Stage 4):** The AD perceptual audit validated that density
+patterns are not merely "paired with" axis patterns — they ARE axis patterns viewed
+from a different perspective. See AD-F-004 (3-way unification: axis = organization =
+density), AD-F-023 (ATTENTION TOPOLOGY meta-equivalence), and AD-F-025 (transition
+grammar classifying all 20 directed pattern transitions). DD-F-012 has been ELEVATED:
+the relationship between axis and density is identity, not servitude. See
+`provenance/stage-4-axis-ad/AD-PA-CONVENTIONS.md` for the convention ideology.
+
 ═══════════════════════════════════════════════════════════════════════════════
 
 ## The 6 Density Patterns
@@ -145,6 +153,10 @@ with perceptual deepening audit. See `provenance/stage-2-density-dd/` for full c
 - EXHALE: 64-80px whitespace
 - Cycle: Dense → Sparse → Dense → Sparse
 
+**AD Validation:** AD-001 (Z-Pattern) proved PULSE is the same phenomenon as
+Z-sweep cycles viewed from the density perspective (AD-F-002). Each Z-sweep IS
+one PULSE beat. Width variation IS TIDAL (AD-F-004, 3-way unification).
+
 ---
 
 ### CRESCENDO — Sparse to Dense Build
@@ -175,6 +187,10 @@ with perceptual deepening audit. See `provenance/stage-2-density-dd/` for full c
 ```
 
 **Key Insight:** Remove density indicators after section 2. Users understand the pattern.
+
+**AD Validation:** AD-002 (F-Pattern) proved CRESCENDO density emerges automatically
+from F-pattern vertical descent (AD-F-005, AD-F-006). Typography compression across
+narrative acts IS CRESCENDO — no manual density annotation needed (AD-F-023).
 
 ---
 
@@ -220,31 +236,41 @@ Beyond spatial density, consider:
 
 | Dimension | Definition | How to Manipulate |
 |-----------|------------|-------------------|
-| **Temporal** | Information over scroll | Use PULSE/CRESCENDO patterns |
-| **Depth** | Z-axis layering | Surface/Sediment/Bedrock model |
+| **Temporal** | Information over scroll | Use PULSE/CRESCENDO patterns. AD validated: Z-sweep speed IS temporal density (AD-F-002), F-descent compression IS temporal CRESCENDO (AD-F-005) |
+| **Depth** | Z-axis layering | Surface/Sediment/Bedrock model. AD validated: Spiral angular nesting IS geological depth (AD-F-013, AD-F-016) |
 | **Semantic** | Meaning per area | Jargon vs expansion |
-| **Cognitive** | Processing required | Novelty, decision points |
+| **Cognitive** | Processing required | Novelty, decision points. AD validated: Decision matrix arrests F-descent, forcing re-engagement (AD-F-008) |
 | **Interaction** | Clickables per viewport | Zones: exploration/action/reading |
-| **Spatial** | Elements per area | Components per viewport |
+| **Spatial** | Elements per area | Components per viewport. AD validated: Bento cell size IS density IS importance (AD-F-010) |
 
 ═══════════════════════════════════════════════════════════════════════════════
 
 ## Key Rules
 
 ### 1. Density Debt
-After dense sections, add recovery whitespace (64-80px).
+After dense sections, add recovery whitespace (64-80px). AD validated: Spiral
+transitions require 48px+ breathing (AD-F-025 transition grammar, "Breathing" type).
 
 ### 2. Density Contrast
-Sparse context makes dense feel denser. Use this intentionally.
+Sparse context makes dense feel denser. Use this intentionally. AD validated:
+hub-spoke hub (sparse) amplifies spoke (dense) through WAVE oscillation (AD-F-017,
+AD-F-019).
 
 ### 3. Density Inheritance
-Child elements inherit parent density. Don't fight this.
+Child elements inherit parent density. Don't fight this. AD validated: Bento cell
+internal layout variation does NOT break fractal density inheritance — like different
+"species" on different islands (AD-F-011).
 
 ### 4. 10-Second Test
 In 10 seconds, user should know: What IS this? What can I DO? How do I GO DEEPER?
 
 ### 5. Max 1-2 Callouts Per Viewport
 More than 2 = alarm fatigue. The signal is lost.
+
+### 6. Density IS Axis IS Organization (AD-F-004, AD-F-023)
+Do not treat density as separate from axis or organization. Choose the organizational
+pattern; the density and axis follow automatically. Three names for one phenomenon:
+ATTENTION TOPOLOGY — how content arrangement shapes attention flow.
 
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -293,14 +319,17 @@ Narrow (dense) ═══
 
 ### FRACTAL SELF-SIMILARITY — Validated by DD-006 (Score: 35/40 INCLUDE ★★ BEST)
 ```
-Page:      █░░█░░█░░
-Section:   █░░█░░█░░
-Component: █░░█░░█░░
-Character: █░░█░░█░░
+Navigation: █░░█░░█░░  (5th scale — discovered during AD, AD-F-027)
+Page:       █░░█░░█░░
+Section:    █░░█░░█░░
+Component:  █░░█░░█░░
+Character:  █░░█░░█░░
 ```
 **Exploration:** DD-006-fractal.html demonstrates same rhythm at all scales.
 **Key Finding:** Self-similar patterns make documentation feel coherent and navigable.
 **Audit Score:** 8.64/10 average across 7 zones — highest scoring exploration.
+**AD Validation:** AD-006 (Compound) verified fractal at all 5 scales (AD-F-027) and
+confirmed no 6th scale exists (AD-F-028). The 5-scale model is complete and universal.
 
 ### Patterns Documented (Not Included)
 

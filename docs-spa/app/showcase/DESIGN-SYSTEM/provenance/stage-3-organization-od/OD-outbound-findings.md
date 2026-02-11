@@ -33,7 +33,9 @@ Migration. These findings have CHAIN IMPACT -- violating them doesn't just
 break OD, it breaks everything downstream.
 
 **Predecessor:** `stage-2-density-dd/DD-outbound-findings.md` (DD-F-001 through DD-F-018)
-**Successor:** `stage-4-axis-ad/AD-outbound-findings.md` (future)
+**Successor:** `stage-4-axis-ad/AD-outbound-findings.md` (AD-F-001 through AD-F-028)
+
+> **AD Forward Reference (Stage 4):** AD consumed and validated ALL 17 OD-F findings across 6 axis explorations (AD-001 through AD-006). The crown jewel AD finding — AD-F-023 (ATTENTION TOPOLOGY) — elevates OD-F-005/OD-F-MP-001 from 2-way identity (organization=density) to 3-way identity (axis=organization=density). See `stage-4-axis-ad/AD-outbound-findings.md` for all 28 AD-F findings that extend OD discoveries.
 
 ===============================================================================
 ## FINDING ID CONVENTION
@@ -106,6 +108,8 @@ PULSE density alternation visible in the finished exploration. OD-CHECKPOINT.md
 line 144 records the finding. Scored ~35/40 (Innovation: 8, Utility: 9, Soul: 9,
 Execution: 9).
 
+> **AD Forward Reference:** [AD-F-002] — AD-001 (Z-Pattern) proved Z-PULSE Equivalence: the Z-sweep cycle IS one PULSE beat. Width variation (60% Q to 100% A) is TIDAL expressed spatially. OD-F-001's width-based density rhythm is not just a density signal — it is the spatial mechanism of Z-pattern traversal.
+
 ---
 
 ### OD-F-002: Fractal Nesting via Follow-ups
@@ -170,6 +174,8 @@ sparse/dense alternation -- do not pad questions or compress answers.
 single-line) alternating with answer sections (dense, multi-paragraph with code
 blocks). OD-CHECKPOINT.md line 146. This finding validated the core OD-001
 hypothesis that conversational organization naturally creates PULSE.
+
+> **AD Forward Reference:** [AD-F-002] — AD confirmed Q&A = PULSE at axis level. Z-sweep cycle IS one PULSE beat. AD-F-004 elevated this to 3-way identity: axis=organization=density are not independent dimensions.
 
 ---
 
@@ -244,6 +250,8 @@ section. OD-CHECKPOINT.md line 153 records this as OD-006's crown jewel. ACCUMUL
 IDENTITY-v1.md Section 6 (lines 282-306) expands the finding. 10+ downstream
 citations across OD-CHECKPOINT, ACCUMULATED-IDENTITY-v1, and OD-006 HTML headers.
 
+> **AD Forward Reference:** [AD-F-004, AD-F-021, AD-F-023] — AD ELEVATED this 2-way identity to 3-way: axis IS organization IS density. AD-F-004 proved it at individual pattern level; AD-F-021 proved it holds at compound scale (zero manual density manipulation across 5 sequential axis patterns); AD-F-023 (ATTENTION TOPOLOGY) provides the meta-equivalence framework unifying all mechanisms. OD-F-005 was the conceptual foundation that AD extended to its crown jewel discovery.
+
 ---
 
 ### OD-F-006: Meta-Documentation as Purest Density Test
@@ -275,6 +283,8 @@ first. Migration can use the density methodology page itself as a validation ref
 density rhythm it describes. OD-CHECKPOINT.md line 154. OD-006 scored as crown jewel
 (targeting >=36/40), partly because the meta-documentary quality creates the most
 natural density rhythm.
+
+> **AD Forward Reference:** [AD-F-026] — AD-006 (Compound) confirmed this at compound axis level: a page demonstrating its own patterns CANNOT fake density compliance. AD-006 is self-validating exactly as OD-006 was, but across all 5 axis patterns simultaneously.
 
 ---
 
@@ -308,6 +318,8 @@ section needs a breathing divider.
 **Validation Evidence:** OD-006-creative.html transitions between organizational
 modes with breathing zones between each. OD-CHECKPOINT.md line 155. Without these
 transitions, OD-006 usability testing revealed cognitive jarring.
+
+> **AD Forward Reference:** [AD-F-025] — AD-006 formalized this into a 5x5 transition grammar classifying all 20 directed pattern transitions into Smooth (4), Bridge (10), and Breathing (6). OD-F-007's 48px+ breathing requirement is validated: every Spiral transition requires breathing, and Choreography is the universal bridge.
 
 ---
 
@@ -382,6 +394,8 @@ three-act density arc.
 density increase. builder-log.md line 144 (original OD-F-005, now renumbered).
 OD-CHECKPOINT.md records ~33/40 score.
 
+> **AD Forward Reference:** [AD-F-006] — AD-002 (F-Pattern) validated narrative CRESCENDO at axis level: typography compression across acts (64px->48px->32px inter-heading spacing) mirrors CRESCENDO density. F-pattern vertical descent IS CRESCENDO viewed through the reader's scanning behavior.
+
 ---
 
 ### OD-F-010: Typography Size Reduction Mirrors Density
@@ -413,6 +427,8 @@ reduction (28px to 20px) for narrative content, not uniform heading sizes.
 reduction across acts. builder-log.md line 145 (original OD-F-006, now renumbered).
 All 6 OD headers cite R1-016 as applied.
 
+> **AD Forward Reference:** [AD-F-006] — AD-002 validated typography-density correlation at axis level. Act-zone padding compresses progressively (64px->48px->32px) while intra-heading spacing remains fixed (24px). This two-level spacing model is the axis-level expression of OD-F-010's typography-density mirroring.
+
 ---
 
 ### OD-F-011: Tension Meters as Narrative Wayfinding
@@ -442,6 +458,8 @@ meters to long-form narrative content for wayfinding.
 
 **Validation Evidence:** OD-002-narrative.html tension meter CSS. builder-log.md
 line 146 (original OD-F-007, now renumbered).
+
+> **AD Forward Reference:** [AD-F-005] — AD-002 (F-Pattern) extended tension meters to axis context: the tension meter tracks CRESCENDO density position (which Freytag act), not just narrative position. Discovery: tension leads density (meter fills fully by Act IV, not Act V).
 
 ---
 
@@ -503,6 +521,8 @@ tables at the end of progressive build-up sections, not at the beginning.
 **Validation Evidence:** OD-002-narrative.html Act III decision matrix. builder-log.md
 line 148 (original OD-F-009, now renumbered).
 
+> **AD Forward Reference:** [AD-F-008] — AD-002 validated decision matrices as CRESCENDO peak at axis level. The decision matrix at Act III IS the densest single component (6x4=24 cells), deliberately arresting F-pattern vertical descent. 3-way convergence proven: F-descent interrupted (axis) + narrative climax (org) + densest component (density).
+
 ===============================================================================
 ## META-PATTERN FINDING (MOST IMPORTANT OD DISCOVERY)
 ===============================================================================
@@ -548,6 +568,8 @@ based on content's natural density, not impose organization and density separate
 OD-001 (Q&A = PULSE), OD-002 (narrative = CRESCENDO), OD-003 (tasks = ISLANDS),
 OD-004 (confidence = GEOLOGICAL), OD-005 (spatial = WAVE), OD-006 (all 5 modes
 cycling with zero density manipulation). OD-CHECKPOINT.md line 112.
+
+> **AD Forward Reference:** [AD-F-023] — AD ELEVATED this meta-pattern to ATTENTION TOPOLOGY. The 2-way identity (organization=density) became 3-way (axis=organization=density) via 5 distinct equivalence mechanisms: temporal (Z-Pattern), spatial (Bento Grid), proportional (Spiral), kinetic (Choreography), gravitational (hub-spoke connection count). OD-F-MP-001 is the conceptual ancestor of AD's crown jewel finding.
 
 ===============================================================================
 ## PROCESS FINDINGS
@@ -690,6 +712,8 @@ specificity. The TRANSITIVE CHAIN is: organizational pattern (OD-F-005) implies
 density pattern (DD-F-001 through DD-F-005) implies axis preference (DD-F-012).
 AD receives all three constraints simultaneously.
 
+> **AD Forward Reference:** [AD-F-004, AD-F-021] — AD VALIDATED every axis preference predicted here. Z-Pattern + Conversational = PULSE (AD-F-002), F-Pattern + Narrative = CRESCENDO (AD-F-006), Bento + Task = ISLANDS (AD-F-009), Spiral + Confidence = GEOLOGICAL (AD-F-013), Choreography + Spatial = WAVE (AD-F-017). AD-F-004 elevated DD-F-012 from "serves" to "IS" — axis does not serve density, axis IS density expressed spatially.
+
 ### R-2 Creative Layouts: Unconsumed Research
 
 **AD WARNING:** R-2 Creative Layouts contains 27 findings at 0% consumption by OD.
@@ -741,23 +765,23 @@ scale authority and document any intentional variations.
 
 | Finding ID | AD | CD | Migration |
 |------------|----|----|-----------|
-| OD-F-001 (Conversational Width) | ⏳ | ⏳ | ⏳ |
-| OD-F-002 (Fractal Nesting) | ⏳ | ⏳ | ⏳ |
-| OD-F-003 (Q&A PULSE) | ⏳ | ⏳ | ⏳ |
-| OD-F-004 (Breathing Zones) | ⏳ | ⏳ | ⏳ |
-| OD-F-005 (Org IS Density) | ★★★ MANDATORY | ★★★ ALL | ★★★ ALL |
-| OD-F-006 (Meta-Doc Test) | ⏳ | ⏳ | ⏳ |
-| OD-F-007 (Mode-Transition Breathing) | ★ Verify | ★ Verify | ★ Verify |
-| OD-F-008 (Compound Creative) | ⏳ | ⏳ | ⏳ |
-| OD-F-009 (Narrative CRESCENDO) | ⏳ | ⏳ | ⏳ |
-| OD-F-010 (Type Size = Density) | ⏳ | ⏳ | ⏳ |
-| OD-F-011 (Tension Wayfinding) | ⏳ | ⏳ | ⏳ |
-| OD-F-012 (Code Absence) | ⏳ | ⏳ | ⏳ |
-| OD-F-013 (Decision Climax) | ⏳ | ⏳ | ⏳ |
-| OD-F-MP-001 (Org=Density Meta) | ★★★ ALL | ★★★ ALL | ★★★ ALL |
-| OD-F-PR-001 (External Research) | ★ Method | ★ Method | ★ Method |
-| OD-F-FL-001 (Org implies Axis) | ★ GATE | -- | -- |
-| OD-F-AP-001 (2px Epidemic) | ★ Verify | ★ Verify | ★ Verify |
+| OD-F-001 (Conversational Width) | ✅ AD-F-002 (Z-PULSE) | ⏳ | ⏳ |
+| OD-F-002 (Fractal Nesting) | ✅ AD-F-003 (Micro-Z) | ⏳ | ⏳ |
+| OD-F-003 (Q&A PULSE) | ✅ AD-F-002 (Z-PULSE) | ⏳ | ⏳ |
+| OD-F-004 (Breathing Zones) | ✅ AD-F-025 (Transition Grammar) | ⏳ | ⏳ |
+| OD-F-005 (Org IS Density) | ★★★ AD-F-004/021/023 ELEVATED | ★★★ ALL | ★★★ ALL |
+| OD-F-006 (Meta-Doc Test) | ✅ AD-F-026 | ⏳ | ⏳ |
+| OD-F-007 (Mode-Transition Breathing) | ✅ AD-F-025 (5x5 grammar) | ★ Verify | ★ Verify |
+| OD-F-008 (Compound Creative) | ✅ AD-006 (compound) | ⏳ | ⏳ |
+| OD-F-009 (Narrative CRESCENDO) | ✅ AD-F-006 (F-Pattern) | ⏳ | ⏳ |
+| OD-F-010 (Type Size = Density) | ✅ AD-F-006 | ⏳ | ⏳ |
+| OD-F-011 (Tension Wayfinding) | ✅ AD-F-005 | ⏳ | ⏳ |
+| OD-F-012 (Code Absence) | ✅ AD-002 (F-Pattern) | ⏳ | ⏳ |
+| OD-F-013 (Decision Climax) | ✅ AD-F-008 | ⏳ | ⏳ |
+| OD-F-MP-001 (Org=Density Meta) | ★★★ AD-F-023 ELEVATED | ★★★ ALL | ★★★ ALL |
+| OD-F-PR-001 (External Research) | ✅ Method adopted | ★ Method | ★ Method |
+| OD-F-FL-001 (Org implies Axis) | ✅ AD-F-004 VALIDATED | -- | -- |
+| OD-F-AP-001 (2px Epidemic) | ✅ 0 violations in AD | ★ Verify | ★ Verify |
 
 **Legend:** ★ = Primary consumer | ⏳ = Pending | ★★★ = Universal (applies to all)
 

@@ -55,6 +55,8 @@ Eye movement patterns form the invisible scaffolding of every successful layout.
 
 **Key Insight:** The best layouts don't fight reading gravity - they harness it. Classic patterns (Z, F, Gutenberg) provide the physics; modern innovations (bento, spiral, diagonal) add controlled variations that create visual interest while maintaining comprehension.
 
+**AD Validation Status:** R-4 was the PRIMARY research source for AD (Stage 4). 169/192 findings cited (~88%). AD produced 28 findings (AD-F-001 through AD-F-028) that validated, extended, or elevated R-4 research. Key AD discoveries: the 3-way unification (axis IS organization IS density, AD-F-004/AD-F-023), transition grammar (AD-F-025), and compound = sequential (AD-F-024). See AD-outbound-findings.md for full chain impact.
+
 ---
 
 ## 1. Classic Reading Patterns
@@ -90,6 +92,8 @@ The Z-pattern follows natural reading habits for left-to-right languages. The ey
 
 **Documentation Application:**
 For documentation hero sections or overview pages where you want to establish context quickly and lead to a single action (start tutorial, view API reference).
+
+**AD Validation:** AD-001 implemented Z-Pattern with golden-ratio hero grid (AD-F-001). AD-F-002 proved Z-PULSE equivalence: Z-pattern traversal IS PULSE rhythm expressed spatially. AD-F-003 validated micro-Z at component scale (DD-F-006 fractal compliance).
 
 **Source:** [Landing Page Flow - Z-Pattern vs F-Pattern](https://www.landingpageflow.com/post/z-pattern-vs-f-pattern)
 
@@ -130,6 +134,8 @@ Users start by scanning horizontally across the top (forming the top bar of the 
 
 **Documentation Application:**
 Perfect for API reference pages, conceptual documentation, and tutorials. Place key terms, headings, and bullet points along the left edge. Front-load important information in first sentences.
+
+**AD Validation:** AD-002 implemented F-Pattern with Freytag 5-act structure. AD-F-006 confirmed typography compression mirrors CRESCENDO density. AD-F-007 validated that F-pattern vertical descent naturally selects left-spine landmarks. AD-F-005 showed tension meters track CRESCENDO position in F-Pattern context.
 
 **Design Optimization for F-Pattern:**
 - Use clear visual hierarchy
@@ -241,6 +247,8 @@ Inspired by Japanese bento boxes with compartments of varied sizes. Popularized 
 
 **Documentation Application:**
 Excellent for feature overview pages, API capability showcases, or dashboard-style documentation landing pages. Use large cells for primary features, smaller cells for related concepts.
+
+**AD Validation:** AD-003 implemented Bento Grid with ISLANDS density pairing. AD-F-009 proved grid cells ARE dense islands (spatial equivalence). AD-F-010 validated cell size as density hierarchy mechanism. PA auditors confirmed the bento layout at 1100px (AD-PA-CONVENTIONS.md, C-01).
 
 **Design Best Practices:**
 - Mind the whitespace (don't feel crammed)
@@ -550,6 +558,8 @@ Responsive design makes full golden ratio support difficult across all viewport 
 **Documentation Application:**
 Use golden ratio for sidebar/content proportions. Apply Fibonacci-based type scale. Place key CTAs at spiral focal points in hero sections.
 
+**AD Validation:** AD-004 implemented the Fibonacci Spiral as angular approximation forced by border-radius: 0 (Soul Piece #1). AD-F-013 proved angular spiral IS geological strata -- the soul constraint was the generative mechanism. AD-F-014 validated the 4px/3px/1px border gradient (skipping 2px per OD-F-AP-001). AD-001 also uses golden ratio proportions in its hero grid (AD-F-001: `grid-template-columns: 1.618fr 1fr`).
+
 **Source:** [NN/G - The Golden Ratio and User-Interface Design](https://www.nngroup.com/articles/golden-ratio-ui-design/)
 
 ---
@@ -724,6 +734,8 @@ Subtle diagonal lines or shapes create energy without dominating content.
 **Documentation Application:**
 Use diagonal elements for hero sections, feature highlights, or to signal transitions between major sections. Avoid in content-heavy areas where scannability matters. Diagonals work best as accents, not structure.
 
+**AD Validation:** AD-005 (Choreography) explored diagonal and directional patterns. AD-F-017 proved direction change IS density change (kinetic equivalence). AD-F-020 clarified that "choreography" means reader attention movement through static structure, NOT CSS animation -- the ANTI-PHYSICAL identity extends to diagonal/movement metaphors.
+
 **Source:** [Envato - Design Style: Diagonal Lines in Web Design](https://medium.com/envato/trendspotting-diagonal-lines-in-web-design-b11d86d85f69)
 
 ---
@@ -731,6 +743,8 @@ Use diagonal elements for hero sections, feature highlights, or to signal transi
 ## 6. Synthesis: Pattern Selection Guide
 
 ### Decision Matrix
+
+**AD Validation Summary:** AD explored all 6 patterns below (Z, F, Bento, Spiral, Choreography, Compound). AD-F-023 unified them under ATTENTION TOPOLOGY: axis IS organization IS density. The natural pairings (AD-F-004) mean CD combinations are constrained to ~5-10 natural pairings, not arbitrary permutations. AD-F-025 provides the 5x5 transition grammar for moving between patterns.
 
 | Pattern | Best For | Avoid When | Complexity |
 |---------|----------|------------|------------|

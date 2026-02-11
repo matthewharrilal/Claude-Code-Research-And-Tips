@@ -81,6 +81,13 @@ END INLINE THREADING HEADER
 | Inter | Content zones | "This is a content zone" (functional) |
 | JetBrains Mono | Technical zones | "This is a technical zone" (precise) |
 
+**AD Validation:** All 6 AD explorations verified the font trio as a density signal
+at character scale (AD-F-027, fractal scale 5). AD-002 (F-Pattern) proved that
+typography compression across acts IS CRESCENDO density (AD-F-006): act-zone padding
+compresses from 64px (Act I) to 32px (Act III) while font sizes maintain hierarchy.
+AD-001 (Z-Pattern) proved typography velocity = Z-position = PULSE tempo (AD-F-004).
+See `provenance/stage-4-axis-ad/AD-PA-CONVENTIONS.md`.
+
 ═══════════════════════════════════════════════════════════════════════════════
 
 ## Type Scale (LOCKED)

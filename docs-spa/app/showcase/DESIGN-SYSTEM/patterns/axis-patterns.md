@@ -35,6 +35,7 @@ DD-F-012 is ELEVATED: the relationship between axis and density is identity
 **Total research provenance:** 169/192 R-4 findings cited (~88%), 33 EXT-AXIS-* bespoke findings across 6 domains, 28 AD-F findings produced.
 
 **To understand WHY a pattern works:** Read its provenance in AD-SYNTHESIS.md
+**For convention ideology:** Read `provenance/stage-4-axis-ad/AD-PA-CONVENTIONS.md`
 
 ---
 

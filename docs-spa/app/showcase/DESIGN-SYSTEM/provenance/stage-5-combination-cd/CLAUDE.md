@@ -20,6 +20,9 @@ ACTIVE (as navigation -- CD work itself is UNBLOCKED, awaiting execution)
 | AD-outbound-findings.md                             | 28 AD-F findings consumed by CD            |
 | AD-SYNTHESIS.md                                     | 12-section cross-AD synthesis              |
 | AD-CONVENTION-SPEC.md                               | 822-line convention spec (reusable base)   |
+| AD-PA-CONVENTIONS.md                                | Convention ideology for pre-build specs    |
+| AD-F-023 (ATTENTION TOPOLOGY)                       | Crown jewel meta-equivalence (MANDATORY)   |
+| AD-F-025 (Transition grammar)                       | 5x5 matrix for pattern transitions         |
 | ACCUMULATED-IDENTITY-v2.md                          | Full accumulated context from Stages 1-4   |
 | original-research/R5-COMBINATION-THEORY.md          | Primary research (39 findings)             |
 | DD-F-013                                            | Key constraint: density tolerance in combos|
@@ -93,12 +96,29 @@ For deeper understanding:
 ===============================================================================
 
 **CONSUMES FROM AD (Stage 4):**
-- 28 AD-F findings (AD-F-001 through AD-F-028)
+- 28 AD-F findings (AD-F-001 through AD-F-028) -- see `../stage-4-axis-ad/AD-outbound-findings.md`
+- **MANDATORY AD-F constraints for CD:**
+  - AD-F-023 (ATTENTION TOPOLOGY) -- meta-equivalence governing all component combinations
+  - AD-F-024 (Sequential, not simultaneous) -- one axis per viewport, combinations must scroll
+  - AD-F-025 (Transition grammar) -- 5x5 matrix: 4 Smooth, 10 Bridge, 6 Breathing transitions
+- **Key AD-F findings CD should reference:**
+  - AD-F-004 (3-way unification) -- axis=org=density identity holds for combinations
+  - AD-F-017 (Kinetic equivalence) -- axis direction change IS density state change
+  - AD-F-021 (Triple equivalence at compound scale) -- zero manual density manipulation
+  - AD-F-027 (5-scale fractal) -- combinations must maintain fractal rhythm at all 5 scales
+  - AD-F-028 (No 6th scale) -- do not seek a 6th fractal scale
 - 33 EXT-AXIS-* bespoke research findings
-- AD-CONVENTION-SPEC.md (822 lines -- reusable locked-layer base)
-- Transition grammar (5x5 matrix: smooth/bridge/breathing)
-- ACCUMULATED-IDENTITY-v2.md (~700 lines)
-- Crown jewel: Axis IS Organization IS Density (AD-F-023: ATTENTION TOPOLOGY)
+- AD-CONVENTION-SPEC.md (822 lines -- reusable locked-layer base for CD-CONVENTION-SPEC)
+- AD-PA-CONVENTIONS.md -- convention ideology document (CD should adopt this methodology)
+- Transition grammar (5x5 matrix derived from AD-F-025: smooth/bridge/breathing)
+- ACCUMULATED-IDENTITY-v2.md (~700 lines) -- includes AD-F-023 as pipeline-level identity
+- 6 AD HTML explorations (reference artifacts):
+  - `../../../../explorations/axis/_perceptual-audit/AD-001/` (Z-Pattern)
+  - `../../../../explorations/axis/_perceptual-audit/AD-002/` (F-Pattern)
+  - `../../../../explorations/axis/_perceptual-audit/AD-003/` (Bento Grid)
+  - `../../../../explorations/axis/_perceptual-audit/AD-004/` (Spiral)
+  - `../../../../explorations/axis/_perceptual-audit/AD-005/` (Choreography)
+  - `../../../../explorations/axis/_perceptual-audit/AD-006/` (Compound)
 
 **CONSUMES FROM OD (Stage 3):**
 - 17 OD-F findings (organization-density equivalences)
@@ -123,10 +143,12 @@ For deeper understanding:
 **CD explores component chemistry -- how components WORK TOGETHER.**
 
 Key inheritance from AD:
-- **3-way unification:** Axis IS Organization IS Density (AD-F-004, AD-F-023)
-- **Sequential, not simultaneous:** Compound patterns emerge through scrolling time, not viewport co-existence (AD-F-024)
-- **Transition grammar:** Every pattern boundary needs classified transitions -- smooth, bridge, or breathing (AD-F-025)
-- **ATTENTION TOPOLOGY:** The meta-equivalence unifying all prior findings -- how content arrangement shapes attention flow
+- **3-way unification:** Axis IS Organization IS Density (AD-F-004, validated at compound scale by AD-F-021)
+- **ATTENTION TOPOLOGY:** AD-F-023 -- the meta-equivalence unifying temporal (AD-F-003), spatial (AD-F-009), proportional (AD-F-008), kinetic (AD-F-017), and gravitational (AD-F-016) mechanisms. ALL component combinations must respect this.
+- **Sequential, not simultaneous:** Compound patterns emerge through scrolling time, not viewport co-existence (AD-F-024). CD combinations are temporal sequences, not spatial juxtapositions.
+- **Transition grammar:** Every pattern boundary needs classified transitions -- smooth, bridge, or breathing (AD-F-025). The 5x5 matrix from AD is the starting point for CD's combination-to-combination transitions.
+- **Fractal bounded:** DD-F-006 confirmed at 5 scales (AD-F-027); no 6th scale (AD-F-028). CD should verify existing scales hold under combination, not seek new ones.
+- **Convention methodology:** AD-PA-CONVENTIONS.md documents how pre-build convention specs prevent quality dialect divergence. CD SHOULD create CD-CONVENTION-SPEC before building.
 
 Key constraint (DD-F-013): Account for density tolerance.
 - Some components compress well at high density

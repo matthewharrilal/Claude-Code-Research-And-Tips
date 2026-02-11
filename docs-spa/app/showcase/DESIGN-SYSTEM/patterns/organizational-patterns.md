@@ -33,6 +33,16 @@ phenomenon, two perspectives.
 
 **To understand WHY a pattern works:** Read its provenance in OD-SYNTHESIS.md
 
+**AD Stage Extension (Stage 4):** The AD perceptual audit extended OD-F-005
+("Organization IS Density") to a 3-way identity: **Axis IS Organization IS Density**
+(AD-F-004, AD-F-023). Each organizational pattern now has a validated axis pairing
+that produces its density automatically. AD-F-023 (ATTENTION TOPOLOGY) unifies all 5
+equivalence mechanisms (temporal, spatial, proportional, kinetic, gravitational) under
+one meta-concept: how content arrangement shapes attention flow. AD-F-025 (transition
+grammar) classifies all 20 directed pattern transitions. See axis-patterns.md for the
+complete axis vocabulary and `provenance/stage-4-axis-ad/AD-PA-CONVENTIONS.md` for the
+convention ideology.
+
 ---
 
 ## The 6 Organizational Patterns
@@ -85,6 +95,11 @@ sparse (a single line, typographically distinct). The answer is naturally dense
 (paragraphs, code, examples). This alternation creates PULSE without any explicit
 density annotation. Organization IS density.
 
+**AD Extension:** AD-001 (Z-Pattern) proved that Q&A PULSE is the SAME phenomenon as
+Z-sweep cycles — each Z-sweep IS one PULSE beat (AD-F-002). Width variation IS TIDAL
+IS Z-asymmetry (AD-F-004). The axis pattern does not need to be "paired with" the
+organizational pattern; axis IS organization IS density (AD-F-023).
+
 ---
 
 ### NARRATIVE -- Story Arc Structure
@@ -135,6 +150,12 @@ density automatically -- exposition is sparse, climax is dense.
 from simple exposition to complex climax mirrors sparse-to-dense. The tension meter
 provides wayfinding without consuming content space. CRESCENDO needs a formal exhale
 (falling action) -- without it, dense climaxes exit abruptly.
+
+**AD Extension:** AD-002 (F-Pattern) proved that F-pattern vertical descent IS
+CRESCENDO expressed spatially — typography compression across acts mirrors density
+(AD-F-005, AD-F-006). The decision matrix at Act III is the densest single component,
+deliberately arresting F-descent (AD-F-008). Tension fills by Act IV, not Act V —
+tension leads density.
 
 ---
 
@@ -188,6 +209,12 @@ static (spatial arrangement) and interactive (wayfinding via collapse/expand).
 Each task island contains prerequisites, steps, code, and a checkpoint -- a complete unit.
 The sparse sea between islands provides cognitive recovery. BOOKENDS framing (dense overview
 at front, dense verification at back) provides orientation and closure.
+
+**AD Extension:** AD-003 (Bento Grid) proved that grid cells ARE dense islands and grid
+gaps ARE sparse ocean — spatial equivalence (AD-F-009, AD-F-010). Cell size IS density IS
+importance (AD-F-010). Internal layout variation (4 templates) provides anti-monotony
+without breaking fractal (AD-F-011). Compound density: BOOKENDS + ISLANDS simultaneously
+at different scales (AD-F-012).
 
 ---
 
@@ -246,6 +273,13 @@ thickness and typographic weight encode certainty without color. The inverse
 density-confidence relationship serves reader comprehension: what's certain is quick
 to scan, what's uncertain demands careful reading.
 
+**AD Extension:** AD-004 (Spiral) proved that angular nesting IS geological
+stratification — the soul constraint (border-radius: 0) forces the angular
+approximation that makes it geological (AD-F-013). Border-weight gradient
+4px/3px/1px encodes confidence as flat 2D property, skipping 2px to avoid
+the 2px epidemic anti-pattern (AD-F-014). Confidence-proportional spacing
+(24px→48px) IS the confidence signal (AD-F-015).
+
 ---
 
 ### SPATIAL -- Hub-and-Spoke Map
@@ -303,6 +337,13 @@ the hypothesis is empirically visible to the reader.
 Users depart from a sparse hub map into dense spoke content, then return to the
 sparse hub. The oscillation between overview and detail is the WAVE. Each spoke is
 simultaneously a WAVE trough (dense) and an ISLAND (self-contained).
+
+**AD Extension:** AD-005 (Choreography) proved that axis direction change IS density
+state change — kinetic equivalence (AD-F-017). The diagonal clip-path IS both
+compositional signal and density boundary (AD-F-018). WAVE density persists even when
+geometry collapses responsively because density is controlled by spacing tokens, not
+column count (AD-F-019). "Movement" means reader attention movement, not CSS animation
+(AD-F-020, ANTI-PHYSICAL identity).
 
 ---
 
@@ -364,6 +405,13 @@ automatically when its organizational mode shifts, with zero explicit density ma
 This is the signature discovery of the OD stage and the single most important insight
 for all subsequent AD/CD work.
 
+**AD Extension:** AD-006 (Compound) provided the definitive proof. Triple equivalence
+holds at compound scale: changing axis pattern per section automatically changes density
+AND organization with zero manual manipulation (AD-F-021). OD-F-005 is now ELEVATED to
+3-way identity: Axis IS Organization IS Density (AD-F-004, AD-F-023). The 5th fractal
+scale (navigation) was verified in compound context (AD-F-027). Transition grammar
+classifies all 20 pattern transitions (AD-F-025): 4 Smooth, 10 Bridge, 6 Breathing.
+
 ---
 
 ## Pattern Selection Guide
@@ -381,16 +429,18 @@ for all subsequent AD/CD work.
 
 ## Key Rules
 
-### 1. Organization Determines Density (OD-F-005)
+### 1. Organization Determines Density (OD-F-005, elevated by AD-F-004/AD-F-023)
 
 Do not annotate density separately from organization. Choose the organizational
-pattern; the density follows automatically.
+pattern; the density AND axis follow automatically. AD elevated this from 2-way
+(org = density) to 3-way (axis = org = density) via ATTENTION TOPOLOGY (AD-F-023).
 
-### 2. DD-F-006 Fractal at 5 Scales
+### 2. DD-F-006 Fractal at 5 Scales (verified by AD-F-027, AD-F-028)
 
-Every organizational pattern MUST demonstrate self-similarity at navigation (where
-applicable), page, section, component, and character scales. OD-006 proved the 5th
-scale (navigation) is achievable through enrichment technique combination.
+Every organizational pattern MUST demonstrate self-similarity at navigation, page,
+section, component, and character scales. OD-006 proved the 5th scale (navigation).
+AD-006 verified all 5 scales in compound context (AD-F-027) and confirmed no 6th
+scale exists (AD-F-028). The 5-scale model is complete and universal.
 
 ### 3. Mode-Transition Breathing (OD-F-007)
 

@@ -92,6 +92,13 @@ END INLINE THREADING HEADER
 
 ═══════════════════════════════════════════════════════════════════════════════
 
+**AD Validation:** AD validated that spacing tokens control density even when axis
+geometry collapses responsively. AD-005 (Choreography) proved WAVE density persists
+under responsive collapse because density is controlled by spacing tokens, not column
+count or clip-path geometry (AD-F-019). AD-004 (Spiral) validated confidence-
+proportional spacing: Established=24px, Probable=32px, Speculative=40px, Open=48px/64px
+(AD-F-015). See `provenance/stage-4-axis-ad/AD-PA-CONVENTIONS.md`.
+
 ## Density Spacing
 
 ### INHALE (Dense) Sections

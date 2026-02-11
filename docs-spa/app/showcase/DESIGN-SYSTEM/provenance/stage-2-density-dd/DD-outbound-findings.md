@@ -115,9 +115,17 @@ break DD, it breaks everything downstream.
 | ID | Finding | Source | Score | For Which OD | Chain Impact |
 |----|---------|--------|-------|--------------|--------------|
 | DD-F-001 | **PULSE rhythm (high-low-high) works for alternating content.** Dense INHALE sections alternate with sparse EXHALE sections. Best for tutorials with practice breaks. | DD-001 | 33/40 | OD-001 Conversational | Conversational flow alternates — PULSE is its density partner. Every alternating pattern should use PULSE. |
+
+> **AD Forward Reference:** [AD-F-002] — AD-001 (Z-Pattern) proved Z-PULSE Equivalence: Z-sweep cycle IS one PULSE beat. PULSE is not just paired with Z-Pattern — it IS Z-Pattern expressed as density rhythm.
 | DD-F-002 | **CRESCENDO (sparse→dense) creates narrative progression.** Introduction → Context → Details → Resolution. Remove density indicators after section 2 — users learn the pattern. | DD-002 | 35/40 | OD-002 Narrative, OD-004 Confidence | Progressive build pairs with narrative arc. Any "journey" content should use CRESCENDO. |
+
+> **AD Forward Reference:** [AD-F-006, AD-F-008] — AD-002 (F-Pattern) validated CRESCENDO at axis level: typography compression across acts mirrors CRESCENDO, and the decision matrix at Act III IS the CRESCENDO peak. AD-004 (Spiral) showed confidence-proportional spacing creates CRESCENDO whitespace within GEOLOGICAL structure (AD-F-015).
 | DD-F-003 | **ISLANDS (clusters in sparse space) group related content.** Dense archipelagos floating in sparse ocean. Horizontal offsets (left/right/center) create visual rhythm. | DD-003 | 32/40 | OD-003 Task-Based | Task groups are natural density islands. Reference documentation = islands of info. |
+
+> **AD Forward Reference:** [AD-F-009, AD-F-011] — AD-003 (Bento Grid) proved the grid CONTAINS ISLANDS: grid cells ARE dense islands, grid gaps ARE sparse ocean. AD-F-011 shows internal layout variation creates fractal ISLANDS at 4 scales without breaking containment.
 | DD-F-004 | **GEOLOGICAL (stacked layers) communicates hierarchy/depth.** Atmosphere (minimal) → Surface (low) → Topsoil (medium) → Subsoil (high) → Bedrock (max). 5-bar depth indicator aids navigation. | DD-004 | 35/40 | OD-004 Confidence | Certainty stratification = geological layering. Expert/Novice paths emerge from layers. |
+
+> **AD Forward Reference:** [AD-F-013, AD-F-014] — AD-004 (Spiral) resolved the geological-radial tension: angular spiral IS geological stratification (soul constraint forces right-angle boundaries). AD-F-014's border-weight gradient (4px/3px/1px) IS the geological encoding as flat 2D property.
 | DD-F-005 | **TIDAL: Width = inverse density. Narrow channels for dense code, wide rivers for sparse context.** Parallel rivers for comparison. Confluence points for decisions. Delta for choices. | DD-005 | 36/40 | OD-001 Conversational | Width as information signal. Narrow = focused attention. Wide = relaxed absorption. |
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -134,6 +142,8 @@ break DD, it breaks everything downstream.
 - When the same dense/sparse rhythm appears at page, section, component, AND
   character levels, documentation feels unified and navigable
 - This constrains ALL future work: your page-level rhythm should appear everywhere
+
+> **AD Forward Reference:** [AD-F-027, AD-F-028] — AD verified DD-F-006 fractal at all 5 scales across all 6 explorations. AD-F-027 confirmed 5-scale compliance in compound context (navigation, page, section, component, character). AD-F-028 formally bounded the model: no 6th scale exists. Fractal compliance is AXIS-AGNOSTIC — each scale operates independently regardless of axis pattern.
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## PROCESS FINDINGS
@@ -162,6 +172,8 @@ break DD, it breaks everything downstream.
 |----|---------|--------|---------------------|
 | DD-F-012 | **Density patterns imply axis preferences.** CRESCENDO suggests vertical flow (top→bottom progression). ISLANDS suggests grid positioning. RIVERS suggests horizontal channels with varying widths. | DD analysis | Axis geometry must SERVE the density pattern, not fight it. When you choose an axis layout, ask: does this serve my density pattern? |
 
+> **AD Forward Reference:** [AD-F-004] — AD ELEVATED DD-F-012 from "serves" to "IS." Axis geometry does not merely serve the density pattern — axis IS the density pattern expressed spatially. Validated across all 6 AD explorations. See DD-F-012 Consumption Report in AD-outbound-findings.md for per-exploration evidence.
+
 ### For CD (Stage 5)
 
 | ID | Finding | Source | How CD Should Apply |
@@ -186,16 +198,16 @@ break DD, it breaks everything downstream.
 
 | Finding ID | OD | AD | CD | Migration |
 |------------|----|----|----| ---------|
-| DD-F-001 (PULSE) | ★ OD-001 | ⏳ | ⏳ | ⏳ |
-| DD-F-002 (CRESCENDO) | ★ OD-002, OD-004 | ⏳ | ⏳ | ⏳ |
-| DD-F-003 (ISLANDS) | ★ OD-003 | ⏳ | ⏳ | ⏳ |
-| DD-F-004 (GEOLOGICAL) | ★ OD-004 | ⏳ | ⏳ | ⏳ |
-| DD-F-005 (TIDAL/RIVERS) | ★ OD-001 | ⏳ | ⏳ | ⏳ |
-| DD-F-006 (FRACTAL) | ★★★ ALL | ★★★ ALL | ★★★ ALL | ★★★ ALL |
-| DD-F-010 (Density serves org) | ★ GATE | — | — | — |
-| DD-F-012 (Density implies axis) | — | ★ GATE | — | — |
+| DD-F-001 (PULSE) | ★ OD-001 | ✅ AD-F-002 (Z-PULSE) | ⏳ | ⏳ |
+| DD-F-002 (CRESCENDO) | ★ OD-002, OD-004 | ✅ AD-F-006/008/015 | ⏳ | ⏳ |
+| DD-F-003 (ISLANDS) | ★ OD-003 | ✅ AD-F-009/011 (Bento) | ⏳ | ⏳ |
+| DD-F-004 (GEOLOGICAL) | ★ OD-004 | ✅ AD-F-013/014 (Spiral) | ⏳ | ⏳ |
+| DD-F-005 (TIDAL/RIVERS) | ★ OD-001 | ✅ AD-F-002 (Z-width) | ⏳ | ⏳ |
+| DD-F-006 (FRACTAL) | ★★★ ALL | ★★★ AD-F-027/028 (5-scale) | ★★★ ALL | ★★★ ALL |
+| DD-F-010 (Density serves org) | ★ GATE | ✅ AD-F-004 ELEVATED | — | — |
+| DD-F-012 (Density implies axis) | — | ★★★ AD-F-004 ELEVATED to "IS" | — | — |
 | DD-F-013 (Component tolerance) | — | — | ★ GATE | — |
-| DD-F-015 (Traffic-light) | ★ Verify | ★ Verify | ★ Verify | ★ Verify |
+| DD-F-015 (Traffic-light) | ★ Verify | ✅ 0 violations in AD | ★ Verify | ★ Verify |
 
 **Legend:** ★ = Primary consumer | ⏳ = Pending | ★★★ = Universal (applies to all)
 

@@ -76,6 +76,12 @@ END INLINE THREADING HEADER
 
 **Why?** Sharp edges = decisive, confident. Rounded = friendly, safe, generic.
 
+**AD Validation:** 0 soul violations across all 6 AD explorations (AD-001 through
+AD-006). border-radius: 0 was verified as GENERATIVE, not merely restrictive — the
+angular spiral in AD-004 exists BECAUSE of this constraint (AD-F-013), and bento
+grid size hierarchy is MORE visible with sharp edges (AD-F-010). See
+`provenance/stage-4-axis-ad/AD-PA-CONVENTIONS.md`.
+
 ═══════════════════════════════════════════════════════════════════════════════
 
 ## Shadows (LOCKED)
@@ -90,6 +96,12 @@ END INLINE THREADING HEADER
 
 **Why?** Shadows = fake 3D, dishonest. Flat = print heritage, honest.
 
+**AD Validation:** 0 shadow violations across all 6 AD explorations. AD-005
+(Choreography) produced the strongest evidence via ANTI-PHYSICAL identity
+(AD-F-020): 20 CONDITIONAL PASS R-4 findings required reinterpretation from
+"visual movement" to "structural movement." Any technique implying physical
+object behavior (including shadows) fails the soul test.
+
 ═══════════════════════════════════════════════════════════════════════════════
 
 ## Border Styles
@@ -101,6 +113,11 @@ END INLINE THREADING HEADER
 }
 ```
 **Rule:** 4px minimum. Never 1-2px (too subtle).
+
+**AD Validation:** AD-004 (Spiral) uses a progressive border-weight gradient
+(4px/3px/1px) for geological depth encoding (AD-F-014). This is the ONE context
+where progressive border widths are semantic. The 2px width is deliberately
+skipped to avoid the 2px epidemic anti-pattern (OD-F-AP-001).
 
 ### Outline Border (Frames)
 ```css

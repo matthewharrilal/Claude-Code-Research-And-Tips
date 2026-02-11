@@ -22,6 +22,8 @@ COMPLETE — covers full pipeline from original research through Stage 4
 - COMP-F-001 to COMP-F-021 (component findings)
 - DD-F-001 to DD-F-018 (density dimension findings)
 - DD-F-006 FRACTAL meta-pattern
+- AD-F-023 ATTENTION TOPOLOGY meta-equivalence
+- AD-F-025 Transition grammar (5x5 matrix)
 - R3-023 (density dimension research finding)
 - SOUL-DISCOVERIES.md
 - RESEARCH-ACTIVE.md
@@ -293,18 +295,60 @@ Six explorations completed and re-enriched (v3) via 43-agent gate-based team:
 ## 5. STAGE 4: AXIS (AD) — COMPLETE
 ═══════════════════════════════════════════════════════════════════════════════
 
-AD explored spatial layout — how components are POSITIONED on the page. Six axis
-explorations built: Z-Pattern, F-Pattern, Bento Grid, Spiral, Choreography, Compound.
+### The Story
 
-- **Consumed:** HANDOFF-OD-TO-AD, 17 OD-F findings, 18 DD-F findings, 21 COMP-F findings, 192 R-4 axis findings (PRIMARY), 27 R-2 creative layout findings (evaluated), 33 EXT-AXIS-* bespoke findings, ACCUMULATED-IDENTITY-v1.1
-- **Produced:** 28 AD-F findings (AD-F-001 through AD-F-028), 6 HTML explorations (~467KB), AD-CONVENTION-SPEC (822 lines), transition grammar (5x5 matrix), HANDOFF-AD-TO-CD, ACCUMULATED-IDENTITY-v2
-- **Crown jewel discovery:** **Axis IS Organization IS Density** — three names for one phenomenon validated through 5 equivalence mechanisms (temporal, spatial, proportional, kinetic, gravitational), unified under meta-equivalence: ATTENTION TOPOLOGY (AD-F-023)
-- **DD-F-012 elevated:** Axis does not "serve" density — axis IS density expressed spatially
-- **DD-F-006 fractal:** Verified at 5 scales; no 6th found (AD-F-028 bounds the model)
-- **Soul compliance:** 0 violations across all 6 explorations. No 6th soul piece.
-- **Audit:** ~47 de-duplicated findings, all fixed. 4 systemic + ~12 per-file fixes applied.
-- **R-2 consumption:** Rose from 0% to ~67% (25/27 mapped, ~18 directly applied)
-- **Convention spec pre-build:** Zero quality dialect divergence (lesson from OD)
+AD explored spatial layout — how components are POSITIONED on the page. Six axis
+explorations tested six hypotheses about how layout geometry relates to density and
+organization. The crown jewel discovery was that axis, organization, and density are
+not three separate phenomena but ONE — unified under ATTENTION TOPOLOGY (AD-F-023).
+
+Each exploration validated a specific equivalence mechanism:
+- AD-001 Z-Pattern: Temporal equivalence — Z-sweep cycle IS one PULSE beat (AD-F-001, AD-F-003)
+- AD-002 F-Pattern: Proportional equivalence — typography compression IS CRESCENDO (AD-F-005, AD-F-007, AD-F-008)
+- AD-003 Bento Grid: Spatial equivalence — grid cells ARE dense islands (AD-F-009, AD-F-010)
+- AD-004 Spiral: Gravitational equivalence — border-weight gradient IS geological encoding (AD-F-016)
+- AD-005 Choreography: Kinetic equivalence — axis direction change IS density state change (AD-F-017, AD-F-020)
+- AD-006 Compound: Meta-equivalence — all mechanisms converge on ATTENTION TOPOLOGY (AD-F-021, AD-F-023, AD-F-024, AD-F-025)
+
+### What It Consumed
+
+| Input | What Was Extracted |
+|-------|-------------------|
+| HANDOFF-OD-TO-AD | Mandatory gate file — all OD-F constraints enforced |
+| 17 OD-F findings | Organization-density equivalences consumed |
+| 18 DD-F findings | Density patterns + fractal mandate consumed |
+| 21 COMP-F findings | Component decisions enforced |
+| 192 R-4 axis findings (PRIMARY) | Primary research — axis innovation hypotheses |
+| 27 R-2 creative layout findings | Evaluated, ~67% applied (up from 0% in OD) |
+| 33 EXT-AXIS-* bespoke findings | Bespoke research created during AD |
+| ACCUMULATED-IDENTITY-v1.1 | Full pipeline identity context |
+
+### What It Produced
+
+| Output | Why It Matters |
+|--------|----------------|
+| 28 AD-F findings (AD-F-001–AD-F-028) | Complete axis finding registry for CD |
+| AD-F-023 ATTENTION TOPOLOGY | Crown jewel: meta-equivalence unifying all mechanisms |
+| AD-F-024 Sequential constraint | Compound patterns = one axis per viewport |
+| AD-F-025 Transition grammar | 5x5 matrix classifying all pattern boundaries |
+| AD-F-027 5-scale fractal confirmation | DD-F-006 verified at all 5 scales |
+| AD-F-028 No 6th scale | Bounds the fractal model |
+| 6 HTML explorations (~467KB) | Validated artifacts |
+| AD-CONVENTION-SPEC (822 lines) | Pre-build convention spec (zero dialect divergence) |
+| AD-PA-CONVENTIONS.md | Convention ideology document |
+| HANDOFF-AD-TO-CD | Gate file for Stage 5 |
+| ACCUMULATED-IDENTITY-v2 | Updated identity incorporating AD discoveries |
+
+### Key Decisions
+
+1. **ATTENTION TOPOLOGY as meta-equivalence** — AD-F-023 establishes that all 5 equivalence mechanisms (temporal, spatial, proportional, kinetic, gravitational) converge on how content arrangement shapes attention flow
+2. **Sequential, not simultaneous** — AD-F-024 constrains compound patterns to one axis per viewport
+3. **Transition grammar** — AD-F-025 classifies all 20 pattern-to-pattern transitions into 3 types (Smooth, Bridge, Breathing)
+4. **DD-F-012 elevated** — Axis does not "serve" density — axis IS density expressed spatially (AD-F-004)
+5. **DD-F-006 fractal bounded** — Verified at 5 scales; no 6th found (AD-F-028). The "strategy" scale candidate collapsed into existing scales
+6. **Convention spec pre-build** — AD-PA-CONVENTIONS.md + AD-CONVENTION-SPEC prevented the 3-dialect quality divergence seen in OD
+7. **R-2 consumption recovered** — Rose from 0% to ~67% (25/27 mapped, ~18 directly applied)
+8. **Soul compliance maintained** — 0 violations across all 6 explorations. No 6th soul piece discovered.
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## 6. STAGE 5: COMBINATION (CD) — PENDING
@@ -313,8 +357,15 @@ explorations built: Z-Pattern, F-Pattern, Bento Grid, Spiral, Choreography, Comp
 CD will explore component combinations — how components work together.
 Reasoning inside Code, Task containing Decision, File Tree with Callouts.
 
-CD consumes: AD-F-### findings + accumulated constraints
-CD produces: CD-F-### findings + combination rules
+**CD consumes from AD (MANDATORY):**
+- AD-F-023 (ATTENTION TOPOLOGY) — meta-equivalence governs all component combinations
+- AD-F-024 (Sequential constraint) — one axis per viewport, combinations must scroll
+- AD-F-025 (Transition grammar) — 5x5 matrix classifies all pattern boundaries (4 Smooth, 10 Bridge, 6 Breathing)
+- AD-F-004 (3-way unification) — axis=org=density holds for combinations
+- AD-F-027 (5-scale fractal) — combinations must maintain fractal rhythm at all 5 scales
+- AD-PA-CONVENTIONS.md — convention ideology preventing quality dialect divergence
+
+**CD produces:** CD-F-### findings + combination rules for Migration
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## 7. RESEARCH CHAIN TABLE
@@ -412,6 +463,7 @@ Migration
 | Find a DD-F-### finding | `provenance/stage-2-density-dd/DD-outbound-findings.md` |
 | Find an OD-F-### finding | `provenance/stage-3-organization-od/OD-outbound-findings.md` |
 | Find an AD-F-### finding | `provenance/stage-4-axis-ad/AD-outbound-findings.md` |
+| Understand AD conventions | `provenance/stage-4-axis-ad/AD-PA-CONVENTIONS.md` |
 | Start CD work | `provenance/stage-4-axis-ad/HANDOFF-AD-TO-CD.md` |
 | Read original research | `provenance/original-research/` |
 | Verify soul compliance | `checkpoints/SOUL-DISCOVERIES.md` |

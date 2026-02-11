@@ -49,10 +49,14 @@ exist elsewhere. But the CHAIN that connects them lives here.
 
 **Quick Navigation:**
 - Want to trace a finding? → `PIPELINE-MANIFEST.md` Section E
+- Want AD-F findings? → `stage-4-axis-ad/AD-outbound-findings.md` (28 findings: AD-F-001–AD-F-028)
+- Want AD synthesis? → `stage-4-axis-ad/AD-SYNTHESIS.md` (AD-F-023 ATTENTION TOPOLOGY as central principle)
+- Want AD convention ideology? → `stage-4-axis-ad/AD-PA-CONVENTIONS.md`
+- Want AD transition grammar? → AD-F-025 in `stage-4-axis-ad/AD-outbound-findings.md`
 - Want OD-F findings? → `stage-3-organization-od/OD-outbound-findings.md`
 - Want OD synthesis? → `stage-3-organization-od/OD-SYNTHESIS.md`
 - Want EXT-* research? → `EXT-RESEARCH-REGISTRY.md`
-- Want to start AD work? → `stage-3-organization-od/HANDOFF-OD-TO-AD.md`
+- Want to start CD work? → `stage-4-axis-ad/HANDOFF-AD-TO-CD.md` (references AD-F-023, AD-F-024, AD-F-025)
 - Want original research? → `original-research/`
 - Want Stage 1 findings? → `stage-1-components/component-findings.md`
 - Want Stage 2 findings? → `stage-2-density-dd/DD-outbound-findings.md`
@@ -70,7 +74,7 @@ exist elsewhere. But the CHAIN that connects them lives here.
 | `stage-1-components/` | ✅ | Component foundation chain |
 | `stage-2-density-dd/` | ✅ | DD exploration chain |
 | `stage-3-organization-od/` | ✅ COMPLETE (v3 re-enriched) | OD exploration chain (6 ODs, 17 OD-F findings, 89 audit findings, 94 EXT-* findings, convention spec, 43-agent re-enrichment) |
-| `stage-4-axis-ad/` | ✅ COMPLETE | AD exploration chain (6 ADs, 28 AD-F findings, ~47 audit findings, 33 EXT-AXIS-* findings, convention spec, transition grammar, ATTENTION TOPOLOGY meta-equivalence) |
+| `stage-4-axis-ad/` | ✅ COMPLETE | AD exploration chain (6 ADs, 28 AD-F findings [AD-F-001–AD-F-028], ~47 audit findings, 33 EXT-AXIS-* findings, AD-CONVENTION-SPEC [822 lines], AD-PA-CONVENTIONS.md [convention ideology], AD-F-025 transition grammar [5x5 matrix], AD-F-023 ATTENTION TOPOLOGY [crown jewel meta-equivalence]) |
 | `stage-5-combination-cd/` | ⏳ PENDING | CD exploration chain |
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -123,7 +127,10 @@ Let me trace ONE finding through the entire chain to show how provenance works:
 - Location: `stage-4-axis-ad/AD-outbound-findings.md`
 - DD-F-006 verified at 5 scales across all 6 AD explorations (AD-F-027)
 - No 6th scale found (AD-F-028 bounds the model)
-- DD-F-012 ELEVATED: axis IS density, not "serves" density
+- DD-F-012 ELEVATED: axis IS density, not "serves" density (AD-F-004 validates 3-way unification)
+- AD-F-023 (ATTENTION TOPOLOGY) subsumes fractal as one of 5 mechanisms: temporal (AD-F-003), spatial (AD-F-009), proportional (AD-F-008), kinetic (AD-F-017), gravitational (AD-F-016)
+- AD-F-025 transition grammar governs how fractal rhythm flows across pattern boundaries
+- Convention methodology: AD-PA-CONVENTIONS.md documents how pre-build specs prevent quality divergence
 - Status: APPLIED, VERIFIED, BOUNDED (5 scales final)
 
 **Stage 5 (CD):**
@@ -162,8 +169,10 @@ Curated narrative documents per pipeline stage:
 - **outbound-findings** — Formal finding declarations (e.g., OD-F-001 through OD-F-013)
 - **SYNTHESIS** — Cross-exploration analysis
 - **AUDIT-SYNTHESIS** — Quality gate results
-- **HANDOFF** — Briefing for the next stage
-- **RESEARCH-GATE** — Research filtering decisions
+- **HANDOFF** — Briefing for the next stage (e.g., HANDOFF-AD-TO-CD references AD-F-023, AD-F-024, AD-F-025)
+- **RESEARCH-GATE** — Research filtering decisions (e.g., AD-RESEARCH-GATE.md)
+- **CONVENTION-SPEC** — Pre-build convention rules (e.g., AD-CONVENTION-SPEC: 822 lines)
+- **PA-CONVENTIONS** — Convention ideology (e.g., AD-PA-CONVENTIONS.md)
 
 **How they relate:** Inline headers are the distributed dependency graph (who
 depends on whom). Formal chain documents are the authoritative narrative (what
@@ -181,9 +190,10 @@ Each pipeline stage inherits ALL prior soul pieces, findings, constraints, and
 decisions from every preceding stage. This accumulated context is formalized in
 `ACCUMULATED-IDENTITY-v1.md` (539 lines), which lives at the pipeline level.
 
-- AD must consume ACCUMULATED-IDENTITY-v1.md and produce v2
+- AD consumed ACCUMULATED-IDENTITY-v1.1 and produced v2 (incorporating AD-F-023 ATTENTION TOPOLOGY and AD-F-025 transition grammar)
 - CD must consume v2 and produce v3
 - The identity grows with each stage — it never shrinks
+- AD-PA-CONVENTIONS.md captures the convention methodology that is now part of the accumulated process identity
 
 This ensures no stage works in isolation. Every decision carries the full
 weight of prior research.

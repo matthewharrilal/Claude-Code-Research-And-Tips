@@ -56,6 +56,8 @@ This document establishes the theoretical framework for how KortAI's 11 document
 
 The core insight: **Components are not interchangeable puzzle pieces.** Each has a character, a density signature, and a structural role. Combination is choreography, not collision.
 
+**AD Validation Note:** AD-F-023 (ATTENTION TOPOLOGY) and AD-F-024 (compound = sequential) provide the spatial framework for applying these combination principles. AD proved that axis IS organization IS density (AD-F-004), meaning component combinations are constrained by their natural axis-density pairings. CD must evaluate all 39 R-5 findings through this lens.
+
 ---
 
 ## Part 1: Component Harmony
@@ -196,7 +198,7 @@ The neutral Code Snippet acts as a *temperature buffer*.
 
 ### Finding T4: The 2-Callout Limit
 
-**Never place more than 2 callouts consecutively.** After 2 callouts, readers experience "sidebar fatigue" — the margin annotation loses its power to interrupt.
+**Never place more than 2 callouts consecutively.** After 2 callouts, readers experience "sidebar fatigue" -- the margin annotation loses its power to interrupt. **AD Confirmed:** DD-F-014 (max 2 callouts per viewport) was enforced across all 6 AD explorations. AD-005 (Choreography) had the highest callout density and specifically validated this limit.
 
 If you need 3+ advisories:
 1. Group them into a single Info Callout with bullets
@@ -222,6 +224,8 @@ Every documentation section should have a narrative arc:
 **Not every section needs all 6**, but they should appear in this order when present.
 
 ### Principle S2: Density Wave Sequencing
+
+**AD Validation (AD-F-024, AD-F-025):** AD proved that compound pages are SEQUENTIAL (one axis pattern per section, compound through scroll), not simultaneous. The transition grammar (AD-F-025) classifies all 20 directed transitions as Smooth/Bridge/Breathing. CD must apply density wave sequencing WITHIN each axis section and manage TRANSITIONS between axis sections using the 5x5 grammar matrix.
 
 Page density should follow a wave pattern, not a plateau:
 
@@ -360,7 +364,7 @@ The cluster reads as a single "advisory moment" rather than scattered interrupti
 
 ### Principle N1: Components Generally Stack, Not Nest
 
-KortAI components are designed to **stack vertically**, not nest within each other. The flat, editorial design philosophy rejects deep nesting.
+KortAI components are designed to **stack vertically**, not nest within each other. The flat, editorial design philosophy rejects deep nesting. **AD Reinforced (AD-F-024):** Compound axis is sequential through scrolling time, not simultaneous within viewport. This extends the stacking principle to the axis level: even axis patterns stack vertically, they do not nest or overlap.
 
 **Stack (Correct):**
 ```
@@ -747,6 +751,12 @@ For a balanced page:
 **Findings Count:** 20+ distinct principles and findings
 **Word Count:** ~4,500
 **Review Status:** Initial research complete
+
+**AD Forward References (for CD consumption):**
+- AD-F-023 (ATTENTION TOPOLOGY): The unifying meta-equivalence that CD component combinations must respect -- axis IS organization IS density
+- AD-F-024 (Compound = sequential): Component combinations within a section commit to ONE axis pattern; compound through scroll only
+- AD-F-025 (Transition grammar): 5x5 matrix classifying all 20 directed axis transitions as Smooth/Bridge/Breathing -- CD must apply when combining sections
+- AD-F-013 (Soul constraint as generative): border-radius: 0 didn't limit combination space, it SHAPED it -- CD combinations should treat soul constraints as creative generators, not limitations
 
 **Referenced Sources:**
 - `/design-extraction/component-system/perceptual-audit-v2/tracking/PERCEPTUAL-TRUTHS.md`

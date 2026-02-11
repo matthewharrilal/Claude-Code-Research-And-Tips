@@ -33,6 +33,8 @@ ACTIVE — updated as findings move through pipeline stages
 | R1-R5 research (337 findings)           | All original research with status      |
 | Pattern-to-finding linkage              | Cross-reference mapping                |
 | COMPREHENSIVE-AUDIT-SPECIFICATION.md    | Comprehensive hierarchical audit fix   |
+| AD-F-023 (ATTENTION TOPOLOGY)           | Crown jewel AD meta-equivalence        |
+| AD-PA-CONVENTIONS.md                    | Convention ideology for AD stage       |
 
 6. MUST HONOR
 - Every finding must trace to its original research source
@@ -211,13 +213,20 @@ to application.
 
 ### Stage 4 (AD-F-###) — Axis COMPLETE
 
-28 findings produced across 6 explorations (AD-001 Z-Pattern, AD-002 F-Pattern, AD-003 Bento Grid, AD-004 Spiral, AD-005 Choreography, AD-006 Compound). See `stage-4-axis-ad/AD-outbound-findings.md` for full registry.
+28 findings produced across 6 explorations (AD-001 Z-Pattern, AD-002 F-Pattern, AD-003 Bento Grid, AD-004 Spiral, AD-005 Choreography, AD-006 Compound). See `stage-4-axis-ad/AD-outbound-findings.md` for full registry. Convention ideology documented in `stage-4-axis-ad/AD-PA-CONVENTIONS.md`.
 
 | ID | Finding | Type | Consumed By | Status |
 |----|---------|------|-------------|--------|
+| AD-F-001 | Z-Pattern Sweep Creates Natural PULSE — Z-sweep cycle IS one PULSE beat | Pattern | CD, Migration | ACTIVE |
+| AD-F-002 | Z-Pattern Width Variation Maps to TIDAL Rhythm | Pattern | CD, Migration | ACTIVE |
+| AD-F-003 | Z-Pattern Validates Temporal Equivalence Mechanism | Validation | CD, Migration | ACTIVE |
 | AD-F-004 | 3-Way Unification Validated — axis, org, density are ONE structure | Primary Finding | CD, Migration | ACTIVE |
 | AD-F-005 | Tension Meter as CRESCENDO Position Indicator in F-Pattern | Design Decision | CD, Migration | ACTIVE |
+| AD-F-006 | F-Pattern Eye Tracking Confirms Density Gradient | Validation | CD, Migration | ACTIVE |
+| AD-F-007 | F-Pattern Progressive Disclosure Maps to CRESCENDO | Pattern | CD, Migration | ACTIVE |
 | AD-F-008 | Decision Matrix Validates CRESCENDO Peak in F-Pattern | Validation | CD, Migration | ACTIVE |
+| AD-F-009 | Bento Grid Cells ARE Dense Islands — Spatial Equivalence | Pattern | CD, Migration | ACTIVE |
+| AD-F-010 | Bento Grid Validates ISLANDS Pattern at Axis Scale | Validation | CD, Migration | ACTIVE |
 | AD-F-016 | Spiral Reading Order ENHANCES Geological Layering (stress-test answer) | Stress-test | CD, Migration | ACTIVE |
 | AD-F-017 | Kinetic Equivalence — axis direction change IS density state change (4th mechanism) | Extension | CD, Migration | ACTIVE |
 | AD-F-020 | Choreography is Reader Attention Movement, not CSS animation (identity clarification) | Identity | CD, Migration | ACTIVE |
@@ -229,6 +238,7 @@ to application.
 | AD-F-028 | No 6th Fractal Scale — 5-Scale Model Complete and bounded | Negative Finding | CD, Migration | ACTIVE |
 
 **Total AD-F-###:** 28 findings (14 Class A confirming + 14 Class B extending, 0 Class C overwriting, 0 Class D breaking)
+**Convention ideology:** AD-PA-CONVENTIONS.md documents the convention methodology that eliminated quality dialect divergence (lesson from OD's 3-dialect problem)
 
 ### Stage 5 (CD-F-###) — Combination ⏳ PENDING
 
@@ -277,6 +287,22 @@ TBD — CD explorations not yet started.
 **Re-enrichment:** 42 EXT findings applied, 27 builder discoveries, convention spec unified 3 dialects
 **Quality: ~35.5/40 average across 6 explorations (v3). Soul compliance: 100%. 20/20 SOUL FAILs = ANTI-PHYSICAL.**
 
+### Axis Patterns ✅ COMPLETE
+
+| Pattern | Research | Generated Finding | Validated By | Key AD-F |
+|---------|----------|-------------------|--------------|----------|
+| Z-PATTERN | R4-VR*, R4-PD* | AD-F-001, AD-F-002, AD-F-003 | AD-001 | AD-F-003 (temporal equivalence) |
+| F-PATTERN | R4-PD*, R1-016 | AD-F-005, AD-F-006, AD-F-007, AD-F-008 | AD-002 | AD-F-008 (CRESCENDO peak) |
+| BENTO GRID | R4-*, R2-014 | AD-F-009, AD-F-010 | AD-003 | AD-F-009 (spatial equivalence) |
+| SPIRAL | R4-*, R3-005, R3-024 | AD-F-016 | AD-004 | AD-F-016 (geological enhancement) |
+| CHOREOGRAPHY | R4-*, OD-F-FL-001 | AD-F-017, AD-F-020 | AD-005 | AD-F-017 (kinetic equivalence) |
+| COMPOUND | All prior | AD-F-021, AD-F-023, AD-F-024, AD-F-025, AD-F-027, AD-F-028 | AD-006 | AD-F-023 (ATTENTION TOPOLOGY) |
+
+**Meta-equivalence:** AD-F-023 — ATTENTION TOPOLOGY unifies temporal (AD-F-003), spatial (AD-F-009), proportional (AD-F-008), kinetic (AD-F-017), and gravitational (AD-F-016) mechanisms
+**Transition grammar:** AD-F-025 — 5x5 matrix classifying all pattern-to-pattern transitions (4 Smooth, 10 Bridge, 6 Breathing)
+**Convention ideology:** AD-PA-CONVENTIONS.md — pre-build convention spec eliminated quality dialect divergence
+**Quality: 0 soul violations across all 6 explorations. R-2 consumption rose from 0% to ~67%.**
+
 ═══════════════════════════════════════════════════════════════════════════════
 ## SECTION E: CROSS-REFERENCE INDEX
 ═══════════════════════════════════════════════════════════════════════════════
@@ -299,6 +325,27 @@ COMP-F-001 (Sharp edges):
 - **DD-001 through DD-006:** All verified border-radius: 0
 - **DD-REAUDIT-PERCEPTUAL-SYNTHESIS:** 6/6 DDs pass edge check
 - **Soul Piece #1:** Documented in SOUL-DISCOVERIES.md
+
+### "Where was AD-F-023 used?"
+
+AD-F-023 (ATTENTION TOPOLOGY — meta-equivalence):
+- **AD-006 Compound:** Crown jewel discovery — all 5 equivalence mechanisms converge
+- **AD-F-004:** 3-way unification (axis=org=density) is the structural basis for AD-F-023
+- **AD-F-017:** Kinetic equivalence (4th mechanism) discovered in AD-005 Choreography
+- **AD-F-025:** Transition grammar (5x5 matrix) governs how attention flows between axis patterns
+- **AD-SYNTHESIS.md:** Central organizing principle for cross-exploration synthesis
+- **HANDOFF-AD-TO-CD.md:** MANDATORY constraint for CD — all combinations must respect attention topology
+- **ACCUMULATED-IDENTITY-v2.md:** Elevated to pipeline-level identity principle
+- **BACKBONE.md Section 5:** Referenced as AD crown jewel in Stage 4 narrative
+
+### "Where was AD-F-025 used?"
+
+AD-F-025 (Transition Grammar — 5x5 matrix):
+- **AD-006 Compound:** Validated all 20 classified transitions (4 Smooth, 10 Bridge, 6 Breathing)
+- **AD-F-024:** Sequential constraint (one axis per viewport) derives from transition grammar
+- **AD-CONVENTION-SPEC.md:** Section on transition handling references AD-F-025
+- **HANDOFF-AD-TO-CD.md:** MANDATORY for CD — component combinations must classify their transitions
+- **AD-PA-CONVENTIONS.md:** Convention ideology references transition grammar as constraint source
 
 ### "Where is traffic-light anti-pattern?"
 
@@ -329,6 +376,7 @@ Traffic-light (DD-F-015):
 **Total EXT-* Findings:** 94 unique bespoke findings created during OD re-enrichment
 **Total Soul Pieces:** 5 visual (no cognitive discovered in OD — OD-F-005 is meta-pattern, not soul piece)
 **Total Patterns:** 6 density + 6 organizational + 6 axis (combination TBD)
+**Convention Documents:** OD-CONVENTION-SPEC.md (468 lines), AD-CONVENTION-SPEC.md (822 lines), AD-PA-CONVENTIONS.md (convention ideology)
 **OD Re-Enrichment:** 43 agents, 3 waves, all 6 ODs upgraded to v3. Average score: ~35.5/40 (up from ~34.8/40). Convention spec unified 3 quality dialects. 20/20 SOUL FAILs confirmed ANTI-PHYSICAL identity.
 
 **Comprehensive Hierarchical Audit (2026-02-09):** ~58 agents across 4 pillars (visual, structural, provenance, triage) + fresh-eyes adversarial + fix execution. 58 findings (5 Critical, 10 High, 17 Medium, 8 Low, 18 Notes) + 7 unique fresh-eyes findings. 10 Critical/High fixes applied across 18 files (6 OD, 6 DD, 4 provenance, 1 TSX, 1 CLAUDE.md). Soul compliance confirmed: 0 violations across ~13,000 elements (3 independent verification processes). DD files received DD-BACKPORT accessibility and palette alignment. PIPELINE-MANIFEST R-2 count corrected (78->27). rgba() opacity epidemic resolved across 4 OD files. All fixes verified via 187 programmatic DOM tests + 12 visual screenshots. Zero new soul violations introduced.
