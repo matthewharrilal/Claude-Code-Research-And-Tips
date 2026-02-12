@@ -8,7 +8,7 @@ CONSUMED BY: All CD agents (compaction survival anchor)
 
 # CD Build State
 
-**Phase:** 1B — Wave 2 Builders (COMPLETE) — Phase 2 next
+**Phase:** 2 — Perceptual Audit (IN PROGRESS)
 **Convention Status:** DRAFT (audited, 3 deficiencies fixed, UNCONDITIONAL PASS)
 **Last Updated:** 2026-02-12
 
@@ -48,7 +48,7 @@ CONSUMED BY: All CD agents (compaction survival anchor)
 | Gate 0 (Foundation) | PASS | All 16 items checked — see Phase 0 summary below |
 | Gate 1A (Wave 1) | PASS | Soul: 0 violations, 12 findings documented, all 3 files 1,500+ lines |
 | Gate 1B (Wave 2) | PASS | Soul: 0 violations, 13 findings documented, all 3 files 1,600+ lines |
-| Gate 2-7 (Audit) | PENDING | 16 + per-auditor |
+| Gate 2-7 (Audit) | IN PROGRESS | Phase 2 started 2026-02-11, 10 agents |
 | Completeness | PENDING | 22 checks |
 
 ## Phase 0 Summary — COMPLETE
@@ -160,3 +160,20 @@ CONSUMED BY: All CD agents (compaction survival anchor)
 | CD-005-multi-axis-transition.html | 1,996 | ~82KB | CD-F-017–020 |
 | CD-006-pilot-migration.html | 2,064 | 109KB | CD-F-021–025 |
 | **TOTAL** | **10,610** | **~461KB** | **25 findings** |
+
+## Phase 2 Audit Team
+
+**Started:** 2026-02-11
+**State file:** `_perceptual-audit/AUDIT-STATE.md`
+
+| Agent | Role | Task | Status |
+|-------|------|------|--------|
+| programmatic-verifier | Programmatic soul checks (border-radius, box-shadow, rgba, 2px) | #5 | IN PROGRESS |
+| combination-auditor | Combination rules + R-5 coverage audit | #6 | IN PROGRESS |
+| convention-auditor | Convention spec S1-S20 + lock sheet compliance | #7 | IN PROGRESS |
+| weaver | State tracking + CD-BUILD-STATE.md updates | #9 | IN PROGRESS |
+| auditor-a | Visual audit CD-001 + CD-002 (Playwright) | #1 | PENDING |
+| auditor-b | Visual audit CD-003 + CD-004 (Playwright) | #2 | PENDING |
+| auditor-c | Visual audit CD-005 + CD-006 (Playwright) | #3 | PENDING |
+| fresh-eyes | Zero-context adversarial audit | #4 | PENDING |
+| cross-page-synthesizer | Cross-page synthesis + pattern analysis | #8 | BLOCKED |
