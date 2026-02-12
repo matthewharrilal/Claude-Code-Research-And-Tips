@@ -164,6 +164,56 @@ Sections 6 (Decision Matrix) and 7 (Fractal Meta) are invisible at all viewports
 - Bento cards functional at 1024px: `screenshots/AD-006-1024-scroll-b07.png`
 - Three-column comparison readable: `screenshots/AD-006-1440-scroll-b03.png`
 
+### Programmatic Verification (Auditor B — Recovery Agent Supplementary)
+
+The following programmatic measurements were taken to verify and quantify the perceptual findings above.
+
+#### Root Cause: Grid Collapse Failure
+
+The CSS at the 768px breakpoint sets `grid-template-areas: none` on all 5 grid layouts but does NOT override the children's explicit `grid-area` declarations (e.g., `.z-top-left { grid-area: z-top-left; }`). When areas are `none`, named area references become invalid, causing the browser to auto-place all children into the same grid cell.
+
+**Programmatic proof (767px CSS width):** All 4 z-layout children render at identical coordinates: top=652, left=88, width=656, height=474. They overlap completely. The bento-grid shows degenerate columns: `10.2px, 10.2px, 0px, 687.8px`.
+
+**Fix required:** Add `grid-area: auto` to all grid children at each breakpoint, OR use single-column named areas instead of `none`.
+
+#### Typography Measurements (1440px CSS)
+
+| Property | Measured Value | Expected |
+|----------|---------------|----------|
+| Body font-size | 16px | 16px -- PASS |
+| Body line-height | 27.2px (1.7 ratio) | 1.7 -- PASS |
+| H1 (crown jewel) | 48px (3rem) | 3rem -- PASS |
+| H2 | 26px (1.625rem) | 1.625rem -- PASS |
+| H3 | 22px (1.375rem) | 1.375rem -- PASS |
+| Callout labels | 12px | 12px (--type-meta) -- PASS |
+| Code blocks | 14px, line-height 1.5 | 0.875rem -- PASS |
+| Inline code | 14.4px (0.9em) | 0.9em -- PASS |
+| Paragraph max-width | 707px (70ch) | 70ch -- PASS |
+
+#### Narrow Container Widths (1440px CSS)
+
+| Container | Width | Chars/line est. | Verdict |
+|-----------|-------|-----------------|---------|
+| z-layout quadrants | 390px | ~48 chars | Adequate |
+| triple-column cells | 260px | ~26 chars | Below 45ch minimum |
+| bento-item (small) | 179px | ~16-18 chars | Word stacking |
+| bento-item (featured) | 390px | ~48 chars | Adequate |
+| choreo-spoke | 207px | ~20 chars | Word stacking |
+| spiral-narrow | 335px | ~40 chars | Below optimal |
+| spiral-wide | 390px+ | ~48 chars | Adequate |
+
+#### Page Heights by Viewport
+
+| Viewport (CSS pixels) | Height | Notes |
+|----------------------|--------|-------|
+| 1440px (innerWidth 1138) | 14,736px | Within 10-14K target |
+| 853px (768 device px) | 22,006px | 50% taller -- broken layout stacking inflates height |
+
+#### DPR Note
+DPR measured at 0.9. Playwright `setViewportSize` sets device pixels, not CSS pixels. At DPR 0.9: 768 device px = 853 CSS px. To achieve 768 CSS px, device width must be ~691px. All breakpoint assertions in this file account for this scaling.
+
+---
+
 ### Dimension Pass Notes (1440px — Auditor B)
 
 **Pass 1 READABILITY:** Header subtitle ghostly; body text comfortable except Section 2 wide paragraphs; tables clean and well-spaced; callout labels small but color-coded; bento cards cramped but readable; code block well-formatted.
