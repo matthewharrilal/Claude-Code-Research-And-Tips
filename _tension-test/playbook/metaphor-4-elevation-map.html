@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Master Playbook -- Elevation Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-primary: #E83025;
+    --color-background: #FEF9F5;
+    --color-text: #1A1A1A;
+    --color-text-secondary: #666666;
+    --color-border: #E0D5C5;
+    --color-border-subtle: #F0EBE3;
+    --color-dark: #1A1A1A;
+    --color-medium: #FAF5ED;
+    --color-breathing: #F0EBE3;
+    --accent-green: #4A7C5B;
+    --accent-coral: #C97065;
+    --accent-amber: #C49052;
+    --accent-purple: #7B5EA7;
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-background);
+    line-height: 1.7;
+    font-size: 17px;
+  }
+
+  /* ===== MAP HEADER (Cartographic Title Block) ===== */
+  .map-title-block {
+    background: var(--color-dark);
+    color: var(--color-background);
+    padding: 64px 40px 48px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-items: end;
+  }
+  .map-title-left {
+    max-width: 600px;
+  }
+  .map-legend-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-primary);
+    margin-bottom: 16px;
+  }
+  .map-title-block h1 {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .map-title-block .projection {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.125rem;
+    color: #888;
+  }
+  .map-title-right {
+    text-align: right;
+  }
+  .map-scale {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: #888;
+    line-height: 2;
+  }
+
+  /* ===== MAIN CONTAINER ===== */
+  .terrain {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* ===== CONTOUR LINES (Section boundaries -- thin, precise) ===== */
+  .contour-section {
+    padding: 48px 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .contour-section-major {
+    padding: 48px 0;
+    border-top: 3px solid var(--color-border);
+  }
+
+  .contour-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-text-secondary);
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 1.875rem;
+    font-weight: 400;
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+  h3 {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    font-weight: 400;
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+  p { margin-bottom: 16px; }
+
+  /* ===== ELEVATION ZONES (Background color = altitude) ===== */
+  /* Lowest elevation = darkest. Highest = lightest. */
+  .zone-valley {
+    background: var(--color-dark);
+    color: var(--color-background);
+    padding: 48px 40px;
+    margin: 0 -40px;
+  }
+  .zone-valley .contour-label { color: #888; }
+  .zone-valley p { color: #BBB; }
+  .zone-valley h2, .zone-valley h3 { color: var(--color-background); }
+
+  .zone-lowland {
+    background: #2A2420;
+    color: #DDD;
+    padding: 48px 40px;
+    margin: 0 -40px;
+  }
+  .zone-lowland .contour-label { color: #888; }
+  .zone-lowland p { color: #BBB; }
+  .zone-lowland h2 { color: #EEE; }
+
+  .zone-foothill {
+    background: var(--color-breathing);
+    padding: 48px 40px;
+    margin: 0 -40px;
+  }
+
+  .zone-highland {
+    background: var(--color-medium);
+    padding: 48px 40px;
+    margin: 0 -40px;
+  }
+
+  .zone-summit {
+    background: var(--color-background);
+    padding: 64px 0;
+  }
+
+  /* ===== BASE CAMP MARKER ===== */
+  .base-camp {
+    border: 3px solid var(--color-primary);
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .base-camp-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-primary);
+    margin-bottom: 8px;
+  }
+
+  /* ===== TRAIL MARKERS (Checkpoints) ===== */
+  .trail-marker {
+    border-left: 4px solid var(--accent-green);
+    padding: 20px 20px 20px 24px;
+    margin: 24px 0;
+    background: #F6FAF7;
+  }
+  .trail-marker .marker-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent-green);
+    margin-bottom: 8px;
+  }
+
+  /* ===== HAZARD ZONES (Anti-patterns) ===== */
+  .hazard-zone {
+    border-left: 4px solid var(--accent-coral);
+    padding: 20px 20px 20px 24px;
+    margin: 24px 0;
+    background: #FEF6F5;
+  }
+  .hazard-zone .hazard-name {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent-coral);
+    margin-bottom: 8px;
+  }
+
+  /* ===== CONTOUR DENSITY (Code blocks) ===== */
+  .contour-dense {
+    background: var(--color-dark);
+    color: #D4D4D4;
+    padding: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    margin: 24px 0;
+  }
+  .contour-dense .topo { color: var(--color-primary); }
+  .contour-dense .grid { color: #6A9955; }
+  .contour-dense .datum { color: #CE9178; }
+
+  /* ===== TOPOGRAPHIC GRID (Principles overview) ===== */
+  .topo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin: 32px 0;
+    border: 1px solid var(--color-border);
+  }
+  .topo-cell {
+    padding: 20px;
+    border-right: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .topo-cell:nth-child(3n) { border-right: none; }
+  .topo-cell:nth-last-child(-n+2) { border-bottom: none; }
+  .topo-cell-id {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+  }
+  .topo-cell-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .topo-cell-desc {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ===== ELEVATION PROFILE (Progression track) ===== */
+  .elevation-profile {
+    margin: 32px 0;
+  }
+  .profile-row {
+    display: grid;
+    grid-template-columns: 40px 80px 1fr 80px;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-border);
+    align-items: center;
+    font-size: 0.9375rem;
+  }
+  .profile-row:first-child { border-top: 3px solid var(--color-border); }
+  .profile-row:last-child { border-bottom: 3px solid var(--color-border); }
+  .profile-elev {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  .profile-name { font-weight: 500; }
+  .profile-time {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    text-align: right;
+  }
+  .profile-pattern {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+  }
+
+  /* ===== TERRAIN COMPARISON (Before/After) ===== */
+  .terrain-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin: 24px 0;
+  }
+  .terrain-side {
+    padding: 24px;
+  }
+  .terrain-lowground {
+    background: var(--color-dark);
+    color: #BBB;
+  }
+  .terrain-highground {
+    background: #F6FAF7;
+  }
+  .terrain-side-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .terrain-lowground .terrain-side-label { color: var(--accent-coral); }
+  .terrain-highground .terrain-side-label { color: var(--accent-green); }
+
+  /* ===== REFERENCE TABLE ===== */
+  .survey-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 0.9375rem;
+  }
+  .survey-table th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+    padding: 12px 16px;
+    border-bottom: 3px solid var(--color-border);
+  }
+  .survey-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  /* ===== FOOTER ===== */
+  .map-footer {
+    background: var(--color-dark);
+    color: var(--color-background);
+    padding: 48px 40px;
+    margin-top: 48px;
+  }
+  .map-footer-inner {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  .map-footer p { color: #888; font-size: 0.875rem; }
+
+  ul, ol { margin-bottom: 16px; padding-left: 24px; }
+  li { margin-bottom: 8px; }
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background: var(--color-breathing);
+    padding: 2px 6px;
+  }
+
+  @media (max-width: 768px) {
+    .map-title-block {
+      grid-template-columns: 1fr;
+      padding: 48px 24px;
+      gap: 24px;
+    }
+    .map-title-block h1 { font-size: 2rem; }
+    .map-title-right { text-align: left; }
+    .terrain { padding: 0 24px; }
+    .topo-grid { grid-template-columns: 1fr; }
+    .topo-cell { border-right: none; }
+    .topo-cell:nth-last-child(-n+2) { border-bottom: 1px solid var(--color-border); }
+    .topo-cell:last-child { border-bottom: none; }
+    .terrain-split { grid-template-columns: 1fr; }
+    .zone-valley, .zone-lowland, .zone-foothill, .zone-highland {
+      padding: 32px 24px; margin: 0 -24px;
+    }
+    .profile-row { grid-template-columns: 32px 60px 1fr 60px; gap: 8px; }
+    .map-footer { padding: 48px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== MAP TITLE BLOCK ===== -->
+<header class="map-title-block">
+  <div class="map-title-left">
+    <div class="map-legend-label">Topographic Survey -- Sheet 1 of 1</div>
+    <h1>Claude Code Master Playbook</h1>
+    <div class="projection">Elevation map of orchestration mastery -- from sea level to summit</div>
+  </div>
+  <div class="map-title-right">
+    <div class="map-scale">
+      Contour interval: 1 Level<br>
+      Datum: Level 0 (sea level)<br>
+      Peak elevation: Level 7<br>
+      Survey date: 2026-01-18
+    </div>
+  </div>
+</header>
+
+<main class="terrain">
+
+  <!-- ===== BASE CAMP: Principles at the Foundation ===== -->
+  <div class="zone-valley">
+    <span class="contour-label">Datum Level -- Foundational Survey Points</span>
+    <h2>The Eight Survey Markers</h2>
+    <p>Fixed reference points against which all elevation is measured. These do not move.</p>
+
+    <div class="topo-grid" style="border-color:rgba(255,255,255,0.15);">
+      <div class="topo-cell" style="border-color:rgba(255,255,255,0.1);">
+        <div class="topo-cell-id" style="color:#888;">P-01</div>
+        <div class="topo-cell-name" style="color:#EEE;">Context Constraint</div>
+        <div class="topo-cell-desc" style="color:#888;">~200K tokens. The map boundary.</div>
+      </div>
+      <div class="topo-cell" style="border-color:rgba(255,255,255,0.1);">
+        <div class="topo-cell-id" style="color:#888;">P-02</div>
+        <div class="topo-cell-name" style="color:#EEE;">External State</div>
+        <div class="topo-cell-desc" style="color:#888;">Files, git. Survives erosion.</div>
+      </div>
+      <div class="topo-cell" style="border-color:rgba(255,255,255,0.1);">
+        <div class="topo-cell-id" style="color:#888;">P-03</div>
+        <div class="topo-cell-name" style="color:#EEE;">Fresh Context</div>
+        <div class="topo-cell-desc" style="color:#888;">20x5min > 1x100min.</div>
+      </div>
+      <div class="topo-cell" style="border-color:rgba(255,255,255,0.1);">
+        <div class="topo-cell-id" style="color:#888;">P-04</div>
+        <div class="topo-cell-name" style="color:#EEE;">Iron Law</div>
+        <div class="topo-cell-desc" style="color:#888;">Coordinate or execute. Never both.</div>
+      </div>
+      <div class="topo-cell" style="border-color:rgba(255,255,255,0.1);">
+        <div class="topo-cell-id" style="color:#888;">P-05</div>
+        <div class="topo-cell-name" style="color:#EEE;">Atomic Tasks</div>
+        <div class="topo-cell-desc" style="color:#888;">Smallest testable units.</div>
+      </div>
+      <div class="topo-cell" style="border-color:rgba(255,255,255,0.1);">
+        <div class="topo-cell-id" style="color:#888;">P-06</div>
+        <div class="topo-cell-name" style="color:#EEE;">Quality Gates</div>
+        <div class="topo-cell-desc" style="color:#888;">Verify before committing.</div>
+      </div>
+      <div class="topo-cell" style="border-color:rgba(255,255,255,0.1);">
+        <div class="topo-cell-id" style="color:#888;">P-07</div>
+        <div class="topo-cell-name" style="color:#EEE;">Isolation</div>
+        <div class="topo-cell-desc" style="color:#888;">Worktrees. Separate branches.</div>
+      </div>
+      <div class="topo-cell" style="border-color:rgba(255,255,255,0.1);">
+        <div class="topo-cell-id" style="color:#888;">P-08</div>
+        <div class="topo-cell-name" style="color:#EEE;">Communication</div>
+        <div class="topo-cell-desc" style="color:#888;">Progress files. Structured tasks.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HAZARD AREAS ===== -->
+  <section class="contour-section-major">
+    <span class="contour-label">Hazard Zones -- Dangerous Terrain</span>
+    <h2>Routes to Avoid</h2>
+
+    <div class="hazard-zone">
+      <div class="hazard-name">Ravine: Context Rot</div>
+      <p style="margin-bottom:0;">Long sessions erode the trail. Quality degrades, decisions wash away. <strong>Stay on the fresh context trail.</strong></p>
+    </div>
+
+    <div class="hazard-zone">
+      <div class="hazard-name">Cliff: Mixed Roles</div>
+      <p style="margin-bottom:0;">Orchestrators that code fall off the ledge. The view narrows, the big picture disappears. <strong>Stay on your assigned route.</strong></p>
+    </div>
+
+    <div class="hazard-zone">
+      <div class="hazard-name">Scree: Missing Verification</div>
+      <p style="margin-bottom:0;">Unverified work slides. One loose stone triggers a cascade. <strong>Test each foothold before stepping up.</strong></p>
+    </div>
+  </section>
+
+  <!-- ===== ELEVATION ZONES: The Ascent ===== -->
+
+  <div class="zone-lowland">
+    <span class="contour-label">Elevation 0 -- Sea Level</span>
+    <h2>Valley Floor: Where You Start</h2>
+    <p>Single continuous conversation. Manual approval for everything. Context degrades at 60%. Ninety minutes until the trail runs out.</p>
+
+    <div class="terrain-split" style="margin-top:24px;">
+      <div class="terrain-side terrain-lowground" style="background:#1A1A1A;">
+        <span class="terrain-side-label">Current Position</span>
+        <p style="font-size:0.9375rem; margin-bottom:0; color:#BBB;">11:00 PM -- Start the climb.<br>11:45 PM -- Altitude sickness at 55%.<br>12:30 AM -- Turn back. No summit.</p>
+      </div>
+      <div class="terrain-side terrain-highground">
+        <span class="terrain-side-label">What You See</span>
+        <p style="font-size:0.9375rem; margin-bottom:0;">90 minutes invested.<br>Feature incomplete.<br>Must re-explain every attempt.<br>The summit looks impossible from here.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="zone-foothill">
+    <span class="contour-label">Elevation 1-2 -- Foothills</span>
+    <h2>The First Ridgeline</h2>
+    <p><strong>Elevation 1:</strong> <code>CLAUDE.md</code> plants a flag. Project context persists between expeditions. Slash commands mark the trail. Token savings: ~20%. The foothills are navigable now.</p>
+    <p><strong>Elevation 2:</strong> Subagents and hooks. Specialized team members who know their zone. A security reviewer scouts the ridge. A test writer maps the route. Each climber carries only what they need.</p>
+
+    <div class="trail-marker">
+      <div class="marker-label">Trail Marker</div>
+      <p style="margin-bottom:0;">Time investment: 30-45 minutes for Level 1. 2-4 hours for Level 2. The foothills are gentle but essential -- they set the direction for everything above.</p>
+    </div>
+  </div>
+
+  <div class="zone-highland">
+    <span class="contour-label">Elevation 3 -- The Treeline</span>
+    <h2>Autonomy: The Ralph Loop</h2>
+    <p>Above the treeline, the terrain changes. The Ralph Loop grants autonomous climbing. Fresh context at every camp. State preserved in cairns between stages. You can now set a course and let the expedition continue while you rest.</p>
+
+    <div class="contour-dense">
+      <span class="grid">#!/bin/bash</span><br>
+      MAX_ITERATIONS=<span class="datum">${1:-25}</span><br><br>
+      <span class="topo">for</span> i <span class="topo">in</span> $(seq 1 $MAX_ITERATIONS); <span class="topo">do</span><br>
+      &nbsp;&nbsp;echo <span class="datum">"=== Camp $i ==="</span><br>
+      &nbsp;&nbsp;OUTPUT=$(cat prompt.md | claude --dangerously-skip-permissions)<br>
+      &nbsp;&nbsp;<span class="topo">if</span> echo "$OUTPUT" | grep -q <span class="datum">"&lt;promise&gt;COMPLETE&lt;/promise&gt;"</span>; <span class="topo">then</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;echo <span class="datum">"Summit reached!"</span> && exit 0<br>
+      &nbsp;&nbsp;<span class="topo">fi</span><br>
+      <span class="topo">done</span>
+    </div>
+
+    <div class="terrain-split">
+      <div class="terrain-side terrain-lowground">
+        <span class="terrain-side-label">Before: Valley Floor</span>
+        <p style="font-size:0.9375rem; margin-bottom:0; color:#BBB;">Babysit for 90 minutes.<br>Manual approval each step.<br>Can't leave the trail.<br>Feature incomplete.</p>
+      </div>
+      <div class="terrain-side terrain-highground">
+        <span class="terrain-side-label">After: Above Treeline</span>
+        <p style="font-size:0.9375rem; margin-bottom:0;"><code>./ralph.sh 25</code><br>Set the route. Rest.<br>Wake to summit flag planted.<br>Human time: 10 minutes.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== OVERNIGHT STORY ===== -->
+  <section class="contour-section-major" style="padding:48px 0;">
+    <span class="contour-label">Field Report -- Night Ascent</span>
+    <h2>The Overnight Expedition</h2>
+    <p>6:47 PM, Wednesday. Three weeks staring at the same contour line. Tonight, the automated expedition runs.</p>
+    <p>Five waypoints plotted. Each atomic, each with clear success criteria. The team departs. You descend to camp.</p>
+    <p>Camp 1: Fresh team, reads the map, establishes the user model. Camp 2: Fresh team, reads the log, builds the login route. Camps 3-5: Database, form, tests. Each team fresh. Each waypoint logged.</p>
+    <p>Camp 6: All waypoints confirmed. Summit flag planted. The expedition returns.</p>
+    <p>7:15 AM, Thursday. Five clean commits. CI green. The route is complete. Three weeks of contour lines -- traversed while you slept.</p>
+  </section>
+
+  <!-- ===== HIGH ALTITUDE ===== -->
+  <section class="contour-section" style="padding:48px 0;">
+    <span class="contour-label">Elevation 4-5 -- Alpine Zone</span>
+    <h2>The High Camps</h2>
+    <p><strong>Elevation 4:</strong> PRD-driven reliability. Explicit criteria, progress tracking, compounding knowledge. Success rate: 60% -> 95%. Each camp is inspected before the next pitch.</p>
+    <p><strong>Elevation 5:</strong> CC Mirror -- multiple teams on different faces of the mountain. Parallel ascent routes. Opus coordinates, Sonnet climbs, Haiku scouts. 2-3x faster than a single rope team.</p>
+
+    <div class="contour-dense">
+      Orchestrator <span class="topo">(Opus -- Route Planner)</span><br>
+      <span class="grid">|--</span> Backend Climber <span class="topo">(Sonnet)</span> -- North face<br>
+      <span class="grid">|--</span> Frontend Climber <span class="topo">(Sonnet)</span> -- South face<br>
+      <span class="grid">|--</span> Test Scout <span class="topo">(Haiku)</span> -- Advance party
+    </div>
+  </section>
+
+  <div class="zone-summit">
+    <span class="contour-label">Elevation 6-7 -- The Summit Ridge</span>
+    <h2>Peak: Factory Scale</h2>
+    <p><strong>Elevation 6:</strong> Git worktrees -- separate routes up separate peaks. Three features on three mountains simultaneously. One hour instead of three. Zero interference between expeditions.</p>
+    <p><strong>Elevation 7:</strong> Gas Town. The mountain becomes a range. Persistent teams, self-improving routes, automatic trail mapping. A mountaineering company, not a single expedition.</p>
+
+    <div class="contour-dense">
+      Gas Town Factory<br>
+      <span class="grid">|--</span> HQ <span class="topo">(Base Camp)</span><br>
+      <span class="grid">|&nbsp;&nbsp;|--</span> Mayor (route planning)<br>
+      <span class="grid">|&nbsp;&nbsp;|--</span> Deacon (weather monitoring)<br>
+      <span class="grid">|&nbsp;&nbsp;|--</span> Dogs (safety gates)<br>
+      <span class="grid">|--</span> Refinery (route decomposition)<br>
+      <span class="grid">|--</span> Rigs (active expeditions)<br>
+      <span class="grid">&nbsp;&nbsp;&nbsp;|--</span> Polecats (experienced climbers)<br>
+      <span class="grid">&nbsp;&nbsp;&nbsp;|--</span> Crew (support team)
+    </div>
+  </div>
+
+  <!-- ===== ELEVATION PROFILE ===== -->
+  <section class="contour-section-major">
+    <span class="contour-label">Elevation Profile -- Complete Route</span>
+    <h2>The Full Ascent</h2>
+
+    <div class="elevation-profile">
+      <div class="profile-row">
+        <span class="profile-elev" style="background:var(--color-background); border:1px solid var(--color-border);">7</span>
+        <span class="profile-pattern">Factory</span>
+        <span class="profile-name">Gas Town -- Summit</span>
+        <span class="profile-time">Minimal</span>
+      </div>
+      <div class="profile-row">
+        <span class="profile-elev" style="background:var(--color-breathing);">6</span>
+        <span class="profile-pattern">Parallel</span>
+        <span class="profile-name">Worktrees -- Ridge</span>
+        <span class="profile-time">15 min</span>
+      </div>
+      <div class="profile-row">
+        <span class="profile-elev" style="background:var(--color-breathing);">5</span>
+        <span class="profile-pattern">Multi-agent</span>
+        <span class="profile-name">CC Mirror -- Alpine</span>
+        <span class="profile-time">30 min</span>
+      </div>
+      <div class="profile-row">
+        <span class="profile-elev" style="background:var(--color-medium);">4</span>
+        <span class="profile-pattern">PRD</span>
+        <span class="profile-name">Reliability -- High Camp</span>
+        <span class="profile-time">20 min</span>
+      </div>
+      <div class="profile-row">
+        <span class="profile-elev" style="background:var(--color-medium);">3</span>
+        <span class="profile-pattern">Ralph</span>
+        <span class="profile-name">Autonomy -- Treeline</span>
+        <span class="profile-time">10 min</span>
+      </div>
+      <div class="profile-row">
+        <span class="profile-elev" style="background:var(--color-breathing);">2</span>
+        <span class="profile-pattern">Subagents</span>
+        <span class="profile-name">Specialization -- Foothills</span>
+        <span class="profile-time">45 min</span>
+      </div>
+      <div class="profile-row">
+        <span class="profile-elev" style="background:var(--color-breathing);">1</span>
+        <span class="profile-pattern">CLAUDE.md</span>
+        <span class="profile-name">First Tools -- Trailhead</span>
+        <span class="profile-time">60 min</span>
+      </div>
+      <div class="profile-row">
+        <span class="profile-elev" style="background:var(--color-dark); color:var(--color-background);">0</span>
+        <span class="profile-pattern">Manual</span>
+        <span class="profile-name">Single Session -- Sea Level</span>
+        <span class="profile-time">90 min</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ROUTE SELECTION ===== -->
+  <section class="contour-section">
+    <span class="contour-label">Route Planning Guide</span>
+    <h2>Which Route?</h2>
+
+    <table class="survey-table">
+      <thead>
+        <tr>
+          <th>Terrain</th>
+          <th>Route</th>
+          <th>Equipment</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Single, simple task</td>
+          <td>Day hike (interactive)</td>
+          <td>Sonnet</td>
+        </tr>
+        <tr>
+          <td>Walk-away autonomous</td>
+          <td>Ralph expedition</td>
+          <td>Sonnet</td>
+        </tr>
+        <tr>
+          <td>Multi-peak parallel</td>
+          <td>Ralph + Worktrees</td>
+          <td>Sonnet/Haiku</td>
+        </tr>
+        <tr>
+          <td>Complex coordination</td>
+          <td>CC Mirror team</td>
+          <td>Opus lead</td>
+        </tr>
+        <tr>
+          <td>Mountain range</td>
+          <td>Gas Town company</td>
+          <td>Full tiered team</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+<!-- ===== MAP MARGIN ===== -->
+<footer class="map-footer">
+  <div class="map-footer-inner">
+    <div class="map-legend-label">Map Margin Notes</div>
+    <p>The summit is not the end -- from the top, you can see the next range. Each level gained changes the view of everything below it.</p>
+    <p style="margin-top:16px; font-style:italic;">Surveyed from 39 source files. Community knowledge, mapped to elevation.</p>
+  </div>
+</footer>
+
+</body>
+</html>
