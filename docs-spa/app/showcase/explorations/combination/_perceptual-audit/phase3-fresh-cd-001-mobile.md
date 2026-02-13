@@ -1,0 +1,433 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: EXPLORATION CD-003
+        - generic [ref=e7]: "COMBINATION: FILE TREE WITH CALLOUTS"
+        - generic [ref=e8]: v1
+      - heading "File Tree with Callouts" [level=1] [ref=e9]
+      - paragraph [ref=e10]: "How do hierarchical File Tree components and advisory Callouts coexist without creating callout cacophony? This exploration uses ISLANDS density in a SPATIAL bento grid layout, then transitions SMOOTHLY into choreographic hub-spoke architecture comparison. Content topic: React application file structure and architecture patterns."
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - region "Project Structure Overview" [ref=e13]:
+        - heading "React Application Architecture" [level=2] [ref=e14]
+        - paragraph [ref=e15]: Understanding a React application's file structure is the foundation for productive development. Each directory below has a specific purpose, and the relationships between directories define the application's architecture. The bento grid below maps the project structure spatially -- the largest cell contains the complete file tree, while surrounding cells provide focused annotations.
+        - generic [ref=e16]:
+          - generic [ref=e17]: Project Overview
+          - paragraph [ref=e19]: This guide covers a standard React + TypeScript project using Vite as the build tool. The directory structure follows the feature-based organization pattern, which groups related components, hooks, and utilities by feature rather than by type.
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - generic [ref=e22]:
+              - generic [ref=e23]: Project File Tree
+              - generic [ref=e24]: Root
+            - generic [ref=e25]:
+              - generic [ref=e26]: my-react-app/
+              - generic [ref=e27]: src/
+              - generic [ref=e28]: components/
+              - generic [ref=e29]: atoms/
+              - generic [ref=e30]: Button.tsx
+              - generic [ref=e31]: Button.test.tsx
+              - generic [ref=e32]: Input.tsx
+              - generic [ref=e33]: Input.test.tsx
+              - generic [ref=e34]: molecules/
+              - generic [ref=e35]: SearchBar.tsx
+              - generic [ref=e36]: FormField.tsx
+              - generic [ref=e37]: organisms/
+              - generic [ref=e38]: Header.tsx
+              - generic [ref=e39]: Sidebar.tsx
+              - generic [ref=e40]: DataTable.tsx
+              - generic [ref=e41]: hooks/
+              - generic [ref=e42]: useAuth.ts
+              - generic [ref=e43]: useDebounce.ts
+              - generic [ref=e44]: useFetch.ts
+              - generic [ref=e45]: pages/
+              - generic [ref=e46]: Dashboard.tsx
+              - generic [ref=e47]: Settings.tsx
+              - generic [ref=e48]: Profile.tsx
+              - generic [ref=e49]: utils/
+              - generic [ref=e50]: formatters.ts
+              - generic [ref=e51]: validators.ts
+              - generic [ref=e52]: api.ts
+              - generic [ref=e53]: styles/
+              - generic [ref=e54]: globals.css
+              - generic [ref=e55]: tokens.css
+              - generic [ref=e56]: reset.css
+              - generic [ref=e57]: types/
+              - generic [ref=e58]: api.d.ts
+              - generic [ref=e59]: components.d.ts
+              - generic [ref=e60]: global.d.ts
+              - generic [ref=e61]: App.tsx
+              - generic [ref=e62]: main.tsx
+              - generic [ref=e63]: public/
+              - generic [ref=e64]: favicon.ico
+              - generic [ref=e65]: tsconfig.json
+              - generic [ref=e66]: vite.config.ts
+              - generic [ref=e67]: package.json
+              - generic [ref=e68]: .eslintrc.cjs
+          - generic [ref=e69]:
+            - generic [ref=e70]:
+              - generic [ref=e71]: Atomic Design
+              - generic [ref=e72]: Info
+            - generic [ref=e73]:
+              - generic [ref=e74]: Component Organization
+              - generic [ref=e75]:
+                - paragraph [ref=e76]:
+                  - text: The
+                  - code [ref=e77]: /components
+                  - text: "directory shown in the tree follows atomic design:"
+                  - strong [ref=e78]: atoms
+                  - text: (Button, Input) compose into
+                  - strong [ref=e79]: molecules
+                  - text: (SearchBar) which compose into
+                  - strong [ref=e80]: organisms
+                  - text: (Header, DataTable).
+                - paragraph [ref=e81]: This hierarchy mirrors the component dependency graph. Atoms have zero internal dependencies. Molecules import atoms. Organisms import both.
+          - generic [ref=e82]:
+            - generic [ref=e83]:
+              - generic [ref=e84]: Test Co-Location
+              - generic [ref=e85]: Tip
+            - generic [ref=e86]:
+              - generic [ref=e87]: Tip
+              - paragraph [ref=e89]:
+                - text: "Co-locate test files with their components:"
+                - code [ref=e90]: Button.tsx
+                - text: +
+                - code [ref=e91]: Button.test.tsx
+                - text: in the same directory. This eliminates the "where is the test?" hunt and keeps related files within one visual scan of the file tree.
+          - generic [ref=e92]:
+            - generic [ref=e93]:
+              - generic [ref=e94]: Path Aliases Configuration
+              - generic [ref=e95]: Config
+            - paragraph [ref=e97]:
+              - text: The
+              - code [ref=e98]: tsconfig.json
+              - text: highlighted in the file tree configures path aliases that eliminate deep relative imports. This is the single most impactful configuration for developer experience.
+            - code [ref=e100]: "{ \"compilerOptions\": { \"baseUrl\": \".\", \"paths\": { \"@components/*\": [\"src/components/*\"], \"@hooks/*\": [\"src/hooks/*\"], \"@utils/*\": [\"src/utils/*\"], \"@types/*\": [\"src/types/*\"], \"@styles/*\": [\"src/styles/*\"] } } }"
+          - generic [ref=e101]:
+            - generic [ref=e102]:
+              - generic [ref=e103]: Import Depth
+              - generic [ref=e104]: Gotcha
+            - generic [ref=e105]:
+              - generic [ref=e106]: Gotcha
+              - generic [ref=e107]:
+                - paragraph [ref=e108]:
+                  - text: Never import from
+                  - code [ref=e109]: src/
+                  - text: using relative paths that go up 3+ levels.
+                  - code [ref=e110]: ../../../utils/formatters
+                  - text: "is a maintenance hazard. Use path aliases:"
+                  - code [ref=e111]: "@utils/formatters"
+                  - text: .
+                - paragraph [ref=e112]:
+                  - text: If you see
+                  - code [ref=e113]: ../../..
+                  - text: in an import, it means the path aliases are either misconfigured or not being used.
+      - separator [ref=e114]
+      - region "Architecture Pattern Comparison" [ref=e115]:
+        - heading "Choosing an Architecture Pattern" [level=2] [ref=e116]
+        - paragraph [ref=e117]:
+          - text: The file tree above shows
+          - emphasis [ref=e118]: one
+          - text: way to organize a React project. But architecture is a decision, not a default. The choreographic layout below places a decision matrix at the hub, with each architecture variant radiating outward as a spoke -- each spoke containing its own file tree and advisory callout.
+        - generic [ref=e119]:
+          - generic [ref=e120]:
+            - heading "The Architecture Decision" [level=3] [ref=e121]
+            - generic [ref=e122]:
+              - paragraph [ref=e123]:
+                - text: "A React application's file structure is not arbitrary. It reflects a fundamental choice about how your team thinks about the codebase: by"
+                - strong [ref=e124]: feature
+                - text: (what it does), by
+                - strong [ref=e125]: layer
+                - text: (what kind of thing it is), or by
+                - strong [ref=e126]: domain
+                - text: (what business concept it serves). Each approach has a different failure mode and a different scaling ceiling.
+              - paragraph [ref=e127]: The decision is architectural, not aesthetic. It determines how new developers navigate the codebase, how features get added, and where boundaries form when the application grows.
+          - generic [ref=e128]:
+            - heading "Architecture Pattern Comparison" [level=3] [ref=e129]
+            - table [ref=e130]:
+              - rowgroup [ref=e131]:
+                - row "Criterion Feature-Based Layer-Based Domain-Driven" [ref=e132]:
+                  - columnheader "Criterion" [ref=e133]
+                  - columnheader "Feature-Based" [ref=e134]
+                  - columnheader "Layer-Based" [ref=e135]
+                  - columnheader "Domain-Driven" [ref=e136]
+              - rowgroup [ref=e137]:
+                - row "Organization By feature (auth/, dashboard/) By type (components/, hooks/) By domain (user/, billing/)" [ref=e138]:
+                  - cell "Organization" [ref=e139]
+                  - cell "By feature (auth/, dashboard/)" [ref=e140]
+                  - cell "By type (components/, hooks/)" [ref=e141]
+                  - cell "By domain (user/, billing/)" [ref=e142]
+                - row "Navigation Find by feature name Find by file type Find by business concept" [ref=e143]:
+                  - cell "Navigation" [ref=e144]
+                  - cell "Find by feature name" [ref=e145]
+                  - cell "Find by file type" [ref=e146]
+                  - cell "Find by business concept" [ref=e147]
+                - row "Team scaling Teams own features Bottleneck at shared layers Teams own domains" [ref=e148]:
+                  - cell "Team scaling" [ref=e149]
+                  - cell "Teams own features" [ref=e150]
+                  - cell "Bottleneck at shared layers" [ref=e151]
+                  - cell "Teams own domains" [ref=e152]
+                - row "Complexity ceiling Medium projects Small projects Large projects" [ref=e153]:
+                  - cell "Complexity ceiling" [ref=e154]
+                  - cell "Medium projects" [ref=e155]
+                  - cell "Small projects" [ref=e156]
+                  - cell "Large projects" [ref=e157]
+                - row "Refactoring cost Low (localized) High (cross-cutting) Low (bounded contexts)" [ref=e158]:
+                  - cell "Refactoring cost" [ref=e159]
+                  - cell "Low (localized)" [ref=e160]
+                  - cell "High (cross-cutting)" [ref=e161]
+                  - cell "Low (bounded contexts)" [ref=e162]
+                - row "Beginner friendliness Moderate High (intuitive grouping) Low (requires domain knowledge)" [ref=e163]:
+                  - cell "Beginner friendliness" [ref=e164]
+                  - cell "Moderate" [ref=e165]
+                  - cell "High (intuitive grouping)" [ref=e166]
+                  - cell "Low (requires domain knowledge)" [ref=e167]
+          - generic [ref=e168]:
+            - generic [ref=e169]:
+              - generic [ref=e170]: Spoke 1 -- Recommended
+              - heading "Feature-Based Structure" [level=3] [ref=e171]
+              - generic [ref=e172]:
+                - generic [ref=e173]: src/
+                - generic [ref=e174]: features/
+                - generic [ref=e175]: auth/
+                - generic [ref=e176]: LoginForm.tsx
+                - generic [ref=e177]: useAuth.ts
+                - generic [ref=e178]: auth.api.ts
+                - generic [ref=e179]: auth.types.ts
+                - generic [ref=e180]: dashboard/
+                - generic [ref=e181]: Dashboard.tsx
+                - generic [ref=e182]: useDashboard.ts
+                - generic [ref=e183]: widgets/
+                - generic [ref=e184]: shared/
+                - generic [ref=e185]: Button.tsx
+                - generic [ref=e186]: Input.tsx
+              - generic [ref=e187]:
+                - generic [ref=e188]: Tip
+                - paragraph [ref=e190]: "Each feature directory is self-contained: components, hooks, API calls, and types all live together. Deleting a feature means deleting one directory."
+            - generic [ref=e191]:
+              - generic [ref=e192]: Spoke 2 -- Traditional
+              - heading "Layer-Based Structure" [level=3] [ref=e193]
+              - generic [ref=e194]:
+                - generic [ref=e195]: src/
+                - generic [ref=e196]: components/
+                - generic [ref=e197]: LoginForm.tsx
+                - generic [ref=e198]: Dashboard.tsx
+                - generic [ref=e199]: Button.tsx
+                - generic [ref=e200]: hooks/
+                - generic [ref=e201]: useAuth.ts
+                - generic [ref=e202]: useDashboard.ts
+                - generic [ref=e203]: services/
+                - generic [ref=e204]: auth.api.ts
+                - generic [ref=e205]: dashboard.api.ts
+                - generic [ref=e206]: types/
+                - generic [ref=e207]: auth.types.ts
+                - generic [ref=e208]: dashboard.types.ts
+              - generic [ref=e209]:
+                - generic [ref=e210]: Gotcha
+                - paragraph [ref=e212]:
+                  - text: Layer-based structure scatters related code across directories. Modifying the auth feature requires changes in
+                  - code [ref=e213]: components/
+                  - text: ","
+                  - code [ref=e214]: hooks/
+                  - text: ","
+                  - code [ref=e215]: services/
+                  - text: ", and"
+                  - code [ref=e216]: types/
+                  - text: simultaneously. This cross-cutting friction grows with project size.
+            - generic [ref=e217]:
+              - generic [ref=e218]: Spoke 3 -- Recommendation
+              - heading "Which Architecture Fits Your Team?" [level=3] [ref=e219]
+              - generic [ref=e220]:
+                - generic [ref=e221]: Decision Framework
+                - generic [ref=e222]:
+                  - paragraph [ref=e223]:
+                    - strong [ref=e224]: Start with feature-based.
+                    - text: Most React applications benefit from feature-based organization because it aligns code boundaries with team boundaries and user-facing features. The cognitive overhead of "where does this go?" reduces to "which feature does this belong to?"
+                  - paragraph [ref=e225]:
+                    - strong [ref=e226]: Evolve to domain-driven
+                    - text: when your application serves multiple business domains with distinct data models. Domain-driven design is more rigorous but provides clearer boundaries at scale. The transition from feature-based to domain-driven is incremental -- features are proto-domains.
+                  - paragraph [ref=e227]:
+                    - strong [ref=e228]: Avoid layer-based
+                    - text: for projects with more than 10 components. The "where is it?" problem compounds quadratically with project size. Layer-based is intuitive for tutorials but does not scale.
+      - region "Challenge and Summary" [ref=e229]:
+        - heading "Architecture Challenge" [level=2] [ref=e230]
+        - generic [ref=e231]:
+          - generic [ref=e232]: Challenge
+          - paragraph [ref=e234]:
+            - text: Take the layer-based file tree from Spoke 2 and refactor it into feature-based organization. Which files stay in
+            - code [ref=e235]: shared/
+            - text: and which move into feature directories? Where does
+            - code [ref=e236]: Button.tsx
+            - text: belong -- is it a shared atom, or does it belong to the design system feature? Document your reasoning.
+        - generic [ref=e237]:
+          - generic [ref=e238]: Essence
+          - generic [ref=e239]: "A file tree is not documentation about structure -- it is the structure. The callouts do not explain the tree; they reveal what the tree implies. The combination of structure and annotation creates a spatial argument: where a file lives IS what it means."
+      - region "Research Application Record" [ref=e240]:
+        - heading "Research Application Record" [level=2] [ref=e241]
+        - heading "1. Combination Pattern" [level=3] [ref=e242]
+        - paragraph [ref=e243]: "DD: ISLANDS (discrete dense clusters) | OD: SPATIAL (position-based meaning) | AD: Bento Grid + Choreography (spatial container + directional flow)"
+        - heading "2. Transition Type" [level=3] [ref=e244]
+        - paragraph [ref=e245]:
+          - text: Bento Grid to Choreography =
+          - strong [ref=e246]: SMOOTH
+          - text: "(same spatial mechanism, minimal breathing). AD-F-025 transition grammar: both patterns use position as the encoding mechanism, so the reader's spatial reasoning transfers directly."
+        - heading "3. Density Pattern Fidelity" [level=3] [ref=e247]
+        - paragraph [ref=e248]: "ISLANDS pattern verified: 6 bento cells as discrete content islands separated by 32px grid gap ocean. Choreography hub-spoke sections separated by 48px inter-spoke gaps. Page sections separated by 64px ocean (--space-16). Ocean whitespace is NOT filled with content -- it is structural emptiness."
+        - heading "4. Finding IDs" [level=3] [ref=e249]
+        - table [ref=e250]:
+          - rowgroup [ref=e251]:
+            - row "ID Description Class" [ref=e252]:
+              - columnheader "ID" [ref=e253]
+              - columnheader "Description" [ref=e254]
+              - columnheader "Class" [ref=e255]
+          - rowgroup [ref=e256]:
+            - 'row "CD-F-009 File Tree and Callouts share left-anchored DNA (border-left: 4px) but avoid monotony through visual weight differentiation: File Tree uses dark border (#1A1A1A) on breathing background (#FAF5ED) with monospace font, while Callouts use colored accent borders on sparse background (#FEF9F5) with body font. The shared mechanism (left-anchor) creates family cohesion (H1) while the weight variation prevents left-anchor fatigue. B (Extending H3)" [ref=e257]':
+              - cell "CD-F-009" [ref=e258]:
+                - strong [ref=e259]: CD-F-009
+              - 'cell "File Tree and Callouts share left-anchored DNA (border-left: 4px) but avoid monotony through visual weight differentiation: File Tree uses dark border (#1A1A1A) on breathing background (#FAF5ED) with monospace font, while Callouts use colored accent borders on sparse background (#FEF9F5) with body font. The shared mechanism (left-anchor) creates family cohesion (H1) while the weight variation prevents left-anchor fatigue." [ref=e260]'
+              - cell "B (Extending H3)" [ref=e261]
+            - row "CD-F-010 ISLANDS density survives the Bento-to-Choreography SMOOTH transition because both patterns use position as their primary encoding mechanism. The reader's spatial reasoning mode does not need to reset -- bento cells and choreography spokes are both \"content at a position.\" The transition requires only a minimal visual divider (120px line), not a breathing zone. A (Confirming AD-F-025)" [ref=e262]:
+              - cell "CD-F-010" [ref=e263]:
+                - strong [ref=e264]: CD-F-010
+              - cell "ISLANDS density survives the Bento-to-Choreography SMOOTH transition because both patterns use position as their primary encoding mechanism. The reader's spatial reasoning mode does not need to reset -- bento cells and choreography spokes are both \"content at a position.\" The transition requires only a minimal visual divider (120px line), not a breathing zone." [ref=e265]
+              - cell "A (Confirming AD-F-025)" [ref=e266]
+            - row "CD-F-011 Callout Cacophony (A1) is mitigated in File Tree pages by using the File Tree itself as a neutral interleaving component. The tree is neither warm nor cold -- it is structural. Placing the tree between callouts of different temperatures (Tip/green, Gotcha/coral) eliminates the traffic-light anti-pattern (DD-F-015) without requiring additional breathing components. B (Extending A1 mitigation)" [ref=e267]:
+              - cell "CD-F-011" [ref=e268]:
+                - strong [ref=e269]: CD-F-011
+              - cell "Callout Cacophony (A1) is mitigated in File Tree pages by using the File Tree itself as a neutral interleaving component. The tree is neither warm nor cold -- it is structural. Placing the tree between callouts of different temperatures (Tip/green, Gotcha/coral) eliminates the traffic-light anti-pattern (DD-F-015) without requiring additional breathing components." [ref=e270]
+              - cell "B (Extending A1 mitigation)" [ref=e271]
+            - 'row "CD-F-012 The Decision Matrix component functions as a choreography hub that converts the reader from passive scanning (bento grid browsing) to active comparison (weighing options). This is a cognitive mode shift: bento cells present information for absorption, while the matrix presents information for decision. The hub-spoke structure physically separates the \"learn\" mode (spokes with file trees) from the \"decide\" mode (hub with matrix). B (Extending AD-F-017)" [ref=e272]':
+              - cell "CD-F-012" [ref=e273]:
+                - strong [ref=e274]: CD-F-012
+              - 'cell "The Decision Matrix component functions as a choreography hub that converts the reader from passive scanning (bento grid browsing) to active comparison (weighing options). This is a cognitive mode shift: bento cells present information for absorption, while the matrix presents information for decision. The hub-spoke structure physically separates the \"learn\" mode (spokes with file trees) from the \"decide\" mode (hub with matrix)." [ref=e275]'
+              - cell "B (Extending AD-F-017)" [ref=e276]
+        - heading "5. R-5 Combination Theory Citations" [level=3] [ref=e277]
+        - paragraph [ref=e278]:
+          - text: "R5-001 (combination rules applied), R5-007 (velocity: FAST code snippet between SLOW callouts in bento), R5-011 (temperature: blue Info before green Tip, neutral Code before coral Gotcha), R5-015 (weight: 1 heavy File Tree cell balanced by 2 light callout cells), R5-020 (proximity: tree node + annotating callout at 8-16px within cell, 48-64px between sections), R5-025 (callout cacophony: max 2 callouts per viewport, File Tree as buffer), R5-031 (editorial spread: File Tree + Core Abstraction = magazine-like H4), R5-033 (family cohesion: all callout types share 2-zone DNA), R5-039 (Recipe 6: architecture overview structure followed in choreography section)."
+          - strong [ref=e279]: "Total: 9 R-5 citations."
+        - heading "6. R-4 and R-2 Citations" [level=3] [ref=e280]
+        - paragraph [ref=e281]:
+          - text: R4-019 (bento varied cell sizes), R4-023 (CSS Grid implementation), R4-025 (readability over aesthetics). R2-4.1 (bento grid layout), R2-2.2 (card-based hierarchy).
+          - strong [ref=e282]: "Total: 5 citations."
+        - heading "7. AD-F Citations" [level=3] [ref=e283]
+        - paragraph [ref=e284]:
+          - text: "AD-F-009 (grid cells ARE islands), AD-F-010 (cell size = hierarchy), AD-F-017 (direction change = density change), AD-F-025 (transition grammar: bento -> choreography = SMOOTH)."
+          - strong [ref=e285]: "Total: 4 AD-F citations."
+        - heading "8. DD-F and OD-F Citations" [level=3] [ref=e286]
+        - paragraph [ref=e287]:
+          - text: DD-F-003 (ISLANDS pattern), DD-F-006 (fractal 5 scales), DD-F-014 (max 2 callouts per viewport), DD-F-015 (no traffic-light adjacency). OD-F-005 (organization IS density -- spatial position = content meaning).
+          - strong [ref=e288]: "Total: 5 citations."
+        - heading "9. Combination Rule Compliance" [level=3] [ref=e289]
+        - table [ref=e290]:
+          - rowgroup [ref=e291]:
+            - row "Rule Status Evidence" [ref=e292]:
+              - columnheader "Rule" [ref=e293]
+              - columnheader "Status" [ref=e294]
+              - columnheader "Evidence" [ref=e295]
+          - rowgroup [ref=e296]:
+            - row "Velocity (T2) PASS Code Snippet (FAST) between Info Callout (SLOW) and Gotcha Callout (SLOW) in bento grid" [ref=e297]:
+              - cell "Velocity (T2)" [ref=e298]
+              - cell "PASS" [ref=e299]
+              - cell "Code Snippet (FAST) between Info Callout (SLOW) and Gotcha Callout (SLOW) in bento grid" [ref=e300]
+            - row "Temperature (T3) PASS Blue (neutral) -> Green (warm) -> Code (neutral) -> Coral (cold). No warm-cold adjacency." [ref=e301]:
+              - cell "Temperature (T3)" [ref=e302]
+              - cell "PASS" [ref=e303]
+              - cell "Blue (neutral) -> Green (warm) -> Code (neutral) -> Coral (cold). No warm-cold adjacency." [ref=e304]
+            - row "Weight (G3) PASS Heavy File Tree (2x2) balanced by 4 light cells (1x1, 1x1, 2x1, 1x1)" [ref=e305]:
+              - cell "Weight (G3)" [ref=e306]
+              - cell "PASS" [ref=e307]
+              - cell "Heavy File Tree (2x2) balanced by 4 light cells (1x1, 1x1, 2x1, 1x1)" [ref=e308]
+            - 'row "Proximity (G1) PASS Within-island: 16px (--space-4). Between islands: 32px grid gap. Between sections: 64px." [ref=e309]':
+              - cell "Proximity (G1)" [ref=e310]
+              - cell "PASS" [ref=e311]
+              - 'cell "Within-island: 16px (--space-4). Between islands: 32px grid gap. Between sections: 64px." [ref=e312]'
+        - heading "10. Soul Compliance" [level=3] [ref=e313]
+        - table [ref=e314]:
+          - rowgroup [ref=e315]:
+            - row "Check Status" [ref=e316]:
+              - columnheader "Check" [ref=e317]
+              - columnheader "Status" [ref=e318]
+          - rowgroup [ref=e319]:
+            - 'row "border-radius: 0 everywhere PASS" [ref=e320]':
+              - 'cell "border-radius: 0 everywhere" [ref=e321]':
+                - code [ref=e322]: "border-radius: 0"
+                - text: everywhere
+              - cell "PASS" [ref=e323]
+            - 'row "box-shadow: none everywhere PASS" [ref=e324]':
+              - 'cell "box-shadow: none everywhere" [ref=e325]':
+                - code [ref=e326]: "box-shadow: none"
+                - text: everywhere
+              - cell "PASS" [ref=e327]
+            - 'row "No filter: drop-shadow() PASS" [ref=e328]':
+              - 'cell "No filter: drop-shadow()" [ref=e329]':
+                - text: "No"
+                - code [ref=e330]: "filter: drop-shadow()"
+              - cell "PASS" [ref=e331]
+            - row "Instrument Serif italic for Essence/Core ONLY PASS" [ref=e332]:
+              - cell "Instrument Serif italic for Essence/Core ONLY" [ref=e333]
+              - cell "PASS" [ref=e334]
+            - 'row "2-zone callouts + border-left: 4px PASS" [ref=e335]':
+              - 'cell "2-zone callouts + border-left: 4px" [ref=e336]'
+              - cell "PASS" [ref=e337]
+            - row "No physical-movement animation PASS" [ref=e338]:
+              - cell "No physical-movement animation" [ref=e339]
+              - cell "PASS" [ref=e340]
+            - 'row "opacity: 1 on ALL backgrounds PASS" [ref=e341]':
+              - 'cell "opacity: 1 on ALL backgrounds" [ref=e342]'
+              - cell "PASS" [ref=e343]
+            - row "3-category borders ONLY (1px, 3px, 4px) PASS" [ref=e344]:
+              - cell "3-category borders ONLY (1px, 3px, 4px)" [ref=e345]
+              - cell "PASS" [ref=e346]
+            - row "#E83025 only accent PASS" [ref=e347]:
+              - cell "#E83025 only accent" [ref=e348]
+              - cell "PASS" [ref=e349]
+            - row "No hover depth effects PASS" [ref=e350]:
+              - cell "No hover depth effects" [ref=e351]
+              - cell "PASS" [ref=e352]
+        - heading "11. Anti-Patterns Avoided" [level=3] [ref=e353]
+        - table [ref=e354]:
+          - rowgroup [ref=e355]:
+            - row "Anti-Pattern Avoided? How" [ref=e356]:
+              - columnheader "Anti-Pattern" [ref=e357]
+              - columnheader "Avoided?" [ref=e358]
+              - columnheader "How" [ref=e359]
+          - rowgroup [ref=e360]:
+            - row "Callout Cacophony (A1) YES Max 2 callouts per viewport. File Tree + Code Snippet interleave between callouts. Distributed across 6 bento cells + 3 spokes." [ref=e361]:
+              - cell "Callout Cacophony (A1)" [ref=e362]
+              - cell "YES" [ref=e363]
+              - cell "Max 2 callouts per viewport. File Tree + Code Snippet interleave between callouts. Distributed across 6 bento cells + 3 spokes." [ref=e364]
+            - 'row "Shared Left-Anchor Monotony YES File Tree: dark border (#1A1A1A), monospace, breathing bg. Callouts: colored borders, body font, sparse bg. Same mechanism, different weight." [ref=e365]':
+              - cell "Shared Left-Anchor Monotony" [ref=e366]
+              - cell "YES" [ref=e367]
+              - 'cell "File Tree: dark border (#1A1A1A), monospace, breathing bg. Callouts: colored borders, body font, sparse bg. Same mechanism, different weight." [ref=e368]'
+            - row "Temperature Cycling (A5) YES Blue (N) -> Green (W) -> neutral Code -> Coral (C). Never warm-cold adjacent." [ref=e369]:
+              - cell "Temperature Cycling (A5)" [ref=e370]
+              - cell "YES" [ref=e371]
+              - cell "Blue (N) -> Green (W) -> neutral Code -> Coral (C). Never warm-cold adjacent." [ref=e372]
+            - row "Traffic Light (DD-F-015) YES Green Tip and Coral Gotcha always separated by neutral component (Code Snippet or grid gap)." [ref=e373]:
+              - cell "Traffic Light (DD-F-015)" [ref=e374]
+              - cell "YES" [ref=e375]
+              - cell "Green Tip and Coral Gotcha always separated by neutral component (Code Snippet or grid gap)." [ref=e376]
+            - 'row "2px Borders YES All borders: 3px (structural), 4px (semantic), 1px (separator/micro). Zero 2px." [ref=e377]':
+              - cell "2px Borders" [ref=e378]
+              - cell "YES" [ref=e379]
+              - 'cell "All borders: 3px (structural), 4px (semantic), 1px (separator/micro). Zero 2px." [ref=e380]'
+            - 'row "Semi-Transparent Backgrounds YES All backgrounds: #FEF9F5, #FFFFFF, #FAF5ED, #1A1A1A. Zero rgba alpha < 1.0." [ref=e381]':
+              - cell "Semi-Transparent Backgrounds" [ref=e382]
+              - cell "YES" [ref=e383]
+              - 'cell "All backgrounds: #FEF9F5, #FFFFFF, #FAF5ED, #1A1A1A. Zero rgba alpha < 1.0." [ref=e384]'
+            - row "Missing Context (A6) YES Info Callout and section intro before every File Tree. Never tree-cold." [ref=e385]:
+              - cell "Missing Context (A6)" [ref=e386]
+              - cell "YES" [ref=e387]
+              - cell "Info Callout and section intro before every File Tree. Never tree-cold." [ref=e388]
+            - 'row "Nesting (N1) YES Callouts sit beside or below File Trees, never nested inside them. N3 re-sequence: \"shown above.\"" [ref=e389]':
+              - cell "Nesting (N1)" [ref=e390]
+              - cell "YES" [ref=e391]
+              - 'cell "Callouts sit beside or below File Trees, never nested inside them. N3 re-sequence: \"shown above.\"" [ref=e392]'
+      - contentinfo "End of exploration" [ref=e393]: CD-003 FILE TREE WITH CALLOUTS
+  - contentinfo [ref=e394]:
+    - generic [ref=e395]:
+      - generic [ref=e396]: CD-003 · File Tree with Callouts
+      - generic [ref=e398]: DD:ISLANDS · OD:SPATIAL · AD:BENTO+CHOREO

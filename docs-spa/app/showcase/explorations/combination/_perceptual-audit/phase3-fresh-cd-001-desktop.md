@@ -1,0 +1,178 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]: EXPLORATION CD-001
+        - generic [ref=e7]: "COMBINATION: DEEP DIVE"
+        - generic [ref=e8]: v1
+      - heading "Reasoning Inside Code" [level=1] [ref=e9]
+      - paragraph [ref=e10]: "Understanding authentication middleware: how token validation actually works. A deep-dive teaching page exploring how reasoning about code can be embedded alongside code examples without creating a code-wall anti-pattern -- demonstrating CRESCENDO density, F-Pattern descent, and Bento Grid containment."
+  - main [ref=e11]:
+    - region "Opening -- What this page covers" [ref=e12]:
+      - generic [ref=e13]: Opening -- Context
+      - generic [ref=e14]: "Density: 1 / 5"
+      - 'generic "Content density: sparse, 1 of 5" [ref=e15]'
+      - heading "Authentication Middleware from First Principles" [level=2] [ref=e21]
+      - generic [ref=e22]:
+        - paragraph [ref=e23]: "Every API request that reaches your server carries a claim: \"I am allowed to do this.\" Authentication middleware is the mechanism that interrogates that claim before the request touches your business logic. The middleware sits between the raw HTTP request and your route handlers, acting as a gatekeeper that either passes the request through or rejects it."
+        - paragraph [ref=e24]: This page walks through token validation middleware from basic concepts to full implementation. The density of information increases as you scroll -- we start with orientation, build through analysis of competing approaches, and arrive at a complete, production-ready implementation.
+      - complementary [ref=e25]:
+        - generic [ref=e26]: Context
+        - paragraph [ref=e28]: This exploration uses authentication middleware as a teaching vehicle. The patterns demonstrated -- chain-of-trust validation, layered extraction, and fail-fast rejection -- apply to any middleware pipeline, not just authentication. The code examples use Node.js with Express, but the architectural principles are framework-agnostic.
+    - generic [ref=e31]:
+      - paragraph [ref=e32]: The middleware does not trust the request. It trusts the process of verification.
+      - generic [ref=e33]: Chain-of-trust principle
+    - region "Rising -- Basic token check" [ref=e34]:
+      - generic [ref=e35]: Rising -- First Contact
+      - generic [ref=e36]: "Density: 2 / 5"
+      - 'generic "Content density: medium, 2 of 5" [ref=e37]'
+      - heading "The Simplest Token Check" [level=2] [ref=e43]
+      - paragraph [ref=e45]:
+        - text: "Before analyzing competing approaches, start with the simplest possible middleware: extract the token from the"
+        - code [ref=e46]: Authorization
+        - text: header, verify it exists, and pass it forward. This is the skeleton that every more complex implementation builds on.
+      - code [ref=e49]: "// The simplest auth middleware -- extract and verify existence function authMiddleware(req, res, next) { const authHeader = req.headers['authorization']; if (!authHeader || !authHeader.startsWith('Bearer ')) { return res.status(401).json({ error: 'Missing or malformed token' }); } const token = authHeader.slice(7); req.token = token; next(); }"
+      - complementary [ref=e50]:
+        - generic [ref=e51]: Tip
+        - paragraph [ref=e53]:
+          - text: The
+          - code [ref=e54]: .slice(7)
+          - text: call removes the
+          - code [ref=e55]: "\"Bearer \""
+          - text: prefix (7 characters including the space). This is a common pattern but fragile -- it assumes the prefix is always exactly
+          - code [ref=e56]: "\"Bearer \""
+          - text: with one space. Production code should use a regex or explicit split to handle edge cases like extra whitespace.
+      - paragraph [ref=e58]:
+        - text: This skeleton works, but it only checks that a token
+        - emphasis [ref=e59]: exists
+        - text: ". It does not verify the token is valid, unexpired, or belongs to a real user. The question becomes: how do you layer verification on top of extraction?"
+    - generic [ref=e62]:
+      - paragraph [ref=e63]: Extraction without verification is an open door with a doorman who checks if you have a key -- but never asks if the key fits.
+      - generic [ref=e64]: Authentication middleware reasoning
+    - region "Building -- Analyzing two auth approaches" [ref=e65]:
+      - generic [ref=e66]: Building -- Analysis
+      - generic [ref=e67]: "Density: 3 / 5"
+      - 'generic "Content density: high, 3 of 5" [ref=e68]'
+      - heading "Session Tokens vs JSON Web Tokens" [level=2] [ref=e74]
+      - paragraph [ref=e76]: "Two dominant approaches exist for token-based authentication: server-side session tokens (opaque strings stored in a database) and JSON Web Tokens (self-contained signed payloads). Each imposes a fundamentally different architecture on your middleware."
+      - generic [ref=e77]:
+        - generic [ref=e78]:
+          - generic [ref=e79]: Reasoning
+          - generic [ref=e80]: Which approach serves the middleware pipeline?
+        - generic [ref=e81]:
+          - paragraph [ref=e82]:
+            - strong [ref=e83]: Session tokens
+            - text: require a database lookup on every request. The middleware extracts the opaque token, queries the session store, and either finds a valid session or rejects. This means the middleware has a hard dependency on the database -- if the database is down, authentication fails for all requests, even if the user's session is valid.
+          - paragraph [ref=e84]:
+            - strong [ref=e85]: JWTs
+            - text: "are self-contained: the token itself carries the user's identity and claims, signed by the server. The middleware verifies the signature and expiration locally -- no database round-trip. But this comes at a cost: a JWT cannot be revoked before expiration without maintaining a blocklist, which reintroduces the database dependency."
+          - paragraph [ref=e86]:
+            - text: "The decision hinges on a tradeoff:"
+            - strong [ref=e87]: latency per request
+            - text: (sessions lose -- database lookup on every call) versus
+            - strong [ref=e88]: revocation capability
+            - text: (JWTs lose -- no instant invalidation). For middleware design, the question is whether you can tolerate the revocation gap.
+      - complementary [ref=e89]:
+        - generic [ref=e90]: Tip
+        - paragraph [ref=e92]: "In practice, most production systems use a hybrid: JWTs for short-lived access tokens (5-15 minutes) and session tokens (stored in a database) for long-lived refresh tokens. The middleware validates the JWT; the refresh endpoint validates the session. This pattern gives you the latency benefit of JWTs with the revocation capability of sessions."
+      - generic [ref=e93]:
+        - heading "Session-Based Middleware" [level=3] [ref=e94]
+        - paragraph [ref=e95]: "The session approach requires a store lookup. Here the middleware queries a session store and attaches the user object to the request:"
+      - code [ref=e98]: "// Session-based auth middleware -- database lookup required async function sessionAuth(req, res, next) { const token = extractToken(req); if (!token) { return res.status(401).json({ error: 'No token provided' }); } const session = await sessionStore.get(token); if (!session || session.expiresAt < Date.now()) { return res.status(401).json({ error: 'Invalid or expired session' }); } req.user = session.user; req.sessionId = token; next(); }"
+      - complementary [ref=e99]:
+        - generic [ref=e100]: Tip
+        - paragraph [ref=e102]:
+          - text: Notice the
+          - code [ref=e103]: await
+          - text: "keyword: session validation is inherently asynchronous because it requires I/O. This means every request pays the cost of at least one database round-trip. For high-throughput APIs, this latency compounds. Consider connection pooling and caching strategies to mitigate."
+      - generic [ref=e104]:
+        - heading "JWT-Based Middleware" [level=3] [ref=e105]
+        - paragraph [ref=e106]: "The JWT approach verifies the signature locally, avoiding the database dependency entirely for the validation step:"
+      - code [ref=e109]: "// JWT-based auth middleware -- local verification, no DB call const jwt = require('jsonwebtoken'); function jwtAuth(req, res, next) { const token = extractToken(req); if (!token) { return res.status(401).json({ error: 'No token provided' }); } try { const decoded = jwt.verify(token, process.env.JWT_SECRET); req.user = decoded; next(); } catch (err) { const message = err.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token'; return res.status(401).json({ error: message }); } }"
+    - generic [ref=e112]:
+      - paragraph [ref=e113]: Each middleware link validates one claim. The chain holds because no single link trusts any other -- each proves its own truth.
+      - generic [ref=e114]: The chain-of-trust principle -- CD-001 core abstraction
+    - region "Peak -- The chain of trust" [ref=e115]:
+      - generic [ref=e116]: Peak -- Core Teaching
+      - generic [ref=e117]: "Density: 5 / 5"
+      - 'generic "Content density: peak, 5 of 5" [ref=e118]'
+      - heading "The Chain of Trust" [level=2] [ref=e124]
+      - generic [ref=e125]:
+        - generic [ref=e126]:
+          - generic [ref=e127]: Core Abstraction
+          - paragraph [ref=e128]: Each middleware link validates one claim and one claim only. The chain holds not because any single link is unbreakable, but because no link trusts any other. Every layer proves its own truth independently.
+        - code [ref=e131]: "// The chain-of-trust middleware pattern // Each function validates ONE claim, then passes to the next // Link 1: Extract -- does the token exist? function extractToken(req, res, next) { const header = req.headers['authorization']; if (!header?.startsWith('Bearer ')) { return res.status(401).json({ error: 'Missing token' }); } req.token = header.slice(7); next(); } // Link 2: Verify -- is the token structurally valid? function verifyToken(req, res, next) { try { req.claims = jwt.verify(req.token, SECRET); next(); } catch { return res.status(401).json({ error: 'Invalid token' }); } } // Link 3: Authorize -- does the user have permission? function requireRole(...roles) { return (req, res, next) => { if (!roles.includes(req.claims.role)) { return res.status(403).json({ error: 'Insufficient permissions' }); } next(); }; } // Chain: extract -> verify -> authorize -> handler app.get('/admin/users', extractToken, verifyToken, requireRole('admin'), adminController.listUsers );"
+      - complementary [ref=e132]:
+        - generic [ref=e133]: Tip
+        - paragraph [ref=e135]:
+          - text: The chain-of-trust pattern makes each middleware function independently testable. You can unit test
+          - code [ref=e136]: extractToken
+          - text: without a valid JWT, test
+          - code [ref=e137]: verifyToken
+          - text: without a role check, and test
+          - code [ref=e138]: requireRole
+          - text: with pre-built claims objects. This decomposition is not just an architectural convenience -- it is the reason chain-of-trust middleware is debuggable in production.
+      - generic [ref=e139]:
+        - heading "Full Implementation in Context" [level=3] [ref=e140]
+        - paragraph [ref=e141]: "The chain-of-trust principle scales to production through two additional concerns: error handling and token refresh. The bento layout below contains the complete implementation, with each cell isolating a different responsibility."
+      - generic [ref=e142]:
+        - generic [ref=e143]:
+          - generic [ref=e144]: Complete Middleware Chain
+          - code [ref=e146]: "const jwt = require('jsonwebtoken'); const AUTH_CONFIG = { secret: process.env.JWT_SECRET, issuer: process.env.JWT_ISSUER || 'auth-service', algorithms: ['HS256'], }; function extractToken(req, res, next) { const header = req.headers['authorization']; if (!header || !header.startsWith('Bearer ')) { return res.status(401).json({ error: 'MISSING_TOKEN', message: 'Authorization header required', }); } req.token = header.slice(7); next(); } function verifyToken(req, res, next) { try { req.claims = jwt.verify(req.token, AUTH_CONFIG.secret, { issuer: AUTH_CONFIG.issuer, algorithms: AUTH_CONFIG.algorithms, }); next(); } catch (err) { const code = err.name === 'TokenExpiredError' ? 'TOKEN_EXPIRED' : 'INVALID_TOKEN'; return res.status(401).json({ error: code }); } }"
+        - generic [ref=e147]:
+          - generic [ref=e148]: Role Authorization
+          - code [ref=e150]: "function requireRole(...roles) { return (req, res, next) => { const userRole = req.claims?.role; if (!userRole) { return res.status(403).json({ error: 'NO_ROLE', }); } if (!roles.includes(userRole)) { return res.status(403).json({ error: 'FORBIDDEN', }); } next(); }; }"
+        - generic [ref=e151]:
+          - generic [ref=e152]: Route Composition
+          - code [ref=e154]: "// Compose middleware chain const authenticate = [ extractToken, verifyToken, ]; // Public route: no auth app.get('/health', healthCheck); // Authenticated route app.get('/profile', ...authenticate, profileController.get ); // Role-restricted route app.get('/admin/users', ...authenticate, requireRole('admin'), adminController.list );"
+    - generic [ref=e157]:
+      - paragraph [ref=e158]: "A middleware chain is a proof by induction: if each link holds, the chain holds. If any link fails, everything after it never executes."
+      - generic [ref=e159]: Chain-of-trust -- CD-001 synthesis
+    - region "Resolution -- Summary and takeaway" [ref=e160]:
+      - generic [ref=e161]: Resolution -- Takeaway
+      - generic [ref=e162]: "Density: 1 / 5"
+      - 'generic "Content density: sparse, 1 of 5" [ref=e163]'
+      - heading "What to Carry Forward" [level=2] [ref=e169]
+      - paragraph [ref=e171]: "The chain-of-trust pattern is not specific to authentication. Any pipeline that processes a request through sequential validation steps benefits from the same decomposition: each step validates one claim, rejects early on failure, and enriches the request object for downstream consumers."
+      - complementary [ref=e172]:
+        - generic [ref=e173]: In Practice
+        - paragraph [ref=e175]: When building middleware chains, start with the three-link pattern (extract, verify, authorize) and add links only when a new validation concern emerges. Each link should be independently testable. If you find yourself passing context between links through anything other than the request object, the chain abstraction is breaking down.
+      - generic [ref=e176]:
+        - heading "Middleware Decision Reference" [level=3] [ref=e177]
+        - table [ref=e179]:
+          - rowgroup [ref=e180]:
+            - row "Concern Session Tokens JWTs Hybrid" [ref=e181]:
+              - columnheader "Concern" [ref=e182]
+              - columnheader "Session Tokens" [ref=e183]
+              - columnheader "JWTs" [ref=e184]
+              - columnheader "Hybrid" [ref=e185]
+          - rowgroup [ref=e186]:
+            - row "Latency per request Database round-trip Local verification Local (access) + DB (refresh)" [ref=e187]:
+              - cell "Latency per request" [ref=e188]
+              - cell "Database round-trip" [ref=e189]
+              - cell "Local verification" [ref=e190]
+              - cell "Local (access) + DB (refresh)" [ref=e191]
+            - row "Revocation Immediate (delete session) Delayed (wait for expiry) Near-immediate (short-lived access)" [ref=e192]:
+              - cell "Revocation" [ref=e193]
+              - cell "Immediate (delete session)" [ref=e194]
+              - cell "Delayed (wait for expiry)" [ref=e195]
+              - cell "Near-immediate (short-lived access)" [ref=e196]
+            - row "Scaling Bound to session store Stateless -- scales freely Stateless access, stateful refresh" [ref=e197]:
+              - cell "Scaling" [ref=e198]
+              - cell "Bound to session store" [ref=e199]
+              - cell "Stateless -- scales freely" [ref=e200]
+              - cell "Stateless access, stateful refresh" [ref=e201]
+            - row "Complexity Simple Moderate Higher (two token types)" [ref=e202]:
+              - cell "Complexity" [ref=e203]
+              - cell "Simple" [ref=e204]
+              - cell "Moderate" [ref=e205]
+              - cell "Higher (two token types)" [ref=e206]
+      - complementary [ref=e207]:
+        - generic [ref=e208]: Essence
+        - paragraph [ref=e210]: Middleware that reasons about trust does not trust its reasoning. It trusts only the chain -- and the chain holds because each link holds independently.
+  - contentinfo [ref=e211]:
+    - generic [ref=e212]:
+      - generic [ref=e213]: CD-001 -- Reasoning Inside Code
+      - generic [ref=e215]: Exploration Complete
