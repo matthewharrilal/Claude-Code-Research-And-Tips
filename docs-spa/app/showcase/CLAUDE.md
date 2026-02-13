@@ -52,19 +52,19 @@ MANDATORY RESEARCH GROUNDING — BEFORE ANY ACTION
 ```
 READ these files (not from memory — actually read them):
 
-1. showcase/checkpoints/RESEARCH-ACTIVE.md
+1. archive/checkpoints/RESEARCH-ACTIVE.md
    → What findings exist? What's been applied? What's unapplied?
 
-2. showcase/research/RESEARCH-SYNTHESIS.md
+2. active/research/RESEARCH-SYNTHESIS.md
    → What are the cross-research insights?
 
-3. DESIGN-SYSTEM/patterns/density-patterns.md
+3. active/design-system/patterns/density-patterns.md
    → What patterns are validated? What confidence levels?
 
-4. DESIGN-SYSTEM/anti-patterns/registry.md
+4. active/design-system/anti-patterns/registry.md
    → What must be avoided?
 
-5. showcase/checkpoints/DISCOVERIES-LOG.md
+5. archive/checkpoints/DISCOVERIES-LOG.md
    → What has been learned from explorations?
 ```
 
@@ -138,7 +138,7 @@ MANDATORY REFINEMENT LOOP — DURING ANY CREATION
 │     └── What research could I have applied but didn't?                      │
 │                                                                             │
 │  4. VERIFY AGAINST SOUL                                                     │
-│     └── Read DESIGN-SYSTEM/tokens/* fresh                                   │
+│     └── Read active/design-system/tokens/* fresh                                   │
 │     └── Check: border-radius: 0?                                            │
 │     └── Check: box-shadow: none?                                            │
 │     └── Check: colors correct?                                              │
@@ -238,13 +238,13 @@ MANDATORY FILES TO READ BEFORE EACH TASK TYPE
 
 ```
 MUST READ:
-□ showcase/research/RESEARCH-SYNTHESIS.md (full)
-□ showcase/research/R[relevant]-*.md (the relevant research stream)
-□ showcase/checkpoints/RESEARCH-ACTIVE.md (what's applied, what's not)
-□ showcase/checkpoints/DISCOVERIES-LOG.md (prior learnings)
-□ DESIGN-SYSTEM/patterns/*.md (validated patterns)
-□ DESIGN-SYSTEM/anti-patterns/registry.md (what to avoid)
-□ DESIGN-SYSTEM/tokens/* (locked values)
+□ active/research/RESEARCH-SYNTHESIS.md (full)
+□ active/research/R[relevant]-*.md (the relevant research stream)
+□ archive/checkpoints/RESEARCH-ACTIVE.md (what's applied, what's not)
+□ archive/checkpoints/DISCOVERIES-LOG.md (prior learnings)
+□ active/design-system/patterns/*.md (validated patterns)
+□ active/design-system/anti-patterns/registry.md (what to avoid)
+□ active/design-system/tokens/* (locked values)
 
 MUST EXTRACT:
 □ List of findings to apply (with IDs)
@@ -276,7 +276,7 @@ MUST READ:
 □ DESIGN-SYSTEM/* (complete package)
 □ All validated explorations
 □ All anti-patterns
-□ knowledge-architecture/KA-DECISIONS.md
+□ archive/knowledge-architecture/core/KA-DECISIONS.md
 
 MUST EXTRACT:
 □ Exact token values to apply
@@ -290,7 +290,7 @@ MANDATORY RESEARCH-ACTIVE.md UPDATE
 █████████████████████████████████████████████████████████████████████████████
 ═══════════════════════════════════════════════════════════════════════════════
 
-**After EVERY piece of work, update showcase/checkpoints/RESEARCH-ACTIVE.md:**
+**After EVERY piece of work, update archive/checkpoints/RESEARCH-ACTIVE.md:**
 
 ```markdown
 ### [Date] — [Task Completed]
@@ -428,32 +428,61 @@ COMPACTION SURVIVAL — THESE RULES PERSIST
 
 ═══════════════════════════════════════════════════════════════════════════════
 █████████████████████████████████████████████████████████████████████████████
-KEY FILE LOCATIONS
+DIRECTORY STRUCTURE (POST-3x-AUDIT RESTRUCTURE)
+█████████████████████████████████████████████████████████████████████████████
+═══════════════════════════════════════════════════════════════════════════════
+
+**3-Tier Architecture:**
+
+```
+showcase/
+├── fortress/           ← Load-bearing explorations (DD, OD, CD). Zero bloat.
+│   ├── density/        ← DD-001 through DD-006 (7 files, 371 refs)
+│   ├── organizational/ ← OD-001 through OD-006 (8 files, 421 refs)
+│   └── combination/    ← CD-001 through CD-006 (13 files, crown jewels)
+├── active/             ← Work-in-progress + forward pipeline
+│   ├── axis/           ← AD explorations (RE-AUDIT REQUIRED)
+│   ├── pipeline/       ← POST-CD planning (17 files)
+│   ├── design-system/  ← Tokens, patterns, provenance (58 files)
+│   └── research/       ← R1-R5 + synthesis (7 files)
+└── CLAUDE.md           ← This file
+
+archive/                ← Completed phases (at repo root)
+├── knowledge-architecture/ ← KA core + synthesis files
+├── ka-scratchpads-c/   ← Provenance, remediation, metacognition
+├── cd-audit-reports/   ← Phase 2, 3, 4 CD audit reports
+├── checkpoints/        ← Audit milestones
+└── ...                 ← Other archived process artifacts
+```
+
+═══════════════════════════════════════════════════════════════════════════════
+█████████████████████████████████████████████████████████████████████████████
+KEY FILE LOCATIONS (UPDATED PATHS)
 █████████████████████████████████████████████████████████████████████████████
 ═══════════════════════════════════════════════════════════════════════════════
 
 **Research Files:**
-- showcase/research/R1-DOCUMENTATION-PATTERNS.md
-- showcase/research/R2-CREATIVE-LAYOUTS.md
-- showcase/research/R3-DENSITY-DIMENSIONS.md
-- showcase/research/R4-AXIS-INNOVATIONS.md
-- showcase/research/R5-COMBINATION-THEORY.md
-- showcase/research/RESEARCH-SYNTHESIS.md
+- active/research/R1-DOCUMENTATION-PATTERNS.md
+- active/research/R2-CREATIVE-LAYOUTS.md
+- active/research/R3-DENSITY-DIMENSIONS.md
+- active/research/R4-AXIS-INNOVATIONS.md
+- active/research/R5-COMBINATION-THEORY.md
+- active/research/RESEARCH-SYNTHESIS.md
 
-**Tracking Files:**
-- showcase/checkpoints/RESEARCH-ACTIVE.md (central tracking)
-- showcase/checkpoints/MASTER-STATE.md (position)
-- showcase/checkpoints/DISCOVERIES-LOG.md (learnings)
-- showcase/checkpoints/RESEARCH-APPLICATION-ENFORCEMENT-TEMPLATE.md
+**Tracking Files (now in archive):**
+- archive/checkpoints/RESEARCH-ACTIVE.md (central tracking)
+- archive/checkpoints/MASTER-STATE.md (position)
+- archive/checkpoints/DISCOVERIES-LOG.md (learnings)
+- archive/checkpoints/RESEARCH-APPLICATION-ENFORCEMENT-TEMPLATE.md
 
 **Design System:**
-- DESIGN-SYSTEM/README.md
-- DESIGN-SYSTEM/tokens/*
-- DESIGN-SYSTEM/patterns/*
-- DESIGN-SYSTEM/anti-patterns/registry.md
+- active/design-system/README.md
+- active/design-system/tokens/*
+- active/design-system/patterns/*
+- active/design-system/anti-patterns/registry.md
 
-**Knowledge Architecture:**
-- knowledge-architecture/KA-DECISIONS.md
-- knowledge-architecture/SOURCE-OF-TRUTH-REGISTRY.md
+**Knowledge Architecture (now in archive):**
+- archive/knowledge-architecture/core/KA-DECISIONS.md
+- archive/knowledge-architecture/core/SOURCE-OF-TRUTH-REGISTRY.md
 
 ═══════════════════════════════════════════════════════════════════════════════
