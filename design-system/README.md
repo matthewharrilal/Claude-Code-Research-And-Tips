@@ -1,6 +1,6 @@
 <!-- ═══════════════════════════════════════════════════════════════════════
      INLINE THREADING HEADER — Phase 2B
-     File: docs-spa/app/showcase/DESIGN-SYSTEM/README.md
+     File: design-system/README.md
      Tier: A | Batch: 2 | Generated: 2026-02-06
      ═══════════════════════════════════════════════════════════════════════
 
@@ -51,18 +51,17 @@ the 5 soul pieces into reasoning, examples, and transferable understanding:
 5. BUILT ON
 | Source | Role | Key Values | Path |
 |--------|------|------------|------|
-| COMP-F-001 through COMP-F-008 | Component-level findings | Soul pieces, locked tokens | perceptual-audit-v2/synthesis/ (via findings) |
-| DD-F-001 through DD-F-018 | Density exploration findings | Fractal self-similarity, CRESCENDO/STACCATO/LEGATO patterns | showcase/explorations/density/ (via findings) |
-| OD-F-001 through OD-F-013, OD-F-MP-001 | OD outbound findings | 17 organizational findings (organization IS density, transitive chain, 2px epidemic) | provenance/stage-3-organization-od/OD-outbound-findings.md |
-| R1 findings | Documentation pattern research | Content structure insights | showcase/research/R1-DOCUMENTATION-PATTERNS.md |
-| R3 findings | Density dimension research | Density analysis framework | showcase/research/R3-DENSITY-DIMENSIONS.md |
-| R5 findings | Combination theory research | Multi-pattern interaction | showcase/research/R5-COMBINATION-THEORY.md |
-| BACKBONE.md | Master narrative | Pipeline state, stage connections | DESIGN-SYSTEM/BACKBONE.md |
-| PIPELINE-MANIFEST.md | Finding registry | All finding IDs and provenance | DESIGN-SYSTEM/provenance/PIPELINE-MANIFEST.md |
-| SOUL-DISCOVERIES.md | Soul discovery record | Original perceptual audit evidence | showcase/checkpoints/SOUL-DISCOVERIES.md |
-| density-patterns.md | Validated density patterns | CRESCENDO, STACCATO, LEGATO confidence levels | DESIGN-SYSTEM/patterns/density-patterns.md |
-| MASTER-SOUL-SYNTHESIS.md | T1 soul authority | 5 soul pieces, 6 universal rules | perceptual-audit-v2/synthesis/MASTER-SOUL-SYNTHESIS.md |
-| DESIGN-TOKEN-SUMMARY.md | T1 token authority | Locked :root CSS block | perceptual-audit-v2/synthesis/DESIGN-TOKEN-SUMMARY.md |
+| COMP-F-001 through COMP-F-008 | Component-level findings | Soul pieces, locked tokens | fortress/DD/, fortress/OD/ (via findings) |
+| DD-F-001 through DD-F-018 | Density exploration findings | Fractal self-similarity, CRESCENDO/PULSE/ISLANDS patterns | fortress/DD/ (via findings) |
+| OD-F-001 through OD-F-013, OD-F-MP-001 | OD outbound findings | 17 organizational findings (organization IS density, transitive chain) | fortress/OD/ (via findings) |
+| CD-F-001 through CD-F-025 | Combination exploration findings | 25 combination findings, crown jewel CD-006 | fortress/CD/ (via findings) |
+| R1 findings | Documentation pattern research | Content structure insights | active/research/R1-DOCUMENTATION-PATTERNS.md |
+| R3 findings | Density dimension research | Density analysis framework | active/research/R3-DENSITY-DIMENSIONS.md |
+| R5 findings | Combination theory research | Multi-pattern interaction | active/research/R5-COMBINATION-THEORY.md |
+| RESEARCH-SYNTHESIS.md | Cross-research insights | Synthesis of R1-R5 streams | active/research/RESEARCH-SYNTHESIS.md |
+| compositional-core/ | Phase C extraction | 40 items, extracted design system | design-system/compositional-core/ |
+| SOUL-DISCOVERIES.md | Soul discovery record | Original perceptual audit evidence | archive/checkpoints/SOUL-DISCOVERIES.md |
+| tension-test/ layouts | Metaphor validation | 15 HTML layouts testing metaphor-driven composition | design-system/tension-test/ |
 
 6. MUST HONOR
 | Constraint | Source | Consequence of Violation |
@@ -76,34 +75,36 @@ the 5 soul pieces into reasoning, examples, and transferable understanding:
 | 7 provenance structures | Part III | Missing any structure breaks the living system metaphor |
 
 7. WHAT BREAKS IF THIS CHANGES
-- **DESIGN-SYSTEM/CLAUDE.md** — Directly references README.md as
+- **design-system/CLAUDE.md** — Directly references README.md as
   "READ FIRST" mandatory prerequisite. If README.md philosophy changes,
   CLAUDE.md's framing becomes misaligned.
-- **All OD/AD/CD work** — Any future stage work must absorb this document
-  as part of its research gate. Changed philosophy = changed reasoning
-  foundation for all downstream stages.
-- **showcase/CLAUDE.md** — The refinement loop and research grounding
-  process assume the philosophical framework documented here.
-- **knowledge-architecture/** — Pipeline documentation references the
-  5-stage model described in Part II.
+- **compositional-core/ extraction** — Phase C extraction was built on
+  the 5-stage pipeline philosophy (discovery-based, not decision-based).
+  Changed philosophy = changed extraction rationale.
+- **All future AD/CD/Phase D work** — Any future work must absorb this
+  document as part of its research gate. Changed philosophy = changed
+  reasoning foundation.
+- **Active research** (active/research/) — R1-R5 streams reference the
+  philosophical framework for grounding.
 - **Blast radius:** Potentially the entire design system. This is the
   philosophical root node. Changes here propagate to every file that
   depends on the reasoning framework.
 - **Files directly affected:**
-  - docs-spa/app/showcase/DESIGN-SYSTEM/CLAUDE.md
-  - docs-spa/app/showcase/CLAUDE.md
-  - docs-spa/app/showcase/DESIGN-SYSTEM/BACKBONE.md
-  - docs-spa/app/showcase/knowledge-architecture/ (multiple files)
-  - All future OD/AD/CD exploration work
+  - design-system/CLAUDE.md
+  - design-system/compositional-core/README.md
+  - design-system/compositional-core/process/extraction-provenance.md
+  - active/research/RESEARCH-SYNTHESIS.md
+  - active/pipeline/ (multiple files)
+  - All future Stage 4 (AD) and Phase D work
 
 8. CONSUMED BY
 | Consumer | How It Uses This File |
 |----------|----------------------|
-| DESIGN-SYSTEM/CLAUDE.md | Mandates this as first read; summarizes 9 Parts, 3 modes, 4 levels; gates all design system work behind absorbing this document |
-| showcase/CLAUDE.md | References philosophical framework for research grounding and refinement loop processes |
+| design-system/CLAUDE.md | Mandates this as first read; summarizes 9 Parts, 3 modes, 4 levels; gates all design system work behind absorbing this document |
+| compositional-core/README.md | References philosophical foundation for extraction rationale |
 | dependency-trace files | References for reachability analysis and relationship mapping |
 | Any new agent session | Context Recovery mode (Mode 3) provides 5-10 minute reorientation path |
-| Future OD/AD/CD stages | Must absorb as part of mandatory research gate before producing any exploration |
+| Future AD/Phase D work | Must absorb as part of mandatory research gate before producing any work |
 
 9. RESEARCH DEBT
 - RESOLVED: OD is COMPLETE. OD-F-007/008/009 in the doc body (Parts III-IX)
@@ -170,9 +171,9 @@ Q5: Does DESIGN-SYSTEM/CLAUDE.md's summary of this document accurately
 **After:** You understand the DESIGN-MIND. You're ready for specific tasks.
 
 **Next Steps After Mode 1:**
-- For building: Read `BACKBONE.md` → relevant stage `CLAUDE.md`
-- For understanding provenance in practice: Read `provenance/CLAUDE.md` (includes R3-023 chain walkthrough)
-- For understanding accumulated context: Read `ACCUMULATED-IDENTITY-v1.md` (539 lines of inherited soul, findings, constraints)
+- For building: Read `compositional-core/README.md` → `compositional-core/vocabulary/tokens.css`
+- For understanding extraction: Read `compositional-core/process/extraction-provenance.md` (766 lines, complete methodology)
+- For understanding research: Read `active/research/RESEARCH-SYNTHESIS.md`
 
 ### Mode 2: TASK EXECUTION (Reference → Action)
 **You are:** Building an exploration, need operational guidance
@@ -181,20 +182,19 @@ Q5: Does DESIGN-SYSTEM/CLAUDE.md's summary of this document accurately
 
 | If You're Doing... | Start Here | Then Go To |
 |--------------------|------------|------------|
-| Building an OD exploration (COMPLETE) | PART IV: Digestion | OD-SYNTHESIS.md + OD-outbound-findings.md |
-| Understanding why a pattern exists | PART III: Backward Traversal | Pattern's DERIVATION CHAIN |
-| Figuring out what to consume | PART III: Forward Traversal | HANDOFF-[FROM]-TO-[TO].md |
-| Deploying sub-agents | PART V: Interception | Sub-agent prompt templates |
-| Building an AD exploration | PART IV: Digestion | stage-4-axis-ad/CLAUDE.md → HANDOFF-OD-TO-AD.md → ACCUMULATED-IDENTITY-v1.md |
+| Building with compositional-core | compositional-core/README.md | compositional-core/vocabulary/ + grammar/ |
+| Understanding why a pattern exists | PART III: Backward Traversal | compositional-core/process/extraction-provenance.md |
+| Validating against soul | compositional-core/identity/prohibitions.md | compositional-core/validation/ |
+| Building an AD exploration | PART IV: Digestion | fortress/OD/ → active/research/ |
 | Creating retroactive updates | PART IX: Retroactive Bridge | Retroactive Update Checklist |
 
 ### Mode 3: CONTEXT RECOVERY (Reset → Reorientation)
 **You are:** Returning after context loss, need to re-ground
 **Time:** 5-10 minutes
 **Path:**
-1. Read DESIGN-SYSTEM/CLAUDE.md — Understand system structure and navigation
+1. Read design-system/CLAUDE.md — Understand system structure and navigation
 2. Read the **inline threading section** of your target file — Extract constraints, dependencies, blast radius
-3. Read BACKBONE.md — Current state snapshot
+3. Read compositional-core/README.md — Current extracted design system
 4. Read this document's PART II — Refresh pipeline understanding
 5. Read the specific PART for your current task
 **After:** You're re-oriented and can continue work.
@@ -270,10 +270,20 @@ Every PART follows this internal structure:
 | OD | Organizational Dimensions -- Stage 3 (cognitive flow patterns) |
 | AD | Axis Dimensions -- Stage 4 (spatial layout geometry) |
 | CD | Combination Dimensions -- Stage 5 (multi-pattern interaction) |
+| Phase C | Compositional-core extraction phase (post-Stage 5) |
+| TT | Tension-test — 15 metaphor validation layouts |
+| Fortress | Tier 1 of 3-tier architecture — zero-bloat explorations (DD, OD, CD) |
+| Active | Tier 2 of 3-tier architecture — forward-work directories (design-system, research, pipeline) |
+| Archive | Tier 3 of 3-tier architecture — completed phases (checkpoints, knowledge-architecture) |
 | COMP-F | Component Finding (Stage 1 output) |
-| DD-F / OD-F / AD-F | Stage-specific outbound findings |
+| DD-F / OD-F / AD-F / CD-F | Stage-specific outbound findings |
 | R-1 through R-5 | Research streams: Documentation Patterns, Creative Layouts, Density Dimensions, Axis Innovations, Combination Theory |
 | T1 | Primary synthesis documents (crown jewels in perceptual-audit-v2/synthesis/) |
+| M1-M12 | Anti-gravity mechanisms (rigidity mechanics) to prevent pattern-matching |
+| Lens | Extraction perspective (Identity, Enablement, Frequency, Completeness, Minimalism) |
+| Identity + Enablement | Hybrid lens used for Phase C extraction (soul preservation + creative freedom) |
+| Convergence | Cross-lens agreement on which items to extract (Tier 1 = 5/5 lenses, Tier 2 = 4/5, Tier 3 = 3/5) |
+| Soul compliance | Verification that no border-radius > 0, no box-shadow, no drop-shadow, primary red #E83025 |
 | CRESCENDO | Density pattern: sparse-to-dense build (narrative arc) |
 | PULSE | Density pattern: rhythmic dense/sparse alternation (Q&A) |
 | ISLANDS | Density pattern: dense clusters in sparse space (task groups) |
@@ -293,6 +303,42 @@ At any point, ask yourself:
 5. "Am I trying to UPDATE the codebase?" → Go to PART IX
 
 The document will guide you. Trust the markers.
+
+═══════════════════════════════════════════════════════════════════════════════
+
+---
+
+## QUICK START: Where to Go First
+
+### By Use Case
+
+| I want to... | Start here | Then read |
+|-------------|-----------|-----------|
+| **Build a new page** | `compositional-core/README.md` | `compositional-core/vocabulary/tokens.css` |
+| **Understand the extracted design system** | `compositional-core/process/extraction-provenance.md` | `compositional-core/validation/` |
+| **Validate an existing page** | `compositional-core/identity/prohibitions.md` | `compositional-core/guidelines/semantic-rules.md` |
+| **Understand the research pipeline** | `research/RESEARCH-SYNTHESIS.md` | `pipeline/` |
+| **See completed explorations** | `fortress/DD/`, `fortress/OD/`, `fortress/CD/` | — |
+| **See metaphor validation** | `design-system/tension-test/` | — |
+| **Understand the philosophy** | Continue reading this README (Part I) | — |
+
+### Current State (2026-02-14)
+
+- **Phase C extraction:** COMPLETE — compositional-core/ contains 40 items extracted from 27 explorations
+- **Stages 1-3:** COMPLETE — DD (density), OD (organization), CD (combination) in fortress/
+- **Tension validation:** COMPLETE — 15 metaphor layouts in tension-test/
+- **Stage 4 (AD - Axis):** IN PROGRESS — axis/ directory
+- **Repository structure:** Post-3x-audit (59% file reduction, 3-tier architecture)
+
+### The 3-Tier Repository Architecture (Post-Restructure)
+
+The repository was restructured via 3x comprehensive audit into:
+
+- **fortress/** (29 files): DD, OD, CD explorations — zero bloat, 100% KEEP. These are the SOURCE MATERIAL for compositional-core extraction.
+- **active/** (283 files): design-system/, research/, pipeline/ — forward work
+- **archive/** (165 files): checkpoints/, knowledge-architecture/, completed phases
+
+compositional-core/ is located at `design-system/compositional-core/` within the active/ tier.
 
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -333,6 +379,35 @@ DD didn't just know "border radius is 0" as a rule to follow. DD consumed COMP-F
 That's not two markdown files sitting next to each other. That's a **CAUSAL CHAIN**. COMP-F-001 enabled DD-006's high score. DD-006's high score validated the fractal principle. The fractal principle became DD-F-006 (an outbound finding). DD-F-006 flowed into OD's research gate as a mandatory input. OD built 6 explorations that applied fractal self-similarity to cognitive flow, and the meta-discovery OD-F-005 revealed that organization IS density -- organizational patterns and density patterns are the SAME phenomenon observed from two perspectives. Those OD explorations scored well, validating the principle AGAIN at a new level. And that validated principle becomes a constraint for AD, then CD, then migration.
 
 The muscle, tissue, and blood is that causal chain — the compounding research pipeline where every stage consumes everything before it and generates new knowledge for everything after it. The chain doesn't just accumulate. It compounds.
+
+## Phase C: From Discovery to Extraction
+
+The 5-stage pipeline (Components → DD → OD → AD → CD) DISCOVERED patterns through building and auditing. But discovery alone doesn't make a design system **usable**. A reader with 27 HTML explorations still asks: "What do I actually USE when building?"
+
+Phase C (compositional-core extraction) answered that question. Through a rigorous lens-based process:
+1. **Identity lens** (what makes KortAI recognizably KortAI)
+2. **Enablement lens** (what ENABLES creativity without constraint)
+3. **Convergence validation** (cross-lens agreement on extraction)
+4. **Anti-gravity deployment** (mechanisms to prevent pattern-matching)
+
+The extraction produced **40 items** organized into 6 layers:
+1. **Identity constraints** (3 soul + 18 prohibitions)
+2. **Design vocabulary** (65 tokens)
+3. **Compositional grammar** (18 mechanisms + 41 rules)
+4. **Component implementations** (26 families)
+5. **Case studies** (12 proof instances — NOT templates)
+6. **Semantic decision rules** (7+ guidelines)
+
+This extraction is NOT "the only possible extraction." It's a CONSTRUCTED extraction optimizing for soul preservation (border-radius: 0, box-shadow: none) + creative freedom (30-40 items, below constraint threshold) + anti-pattern-matching (mechanisms separated from metaphors).
+
+Different lenses would produce different extractions:
+- **Frequency lens** → 42-45 items (includes web standards)
+- **Completeness lens** → 56 items (includes all syntax highlighting tokens)
+- **Minimalism lens** → 10 items (soul + prohibitions only)
+
+The Identity + Enablement hybrid was chosen to balance identity truth (what MUST be preserved) with creative freedom (what CAN vary).
+
+**Why this matters:** The compositional-core extraction is the BRIDGE between "patterns we discovered" and "tools you can use." It makes the design mind TRANSFERABLE — not just readable, but APPLICABLE.
 
 ## ⚠️ The Problem: Stored vs Transmitted
 
@@ -470,11 +545,51 @@ Questions don't disappear — they ACCUMULATE and FORWARD until answered:
 
 **What it will produce:** Spatial layout geometry patterns, axis outbound findings, ACCUMULATED-IDENTITY-v2.md
 
-### Stage 5 — Combination (CD) — FUTURE
+### Stage 5 — Combination (CD) — COMPLETE
 
-**What it will consume:** ALL prior stages' output + R-5 Combination Theory
+**What it did:** Built 6 combination explorations testing multi-pattern interaction and advanced compositional techniques. CD-006 achieved crown jewel status (39/40).
 
-**What it will produce:** Component interaction patterns, the final pattern vocabulary
+**What it consumed:** ALL prior stages' output + R-5 Combination Theory
+
+**What it produced:** 6 validated combination explorations (CD-001 through CD-006), 25 findings (CD-F-001 through CD-F-025), 0 soul violations
+
+**Quality:** 9-agent adversarial audit. Overall: CONDITIONAL PASS (37.3/40 average, 93.3%). CD-006 = 39/40 TARGET MET.
+
+**⬇️ Forward:** CD findings + all explorations flow into Phase C extraction.
+
+---
+
+### Phase C — Compositional-Core Extraction — COMPLETE
+
+**What it did:** Extracted 40 items (identity, vocabulary, grammar, components) from 27 validated explorations using an Identity + Enablement hybrid lens.
+
+**What it consumed:** ALL DD/OD/CD explorations (fortress/), ALL TT layouts (tension-test/), R1-R5 research, rigidity-mechanics anti-gravity research (R4).
+
+**What it produced:**
+- **21 identity constraints:** 3 soul pieces (IMMUTABLE) + 18 prohibitions (8 absolute, 10 conditional)
+- **65 design tokens:** 21 immutable, 14 mutable, 30 available
+- **18 compositional mechanisms** (reusable techniques) + **41 compositional rules**
+- **26 component families** (34 selectors total)
+- **12 case studies** (DD-003, DD-004, DD-006, OD-001, OD-004, OD-006, CD-001, CD-005, CD-006, plus 3 TT)
+- **7+ semantic decision guidelines** (when Info vs Context? when serif vs sans?)
+- **Anti-gravity mechanisms:** 7 of 12 deployed (M1, M2, M3, M5, M6, M9, M12 partial)
+
+**Quality:** 98% convergence (25/25 required items), 94.7% anti-gravity compliance, 100% soul compliance (0 violations across 34 components)
+
+**⬇️ Forward:** This is THE design system to USE when building. compositional-core/ is the PRIMARY output of the entire pipeline.
+
+**Why it matters:** Phases 1-5 DISCOVERED patterns. Phase C EXTRACTED the reusable vocabulary, grammar, and components. Without Phase C, builders would have 27 HTML explorations to study but no clear "here's what to use" extraction.
+
+**Location:** `design-system/compositional-core/`
+
+**Provenance:** See `compositional-core/process/extraction-provenance.md` (766 lines, complete methodology)
+
+**Lens choice:** Identity + Enablement hybrid was chosen to balance soul preservation (border-radius: 0, box-shadow: none, primary red #E83025) with creative freedom (30-40 items, below constraint threshold). Different lenses would produce different extractions:
+- Frequency lens → 42-45 items (includes web standards)
+- Completeness lens → 56 items (includes all syntax highlighting tokens)
+- Minimalism lens → 10 items (soul + prohibitions only)
+
+---
 
 ## How Research Compounds
 
@@ -1856,97 +1971,110 @@ Three distinct modes emerged during execution. Each is valid. Understanding whic
 
 ## How the Folders Work
 
-The design system lives in `docs-spa/showcase/DESIGN-SYSTEM/`. Here's how the folder structure embodies the knowledge chain:
+The design system lives in `design-system/` at the repository root. Here's how the folder structure embodies the knowledge chain:
 
-### The Output Layer: What to Use
+### The Primary Output: What to Use (START HERE)
 
 ```
-DESIGN-SYSTEM/
-├── tokens/           ← WHAT the system uses (colors, geometry, spacing, typography)
-├── components/       ← HOW elements behave
-├── patterns/         ← WHEN to apply what (density, organizational, axis, combination)
-├── guides/           ← HOW to migrate and apply
-└── anti-patterns/    ← What NOT to do
+design-system/
+├── compositional-core/     ← **START HERE** — The extracted design system (Phase C)
+│   ├── identity/           ← Soul constraints (border-radius: 0, etc.) + prohibitions
+│   ├── vocabulary/         ← 65 tokens (colors, spacing, typography)
+│   ├── grammar/            ← 18 mechanisms + 41 compositional rules
+│   ├── components/         ← 26 families, 34 selectors
+│   ├── case-studies/       ← 12 proof instances (DD, OD, CD) — NOT templates
+│   ├── guidelines/         ← Semantic rules + responsive strategy
+│   ├── validation/         ← Convergence + anti-gravity + soul verification
+│   └── process/            ← Extraction provenance + methodology
+├── tension-test/           ← 15 metaphor validation layouts
+├── validated-explorations/ ← Source explorations that informed extraction
+├── axis/                   ← AD (Stage 4) work in progress
+├── pipeline/               ← Planning docs + tension synthesis
+├── research/               ← R1-R5 research streams + RESEARCH-SYNTHESIS.md
+├── specification/          ← Specifications
+├── implementation/         ← Implementation artifacts
+├── CLAUDE.md               ← Navigation + process enforcement
+└── README.md               ← This file (philosophical anchor)
 ```
+
+**compositional-core/** is the PRIMARY output of the entire design system pipeline — 40 items extracted from 27 HTML explorations using an Identity + Enablement hybrid lens. This is what you USE when building. Everything else (validated-explorations/, tension-test/, research/, pipeline/) is the source material and provenance that PRODUCED compositional-core/.
+
+**Quality:** 98% convergence (25/25 required items present), 94.7% anti-gravity compliance, 100% soul compliance (0 violations across 34 components).
 
 This is the skeleton. If you only need Level 1 engagement, this is sufficient.
 
-### The Provenance Layer: Why It's This Way
+### The Research & Process Layer
 
 ```
-DESIGN-SYSTEM/provenance/
-├── PIPELINE-MANIFEST.md     ← The database of every finding
-├── RESEARCH-ACTIVE.md       ← Application tracking
-├── SOUL-DISCOVERIES.md      ← The non-negotiable identity truths
-├── original-research/       ← R-1→R-5 source documents
-├── stage-1-components/      ← Component foundation chain
-├── stage-2-density-dd/      ← Density exploration chain
-├── stage-3-organization-od/ ← Organizational exploration chain
-├── stage-4-axis-ad/         ← Axis exploration chain
-└── stage-5-combination-cd/  ← Combination exploration chain
+active/research/
+├── R1-DOCUMENTATION-PATTERNS.md  ← 28 findings
+├── R2-CREATIVE-LAYOUTS.md        ← 27 findings
+├── R3-DENSITY-DIMENSIONS.md      ← 51 findings
+├── R4-AXIS-INNOVATIONS.md        ← 192 findings
+├── R5-COMBINATION-THEORY.md      ← 39 findings
+└── RESEARCH-SYNTHESIS.md         ← Cross-research insights
+
+active/pipeline/
+├── 01-09 planning docs           ← POST-CD planning
+└── tension-synthesis/            ← Tension-composition analysis
+
+design-system/tension-test/
+├── boris/                        ← 5 Boris metaphor layouts
+├── gastown/                      ← 5 Gas Town metaphor layouts
+└── playbook/                     ← 5 Playbook metaphor layouts
 ```
 
-This is the muscle. Level 2-4 engagement requires reading here.
+This is the research and planning infrastructure.
 
-### The Operational Layer: Current Work State
-
-```
-showcase/checkpoints/
-├── MASTER-STATE.md           ← Current project position
-├── [PHASE]-CHECKPOINT.md     ← Live iteration tracking
-├── [PHASE]-RESEARCH-GATE.md  ← Finding-to-exploration mapping
-├── RESEARCH-ACTIVE.md        ← Live research tracking (syncs to provenance/)
-└── SOUL-DISCOVERIES.md       ← Live soul tracking (syncs to provenance/)
-```
-
-This is the nervous system during active work. After a stage completes, key files are finalized and synced to provenance/.
-
-### The Artifacts: What Was Built
+### The Tracking & Archive Layer
 
 ```
-showcase/explorations/
-├── density/          ← 6 DD HTML explorations (complete)
-├── organizational/   ← 6 OD HTML explorations (complete — audited, fixed, provenance chain remediated)
-├── axis/             ← 6 AD HTML explorations (pending — HANDOFF-OD-TO-AD.md + ACCUMULATED-IDENTITY-v1.md ready)
-└── combination/      ← 6 CD HTML explorations (future)
+archive/checkpoints/
+├── SOUL-DISCOVERIES.md      ← Non-negotiable identity truths
+├── MASTER-STATE.md          ← Project position snapshots
+├── DISCOVERIES-LOG.md       ← Learnings from explorations
+└── RESEARCH-ACTIVE.md       ← Research application tracking
+
+archive/knowledge-architecture/
+└── core/                    ← KA synthesis files
 ```
 
-These are the actual built artifacts — HTML files you can open in a browser. They use inline KortAI styles (correct colors), not globals.css (outdated).
+This is the historical record and tracking.
+
+### The Source Material: What Was Built (Fortress Tier)
+
+```
+fortress/DD/    ← 6 density explorations (DD-001 through DD-006)
+fortress/OD/    ← 6 organizational explorations (OD-001 through OD-006)
+fortress/CD/    ← 6 combination explorations (CD-001 through CD-006)
+```
+
+These are the actual built artifacts — HTML files you can open in a browser. Zero bloat. 100% KEEP. These are the SOURCE MATERIAL for compositional-core extraction.
 
 ### The Navigation Layer (Added Phase 2B)
 
-In addition to the Output, Provenance, Operational, and Artifacts layers, Phase 2B added a **Navigation layer**:
+In addition to the Output, Research, and Fortress layers, Phase 2B added a **Navigation layer**:
 
 ```
-showcase/
-├── CLAUDE.md              ← Lab-level navigation and process enforcement (also serves as folder map)
-├── DESIGN-SYSTEM/
-│   └── CLAUDE.md          ← Design system navigation and identity
-├── checkpoints/
-│   └── CLAUDE.md          ← Operational checkpoint navigation
-├── explorations/
-│   ├── CLAUDE.md          ← Exploration navigation
-│   └── density/
-│       └── CLAUDE.md      ← Density exploration navigation
-├── research/
-│   └── CLAUDE.md          ← Research stream navigation
-└── knowledge-architecture/
-    └── CLAUDE.md          ← KA folder navigation
+design-system/
+├── CLAUDE.md                    ← Design system navigation and process enforcement
+├── compositional-core/
+│   ├── README.md                ← Primary compositional-core navigation
+│   ├── identity/README.md       ← Identity constraints navigation
+│   ├── vocabulary/README.md     ← Token system navigation
+│   ├── grammar/README.md        ← Mechanisms + rules navigation
+│   ├── components/README.md     ← Component families navigation
+│   ├── case-studies/README.md   ← Proof instances navigation
+│   └── guidelines/README.md     ← Semantic decision rules navigation
 ```
 
-**CLAUDE.md files** (per-directory) provide the same navigational purpose originally planned for a standalone FOLDER-MAP.md:
-- Per-folder file listings with purpose and status
-- T1 (authoritative) vs T2 (derivative) classification via inline threading sections
-- Context recovery via identity signatures and status fields
-- Cross-references to related directories and files
-
-**CLAUDE.md files** provide:
+**CLAUDE.md and README.md files** provide:
 - Per-folder navigation with identity signatures
 - File listings with status and purpose
 - How the folder connects to the pipeline
 - What to read first and in what order
 
-This layer enables faster **Context Recovery** (Mode 3) — instead of reading multiple files to understand structure, read DESIGN-SYSTEM/CLAUDE.md first, then the CLAUDE.md in your target directory.
+This layer enables faster **Context Recovery** (Mode 3) — instead of reading multiple files to understand structure, read design-system/CLAUDE.md first, then the README.md in your target directory.
 
 ### Inline Threading Sections (Added Phase 2B)
 
@@ -1997,29 +2125,53 @@ Every significant folder has a CLAUDE.md file that explains:
 
 These files are the navigational guides. They make the system self-documenting — you don't need an external manual to understand the structure, because the structure explains itself.
 
-## The Four Master Documents
+## The Key Documents (Post-Phase C)
 
-| Document | Purpose | Analogy |
-|----------|---------|---------|
-| **BACKBONE.md** | The narrative chain. The complete story of how the system was built, stage by stage. | The tour guide |
-| **PIPELINE-MANIFEST.md** | The finding database. Every finding mapped with ID, text, source, application status, lifecycle. | The medical records |
-| **PATTERN-INDEX.md** | The practical application guide. Content type → organizational pattern + density pattern. | The prescription |
-| **SOUL-DISCOVERIES.md** | The identity constants. What cannot be violated, and why. | The DNA test results |
+| Document | Purpose | Location |
+|----------|---------|----------|
+| **compositional-core/README.md** | The extracted design system. What to USE when building. | design-system/compositional-core/ |
+| **extraction-provenance.md** | The extraction methodology. How Phase C was constructed. | compositional-core/process/ |
+| **RESEARCH-SYNTHESIS.md** | Cross-research insights from R1-R5 streams. | active/research/ |
+| **SOUL-DISCOVERIES.md** | The identity constants. What cannot be violated, and why. | archive/checkpoints/ |
+| **CLAUDE.md** | Design system navigation and process enforcement. | design-system/ |
 
 ## How to Navigate
 
 | I want to... | Start here |
 |--------------|------------|
-| Understand the whole system | BACKBONE.md |
-| Apply a pattern to specific content | PATTERN-INDEX.md |
-| Understand WHY a pattern exists | The pattern's "Research Provenance" field → follow the IDs |
-| Check if a finding has been applied | PIPELINE-MANIFEST.md |
-| Understand the non-negotiable constraints | SOUL-DISCOVERIES.md |
-| See what a stage consumed and produced | provenance/stage-[N]-*/STAGE-HEADER.md |
-| See what one stage learned for the next | provenance/stage-[N]-*/[PHASE]-outbound-findings.md |
-| See the bridge between stages | provenance/stage-[N]-*/HANDOFF-[FROM]-TO-[TO].md |
-| See the actual built artifact | explorations/[phase]/[exploration].html |
-| See current project state | checkpoints/MASTER-STATE.md |
+| **Build a new page** | compositional-core/README.md → vocabulary/ → grammar/ → components/ |
+| **Understand the extracted design system** | compositional-core/process/extraction-provenance.md |
+| **Validate against soul constraints** | compositional-core/identity/prohibitions.md |
+| **Understand WHY patterns exist** | This README (Part I + Part II) → compositional-core/process/ |
+| **See the research that informed extraction** | active/research/RESEARCH-SYNTHESIS.md |
+| **Understand the non-negotiable constraints** | compositional-core/identity/soul-pieces.md |
+| **See the source explorations** | fortress/DD/, fortress/OD/, fortress/CD/ |
+| **See metaphor validation** | design-system/tension-test/ |
+| **See current project state** | archive/checkpoints/MASTER-STATE.md |
+
+---
+
+## Related Navigation Files
+
+This README (THE KORTAI DESIGN MIND) is the **philosophical anchor**. For directory-specific navigation:
+
+| Directory | README | Purpose |
+|-----------|--------|---------|
+| `compositional-core/` | `compositional-core/README.md` | How to use the extracted design system |
+| `compositional-core/identity/` | `compositional-core/identity/README.md` | Soul constraints + prohibitions |
+| `compositional-core/vocabulary/` | `compositional-core/vocabulary/README.md` | Token system (65 tokens) |
+| `compositional-core/grammar/` | `compositional-core/grammar/README.md` | Mechanisms + compositional rules |
+| `compositional-core/components/` | `compositional-core/components/README.md` | Component families (26 families) |
+| `compositional-core/case-studies/` | `compositional-core/case-studies/README.md` | Proof instances (12 studies) |
+| `compositional-core/guidelines/` | `compositional-core/guidelines/README.md` | Semantic decision rules |
+| `design-system/` | `design-system/CLAUDE.md` | Process enforcement + directory map |
+
+**When to read which:**
+- **New to the system?** Read this README (Part I: Philosophy) → compositional-core/README.md
+- **Building a page?** Start with compositional-core/README.md → vocabulary/ → grammar/ → components/
+- **Validating a page?** Start with compositional-core/identity/README.md → guidelines/
+- **Understanding extraction?** Read compositional-core/process/extraction-provenance.md
+- **Understanding pipeline?** Read this README (Part II: Pipeline) → active/research/RESEARCH-SYNTHESIS.md
 
 ---
 
