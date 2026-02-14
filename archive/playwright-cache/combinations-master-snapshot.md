@@ -1,0 +1,1053 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - link "Claude Code" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img [ref=e5]
+        - generic [ref=e7]: Claude Code
+      - generic [ref=e9]:
+        - img [ref=e10]
+        - textbox "Search documentation..." [ref=e13]
+        - generic [ref=e14]: ⌘K
+    - generic [ref=e15]:
+      - complementary [ref=e16]:
+        - navigation "Main navigation" [ref=e18]:
+          - generic [ref=e21]:
+            - img [ref=e22]
+            - textbox "Filter pages..." [ref=e25]
+          - generic [ref=e28]:
+            - generic [ref=e30]:
+              - button "Core Guides 3" [expanded] [ref=e31]:
+                - img [ref=e33]
+                - img [ref=e36]
+                - generic [ref=e38]: Core Guides
+                - generic [ref=e39]: "3"
+              - generic [ref=e43]:
+                - link "The Complete Playbook" [ref=e45] [cursor=pointer]:
+                  - /url: /synthesis/master-playbook
+                  - generic [ref=e47]: The Complete Playbook
+                - link "Judgment Guide" [ref=e49] [cursor=pointer]:
+                  - /url: /synthesis/judgment-guide
+                  - generic [ref=e51]: Judgment Guide
+                - link "Synthesis Index" [ref=e53] [cursor=pointer]:
+                  - /url: /synthesis/synthesis-index
+                  - generic [ref=e55]: Synthesis Index
+            - generic [ref=e57]:
+              - button "Architecture 5" [expanded] [ref=e58]:
+                - img [ref=e60]
+                - img [ref=e63]
+                - generic [ref=e67]: Architecture
+                - generic [ref=e68]: "5"
+              - generic [ref=e72]:
+                - link "Complexity Ladder (0-7)" [ref=e74] [cursor=pointer]:
+                  - /url: /synthesis/architecture-complexity-ladder
+                  - generic [ref=e76]: Complexity Ladder (0-7)
+                - link "Architecture Primitives" [ref=e78] [cursor=pointer]:
+                  - /url: /synthesis/architecture-primitives
+                  - generic [ref=e80]: Architecture Primitives
+                - generic [ref=e81]:
+                  - link "Composition Rules" [ref=e82] [cursor=pointer]:
+                    - /url: /synthesis/architecture-composition-rules
+                    - generic [ref=e83]:
+                      - generic [ref=e85]: Composition Rules
+                      - img [ref=e86]
+                  - generic:
+                    - generic [ref=e902]:
+                      - generic [ref=e904]: On this page
+                      - generic [ref=e905]: "8"
+                    - generic [ref=e906]:
+                      - link "essence" [ref=e908] [cursor=pointer]:
+                        - /url: "#essence"
+                        - generic [ref=e911]: essence
+                      - link "2 The Core Abstraction" [ref=e913] [cursor=pointer]:
+                        - /url: "#core-abstraction"
+                        - generic [ref=e916]: 2 The Core Abstraction
+                      - link "3 Composition Equations" [ref=e918] [cursor=pointer]:
+                        - /url: "#equation-ralph"
+                        - generic [ref=e921]: 3 Composition Equations
+                      - link "4 The 6 Composition Operators" [ref=e923] [cursor=pointer]:
+                        - /url: "#operators"
+                        - generic [ref=e926]: 4 The 6 Composition Operators
+                      - link "5 Valid Compositions" [ref=e928] [cursor=pointer]:
+                        - /url: "#valid"
+                        - generic [ref=e931]: 5 Valid Compositions
+                      - link "6 Invalid Compositions (Anti-patterns)" [ref=e933] [cursor=pointer]:
+                        - /url: "#antipatterns"
+                        - generic [ref=e936]: 6 Invalid Compositions (Anti-patterns)
+                      - link "7 What's Hard" [ref=e938] [cursor=pointer]:
+                        - /url: "#hard"
+                        - generic [ref=e941]: 7 What's Hard
+                      - link "8 Composition Decision Tree" [ref=e943] [cursor=pointer]:
+                        - /url: "#decision"
+                        - generic [ref=e946]: 8 Composition Decision Tree
+                - link "Domain Isolation" [ref=e89] [cursor=pointer]:
+                  - /url: /synthesis/architecture-domain-isolation
+                  - generic [ref=e91]: Domain Isolation
+                - link "Swarm Topologies" [ref=e93] [cursor=pointer]:
+                  - /url: /synthesis/architecture-swarm-topologies
+                  - generic [ref=e95]: Swarm Topologies
+            - generic [ref=e97]:
+              - button "Mastery Guides 6" [expanded] [ref=e98]:
+                - img [ref=e100]
+                - img [ref=e103]
+                - generic [ref=e106]: Mastery Guides
+                - generic [ref=e107]: "6"
+              - generic [ref=e111]:
+                - link "Mastery Overview" [ref=e113] [cursor=pointer]:
+                  - /url: /synthesis/mastery-master
+                  - generic [ref=e115]: Mastery Overview
+                - link "Ralph Pattern Deep Dive" [ref=e117] [cursor=pointer]:
+                  - /url: /synthesis/mastery-ralph-complete
+                  - generic [ref=e119]: Ralph Pattern Deep Dive
+                - link "Context Management" [ref=e121] [cursor=pointer]:
+                  - /url: /synthesis/mastery-context-management
+                  - generic [ref=e123]: Context Management
+                - link "Multi-Agent Patterns" [ref=e125] [cursor=pointer]:
+                  - /url: /synthesis/mastery-multi-agent
+                  - generic [ref=e127]: Multi-Agent Patterns
+                - link "CC Mirror Complete" [ref=e129] [cursor=pointer]:
+                  - /url: /synthesis/mastery-ccmirror-complete
+                  - generic [ref=e131]: CC Mirror Complete
+                - link "Gas Town Complete" [ref=e133] [cursor=pointer]:
+                  - /url: /synthesis/mastery-gastown-complete
+                  - generic [ref=e135]: Gas Town Complete
+            - generic [ref=e137]:
+              - button "Principles 5" [expanded] [ref=e138]:
+                - img [ref=e140]
+                - img [ref=e143]
+                - generic [ref=e145]: Principles
+                - generic [ref=e146]: "5"
+              - generic [ref=e150]:
+                - link "Principles Overview" [ref=e152] [cursor=pointer]:
+                  - /url: /synthesis/principles-master
+                  - generic [ref=e154]: Principles Overview
+                - link "Core Principles" [ref=e156] [cursor=pointer]:
+                  - /url: /synthesis/principles-core
+                  - generic [ref=e158]: Core Principles
+                - link "Anti-Patterns" [ref=e160] [cursor=pointer]:
+                  - /url: /synthesis/principles-anti-patterns
+                  - generic [ref=e162]: Anti-Patterns
+                - link "Derivation Guide" [ref=e164] [cursor=pointer]:
+                  - /url: /synthesis/principles-derivation-guide
+                  - generic [ref=e166]: Derivation Guide
+                - link "Learning Loops" [ref=e168] [cursor=pointer]:
+                  - /url: /synthesis/principles-learning-loops
+                  - generic [ref=e170]: Learning Loops
+            - generic [ref=e172]:
+              - button "Taxonomies 10" [expanded] [ref=e173]:
+                - img [ref=e175]
+                - img [ref=e178]
+                - generic [ref=e183]: Taxonomies
+                - generic [ref=e184]: "10"
+              - generic [ref=e188]:
+                - link "Taxonomy Overview" [ref=e190] [cursor=pointer]:
+                  - /url: /synthesis/taxonomy-master
+                  - generic [ref=e192]: Taxonomy Overview
+                - link "Tools Taxonomy" [ref=e194] [cursor=pointer]:
+                  - /url: /synthesis/taxonomy-tools
+                  - generic [ref=e196]: Tools Taxonomy
+                - link "Workflows Taxonomy" [ref=e198] [cursor=pointer]:
+                  - /url: /synthesis/taxonomy-workflows
+                  - generic [ref=e200]: Workflows Taxonomy
+                - link "Orchestration Taxonomy" [ref=e202] [cursor=pointer]:
+                  - /url: /synthesis/taxonomy-orchestration
+                  - generic [ref=e204]: Orchestration Taxonomy
+                - link "Architectures Taxonomy" [ref=e206] [cursor=pointer]:
+                  - /url: /synthesis/taxonomy-architectures
+                  - generic [ref=e208]: Architectures Taxonomy
+                - link "Context & Memory" [ref=e210] [cursor=pointer]:
+                  - /url: /synthesis/taxonomy-context-memory
+                  - generic [ref=e212]: Context & Memory
+                - link "Deployment Taxonomy" [ref=e214] [cursor=pointer]:
+                  - /url: /synthesis/taxonomy-deployment
+                  - generic [ref=e216]: Deployment Taxonomy
+                - link "Skills Expanded" [ref=e218] [cursor=pointer]:
+                  - /url: /synthesis/taxonomy-skills-expanded
+                  - generic [ref=e220]: Skills Expanded
+                - link "Enterprise Agents" [ref=e222] [cursor=pointer]:
+                  - /url: /synthesis/taxonomy-enterprise-agents
+                  - generic [ref=e224]: Enterprise Agents
+                - link "Cross Reference" [ref=e226] [cursor=pointer]:
+                  - /url: /synthesis/taxonomy-cross-reference
+                  - generic [ref=e228]: Cross Reference
+            - generic [ref=e230]:
+              - button "Comparisons 9" [expanded] [ref=e231]:
+                - img [ref=e233]
+                - img [ref=e236]
+                - generic [ref=e241]: Comparisons
+                - generic [ref=e242]: "9"
+              - generic [ref=e246]:
+                - link "Comparisons Overview" [ref=e248] [cursor=pointer]:
+                  - /url: /synthesis/compare-master
+                  - generic [ref=e250]: Comparisons Overview
+                - link "Architecture Comparison" [ref=e252] [cursor=pointer]:
+                  - /url: /synthesis/compare-architecture
+                  - generic [ref=e254]: Architecture Comparison
+                - link "Orchestration Comparison" [ref=e256] [cursor=pointer]:
+                  - /url: /synthesis/compare-orchestration
+                  - generic [ref=e258]: Orchestration Comparison
+                - link "Memory Comparison" [ref=e260] [cursor=pointer]:
+                  - /url: /synthesis/compare-memory
+                  - generic [ref=e262]: Memory Comparison
+                - link "Cost Comparison" [ref=e264] [cursor=pointer]:
+                  - /url: /synthesis/compare-cost
+                  - generic [ref=e266]: Cost Comparison
+                - link "Observability Comparison" [ref=e268] [cursor=pointer]:
+                  - /url: /synthesis/compare-observability
+                  - generic [ref=e270]: Observability Comparison
+                - link "Ralph Variants" [ref=e272] [cursor=pointer]:
+                  - /url: /synthesis/compare-ralph-variants-complete
+                  - generic [ref=e274]: Ralph Variants
+                - link "OpenCode Alternatives" [ref=e276] [cursor=pointer]:
+                  - /url: /synthesis/compare-opencode-alternatives
+                  - generic [ref=e278]: OpenCode Alternatives
+                - link "Enterprise Orchestration" [ref=e280] [cursor=pointer]:
+                  - /url: /synthesis/compare-enterprise-orchestration
+                  - generic [ref=e282]: Enterprise Orchestration
+            - generic [ref=e284]:
+              - button "Transformations 5" [expanded] [ref=e285]:
+                - img [ref=e287]
+                - img [ref=e290]
+                - generic [ref=e293]: Transformations
+                - generic [ref=e294]: "5"
+              - generic [ref=e298]:
+                - link "Transformations Overview" [ref=e300] [cursor=pointer]:
+                  - /url: /synthesis/transform-master
+                  - generic [ref=e302]: Transformations Overview
+                - link "Single to Autonomous" [ref=e304] [cursor=pointer]:
+                  - /url: /synthesis/transform-single-to-autonomous
+                  - generic [ref=e306]: Single to Autonomous
+                - link "Prompt to Agent" [ref=e308] [cursor=pointer]:
+                  - /url: /synthesis/transform-prompt-to-agent
+                  - generic [ref=e310]: Prompt to Agent
+                - link "Manual to Filesystem" [ref=e312] [cursor=pointer]:
+                  - /url: /synthesis/transform-manual-to-filesystem
+                  - generic [ref=e314]: Manual to Filesystem
+                - link "Generalist to Swarm" [ref=e316] [cursor=pointer]:
+                  - /url: /synthesis/transform-generalist-to-swarm
+                  - generic [ref=e318]: Generalist to Swarm
+            - generic [ref=e320]:
+              - button "Pattern Combinations 6" [expanded] [ref=e321]:
+                - img [ref=e323]
+                - img [ref=e326]
+                - generic [ref=e333]: Pattern Combinations
+                - generic [ref=e334]: "6"
+              - generic [ref=e338]:
+                - link "Combinations Overview" [ref=e340] [cursor=pointer]:
+                  - /url: /synthesis/combinations-master
+                  - generic [ref=e342]: Combinations Overview
+                - link "Pairwise Combinations" [ref=e344] [cursor=pointer]:
+                  - /url: /synthesis/combinations-pairwise
+                  - generic [ref=e346]: Pairwise Combinations
+                - link "Triple+ Combinations" [ref=e348] [cursor=pointer]:
+                  - /url: /synthesis/combinations-triple-plus
+                  - generic [ref=e350]: Triple+ Combinations
+                - link "Combinations Matrix" [ref=e352] [cursor=pointer]:
+                  - /url: /synthesis/combinations-matrix
+                  - generic [ref=e354]: Combinations Matrix
+                - link "Pattern Extensions" [ref=e356] [cursor=pointer]:
+                  - /url: /synthesis/combinations-extensions
+                  - generic [ref=e358]: Pattern Extensions
+                - link "Unexplored Combos" [ref=e360] [cursor=pointer]:
+                  - /url: /synthesis/combinations-unexplored
+                  - generic [ref=e362]: Unexplored Combos
+            - generic [ref=e364]:
+              - button "Reference 5" [expanded] [ref=e365]:
+                - img [ref=e367]
+                - img [ref=e370]
+                - generic [ref=e372]: Reference
+                - generic [ref=e373]: "5"
+              - generic [ref=e377]:
+                - link "Reference Overview" [ref=e379] [cursor=pointer]:
+                  - /url: /synthesis/reference-master
+                  - generic [ref=e381]: Reference Overview
+                - link "Cost Economics" [ref=e383] [cursor=pointer]:
+                  - /url: /synthesis/reference-cost-economics
+                  - generic [ref=e385]: Cost Economics
+                - link "Enterprise Economics" [ref=e387] [cursor=pointer]:
+                  - /url: /synthesis/cost-economics-enterprise
+                  - generic [ref=e389]: Enterprise Economics
+                - link "Boris Workflow" [ref=e391] [cursor=pointer]:
+                  - /url: /synthesis/boris-workflow-complete
+                  - generic [ref=e393]: Boris Workflow
+                - link "Staff Engineer Model" [ref=e395] [cursor=pointer]:
+                  - /url: /synthesis/staff-engineer-mental-model
+                  - generic [ref=e397]: Staff Engineer Model
+            - generic [ref=e399]:
+              - button "Grammar & Syntax 4" [expanded] [ref=e400]:
+                - img [ref=e402]
+                - img [ref=e405]
+                - generic [ref=e408]: Grammar & Syntax
+                - generic [ref=e409]: "4"
+              - generic [ref=e413]:
+                - link "Grammar Overview" [ref=e415] [cursor=pointer]:
+                  - /url: /synthesis/grammar-master
+                  - generic [ref=e417]: Grammar Overview
+                - link "Syntax Guide" [ref=e419] [cursor=pointer]:
+                  - /url: /synthesis/grammar-syntax
+                  - generic [ref=e421]: Syntax Guide
+                - link "Vocabulary" [ref=e423] [cursor=pointer]:
+                  - /url: /synthesis/grammar-vocabulary
+                  - generic [ref=e425]: Vocabulary
+                - link "Plugins Guide" [ref=e427] [cursor=pointer]:
+                  - /url: /synthesis/grammar-plugins
+                  - generic [ref=e429]: Plugins Guide
+            - generic [ref=e431]:
+              - button "Technical Deep Dives 6" [expanded] [ref=e432]:
+                - img [ref=e434]
+                - img [ref=e437]
+                - generic [ref=e439]: Technical Deep Dives
+                - generic [ref=e440]: "6"
+              - generic [ref=e444]:
+                - link "Advanced Context" [ref=e446] [cursor=pointer]:
+                  - /url: /synthesis/technical-context-management-advanced
+                  - generic [ref=e448]: Advanced Context
+                - link "Subagent Best Practices" [ref=e450] [cursor=pointer]:
+                  - /url: /synthesis/technical-subagent-spawning-best-practices
+                  - generic [ref=e452]: Subagent Best Practices
+                - link "Async Coordination" [ref=e454] [cursor=pointer]:
+                  - /url: /synthesis/async-coordination-patterns
+                  - generic [ref=e456]: Async Coordination
+                - link "Debugging Failures" [ref=e458] [cursor=pointer]:
+                  - /url: /synthesis/debugging-agent-failures
+                  - generic [ref=e460]: Debugging Failures
+                - link "Error Recovery" [ref=e462] [cursor=pointer]:
+                  - /url: /synthesis/error-taxonomy-recovery
+                  - generic [ref=e464]: Error Recovery
+                - link "Pattern Migration" [ref=e466] [cursor=pointer]:
+                  - /url: /synthesis/cross-pattern-migration
+                  - generic [ref=e468]: Pattern Migration
+            - button "Ecosystem & Tools 6" [ref=e471]:
+              - img [ref=e473]
+              - img [ref=e476]
+              - generic [ref=e478]: Ecosystem & Tools
+              - generic [ref=e479]: "6"
+            - generic [ref=e481]:
+              - button "Frontier & Research 5" [expanded] [ref=e482]:
+                - img [ref=e484]
+                - img [ref=e487]
+                - generic [ref=e492]: Frontier & Research
+                - generic [ref=e493]: "5"
+              - generic [ref=e497]:
+                - link "Frontier Overview" [ref=e499] [cursor=pointer]:
+                  - /url: /synthesis/frontier-master
+                  - generic [ref=e501]: Frontier Overview
+                - link "Innovations" [ref=e503] [cursor=pointer]:
+                  - /url: /synthesis/frontier-innovations
+                  - generic [ref=e505]: Innovations
+                - link "International Patterns" [ref=e507] [cursor=pointer]:
+                  - /url: /synthesis/frontier-international
+                  - generic [ref=e509]: International Patterns
+                - link "Mobile Patterns" [ref=e511] [cursor=pointer]:
+                  - /url: /synthesis/frontier-mobile
+                  - generic [ref=e513]: Mobile Patterns
+                - link "Mobile-First Workflows" [ref=e515] [cursor=pointer]:
+                  - /url: /synthesis/mobile-first-workflows
+                  - generic [ref=e517]: Mobile-First Workflows
+      - separator "Resize navigation panel" [ref=e518]
+      - main [ref=e530]:
+        - article [ref=e534]:
+          - generic [ref=e536]:
+            - generic [ref=e537]: Essence (15 words)
+            - generic [ref=e538]: Primitives combine through operators into patterns. Wrong combinations break. Right combinations unlock emergent capability.
+          - generic [ref=e539]:
+            - heading "2 The Core Abstraction" [level=2] [ref=e540]:
+              - generic [ref=e541]: "2"
+              - text: The Core Abstraction
+            - generic [ref=e542]:
+              - generic [ref=e543]: "\"Patterns aren't monoliths. They're compositions of primitives with operators.\""
+              - generic [ref=e544]:
+                - button "Copy" [ref=e545] [cursor=pointer]: Copy
+                - code [ref=e547]: Pattern = Primitive1 + Primitive2 + ... | Operator
+              - generic [ref=e548]: Every pattern decomposes to this. Understand primitives and operators, understand everything.
+            - paragraph [ref=e549]: "Ralph, CC Mirror, Gas Town, and Panopticon aren't magic. They're combinations of the same building blocks: loops, state files, agents, hooks, and isolation boundaries. The difference is HOW they're combined."
+            - paragraph [ref=e550]: This document is a grammar for agent orchestration. Learn the vocabulary (primitives), the syntax (operators), and the valid sentences (compositions). Then you can write your own patterns instead of copying others.
+            - heading "The Primitive Inventory" [level=3] [ref=e551]
+            - generic [ref=e552]:
+              - button "Copy" [ref=e553] [cursor=pointer]: Copy
+              - generic [ref=e555]: "# Control Flow Primitives Bash Loop # while :; do ... done Fresh Context # New Claude per iteration Stop Hook # Intercepts exit, restarts Completion # <promise>COMPLETE</promise> # State Primitives JSON Tasks # prd.json with passes: true/false File State # progress.txt (append-only) Git Memory # Commits persist across resets CLAUDE.md # Static project context # Agent Primitives Orchestrator # Coordinates, no tools Worker # Executes, no spawning Subagent # Task() for isolated context TaskAPI # TaskCreate, TaskUpdate, blockedBy # Isolation Primitives Directory # Separate filesystem per domain Git Worktree # Parallel branches without conflicts Docker # Full process isolation tmux Pane # Visual monitoring"
+          - generic [ref=e556]:
+            - heading "3 Composition Equations" [level=2] [ref=e557]:
+              - generic [ref=e558]: "3"
+              - text: Composition Equations
+            - paragraph [ref=e559]: Each major pattern can be expressed as an equation of primitives. This isn't metaphor - it's literally what they're made of.
+            - generic [ref=e560]:
+              - generic [ref=e561]: Ralph = Loop + JSON Tasks + File State + Git Memory
+              - generic [ref=e562]: "while(!complete) { FreshContext() + ReadState(prd.json, progress.txt, git.log) + Execute(next_task) + Verify(tests, typecheck) + UpdateState(prd.json, progress.txt) + Commit() + CheckCompletion() }"
+              - generic [ref=e563]:
+                - strong [ref=e564]: "Why it works:"
+                - text: External memory (files, git) compensates for context reset. Each iteration benefits from accumulated learnings without context rot.
+            - generic [ref=e565]:
+              - generic [ref=e566]: CC Mirror = Orchestrator + Workers + Task API
+              - generic [ref=e567]: "Orchestrator(TaskAPI) { TaskCreate(tasks[]) + SetDependencies(blockedBy[]) + for task in unblocked: Worker(task, tools=[Read,Write,Edit,Bash]) + TaskUpdate(status) }"
+              - generic [ref=e568]:
+                - strong [ref=e569]: "Why it works:"
+                - text: Clear separation between coordination (orchestrator) and execution (workers). Workers can't spawn, preventing recursion. Task dependencies auto-schedule work.
+            - generic [ref=e570]:
+              - generic [ref=e571]: Gas Town = Factory + Specialized Roles + Beads + tmux
+              - generic [ref=e572]: "Factory { Mayor(coordination) + Deacon(monitoring) + Dogs(quality_gates) + for rig in rigs: Witness(rig, observation) + Refinery(rig, decomposition) + Polecat[](rig, persistent_workers) + Crew[](rig, ephemeral_workers) + Beads(shared_context) + AgentMail(communication) + Overseer(human_decisions) }"
+              - generic [ref=e573]:
+                - strong [ref=e574]: "Why it works:"
+                - text: Role specialization prevents overload. Factory can scale workers indefinitely. Beads provides shared context. Human stays in loop via inbox.
+            - generic [ref=e575]:
+              - generic [ref=e576]: Panopticon = Isolated Directories + Cron + Subagents
+              - generic [ref=e577]: "for domain in domains: IsolatedDirectory(domain) + Cron(scheduled_pulls) + while(running): Claude(domain_tasks) + Subagent(specific_tasks) + FileHandoff(cross_domain_data) + Checkpoint(notify_human)"
+              - generic [ref=e578]:
+                - strong [ref=e579]: "Why it works:"
+                - text: Domain isolation prevents context pollution. Cron provides automation. File handoffs enable cross-domain awareness without context bloat.
+          - generic [ref=e580]:
+            - heading "4 The 6 Composition Operators" [level=2] [ref=e581]:
+              - generic [ref=e582]: "4"
+              - text: The 6 Composition Operators
+            - paragraph [ref=e583]: Operators define HOW primitives combine. Using the wrong operator breaks the pattern.
+            - generic [ref=e584]:
+              - generic [ref=e585]:
+                - generic [ref=e586]: A -> B
+                - generic [ref=e587]: Sequential
+              - generic [ref=e588]: Complete A before starting B. Used when order matters or state must be consistent.
+              - generic [ref=e590]: "# Example: Ralph iteration Read_State() -> Execute_Task() -> Verify() -> Commit() -> Update_State() # Bash implementation task_a && task_b && task_c"
+            - generic [ref=e591]:
+              - generic [ref=e592]:
+                - generic [ref=e593]: A || B
+                - generic [ref=e594]: Parallel
+              - generic [ref=e595]: Execute A and B concurrently. Requires independence and isolation. Increases throughput at cost of complexity.
+              - generic [ref=e597]: "# Example: Parallel Ralph with worktrees (cd wt-feature-a && ./ralph.sh) & (cd wt-feature-b && ./ralph.sh) & (cd wt-feature-c && ./ralph.sh) & wait"
+            - generic [ref=e598]:
+              - generic [ref=e599]:
+                - generic [ref=e600]: "A { B }"
+                - generic [ref=e601]: Nested
+              - generic [ref=e602]: B runs within A's scope. Used for subagent isolation. Protects main context from expensive operations.
+              - generic [ref=e604]: "# Example: Playwright verification in subagent MainAgent { Implement(ui_task) Subagent(Playwright) { Navigate(url) Screenshot() Assert(visual_state) } MarkComplete(if_verified) }"
+            - generic [ref=e605]:
+              - generic [ref=e606]:
+                - generic [ref=e607]: "X ? A : B"
+                - generic [ref=e608]: Conditional
+              - generic [ref=e609]: Choose path based on condition. Used for error recovery, model selection, or optimization.
+              - generic [ref=e611]: "# Example: Ralph completion check if grep -q \"COMPLETE\" output.txt; then break # Exit loop else continue # Next iteration fi"
+            - generic [ref=e612]:
+              - generic [ref=e613]:
+                - generic [ref=e614]: "while(!done) { A }"
+                - generic [ref=e615]: Iterative
+              - generic [ref=e616]: Repeat until termination. MUST have explicit completion condition, max iterations, and external memory.
+              - generic [ref=e618]: "# Example: Bounded Ralph loop for i in $(seq 1 $MAX_ITERATIONS); do claude @prompt.md # Check for completion signal done"
+            - generic [ref=e619]:
+              - generic [ref=e620]:
+                - generic [ref=e621]: A -> spawn(B)
+                - generic [ref=e622]: Delegation
+              - generic [ref=e623]: A creates B for subtask. Parent can't see child's context. Child can't spawn (prevents recursion).
+              - generic [ref=e625]: "# Example: Orchestrator spawns workers Orchestrator -> spawn(Worker(task_1)) Orchestrator -> spawn(Worker(task_2)) # Workers return results via Task output"
+          - generic [ref=e626]:
+            - heading "5 Valid Compositions" [level=2] [ref=e627]:
+              - generic [ref=e628]: "5"
+              - text: Valid Compositions
+            - paragraph [ref=e629]: Not everything composes. Here's what works and why.
+            - heading "Compatibility Matrix" [level=3] [ref=e630]
+            - table [ref=e632]:
+              - rowgroup [ref=e633]:
+                - row "Loop Tasks Subagent Worktree Docker Hooks Memory" [ref=e634]:
+                  - columnheader [ref=e635]
+                  - columnheader "Loop" [ref=e636]
+                  - columnheader "Tasks" [ref=e637]
+                  - columnheader "Subagent" [ref=e638]
+                  - columnheader "Worktree" [ref=e639]
+                  - columnheader "Docker" [ref=e640]
+                  - columnheader "Hooks" [ref=e641]
+                  - columnheader "Memory" [ref=e642]
+                - row "Loop Y Y Y Y Y Y Y" [ref=e643]:
+                  - rowheader "Loop" [ref=e644]
+                  - cell "Y" [ref=e645]
+                  - cell "Y" [ref=e646]
+                  - cell "Y" [ref=e647]
+                  - cell "Y" [ref=e648]
+                  - cell "Y" [ref=e649]
+                  - cell "Y" [ref=e650]
+                  - cell "Y" [ref=e651]
+                - row "Tasks Y Y Y C C Y Y" [ref=e652]:
+                  - rowheader "Tasks" [ref=e653]
+                  - cell "Y" [ref=e654]
+                  - cell "Y" [ref=e655]
+                  - cell "Y" [ref=e656]
+                  - cell "C" [ref=e657]
+                  - cell "C" [ref=e658]
+                  - cell "Y" [ref=e659]
+                  - cell "Y" [ref=e660]
+                - row "Subagent Y Y C Y Y Y Y" [ref=e661]:
+                  - rowheader "Subagent" [ref=e662]
+                  - cell "Y" [ref=e663]
+                  - cell "Y" [ref=e664]
+                  - cell "C" [ref=e665]
+                  - cell "Y" [ref=e666]
+                  - cell "Y" [ref=e667]
+                  - cell "Y" [ref=e668]
+                  - cell "Y" [ref=e669]
+                - row "Worktree Y C Y Y Y Y Y" [ref=e670]:
+                  - rowheader "Worktree" [ref=e671]
+                  - cell "Y" [ref=e672]
+                  - cell "C" [ref=e673]
+                  - cell "Y" [ref=e674]
+                  - cell "Y" [ref=e675]
+                  - cell "Y" [ref=e676]
+                  - cell "Y" [ref=e677]
+                  - cell "Y" [ref=e678]
+                - row "Docker Y C Y Y Y Y Y" [ref=e679]:
+                  - rowheader "Docker" [ref=e680]
+                  - cell "Y" [ref=e681]
+                  - cell "C" [ref=e682]
+                  - cell "Y" [ref=e683]
+                  - cell "Y" [ref=e684]
+                  - cell "Y" [ref=e685]
+                  - cell "Y" [ref=e686]
+                  - cell "Y" [ref=e687]
+                - row "Hooks Y Y Y Y Y Y Y" [ref=e688]:
+                  - rowheader "Hooks" [ref=e689]
+                  - cell "Y" [ref=e690]
+                  - cell "Y" [ref=e691]
+                  - cell "Y" [ref=e692]
+                  - cell "Y" [ref=e693]
+                  - cell "Y" [ref=e694]
+                  - cell "Y" [ref=e695]
+                  - cell "Y" [ref=e696]
+                - row "Memory Y Y Y Y Y Y Y" [ref=e697]:
+                  - rowheader "Memory" [ref=e698]
+                  - cell "Y" [ref=e699]
+                  - cell "Y" [ref=e700]
+                  - cell "Y" [ref=e701]
+                  - cell "Y" [ref=e702]
+                  - cell "Y" [ref=e703]
+                  - cell "Y" [ref=e704]
+                  - cell "Y" [ref=e705]
+            - paragraph [ref=e706]: Y = Works well | C = Works with caveats (see documentation)
+            - heading "Composition Tiers" [level=3] [ref=e707]
+            - generic [ref=e708]:
+              - generic [ref=e709]:
+                - generic [ref=e710]: TIER 1
+                - generic [ref=e711]:
+                  - generic [ref=e712]: Solo Developer (Quick Win)
+                  - generic [ref=e713]: 1 hour setup | Single agent cost
+              - generic [ref=e715]: "Ralph = Loop + JSON + Git # Overnight feature development for one dev"
+            - generic [ref=e716]:
+              - generic [ref=e717]:
+                - generic [ref=e718]: TIER 2
+                - generic [ref=e719]:
+                  - generic [ref=e720]: Power User (Medium Lift)
+                  - generic [ref=e721]: Half-day setup | Moderate cost (subagent overhead)
+              - generic [ref=e723]: "Ralph + Playwright = Loop + Browser + Subagents CC Mirror = Orchestrator + Workers + Tasks # UI verification, multi-agent coordination"
+            - generic [ref=e724]:
+              - generic [ref=e725]:
+                - generic [ref=e726]: TIER 3
+                - generic [ref=e727]:
+                  - generic [ref=e728]: Agent Factory (Deep Dive)
+                  - generic [ref=e729]: Days of setup | High cost (multiple accounts)
+              - generic [ref=e731]: "Gas Town = 7 Roles + Beads + tmux + Mail Parallel Ralph = Worktrees + Multiple Loops # Maximum throughput, factory-scale"
+          - generic [ref=e732]:
+            - heading "6 Invalid Compositions (Anti-patterns)" [level=2] [ref=e733]:
+              - generic [ref=e734]: "6"
+              - text: Invalid Compositions (Anti-patterns)
+            - paragraph [ref=e735]: These break. Learn why so you don't reinvent failed experiments.
+            - generic [ref=e736]:
+              - generic [ref=e737]: Subagent Recursion
+              - generic [ref=e738]: "Worker { Subagent { Subagent { // INFINITE RECURSION ... } } }"
+              - generic [ref=e739]:
+                - strong [ref=e740]: "Why it breaks:"
+                - text: Unbounded context growth. Each level spawns more. Eventually hits limits or costs explode.
+              - generic [ref=e741]:
+                - strong [ref=e742]: "Fix:"
+                - text: Workers NEVER spawn. Only orchestrators spawn.
+            - generic [ref=e743]:
+              - generic [ref=e744]: Loop Without External Memory
+              - generic [ref=e745]: while true; do claude "Continue working" // NO STATE BETWEEN ITERATIONS done
+              - generic [ref=e746]:
+                - strong [ref=e747]: "Why it breaks:"
+                - text: Each iteration starts from zero. No learning. No progress tracking. Repeats same mistakes.
+              - generic [ref=e748]:
+                - strong [ref=e749]: "Fix:"
+                - text: Add prd.json, progress.txt, git commits. External memory compensates for context reset.
+            - generic [ref=e750]:
+              - generic [ref=e751]: Parallel Without Isolation
+              - generic [ref=e752]: "Terminal 1: claude \"Edit src/auth.ts\" Terminal 2: claude \"Edit src/auth.ts\" // CONFLICT"
+              - generic [ref=e753]:
+                - strong [ref=e754]: "Why it breaks:"
+                - text: Race conditions. Overwrites. Broken state. One agent's work destroys another's.
+              - generic [ref=e755]:
+                - strong [ref=e756]: "Fix:"
+                - text: Use git worktrees. Or serialize access. Or file-level locking.
+            - generic [ref=e757]:
+              - generic [ref=e758]: Orchestrator With Tools
+              - generic [ref=e759]: "Orchestrator { Write(file) // WRONG - should delegate Edit(file) // WRONG - should delegate spawn(Worker) }"
+              - generic [ref=e760]:
+                - strong [ref=e761]: "Why it breaks:"
+                - text: Orchestrator context fills with tool output. Loses coordination capacity. Becomes unfocused.
+              - generic [ref=e762]:
+                - strong [ref=e763]: "Fix:"
+                - text: Orchestrator ONLY uses TaskCreate, TaskUpdate, Task(). Workers do implementation.
+            - generic [ref=e764]:
+              - generic [ref=e765]: Loop Without Termination
+              - generic [ref=e766]: while true; do claude @prompt.md done // NO EXIT CONDITION
+              - generic [ref=e767]:
+                - strong [ref=e768]: "Why it breaks:"
+                - text: Runs forever. Consumes unlimited tokens. No completion signal.
+              - generic [ref=e769]:
+                - strong [ref=e770]: "Fix:"
+                - text: Add completion promise. Add max iterations. Add stuck detection.
+            - generic [ref=e771]:
+              - generic [ref=e772]: Context Pollution
+              - generic [ref=e773]: claude " Fix the auth bug AND Update the marketing copy AND Analyze financial data AND Generate workout plan "
+              - generic [ref=e774]:
+                - strong [ref=e775]: "Why it breaks:"
+                - text: Unrelated concerns bloat context. Model gets confused. Quality degrades.
+              - generic [ref=e776]:
+                - strong [ref=e777]: "Fix:"
+                - text: Isolate domains (directories, sessions). One domain per context.
+          - generic [ref=e778]:
+            - heading "7 What's Hard" [level=2] [ref=e779]:
+              - generic [ref=e780]: "7"
+              - text: What's Hard
+            - paragraph [ref=e781]: These are fundamental tensions in composition, not bugs to fix.
+            - generic [ref=e782]:
+              - generic [ref=e783]: Isolation vs. Coordination
+              - generic [ref=e785]:
+                - strong [ref=e786]: "The tension:"
+                - text: Strong isolation (worktrees, containers) prevents interference but makes coordination harder. Shared state enables coordination but creates conflicts.
+              - generic [ref=e787]:
+                - strong [ref=e788]: "Symptoms:"
+                - text: Parallel agents step on each other (weak isolation), OR agents can't share context (strong isolation).
+              - generic [ref=e789]:
+                - strong [ref=e790]: "Mitigation:"
+                - text: Use Beads-style shared data plane. File handoffs for cross-agent communication. Accept that some re-work is the cost of parallelism.
+            - generic [ref=e791]:
+              - generic [ref=e792]: Operator Selection
+              - generic [ref=e794]:
+                - strong [ref=e795]: "The tension:"
+                - text: Sequential is safe but slow. Parallel is fast but complex. Nested is clean but costly. No operator is universally right.
+              - generic [ref=e796]:
+                - strong [ref=e797]: "Symptoms:"
+                - text: Sequential bottlenecks at scale. Parallel race conditions. Nested context explosion.
+              - generic [ref=e798]:
+                - strong [ref=e799]: "Mitigation:"
+                - text: Start sequential, parallelize only proven bottlenecks. Use nested for expensive isolation. Profile before optimizing.
+            - generic [ref=e800]:
+              - generic [ref=e801]: Composition Debugging
+              - generic [ref=e803]:
+                - strong [ref=e804]: "The tension:"
+                - text: When a composition fails, which primitive broke? Which operator was wrong? The more components, the harder to diagnose.
+              - generic [ref=e805]:
+                - strong [ref=e806]: "Symptoms:"
+                - text: "\"It just doesn't work\" without clear failure signal. Output is garbage but all primitives seem fine."
+              - generic [ref=e807]:
+                - strong [ref=e808]: "Mitigation:"
+                - text: Build incrementally. Test primitives in isolation first. Add one component at a time. Keep compositions minimal.
+          - generic [ref=e809]:
+            - heading "8 Composition Decision Tree" [level=2] [ref=e810]:
+              - generic [ref=e811]: "8"
+              - text: Composition Decision Tree
+            - paragraph [ref=e812]: Start here. Answer questions to find your pattern.
+            - generic [ref=e813]:
+              - generic [ref=e814]:
+                - generic [ref=e815]: Q
+                - strong [ref=e817]: What are you building?
+              - generic [ref=e818]:
+                - generic [ref=e819]: "1"
+                - generic [ref=e820]:
+                  - strong [ref=e821]: Single feature, well-defined completion?
+                  - text: "Use: RALPH - Loop + JSON + Git"
+                  - text: "Effort: Quick Win (1 hour)"
+              - generic [ref=e822]:
+                - generic [ref=e823]: "2"
+                - generic [ref=e824]:
+                  - strong [ref=e825]: Multiple features, need parallelization?
+                  - text: "Same repo, no file conflicts? Use: PARALLEL RALPH - Worktrees + Multiple Loops"
+                  - text: "Need task dependencies? Use: CC MIRROR - Orchestrator + Workers + Task API"
+              - generic [ref=e826]:
+                - generic [ref=e827]: "3"
+                - generic [ref=e828]:
+                  - strong [ref=e829]: UI-heavy work?
+                  - text: "Use: RALPH + PLAYWRIGHT - Loop + Browser Subagent"
+                  - text: "Note: Subagent isolates high token cost"
+              - generic [ref=e830]:
+                - generic [ref=e831]: "4"
+                - generic [ref=e832]:
+                  - strong [ref=e833]: Multi-domain life automation?
+                  - text: "Use: PANOPTICON - Isolated Dirs + Cron + Handoffs"
+                  - text: "Note: Domain isolation prevents context pollution"
+              - generic [ref=e834]:
+                - generic [ref=e835]: "5"
+                - generic [ref=e836]:
+                  - strong [ref=e837]: Maximum throughput, cost no object?
+                  - text: "Stage 7+ developer? Use: GAS TOWN - Factory + Roles + Beads + tmux"
+                  - text: "Stage 5-6 developer? Use: CC MIRROR - 80% of value, 10% of effort"
+            - generic [ref=e838]:
+              - generic [ref=e839]:
+                - generic [ref=e840]: COMPOSE PATTERNS WHEN
+                - generic [ref=e844]: Base pattern is insufficient for your needs
+                - generic [ref=e847]: Components are in the compatibility matrix
+                - generic [ref=e850]: You understand each primitive in isolation
+                - generic [ref=e853]: You can articulate why each operator choice
+                - generic [ref=e856]: You have debugged simpler versions first
+              - generic [ref=e857]:
+                - generic [ref=e858]: DON'T COMPOSE WHEN
+                - generic [ref=e862]: A simpler pattern already solves your problem
+                - generic [ref=e865]: You're copying without understanding
+                - generic [ref=e868]: Components aren't in compatibility matrix
+                - generic [ref=e871]: You can't debug the simpler version
+                - generic [ref=e874]: "\"More complex = better\" is your reasoning"
+            - 'heading "Quick Reference: Composition Formulas" [level=3] [ref=e875]'
+            - generic [ref=e876]:
+              - button "Copy" [ref=e877] [cursor=pointer]: Copy
+              - generic [ref=e879]: "# Pattern Equations (Memorize These) Ralph = while(!complete) { Fresh + State + Execute + Verify + Commit } CC Mirror = Orchestrator(TaskAPI) { spawn(Workers) } Gas Town = Factory { Mayor + Roles[] + Beads + Mail + Human } Panopticon = Domains[] { Cron + Claude + Handoffs } Orchestra = Docker { while(true) { if(idle) improve() else work() } } Ralph+Play = Ralph { Subagent(Playwright.verify()) } Parallel Ralph = Worktrees[] { Ralph(worktree) } + Merge"
+      - separator "Resize activity zone" [ref=e880]
+      - complementary [ref=e882]:
+        - generic [ref=e883]:
+          - generic [ref=e884]:
+            - img [ref=e886]
+            - generic [ref=e888]:
+              - generic [ref=e889]: Operational Intelligence
+              - generic [ref=e890]: 29 insights for this page
+          - generic [ref=e891]:
+            - 'button "Inversion Lens What if patterns WERE monoliths? You''d design: One pattern per use case. No shared primitives. No composition. Why this fails: You''d reinvent loops, state files, and isolation in every pattern. Hidden constraint revealed: Patterns share 80% of their machinery. Composition is inevitable." [pressed] [ref=e948] [cursor=pointer]':
+              - generic [ref=e950]:
+                - generic [ref=e951]: Inversion Lens
+                - heading "What if patterns WERE monoliths?" [level=4] [ref=e953]
+                - generic [ref=e954]:
+                  - strong [ref=e955]: "You'd design:"
+                  - text: One pattern per use case. No shared primitives. No composition.
+                  - strong [ref=e956]: "Why this fails:"
+                  - text: You'd reinvent loops, state files, and isolation in every pattern.
+                  - strong [ref=e957]: "Hidden constraint revealed:"
+                  - text: Patterns share 80% of their machinery. Composition is inevitable.
+            - 'button "Minimal Pattern The irreducible core Primitive + Operator + Termination Essential: Something that does work. Something that combines. Something that stops. Everything else: Reliability, observability, scale." [pressed] [ref=e960] [cursor=pointer]':
+              - generic [ref=e962]:
+                - generic [ref=e963]: Minimal Pattern
+                - heading "The irreducible core" [level=4] [ref=e965]
+                - generic [ref=e966]:
+                  - code [ref=e967]: Primitive + Operator + Termination
+                  - strong [ref=e968]: "Essential:"
+                  - text: Something that does work. Something that combines. Something that stops.
+                  - strong [ref=e969]: "Everything else:"
+                  - text: Reliability, observability, scale.
+            - 'button "Invariant Connection INV-001: All patterns share the same primitives Ralph, CC Mirror, Gas Town, Panopticon all use loops, state files, and isolation. Why this matters: Learn primitives once, understand all patterns. The \"pattern\" is just how you wire them." [pressed] [ref=e972] [cursor=pointer]':
+              - generic [ref=e974]:
+                - generic [ref=e975]: Invariant Connection
+                - 'heading "INV-001: All patterns share the same primitives" [level=4] [ref=e977]'
+                - generic [ref=e978]:
+                  - text: Ralph, CC Mirror, Gas Town, Panopticon all use loops, state files, and isolation.
+                  - strong [ref=e979]: "Why this matters:"
+                  - text: Learn primitives once, understand all patterns. The "pattern" is just how you wire them.
+            - button "Analogical Bridge Composition = Programming Language Grammar Primitives -> Keywords Operators -> Syntax rules Valid compositions -> Legal programs Anti-patterns -> Syntax errors If you've learned a programming language, you can learn pattern composition." [ref=e982] [cursor=pointer]:
+              - generic [ref=e984]:
+                - generic [ref=e985]: Analogical Bridge
+                - heading "Composition = Programming Language Grammar" [level=4] [ref=e987]
+                - generic [ref=e988]:
+                  - text: Primitives -> Keywords
+                  - text: Operators -> Syntax rules
+                  - text: Valid compositions -> Legal programs
+                  - text: Anti-patterns -> Syntax errors
+                  - emphasis [ref=e989]: If you've learned a programming language, you can learn pattern composition.
+            - 'button "Expertise Gradient How deep is your understanding? Beginner: \"What are the primitives?\" -> The inventory Intermediate: \"How do I combine them?\" -> Operators Advanced: \"What compositions work?\" -> Compatibility matrix Staff: \"Why does this break?\" -> Anti-pattern diagnosis Expert: \"Can I invent new patterns?\" -> Yes, from primitives" [ref=e991] [cursor=pointer]':
+              - generic [ref=e993]:
+                - generic [ref=e994]: Expertise Gradient
+                - heading "How deep is your understanding?" [level=4] [ref=e996]
+                - generic [ref=e997]:
+                  - strong [ref=e998]: "Beginner:"
+                  - text: "\"What are the primitives?\" -> The inventory"
+                  - strong [ref=e999]: "Intermediate:"
+                  - text: "\"How do I combine them?\" -> Operators"
+                  - strong [ref=e1000]: "Advanced:"
+                  - text: "\"What compositions work?\" -> Compatibility matrix"
+                  - strong [ref=e1001]: "Staff:"
+                  - text: "\"Why does this break?\" -> Anti-pattern diagnosis"
+                  - strong [ref=e1002]: "Expert:"
+                  - text: "\"Can I invent new patterns?\" -> Yes, from primitives"
+            - 'button "Constraint Chain One constraint -> FIVE compositions ROOT: Context window is finite (200K) -> Fresh context needed (Loop primitive) -> State must persist externally (File State primitive) -> Expensive ops need isolation (Subagent primitive) -> Parallel work needs isolation (Worktree primitive) -> Coordination needs separation (Orchestrator/Worker split)" [ref=e1004] [cursor=pointer]':
+              - generic [ref=e1006]:
+                - generic [ref=e1007]: Constraint Chain
+                - heading "One constraint -> FIVE compositions" [level=4] [ref=e1009]
+                - generic [ref=e1010]:
+                  - strong [ref=e1011]: "ROOT:"
+                  - text: Context window is finite (200K)
+                  - text: "-> Fresh context needed (Loop primitive)"
+                  - text: "-> State must persist externally (File State primitive)"
+                  - text: "-> Expensive ops need isolation (Subagent primitive)"
+                  - text: "-> Parallel work needs isolation (Worktree primitive)"
+                  - text: "-> Coordination needs separation (Orchestrator/Worker split)"
+            - 'button "War Story Steve Yegge: \"Once you see the primitives...\" Gas Town looks complex from outside (7 roles, Beads, AgentMail). But it''s just primitives + operators. Yegge built it by understanding composition, not by inventing new magic." [ref=e1013] [cursor=pointer]':
+              - generic [ref=e1015]:
+                - generic [ref=e1016]: War Story
+                - 'heading "Steve Yegge: \"Once you see the primitives...\"" [level=4] [ref=e1018]'
+                - generic [ref=e1019]: Gas Town looks complex from outside (7 roles, Beads, AgentMail). But it's just primitives + operators. Yegge built it by understanding composition, not by inventing new magic.
+            - 'button "Inversion Lens What if Ralph didn''t use fresh context? You''d design: One long session. No loop. No external state files. Why this fails: Context rot at 80K tokens. Quality degrades with accumulated context. Hidden constraint revealed: The loop ISN''T overhead - it''s the core mechanism." [ref=e1021] [cursor=pointer]':
+              - generic [ref=e1023]:
+                - generic [ref=e1024]: Inversion Lens
+                - heading "What if Ralph didn't use fresh context?" [level=4] [ref=e1026]
+                - generic [ref=e1027]:
+                  - strong [ref=e1028]: "You'd design:"
+                  - text: One long session. No loop. No external state files.
+                  - strong [ref=e1029]: "Why this fails:"
+                  - text: Context rot at 80K tokens. Quality degrades with accumulated context.
+                  - strong [ref=e1030]: "Hidden constraint revealed:"
+                  - text: The loop ISN'T overhead - it's the core mechanism.
+            - 'button "Failure Gradient How Ralph degrades without external state Iteration 1-3: Works fine (context fresh) Iteration 4-8: Starts repeating mistakes Iteration 9-15: No velocity improvement Iteration 15+: Same as iteration 1 forever Without external state, there''s no learning curve." [ref=e1032] [cursor=pointer]':
+              - generic [ref=e1034]:
+                - generic [ref=e1035]: Failure Gradient
+                - heading "How Ralph degrades without external state" [level=4] [ref=e1037]
+                - generic [ref=e1038]:
+                  - strong [ref=e1039]: "Iteration 1-3:"
+                  - text: Works fine (context fresh)
+                  - strong [ref=e1040]: "Iteration 4-8:"
+                  - text: Starts repeating mistakes
+                  - strong [ref=e1041]: "Iteration 9-15:"
+                  - text: No velocity improvement
+                  - strong [ref=e1042]: "Iteration 15+:"
+                  - text: Same as iteration 1 forever
+                  - emphasis [ref=e1043]: Without external state, there's no learning curve.
+            - 'button "Composition Case CC Mirror + Git Worktrees Works: Task dependencies + conflict-free parallel execution Caveat: Task API doesn''t know about worktrees natively Recommendation: Use file-based handoffs between worktree workers" [ref=e1045] [cursor=pointer]':
+              - generic [ref=e1047]:
+                - generic [ref=e1048]: Composition Case
+                - heading "CC Mirror + Git Worktrees" [level=4] [ref=e1050]
+                - generic [ref=e1051]:
+                  - strong [ref=e1052]: "Works:"
+                  - text: Task dependencies + conflict-free parallel execution
+                  - strong [ref=e1053]: "Caveat:"
+                  - text: Task API doesn't know about worktrees natively
+                  - strong [ref=e1054]: "Recommendation:"
+                  - text: Use file-based handoffs between worktree workers
+            - button "Analogical Bridge Gas Town = Microservices Architecture Mayor -> API Gateway Polecats -> Stateless workers Beads -> Shared database AgentMail -> Message queue If you've built microservices, Gas Town is the same pattern for agents." [ref=e1056] [cursor=pointer]:
+              - generic [ref=e1058]:
+                - generic [ref=e1059]: Analogical Bridge
+                - heading "Gas Town = Microservices Architecture" [level=4] [ref=e1061]
+                - generic [ref=e1062]:
+                  - text: Mayor -> API Gateway
+                  - text: Polecats -> Stateless workers
+                  - text: Beads -> Shared database
+                  - text: AgentMail -> Message queue
+                  - emphasis [ref=e1063]: If you've built microservices, Gas Town is the same pattern for agents.
+            - 'button "Trade-Off Tension Sequential vs. Parallel Sequential: Safe, predictable, but slow. No isolation needed. Parallel: Fast, but requires isolation. Race conditions possible. Heuristic: Start sequential. Profile. Parallelize only proven bottlenecks." [ref=e1065] [cursor=pointer]':
+              - generic [ref=e1067]:
+                - generic [ref=e1068]: Trade-Off Tension
+                - heading "Sequential vs. Parallel" [level=4] [ref=e1070]
+                - generic [ref=e1071]:
+                  - strong [ref=e1072]: "Sequential:"
+                  - text: Safe, predictable, but slow. No isolation needed.
+                  - strong [ref=e1073]: "Parallel:"
+                  - text: Fast, but requires isolation. Race conditions possible.
+                  - strong [ref=e1074]: "Heuristic:"
+                  - text: Start sequential. Profile. Parallelize only proven bottlenecks.
+            - 'button "Violation Chain If you use parallel without isolation IF: Two agents edit same file in parallel THEN: One overwrites the other''s work THEN: Later agent has corrupted foundation THEN: Cascading failures in dependent work FINALLY: Hours of debugging for 10 minutes of parallelism The fix: Worktrees or explicit file ownership." [ref=e1076] [cursor=pointer]':
+              - generic [ref=e1078]:
+                - generic [ref=e1079]: Violation Chain
+                - heading "If you use parallel without isolation" [level=4] [ref=e1081]
+                - generic [ref=e1082]:
+                  - strong [ref=e1083]: "IF:"
+                  - text: Two agents edit same file in parallel
+                  - strong [ref=e1084]: "THEN:"
+                  - text: One overwrites the other's work
+                  - strong [ref=e1085]: "THEN:"
+                  - text: Later agent has corrupted foundation
+                  - strong [ref=e1086]: "THEN:"
+                  - text: Cascading failures in dependent work
+                  - strong [ref=e1087]: "FINALLY:"
+                  - text: Hours of debugging for 10 minutes of parallelism
+                  - emphasis [ref=e1088]: "The fix: Worktrees or explicit file ownership."
+            - 'button "Expertise Gradient Operator selection depth Beginner: \"Which operator?\" -> Sequential for safety Intermediate: \"When parallel?\" -> Independent tasks only Advanced: \"When nested?\" -> Expensive ops needing isolation Staff: \"When delegation?\" -> When workers shouldn''t spawn Expert: \"Operator combinations?\" -> Sequential-of-parallel is common" [ref=e1090] [cursor=pointer]':
+              - generic [ref=e1092]:
+                - generic [ref=e1093]: Expertise Gradient
+                - heading "Operator selection depth" [level=4] [ref=e1095]
+                - generic [ref=e1096]:
+                  - strong [ref=e1097]: "Beginner:"
+                  - text: "\"Which operator?\" -> Sequential for safety"
+                  - strong [ref=e1098]: "Intermediate:"
+                  - text: "\"When parallel?\" -> Independent tasks only"
+                  - strong [ref=e1099]: "Advanced:"
+                  - text: "\"When nested?\" -> Expensive ops needing isolation"
+                  - strong [ref=e1100]: "Staff:"
+                  - text: "\"When delegation?\" -> When workers shouldn't spawn"
+                  - strong [ref=e1101]: "Expert:"
+                  - text: "\"Operator combinations?\" -> Sequential-of-parallel is common"
+            - 'button "Time Horizon Shift How operator choice feels over time Day 1: \"Sequential is slow, let''s parallelize!\" Day 3: \"Why are there merge conflicts everywhere?\" Week 2: \"Oh, isolation is the real work, not parallelism\" Month 1: \"Sequential was actually fine for 80% of cases\" Optimize operators based on data, not intuition." [ref=e1103] [cursor=pointer]':
+              - generic [ref=e1105]:
+                - generic [ref=e1106]: Time Horizon Shift
+                - heading "How operator choice feels over time" [level=4] [ref=e1108]
+                - generic [ref=e1109]:
+                  - strong [ref=e1110]: "Day 1:"
+                  - text: "\"Sequential is slow, let's parallelize!\""
+                  - strong [ref=e1111]: "Day 3:"
+                  - text: "\"Why are there merge conflicts everywhere?\""
+                  - strong [ref=e1112]: "Week 2:"
+                  - text: "\"Oh, isolation is the real work, not parallelism\""
+                  - strong [ref=e1113]: "Month 1:"
+                  - text: "\"Sequential was actually fine for 80% of cases\""
+                  - emphasis [ref=e1114]: Optimize operators based on data, not intuition.
+            - 'button "Composition Case Ralph + Playwright Works: Visual verification catches UI bugs tests miss Danger: Browser context is expensive (5-10x tokens) Recommendation: Put Playwright in subagent to protect main context" [ref=e1116] [cursor=pointer]':
+              - generic [ref=e1118]:
+                - generic [ref=e1119]: Composition Case
+                - heading "Ralph + Playwright" [level=4] [ref=e1121]
+                - generic [ref=e1122]:
+                  - strong [ref=e1123]: "Works:"
+                  - text: Visual verification catches UI bugs tests miss
+                  - strong [ref=e1124]: "Danger:"
+                  - text: Browser context is expensive (5-10x tokens)
+                  - strong [ref=e1125]: "Recommendation:"
+                  - text: Put Playwright in subagent to protect main context
+            - 'button "Composition Case Ralph + Claude-Mem Works: Cross-session memory without progress.txt bloat Caveat: Requires 3-layer retrieval strategy (Search -> Timeline -> Get) Recommendation: Inject only relevant memories, not everything" [ref=e1127] [cursor=pointer]':
+              - generic [ref=e1129]:
+                - generic [ref=e1130]: Composition Case
+                - heading "Ralph + Claude-Mem" [level=4] [ref=e1132]
+                - generic [ref=e1133]:
+                  - strong [ref=e1134]: "Works:"
+                  - text: Cross-session memory without progress.txt bloat
+                  - strong [ref=e1135]: "Caveat:"
+                  - text: Requires 3-layer retrieval strategy (Search -> Timeline -> Get)
+                  - strong [ref=e1136]: "Recommendation:"
+                  - text: Inject only relevant memories, not everything
+            - 'button "Second-Order Effect At Tier 3, coordination dominates Tier 1-2: Execution is the bottleneck Tier 3: Coordination is the bottleneck Threshold: ~7 agents, ~5 concurrent tasks Past this point, you need explicit coordination primitives (Beads, AgentMail)." [ref=e1138] [cursor=pointer]':
+              - generic [ref=e1140]:
+                - generic [ref=e1141]: Second-Order Effect
+                - heading "At Tier 3, coordination dominates" [level=4] [ref=e1143]
+                - generic [ref=e1144]:
+                  - strong [ref=e1145]: "Tier 1-2:"
+                  - text: Execution is the bottleneck
+                  - strong [ref=e1146]: "Tier 3:"
+                  - text: Coordination is the bottleneck
+                  - strong [ref=e1147]: "Threshold:"
+                  - text: ~7 agents, ~5 concurrent tasks
+                  - emphasis [ref=e1148]: Past this point, you need explicit coordination primitives (Beads, AgentMail).
+            - 'button "Inflection Point When Tier 2 becomes insufficient 1-3 features: Single Ralph handles it 4-6 features: Parallel Ralph or CC Mirror 7+ features: Factory pattern needed 10+ features: Gas Town or equivalent THE INFLECTION: ~7 concurrent features Detection: Tasks blocked waiting for other tasks." [ref=e1150] [cursor=pointer]':
+              - generic [ref=e1152]:
+                - generic [ref=e1153]: Inflection Point
+                - heading "When Tier 2 becomes insufficient" [level=4] [ref=e1155]
+                - generic [ref=e1156]:
+                  - strong [ref=e1157]: "1-3 features:"
+                  - text: Single Ralph handles it
+                  - strong [ref=e1158]: "4-6 features:"
+                  - text: Parallel Ralph or CC Mirror
+                  - strong [ref=e1159]: "7+ features:"
+                  - text: Factory pattern needed
+                  - strong [ref=e1160]: "10+ features:"
+                  - text: Gas Town or equivalent
+                  - strong [ref=e1161]: "THE INFLECTION:"
+                  - text: ~7 concurrent features
+                  - emphasis [ref=e1162]: "Detection: Tasks blocked waiting for other tasks."
+            - 'button "Violation Chain If orchestrator uses tools directly IF: Orchestrator calls Write() or Edit() directly THEN: Tool output fills orchestrator context THEN: Less room for coordination logic THEN: Orchestrator becomes unfocused FINALLY: Coordination quality degrades, workers go rogue The fix: Orchestrators ONLY use TaskCreate/TaskUpdate/Task()." [ref=e1164] [cursor=pointer]':
+              - generic [ref=e1166]:
+                - generic [ref=e1167]: Violation Chain
+                - heading "If orchestrator uses tools directly" [level=4] [ref=e1169]
+                - generic [ref=e1170]:
+                  - strong [ref=e1171]: "IF:"
+                  - text: Orchestrator calls Write() or Edit() directly
+                  - strong [ref=e1172]: "THEN:"
+                  - text: Tool output fills orchestrator context
+                  - strong [ref=e1173]: "THEN:"
+                  - text: Less room for coordination logic
+                  - strong [ref=e1174]: "THEN:"
+                  - text: Orchestrator becomes unfocused
+                  - strong [ref=e1175]: "FINALLY:"
+                  - text: Coordination quality degrades, workers go rogue
+                  - emphasis [ref=e1176]: "The fix: Orchestrators ONLY use TaskCreate/TaskUpdate/Task()."
+            - 'button "Inversion Lens Why CAN''T workers spawn? What if workers could spawn? Recursive spawning. Worker spawns worker spawns worker. Why this fails: Unbounded depth. No clear termination. Cost explosion. Hidden constraint revealed: Spawn hierarchy MUST be shallow. Orchestrator -> Worker. No deeper." [ref=e1178] [cursor=pointer]':
+              - generic [ref=e1180]:
+                - generic [ref=e1181]: Inversion Lens
+                - heading "Why CAN'T workers spawn?" [level=4] [ref=e1183]
+                - generic [ref=e1184]:
+                  - strong [ref=e1185]: What if workers could spawn?
+                  - text: Recursive spawning. Worker spawns worker spawns worker.
+                  - strong [ref=e1186]: "Why this fails:"
+                  - text: Unbounded depth. No clear termination. Cost explosion.
+                  - strong [ref=e1187]: "Hidden constraint revealed:"
+                  - text: Spawn hierarchy MUST be shallow. Orchestrator -> Worker. No deeper.
+            - 'button "Failure Gradient How context pollution degrades work 1 domain: Full focus, high quality 2 domains: Slight confusion, still workable 3 domains: Mixing concerns, errors creep in 4+ domains: Model confused, wrong domain context in outputs Critical: Degradation is invisible until quality cliff." [ref=e1189] [cursor=pointer]':
+              - generic [ref=e1191]:
+                - generic [ref=e1192]: Failure Gradient
+                - heading "How context pollution degrades work" [level=4] [ref=e1194]
+                - generic [ref=e1195]:
+                  - strong [ref=e1196]: "1 domain:"
+                  - text: Full focus, high quality
+                  - strong [ref=e1197]: "2 domains:"
+                  - text: Slight confusion, still workable
+                  - strong [ref=e1198]: "3 domains:"
+                  - text: Mixing concerns, errors creep in
+                  - strong [ref=e1199]: "4+ domains:"
+                  - text: Model confused, wrong domain context in outputs
+                  - emphasis [ref=e1200]: "Critical: Degradation is invisible until quality cliff."
+            - 'button "Research Frontier UNSOLVED: Anti-pattern detection The question: Can we automatically detect invalid compositions before they fail? Why it''s hard: Failures are emergent. Components work alone but fail together. Current practice: Manual review, incremental testing, pattern knowledge." [ref=e1202] [cursor=pointer]':
+              - generic [ref=e1204]:
+                - generic [ref=e1205]: Research Frontier
+                - 'heading "UNSOLVED: Anti-pattern detection" [level=4] [ref=e1207]'
+                - generic [ref=e1208]:
+                  - strong [ref=e1209]: "The question:"
+                  - text: Can we automatically detect invalid compositions before they fail?
+                  - strong [ref=e1210]: "Why it's hard:"
+                  - text: Failures are emergent. Components work alone but fail together.
+                  - strong [ref=e1211]: "Current practice:"
+                  - text: Manual review, incremental testing, pattern knowledge.
+            - 'button "Trade-Off Tension Isolation vs. Coordination Strong isolation: Clean boundaries, but hard to share state Weak isolation: Easy sharing, but race conditions Shared data plane (Beads): Balanced, but more infrastructure WHY NO PERFECT ANSWER: The tension is fundamental. Pick based on coordination needs." [ref=e1213] [cursor=pointer]':
+              - generic [ref=e1215]:
+                - generic [ref=e1216]: Trade-Off Tension
+                - heading "Isolation vs. Coordination" [level=4] [ref=e1218]
+                - generic [ref=e1219]:
+                  - strong [ref=e1220]: "Strong isolation:"
+                  - text: Clean boundaries, but hard to share state
+                  - strong [ref=e1221]: "Weak isolation:"
+                  - text: Easy sharing, but race conditions
+                  - strong [ref=e1222]: "Shared data plane (Beads):"
+                  - text: Balanced, but more infrastructure
+                  - strong [ref=e1223]: "WHY NO PERFECT ANSWER:"
+                  - text: The tension is fundamental. Pick based on coordination needs.
+            - 'button "War Story Debugging a 5-primitive composition \"Added Playwright to Ralph. Broke completely. Spent 4 hours debugging. Problem wasn''t Playwright - it was progress.txt getting filled with screenshot base64. Subagent isolation fixed it in 10 minutes.\" Key learning: Diagnose primitives in isolation before blaming composition." [ref=e1225] [cursor=pointer]':
+              - generic [ref=e1227]:
+                - generic [ref=e1228]: War Story
+                - heading "Debugging a 5-primitive composition" [level=4] [ref=e1230]
+                - generic [ref=e1231]:
+                  - text: "\"Added Playwright to Ralph. Broke completely. Spent 4 hours debugging. Problem wasn't Playwright - it was progress.txt getting filled with screenshot base64. Subagent isolation fixed it in 10 minutes.\""
+                  - emphasis [ref=e1232]: "Key learning: Diagnose primitives in isolation before blaming composition."
+            - 'button "Expertise Gradient Composition debugging depth Beginner: \"It doesn''t work\" -> Check each primitive alone Intermediate: \"Which primitive broke?\" -> Binary search elimination Advanced: \"Is the operator wrong?\" -> Try different wiring Staff: \"Is this composition valid?\" -> Check compatibility matrix Expert: \"Is this a new anti-pattern?\" -> Document for others" [ref=e1234] [cursor=pointer]':
+              - generic [ref=e1236]:
+                - generic [ref=e1237]: Expertise Gradient
+                - heading "Composition debugging depth" [level=4] [ref=e1239]
+                - generic [ref=e1240]:
+                  - strong [ref=e1241]: "Beginner:"
+                  - text: "\"It doesn't work\" -> Check each primitive alone"
+                  - strong [ref=e1242]: "Intermediate:"
+                  - text: "\"Which primitive broke?\" -> Binary search elimination"
+                  - strong [ref=e1243]: "Advanced:"
+                  - text: "\"Is the operator wrong?\" -> Try different wiring"
+                  - strong [ref=e1244]: "Staff:"
+                  - text: "\"Is this composition valid?\" -> Check compatibility matrix"
+                  - strong [ref=e1245]: "Expert:"
+                  - text: "\"Is this a new anti-pattern?\" -> Document for others"
+            - button "Alternative Path If you're overwhelmed by composition Can't decide? -> Start with Ralph (simplest) Need parallelism fast? -> CC Mirror (built-in coordination) Building from scratch? -> Start with primitives, add one at a time Enterprise scale? -> Gas Town (maximum capability)" [ref=e1247] [cursor=pointer]:
+              - generic [ref=e1249]:
+                - generic [ref=e1250]: Alternative Path
+                - heading "If you're overwhelmed by composition" [level=4] [ref=e1252]
+                - generic [ref=e1253]:
+                  - strong [ref=e1254]: Can't decide?
+                  - text: "-> Start with Ralph (simplest)"
+                  - strong [ref=e1255]: Need parallelism fast?
+                  - text: "-> CC Mirror (built-in coordination)"
+                  - strong [ref=e1256]: Building from scratch?
+                  - text: "-> Start with primitives, add one at a time"
+                  - strong [ref=e1257]: Enterprise scale?
+                  - text: "-> Gas Town (maximum capability)"
+            - 'button "Time Horizon Shift How pattern choice feels over time Week 1: \"I need the most powerful pattern\" Month 1: \"Why is Gas Town so complex to debug?\" Month 3: \"Oh, Ralph handles 80% of my cases\" Month 6: \"I compose patterns based on actual need now\" Don''t over-engineer. Start simple, compose when needed." [ref=e1259] [cursor=pointer]':
+              - generic [ref=e1261]:
+                - generic [ref=e1262]: Time Horizon Shift
+                - heading "How pattern choice feels over time" [level=4] [ref=e1264]
+                - generic [ref=e1265]:
+                  - strong [ref=e1266]: "Week 1:"
+                  - text: "\"I need the most powerful pattern\""
+                  - strong [ref=e1267]: "Month 1:"
+                  - text: "\"Why is Gas Town so complex to debug?\""
+                  - strong [ref=e1268]: "Month 3:"
+                  - text: "\"Oh, Ralph handles 80% of my cases\""
+                  - strong [ref=e1269]: "Month 6:"
+                  - text: "\"I compose patterns based on actual need now\""
+                  - emphasis [ref=e1270]: Don't over-engineer. Start simple, compose when needed.
+            - 'button "Invariant Connection INV-007: Simpler compositions are more reliable Ralph, CC Mirror, Gas Town, Panopticon all follow this: minimum primitives for the job. Why this matters: Every added primitive is a failure point. Composition complexity is not free." [ref=e1272] [cursor=pointer]':
+              - generic [ref=e1274]:
+                - generic [ref=e1275]: Invariant Connection
+                - 'heading "INV-007: Simpler compositions are more reliable" [level=4] [ref=e1277]'
+                - generic [ref=e1278]:
+                  - text: "Ralph, CC Mirror, Gas Town, Panopticon all follow this: minimum primitives for the job."
+                  - strong [ref=e1279]: "Why this matters:"
+                  - text: Every added primitive is a failure point. Composition complexity is not free.
+  - button "Open Next.js Dev Tools" [ref=e898] [cursor=pointer]:
+    - img [ref=e899]
+  - alert [ref=e1280]
