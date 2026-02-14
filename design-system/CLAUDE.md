@@ -1,488 +1,705 @@
-<!-- ═══════════════════════════════════════════════════════════════════════════════
-INLINE THREADING HEADER — Phase 2B
-File: docs-spa/app/showcase/CLAUDE.md
-Tier: C | Batch: 5 | Generated: 2026-02-06
-
-1. WHY THIS EXISTS
-Process enforcement document for ALL work within the showcase/ directory. Read
-automatically by Claude Code on directory entry. Enforces mandatory research
-grounding (5-file read requirement), research citation format, and exploration
-methodology before any creation or modification.
-
-3. STATUS
-ACTIVE
-
-5. BUILT ON
-| Dependency                              | Relationship                          |
-|-----------------------------------------|---------------------------------------|
-| R3-012                                  | Template example for density patterns  |
-| R5-007                                  | Template example for advanced patterns |
-| R4-003                                  | Template example for component patterns|
-| 337 total research findings             | Aggregate count enforced in grounding  |
-
-8. CONSUMED BY
-| Consumer                                | How Used                              |
-|-----------------------------------------|---------------------------------------|
-| Claude Code agent                       | Auto-read on showcase/ directory entry |
-| ALL showcase/ work                      | Mandatory process enforcement          |
-
-END INLINE THREADING HEADER
-═══════════════════════════════════════════════════════════════════════════════ -->
-
-# CLAUDE.md — Project Instructions
-## Persistent Rules for KortAI Design System Development
-
-───────────────────────────────────────────────────────────────────────────────
-THIS FILE IS READ AT THE START OF EVERY SESSION
-───────────────────────────────────────────────────────────────────────────────
-
-These instructions are ALWAYS active. They don't need to be prompted.
-Violation of these instructions means the work is INVALID.
+# design-system/CLAUDE.md — Root Navigation & Process Enforcement
 
 ═══════════════════════════════════════════════════════════════════════════════
-█████████████████████████████████████████████████████████████████████████████
-MANDATORY RESEARCH GROUNDING — BEFORE ANY ACTION
-█████████████████████████████████████████████████████████████████████████████
+THIS FILE IS AUTO-LOADED ON DIRECTORY ENTRY
 ═══════════════════════════════════════════════════════════════════════════════
 
-**BEFORE building, creating, or generating ANYTHING, you MUST:**
+**Purpose:** Navigate the design system's 8 subfolders, enforce cross-cutting rules, and route agents to the right place based on task intent.
 
-### STEP 1: Load Research Context
+**Current Phase:** Phase D Extraction Validation (NEXT — not yet started)
+
+**Key Principle:** This folder contains TWO parallel systems serving different purposes:
+- **compositional-core/** — Minimal vocabulary for building (40 items, phase-gated)
+- **specification/** — Complete documentation for understanding (research provenance)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+## QUICK START — What Are You Here To Do?
+
+### I'm here to BUILD content/pages
+**→ Start:** `compositional-core/README.md`
+**→ ALWAYS load first:** `compositional-core/identity/prohibitions.md` (22 prohibitions)
+**→ Then:** `compositional-core/vocabulary/tokens.css` (65 locked tokens)
+
+### I'm here to VALIDATE/AUDIT
+**→ Start:** `compositional-core/identity/prohibitions.md` (soul constraints)
+**→ Then:** `compositional-core/validation/` (quantitative rules + anti-gravity report)
+
+### I'm here to UNDERSTAND the philosophy
+**→ Start:** `README.md` (THE KORTAI DESIGN MIND, Parts I-III, 45 min)
+**→ Then:** `specification/BACKBONE.md` (master narrative)
+
+### I'm here to PLAN migration/evolution
+**→ Start:** `pipeline/README.md` (roadmap overview)
+**→ Then:** `pipeline/03-MIGRATION-PIPELINE.md` (Track 1+2 architecture)
+
+### I'm here to RESEARCH patterns
+**→ Start:** `research/RESEARCH-SYNTHESIS.md` (cross-research insights)
+**→ Then:** `research/R[1-5].md` (337 total findings)
+
+### I'm here to TRACE provenance
+**→ Start:** `specification/provenance/PIPELINE-MANIFEST.md`
+**→ Then:** `specification/provenance/stage-[N]-[name]/` directories
+
+═══════════════════════════════════════════════════════════════════════════════
+## SOUL CONSTRAINTS (UNIVERSAL — ALL Work, ALL Folders)
+═══════════════════════════════════════════════════════════════════════════════
+
+**These rules apply EVERYWHERE in design-system/, with ZERO exceptions:**
+
+### Visual Constraints (ABSOLUTE)
+- **border-radius: 0** — ALWAYS sharp edges (identity truth encoded in DNA)
+- **box-shadow: none** — ALWAYS flat surfaces (no fake depth)
+- **No drop-shadow filter** — No shadow effects anywhere
+- **No pure black #000 or pure white #FFF** — Use palette values
+- **No gradient backgrounds** — Solid colors only
+
+### Color Palette (LOCKED)
+- Primary: `#E83025` (KortAI red)
+- Background: `#FEF9F5` (warm cream)
+- Text: `#1A1A1A` (near-black)
+- Accent-blue: `#2563EB`
+
+### Typography Trinity (LOCKED)
+- **Display headings:** Instrument Serif (ONLY for headings)
+- **Body text:** Inter (NEVER use serif for body)
+- **Code:** JetBrains Mono
+
+### Spacing Scale (4px base unit)
+- space-2 (8px), space-4 (16px), space-6 (24px), space-8 (32px), space-12 (48px), space-16 (64px)
+
+**Source of truth:** `compositional-core/identity/prohibitions.md` (22 prohibitions, 8 absolute + 12 conditional + 2 meta)
+
+**Verification:** Read fresh from file (not memory) — values can change (rarely).
+
+═══════════════════════════════════════════════════════════════════════════════
+## FOLDER MAP — 8 Subfolders Explained
+═══════════════════════════════════════════════════════════════════════════════
+
+### compositional-core/ (NEW — Phase C Extraction, Feb 2026)
+**Status:** ACTIVE — operational layer
+**Files:** 43 files, 880KB, 20,576 lines
+**Purpose:** Minimal operational vocabulary for building KortAI pages (40 items)
+
+**6-Layer Ontology:**
+```
+compositional-core/
+├── identity/          [Layer 1] 20 prohibitions + 3 soul constraints (ABSOLUTE vs CONDITIONAL)
+├── vocabulary/        [Layer 2] tokens.css (:root block) + mutability classification
+├── grammar/           [Layer 3] 18 mechanisms + 11 compositional rules + border system
+├── components/        [Layer 4] merged-components.css (31KB) + inventory with confidence
+├── case-studies/      [Layer 5] 9 case studies (anti-prescription format) — NOT TEMPLATES
+└── guidelines/        [Layer 6] 7+ semantic gap rules + responsive strategy + usage criteria
+```
+
+**When to use:** Building new pages (Track 1 assembly OR Track 2 composition)
+
+**Anti-gravity mechanisms:** 94.7% deployment (18/19 mechanisms verified)
+- Case studies are PROOF-OF-CONCEPT, not templates
+- Phase-gated access (identity/vocabulary FIRST, case-studies LAST)
+- Divergence mandate (if metaphor matches library → justify or regenerate)
+
+**Key principle:** CHOICE-oriented extraction (what to use, when) vs comprehensive documentation
+
+---
+
+### specification/ (ONGOING — Abstract Specification)
+**Status:** ACTIVE — canonical source of truth
+**Files:** 57 files
+**Purpose:** Complete design system documentation with research provenance
+
+**Key Contents:**
+```
+specification/
+├── README.md              [109KB] THE KORTAI DESIGN MIND (philosophical anchor)
+├── BACKBONE.md            [35KB] Master narrative (5-stage pipeline)
+├── tokens/                [617 lines total] SOURCE OF TRUTH for token values
+│   ├── colors.md          [133 lines] Palette definitions
+│   ├── typography.md      [166 lines] Font trinity
+│   ├── spacing.md         [155 lines] 4px base unit
+│   └── geometry.md        [163 lines] Border-radius: 0
+├── patterns/              Validated rhythms (density, organizational, axis, combination)
+├── anti-patterns/         What to avoid (registry.md)
+└── provenance/            3-layer architecture (inline headers, light sections, formal docs)
+```
+
+**When to use:** Understanding WHY decisions were made, tracing research provenance
+
+**Key principle:** CONTEXT-oriented provenance (why it exists, how discovered)
+
+---
+
+### validated-explorations/ (FROZEN — Fortress Zone)
+**Status:** REFERENCE — frozen artifacts
+**Files:** 30 files
+**Purpose:** DD/OD/CD HTML explorations that proved design concepts
+
+**Structure:**
+```
+validated-explorations/
+├── density/           DD-001 through DD-006 (crown jewel: DD-006 fractal, 20+ refs)
+├── organizational/    OD-001 through OD-006 (OD-004 confidence, OD-006 creative)
+└── combination/       CD-001 through CD-006 (crown jewel: CD-006 pilot, 39/40 score)
+```
+
+**When to use:** Visual proof-of-concept, understanding pattern implementations (inspiration, NOT templates)
+
+---
+
+### research/ (COMPLETED — R1-R5 Streams)
+**Status:** REFERENCE — 337 findings
+**Files:** 7 files
+**Purpose:** Original research findings that fed into design system
+
+**337 Findings Breakdown:**
+- R1: 28 (documentation patterns)
+- R2: 27 (creative layouts)
+- R3: 51 (density dimensions — source of DD patterns)
+- R4: 192 (axis innovations — source of AD patterns)
+- R5: 39 (combination theory — source of CD patterns)
+
+**When to use:**
+- ❌ NEVER for building tasks (compositional-core/ has distilled findings)
+- ✅ ALWAYS for research tasks (understanding WHY decisions were made)
+- ⚠️ SOMETIMES for validation (cross-checking extraction captured intent)
+
+---
+
+### pipeline/ (PLANNING — Post-CD Strategy)
+**Status:** ACTIVE — strategic planning
+**Files:** 17 files
+**Purpose:** Post-CD phase planning (extraction, migration, content ingestion)
+
+**Key Files:**
+- `01-CD-EVOLVED-VISION.md` — CD vision
+- `02-POST-CD-PHASES.md` — Phase definitions
+- `03-MIGRATION-PIPELINE.md` — Track 1+2 architecture
+- `05-COMPLETE-ROADMAP.md` — Master timeline (835 lines)
+- `07-TRACK-2-COMPOSITIONAL-SUPPLEMENT.md` — Track 2 execution spec
+- `09-EXTRACTION-VALIDATION-PROTOCOL.md` — Phase D test procedures
+
+**When to use:** Planning future phases, understanding migration strategy
+
+---
+
+### implementation/ (MIXED — Active + Archive)
+**Status:** SPECIALIZED
+**Files:** 4,059 files
+**Purpose:** React components, testing infrastructure, experiments
+
+**Contains:**
+- `component-system/` — Active component library
+- `card-system/` — Card component experiments
+- `typography-system/` — Typography testing
+- `font-research/` — Font specimen comparisons
+- **`archive/`** — ⚠️ DANGEROUS: Deprecated code with WRONG values (border-radius > 0, incorrect fonts like 'Bebas Neue', wrong spacing)
+
+**When to use:** React implementation, Playwright testing
+
+**WARNING:** DO NOT use `implementation/archive/` — contains obsolete token values that VIOLATE soul constraints. Specifically: border-radius > 0, wrong font families, deprecated color values. Using these values produces INVALID output.
+
+---
+
+### axis/ (COMPLETED — Stage 4 AD)
+**Status:** REFERENCE — AD explorations
+**Files:** 194 files
+**Purpose:** Axis dimension (attention topology) explorations
+
+**Contents:** AD-001 through AD-006 (6 explorations)
+**Findings:** AD-F-001 through AD-F-028 (28 findings)
+**Crown jewel:** AD-F-023 (ATTENTION TOPOLOGY meta-equivalence)
+
+**When to use:** Understanding axis dimension, tracing AD findings
+
+---
+
+### tension-test/ (ARCHIVED — Validation Complete)
+**Status:** REFERENCE — metaphor validation
+**Files:** 104 files (moved to archive/tension-test/ per git status)
+**Purpose:** 15 HTML layouts testing metaphor-driven composition
+
+**Structure:** 3 base contents × 5 metaphors each
+- Playbook (5 metaphors) — Top pick: Elevation Map
+- Boris (5 metaphors) — Top pick: Geological Core
+- Gas Town (5 metaphors) — Top pick: Building Floorplan
+
+**When to use:** Understanding tension-composition skill development
+
+═══════════════════════════════════════════════════════════════════════════════
+## EVOLUTION STATE — Where We Are
+═══════════════════════════════════════════════════════════════════════════════
+
+### CURRENT PHASE: Phase D Extraction Validation (NEXT)
+
+**Status:** NOT YET STARTED
+**Predecessor:** Phase C Extraction (COMPLETE)
+**Purpose:** Prove compositional-core/ sufficiency BEFORE writing playbook
+
+**What happens:**
+- Build 1 Track 1 page using compositional-core/ alone
+- Build 1 Track 2 page using compositional-core/ + tension-composition skill
+- Document gaps, verify sufficiency
+- Produce validation report
+
+**Why:** Better to discover extraction gaps on 2 test pages than 75 production pages
+
+---
+
+### 3-TIER TIMELINE
+
+**COMPLETE (4 exploration stages + 1 extraction):**
+- ✅ Stage 1: Component Foundations (11 components, 5 soul pieces)
+- ✅ Stage 2: Density Dimension (DD-001–DD-006, 18 DD-F findings)
+- ✅ Stage 3: Organizational Dimension (OD-001–OD-006, 17 OD-F findings, v3 re-enriched)
+- ✅ Stage 4: Axis Dimension (AD-001–AD-006, 28 AD-F findings)
+- ✅ Stage 5: Combination Dimension (CD-001–CD-006, 25 CD-F findings)
+- ✅ Phase C: Compositional Core Extraction (6-layer ontology, 42 files)
+- ✅ Skill Enrichment (tension-composition + perceptual-auditing, Phase 4.0 guardrails)
+
+**CURRENT (validation + freeze line approach):**
+- ⏳ Phase D: Extraction Validation (NEXT)
+- ⏳ Phase E: Migration Playbook v2 (dual-track)
+- ⏳ Phase F: Pilot Migration (MUST include Track 2)
+- ⏳ Phase G: Playbook Refinement
+
+**FORWARD (post-freeze migration):**
+- ═══ FREEZE LINE ═══ (After Phase G, design system locks)
+- 📋 Phase H: Track 1 Migration (30-40 pages @ 45-90 min, parallelizable)
+- 📋 Phase I: Track 2 Migration (35-45 pages @ 3-5 hrs, sequential bottleneck)
+
+**Full roadmap:** `pipeline/05-COMPLETE-ROADMAP.md` (835 lines)
+
+---
+
+### SUPERSESSION MATRIX: What Supersedes What
+
+| Layer | New Authority | Historical Context | Relationship | When to Use Which |
+|-------|--------------|-------------------|--------------|-------------------|
+| **Identity** | compositional-core/identity/ | specification/tokens/ | REFINES | compositional-core/ for PROHIBITIONS; specification/ for VALUES |
+| **Vocabulary** | compositional-core/vocabulary/tokens.css | specification/tokens/*.md | CONSOLIDATES | compositional-core/ for SINGLE-FILE ref; specification/ for RATIONALE |
+| **Grammar** | compositional-core/grammar/ | specification/patterns/*.md | EXTRACTS | compositional-core/ for BUILDING; specification/ for RESEARCH |
+| **Components** | compositional-core/components/ | validated-explorations/ | DISTILLS | compositional-core/ for MIGRATION; explorations/ for PROVENANCE |
+| **Case Studies** | compositional-core/case-studies/ | validated-explorations/ HTMLs | DEMONSTRATES | compositional-core/ for PATTERNS; explorations/ for FULL CONTEXT |
+| **Guidelines** | compositional-core/guidelines/ | pipeline/03-MIGRATION-PIPELINE.md | OPERATIONALIZES | compositional-core/ for QUICK REF; pipeline/ for FULL PLAYBOOK |
+
+**Key principle:**
+- compositional-core/ = CHOICE-oriented (what to use, when) → **USE FOR BUILDING**
+- specification/ = CONTEXT-oriented (why it exists) → **USE FOR RESEARCH**
+- validated-explorations/ = PERMANENT REFERENCE → **USE FOR DEEP CONTEXT**
+
+═══════════════════════════════════════════════════════════════════════════════
+## SKILLS — When to Invoke
+═══════════════════════════════════════════════════════════════════════════════
+
+### Tension-Composition (Track 2 Building)
+
+**Trigger:** Build new HTML page from content tensions
+
+**Invocation:**
+```
+Invoke tension-composition skill
+See ~/.claude/skills/tension-composition/SKILL.md for full pipeline
+```
+
+**Phase-gated access:** Skill enforces library prohibition until Phase 5
+
+**NOT invoked for:** Track 1 building (research-driven), auditing, planning
+
+---
+
+### Perceptual-Auditing (Post-Build Verification)
+
+**Trigger:** AFTER building ANY HTML page, BEFORE marking complete
+
+**Applies to:** Track 1 AND Track 2 (all building)
+
+**Invocation:**
+```
+Invoke perceptual-auditing skill
+See ~/.claude/skills/perceptual-auditing/SKILL.md for full audit
+```
+
+**Passing criteria:**
+- Zero soul violations (border-radius: 0, box-shadow: none, correct palette)
+- All guardrails met (940px container, 16px spacing, 32px padding, 40% compression)
+- Squint test passed (visual coherence)
+
+**Full audit required** — abbreviated audit NOT acceptable
+
+═══════════════════════════════════════════════════════════════════════════════
+## INGESTION PROTOCOL — What to Load
+═══════════════════════════════════════════════════════════════════════════════
+
+### ALWAYS-LOAD (ALL Agents, ALL Tasks)
+
+**Mandatory read at session start:**
+
+1. **`compositional-core/identity/prohibitions.md`** (353 lines)
+   - 8 absolute prohibitions (NEVER, zero exceptions)
+   - 12 conditional prohibitions (documented exceptions)
+   - 2 meta-prohibitions (process-level)
+   - Soul constraints: border-radius: 0, box-shadow: none, palette
+
+2. **`compositional-core/vocabulary/tokens.css`** (174 lines)
+   - 65 tokens (21 immutable, 14 mutable, 30 available)
+   - Color palette (8 values)
+   - Typography trinity (3 fonts)
+   - Spacing scale (6 anchors, 14 increments)
+   - Border weights (4px/3px/1px)
+
+**Total mandatory overhead: 527 lines (2 files)**
+
+**Read fresh** (not from memory) — token values and prohibitions can change
+
+---
+
+### CONDITIONAL-LOAD (Based on Task)
+
+**Builder agents (Track 2 — tension-composition):**
+
+Phase 0: Load vocabulary
+- ✅ Read prohibitions.md (already loaded)
+- ✅ Read tokens.css (already loaded)
+- ❌ DO NOT read case-studies/ (PROHIBITED until Phase 5)
+
+Phases 0-3: Run pipeline BLIND
+- Invoke tension-composition skill
+- Case studies PROHIBITED
+
+Phase 3.5: Lock metaphor (GATE)
+- Write metaphor commitment BEFORE consulting library
+
+Phase 4: Read mechanisms
+- `compositional-core/grammar/mechanism-catalog.md` (first 200 lines)
+- `compositional-core/components/components.css` (first 100 lines)
+- Extract TECHNIQUES, not implementations
+
+Phase 5: OPTIONALLY read case studies
+- `compositional-core/case-studies/_INDEX.md` (titles)
+- Select 2-3 most similar to YOUR metaphor
+- Complete divergence table (5 dimensions)
+
+Phase 6: Implement
+- Use exact token values
+- Apply mechanisms to YOUR metaphor
+- Generate YOUR vocabulary
+
+Phase 7: Verify
+- Invoke perceptual-auditing skill
+
+---
+
+**Builder agents (Track 1 — research-driven):**
+
+Mandatory read:
+- ✅ prohibitions.md + tokens.css (already loaded)
+- `research/RESEARCH-SYNTHESIS.md` (unified framework)
+- `research/R[relevant]-*.md` (the relevant research stream)
+- `compositional-core/grammar/mechanism-catalog.md`
+
+Build approach:
+- Identify applicable R-X findings
+- Commit to specific applications
+- Annotate research applications in code
+
+---
+
+**Auditor agents:**
+
+Mandatory read:
+- ✅ prohibitions.md + tokens.css (already loaded)
+- `compositional-core/grammar/mechanism-catalog.md` (full file)
+- `compositional-core/case-studies/*.md` (quality comparison)
+
+Optional read:
+- `compositional-core/components/component-inventory.md` (confidence levels)
+- `compositional-core/validation/anti-gravity-compliance.md`
+- `compositional-core/guidelines/semantic-rules.md`
+
+**No phase restrictions** — auditors read everything
+
+---
+
+**Research agents:**
+
+Mandatory read (context-first order):
+- `compositional-core/process/lens-manifesto.md` (WHY extraction choices)
+- `compositional-core/process/construction-narrative.md` (HOW extraction built)
+- `compositional-core/validation/anti-gravity-compliance.md`
+- ✅ prohibitions.md + tokens.css (already loaded)
+
+Conditional read:
+- ALL research files (R1-R5, RESEARCH-SYNTHESIS.md)
+- `compositional-core/process/assumption-log.md` (bias tracking)
+
+**Analysis mode** (not application mode)
+
+---
+
+**Planner agents:**
+
+Mandatory read:
+- ✅ prohibitions.md + tokens.css (already loaded)
+- `compositional-core/guidelines/usage-criteria.md`
+- `compositional-core/validation/gap-check.md` (coverage gaps)
+
+Conditional read:
+- `research/RESEARCH-SYNTHESIS.md`
+- `compositional-core/case-studies/_INDEX.md`
+- `compositional-core/components/component-inventory.md`
+
+═══════════════════════════════════════════════════════════════════════════════
+## ROUTING LOGIC — Task-to-Folder Decision Tree
+═══════════════════════════════════════════════════════════════════════════════
+
+### Q1: What phase are you in?
+
+- Phase C extraction complete → compositional-core/ is operational (LOCKED)
+- Phase D validation → Read `pipeline/09-EXTRACTION-VALIDATION-PROTOCOL.md`
+- Pre-Phase C (fortress only) → validated-explorations/ + specification/
+- Migration → compositional-core/ + pipeline/03
+
+### Q2: Build, Analyze, or Plan?
+
+- **Build** → compositional-core/
+- **Analyze** → specification/ + compositional-core/validation/
+- **Plan** → pipeline/
+
+### Q3: Track 1 (assembly) or Track 2 (composition)?
+
+- **Track 1** (research-driven assembly) → compositional-core/vocabulary/ + grammar/
+- **Track 2** (tension-driven composition) → compositional-core/ + pipeline/07 + tension-composition skill
+
+### Q4: Raw research or extracted design system?
+
+- **Raw research** (R1-R5, 337 findings) → research/
+- **Extracted design system** (40 items, 6 layers) → compositional-core/
+- **Provenance chain** → specification/provenance/
+
+### Q5: What's my first file to read?
+
+- **Philosophy/orientation** → README.md (THE KORTAI DESIGN MIND)
+- **Operational building** → compositional-core/README.md (phase-gated protocol)
+- **Abstract specification** → specification/BACKBONE.md (master narrative)
+- **Planning/evolution** → pipeline/README.md (roadmap overview)
+- **Soul compliance** → compositional-core/identity/prohibitions.md
+- **Research grounding** → research/RESEARCH-SYNTHESIS.md
+
+═══════════════════════════════════════════════════════════════════════════════
+## ANTI-PATTERNS — Common Routing Mistakes
+═══════════════════════════════════════════════════════════════════════════════
+
+### 1. Going to specification/ when you need compositional-core/
+
+**Problem:** Reading specification/tokens/ (abstract, multi-file, 617 lines) when building
+
+**Correct:** Read compositional-core/vocabulary/tokens.css (operational, single-file, 174 lines)
+
+**Rule:** specification/ for UNDERSTANDING, compositional-core/ for BUILDING
+
+---
+
+### 2. Reading pipeline/ when you should be building
+
+**Problem:** Reading strategic planning docs when user asked "build a page"
+
+**Correct:** compositional-core/README.md → phase-gated access → build
+
+**Rule:** pipeline/ for PLANNING, compositional-core/ for BUILDING
+
+---
+
+### 3. Skipping research/ context before building explorations
+
+**Problem:** Building DD/OD/CD-style exploration without R3/R5 research
+
+**Correct:** research/RESEARCH-SYNTHESIS.md → research/R[X].md → build
+
+**Rule:** Explorations test research hypotheses, not just demonstrate components
+
+---
+
+### 4. Confusing validated-explorations/ with templates
+
+**Problem:** Treating DD-006 or OD-006 as copy-paste templates
+
+**Correct:** Read for UNDERSTANDING, use compositional-core/case-studies/ (anti-prescription format)
+
+**Rule:** Explorations are PROOF-OF-CONCEPT, not templates
+
+---
+
+### 5. Not reading prohibitions.md before building
+
+**Problem:** Building with border-radius > 0, box-shadow, gradients
+
+**Correct:** compositional-core/identity/prohibitions.md is FIRST CONTACT layer (always-load)
+
+**Rule:** 8 absolute prohibitions have ZERO exceptions — violating = INVALID work
+
+---
+
+### 6. Reading BACKBONE when you need compositional-core/README
+
+**Problem:** Reading 35KB master narrative when user asked "how do I use the design system?"
+
+**Correct:** BACKBONE for understanding WHY/HOW, compositional-core/README for USING
+
+**Rule:** BACKBONE = historical narrative, compositional-core/README = operations manual
+
+---
+
+### 7. Not distinguishing Track 1 from Track 2
+
+**Problem:** Using token application for prose-heavy content, or invoking skill for data tables
+
+**Correct:** Read pipeline/03-MIGRATION-PIPELINE.md (explains Track 1 vs Track 2 split)
+
+**Rule:** Track 1 = assembly (45-90 min), Track 2 = composition (3-5 hrs)
+
+═══════════════════════════════════════════════════════════════════════════════
+## DIRECTORY STRUCTURE (Accurate Tree)
+═══════════════════════════════════════════════════════════════════════════════
 
 ```
-READ these files (not from memory — actually read them):
-
-1. archive/checkpoints/RESEARCH-ACTIVE.md
-   → What findings exist? What's been applied? What's unapplied?
-
-2. active/research/RESEARCH-SYNTHESIS.md
-   → What are the cross-research insights?
-
-3. active/design-system/patterns/density-patterns.md
-   → What patterns are validated? What confidence levels?
-
-4. active/design-system/anti-patterns/registry.md
-   → What must be avoided?
-
-5. archive/checkpoints/DISCOVERIES-LOG.md
-   → What has been learned from explorations?
-```
-
-### STEP 2: Identify Applicable Research
-
-```
-For the task at hand, identify:
-- Which R-X findings are DIRECTLY applicable?
-- Which validated explorations (DD-XXX, OD-XXX, etc.) are relevant?
-- Which anti-patterns could occur?
-- What prior learnings apply?
-
-WRITE THIS DOWN before proceeding.
-```
-
-### STEP 3: Commit to Specific Applications
-
-```
-STATE explicitly:
-- "I will apply R3-[ID] by doing [specific action]"
-- "I will reference DD-[XXX] for [specific aspect]"
-- "I will avoid [anti-pattern] by [specific approach]"
-
-DO NOT proceed without this commitment.
-```
-
-### STEP 4: Build with Research Visible
-
-```
-As you build, annotate your work:
-- When applying a finding: "Applying R3-012: [what]"
-- When referencing exploration: "Referencing DD-002: [what]"
-- When avoiding anti-pattern: "Avoiding [anti-pattern]: [how]"
-```
-
-### STEP 5: Verify Application
-
-```
-After building, verify:
-- Did I actually apply the findings I committed to?
-- Can I point to specific lines/elements where each was applied?
-- Did any research get forgotten?
+design-system/
+├── compositional-core/      [43 files] Phase C extraction, 6-layer ontology
+│   ├── identity/            [Layer 1] 20 prohibitions + 3 soul constraints
+│   ├── vocabulary/          [Layer 2] tokens.css (:root block)
+│   ├── grammar/             [Layer 3] 18 mechanisms + 11 rules
+│   ├── components/          [Layer 4] merged CSS + inventory
+│   ├── case-studies/        [Layer 5] 9 anti-prescription examples
+│   ├── guidelines/          [Layer 6] 7+ semantic gap rules
+│   ├── validation/          Anti-gravity audit, convergence, gap check
+│   ├── process/             Lens manifesto, construction narrative, provenance
+│   └── skill-enrichments/   Tension + perceptual additions
+│
+├── specification/           [57 files] Abstract specification + provenance
+│   ├── README.md            [109KB] THE KORTAI DESIGN MIND
+│   ├── BACKBONE.md          [35KB] Master narrative (5-stage pipeline)
+│   ├── tokens/              [4 files, 617 lines] SOURCE OF TRUTH
+│   ├── patterns/            Validated rhythms (density, org, axis, combo)
+│   ├── anti-patterns/       Registry of what to avoid
+│   ├── components/          Component specifications
+│   ├── guides/              Migration guide
+│   └── provenance/          3-layer architecture (490 inline + 244 light + formal docs)
+│
+├── validated-explorations/  [30 files] DD/OD/CD HTML explorations (FROZEN)
+│   ├── density/             DD-001 through DD-006 (DD-006 fractal: 20+ refs)
+│   ├── organizational/      OD-001 through OD-006
+│   └── combination/         CD-001 through CD-006 (CD-006 pilot: 39/40)
+│
+├── research/                [7 files] R1-R5 research streams (337 findings)
+│   ├── R1-DOCUMENTATION-PATTERNS.md     [28 findings]
+│   ├── R2-CREATIVE-LAYOUTS.md           [27 findings]
+│   ├── R3-DENSITY-DIMENSIONS.md         [51 findings]
+│   ├── R4-AXIS-INNOVATIONS.md           [192 findings]
+│   ├── R5-COMBINATION-THEORY.md         [39 findings]
+│   └── RESEARCH-SYNTHESIS.md            [Cross-research insights]
+│
+├── pipeline/                [17 files] Post-CD strategic planning
+│   ├── 01-CD-EVOLVED-VISION.md
+│   ├── 03-MIGRATION-PIPELINE.md         [Track 1+2 architecture]
+│   ├── 05-COMPLETE-ROADMAP.md           [835 lines, master timeline]
+│   ├── 07-TRACK-2-COMPOSITIONAL-SUPPLEMENT.md
+│   └── 09-EXTRACTION-VALIDATION-PROTOCOL.md
+│
+├── implementation/          [4,059 files] React components, testing
+│   ├── component-system/    Active component library
+│   ├── card-system/         Card experiments
+│   ├── typography-system/   Typography testing
+│   ├── font-research/       Font specimens
+│   └── archive/             ⚠️ DANGEROUS: Deprecated code with WRONG values
+│
+├── axis/                    [194 files] Stage 4 AD explorations (COMPLETE)
+│   ├── AD-001-z-pattern.html through AD-006-compound.html
+│   └── _perceptual-audit/, _perceptual-research/
+│
+├── tension-test/            [104 files] Metaphor validation (ARCHIVED)
+│   ├── playbook/            [5 metaphors] Top pick: Elevation Map
+│   ├── boris/               [5 metaphors] Top pick: Geological Core
+│   ├── gastown/             [5 metaphors] Top pick: Building Floorplan
+│   └── audit/               [Audit reports + screenshots]
+│
+├── README.md                [109KB, 2,053 lines] THE KORTAI DESIGN MIND
+└── CLAUDE.md                [THIS FILE] Root navigation + process enforcement
 ```
 
 ═══════════════════════════════════════════════════════════════════════════════
-█████████████████████████████████████████████████████████████████████████████
-MANDATORY REFINEMENT LOOP — DURING ANY CREATION
-█████████████████████████████████████████████████████████████████████████████
+## KEY FILE PATHS (Verified Correct)
 ═══════════════════════════════════════════════════════════════════════════════
 
-**Every piece of work goes through this refinement loop:**
+### Compositional-Core (6-Layer Ontology)
+- Layer 1 (Identity): `compositional-core/identity/prohibitions.md`
+- Layer 2 (Vocabulary): `compositional-core/vocabulary/tokens.css`
+- Layer 3 (Grammar): `compositional-core/grammar/mechanism-catalog.md`
+- Layer 4 (Components): `compositional-core/components/merged-components.css`
+- Layer 5 (Case Studies): `compositional-core/case-studies/_INDEX.md`
+- Layer 6 (Guidelines): `compositional-core/guidelines/semantic-rules.md`
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         THE REFINEMENT LOOP                                 │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  1. GROUND IN RESEARCH                                                      │
-│     └── Read applicable R-X findings                                        │
-│     └── Read validated explorations                                         │
-│     └── Read anti-patterns                                                  │
-│     └── State what you'll apply                                             │
-│                                                                             │
-│  2. BUILD DRAFT                                                             │
-│     └── Create with research in mind                                        │
-│     └── Annotate research applications                                      │
-│                                                                             │
-│  3. VERIFY AGAINST RESEARCH                                                 │
-│     └── For each finding identified: Did I apply it?                        │
-│     └── For each anti-pattern: Did I avoid it?                              │
-│     └── What research could I have applied but didn't?                      │
-│                                                                             │
-│  4. VERIFY AGAINST SOUL                                                     │
-│     └── Read active/design-system/tokens/* fresh                                   │
-│     └── Check: border-radius: 0?                                            │
-│     └── Check: box-shadow: none?                                            │
-│     └── Check: colors correct?                                              │
-│     └── Check: typography correct?                                          │
-│     └── Invoke Perceptual Depth Audit sub-agents                            │
-│                                                                             │
-│  5. IDENTIFY GAPS                                                           │
-│     └── What research wasn't applied?                                       │
-│     └── What soul violations exist?                                         │
-│     └── What could be improved?                                             │
-│                                                                             │
-│  6. REFINE                                                                  │
-│     └── Address gaps                                                        │
-│     └── Apply missed research                                               │
-│     └── Fix soul violations                                                 │
-│                                                                             │
-│  7. RE-VERIFY (Return to step 3)                                            │
-│     └── Repeat until:                                                       │
-│         - All identified research is applied                                │
-│         - No soul violations remain                                         │
-│         - No gaps identified                                                │
-│                                                                             │
-│  8. DOCUMENT                                                                │
-│     └── Log what research was applied                                       │
-│     └── Log what was learned                                                │
-│     └── Update RESEARCH-ACTIVE.md                                           │
-│     └── Update DISCOVERIES-LOG.md                                           │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+### Specification (Tokens — SOURCE OF TRUTH)
+- `specification/tokens/colors.md` (133 lines)
+- `specification/tokens/typography.md` (166 lines)
+- `specification/tokens/spacing.md` (155 lines)
+- `specification/tokens/geometry.md` (163 lines)
 
-**This loop is NOT optional. It happens EVERY time.**
+**Relationship:** compositional-core/vocabulary/tokens.css is EXTRACTED from these files (174 lines subset of 617 lines). For BUILDING use tokens.css. For RESEARCH/RATIONALE use specification/tokens/.
+
+### Research (337 Findings)
+- `research/RESEARCH-SYNTHESIS.md` (cross-research insights)
+- `research/R1-DOCUMENTATION-PATTERNS.md` (28 findings)
+- `research/R3-DENSITY-DIMENSIONS.md` (51 findings — source of DD)
+- `research/R5-COMBINATION-THEORY.md` (39 findings — source of CD)
+
+### Skills (External to design-system/)
+- `~/.claude/skills/tension-composition/SKILL.md` (839 lines, 42KB)
+- `~/.claude/skills/perceptual-auditing/SKILL.md` (48 PA questions)
+
+### Pipeline (Strategic Planning)
+- `pipeline/05-COMPLETE-ROADMAP.md` (835 lines, master timeline)
+- `pipeline/03-MIGRATION-PIPELINE.md` (Track 1+2 architecture)
+- `pipeline/09-EXTRACTION-VALIDATION-PROTOCOL.md` (Phase D tests)
+
+### Validated Explorations (Crown Jewels)
+- `validated-explorations/density/DD-006-fractal.html` (20+ inbound refs)
+- `validated-explorations/organizational/OD-006-creative.html` (726 citations)
+- `validated-explorations/combination/CD-006-pilot-migration.html` (39/40 score)
 
 ═══════════════════════════════════════════════════════════════════════════════
-█████████████████████████████████████████████████████████████████████████████
-MANDATORY OUTPUT FORMAT — RESEARCH CITATIONS
-█████████████████████████████████████████████████████████████████████████████
+## COMPACTION SURVIVAL — After Context Loss
 ═══════════════════════════════════════════════════════════════════════════════
 
-**Every output (exploration, section, component) MUST include:**
+**After compaction, re-read this file:**
 
-```markdown
-## RESEARCH APPLICATION RECORD
+1. Soul constraints are ALWAYS active (border-radius: 0, box-shadow: none, palette)
+2. compositional-core/identity/prohibitions.md is FIRST CONTACT layer (always-load)
+3. compositional-core/vocabulary/tokens.css is SECOND CONTACT layer (always-load)
+4. For building: compositional-core/README.md (phase-gated protocol)
+5. For research: specification/README.md (THE KORTAI DESIGN MIND)
 
-### Research Identified as Applicable
-| Finding ID | Description | Planned Application |
-|------------|-------------|---------------------|
-| R3-012 | [finding] | [how I'll apply it] |
-| R5-007 | [finding] | [how I'll apply it] |
-
-### Research Actually Applied
-| Finding ID | Where Applied | Evidence |
-|------------|---------------|----------|
-| R3-012 | [line/element] | [specific proof] |
-| R5-007 | [line/element] | [specific proof] |
-
-### Research Identified But NOT Applied
-| Finding ID | Why Not Applied | Future Action |
-|------------|-----------------|---------------|
-| R4-003 | [reason] | [what to do about it] |
-
-### Anti-Patterns Checked
-| Anti-Pattern | Avoided? | How |
-|--------------|----------|-----|
-| [pattern] | YES/NO | [specific approach] |
-
-### Validated Explorations Referenced
-| Exploration | What I Took From It |
-|-------------|---------------------|
-| DD-002 | [specific element or approach] |
-
-### Soul Verification
-- border-radius: 0 everywhere? [YES/NO]
-- box-shadow: none everywhere? [YES/NO]
-- Colors correct? [YES/NO]
-- Typography correct? [YES/NO]
-- Spacing correct? [YES/NO]
-
-### Perceptual Depth Audit Results
-[Brief summary of 7 sub-agent findings]
-
-### Refinement Iterations
-- Iteration 1: [what was refined, why]
-- Iteration 2: [what was refined, why]
-- Final: [what changed from initial]
-```
-
-**If this record is missing or incomplete, the work is INVALID.**
+**Resume with ingestion protocol for your task type** (see "INGESTION PROTOCOL" section above)
 
 ═══════════════════════════════════════════════════════════════════════════════
-█████████████████████████████████████████████████████████████████████████████
-MANDATORY FILES TO READ BEFORE EACH TASK TYPE
-█████████████████████████████████████████████████████████████████████████████
+## RESEARCH FINDING COUNTS (Accurate as of 2026-02-14)
 ═══════════════════════════════════════════════════════════════════════════════
 
-### Before ANY Exploration (DD-XXX, OD-XXX, AD-XXX, CD-XXX):
+**Total Research Findings: 337**
 
-```
-MUST READ:
-□ active/research/RESEARCH-SYNTHESIS.md (full)
-□ active/research/R[relevant]-*.md (the relevant research stream)
-□ archive/checkpoints/RESEARCH-ACTIVE.md (what's applied, what's not)
-□ archive/checkpoints/DISCOVERIES-LOG.md (prior learnings)
-□ active/design-system/patterns/*.md (validated patterns)
-□ active/design-system/anti-patterns/registry.md (what to avoid)
-□ active/design-system/tokens/* (locked values)
+| Stream | Count | Primary Stage | Key Findings |
+|--------|-------|---------------|--------------|
+| R1 | 28 | OD | Documentation patterns, progressive disclosure |
+| R2 | 27 | Multiple | Creative layouts, editorial asymmetry |
+| R3 | 51 | DD | Density dimensions, R3-023 fractal self-similarity |
+| R4 | 192 | AD | Axis innovations, AD-F-023 ATTENTION TOPOLOGY |
+| R5 | 39 | CD | Combination theory, multi-pattern interaction |
 
-MUST EXTRACT:
-□ List of findings to apply (with IDs)
-□ List of anti-patterns to avoid
-□ List of validated explorations to reference
-□ Specific techniques from prior learnings
-```
+**Research is NOW DISTILLED into compositional-core/**
 
-### Before ANY Section Build (Phase 3):
-
-```
-MUST READ:
-□ All research files (R1-R5)
-□ RESEARCH-SYNTHESIS.md
-□ All INCLUDE explorations for relevant category
-□ DISCOVERIES-LOG.md lessons learned
-□ RESEARCH-ACTIVE.md for unapplied findings
-
-MUST EXTRACT:
-□ Complete list of applicable findings
-□ Which INCLUDE explorations demonstrate what I need
-□ Specific anti-patterns for this content type
-```
-
-### Before ANY Migration:
-
-```
-MUST READ:
-□ DESIGN-SYSTEM/* (complete package)
-□ All validated explorations
-□ All anti-patterns
-□ archive/knowledge-architecture/core/KA-DECISIONS.md
-
-MUST EXTRACT:
-□ Exact token values to apply
-□ Pattern to use (with validation reference)
-□ Compliance checklist
-```
+**When to read R1-R5:**
+- ❌ NEVER for building tasks (compositional-core/ sufficient)
+- ✅ ALWAYS for research tasks (understanding WHY)
+- ⚠️ SOMETIMES for validation (cross-checking extraction)
 
 ═══════════════════════════════════════════════════════════════════════════════
-█████████████████████████████████████████████████████████████████████████████
-MANDATORY RESEARCH-ACTIVE.md UPDATE
-█████████████████████████████████████████████████████████████████████████████
-═══════════════════════════════════════════════════════════════════════════════
-
-**After EVERY piece of work, update archive/checkpoints/RESEARCH-ACTIVE.md:**
-
-```markdown
-### [Date] — [Task Completed]
-
-**Research Applied:**
-| Finding ID | Applied In | How |
-|------------|------------|-----|
-| [ID] | [output] | [specific application] |
-
-**Research Still Unapplied:**
-| Finding ID | Why Not This Time | When To Apply |
-|------------|-------------------|---------------|
-| [ID] | [reason] | [future task] |
-
-**New Learnings to Add to Research:**
-| Learning | Should Be Added To | Priority |
-|----------|-------------------|----------|
-| [learning] | [R-X or new file] | [HIGH/MED/LOW] |
-```
-
-**This update is MANDATORY. Without it, research application is not tracked.**
-
-═══════════════════════════════════════════════════════════════════════════════
-█████████████████████████████████████████████████████████████████████████████
-PERCEPTUAL DEPTH AUDIT — ALWAYS INVOKE FULLY
-█████████████████████████████████████████████████████████████████████████████
-═══════════════════════════════════════════════════════════════════════════════
-
-**The Perceptual Depth Audit Skill Package is ALWAYS invoked at these points:**
-
-1. **After building any visual output** — Full 7 sub-agent audit
-2. **After any iteration** — At least abbreviated audit
-3. **Before marking anything complete** — Full verification audit
-4. **When comparing to validated explorations** — Comparative audit
-
-**Invoking the skill package means:**
-
-```
-1. READ the skill package documentation (not from memory)
-2. EXTRACT the full methodology
-3. APPLY every layer:
-   - Soul extraction
-   - Sub-agent deployment (A through G, full definitions)
-   - Squint test
-   - KortAI comparison
-   - Scoring rubric
-4. DOCUMENT the audit results
-5. REFINE based on findings
-6. RE-AUDIT until passing
-```
-
-**Abbreviated audit is NOT acceptable for:**
-- Final versions of explorations
-- Section builds
-- Anything going into DESIGN-SYSTEM/
-
-═══════════════════════════════════════════════════════════════════════════════
-█████████████████████████████████████████████████████████████████████████████
-RESEARCH FINDING COUNTS (ACTUAL)
-█████████████████████████████████████████████████████████████████████████████
-═══════════════════════════════════════════════════════════════════════════════
-
-The actual finding counts (as of 2026-02-04):
-
-| Research | Actual Count | Status |
-|----------|--------------|--------|
-| R-1 | 28 findings | COMPLETE |
-| R-2 | 27 findings | COMPLETE |
-| R-3 | 51 findings | COMPLETE |
-| R-4 | 192 findings | COMPLETE |
-| R-5 | 39 findings | COMPLETE |
-| **TOTAL** | **337 findings** | |
-
-This is the actual number of findings to track, not 124.
-
-═══════════════════════════════════════════════════════════════════════════════
-█████████████████████████████████████████████████████████████████████████████
-WHAT HAPPENS IF THESE RULES ARE VIOLATED
-█████████████████████████████████████████████████████████████████████████████
-═══════════════════════════════════════════════════════════════════════════════
-
-**If any mandatory step is skipped:**
-
-1. The output is INVALID
-2. It cannot be added to DESIGN-SYSTEM/
-3. It cannot be marked as INCLUDE
-4. It cannot inform migration
-5. It must be REDONE with proper process
-
-**Signs of violation:**
-
-- "Research Application Record" is missing or empty
-- Cannot point to specific lines where research was applied
-- RESEARCH-ACTIVE.md not updated
-- Perceptual Depth Audit not documented
-- "I applied the research" without evidence
-
-═══════════════════════════════════════════════════════════════════════════════
-█████████████████████████████████████████████████████████████████████████████
-SELF-CHECK QUESTIONS — ASK BEFORE EVERY OUTPUT
-█████████████████████████████████████████████████████████████████████████████
-═══════════════════════════════════════════════════════════════════════════════
-
-Before outputting anything, ask yourself:
-
-```
-□ Did I READ the research files (not recall from memory)?
-□ Did I IDENTIFY specific findings to apply (with IDs)?
-□ Did I COMMIT to specific applications before building?
-□ Did I ANNOTATE where research was applied?
-□ Did I VERIFY application after building?
-□ Did I invoke the FULL Perceptual Depth Audit?
-□ Did I REFINE based on gaps found?
-□ Did I UPDATE RESEARCH-ACTIVE.md?
-□ Is my Research Application Record COMPLETE?
-□ Can I PROVE each research application with specific evidence?
-```
-
-**If ANY answer is NO → Stop. Complete the step. Then proceed.**
-
-═══════════════════════════════════════════════════════════════════════════════
-█████████████████████████████████████████████████████████████████████████████
-COMPACTION SURVIVAL — THESE RULES PERSIST
-█████████████████████████████████████████████████████████████████████████████
-═══════════════════════════════════════════════════════════════════════════════
-
-**When context is compacted:**
-
-1. READ this CLAUDE.md file FIRST
-2. These rules are STILL ACTIVE
-3. Resume with mandatory research grounding
-4. Do not skip steps just because context is fresh
-
-**The refinement loop is not session-dependent. It is ALWAYS active.**
-
-═══════════════════════════════════════════════════════════════════════════════
-█████████████████████████████████████████████████████████████████████████████
-DIRECTORY STRUCTURE (POST-3x-AUDIT RESTRUCTURE)
-█████████████████████████████████████████████████████████████████████████████
-═══════════════════════════════════════════════════════════════════════════════
-
-**3-Tier Architecture:**
-
-```
-showcase/
-├── fortress/           ← Load-bearing explorations (DD, OD, CD). Zero bloat.
-│   ├── density/        ← DD-001 through DD-006 (7 files, 371 refs)
-│   ├── organizational/ ← OD-001 through OD-006 (8 files, 421 refs)
-│   └── combination/    ← CD-001 through CD-006 (13 files, crown jewels)
-├── active/             ← Work-in-progress + forward pipeline
-│   ├── axis/           ← AD explorations (RE-AUDIT REQUIRED)
-│   ├── pipeline/       ← POST-CD planning (17 files)
-│   ├── design-system/  ← Tokens, patterns, provenance (58 files)
-│   └── research/       ← R1-R5 + synthesis (7 files)
-└── CLAUDE.md           ← This file
-
-archive/                ← Completed phases (at repo root)
-├── knowledge-architecture/ ← KA core + synthesis files
-├── ka-scratchpads-c/   ← Provenance, remediation, metacognition
-├── cd-audit-reports/   ← Phase 2, 3, 4 CD audit reports
-├── checkpoints/        ← Audit milestones
-└── ...                 ← Other archived process artifacts
-```
-
-═══════════════════════════════════════════════════════════════════════════════
-█████████████████████████████████████████████████████████████████████████████
-KEY FILE LOCATIONS (UPDATED PATHS)
-█████████████████████████████████████████████████████████████████████████████
-═══════════════════════════════════════════════════════════════════════════════
-
-**Research Files:**
-- active/research/R1-DOCUMENTATION-PATTERNS.md
-- active/research/R2-CREATIVE-LAYOUTS.md
-- active/research/R3-DENSITY-DIMENSIONS.md
-- active/research/R4-AXIS-INNOVATIONS.md
-- active/research/R5-COMBINATION-THEORY.md
-- active/research/RESEARCH-SYNTHESIS.md
-
-**Tracking Files (now in archive):**
-- archive/checkpoints/RESEARCH-ACTIVE.md (central tracking)
-- archive/checkpoints/MASTER-STATE.md (position)
-- archive/checkpoints/DISCOVERIES-LOG.md (learnings)
-- archive/checkpoints/RESEARCH-APPLICATION-ENFORCEMENT-TEMPLATE.md
-
-**Design System:**
-- active/design-system/README.md
-- active/design-system/tokens/*
-- active/design-system/patterns/*
-- active/design-system/anti-patterns/registry.md
-
-**Knowledge Architecture (now in archive):**
-- archive/knowledge-architecture/core/KA-DECISIONS.md
-- archive/knowledge-architecture/core/SOURCE-OF-TRUTH-REGISTRY.md
-
+END ROOT CLAUDE.MD
 ═══════════════════════════════════════════════════════════════════════════════
