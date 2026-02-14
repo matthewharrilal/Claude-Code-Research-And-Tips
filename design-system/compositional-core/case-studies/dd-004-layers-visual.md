@@ -1,0 +1,145 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]: DD-004 — Density Exploration
+    - heading "Density Layers" [level=1] [ref=e5]
+    - paragraph [ref=e6]:
+      - strong [ref=e7]: "Hypothesis:"
+      - text: "Information density can be stratified into distinct layers like geological strata — Atmosphere, Surface, Topsoil, Subsoil, Bedrock — each with appropriate density for its depth. Users drill down into density by choice. Applying R-3 Geological Model (Insight #5)."
+  - main [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Atmosphere
+        - generic [ref=e12]: Minimal density — ambient context
+      - generic [ref=e13]:
+        - generic [ref=e14]: Surface
+        - generic [ref=e15]: Low density — headlines, navigation
+      - generic [ref=e16]:
+        - generic [ref=e17]: Topsoil
+        - generic [ref=e18]: Medium density — summaries, key points
+      - generic [ref=e19]:
+        - generic [ref=e20]: Subsoil
+        - generic [ref=e21]: Medium-high density — details, explanations
+      - generic [ref=e22]:
+        - generic [ref=e23]: Bedrock
+        - generic [ref=e24]: Maximum density — reference, code, raw data
+    - generic [ref=e25]:
+      - generic [ref=e26]: "Example: API Documentation with Full Layer Stack"
+      - generic [ref=e27]:
+        - generic [ref=e28]: Atmosphere Layer
+        - generic [ref=e35]: API Reference → Authentication → OAuth 2.0
+        - paragraph [ref=e36]: OAuth 2.0 is the industry-standard protocol for authorization. This section covers implementing OAuth flows in your application, from simple access tokens to complex multi-tenant scenarios.
+      - generic [ref=e37]:
+        - generic [ref=e38]: Surface Layer
+        - heading "Authorization Code Flow" [level=1] [ref=e45]
+        - paragraph [ref=e46]: The most secure OAuth flow for server-side applications. Exchanges a temporary code for access tokens without exposing credentials to the browser.
+      - generic [ref=e47]:
+        - generic [ref=e48]: Topsoil Layer
+        - heading "Flow Overview" [level=2] [ref=e55]
+        - paragraph [ref=e57]: "The authorization code flow involves three parties: your application, the user, and the authorization server. It's a two-step process that keeps secrets secure."
+        - generic [ref=e58]:
+          - generic [ref=e59]:
+            - generic [ref=e60]: Security Level
+            - generic [ref=e61]: Highest
+          - generic [ref=e62]:
+            - generic [ref=e63]: Best For
+            - generic [ref=e64]: Server Apps
+          - generic [ref=e65]:
+            - generic [ref=e66]: Complexity
+            - generic [ref=e67]: Moderate
+        - generic [ref=e68]:
+          - generic [ref=e69]: Note
+          - generic [ref=e70]: This flow requires a server-side component. For single-page applications without a backend, see the PKCE extension section below.
+      - generic [ref=e71]:
+        - generic [ref=e72]: Subsoil Layer
+        - heading "Implementation Steps" [level=3] [ref=e79]
+        - paragraph [ref=e81]: Follow these steps to implement the authorization code flow. Each step must complete successfully before proceeding to the next.
+        - generic [ref=e82]:
+          - generic [ref=e83]:
+            - generic [ref=e84]: 1. Redirect User
+            - generic [ref=e85]: Send user to authorization endpoint with client_id, redirect_uri, scope, and state parameters
+          - generic [ref=e86]:
+            - generic [ref=e87]: 2. User Authenticates
+            - generic [ref=e88]: User logs in and approves requested permissions at the authorization server
+          - generic [ref=e89]:
+            - generic [ref=e90]: 3. Receive Code
+            - generic [ref=e91]: Authorization server redirects back with temporary authorization code
+          - generic [ref=e92]:
+            - generic [ref=e93]: 4. Exchange Code
+            - generic [ref=e94]: Server-side POST to token endpoint exchanges code for access + refresh tokens
+          - generic [ref=e95]:
+            - generic [ref=e96]: 5. Store Tokens
+            - generic [ref=e97]: Securely store tokens server-side; never expose to client
+        - generic [ref=e98]:
+          - generic [ref=e99]: Tip
+          - generic [ref=e100]:
+            - text: Always verify the
+            - code [ref=e101]: state
+            - text: parameter matches what you sent. This prevents CSRF attacks. Generate a cryptographically random string for each request.
+        - generic [ref=e102]:
+          - generic [ref=e103]: Gotcha
+          - generic [ref=e104]: Authorization codes are single-use and expire quickly (typically 10 minutes). Exchange them immediately — don't store them for later.
+        - generic [ref=e105]:
+          - generic [ref=e106]: Required Endpoints
+          - text: "OAuth Server ├── /authorize # Step 1: User redirect ├── /token # Step 4: Code exchange └── /userinfo # Optional: Get user data Your Server ├── /login # Initiates flow └── /callback # Receives code"
+      - generic [ref=e107]:
+        - generic [ref=e108]: Bedrock Layer
+        - generic [ref=e115]:
+          - generic [ref=e116]: auth/oauth.ts
+          - button "Copy" [ref=e117] [cursor=pointer]
+        - generic [ref=e118]: "import { OAuth2Client } from 'google-auth-library'; const client = new OAuth2Client({ clientId: process.env.OAUTH_CLIENT_ID, clientSecret: process.env.OAUTH_CLIENT_SECRET, redirectUri: 'https://app.example.com/callback' }); // Step 1: Generate authorization URL export function getAuthUrl(state: string): string { return client.generateAuthUrl({ access_type: 'offline', scope: ['openid', 'email', 'profile'], state, prompt: 'consent' }); } // Step 4: Exchange code for tokens export async function exchangeCode(code: string) { const { tokens } = await client.getToken(code); client.setCredentials(tokens); return tokens; }"
+    - generic [ref=e121]: Pattern Reflection
+    - generic [ref=e123]:
+      - generic [ref=e124]: Key Insight
+      - generic [ref=e125]: "You've just experienced density layering: from the atmospheric breadcrumb context, through the clean surface headline, past the scannable topsoil summary, into the detailed subsoil steps, and finally to the bedrock code reference. Each layer serves a different reading mode — you choose how deep to drill."
+    - generic [ref=e126]:
+      - generic [ref=e127]: "Example: Expert Path (Surface → Bedrock)"
+      - generic [ref=e128]:
+        - generic [ref=e129]: Surface → Bedrock (Expert)
+        - heading "Token Refresh" [level=1] [ref=e136]
+        - paragraph [ref=e137]: When access tokens expire, use the refresh token to get a new one.
+      - generic [ref=e138]:
+        - generic [ref=e139]:
+          - generic [ref=e140]: auth/refresh.ts
+          - button "Copy" [ref=e141] [cursor=pointer]
+        - generic [ref=e142]: "export async function refreshAccessToken(refreshToken: string) { client.setCredentials({ refresh_token: refreshToken }); const { credentials } = await client.refreshAccessToken(); return credentials.access_token; }"
+    - generic [ref=e143]:
+      - generic [ref=e144]: "Example: Novice Path (Full Explanatory Stack)"
+      - generic [ref=e145]:
+        - generic [ref=e146]: Atmosphere — Context
+        - paragraph [ref=e153]: Before implementing token refresh, understand why tokens expire in the first place. Short-lived access tokens limit the damage if one is compromised.
+      - generic [ref=e154]:
+        - generic [ref=e155]: Topsoil — Key Concept
+        - heading "Why Tokens Expire" [level=2] [ref=e162]
+        - paragraph [ref=e164]: Access tokens are deliberately short-lived (typically 1 hour). If stolen, they can only be misused briefly. Refresh tokens are long-lived but should never leave your server.
+        - generic [ref=e165]:
+          - generic [ref=e166]:
+            - generic [ref=e167]: Access Token
+            - generic [ref=e168]: ~1 hour
+          - generic [ref=e169]:
+            - generic [ref=e170]: Refresh Token
+            - generic [ref=e171]: ~30 days
+          - generic [ref=e172]:
+            - generic [ref=e173]: Storage
+            - generic [ref=e174]: Server only
+      - generic [ref=e175]:
+        - generic [ref=e176]: Subsoil — Details
+        - heading "When to Refresh" [level=3] [ref=e183]
+        - paragraph [ref=e185]:
+          - text: Don't wait for API errors. Proactively check token expiration before making requests. Most tokens include an
+          - code [ref=e186]: expires_at
+          - text: timestamp.
+        - generic [ref=e187]:
+          - generic [ref=e188]:
+            - generic [ref=e189]: Check Timing
+            - generic [ref=e190]: Refresh when token has <5 minutes remaining
+          - generic [ref=e191]:
+            - generic [ref=e192]: Handle Failure
+            - generic [ref=e193]: If refresh fails, redirect user to re-authenticate
+          - generic [ref=e194]:
+            - generic [ref=e195]: Race Conditions
+            - generic [ref=e196]: Use mutex/lock when refreshing to prevent duplicate requests
+        - generic [ref=e197]:
+          - generic [ref=e198]: Gotcha
+          - generic [ref=e199]: Some providers rotate refresh tokens on each use. Always store the new refresh token returned from a refresh request, not just the access token.

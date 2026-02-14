@@ -1,0 +1,166 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e4]: DD-006 — Density Exploration (Creative Slot)
+    - heading "Fractal Density" [level=1] [ref=e5]
+    - paragraph [ref=e6]:
+      - strong [ref=e7]: "Hypothesis:"
+      - text: "Good density patterns are self-similar at multiple scales — the same rhythm of dense/sparse appears at page level, section level, component level, and even character level. This creates coherent, recognizable structure. Applying R-3 Insight #23 (Self-Similar Density)."
+  - main [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]: The Same Rhythm at Every Scale
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - generic [ref=e13]: Page Level
+          - generic [ref=e14]: Dense section
+          - generic [ref=e15]: Sparse section
+          - generic [ref=e16]: Dense section
+          - generic [ref=e17]: Sections alternate
+        - generic [ref=e18]: ≈
+        - generic [ref=e19]:
+          - generic [ref=e20]: Section Level
+          - generic [ref=e21]: Dense paragraph
+          - generic [ref=e22]: Whitespace
+          - generic [ref=e23]: Dense paragraph
+          - generic [ref=e24]: Paragraphs alternate
+        - generic [ref=e25]: ≈
+        - generic [ref=e26]:
+          - generic [ref=e27]: Component Level
+          - generic [ref=e28]: Dense header
+          - generic [ref=e29]: Sparse body
+          - generic [ref=e30]: Dense footer
+          - generic [ref=e31]: Zones alternate
+        - generic [ref=e32]: ≈
+        - generic [ref=e33]:
+          - generic [ref=e34]: Character Level
+          - generic [ref=e35]: Dense code
+          - generic [ref=e36]: Sparse comment
+          - generic [ref=e37]: Dense code
+          - generic [ref=e38]: Lines alternate
+    - generic [ref=e39]:
+      - heading "Self-Similarity Creates Recognition" [level=2] [ref=e40]
+      - paragraph [ref=e41]: Like fractals in nature — fern leaves, coastlines, snowflakes — documentation that follows the same density rhythm at every scale feels coherent and navigable. You learn the pattern once and recognize it everywhere.
+    - generic [ref=e42]:
+      - generic [ref=e43]:
+        - generic [ref=e44]: Page
+        - generic [ref=e45]: █░░█░░█░░
+        - generic [ref=e46]: Dense sections alternate with sparse
+      - generic [ref=e47]:
+        - generic [ref=e48]: Section
+        - generic [ref=e49]: █░░█░░█░░
+        - generic [ref=e50]: Dense paragraphs alternate with whitespace
+      - generic [ref=e51]:
+        - generic [ref=e52]: Component
+        - generic [ref=e53]: █░░█░░█░░
+        - generic [ref=e54]: Dense labels alternate with sparse content
+      - generic [ref=e55]:
+        - generic [ref=e56]: Character
+        - generic [ref=e57]: █░░█░░█░░
+        - generic [ref=e58]: Dense code alternate with sparse comments
+    - generic [ref=e59]: Demonstration at Each Scale
+    - generic [ref=e60]:
+      - generic [ref=e61]:
+        - generic [ref=e62]: Level 1
+        - generic [ref=e63]: Page Scale — Dense vs Sparse Sections
+      - generic [ref=e64]:
+        - generic [ref=e65]:
+          - generic [ref=e66]: Dense Section
+          - paragraph [ref=e68]: Configuration options, API reference, code examples, parameter tables — information-rich content that experts scan quickly.
+        - generic [ref=e69]:
+          - generic [ref=e70]: Sparse Section
+          - paragraph [ref=e72]: Breathing room. Context. Philosophy. The "why" before the "how."
+        - generic [ref=e73]:
+          - generic [ref=e74]: Dense Section
+          - paragraph [ref=e76]: Implementation details, error handling, edge cases, troubleshooting — detailed reference material.
+    - generic [ref=e77]:
+      - generic [ref=e78]:
+        - generic [ref=e79]: Level 2
+        - generic [ref=e80]: Section Scale — Dense vs Sparse Paragraphs
+      - generic [ref=e81]:
+        - heading "Error Handling Patterns" [level=3] [ref=e82]
+        - generic [ref=e83]:
+          - generic [ref=e84]: Sparse — Context
+          - text: Errors are inevitable. How you handle them determines whether your application feels robust or fragile. The goal isn't to prevent all errors — it's to respond gracefully when they occur.
+        - generic [ref=e85]:
+          - generic [ref=e86]: Dense — Details
+          - text: Catch specific exceptions, not generic ones. Log the stack trace. Include request ID in error responses. Implement retry logic with exponential backoff. Set appropriate timeouts. Return meaningful error codes (4xx for client errors, 5xx for server errors). Never expose internal details in production error messages.
+        - generic [ref=e87]:
+          - generic [ref=e88]: Sparse — Reflection
+          - text: Well-handled errors build user trust. They show you've anticipated problems and cared enough to provide guidance.
+    - generic [ref=e89]:
+      - generic [ref=e90]:
+        - generic [ref=e91]: Level 3
+        - generic [ref=e92]: Component Scale — Dense vs Sparse Zones
+      - generic [ref=e93]:
+        - generic [ref=e94]:
+          - generic [ref=e95]: Info Callout
+          - generic [ref=e96]: Dense label zone
+        - generic [ref=e97]:
+          - strong [ref=e98]: "Rate Limit:"
+          - text: 100 req/min |
+          - strong [ref=e99]: "Timeout:"
+          - text: 30s |
+          - strong [ref=e100]: "Retry:"
+          - text: 3x
+        - generic [ref=e101]: These limits apply to all API endpoints. Contact support for higher limits.
+      - generic [ref=e102]:
+        - generic [ref=e103]: Same Pattern
+        - generic [ref=e104]:
+          - text: Notice how this callout also has a
+          - strong [ref=e105]: dense label zone
+          - text: (the blue label) followed by a
+          - strong [ref=e106]: sparse content zone
+          - text: (this text). The pattern repeats.
+    - generic [ref=e107]:
+      - generic [ref=e108]:
+        - generic [ref=e109]: Level 4
+        - generic [ref=e110]: Character Scale — Dense Code vs Sparse Comments
+      - generic [ref=e111]:
+        - generic [ref=e112]:
+          - generic [ref=e113]: "1"
+          - generic [ref=e114]: "// Sparse: What this function does"
+        - generic [ref=e115]:
+          - generic [ref=e116]: "2"
+          - generic [ref=e117]: "async function fetchUser(id) {"
+        - generic [ref=e118]:
+          - generic [ref=e119]: "3"
+          - generic [ref=e120]: "const response = await fetch(`/api/users/${id}`);"
+        - generic [ref=e122]: "4"
+        - generic [ref=e124]:
+          - generic [ref=e125]: "5"
+          - generic [ref=e126]: "// Sparse: Why we check status"
+        - generic [ref=e127]:
+          - generic [ref=e128]: "6"
+          - generic [ref=e129]: if (!response.ok) throw new Error('Failed');
+        - generic [ref=e131]: "7"
+        - generic [ref=e133]:
+          - generic [ref=e134]: "8"
+          - generic [ref=e135]: "// Sparse: Why we parse JSON"
+        - generic [ref=e136]:
+          - generic [ref=e137]: "9"
+          - generic [ref=e138]: return await response.json();
+        - generic [ref=e139]:
+          - generic [ref=e140]: "10"
+          - generic [ref=e141]: "}"
+    - generic [ref=e142]: Complete Fractal Example
+    - generic [ref=e143]:
+      - generic [ref=e145]: All Four Scales in One Structure
+      - generic [ref=e147]:
+        - generic [ref=e148]: "Page Scale: Dense Section"
+        - generic [ref=e149]:
+          - paragraph [ref=e150]:
+            - strong [ref=e151]: Authentication
+            - text: — Every request must include a valid API key.
+          - generic [ref=e152]:
+            - generic [ref=e153]: "Component Scale: Info Callout"
+            - generic [ref=e154]:
+              - generic [ref=e155]: API KEY FORMAT
+              - generic [ref=e157]:
+                - generic [ref=e158]: "Character Scale: Code"
+                - code [ref=e160]:
+                  - text: // Your API key
+                  - text: const key = "sk_live_...";
+    - generic [ref=e161]:
+      - generic [ref=e162]: Key Insight
+      - generic [ref=e163]: "You've just experienced fractal density: the same rhythm of dense/sparse repeating at every level of scale. Page sections alternate dense and sparse. Within sections, paragraphs alternate. Within components, zones alternate. Within code, lines alternate. This self-similarity makes documentation feel coherent and navigable — you learn the pattern once and recognize it everywhere."

@@ -1,0 +1,463 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - navigation "Chapter progress" [ref=e3]:
+    - link "Ch 1" [ref=e4] [cursor=pointer]:
+      - /url: "#chapter-1"
+      - generic [ref=e6]: Ch 1
+    - link "Ch 2" [ref=e7] [cursor=pointer]:
+      - /url: "#chapter-2"
+      - generic [ref=e9]: Ch 2
+    - link "Ch 3" [ref=e10] [cursor=pointer]:
+      - /url: "#chapter-3"
+      - generic [ref=e12]: Ch 3
+    - link "Ch 4" [ref=e13] [cursor=pointer]:
+      - /url: "#chapter-4"
+      - generic [ref=e15]: Ch 4
+  - banner [ref=e16]:
+    - generic [ref=e17]:
+      - generic [ref=e18]:
+        - text: Exploration OD-001
+        - generic [ref=e19]: v3 re-enriched
+      - heading "Conversational Structure" [level=1] [ref=e20]
+      - paragraph [ref=e21]: What if documentation was organized as a conversation between a curious reader and a knowledgeable guide? Questions create sparse breathing room; answers deliver dense, authoritative content. Conversational Q&A IS PULSE + TIDAL.
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - text: "Density:"
+          - strong [ref=e24]: PULSE + TIDAL
+        - generic [ref=e25]:
+          - text: "Organization:"
+          - strong [ref=e26]: Q&A Dialogue
+        - generic [ref=e27]:
+          - text: "DD Sources:"
+          - strong [ref=e28]: DD-005, DD-006
+        - generic [ref=e29]:
+          - text: "Score:"
+          - strong [ref=e30]: 37/40
+  - main [ref=e31]:
+    - generic [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]: Conversational Density Pattern
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - generic [ref=e37]: Question
+            - generic [ref=e38]: sparse — interrogative
+            - generic [ref=e39]: LOW
+          - generic [ref=e43]:
+            - generic [ref=e44]: Answer
+            - generic [ref=e45]: dense — authoritative — code, tables, examples
+            - generic [ref=e46]: HIGH
+          - generic [ref=e50]:
+            - generic [ref=e51]: Follow-up
+            - generic [ref=e52]: narrower — deeper
+            - generic [ref=e53]: LOW
+          - generic [ref=e57]:
+            - generic [ref=e58]: Answer
+            - generic [ref=e59]: dense — implementation detail — patterns
+            - generic [ref=e60]: HIGH
+        - generic [ref=e61]:
+          - strong [ref=e62]: "PULSE rhythm:"
+          - code [ref=e63]: sparse → dense → sparse → dense
+          - text: maps to
+          - code [ref=e64]: question → answer → question → answer
+          - text: ". Width variation (TIDAL) reinforces: narrow questions, wide flowing answers."
+          - strong [ref=e65]: "Socratic narrowing:"
+          - text: follow-up questions get progressively more specific, shown by decreasing bar width.
+      - generic [ref=e66]:
+        - generic [ref=e67]: Chapter 1
+        - heading "Understanding the Pattern" [level=2] [ref=e68]
+        - generic [ref=e75]: "Socratic level: broad"
+      - 'region "Question: What is a React Server Component" [ref=e76]':
+        - generic [ref=e77]:
+          - generic [ref=e78]: Q
+          - generic [ref=e79]: What is a React Server Component, and why should I care?
+          - generic [ref=e80]: Broad → establishing context
+        - generic [ref=e81]:
+          - paragraph [ref=e82]: A React Server Component runs on the server and sends only its rendered output to the client. No JavaScript bundle. No hydration cost. The component executes where the data lives.
+          - generic [ref=e83]:
+            - paragraph [ref=e84]:
+              - text: This matters because the traditional React model ships component code to the browser, then re-executes it to produce HTML. For data-heavy pages, you end up sending both the rendering logic
+              - emphasis [ref=e85]: and
+              - text: the data, doubling the payload.
+            - paragraph [ref=e86]: Server Components eliminate that duplication. They fetch data on the server, render to HTML, and stream the result. The client receives ready-to-display content with zero JavaScript overhead for those components.
+          - generic [ref=e87]:
+            - generic [ref=e88]: Info
+            - generic [ref=e89]:
+              - text: Server Components are the default in Next.js 13+ App Router. You only opt into Client Components when you need interactivity (
+              - code [ref=e90]: "'use client'"
+              - text: directive).
+      - 'region "Question: How to decide Server vs Client Components" [ref=e91]':
+        - generic [ref=e92]:
+          - generic [ref=e93]: Q
+          - generic [ref=e94]: How do I decide which components should be Server vs Client?
+          - generic [ref=e95]: Narrowing → from concept to decision
+        - generic [ref=e96]:
+          - paragraph [ref=e97]: "The decision comes down to a single question: does this component need browser APIs or user interaction? If yes, Client Component. If no, Server Component."
+          - table [ref=e99]:
+            - rowgroup [ref=e100]:
+              - row "Signal Server Component Client Component" [ref=e101]:
+                - columnheader "Signal" [ref=e102]
+                - columnheader "Server Component" [ref=e103]
+                - columnheader "Client Component" [ref=e104]
+            - rowgroup [ref=e105]:
+              - row "Data fetching Direct DB/API access Via API routes or props" [ref=e106]:
+                - cell "Data fetching" [ref=e107]
+                - cell "Direct DB/API access" [ref=e108]
+                - cell "Via API routes or props" [ref=e109]
+              - row "Interactivity None needed onClick, onChange, etc." [ref=e110]:
+                - cell "Interactivity" [ref=e111]
+                - cell "None needed" [ref=e112]
+                - cell "onClick, onChange, etc." [ref=e113]
+              - row "State No useState/useReducer Manages local state" [ref=e114]:
+                - cell "State" [ref=e115]
+                - cell "No useState/useReducer" [ref=e116]
+                - cell "Manages local state" [ref=e117]
+              - row "Browser APIs No window/document Needs window/document" [ref=e118]:
+                - cell "Browser APIs" [ref=e119]
+                - cell "No window/document" [ref=e120]
+                - cell "Needs window/document" [ref=e121]
+              - row "Bundle impact Zero JS shipped Adds to bundle size" [ref=e122]:
+                - cell "Bundle impact" [ref=e123]
+                - cell "Zero JS shipped" [ref=e124]
+                - cell "Adds to bundle size" [ref=e125]
+          - paragraph [ref=e127]: "In practice, most of your application can be Server Components. Layouts, pages, data displays, and static content all qualify. Reserve Client Components for interactive islands: forms, modals, tooltips, and anything with event handlers."
+      - generic [ref=e128]:
+        - generic [ref=e129]: Essence
+        - paragraph [ref=e130]: Every question a reader asks is a doorway. The answer behind it should be exactly as deep as the curiosity that opened it.
+      - generic [ref=e131]:
+        - generic [ref=e132]: Chapter 2
+        - heading "Building It" [level=2] [ref=e133]
+        - generic [ref=e140]: "Socratic level: specific"
+      - 'region "Question: File structure for Server Components" [ref=e141]':
+        - generic [ref=e142]:
+          - generic [ref=e143]: Q
+          - generic [ref=e144]: Show me the file structure. Where does everything go?
+          - generic [ref=e145]: Specific → from decision to structure
+        - generic [ref=e146]:
+          - paragraph [ref=e147]: The App Router uses a file-system convention. Each folder becomes a route segment. Server Components are the default; Client Components are explicitly marked.
+          - generic [ref=e148]:
+            - generic [ref=e149]: Project Structure
+            - text: app/
+            - text: ├── layout.tsx ← Server Component (wraps all pages)
+            - text: ├── page.tsx ← Server Component (home page)
+            - text: ├── dashboard/
+            - text: "│ ├── page.tsx ← Server: fetches data"
+            - text: "│ ├── chart.tsx ← Client: interactive ('use client')"
+            - text: "│ └── stats.tsx ← Server: static display"
+            - text: └── api/
+            - text: └── route.ts ← API handler
+          - paragraph [ref=e151]: "Notice the pattern: the page-level component is always a Server Component that fetches data and orchestrates layout. Interactive elements are isolated into specific Client Components imported where needed."
+      - 'region "Question: Server Component code examples" [ref=e152]':
+        - generic [ref=e153]:
+          - generic [ref=e154]: Q
+          - generic [ref=e155]: What does the actual code look like?
+          - generic [ref=e156]: Specific → from structure to implementation
+        - generic [ref=e157]:
+          - paragraph [ref=e158]:
+            - text: A Server Component looks like any React component, except it can use
+            - code [ref=e159]: async/await
+            - text: directly. No hooks for data fetching needed.
+          - generic [ref=e160]:
+            - generic [ref=e161]:
+              - generic [ref=e162]: tsx
+              - button "Copy" [ref=e163] [cursor=pointer]
+            - generic [ref=e164]:
+              - generic [ref=e165]:
+                - generic [ref=e166]: "1"
+                - generic [ref=e167]: // Server Component — runs on the server only
+              - generic [ref=e168]:
+                - generic [ref=e169]: "2"
+                - generic [ref=e170]: // No 'use client' directive = Server by default
+              - generic [ref=e172]: "3"
+              - generic [ref=e173]:
+                - generic [ref=e174]: "4"
+                - generic [ref=e175]: "export default async function DashboardPage() {"
+              - generic [ref=e176]:
+                - generic [ref=e177]: "5"
+                - generic [ref=e178]: // Direct database access — no API layer needed
+              - generic [ref=e179]:
+                - generic [ref=e180]: "6"
+                - generic [ref=e181]: const metrics = await db.query('SELECT * FROM metrics')
+              - generic [ref=e183]: "7"
+              - generic [ref=e184]:
+                - generic [ref=e185]: "8"
+                - generic [ref=e186]: return (
+              - generic [ref=e187]:
+                - generic [ref=e188]: "9"
+                - generic [ref=e189]: <main>
+              - generic [ref=e190]:
+                - generic [ref=e191]: "10"
+                - generic [ref=e192]: <h1>Dashboard</h1>
+              - generic [ref=e193]:
+                - generic [ref=e194]: "11"
+                - generic [ref=e195]: "<Stats data={metrics} /> {/* Server */}"
+              - generic [ref=e196]:
+                - generic [ref=e197]: "12"
+                - generic [ref=e198]: "<Chart data={metrics} /> {/* Client */}"
+              - generic [ref=e199]:
+                - generic [ref=e200]: "13"
+                - generic [ref=e201]: </main>
+              - generic [ref=e202]:
+                - generic [ref=e203]: "14"
+                - generic [ref=e204]: )
+              - generic [ref=e205]:
+                - generic [ref=e206]: "15"
+                - generic [ref=e207]: "}"
+          - generic [ref=e208]:
+            - generic [ref=e209]: Tip
+            - generic [ref=e210]:
+              - text: The
+              - code [ref=e211]: Stats
+              - text: component receives data as props from the Server Component. It never fetches data itself. The
+              - code [ref=e212]: Chart
+              - text: component adds interactivity (hover, zoom) via
+              - code [ref=e213]: "'use client'"
+              - text: ", but still receives server-fetched data."
+          - generic [ref=e214]:
+            - generic [ref=e215]:
+              - generic [ref=e216]: Q
+              - generic [ref=e217]: What about the Client Component? How different is it?
+              - generic [ref=e218]: Narrower → specific component detail
+            - generic [ref=e219]:
+              - paragraph [ref=e220]:
+                - text: Client Components use the
+                - code [ref=e221]: "'use client'"
+                - text: directive at the top of the file. They can use hooks, event handlers, and browser APIs.
+              - generic [ref=e222]:
+                - generic [ref=e223]:
+                  - generic [ref=e224]: tsx — chart.tsx
+                  - button "Copy" [ref=e225] [cursor=pointer]
+                - generic [ref=e226]:
+                  - generic [ref=e227]:
+                    - generic [ref=e228]: "1"
+                    - generic [ref=e229]: "'use client' // ← This makes it a Client Component"
+                  - generic [ref=e231]: "2"
+                  - generic [ref=e232]:
+                    - generic [ref=e233]: "3"
+                    - generic [ref=e234]: "import { useState } from 'react'"
+                  - generic [ref=e236]: "4"
+                  - generic [ref=e237]:
+                    - generic [ref=e238]: "5"
+                    - generic [ref=e239]: "export function Chart({ data }: { data: Metric[] }) {"
+                  - generic [ref=e240]:
+                    - generic [ref=e241]: "6"
+                    - generic [ref=e242]: const [hoveredPoint, setHoveredPoint] = useState(null)
+                  - generic [ref=e244]: "7"
+                  - generic [ref=e245]:
+                    - generic [ref=e246]: "8"
+                    - generic [ref=e247]: "return <svg onMouseMove={handleHover}>...</svg>"
+                  - generic [ref=e248]:
+                    - generic [ref=e249]: "9"
+                    - generic [ref=e250]: "}"
+      - generic [ref=e251]:
+        - generic [ref=e252]: Chapter 3
+        - heading "Common Mistakes" [level=2] [ref=e253]
+        - generic [ref=e260]: "Socratic level: specific → diagnostic"
+      - 'region "Question: Common Server Component mistakes" [ref=e261]':
+        - generic [ref=e262]:
+          - generic [ref=e263]: Q
+          - generic [ref=e264]: What goes wrong? What are the mistakes everyone makes?
+          - generic [ref=e265]: Specific → identifying failure patterns
+        - generic [ref=e266]:
+          - paragraph [ref=e267]: Three patterns account for 90% of Server Component confusion. Each stems from treating Server and Client Components as interchangeable when they are not.
+          - generic [ref=e268]:
+            - generic [ref=e269]: Gotcha
+            - generic [ref=e270]:
+              - text: The compiler error
+              - code [ref=e271]: "\"useState is not a function\""
+              - text: always means you forgot
+              - code [ref=e272]: "'use client'"
+              - text: . Server Components cannot use hooks.
+          - generic [ref=e273]:
+            - paragraph [ref=e274]:
+              - strong [ref=e275]: "Mistake 1: Importing a Client Component into a Server Component's module scope."
+              - text: This forces the entire module to become a Client Component. Instead, import Client Components as children or through composition.
+            - paragraph [ref=e276]:
+              - strong [ref=e277]: "Mistake 2: Passing non-serializable props across the boundary."
+              - text: Server Components can only pass serializable data (strings, numbers, plain objects) to Client Components. Functions, class instances, and Dates need conversion.
+            - paragraph [ref=e278]:
+              - strong [ref=e279]: "Mistake 3: Making everything a Client Component \"just in case.\""
+              - text: This defeats the purpose entirely. Start with Server Components. Add
+              - code [ref=e280]: "'use client'"
+              - text: only when the component genuinely needs interactivity.
+          - group [ref=e281]:
+            - generic "▸ Dive deeper — serialization boundary rules" [ref=e282] [cursor=pointer]
+      - 'region "Question: Mental model for Server/Client boundary" [ref=e283]':
+        - generic [ref=e284]:
+          - generic [ref=e285]: Q
+          - generic [ref=e286]: So what is the right mental model for the boundary?
+          - generic [ref=e287]: Deepest → mental model synthesis
+        - generic [ref=e288]:
+          - paragraph [ref=e289]: Think of your application as two trees that share a single rendering surface. The Server tree renders first and produces HTML. The Client tree hydrates specific subtrees where interactivity is needed.
+          - paragraph [ref=e291]:
+            - text: The boundary between them is the
+            - code [ref=e292]: "'use client'"
+            - text: directive. Everything above it is server territory. Everything below it is client territory. Data flows down across the boundary as serialized props. Events never cross back up — they trigger client-side state changes or server actions.
+          - generic [ref=e293]:
+            - generic [ref=e294]: Challenge
+            - generic [ref=e295]:
+              - text: Examine your current Next.js application. How many components use
+              - code [ref=e296]: "'use client'"
+              - text: "? For each one, ask: does this genuinely need interactivity, or could it be a Server Component receiving data as props?"
+      - generic [ref=e297]:
+        - generic [ref=e298]: Essence
+        - paragraph [ref=e299]: The boundary between server and client is not a wall — it is a membrane. Data passes through freely. Behavior does not.
+      - generic [ref=e300]:
+        - generic [ref=e301]: Chapter 4
+        - heading "Advanced Patterns" [level=2] [ref=e302]
+        - generic [ref=e309]: "Socratic level: deep synthesis"
+      - 'region "Question: Composing Server and Client Components" [ref=e310]':
+        - generic [ref=e311]:
+          - generic [ref=e312]: Q
+          - generic [ref=e313]: How do I compose Server and Client Components together?
+          - generic [ref=e314]: Deep → composition architecture
+        - generic [ref=e315]:
+          - paragraph [ref=e316]: The composition pattern is the key to elegant Server/Client boundaries. Server Components can render Client Components as children, passing server-fetched data down through props while keeping the parent's zero-JS footprint.
+          - generic [ref=e317]:
+            - generic [ref=e318]:
+              - generic [ref=e319]: tsx — composition pattern
+              - button "Copy" [ref=e320] [cursor=pointer]
+            - generic [ref=e321]:
+              - generic [ref=e322]:
+                - generic [ref=e323]: "1"
+                - generic [ref=e324]: // Server Component — the orchestrator
+              - generic [ref=e325]:
+                - generic [ref=e326]: "2"
+                - generic [ref=e327]: "export default async function Page() {"
+              - generic [ref=e328]:
+                - generic [ref=e329]: "3"
+                - generic [ref=e330]: const data = await fetchData()
+              - generic [ref=e331]:
+                - generic [ref=e332]: "4"
+                - generic [ref=e333]: return (
+              - generic [ref=e334]:
+                - generic [ref=e335]: "5"
+                - generic [ref=e336]: <ServerLayout>
+              - generic [ref=e337]:
+                - generic [ref=e338]: "6"
+                - generic [ref=e339]: "<ClientSearch initialData={data.items} />"
+              - generic [ref=e340]:
+                - generic [ref=e341]: "7"
+                - generic [ref=e342]: "<ServerContent content={data.body} />"
+              - generic [ref=e343]:
+                - generic [ref=e344]: "8"
+                - generic [ref=e345]: </ServerLayout>
+              - generic [ref=e346]:
+                - generic [ref=e347]: "9"
+                - generic [ref=e348]: )
+              - generic [ref=e349]:
+                - generic [ref=e350]: "10"
+                - generic [ref=e351]: "}"
+          - generic [ref=e352]:
+            - generic [ref=e353]:
+              - generic [ref=e354]: Q
+              - generic [ref=e355]: Can Client Components render Server Components?
+              - generic [ref=e356]: Deeper → boundary inversion question
+            - generic [ref=e357]:
+              - paragraph [ref=e358]:
+                - text: Not directly. But you can pass Server Components as
+                - code [ref=e359]: children
+                - text: to Client Components. The server renders the children first, then the client wraps them.
+              - generic [ref=e360]:
+                - generic [ref=e361]: Essence
+                - generic [ref=e362]: Server Components flow downward like water. Client Components are the vessels that contain them. The water fills the shape of the vessel, but the vessel cannot become water.
+              - generic [ref=e363]:
+                - generic [ref=e364]:
+                  - generic [ref=e365]: Q
+                  - generic [ref=e366]: What about Server Actions? How do events cross the boundary?
+                  - generic [ref=e367]: Deepest → boundary mechanics
+                - generic [ref=e368]:
+                  - paragraph [ref=e369]:
+                    - text: Server Actions let Client Components call server-side functions directly. Mark a function with
+                    - code [ref=e370]: "'use server'"
+                    - text: and it becomes an RPC endpoint that the client can invoke without building an API route.
+                  - group [ref=e371]:
+                    - generic "▸ Dive deeper — Server Actions vs API Routes" [ref=e372] [cursor=pointer]
+      - generic [ref=e373]:
+        - generic [ref=e374]: What We Covered
+        - list [ref=e375]:
+          - listitem [ref=e376]:
+            - generic [ref=e378]: Server Components run on the server and send only rendered HTML — zero JavaScript overhead
+          - listitem [ref=e379]:
+            - generic [ref=e381]: "Use the decision matrix: if it needs browser APIs or interactivity, make it a Client Component"
+          - listitem [ref=e382]:
+            - generic [ref=e384]: File structure reflects the boundary — Server Components orchestrate, Client Components interact
+          - listitem [ref=e385]:
+            - generic [ref=e387]: The three common mistakes all stem from treating the boundary as optional rather than architectural
+          - listitem [ref=e388]:
+            - generic [ref=e390]: "Think in two trees: server renders first, client hydrates interactive subtrees"
+          - listitem [ref=e391]:
+            - generic [ref=e393]: Composition is the key pattern — Server Components orchestrate, passing data down to Client islands
+          - listitem [ref=e394]:
+            - generic [ref=e396]:
+              - text: Server Actions bridge the boundary for mutations —
+              - code [ref=e397]: "'use server'"
+              - text: creates RPC endpoints automatically
+      - generic [ref=e398]:
+        - generic [ref=e399]: Research Enrichments Applied
+        - generic [ref=e400]:
+          - generic [ref=e401]:
+            - generic [ref=e402]: EXT-CONV-001
+            - generic [ref=e403]: Socratic Progressive Narrowing
+            - generic [ref=e404]: Questions progressively narrow from broad context to specific implementation detail. Visualized via narrowing indicators and decreasing follow-up widths.
+            - generic [ref=e405]: "Applied: All Q&A pairs, question__narrowing labels"
+          - generic [ref=e406]:
+            - generic [ref=e407]: EXT-CONV-004
+            - generic [ref=e408]: Background Color Differentiation
+            - generic [ref=e409]: Questions and answers have distinct background colors, making the PULSE rhythm visible even without width variation (mobile fallback).
+            - generic [ref=e410]: "Applied: --color-question-bg, --color-answer-bg"
+          - generic [ref=e411]:
+            - generic [ref=e412]: EXT-CREATIVE-001
+            - generic [ref=e413]: THE SOLID OFFSET
+            - generic [ref=e414]: "Neobrutalist depth using pseudo-element solid blocks instead of box-shadow. Respects box-shadow: none constraint while adding visual depth."
+            - generic [ref=e415]: "Applied: Pattern viz, code blocks, essence callouts, summary"
+          - generic [ref=e416]:
+            - generic [ref=e417]: EXT-CREATIVE-002
+            - generic [ref=e418]: Typographic Hierarchy Cascade
+            - generic [ref=e419]: 5-level type system (40px/26px/22px/16px/14px) with ~1.5x ratio, creating fractal-aligned typographic hierarchy.
+            - generic [ref=e420]: "Applied: CSS custom properties --type-*"
+          - generic [ref=e421]:
+            - generic [ref=e422]: EXT-CREATIVE-003
+            - generic [ref=e423]: THE SCROLL WITNESS
+            - generic [ref=e424]: Fixed sidebar with per-chapter progress indicators. Shows reading position and chapter completion.
+            - generic [ref=e425]: "Applied: .scroll-witness nav element (desktop only)"
+          - generic [ref=e426]:
+            - generic [ref=e427]: EXT-CREATIVE-004
+            - generic [ref=e428]: THE ARRIVING WISDOM
+            - generic [ref=e429]: Scroll-triggered staggered reveal animations using CSS scroll-driven animations API. Graceful fallback for non-Chromium.
+            - generic [ref=e430]: "Applied: .reveal class on all major sections"
+          - generic [ref=e431]:
+            - generic [ref=e432]: EXT-CREATIVE-005
+            - generic [ref=e433]: THE EDITORIAL DROP
+            - generic [ref=e434]: Serif drop caps on chapter-opening answer paragraphs, connecting documentation to centuries of editorial tradition.
+            - generic [ref=e435]: "Applied: .answer__lead--dropcap (Ch1, Ch2, Ch3 openers)"
+          - generic [ref=e436]:
+            - generic [ref=e437]: EXT-CONV-003
+            - generic [ref=e438]: Three-Level Gestalt Spacing
+            - generic [ref=e439]: "Enforced three-tier spacing: 8px within related elements, 32px between elements, 64px between chapters. Respects Gestalt Pure Distance Law."
+            - generic [ref=e440]: "Applied: --space-within, --space-between, --space-chapter"
+          - generic [ref=e441]:
+            - generic [ref=e442]: EXT-CONV-006
+            - generic [ref=e443]: Hourglass Conversational Architecture
+            - generic [ref=e444]: "Socratic hourglass: broad universal question, narrow particular case, broad universal answer. Maps to PULSE at section scale, satisfying DD-F-006 fractal."
+            - generic [ref=e445]: "Applied: Ch3 structure (broad mistake Q → specific errors → universal mental model)"
+          - generic [ref=e446]:
+            - generic [ref=e447]: EXT-CONV-007
+            - generic [ref=e448]: Rhythm Through Repetition
+            - generic [ref=e449]: Consistent Q/A visual markers (8px square, background shift, width shift) compound into a recognizable repeating beat. Reinforces Soul Piece 5.
+            - generic [ref=e450]: "Applied: Consistent question markers + background + width across all 7 Q&A pairs"
+          - generic [ref=e451]:
+            - generic [ref=e452]: EXT-CONV-010
+            - generic [ref=e453]: Flowing Rhythm Layout
+            - generic [ref=e454]: Question margin-left asymmetry creates flowing TIDAL metaphor. Questions indent like retreating water; answers spread like advancing waves.
+            - generic [ref=e455]: "Applied: .question { margin-left: 5% }"
+          - generic [ref=e456]:
+            - generic [ref=e457]: EXT-CONV-011
+            - generic [ref=e458]: Bold Minimalism 2026
+            - generic [ref=e459]: Typography-dominant header, stronger contrast between question (serif italic, large) and answer (sans, standard). Sharp edges, clean lines validate KortAI soul.
+            - generic [ref=e460]: "Applied: Dark header, typographic cascade contrast"
+          - generic [ref=e461]:
+            - generic [ref=e462]: R1-028
+            - generic [ref=e463]: WAI-ARIA Compliance
+            - generic [ref=e464]: ARIA roles and labels on Q&A regions for accessible navigation. Each Q&A pair is an article with role="region" and descriptive aria-label.
+            - generic [ref=e465]: "Applied: All 7 Q&A pairs wrapped in <article role=\"region\">"
