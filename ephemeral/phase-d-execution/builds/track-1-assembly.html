@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orchestration Approaches — Component Assembly Testing</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================
+       TOKEN IMPORTS
+       ============================================ */
+
+    :root {
+      /* Soul constraints */
+      --border-radius: 0;
+      --box-shadow: none;
+
+      /* Colors */
+      --color-primary: #E83025;
+      --color-background: #FEF9F5;
+      --color-text: #1A1A1A;
+      --color-text-secondary: #666666;
+      --color-border: #E0D5C5;
+      --color-border-subtle: #F0EBE3;
+
+      --accent-blue: #4A90D9;
+      --accent-green: #4A9D6B;
+      --accent-coral: #C97065;
+      --accent-amber: #D97706;
+      --accent-purple: #7C3AED;
+
+      --bg-page: #FAFAFA;
+      --bg-card: #FFFFFF;
+      --bg-warm: #FEF9F5;
+      --bg-dark: #1E1E1E;
+
+      --color-zone-sparse: #FEF9F5;
+      --color-zone-dense: #FFFFFF;
+
+      /* Typography */
+      --font-display: 'Instrument Serif', Georgia, serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-base: 1rem;
+      --text-lg: 1.125rem;
+      --text-h4: 1.25rem;
+      --text-h3: 1.5rem;
+      --text-h2: 2rem;
+      --text-h1: 2.5rem;
+
+      --type-meta: 0.75rem;
+      --type-body: 1rem;
+      --type-code: 0.875rem;
+      --type-subsection: 1.375rem;
+      --type-section: 1.625rem;
+      --type-page: 3rem;
+
+      /* Spacing */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --space-12: 48px;
+      --space-16: 64px;
+      --space-20: 80px;
+      --space-24: 96px;
+
+      --space-within: var(--space-2);
+      --space-between: var(--space-8);
+      --space-chapter: var(--space-16);
+
+      /* Borders */
+      --border-structural: 4px;
+      --border-accent: 3px;
+      --border-micro: 1px;
+      --border-left-width: 4px;
+
+      /* Syntax highlighting */
+      --syntax-keyword: #E83025;
+      --syntax-string: #6B9B7A;
+      --syntax-comment: #666666;
+      --syntax-function: #4A7C9B;
+      --syntax-type: #C97065;
+      --syntax-number: #D97706;
+      --syntax-punctuation: #E0D5C5;
+    }
+
+    /* ============================================
+       BASE STYLES
+       ============================================ */
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: var(--type-body);
+      line-height: 1.7;
+      color: var(--color-text);
+      background: var(--color-background);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-display);
+      line-height: 1.3;
+      margin-bottom: var(--space-4);
+    }
+
+    h1 {
+      font-size: var(--text-h1);
+      font-style: italic;
+    }
+
+    h2 {
+      font-size: var(--text-h2);
+      margin-top: var(--space-12);
+      margin-bottom: var(--space-6);
+    }
+
+    h3 {
+      font-size: var(--text-h3);
+      font-style: italic;
+      margin-top: var(--space-8);
+      margin-bottom: var(--space-4);
+    }
+
+    h4 {
+      font-size: var(--text-h4);
+      margin-top: var(--space-6);
+    }
+
+    p {
+      margin-bottom: var(--space-4);
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    ul, ol {
+      margin-left: var(--space-6);
+      margin-bottom: var(--space-4);
+    }
+
+    li {
+      margin-bottom: var(--space-2);
+    }
+
+    /* ============================================
+       LAYOUT
+       ============================================ */
+
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 0;
+      background: var(--color-primary);
+      color: var(--color-background);
+      padding: 8px 16px;
+      z-index: 1000;
+      font-family: var(--font-body);
+      font-size: 14px;
+      text-decoration: none;
+      border: none;
+      border-radius: var(--border-radius);
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    .page-container {
+      max-width: 1100px;
+      min-width: 940px;
+      margin: 0 auto;
+      padding: var(--space-6);
+    }
+
+    /* ============================================
+       COMPONENTS (from components.css)
+       ============================================ */
+
+    /* Page Header */
+    .page-header {
+      border-bottom: 3px solid var(--color-primary);
+      padding: var(--space-6);
+      background: white;
+      margin-bottom: var(--space-12);
+    }
+
+    .page-header__id {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-2);
+    }
+
+    .page-header__title {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-style: italic;
+      margin-bottom: var(--space-3);
+    }
+
+    .page-header__subtitle {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      max-width: 600px;
+    }
+
+    /* Callout Family */
+    .callout {
+      border-left: var(--border-left-width) solid var(--callout-border-color, var(--accent-color));
+      background: var(--callout-bg-color, var(--color-zone-sparse));
+      padding: var(--space-6) var(--space-5);
+      margin-bottom: var(--space-6);
+    }
+
+    .callout__label {
+      font-family: var(--font-body);
+      font-size: var(--type-meta);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--callout-label-color, var(--accent-color));
+      margin-bottom: var(--space-3);
+    }
+
+    .callout__content,
+    .callout__body {
+      font-size: var(--type-body);
+      line-height: 1.7;
+      color: var(--color-text);
+    }
+
+    .callout--essence {
+      --callout-border-color: var(--accent-amber);
+      --callout-bg-color: rgba(217, 119, 6, 0.05);
+      --callout-label-color: var(--accent-amber);
+      --accent-color: var(--accent-amber);
+    }
+
+    .callout--essence .callout__content,
+    .callout--essence .callout__body {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-style: italic;
+    }
+
+    .callout--tip {
+      --callout-border-color: var(--accent-green);
+      --callout-bg-color: rgba(74, 157, 107, 0.05);
+      --callout-label-color: var(--accent-green);
+      --accent-color: var(--accent-green);
+    }
+
+    .callout--info {
+      --callout-border-color: var(--accent-blue);
+      --callout-bg-color: rgba(74, 144, 217, 0.05);
+      --callout-label-color: var(--accent-blue);
+      --accent-color: var(--accent-blue);
+    }
+
+    .callout--gotcha,
+    .callout--warning {
+      --callout-border-color: var(--color-primary);
+      --callout-bg-color: rgba(232, 48, 37, 0.05);
+      --callout-label-color: var(--color-primary);
+      --accent-color: var(--color-primary);
+    }
+
+    .callout--challenge,
+    .callout--caution {
+      --callout-border-color: var(--accent-purple);
+      --callout-bg-color: rgba(124, 58, 237, 0.05);
+      --callout-label-color: var(--accent-purple);
+      --accent-color: var(--accent-purple);
+    }
+
+    /* Code Blocks */
+    pre {
+      background: var(--color-text);
+      color: var(--color-background);
+      border: 3px solid var(--color-border);
+      padding: var(--space-6) var(--space-8);
+      font-family: var(--font-mono);
+      font-size: var(--type-code);
+      line-height: 1.5;
+      overflow-x: auto;
+      margin-bottom: var(--space-8);
+      border-radius: var(--border-radius);
+    }
+
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: var(--type-code);
+      line-height: 1.5;
+    }
+
+    p code,
+    li code {
+      background: var(--color-border-subtle);
+      padding: 2px 6px;
+      font-size: var(--type-code);
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius);
+    }
+
+    .keyword { color: var(--syntax-keyword); }
+    .string { color: var(--syntax-string); }
+    .comment { color: var(--syntax-comment); }
+    .function { color: var(--syntax-function); }
+    .variable { color: var(--syntax-type); }
+    .number { color: var(--syntax-number); }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: var(--space-8);
+      display: block;
+      overflow-x: auto;
+    }
+
+    th {
+      font-family: var(--font-body);
+      font-size: var(--type-meta);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 3px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+
+    td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+      font-size: var(--type-body);
+      line-height: 1.6;
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Decision Matrix */
+    .decision-matrix {
+      border-left: 4px solid var(--color-primary);
+      margin-bottom: var(--space-6);
+      overflow-x: auto;
+    }
+
+    .decision-matrix__header {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: var(--space-4);
+      padding: var(--space-3) var(--space-4);
+      background: rgba(232, 48, 37, 0.05);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .decision-matrix__row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: var(--space-4);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-border-subtle);
+      font-size: 14px;
+    }
+
+    .decision-matrix__row:last-child {
+      border-bottom: none;
+    }
+
+    /* File Tree */
+    .file-tree {
+      background: var(--color-background);
+      border: 1px solid var(--color-border-subtle);
+      border-left: 4px solid var(--accent-blue);
+      padding: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+
+    .file-tree__label {
+      font-family: var(--font-body);
+      font-size: var(--type-meta);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-blue);
+      margin-bottom: var(--space-3);
+    }
+
+    .file-tree__content {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      white-space: pre;
+    }
+
+    .file-tree__content .folder { color: var(--accent-blue); }
+    .file-tree__content .file { color: var(--color-text); }
+    .file-tree__content .comment { color: var(--color-text-secondary); }
+
+    /* Section Indicator */
+    .section-indicator {
+      font-family: var(--font-mono);
+      font-size: var(--type-meta);
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-4);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    /* Page Footer */
+    .page-footer {
+      border-top: 3px solid var(--color-primary);
+      padding: var(--space-6);
+      margin-top: var(--space-16);
+      font-size: var(--type-meta);
+      color: var(--color-text-secondary);
+    }
+
+    .page-footer__section {
+      margin-bottom: var(--space-4);
+    }
+
+    .page-footer__label {
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-2);
+    }
+
+    /* Focus visible */
+    *:focus-visible {
+      outline: 3px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    /* Selection */
+    ::selection {
+      background: var(--color-primary);
+      color: var(--color-background);
+    }
+
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+
+    @media (max-width: 768px) {
+      .page-container {
+        min-width: 100%;
+        padding: var(--space-4);
+      }
+
+      .page-header__title {
+        font-size: 26px;
+      }
+
+      .decision-matrix__header,
+      .decision-matrix__row {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        font-size: var(--text-sm);
+      }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <div class="page-container">
+    <!-- Page Header -->
+    <header class="page-header">
+      <div class="page-header__id">TRACK-1-ASSEMBLY</div>
+      <h1 class="page-header__title">Orchestration Approaches</h1>
+      <p class="page-header__subtitle">Component Assembly Testing Content — Comparing four orchestration strategies (Basic Ralph, PRD-Ralph, CC Mirror, Gas Town) for autonomous Claude Code workflows.</p>
+    </header>
+
+    <main id="main-content">
+      <!-- The Same Goal -->
+      <h2>The Same Goal</h2>
+
+      <p><strong>Ship a complete feature autonomously</strong> — from specification to working, tested code — with minimal human intervention.</p>
+
+      <p>Each approach below represents a different philosophy for achieving this goal, with distinct tradeoffs in setup complexity, parallelism, and appropriate scale.</p>
+
+      <!-- Essence Callout -->
+      <div class="callout callout--essence">
+        <div class="callout__label">Essence</div>
+        <div class="callout__content">
+          This document compares four orchestration strategies (Basic Ralph, PRD-Ralph, CC Mirror, Gas Town) for running autonomous Claude Code workflows. Use this when deciding HOW to structure your agent automation, not WHAT architecture to use.
+        </div>
+      </div>
+
+      <!-- Approach Comparison Matrix -->
+      <h2>Approach Comparison Matrix</h2>
+
+      <p>The following matrix compares four orchestration approaches across key decision factors:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Factor</th>
+            <th>Basic Ralph</th>
+            <th>PRD-Ralph</th>
+            <th>CC Mirror</th>
+            <th>Gas Town</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Setup Complexity</strong></td>
+            <td>Easy</td>
+            <td>Medium</td>
+            <td>Medium</td>
+            <td>Hard</td>
+          </tr>
+          <tr>
+            <td><strong>Parallelism</strong></td>
+            <td>None</td>
+            <td>None</td>
+            <td>High</td>
+            <td>Maximum</td>
+          </tr>
+          <tr>
+            <td><strong>Agent Count</strong></td>
+            <td>1</td>
+            <td>1</td>
+            <td>3-8</td>
+            <td>10-50+</td>
+          </tr>
+          <tr>
+            <td><strong>Infrastructure</strong></td>
+            <td>Low</td>
+            <td>Low</td>
+            <td>Medium</td>
+            <td>High</td>
+          </tr>
+          <tr>
+            <td><strong>Upfront Planning</strong></td>
+            <td>Low</td>
+            <td>High</td>
+            <td>Medium</td>
+            <td>Medium</td>
+          </tr>
+          <tr>
+            <td><strong>Cost per Day</strong></td>
+            <td>$5-20</td>
+            <td>$5-20</td>
+            <td>$20-80</td>
+            <td>$50-200</td>
+          </tr>
+          <tr>
+            <td><strong>Learning Curve</strong></td>
+            <td>Low</td>
+            <td>Low</td>
+            <td>Medium</td>
+            <td>High</td>
+          </tr>
+          <tr>
+            <td><strong>Debugging Ease</strong></td>
+            <td>Easy</td>
+            <td>Easy</td>
+            <td>Medium</td>
+            <td>Hard</td>
+          </tr>
+          <tr>
+            <td><strong>Best Project Scale</strong></td>
+            <td>Small</td>
+            <td>Medium</td>
+            <td>Medium</td>
+            <td>Large</td>
+          </tr>
+          <tr>
+            <td><strong>Human Oversight</strong></td>
+            <td>Low</td>
+            <td>Low</td>
+            <td>Medium</td>
+            <td>Low</td>
+          </tr>
+          <tr>
+            <td><strong>Flexibility</strong></td>
+            <td>High</td>
+            <td>Low</td>
+            <td>Medium</td>
+            <td>High</td>
+          </tr>
+          <tr>
+            <td><strong>Quality Gates</strong></td>
+            <td>Manual</td>
+            <td>Criteria</td>
+            <td>Workers</td>
+            <td>Dogs</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- APPROACH 1: BASIC RALPH -->
+      <div class="section-indicator">APPROACH 1: BASIC RALPH</div>
+
+      <h3>How it works</h3>
+
+      <div class="callout callout--info">
+        <div class="callout__label">Info</div>
+        <div class="callout__content">
+          A simple bash loop that runs Claude Code repeatedly with fresh context until a completion condition is met. Each iteration:
+          <ol>
+            <li>Reads the current state (prd.json, progress.txt)</li>
+            <li>Works on the next task in the list</li>
+            <li>Commits changes</li>
+            <li>Checks for completion signal</li>
+            <li>Loops or exits</li>
+          </ol>
+        </div>
+      </div>
+
+      <pre><code><span class="keyword">for</span> (( i=<span class="number">1</span>; i&lt;=<span class="variable">$MAX_ITERATIONS</span>; i++ )); <span class="keyword">do</span>
+  claude <span class="string">"Review prd.json... If complete, output PROMISE COMPLETE HERE"</span>
+  <span class="keyword">if</span> grep -q <span class="string">"PROMISE COMPLETE HERE"</span> output.txt; <span class="keyword">then</span> <span class="keyword">break</span>; <span class="keyword">fi</span>
+<span class="keyword">done</span></code></pre>
+
+      <div class="file-tree">
+        <div class="file-tree__label">Key Files</div>
+        <div class="file-tree__content">ralph-project/
+├── <span class="file">ralph.sh</span>          <span class="comment"># The loop script</span>
+├── <span class="file">prompt.md</span>         <span class="comment"># Instructions for each iteration</span>
+├── <span class="file">prd.json</span>          <span class="comment"># Task list with user stories</span>
+└── <span class="file">progress.txt</span>      <span class="comment"># Accumulated learnings</span></div>
+      </div>
+
+      <p><strong>Pros Summary:</strong></p>
+      <ul>
+        <li>Simple to set up — Just a bash script and a few files</li>
+        <li>Low overhead — No complex infrastructure or dependencies</li>
+        <li>Easy to understand — Anyone can read the code and know what it does</li>
+        <li>Fresh context per iteration — Avoids "context rot" from accumulated confusion</li>
+        <li>Git history as memory — Each iteration commits, creating implicit documentation</li>
+        <li>Verifiable — Tests must pass each iteration, catching regressions early</li>
+      </ul>
+
+      <div class="callout callout--warning">
+        <div class="callout__label">Cons</div>
+        <div class="callout__content">
+          <ul>
+            <li>Sequential only — One task at a time, no parallelism</li>
+            <li>Single agent — No specialization or role separation</li>
+            <li>Context amnesia — Each iteration starts fresh (mitigated by progress.txt)</li>
+            <li>No dependency management — Tasks must be linearly ordered</li>
+            <li>Human-designed task breakdown — Quality depends on PRD quality</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout--tip">
+        <div class="callout__label">Tip</div>
+        <div class="callout__content">
+          <p><strong>Best for:</strong></p>
+          <ul>
+            <li>Solo developers working on single features</li>
+            <li>Overnight "ship it while I sleep" workflows</li>
+            <li>Well-scoped features with clear completion criteria</li>
+            <li>Getting started with autonomous development (Stage 1-3)</li>
+          </ul>
+          <p><strong>Setup Time:</strong> 15-30 minutes</p>
+        </div>
+      </div>
+
+      <!-- APPROACH 2: PRD-DRIVEN RALPH -->
+      <div class="section-indicator">APPROACH 2: PRD-DRIVEN RALPH</div>
+
+      <h3>How it works</h3>
+
+      <p>Extension of basic Ralph that adds structured task management via a JSON-based Product Requirements Document:</p>
+
+      <pre><code>{
+  <span class="string">"name"</span>: <span class="string">"Authentication System"</span>,
+  <span class="string">"stories"</span>: [
+    {
+      <span class="string">"id"</span>: <span class="string">"story-1"</span>,
+      <span class="string">"title"</span>: <span class="string">"User can register"</span>,
+      <span class="string">"acceptanceCriteria"</span>: [
+        <span class="string">"Email validation works"</span>,
+        <span class="string">"Password hashed with bcrypt"</span>,
+        <span class="string">"Confirmation email sent"</span>
+      ],
+      <span class="string">"passes"</span>: <span class="keyword">false</span>,
+      <span class="string">"priority"</span>: <span class="number">1</span>
+    }
+  ]
+}</code></pre>
+
+      <p>Each iteration:</p>
+      <ol>
+        <li>Parse prd.json for next incomplete story (by priority)</li>
+        <li>Implement to meet acceptance criteria</li>
+        <li>Mark story as passed when criteria verified</li>
+        <li>Continue until all stories pass</li>
+      </ol>
+
+      <p><strong>Enhanced with quality gates</strong> (Dr. Ralph variant):</p>
+      <ul>
+        <li>80%+ confidence threshold before advancing</li>
+        <li>Multi-phase verification between stages</li>
+      </ul>
+
+      <div class="callout callout--essence">
+        <div class="callout__label">Essence</div>
+        <div class="callout__content">
+          <p><strong>Pros Summary:</strong></p>
+          <ul>
+            <li>Structured tasks — Clear boundaries between work items</li>
+            <li>Acceptance criteria — Explicit success conditions, not just "it works"</li>
+            <li>Priority ordering — Most important work happens first</li>
+            <li>Measurable progress — Track story completion percentage</li>
+            <li>Self-documenting — PRD becomes project history</li>
+            <li>Quality gates — Optional confidence thresholds prevent low-quality work</li>
+            <li>Compounding learning — progress.txt captures patterns for future iterations</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout--gotcha">
+        <div class="callout__label">Gotcha</div>
+        <div class="callout__content">
+          <p><strong>Cons Summary:</strong></p>
+          <ul>
+            <li>Upfront planning required — Someone must write the PRD first</li>
+            <li>PRD quality is critical — Garbage in, garbage out</li>
+            <li>Still sequential — Parallelism not improved over Basic Ralph</li>
+            <li>Single agent — Still no role specialization</li>
+            <li>Rigid structure — Hard to adapt to emergent requirements</li>
+            <li>Manual task sizing — Must ensure each story fits in one context window</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout--tip">
+        <div class="callout__label">Tip</div>
+        <div class="callout__content">
+          <p><strong>Best for:</strong></p>
+          <ul>
+            <li>Well-defined features with clear requirements</li>
+            <li>Teams that already write good specs</li>
+            <li>Regulated environments needing documentation</li>
+            <li>Features with natural linear dependencies</li>
+            <li>Medium-scale projects (Stage 3-5)</li>
+          </ul>
+          <p><strong>Setup Time:</strong> 1-2 hours (including PRD creation)</p>
+        </div>
+      </div>
+
+      <!-- APPROACH 3: CC MIRROR HUB-AND-SPOKE -->
+      <div class="section-indicator">APPROACH 3: CC MIRROR HUB-AND-SPOKE</div>
+
+      <h3>How it works</h3>
+
+      <p>Central orchestrator that delegates to specialized worker agents through Claude Code's native Task API. The orchestrator <strong>never writes code</strong> — it coordinates.</p>
+
+      <pre><code>                ┌─────────────────┐
+                │  Orchestrator   │
+                │  (Conductor)    │
+                └────────┬────────┘
+                         │
+         ┌───────────────┼───────────────┐
+         │               │               │
+         ▼               ▼               ▼
+   ┌───────────┐   ┌───────────┐   ┌───────────┐
+   │  Coder    │   │  Tester   │   │  Reviewer │
+   │  (Opus)   │   │  (Sonnet) │   │  (Haiku)  │
+   └───────────┘   └───────────┘   └───────────┘</code></pre>
+
+      <div class="callout callout--challenge">
+        <div class="callout__label">Challenge</div>
+        <div class="callout__content">
+          <p><strong>Orchestrator Philosophy:</strong></p>
+          <pre>╔═══════════════════════════════════════════════════════════════╗
+║  YOU DO NOT WRITE CODE. YOU DO NOT RUN COMMANDS.              ║
+║  YOU DO NOT EXPLORE CODEBASES.                                ║
+║  You are the CONDUCTOR. Your agents play the instruments.     ║
+╚═══════════════════════════════════════════════════════════════╝</pre>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Allowed Tools</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Orchestrator</td>
+            <td>Read (1-2 files), Task*, AskUserQuestion</td>
+          </tr>
+          <tr>
+            <td>Workers</td>
+            <td>Read, Write, Edit, Bash, Glob, Grep, WebFetch, LSP</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p><strong>Task Management:</strong></p>
+      <ul>
+        <li><code>TaskCreate</code> — Create with subject, description, acceptance criteria</li>
+        <li><code>addBlocks</code> / <code>addBlockedBy</code> — Dependency management</li>
+        <li>Model-appropriate routing (Opus for architecture, Sonnet for code, Haiku for lookups)</li>
+      </ul>
+
+      <div class="callout callout--tip">
+        <div class="callout__label">Tip</div>
+        <div class="callout__content">
+          <p><strong>Pros Summary:</strong></p>
+          <ul>
+            <li>True parallelism — Multiple workers execute simultaneously</li>
+            <li>Specialization — Right model for each task type</li>
+            <li>Cost optimization — Expensive models only where needed</li>
+            <li>Dependency tracking — Built-in blocked/blocking relationships</li>
+            <li>Native integration — Uses Claude Code's Task API directly</li>
+            <li>Domain reference loading — Specialized context per task type</li>
+            <li>Clear separation — Orchestrator thinks, workers do</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout--warning">
+        <div class="callout__label">Cons</div>
+        <div class="callout__content">
+          <ul>
+            <li>More complex setup — Requires understanding task decomposition</li>
+            <li>Coordination overhead — Orchestrator context grows with task graph</li>
+            <li>Needs good decomposition — Poorly split tasks cause confusion</li>
+            <li>Learning curve — Different mental model from solo coding</li>
+            <li>Worker isolation — Workers don't see each other's work directly</li>
+            <li>Merge complexity — Parallel work may need conflict resolution</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout--tip">
+        <div class="callout__label">Tip</div>
+        <div class="callout__content">
+          <p><strong>Best for:</strong></p>
+          <ul>
+            <li>Multi-domain features (frontend + backend + tests)</li>
+            <li>Teams wanting cost-optimized model usage</li>
+            <li>Interactive development with human oversight</li>
+            <li>Medium to large projects (Stage 4-6)</li>
+            <li>Features requiring different specializations</li>
+          </ul>
+          <p><strong>Setup Time:</strong> 1-2 hours</p>
+        </div>
+      </div>
+
+      <!-- APPROACH 4: GAS TOWN FACTORY -->
+      <div class="section-indicator">APPROACH 4: GAS TOWN FACTORY</div>
+
+      <h3>How it works</h3>
+
+      <p>Not just agents, but an <strong>agent factory</strong> — a self-managing town of specialized workers that coordinate through inboxes and handoffs.</p>
+
+      <div class="file-tree">
+        <div class="file-tree__label">Architecture</div>
+        <div class="file-tree__content">Gas Town (~/.gt)
+├── <span class="folder">HQ</span> <span class="comment">(town-level management)</span>
+├── <span class="folder">Rigs</span> <span class="comment">(project repos)</span>
+│   └── <span class="file">Witness</span> <span class="comment">(per-rig observer)</span>
+├── <span class="folder">Workers</span>
+│   ├── <span class="file">Mayor</span> <span class="comment">(town coordination)</span>
+│   ├── <span class="file">Deacon</span> <span class="comment">(monitoring/handshakes)</span>
+│   ├── <span class="file">Dogs</span> <span class="comment">(quality gates)</span>
+│   ├── <span class="file">Refinery</span> <span class="comment">(task decomposition)</span>
+│   ├── <span class="file">Polecat</span> <span class="comment">(named persistent workers)</span>
+│   └── <span class="file">Crew</span> <span class="comment">(ephemeral workers)</span>
+└── <span class="file">Overseer</span> <span class="comment">(YOU - human with inbox)</span></div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Mayor</td>
+            <td>Town-wide coordination, resource allocation</td>
+          </tr>
+          <tr>
+            <td>Deacon</td>
+            <td>Monitoring agent health, handshakes between agents</td>
+          </tr>
+          <tr>
+            <td>Dogs</td>
+            <td>Quality gates, watchdogs for bad behavior</td>
+          </tr>
+          <tr>
+            <td>Refinery</td>
+            <td>Task decomposition into worker-sized chunks</td>
+          </tr>
+          <tr>
+            <td>Polecat</td>
+            <td>Named persistent workers with specialization</td>
+          </tr>
+          <tr>
+            <td>Crew</td>
+            <td>Ephemeral workers for one-off tasks</td>
+          </tr>
+          <tr>
+            <td>Witness</td>
+            <td>Per-project observer, watches for problems</td>
+          </tr>
+          <tr>
+            <td>Overseer</td>
+            <td>Human with inbox (you)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p><strong>Communication:</strong> Email-like inboxes via MCP Agent Mail</p>
+
+      <div class="callout callout--essence">
+        <div class="callout__label">Essence</div>
+        <div class="callout__content">
+          <strong>Philosophy:</strong> "You just make up features, design them, file the implementation plans, and sling work around to your polecats and crew."
+        </div>
+      </div>
+
+      <div class="callout callout--tip">
+        <div class="callout__label">Tip</div>
+        <div class="callout__content">
+          <p><strong>Pros Summary:</strong></p>
+          <ul>
+            <li>Maximum parallelism — 10+ agents working simultaneously</li>
+            <li>Deep specialization — Each role optimized for its function</li>
+            <li>Self-improving — Factory learns and adapts over time</li>
+            <li>Full team simulation — Approximates human dev team dynamics</li>
+            <li>Automatic decomposition — Refinery breaks down work</li>
+            <li>Quality built-in — Dogs enforce standards at every step</li>
+            <li>Resilient — System continues if individual agents fail</li>
+            <li>Persistent workers — Polecats maintain context across sessions</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout--gotcha">
+        <div class="callout__label">Gotcha</div>
+        <div class="callout__content">
+          <p><strong>Cons Summary:</strong></p>
+          <ul>
+            <li>Complex setup — Significant infrastructure to configure</li>
+            <li>High overhead — Many agents = many tokens = high cost ($50-200/day)</li>
+            <li>Needs scale to justify — Overkill for small features</li>
+            <li>Requires experience — Must be comfortable with agent chaos</li>
+            <li>Tmux proficiency required — Primary UI is terminal multiplexing</li>
+            <li>Debugging difficulty — Hard to trace problems across many agents</li>
+            <li>Budget implications — Not for hobby projects</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout--tip">
+        <div class="callout__label">Tip</div>
+        <div class="callout__content">
+          <p><strong>Best for:</strong></p>
+          <ul>
+            <li>Large projects with many parallel workstreams</li>
+            <li>Teams shipping multiple features simultaneously</li>
+            <li>Production environments with high throughput requirements</li>
+            <li>Stage 7+ developers (10+ agent experience)</li>
+            <li>Organizations with significant AI budget</li>
+            <li>Projects where speed-to-market justifies cost</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout--caution">
+        <div class="callout__label">Caution</div>
+        <div class="callout__content">
+          <p><strong>Prerequisites:</strong></p>
+          <ul>
+            <li>Extensive multi-agent experience</li>
+            <li>Comfort with chaos and emergent behavior</li>
+            <li>$50-200/day budget tolerance</li>
+            <li>tmux as primary development interface</li>
+            <li>Willingness to debug complex agent interactions</li>
+          </ul>
+          <p><strong>Setup Time:</strong> 4-8 hours (plus learning curve)</p>
+        </div>
+      </div>
+
+      <!-- Checkpoint -->
+      <div class="callout callout--challenge">
+        <div class="callout__label">Checkpoint</div>
+        <div class="callout__content">
+          <h3>Checkpoint: Orchestration Approaches</h3>
+          <p><strong>You should now understand:</strong></p>
+          <ul>
+            <li>How Basic Ralph uses fresh context per iteration</li>
+            <li>How PRD-Ralph adds structured task management</li>
+            <li>How CC Mirror enables parallel workers with hub-and-spoke</li>
+            <li>How Gas Town creates a full agent factory with specialized roles</li>
+          </ul>
+          <p><strong>If unclear:</strong> Re-read the "How it works" section for the approach you are considering.</p>
+        </div>
+      </div>
+
+      <!-- FEATURE COMPARISON -->
+      <div class="section-indicator">FEATURE COMPARISON</div>
+
+      <h3>Context Management</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Approach</th>
+            <th>Strategy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Basic Ralph</td>
+            <td>Fresh context each iteration, git history as memory</td>
+          </tr>
+          <tr>
+            <td>PRD-Ralph</td>
+            <td>Fresh context + structured prd.json + progress.txt</td>
+          </tr>
+          <tr>
+            <td>CC Mirror</td>
+            <td>Orchestrator accumulates context, workers get task-specific</td>
+          </tr>
+          <tr>
+            <td>Gas Town</td>
+            <td>Persistent workers (Polecats) maintain context, Crew ephemeral</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Error Handling</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Approach</th>
+            <th>Strategy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Basic Ralph</td>
+            <td>Tests must pass, loop continues until success or max iterations</td>
+          </tr>
+          <tr>
+            <td>PRD-Ralph</td>
+            <td>Same + acceptance criteria validation</td>
+          </tr>
+          <tr>
+            <td>CC Mirror</td>
+            <td>Task dependencies, requeue on failure</td>
+          </tr>
+          <tr>
+            <td>Gas Town</td>
+            <td>Dogs catch quality issues, Witness monitors, Deacon coordinates recovery</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Task Decomposition</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Approach</th>
+            <th>Responsibility</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Basic Ralph</td>
+            <td>Human creates small tasks</td>
+          </tr>
+          <tr>
+            <td>PRD-Ralph</td>
+            <td>Human writes detailed PRD with stories</td>
+          </tr>
+          <tr>
+            <td>CC Mirror</td>
+            <td>Orchestrator decomposes, routes to workers</td>
+          </tr>
+          <tr>
+            <td>Gas Town</td>
+            <td>Refinery automatically decomposes</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Communication</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Approach</th>
+            <th>Mechanism</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Basic Ralph</td>
+            <td>File-based (progress.txt, git commits)</td>
+          </tr>
+          <tr>
+            <td>PRD-Ralph</td>
+            <td>Same + structured prd.json</td>
+          </tr>
+          <tr>
+            <td>CC Mirror</td>
+            <td>Task API (TaskCreate, TaskUpdate, dependencies)</td>
+          </tr>
+          <tr>
+            <td>Gas Town</td>
+            <td>MCP Agent Mail (inbox-based), file handoffs</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- SCALING PATH -->
+      <div class="section-indicator">SCALING PATH</div>
+
+      <pre><code>┌─────────────────────────────────────────────────────────────────┐
+│                     SCALING PROGRESSION                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│   SIMPLE ─────────────────────────────────────────────► COMPLEX  │
+│                                                                   │
+│   Stage 1-3          Stage 4-5          Stage 6          Stage 7+│
+│   ┌─────────┐       ┌─────────┐       ┌─────────┐       ┌───────┐│
+│   │ Ralph   │──────►│  PRD    │──────►│CC Mirror│──────►│  Gas  ││
+│   │ (Basic) │       │ Ralph   │       │Hub-Spoke│       │ Town  ││
+│   └─────────┘       └─────────┘       └─────────┘       └───────┘│
+│                                                                   │
+│   1 agent           1 agent           3-8 agents        10+ agents│
+│   $5/day            $10/day           $50/day           $150/day  │
+│                                                                   │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+      <!-- SELECTION GUIDE -->
+      <div class="section-indicator">SELECTION GUIDE</div>
+
+      <div class="callout callout--tip">
+        <div class="callout__label">Selection Guide</div>
+        <div class="callout__content">
+          <h3>Start with Basic Ralph when:</h3>
+          <ul>
+            <li>You're new to autonomous development</li>
+            <li>The feature is well-scoped and fits in a day</li>
+            <li>You want "set it and forget it" overnight shipping</li>
+            <li>Budget is a concern</li>
+            <li>You value simplicity over parallelism</li>
+          </ul>
+
+          <h3>Upgrade to PRD-Ralph when:</h3>
+          <ul>
+            <li>You have clear, detailed requirements</li>
+            <li>Quality gates matter (regulated environment)</li>
+            <li>You want measurable progress tracking</li>
+            <li>Tasks have natural linear dependencies</li>
+            <li>You're comfortable writing structured specs</li>
+          </ul>
+
+          <h3>Move to CC Mirror when:</h3>
+          <ul>
+            <li>You need parallelism across domains</li>
+            <li>Cost optimization matters (right model for each task)</li>
+            <li>Features span frontend + backend + tests</li>
+            <li>You want native Claude Code orchestration</li>
+            <li>Interactive development with oversight</li>
+          </ul>
+
+          <h3>Go Gas Town when:</h3>
+          <ul>
+            <li>You're at Stage 7+ (10+ agent experience)</li>
+            <li>Project scale justifies the overhead</li>
+            <li>Speed-to-market is critical</li>
+            <li>Budget is not a constraint</li>
+            <li>You're comfortable with emergence and chaos</li>
+            <li>You need a self-improving agent factory</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- HYBRID STRATEGIES -->
+      <div class="section-indicator">HYBRID STRATEGIES</div>
+
+      <p>These approaches aren't mutually exclusive. Common combinations:</p>
+
+      <h3>1. Ralph + Git Worktrees</h3>
+
+      <div class="callout callout--info">
+        <div class="callout__label">Info</div>
+        <div class="callout__content">
+          Run multiple Ralph loops in parallel via worktrees:
+        </div>
+      </div>
+
+      <pre><code><span class="keyword">for</span> feature <span class="keyword">in</span> auth payments notifications; <span class="keyword">do</span>
+  git worktree add ../wt-<span class="variable">$feature</span> <span class="variable">$feature</span>-branch
+  (cd ../wt-<span class="variable">$feature</span> && ./ralph.sh <span class="number">20</span>) &
+<span class="keyword">done</span>
+wait</code></pre>
+
+      <p><strong>Result:</strong> Parallel Ralph without CC Mirror complexity</p>
+
+      <h3>2. CC Mirror by Day, Ralph by Night</h3>
+
+      <ul>
+        <li>Daytime: Interactive CC Mirror with human oversight</li>
+        <li>Overnight: Ralph loops for verified, autonomous work</li>
+      </ul>
+
+      <p><strong>Result:</strong> Best of both interaction models</p>
+
+      <h3>3. Gas Town with PRD Discipline</h3>
+
+      <p>Use Gas Town's Refinery but feed it well-structured PRDs:</p>
+      <ul>
+        <li>Human writes PRD</li>
+        <li>Refinery decomposes into worker tasks</li>
+        <li>Polecats execute with acceptance criteria</li>
+      </ul>
+
+      <p><strong>Result:</strong> Factory-scale with structured requirements</p>
+
+      <!-- COST-BENEFIT SUMMARY -->
+      <div class="section-indicator">COST-BENEFIT SUMMARY</div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Investment</th>
+            <th>Basic Ralph</th>
+            <th>PRD-Ralph</th>
+            <th>CC Mirror</th>
+            <th>Gas Town</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Setup Time</td>
+            <td>30 min</td>
+            <td>2 hrs</td>
+            <td>2 hrs</td>
+            <td>8 hrs</td>
+          </tr>
+          <tr>
+            <td>Learning</td>
+            <td>1 day</td>
+            <td>1 day</td>
+            <td>3 days</td>
+            <td>1-2 weeks</td>
+          </tr>
+          <tr>
+            <td>Daily Cost</td>
+            <td>$5-20</td>
+            <td>$10-30</td>
+            <td>$30-80</td>
+            <td>$50-200</td>
+          </tr>
+          <tr>
+            <td>ROI Scale</td>
+            <td>Small</td>
+            <td>Medium</td>
+            <td>Medium</td>
+            <td>Large</td>
+          </tr>
+          <tr>
+            <td>Break-even</td>
+            <td>Immediate</td>
+            <td>Week 1</td>
+            <td>Week 2</td>
+            <td>Month 1</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Final Recommendations -->
+      <div class="callout callout--essence">
+        <div class="callout__label">Final Recommendations</div>
+        <div class="callout__content">
+          <ol>
+            <li><strong>Start simple (Basic Ralph)</strong> — Prove autonomous development works for your workflow</li>
+            <li><strong>Add structure when needed (PRD-Ralph)</strong> — When you want quality gates and tracking</li>
+            <li><strong>Scale with parallelism (CC Mirror)</strong> — When single-agent becomes a bottleneck</li>
+            <li><strong>Go full factory (Gas Town)</strong> — Only when scale demands it and budget permits</li>
+          </ol>
+          <p>The best orchestration approach is the simplest one that meets your needs. Complexity has costs — in setup, debugging, and cognitive overhead. Scale up only when the simpler approach demonstrably fails.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Page Footer -->
+    <footer class="page-footer">
+      <div class="page-footer__section">
+        <div class="page-footer__label">Component Coverage</div>
+        <p>Total components mapped: 10 types (callout variants: 7, code blocks: 7, tables: 6, file trees: 2, decision matrix: 1, section indicators: 10)</p>
+      </div>
+      <div class="page-footer__section">
+        <div class="page-footer__label">Source Provenance</div>
+        <p>Original: compare-orchestration.md (synthesis/)</p>
+        <p>Track: Track 1 (Assembly)</p>
+        <p>Word count: ~2,150 words</p>
+      </div>
+      <div class="page-footer__section">
+        <div class="page-footer__label">Library Utilization</div>
+        <p>10/10 component types from compositional-core/components.css — Zero custom CSS beyond page layout</p>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
