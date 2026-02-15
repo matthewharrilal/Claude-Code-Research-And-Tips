@@ -6,7 +6,7 @@ THIS FILE IS AUTO-LOADED ON DIRECTORY ENTRY
 
 **Purpose:** Navigate the design system's 8 subfolders, enforce cross-cutting rules, and route agents to the right place based on task intent.
 
-**Current Phase:** Phase D Extraction Validation (NEXT — not yet started)
+**Current Phase:** Phase D COMPLETE (CONDITIONAL PASS, 2026-02-15). Richness + rigidity research COMPLETE (11 agents, tier model established). Current focus: skill enrichment before Phase E.
 
 **Key Principle:** This folder contains TWO parallel systems serving different purposes:
 - **compositional-core/** — Minimal vocabulary for building (40 items, phase-gated)
@@ -229,19 +229,26 @@ validated-explorations/
 ## EVOLUTION STATE — Where We Are
 ═══════════════════════════════════════════════════════════════════════════════
 
-### CURRENT PHASE: Phase D Extraction Validation (NEXT)
+### CURRENT PHASE: Phase D Extraction Validation (COMPLETE — CONDITIONAL PASS)
 
-**Status:** NOT YET STARTED
-**Predecessor:** Phase C Extraction (COMPLETE)
-**Purpose:** Prove compositional-core/ sufficiency BEFORE writing playbook
+**Status:** COMPLETE — CONDITIONAL PASS (2026-02-15)
+**Output:** 47 files, 17MB in ephemeral/phase-d-execution/
 
-**What happens:**
-- Build 1 Track 1 page using compositional-core/ alone
-- Build 1 Track 2 page using compositional-core/ + tension-composition skill
-- Document gaps, verify sufficiency
-- Produce validation report
+**Results:**
+- Variant B (weak permission) scored 18/19 compliance, 4/5 novelty — best variant
+- Container width was THE primary failure mode (4/5 pages violated 940px)
+- Prose-only content limited component testing to 22-44% (vs 67% target)
+- "Always-load" protocol failure caused Track 1's instant fail (5 critical violations)
+- "Weak permission" framing had ZERO behavioral effect on library utilization
 
-**Why:** Better to discover extraction gaps on 2 test pages than 75 production pages
+**Post-Phase D Research (COMPLETE, 2026-02-15):**
+- Richness investigation (5 agents): gap is technique saturation, not absence. ~60-85% addressable.
+- Rigidity investigation (6 agents): showcase pages were MORE rigid, not less. "Paradox" dissolved.
+- Tier model established: Floor/Middle/Ceiling/Flagship. Middle recommended as universal floor.
+- 4 modification recommendations: ADOPT fractal gate, MODIFY mechanism mandate + coherence check, REJECT technique count metric.
+- See: ephemeral/continuity-docs/HANDOFF.md for complete summary.
+
+**Next:** Skill enrichment (modification implementation), then Middle-tier experiment, then Phase E
 
 ---
 
@@ -256,8 +263,11 @@ validated-explorations/
 - ✅ Phase C: Compositional Core Extraction (6-layer ontology, 42 files)
 - ✅ Skill Enrichment (tension-composition + perceptual-auditing, Phase 4.0 guardrails)
 
-**CURRENT (validation + freeze line approach):**
-- ⏳ Phase D: Extraction Validation (NEXT)
+**CURRENT (validation + skill enrichment + experimentation):**
+- ✅ Phase D: Extraction Validation (COMPLETE — CONDITIONAL PASS, 2026-02-15)
+- ✅ Richness + Rigidity Research (COMPLETE — 11 agents, tier model established, 2026-02-15)
+- 🔧 Skill Enrichment: Apply modification recommendations to tension-composition skill
+- 🧪 Middle-tier Experiment: Build exceptional Middle-tier page (8-10 mechanisms, no metaphor)
 - ⏳ Phase E: Migration Playbook v2 (dual-track)
 - ⏳ Phase F: Pilot Migration (MUST include Track 2)
 - ⏳ Phase G: Playbook Refinement
