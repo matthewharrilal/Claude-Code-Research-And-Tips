@@ -16,59 +16,70 @@ The KortAI design system moves from validated research to fully adopted document
 
 | Phase | Name | Hours | Sessions | What It Produces |
 |-------|------|-------|----------|------------------|
-| A | **CD (Combination Dimension)** | 4-5 | 1-2 | 6 explorations, 15-25 CD-F findings, ACCUMULATED-IDENTITY-v3 (terminal), completeness gate, Track 1+2 validation |
+| A | **CD (Combination Dimension)** | 4-5 | 1-2 | ✅ COMPLETE — 6 explorations, 25 CD-F findings, CD-006 crown jewel 39/40 |
 | B | **Content Analysis + Track Classification** | 4-6 | 1 | 75-page inventory with Track 1 vs Track 2 classification, tension pre-screening, tentative metaphor candidates |
-| C | **Component + Pattern Base Extraction** | 6-10 | 1-2 | ~400 lines Tier 1+2 CSS, compositional strategy library (~900 lines prose), pattern recognition guide |
-| D | **Extraction Validation Pass** | 1-2 | 1 | 2-3 test pages validating extraction sufficiency, gap documentation, confidence report |
+| C | **Component + Pattern Base Extraction** | 6-10 | 1-2 | ✅ COMPLETE — 42 files, 880KB, 6-layer ontology, all 11 success criteria MET |
+| D | **Extraction Validation Pass** | 1-2 | 1 | ✅ COMPLETE (2026-02-15) — CONDITIONAL PASS. 47 files, Variant B best (18/19, 4/5 novelty) |
+| D+ | **Richness + Rigidity Research** | 8-12 | 1 | ✅ COMPLETE (2026-02-15) — 11 agents, tier model, modification recommendations |
+| D++ | **Skill Enrichment** | 2-4 | 1 | 🔧 IN PROGRESS — Apply modification recommendations to tension-composition skill |
+| D+++ | **Middle-tier Experiment** | 1-2 | 1 | 🧪 PLANNED — Build exceptional Middle-tier page (8-10 mechanisms, no metaphor) |
 | E | **Migration Playbook v2** | 4-5 | 1 | Complete dual-track process: Track 1 assembly path + Track 2 composition path with tension-composition skill integration |
 | F | **Pilot Migration** | 3-5 | 1 | 2-3 validated pages spanning both tracks, process proof, timing data (CRITICAL: Track 2 per-page estimate) |
 | G | **Playbook Refinement** | 1-2 | 1 | Updated process incorporating pilot learnings, refined time estimates for BOTH tracks |
 | | **FREEZE LINE** | | | Design system locked permanently |
 | H | **Migration Track 1 (Assembly)** | 22-60 | 3-6 | 30-40 pages @ 45-90 min, mechanical assembly, parallelizable (6 agents simultaneously) |
 | I | **Migration Track 2 (Composition)** | 105-225 | 9-19 | 35-45 pages @ 3-5 hrs, creative tension resolution, sequential bottleneck (2-3 agents max) |
-| | **TOTAL** | **~150-325** | **16-31** | Complete design system adoption with dual-track migration |
+| | **TOTAL** | **~160-345** | **18-34** | Complete design system adoption with dual-track migration |
 
 ---
 
 ## VISUAL FLOW
 
 ```
-YOU ARE HERE
-     |
-     v
-PHASE A: CD (Combination Dimension)                    ~4-5 hours
-  |  6 explorations testing pattern combinations
-  |  CD-006 = real-content pilot (validates both Track 1+2)
-  |  15-25 CD-F findings (combination rules)
-  |  ACCUMULATED-IDENTITY-v3 (TERMINAL -- no v4)
-  |  HANDOFF-CD-TO-MIGRATION (includes Track classification decision tree)
-  |  Completeness Gate: Track 1 AND Track 2 validated
+PHASE A: CD (Combination Dimension)                    ✅ COMPLETE
+  |  6 explorations, 25 CD-F findings, CD-006 crown jewel 39/40
+  |  ACCUMULATED-IDENTITY-v3 (TERMINAL)
   |
   v
-PHASE B: Content Analysis + Track Classification      ~4-6 hours [MOVED FROM F]
+PHASE B: Content Analysis + Track Classification      ~4-6 hours [NOT STARTED]
   |  Inventory all 75+ docs-spa pages
   |  Classify Track 1 (assembly) vs Track 2 (composition)
   |  Pre-screen tension via Addition Test + BECAUSE test
-  |  Assign tentative metaphor candidates for Track 2 pages
-  |  Output guides Component Extraction priorities
-  |
-  |  [CRITICAL REORDERING: Analysis BEFORE Extraction]
-  v
-PHASE C: Component + Pattern Base Extraction          ~6-10 hours [SCOPE REDUCED]
-  |  Extract ~400 lines Tier 1+2 CSS (atoms + molecules)
-  |  Document Tier 3 compositional strategies as PROSE
-  |  Geological stratification, narrative crescendo, hub-spoke, etc.
-  |  NOT a "printing press" — an alphabet + vocabulary
-  |  [Token fix: 30 min, can run in parallel]
   |
   v
-PHASE D: Extraction Validation Pass                   ~1-2 hours [NEW PHASE]
-  |  Build 1 Track 1 page using library alone (test assembly)
-  |  Build 1 Track 2 page using library + pipeline (test composition)
-  |  Document gaps, verify sufficiency BEFORE playbook
+PHASE C: Component + Pattern Base Extraction          ✅ COMPLETE
+  |  42 files, 880KB, 6-layer ontology
+  |  All 11 success criteria MET or EXCEEDED
   |
   v
-PHASE E: Migration Playbook v2                        ~4-5 hours [EXPANDED]
+PHASE D: Extraction Validation Pass                   ✅ COMPLETE (2026-02-15)
+  |  47 files, 5 variants tested, Variant B best (18/19, 4/5 novelty)
+  |  CONDITIONAL PASS
+  |
+  v
+PHASE D+: Richness + Rigidity Research               ✅ COMPLETE (2026-02-15)
+  |  11 agents (5 richness + 6 rigidity)
+  |  Tier model established: Floor/Middle/Ceiling/Flagship
+  |  4 modification recommendations
+  |  See: ephemeral/continuity-docs/HANDOFF.md
+  |
+  v
+PHASE D++: Skill Enrichment                          🔧 IN PROGRESS
+  |  Apply modification recommendations to tension-composition skill
+  |  Replace "sample 2-4" with per-category minimums
+  |  Add fractal gate, container width guardrail, tier-based pipeline
+  |
+  v
+PHASE D+++: Middle-tier Experiment                   🧪 PLANNED
+  |  Build one exceptional Middle-tier page (8-10 mechanisms, no metaphor)
+  |  THE most important untested hypothesis
+  |  Validates whether grammar/ mechanisms can be used freely at scale
+  |
+  v
+YOU ARE HERE
+  |
+  v
+PHASE E: Migration Playbook v2                       ~4-5 hours [NOT STARTED]
   |  Track 1 execution path (mechanical assembly, existing spec)
   |  Track 2 execution path (tension-composition skill invocation)
   |  Perceptual guardrails (940px min, 16px label gap, 32px padding, 40% compression)
@@ -124,7 +135,7 @@ DONE -- Full design system adoption achieved
 
 ### Phase A: CD (Combination Dimension) -- 4-5 hours
 
-**Status:** PENDING. Fully planned. HANDOFF-AD-TO-CD exists and is complete.
+**Status:** COMPLETE — 6 CD explorations, CD-006 crown jewel scored 39/40. Commits: 95b3cdb + 42fd987.
 **Team:** ~18-20 agents
 **Dependency:** HANDOFF-AD-TO-CD.md (exists)
 
@@ -204,7 +215,7 @@ DONE -- Full design system adoption achieved
 
 ### Phase C: Component + Pattern Base Extraction -- 6-10 hours [RENAMED, SCOPE REDUCED]
 
-**Status:** NOT STARTED. Not previously planned in any document.
+**Status:** COMPLETE — 42 files, 880KB, 6-layer ontology. All 11 success criteria MET or EXCEEDED. Output in design-system/compositional-core/.
 **Team:** ~6-10 agents across 2 sessions
 **Dependency:** Phase B (needs Track classification + extraction guidance)
 
@@ -252,11 +263,41 @@ DONE -- Full design system adoption achieved
 
 ---
 
-### Phase D: Extraction Validation Pass -- 1-2 hours [NEW PHASE]
+### Phase D: Extraction Validation Pass -- 1-2 hours [COMPLETE]
 
-**Status:** NEW. Not in original plan.
-**Team:** ~2-3 agents
+**Status:** ✅ COMPLETE — CONDITIONAL PASS (2026-02-15). 47 files in ephemeral/phase-d-execution/. Variant B best (18/19 compliance, 4/5 novelty). Container width was primary failure mode.
+**Team:** 14 agents across validation + analysis
 **Dependency:** Phase C (needs extracted components to test)
+
+---
+
+### Phase D+: Richness + Rigidity Research -- 8-12 hours [COMPLETE]
+
+**Status:** ✅ COMPLETE (2026-02-15). 11 agents (5 richness + 6 rigidity), 11 reports. Tier model established. See ephemeral/continuity-docs/HANDOFF.md for full results.
+**Team:** 11 research agents
+**Dependency:** Phase D results (analyzing the gap)
+
+---
+
+### Phase D++: Skill Enrichment -- 2-4 hours [IN PROGRESS]
+
+**Status:** 🔧 IN PROGRESS. Auditing all documentation for skill modification impact, fixing staleness, building execution plan.
+**Team:** ~6-8 agents (modification auditor, staleness fixer, roadmap builder, skill writer, skill auditor, cross-validator)
+**Dependency:** Phase D+ research (modification recommendations)
+
+**What it produces:**
+- Updated `~/.claude/skills/tension-composition/SKILL.md` with 4 modifications applied
+- Updated `~/.claude/skills/perceptual-auditing/SKILL.md` if needed
+- Skill modification verification report
+- Comprehensive execution roadmap for all remaining work
+
+---
+
+### Phase D+++: Middle-tier Experiment -- 1-2 hours [PLANNED]
+
+**Status:** 🧪 PLANNED. User has not committed. Research recommends this as THE most important next step.
+**Team:** ~3-4 agents (builder + auditor + metacognitive analyst)
+**Dependency:** Phase D++ (needs enriched skill)
 
 **WHY THIS EXISTS:** Without validation, the playbook assumes extraction is complete when it's only 60-70%. Better to discover gaps on 2 test pages than 75 production pages.
 

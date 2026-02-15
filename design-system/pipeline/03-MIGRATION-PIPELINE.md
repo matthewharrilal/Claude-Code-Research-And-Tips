@@ -124,6 +124,19 @@ Content classification is the single most important decision. It determines trac
 
 **The 3-way equivalence (AD-F-023):** Axis IS organization IS density IS **attention topology**. You are choosing one thing expressed through three lenses.
 
+### Content-to-Tier Mapping (From Richness/Rigidity Research, 2026-02-15)
+
+Content classification maps to a 4-tier richness model:
+
+| Content Type | Typical Tier | Mechanisms | Build Time |
+|-------------|-------------|------------|------------|
+| API reference, changelog, config | Floor | 5 | 30-45 min |
+| Tutorial, guide, overview | Middle (RECOMMENDED DEFAULT) | 8-10 | 70-100 min |
+| Conceptual deep-dive, architecture | Ceiling | 12-15 | 150-220 min |
+| Anchor content, crown jewels | Flagship | 16-18 | 240-400 min |
+
+Middle tier is the recommended universal floor. The Floor-to-Middle transition has the highest ROI (3-4x richness for +45 min). See ephemeral/continuity-docs/HANDOFF.md Section 4 for full tier specifications.
+
 ---
 
 ## Track 1 Walkthrough: "Setting Up Authentication"
