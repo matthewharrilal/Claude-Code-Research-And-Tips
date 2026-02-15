@@ -49,9 +49,63 @@ A mechanism is a **CSS technique that works across MULTIPLE metaphors**, extract
 
 ---
 
+## Mechanism Categories (5 Property Families)
+
+Each mechanism belongs to one or more property categories. These categories enable per-category selection (see tension-composition skill Phase 4).
+
+| Category | ID | Mechanisms | What It Governs |
+|----------|----|-----------|-----------------|
+| **Spatial** | S | #5, #6, #15 | Layout topology, density rhythm, grid structure |
+| **Hierarchy** | H | #1, #4, #11 | Importance encoding, structural weight, scale |
+| **Component** | C | #2, #9, #10, #17 | Internal component patterns, semantic signals |
+| **Depth/Emphasis** | D | #3, #7, #16 | Layering, zone differentiation, focal points |
+| **Structure/Navigation** | N | #8, #12, #13, #14, #18 | Page chrome, navigation, progressive disclosure |
+
+**Multi-category note:** Some mechanisms serve multiple categories. Border-weight gradient (#1) is primarily HIERARCHY but also encodes DEPTH. Tag the PRIMARY category in the heading; note secondary categories in the mechanism description.
+
+**Per-category selection protocol:** For Middle-tier+ pages, deploy AT LEAST ONE mechanism from each category to ensure vocabulary breadth. See tension-composition skill Phase 4 for the full protocol.
+
+---
+
+## Provenance and Family Resemblance
+
+### Where These Mechanisms Come From
+
+All 18 mechanisms were extracted from showcase pages during Phase C (Extraction Validation). They represent the **structural DNA** of pages that achieved high richness scores — OD-004 (geological confidence), DD-006 (fractal density), CD-006 (combination pilot).
+
+### Family Resemblance Is Expected
+
+When you deploy these mechanisms to new content, the resulting page WILL share structural characteristics with showcase pages. **This is intentional.** Family resemblance = shared vocabulary = design system coherence.
+
+**The critical distinction:**
+
+| Property | Family Resemblance (GOOD) | Template Convergence (BAD) |
+|----------|--------------------------|---------------------------|
+| Mechanisms | Same (border-weight gradient) | Same (border-weight gradient) |
+| Values | DIFFERENT (YOUR semantic reasoning) | SAME (copied from showcase) |
+| Metaphor/Pattern | DIFFERENT (YOUR content's needs) | SAME (copied metaphor) |
+| Semantic reasoning | UNIQUE to YOUR content | Borrowed from showcase |
+
+### Validation Test
+
+"If two pages both use border-weight gradient (#1), do they encode DIFFERENT semantics?"
+
+- **YES** (Page A uses border-weight for geological depth, Page B uses it for architectural hierarchy) → **Vocabulary usage.** This is grammar fluency.
+- **NO** (Page B uses the same geological confidence encoding with the same 4px/3px/2px/1px values) → **Template convergence.** This is copying.
+
+### Core Principle
+
+**Mechanisms ARE showcase DNA.** Deploying showcase mechanisms produces showcase-adjacent structure. This is **GRAMMAR fluency, not failure to diverge.** The goal is not structural uniqueness — it's semantic uniqueness. Two pages can look structurally similar (shared mechanisms) while encoding completely different content meanings.
+
+The Name Test and Transfer Test verify this:
+- **Name Test:** Remove the metaphor name. Does the mechanism still encode structure? YES → vocabulary.
+- **Transfer Test:** Apply the mechanism to a different metaphor. Does it work? YES → vocabulary.
+
+---
+
 ## The Mechanisms (18 Total)
 
-### 1. Border-Weight Gradient Encoding
+### 1. Border-Weight Gradient Encoding [HIERARCHY]
 
 **CSS Mechanism:**
 ```css
@@ -84,7 +138,7 @@ A mechanism is a **CSS technique that works across MULTIPLE metaphors**, extract
 
 ---
 
-### 2. 2-Zone Component DNA
+### 2. 2-Zone Component DNA [COMPONENT]
 
 **CSS Mechanism:**
 ```css
@@ -127,7 +181,7 @@ A mechanism is a **CSS technique that works across MULTIPLE metaphors**, extract
 
 ---
 
-### 3. Solid Offset Depth (Box-Shadow Alternative)
+### 3. Solid Offset Depth (Box-Shadow Alternative) [DEPTH/EMPHASIS]
 
 **CSS Mechanism:**
 ```css
@@ -161,7 +215,7 @@ A mechanism is a **CSS technique that works across MULTIPLE metaphors**, extract
 
 ---
 
-### 4. Spacing Compression (Inverse Density-Confidence)
+### 4. Spacing Compression (Inverse Density-Confidence) [HIERARCHY]
 
 **CSS Mechanism:**
 ```css
@@ -193,7 +247,7 @@ A mechanism is a **CSS technique that works across MULTIPLE metaphors**, extract
 
 ---
 
-### 5. Dense/Sparse Alternation (INHALE/EXHALE Rhythm)
+### 5. Dense/Sparse Alternation (INHALE/EXHALE Rhythm) [SPATIAL]
 
 **CSS Mechanism:**
 ```css
@@ -220,7 +274,7 @@ A mechanism is a **CSS technique that works across MULTIPLE metaphors**, extract
 
 ---
 
-### 6. Width Variation (Channel/Pool Pattern)
+### 6. Width Variation (Channel/Pool Pattern) [SPATIAL]
 
 **CSS Mechanism:**
 ```css
@@ -246,7 +300,7 @@ A mechanism is a **CSS technique that works across MULTIPLE metaphors**, extract
 
 ---
 
-### 7. Zone Background Differentiation
+### 7. Zone Background Differentiation [DEPTH/EMPHASIS]
 
 **CSS Mechanism:**
 ```css
@@ -275,7 +329,7 @@ A mechanism is a **CSS technique that works across MULTIPLE metaphors**, extract
 
 ---
 
-### 8. Scroll Witness / Sticky TOC
+### 8. Scroll Witness / Sticky TOC [STRUCTURE/NAVIGATION]
 
 **CSS Mechanism:**
 ```css
@@ -311,7 +365,7 @@ A mechanism is a **CSS technique that works across MULTIPLE metaphors**, extract
 
 ---
 
-### 9. Confidence/Priority Encoding via Color
+### 9. Confidence/Priority Encoding via Color [COMPONENT]
 
 **CSS Mechanism:**
 ```css
@@ -335,7 +389,7 @@ A mechanism is a **CSS technique that works across MULTIPLE metaphors**, extract
 
 ---
 
-### 10. Border-Left Semantic Signaling
+### 10. Border-Left Semantic Signaling [COMPONENT]
 
 **CSS Mechanism:**
 ```css
@@ -357,7 +411,7 @@ A mechanism is a **CSS technique that works across MULTIPLE metaphors**, extract
 
 ---
 
-### 11. Typographic Scale Jumping (Hierarchy Transitions)
+### 11. Typographic Scale Jumping (Hierarchy Transitions) [HIERARCHY]
 
 **CSS Mechanism:**
 ```css
@@ -385,7 +439,7 @@ A mechanism is a **CSS technique that works across MULTIPLE metaphors**, extract
 
 ---
 
-### 12. Progressive Disclosure (Density Gradient Flow)
+### 12. Progressive Disclosure (Density Gradient Flow) [STRUCTURE/NAVIGATION]
 
 **CSS Mechanism:**
 ```css
@@ -422,7 +476,7 @@ A mechanism is a **CSS technique that works across MULTIPLE metaphors**, extract
 
 ---
 
-### 13. Dark Header + 3px Primary Border
+### 13. Dark Header + 3px Primary Border [STRUCTURE/NAVIGATION]
 
 **CSS Mechanism:**
 ```css
@@ -451,7 +505,7 @@ header {
 
 ---
 
-### 14. Footer Mirror (Dark + 3px Border-Top)
+### 14. Footer Mirror (Dark + 3px Border-Top) [STRUCTURE/NAVIGATION]
 
 **CSS Mechanism:**
 ```css
@@ -478,7 +532,7 @@ footer {
 
 ---
 
-### 15. Bento Grid (Variable Span Layout)
+### 15. Bento Grid (Variable Span Layout) [SPATIAL]
 
 **CSS Mechanism:**
 ```css
@@ -514,7 +568,7 @@ footer {
 
 ---
 
-### 16. Drop Cap (Editorial Opening)
+### 16. Drop Cap (Editorial Opening) [DEPTH/EMPHASIS]
 
 **CSS Mechanism:**
 ```css
@@ -541,7 +595,7 @@ footer {
 
 ---
 
-### 17. Code Block (Dark Background + Syntax Highlighting)
+### 17. Code Block (Dark Background + Syntax Highlighting) [COMPONENT]
 
 **CSS Mechanism:**
 ```css
@@ -575,7 +629,7 @@ pre {
 
 ---
 
-### 18. Data Table (Mono Headers + Border Categories)
+### 18. Data Table (Mono Headers + Border Categories) [STRUCTURE/NAVIGATION]
 
 **CSS Mechanism:**
 ```css
