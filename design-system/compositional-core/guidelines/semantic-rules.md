@@ -276,3 +276,104 @@ Extract clean table styling only. Mark zebra-striping as future enhancement.
 **EXTRACTION COMPLETE**
 All semantic gaps filled with 2+ HTML examples per rule.
 Hypothetical patterns marked explicitly (Context callout, zebra-striping).
+
+---
+
+## Semantic Value Framework
+
+### The 3-Question Test
+
+For EVERY varying CSS value (padding, margin, font-size, border-width), answer:
+
+**Q1: WHAT varies?** Identify the property and its range across the page.
+
+**Q2: WHY does it vary?** Reference one of:
+- Content structure (hierarchical depth, section importance, reader journey phase)
+- Metaphor logic (geological depth, confidence certainty) — Ceiling+ only
+- Pattern logic (CRESCENDO peaks here, dense stratum, EXHALE section)
+- NOT "token availability" or "looked good" (these are ARBITRARY)
+
+**Q3: WHY THESE SPECIFIC VALUES and not adjacent ones on the token scale?**
+- If answer references content/metaphor/pattern → SEMANTIC
+- If answer references "it's on the scale" or "looked good" → ARBITRARY, revise
+
+### Tier-Specific Justification Depth
+
+| Tier | Expected Depth | Example |
+|------|---------------|---------|
+| **Floor** | None (lookup) | "Callouts use --space-6 per component inventory" |
+| **Middle** | Pattern logic | "CRESCENDO peak uses 16px because complexity peaks here" |
+| **Ceiling** | Metaphor logic | "Bedrock uses 40px because geological consolidation = sparse" |
+| **Flagship** | Multi-dimensional | "20px = confidence (compression) × journey (unfamiliarity) × attention (recovery)" |
+
+### Passing Criteria
+
+- **Floor:** No justification required (lookup values)
+- **Middle:** 80%+ varying values justified via pattern logic
+- **Ceiling:** 90%+ varying values justified via metaphor logic
+- **Flagship:** 95%+ varying values encode multi-dimensional overlaps
+
+### Red Flags (Indicates ARBITRARY Values)
+
+- "It looked good" — aesthetics without structural reasoning
+- "It was available on the token scale" — token availability ≠ semantic fit
+- "OD-004 used this value" — copied values without YOUR semantic reasoning
+- "Padding decreases as page progresses" — pattern without RATIO justification
+
+### Before/After Examples
+
+**Example 1: Section Padding (ARBITRARY vs SEMANTIC)**
+
+ARBITRARY:
+```css
+.section--intro { padding: 48px 24px; }
+.section--detail { padding: 40px 24px; }
+.section--summary { padding: 32px 24px; }
+/* "Padding decreases" — but WHY 48/40/32? No ratio justification. */
+```
+
+SEMANTIC:
+```css
+.section--intro { padding: 64px 24px; }
+  /* CRESCENDO intro: reader unfamiliar, needs orientation SPACE. Maximum breathing. */
+.section--detail { padding: 32px 24px; }
+  /* CRESCENDO build: reader oriented. 50% compression from intro. */
+.section--summary { padding: 16px 24px; }
+  /* CRESCENDO peak: reader has full context. Minimum padding = densest.
+     RATIO: 64→32→16 = 4:2:1 exponential compression matching cognitive familiarity. */
+```
+
+**Example 2: Border-Weight (ARBITRARY vs SEMANTIC)**
+
+ARBITRARY:
+```css
+.level-1 { border-left: 4px solid; padding: 40px; }
+.level-2 { border-left: 3px solid; padding: 32px; }
+.level-3 { border-left: 2px solid; padding: 24px; }
+/* Values decrease — but 40→32→24 has no ratio justification */
+```
+
+SEMANTIC:
+```css
+.stratum--established { border-left: 4px solid; padding: 40px; }
+  /* Bedrock: max weight (4px) + sparse (40px). Consolidation = space. */
+.stratum--probable { border-left: 3px solid; padding: 32px; }
+  /* Sediment: 75% weight. Partially consolidated. */
+.stratum--speculative { border-left: 2px solid; padding: 16px; }
+  /* Topsoil: 50% weight + 60% compression from bedrock.
+     Gap between probable→speculative is LARGER than established→probable
+     because epistemic distance grows non-linearly. */
+```
+
+### PA-SEMANTIC Integration
+
+The 3-question test connects to Perceptual Audit semantic questions (PA-SEM-01 through PA-SEM-08):
+- PA-SEM-01 through PA-SEM-03 verify PATTERN LOGIC (Middle tier)
+- PA-SEM-04 through PA-SEM-06 verify METAPHOR LOGIC (Ceiling tier)
+- PA-SEM-07 through PA-SEM-08 verify MULTI-DIMENSIONAL encoding (Flagship tier)
+
+When auditing: apply the 3-question test to flagged CSS values. If Q2 answer references aesthetics/availability → FAIL.
+
+---
+
+**For more details:** See ephemeral/session-insights/03-semantic-framework.md (complete 991-line analysis with 5 before/after examples, audit checklists, and perceptual audit integration protocol).

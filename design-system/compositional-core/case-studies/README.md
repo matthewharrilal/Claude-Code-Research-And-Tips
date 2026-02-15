@@ -364,4 +364,178 @@
 
 ---
 
+## Why BOTH Grammar and Case Studies?
+
+**The Architectural Question:** If mechanisms (grammar/) are extracted FROM case studies, why keep both layers?
+
+**Short Answer:** Grammar = TOOLS you use. Case Studies = USAGE examples you learn from. Jazz musicians need BOTH chord voicings (tools) AND transcribed solos (usage examples).
+
+---
+
+### The Two-Layer Architecture
+
+**Layer 3 (Grammar - mechanism-catalog.md):**
+- **Content:** 18 transferable CSS TECHNIQUES
+- **Abstraction level:** Mechanism divorced from metaphor
+- **Test applied:** Name Test (remove metaphor, still makes sense?)
+- **Example:** "Border-weight gradient encodes hierarchy: 4px/3px/2px/1px"
+- **Purpose:** VOCABULARY — what mechanisms exist, what they encode (abstract)
+
+**Layer 5 (Case Studies - this directory):**
+- **Content:** 9 complete implementations in specific metaphors
+- **Abstraction level:** Mechanism + metaphor + context + process
+- **Test applied:** Divergence (is this implementation unique or copied?)
+- **Example:** "Geological metaphor uses 4px bedrock (established knowledge = consolidated, heavy) vs 1px surface (speculative = loose, fragile)"
+- **Purpose:** USAGE PROOF — how mechanisms were applied to THIS content with THIS metaphor
+
+---
+
+### What Happens With Only Grammar?
+
+**WITHOUT case studies, builders would:**
+- ✓ Know mechanisms exist (border-weight gradient, spacing compression)
+- ✓ Know mechanisms transfer (work across metaphors)
+- ✗ NOT know how mechanisms LOOK in practice (what does "spacing compression" actually mean visually?)
+- ✗ NOT see how mechanisms COMBINE (border-weight + spacing + backgrounds can encode the SAME semantic together)
+- ✗ NOT understand WHEN mechanisms fit (geological metaphor supports compression, musical metaphor doesn't)
+- ✗ NOT see the PROCESS (how tension → metaphor → mechanism selection actually unfolds)
+
+**Result:** Abstract vocabulary with no usage context → builders copy from TRAINING DISTRIBUTION (generic blog layouts) instead of compositional-core grammar.
+
+---
+
+### What Happens With Only Case Studies?
+
+**WITHOUT mechanism catalog, builders would:**
+- ✓ See complete implementations (OD-004 geological stratification)
+- ✓ Understand context (why geological metaphor for API confidence)
+- ✗ NOT know what's TRANSFERABLE (is "4px bedrock border" the mechanism or is "border-weight gradient" the mechanism?)
+- ✗ NOT separate METAPHOR (geological) from MECHANISM (border-weight encoding)
+- ✗ NOT abstract PATTERNS (geological compression is a specific instance of spacing compression)
+
+**Result:** Case studies treated as TEMPLATES → builders copy geological vocabulary (`.stratum` classes) because they can't separate metaphor from mechanism.
+
+---
+
+### How the Two Layers Work Together
+
+**The Intended Workflow:**
+
+**Phase 0-3:** Derive YOUR metaphor (NO library access)
+- Grammar: Not yet consulted
+- Case Studies: PROHIBITED (anti-gravity R1)
+
+**Phase 4:** Extract mechanisms for YOUR metaphor
+- **Read:** mechanism-catalog.md (FIRST)
+- **Apply Name Test:** Remove metaphor, does mechanism still make sense?
+- **Example:** "Border-weight gradient" (abstracted) vs "4px bedrock" (metaphor-specific)
+- **Select:** 8-10 mechanisms that serve YOUR content needs
+- **Apply:** Mechanisms to YOUR metaphor with YOUR values
+
+**Phase 5:** Verify divergence (OPTIONAL but recommended)
+- **Read:** 2-3 case studies most similar to YOUR metaphor
+- **Purpose:** NOT to get ideas (metaphor is locked), but to verify you're not copying
+- **Compare:** YOUR mechanism APPLICATION vs showcase MECHANISM APPLICATION
+- **Check:** Different values? Different combinations? Different spatial logic?
+
+**Phase 6:** Build using mechanisms as VOCABULARY
+- Exact token values (var(--space-8))
+- Mechanisms adapted to YOUR metaphor
+- YOUR vocabulary (not library class names)
+
+---
+
+### The Abstraction Relationship
+
+**Case Studies → Grammar extraction:**
+
+```
+SHOWCASE PAGE (OD-004)
+├─ Metaphor: Geological stratification (bedrock/topsoil)
+├─ CSS: .stratum--bedrock { border-left: 4px; padding: 40px; }
+├─ Semantic: Established knowledge = consolidated = heavy = sparse
+└─ Context: API confidence documentation
+
+     ↓ Name Test + Transfer Test applied
+
+MECHANISM CATALOG
+├─ Mechanism: Border-Weight Gradient
+├─ CSS Pattern: 4px/3px/2px/1px encoding
+├─ Semantic Domain: Hierarchy / Importance / Confidence (ABSTRACT)
+├─ Transfers to: ANY content with hierarchical structure
+└─ Metaphor-independent: Works for geological, architectural, botanical, etc.
+```
+
+**Grammar → Builder application:**
+
+```
+MECHANISM CATALOG
+└─ Mechanism: Border-Weight Gradient (4px/3px/2px/1px)
+
+     ↓ Builder applies to THEIR metaphor
+
+YOUR PAGE (Architectural floors metaphor)
+├─ Metaphor: Building structure (basement/ground/roofline)
+├─ CSS: .floor--basement { border-left: 4px; padding: 48px; }
+├─ Semantic: Foundation load-bearing = heavy = structural certainty
+└─ Context: Infrastructure architecture guide
+```
+
+**Key Property:** Builder used the SAME mechanism (#1 border-weight gradient) but with DIFFERENT metaphor, DIFFERENT values, DIFFERENT class names. SAME vocabulary, DIFFERENT sentence. This is grammar fluency, not template copying.
+
+---
+
+### Why NOT Merge the Layers?
+
+**Option considered:** Merge mechanism definitions + usage examples into single file.
+
+**Rejected because:**
+
+1. **Anti-gravity protection:** Separating grammar (early access, Phase 4) from case studies (late access, Phase 5) prevents pre-creative anchoring. If merged, builders would see implementations WHILE reading mechanisms → pattern-matching.
+
+2. **Cognitive load:** Mechanism catalog is 869 lines (already dense). Adding 9 case studies = 3,500+ lines. Builders need concise reference, not tome.
+
+3. **Abstraction clarity:** Grammar layer documents WHAT transfers (mechanism). Case study layer documents WHAT doesn't transfer (metaphor). Keeping them separate reinforces the distinction.
+
+4. **Usage sequence:** Builders need mechanisms FIRST (Phase 4), case studies SECOND (Phase 5, optional). Merged file doesn't enforce sequence.
+
+---
+
+### The Jazz Real Book Analogy (Applied)
+
+**Jazz Real Book = Case Studies Layer:**
+- Contains 200+ standards (complete songs with melody, chords, form)
+- Musicians study these to learn CONTEXT (when ii-V-I appears, how melody shapes over changes)
+- Purpose: See vocabulary IN USE
+
+**Jazz Theory Book = Grammar Layer:**
+- Contains chord voicings, scales, patterns (ii-V-I, tritone substitution)
+- Musicians study these to learn VOCABULARY (what harmonic tools exist)
+- Purpose: Build vocabulary INVENTORY
+
+**Jazz musicians use BOTH:**
+- Theory book: Learn ii-V-I progression exists, see notation
+- Real Book: Hear ii-V-I in "Autumn Leaves," see how melody navigates the changes
+- Application: Use ii-V-I in ORIGINAL compositions (not playing "Autumn Leaves" verbatim)
+
+**KortAI builders use BOTH:**
+- Grammar: Learn border-weight gradient exists, see CSS pattern
+- Case Studies: See border-weight in OD-004 geological context, understand how it encoded confidence
+- Application: Use border-weight in YOUR page with YOUR metaphor (not copying geological strata)
+
+---
+
+**SUMMARY:**
+
+Grammar (Layer 3) extracts the TRANSFERABLE (mechanisms).
+Case Studies (Layer 5) preserve the SITUATED (metaphor + context).
+
+Both layers are necessary:
+- Grammar alone = vocabulary without usage context → builders can't see what mechanisms LOOK like
+- Case Studies alone = examples without abstraction → builders can't separate transferable from specific
+
+Together, they enable **vocabulary fluency** (knowing tools) + **usage wisdom** (knowing when tools fit).
+
+---
+
 **LEARN THE PROCESS. NOT THE ANSWER.**

@@ -4,8 +4,8 @@
 You MUST read identity/prohibitions.md and vocabulary/tokens.css BEFORE any other action.
 Violating prohibitions = INVALID work. No exceptions. No shortcuts.
 
-**Last Updated:** 2026-02-14
-**Status:** OPERATIONAL (Phase C Extraction Complete)
+**Last Updated:** 2026-02-15
+**Status:** OPERATIONAL (Phase C Extraction Complete, Phase D Validation Complete, Skill Enrichment In Progress)
 
 ---
 
@@ -65,6 +65,7 @@ This IS:
 
 **Build:** Use existing components with token values.
 
+~/.claude/skills/perceptual-auditing
 **Verify:** Soul check + perceptual audit.
 
 **NO metaphor derivation required.**
@@ -73,6 +74,7 @@ This IS:
 
 **When:** Content is prose-dominant (>70% narrative). Implicit tension exists (warmth vs austerity, authority vs playfulness). No direct tool available.
 
+~/.claude/skills/tension-composition
 **Load:** prohibitions → tokens → [RUN TENSION-COMPOSITION BLIND] → mechanisms → [OPTIONAL case studies]
 
 **Build:** Derive metaphor independently, apply mechanisms to YOUR metaphor, generate YOUR vocabulary.
@@ -346,6 +348,175 @@ He APPLIED them to NEW material with HIS voice.
 
 **"Play what YOU hear."** The library is your Real Book. Your composition is your solo.
 
+---
+
+### Concrete Example: Vocabulary vs Library in CSS
+
+**The Distinction (Abstract):**
+- Vocabulary (mechanism catalog) = tools you USE
+- Library (case studies) = usage examples you LEARN FROM
+
+**The Distinction (Concrete CSS):**
+
+#### Mechanism (Vocabulary — Transferable)
+
+**From:** `compositional-core/grammar/mechanism-catalog.md` (Mechanism #1)
+
+```css
+/**
+ * Mechanism: Border-Weight Gradient
+ * Encodes: Hierarchy / Importance / Confidence (ABSTRACT semantic domain)
+ * Values: 4px/3px/2px/1px gradient
+ * Transfers to: ANY content with hierarchical importance structure
+ */
+
+/* The PATTERN (what transfers): */
+.element--highest { border-left: 4px solid var(--color); }
+.element--high    { border-left: 3px solid var(--color); }
+.element--medium  { border-left: 2px solid var(--color); }
+.element--low     { border-left: 1px solid var(--color); }
+```
+
+**What this documents:** The CSS TECHNIQUE (4px/3px/2px/1px border progression). What it ENCODES (hierarchy/importance/confidence in abstract). NOT what values to use, NOT what classes to name, NOT what metaphor to apply.
+
+---
+
+#### Implementation 1 (Library — Geological Metaphor)
+
+**From:** `compositional-core/case-studies/OD-004-confidence.md`
+
+```css
+/**
+ * Metaphor: Geological stratification (bedrock → topsoil)
+ * Semantic: Established knowledge → speculative (confidence gradient)
+ * Mapping: Deep strata = consolidated = certain = heavy borders
+ */
+
+.stratum--bedrock {
+  border-left: 4px solid var(--color-text);
+  /* WHY 4px? Bedrock = foundational layer, geologically consolidated
+     under pressure over millennia. Maximum structural weight (4px)
+     encodes maximum epistemic weight (established certainty). */
+}
+
+.stratum--sediment {
+  border-left: 3px solid var(--color-text);
+  /* WHY 3px? Sediment = partially consolidated. Some compression
+     but not fully settled. 75% of bedrock weight (3/4px) = probable,
+     not established. */
+}
+
+.stratum--topsoil {
+  border-left: 2px solid var(--color-text-secondary);
+  /* WHY 2px? Topsoil = loose, unconsolidated. Speculative knowledge.
+     50% of bedrock weight (2/4px) = half as certain. CRITICAL: 2px
+     is SEMANTIC (hierarchy) not decorative (per prohibitions.md). */
+}
+
+.stratum--surface {
+  border-left: 1px solid var(--color-border);
+  /* WHY 1px? Surface = atmospheric, no consolidation. Open questions.
+     Minimum weight (1px) = minimum certainty. */
+}
+```
+
+**What this documents:** A SPECIFIC APPLICATION of border-weight gradient mechanism to geological metaphor. The VALUES are metaphor-specific (4px bedrock, 1px surface). The JUSTIFICATION connects metaphor to mechanism (consolidation → weight → certainty).
+
+---
+
+#### Implementation 2 (Your Application — Architectural Metaphor)
+
+**From:** YOUR page (hypothetical — architectural building structure)
+
+```css
+/**
+ * Metaphor: Building structure (basement → roofline)
+ * Semantic: Load-bearing structure → decorative (structural importance)
+ * Mapping: Basement = foundation = load-bearing = heavy borders
+ */
+
+.floor--basement {
+  border-left: 4px solid var(--color-text);
+  /* WHY 4px? Basement = foundation, load-bearing walls, structural.
+     Maximum weight (4px) = maximum structural importance. All weight
+     above this floor is supported here. */
+}
+
+.floor--ground {
+  border-left: 3px solid var(--color-text);
+  /* WHY 3px? Ground floor = primary access, moderate structural load.
+     75% of foundation weight = secondary importance (not foundational
+     but still load-bearing). */
+}
+
+.floor--upper {
+  border-left: 2px solid var(--color-text-secondary);
+  /* WHY 2px? Upper floors = residential, minimal structural load.
+     50% of foundation weight = tertiary importance. */
+}
+
+.floor--roofline {
+  border-left: 1px solid var(--color-border);
+  /* WHY 1px? Roofline = decorative, no load-bearing function.
+     Minimum weight = minimum structural importance. */
+}
+```
+
+**What this documents:** A DIFFERENT APPLICATION of the SAME mechanism (border-weight gradient) to a DIFFERENT metaphor (architectural vs geological). The MECHANISM is the same (#1). The VALUES are different (your padding, your class names). The SEMANTIC DOMAIN is parallel (structural importance vs confidence).
+
+---
+
+#### The Key Differences
+
+| Dimension | Mechanism (Vocabulary) | Implementation 1 (OD-004) | Implementation 2 (Yours) |
+|-----------|----------------------|--------------------------|-------------------------|
+| **CSS Pattern** | 4px/3px/2px/1px | 4px/3px/2px/1px | 4px/3px/2px/1px |
+| **What it encodes** | Hierarchy (abstract) | Confidence (specific) | Structural importance (specific) |
+| **Metaphor** | None (transferable) | Geological strata | Building floors |
+| **Class names** | `.element--high/low` | `.stratum--bedrock/surface` | `.floor--basement/roofline` |
+| **Justification** | "Encodes hierarchy" | "Bedrock = consolidated under pressure = certain = heavy" | "Basement = load-bearing = structural = heavy" |
+
+**Same mechanism (#1 border-weight gradient).
+Different metaphors (geological ≠ architectural).
+Different values (class names, justification).
+Different semantics (confidence ≠ structural importance).
+Same structural pattern (4px/3px/2px/1px progression).**
+
+---
+
+#### What Makes This Vocabulary (Not Template Copying)?
+
+**The Name Test:**
+- Remove "geological" from Implementation 1. Does "border-weight encodes hierarchy" still make sense? **YES** → mechanism
+- Remove "bedrock" from Implementation 1. Does "4px border" still make sense without context? **NO** → metaphor-specific
+
+**The Transfer Test:**
+- Does border-weight gradient work with architectural metaphor (Implementation 2)? **YES** → transferable
+- Does "`.stratum--bedrock`" work with architectural metaphor? **NO** → metaphor-specific class name
+
+**The Semantic Independence Test:**
+- Does Implementation 2 encode the SAME semantic as Implementation 1? **NO** (confidence ≠ structural importance)
+- Do both use the SAME CSS pattern? **YES** (4px/3px/2px/1px gradient)
+- **Verdict:** Same vocabulary (mechanism), different usage (metaphor + semantic). This is grammar fluency, not template copying.
+
+---
+
+#### Why This Example Matters
+
+**Before this example:**
+- "Vocabulary = tools, library = examples" (abstract framing)
+- Builders know the distinction conceptually but can't SEE it in CSS
+
+**After this example:**
+- Border-weight gradient IS the mechanism (4px/3px/2px/1px pattern)
+- Geological strata IS the metaphor-specific implementation (bedrock class names)
+- Architectural floors IS a different implementation (same mechanism, different metaphor)
+- The mechanism TRANSFERS (same CSS pattern), the metaphor DOESN'T (different class names, different justifications)
+
+**One concrete CSS example is worth 1000 words of explanation.**
+
+---
+
 ### Context Awareness
 
 **EVERY PATTERN IS SITUATED, not universal.**
@@ -465,6 +636,24 @@ He APPLIED them to NEW material with HIS voice.
 - □ 5-dimension divergence table complete?
 - □ DIFFERENT on 3+ dimensions?
 - □ If convergence: strong justification documented?
+
+---
+
+## PHASE D VALIDATION LESSONS (2026-02-15)
+
+Phase D tested 5 pipeline configurations. COMPLETE — CONDITIONAL PASS. Key lessons for builders:
+
+1. **Container width 940-960px is NON-NEGOTIABLE.** This was THE primary failure mode (4/5 pages violated it). Express narrowing through INTERNAL spacing, not external width reduction. No metaphor may override this.
+
+2. **The always-load protocol is CRITICAL.** Track 1's instant fail (5 critical violations, 11/19 compliance) was caused by not reading prohibitions.md. This file is not optional.
+
+3. **"Weak permission" framing has ZERO effect.** Telling agents case studies are "available for reference" produces identical behavior to not mentioning them. Library access must be phase-gated (anti-gravity R1), not permission-gated.
+
+4. **Variant B demonstrated genuine pipeline identity.** The tension-composition pipeline produces real metaphor derivation (4/5 novelty). The gap is technique DENSITY (5/44 techniques), not technique ABSENCE.
+
+**Post-D Research (COMPLETE, 2026-02-15):** Richness + rigidity investigations (11 agents) established tier model (Floor/Middle/Ceiling/Flagship) and modification recommendations. Skill enrichment currently in progress to address "sample 2-4 mechanisms" limitation.
+
+See: ephemeral/continuity-docs/HANDOFF.md for full Phase D results.
 
 ---
 
