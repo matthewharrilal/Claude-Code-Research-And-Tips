@@ -12,7 +12,7 @@ integration. Describes phase reordering, extraction scope reconception, and the
 new validation pass.
 
 3. STATUS
-ACTIVE -- updated to reflect pipeline evolution research
+ACTIVE -- updated to reflect pipeline evolution research. Phase D COMPLETE (2026-02-15, CONDITIONAL PASS). Richness + rigidity research COMPLETE (11 agents, tier model established). Skill enrichment Wave 1 COMPLETE (M2/M3/M5/M8).
 
 5. BUILT ON
 | Dependency                              | Relationship                          |
@@ -111,27 +111,44 @@ You can extract the alphabet and vocabulary. You cannot extract the prose — yo
 
 ```
 Phase A: CD Completion (4-5h)
+  ✅ COMPLETE (2026-02-15, CONDITIONAL PASS)
   Validate both Track 1 + Track 2 via CD-006 pilot
   Produce: ACCUMULATED-IDENTITY-v3, combination rules, transition grammar
   ↓
 Phase B: Content Analysis + Track Classification (4-6h) [REORDERED FROM F]
+  NOT STARTED
   Inventory all 75+ pages
   Classify: Track 1 (assembly) vs Track 2 (composition)
   Pre-screen tension via Addition Test + BECAUSE test
   Produce: Track assignments, tentative metaphor candidates, extraction priorities
   ↓
 Phase C: Component + Pattern Base Extraction (6-10h) [SCOPE REDUCED]
+  ✅ COMPLETE (2026-02-14, compositional-core/ 6-layer ontology, 43 files)
   Extract ~400 lines Tier 1+2+2.5 CSS
   Document Tier 3 compositional strategies as prose patterns
   Produce: Component library (~400 lines CSS) + Pattern strategy docs (~1,200 lines prose)
   ↓
 Phase D: Extraction Validation Pass (1-2h) [NEW]
+  ✅ COMPLETE (2026-02-15, CONDITIONAL PASS)
+  Variant B (weak permission) best: 18/19 compliance, 4/5 novelty
   Build 1 Track 1 page using library alone
   Build 1 Track 2 page using library + tension-composition pipeline
   Verify sufficiency, document gaps
   Produce: Validation report, gap documentation, confidence assessment
   ↓
+Phase D+ (Richness + Rigidity Research):
+  ✅ COMPLETE (2026-02-15, 11 agents, tier model established)
+  Richness investigation (5 agents): gap is technique saturation, ~60-85% addressable
+  Rigidity investigation (6 agents): showcase MORE rigid than pipeline
+  Tier model: Floor/Middle/Ceiling/Flagship, Middle recommended as universal floor
+  ↓
+Phase D++ (Skill Enrichment):
+  🔧 Wave 1 COMPLETE (2026-02-15): M2/M3/M5/M8 applied
+  ⏳ Wave 2 IN PROGRESS: M1 per-category minimum after Middle experiment
+  ⏳ Wave 3 PENDING: M9/M10/M11 perceptual-auditing tier integration
+  ↓
 Phase E: Migration Playbook v2 (4-5h) [EXPANDED]
+  NOT STARTED
   Track 1 execution path (mechanical assembly)
   Track 2 execution path (tension-composition skill invocation)
   Perceptual guardrail integration (8 quantitative rules)
@@ -139,11 +156,13 @@ Phase E: Migration Playbook v2 (4-5h) [EXPANDED]
   Produce: Migration Execution Spec (~1,400 lines) + Ingestion Operational Spec (~100 lines)
   ↓
 Phase F: Pilot Migration (3-5h) [MUST INCLUDE TRACK 2]
+  NOT STARTED
   2-3 pages minimum: 1+ Track 1, 1+ Track 2
   Test skill invocation, guardrail enforcement, audit flow
   Produce: Pilot pages, timing data, process validation, discovered edge cases
   ↓
 Phase G: Playbook Refinement (1-2h) [NO CHANGE]
+  NOT STARTED
   Incorporate pilot learnings into playbook
   Update time estimates with actual measurements
   Refine escalation protocol based on pilot results
@@ -156,6 +175,7 @@ Phase G: Playbook Refinement (1-2h) [NO CHANGE]
 ═══════════════════════════════════════════════════════════
   ↓
 Phase H+I: Full Migration (80-160h) [TIMELINE EXPANDED]
+  NOT STARTED
   Track 1: 30-40 pages @ 45-90 min = 22-60h (parallelizable)
   Track 2: 35-45 pages @ 3-5h = 105-225h (creative bottleneck)
   Produce: All pages migrated with full provenance

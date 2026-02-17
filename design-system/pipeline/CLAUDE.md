@@ -13,7 +13,9 @@ including tension-composition skill integration and component extraction.
 
 3. STATUS
 ACTIVE — Expanded with Track 2 compositional supplements, strategy library,
-extraction validation, and open questions tracking (13+ files, ~9,200 lines)
+extraction validation, and open questions tracking (13+ files, ~9,200 lines).
+Phase D COMPLETE (2026-02-15, CONDITIONAL PASS). Richness + rigidity research
+COMPLETE (11 agents, tier model established).
 
 5. BUILT ON
 | Dependency                              | Relationship                          |
@@ -102,7 +104,7 @@ pipeline. This directory documents what that context is and how to assemble it.
 | `06-KEY-INSIGHTS.md` | ~245 | Language analogy, sameness impossibility, attention topology |
 | `07-TRACK-2-COMPOSITIONAL-SUPPLEMENT.md` | ~1,142 | Track 2 skill invocation, Phase 3 pipeline, quality lessons |
 | `08-COMPOSITIONAL-STRATEGY-LIBRARY.md` | ~1,747 | 3-tier model, component inventory, Tier 2.5 catalog, Tier 3 recipes |
-| `09-EXTRACTION-VALIDATION-PROTOCOL.md` | ~984 | Phase D test procedures, validation checklists |
+| `09-EXTRACTION-VALIDATION-PROTOCOL.md` | ~984 | Phase D test procedures (✅ COMPLETE 2026-02-15, CONDITIONAL PASS) |
 | `OPEN-QUESTIONS.md` | ~1,184 | Central tracking of 23 open questions across 7 categories |
 | `_SOURCE-BRIEF.md` | ~380 | Raw source material reference for writing agents |
 
