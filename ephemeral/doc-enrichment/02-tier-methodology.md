@@ -74,6 +74,15 @@ Every research agent (11/11) agreed that the most important untested hypothesis 
 - 80-90% reproducibility means agents produce consistent output
 - Content-type-to-pattern mapping is codifiable: tutorial = CRESCENDO, reference = F-PATTERN, overview = BENTO, narrative = PULSE
 
+**CRITICAL CAVEAT — Mechanism Count as Proxy, Not Target:**
+The 8-10 mechanism count is DESCRIPTIVE (backward-engineered from what Middle-tier effort naturally produces), not PRESCRIPTIVE (a target to hit). These numbers describe natural landing zones:
+- Floor (30-45 min component assembly) → ~5 mechanisms
+- Middle (70-100 min individual deployment across categories) → ~8-10 mechanisms
+- Ceiling (150-220 min combination deployment) → ~12-15 mechanisms
+- Flagship (240-400 min multi-pattern) → ~16-18 mechanisms
+
+Peak richness occurs at maximum content-mechanism fit, not maximum technique count. A page with 6 perfectly-deployed mechanisms reinforcing a coherent pattern is richer than a page with 10 mechanisms where 3 feel forced. The per-category minimum (M1, Wave 2) ensures BREADTH (all 5 families), and count emerges naturally from breadth. DO NOT treat "8-10" as a number to hit.
+
 **Concrete profile:**
 - 8-10 mechanisms: all 5 Floor mechanisms plus spacing compression, dense/sparse alternation, zone background differentiation, dark header + 3px border, data table
 - Optional 1-2 additional: border-weight gradient, solid offset depth, width variation, bento grid
@@ -416,15 +425,17 @@ This question shapes every proceeding conversation about tier building. It deter
 
 ## 7. METHODOLOGY -- HOW TO APPROACH EXPERIMENTS
 
-### Build First With Current Skill
+### Build First With Wave 1-Modified Skill, Then Apply Wave 2
 
-The content-adversarial audit (06-content-adversarial.md) made a critical point: the proposed skill modifications should NOT be implemented BEFORE the first experiment. The correct sequence is:
+**Status as of 2026-02-15:** Wave 1 modifications APPLIED (M2 fractal gate, M3 container width, M5 tier routing, M8 tier framing). The original plan was "build with unmodified skill, evaluate, then modify." That plan has evolved:
 
-1. **Build a Middle-tier page with the CURRENT unmodified skill.** This determines whether the tier model works, whether Middle achieves the engagement threshold, and whether the current pipeline produces acceptable Middle-tier output. Tell the builder agent in its prompt: "Skip Phases 1-3, apply CRESCENDO pattern, deploy 8-10 mechanisms from the catalog." No skill file changes needed -- just prompt-level instructions.
+**Current sequence:**
 
-2. **Evaluate the result.** Does it achieve the engagement threshold? If yes, the skill modifications are confirmed. If the page is excellent without modifications, some proposed changes may be unnecessary.
+1. **Build a Middle-tier page with the Wave 1-modified skill.** The tier routing (M5) is now in the skill, so Middle-tier pages will automatically skip Phases 1-3 and go to Phase 4 with pattern selection. The fractal gate (M2) is a mandatory deliverable. Container width (M3) is a binary rule. **HOWEVER: the skill STILL contains "sample 2-4 mechanisms"** (M1 pending Wave 2). Override this at builder-prompt level: "Deploy 8-10 mechanisms across all 5 categories. Read full catalog. Justify each selection."
 
-3. **Then implement the modifications that the experiment validated.** Apply per-category minimum, fractal gate, container width enforcement, Phase 3.5 strengthening.
+2. **Evaluate the result.** Measure against 4 criteria: (a) Container width 940-960px (binary), (b) Fractal coherence at 2 scales (binary), (c) Engagement threshold (subjective — does it feel designed?), (d) Novelty vs derivation (PA Mode 5 test).
+
+3. **Then apply Wave 2 modifications informed by results.** M1 (per-category minimum) formalizes the 8-10 deployment in the skill. M6 (semantic justification) adds depth requirement. M7 (combinations) adds Ceiling-tier guidance. Do NOT apply blindly — if experiment shows M6 is busywork or M7 over-prescribes, adjust.
 
 4. **Build a Ceiling-tier page with the modified skill.** Compare against the Middle page on the same content.
 

@@ -107,9 +107,34 @@ The research converged on a 4-tier system mapping content needs to richness leve
 | **Metaphor?** | No | No | Yes (full pipeline) | Yes (multi-pass audit) |
 | **Content type** | API refs, changelogs, config | Tutorials, guides, overviews | Conceptual docs, deep explanations | Anchor content, crown jewels |
 
+**CRITICAL CAVEAT -- Mechanism Count as Proxy, Not Target:**
+
+The mechanism counts above (5, 8-10, 12-15, 16-18) were BACKWARD-ENGINEERED from existing pages, not invented as targets. They describe NATURAL LANDING ZONES for each level of effort, not numbers to hit.
+
+**Provenance:**
+- Variant B (Phase D best): 7 mechanisms across ALL 5 categories (Spatial: 1, Hierarchy: 3, Component: 2, Depth/Emphasis: 1, Structure/Nav: 1) (30-45 min build)
+- OD-004 (geological confidence): ~12-15 across all 5 categories (150-220 min)
+- CD-006 (combination pilot): ~16-18 across all 5 categories (240-400 min)
+- DD-006 (fractal crown jewel): ~16+ mechanisms (multi-pass audit)
+
+Without this context, a builder might treat "8-10" as a target and pad mechanisms to hit 8, or stop at 8 when the content naturally wants 11. The per-category minimum (M1) was designed specifically to avoid this — it ensures BREADTH (all 5 families), and the count emerges naturally from breadth.
+
 **The key insight: the Floor-to-Middle transition has the HIGHEST ROI.** For ~45 extra minutes, you get 3-4x richness, crossing the threshold from "formatted" to "designed." Every page should be at least Middle.
 
 **Middle tier adds (over Floor):** grid/flex layouts, zone backgrounds, density rhythm patterns, dark header, accessibility triple, pseudo-elements. All lookup-based decisions, not creative ones.
+
+**CRITICAL DISTINCTION: Patterns Are the Skeleton, Mechanisms Are the Flesh**
+
+The 4 density patterns (CRESCENDO, F-PATTERN, BENTO, PULSE) are SPATIAL ORGANIZATION STRATEGIES — how information density flows across the page. They're the skeleton that determines overall page rhythm.
+
+The 18 mechanisms are INDIVIDUAL CSS TECHNIQUES deployed WITHIN whatever pattern is selected. They're the flesh.
+
+- CRESCENDO = sparse intro → dense peak → sparse resolution (overall flow)
+- Within a CRESCENDO page, you deploy mechanism #1 (border-weight) for hierarchy, #7 (zone backgrounds) for section differentiation, #5 (dense/sparse alternation) for rhythm, etc.
+
+**The pattern is NOT hardcoded to CRESCENDO.** For Middle tier (no metaphor derivation), select pattern based on content type using the table below. The previous discussion kept saying "CRESCENDO" because the experiment content was assumed to be tutorial format.
+
+**For Middle tier:** The 4-option pattern table is intentionally a fixed lookup. Middle removes creative judgment — you match content type to pattern, then deploy mechanisms. Whether this produces "designed" output (vs "formatted") is what the experiment tests.
 
 **Density rhythm patterns (used at Middle tier and above):**
 - **CRESCENDO:** Information density builds from sparse to dense across the page (opening breath, gradual intensification, peak section, resolution). Best for tutorials and progressive explanations.
@@ -138,7 +163,15 @@ Four modifications were proposed to close the richness gap. The rigidity researc
 
 **The single most damaging instruction:** "Sample 2-4 mechanisms" in `~/.claude/skills/tension-composition/SKILL.md` (line ~787). Exists in two inconsistent forms ("2-4" and "3-5"). Caps technique density, prevents engagement with the full mechanism catalog. All 11 research agents independently identified this as the highest-leverage change.
 
-**Status: NO modifications have been applied yet.** The skill files are unchanged. The user has not committed to implementation.
+**Why M1 was in Wave 2 (and why it's arguably a sequencing mistake):**
+
+M1 was grouped with M6 and M7 as "vocabulary expansion" modifications. The original rationale: validate M1's specific parameters through experiment before permanent encoding. The problem: you can't test whether 8-10 mechanisms across 5 categories works if the skill tells the builder to use 2-4.
+
+M6 and M7 genuinely need experiment feedback (M6 might be busywork, M7 might over-prescribe). M1 is the foundational enabler, categorically different from M6/M7. Running the experiment without M1 would confirm what 11 agents already concluded. The user conversation consensus: M1 sequencing was arguably a mistake.
+
+**Current state (2026-02-15):** M1 has NOT been applied yet. The broken "sample 2-4" instruction is STILL in the skill as of post-Wave 1 execution. The proposed Middle tier uses 8-10 mechanisms across all 5 categories, but the skill currently says "2-4," creating a direct contradiction.
+
+**Status: Wave 1 modifications applied (M2/M3/M5/M8). M1 NOT YET APPLIED (sequenced in Wave 2 after Middle experiment).** The skill currently STILL contains "sample 2-4 mechanisms." This was a deliberate sequencing decision: Wave 1 focused on enabling constraints (fractal gate, container width, tier routing), Wave 2 will apply vocabulary expansion (per-category minimum) informed by experiment feedback. However, 17-conversation-clarifications.md notes this sequencing may have been a mistake — testing Middle tier under "sample 2-4" validates what 11 agents already concluded. See CLARIFICATION 2 for full rationale.
 
 ---
 
@@ -280,13 +313,15 @@ The user is aware of the 2.6:1 meta-to-output ratio (47,944 lines infrastructure
 
 ### Immediate (Before Next Build)
 
-1. **Edit `~/.claude/skills/tension-composition/SKILL.md`:** Replace "sample 2-4 mechanisms" with per-category minimum + justification. New instruction: "For each of the 5 property categories (Spatial, Temporal, Material, Behavioral, Relational), identify AT LEAST ONE mechanism. For each mechanism deployed, document WHY. For at least 3 mechanisms NOT deployed, document WHY NOT."
+**Wave 1 COMPLETE (2026-02-15):** M2 (fractal gate), M3 (container width), M5 (tier routing), M8 (framing) applied. PRE-1 (category labels) and DOC-1 through DOC-6 also applied.
 
-2. **Edit `~/.claude/skills/tension-composition/SKILL.md`:** Add tier-based pipeline selection. Middle tier: SKIP Phases 1-3, go directly to Phase 4.0 with content-type pattern.
+**Next Immediate Actionable:** Build Middle-tier experiment using modified skill. This validates:
+- M2 fractal gate achieves 100% compliance (binary rule)
+- M3 container width prevents violations (4/5 Phase D pages violated this)
+- M5 tier routing works (Middle skips Phases 1-3 correctly)
+- Engagement threshold question: does Middle achieve "place" feeling without metaphor?
 
-3. **Edit `~/.claude/skills/tension-composition/SKILL.md`:** Promote fractal consistency from CHECK to GATE with scale coverage table. Scope-calibrate by tier.
-
-4. **Add NON-NEGOTIABLE container width rule** to Phase 4.0 guardrails: "Container width 940-960px is NON-NEGOTIABLE. Express narrowing through INTERNAL spacing, not external width reduction."
+**After Middle experiment:** Apply Wave 2 (M1 per-category minimum, M6 semantic justification, M7 combinations) informed by experiment results.
 
 ### Short-Term (Next 1-2 Builds)
 

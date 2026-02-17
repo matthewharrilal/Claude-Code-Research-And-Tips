@@ -31,7 +31,7 @@ Phase D validation is COMPLETE (CONDITIONAL PASS, 2026-02-15). Two follow-up inv
 
 Building richness tiers on Variant B's foundation (weak permission configuration — scored 18/19 compliance, 4/5 novelty) to determine how much richness is achievable through the pipeline at each tier level. The single most important untested hypothesis: **does an exceptional Middle-tier page achieve the "place" feeling without metaphor derivation?** If yes, every page can reach "designed" quality in 70-100 minutes. If no, metaphor penetration is confirmed as necessary. One experiment answers more questions than another research team.
 
-The methodology: **build first with the CURRENT skill, modify second based on what we learn.** The content adversary (agent that challenges whether content NEEDS full pipeline treatment) key finding: experiment-first resolves more questions than perfecting instructions. Build one Middle-tier page, evaluate results, THEN apply skill modifications based on evidence.
+The methodology: **Wave 1 mods applied (2026-02-15), build Middle experiment, evaluate, THEN apply Wave 2 informed by results.** Wave 1 (M2/M3/M5/M8) focused on enabling constraints (fractal gate, container width, tier routing, framing). Wave 2 (M1/M6/M7) focuses on vocabulary expansion (per-category minimum, semantic justification, combinations). Sequencing decision: validate tier routing + fractal + container width BEFORE changing mechanism selection protocol. However, this means the skill STILL contains "sample 2-4 mechanisms" during the Middle experiment — testing what 11 agents already concluded. See 17-conversation-clarifications.md CLARIFICATION 2 for the sequencing rationale + tradeoffs.
 
 ## KEY CONTEXT (5 Essential Concepts)
 
@@ -64,11 +64,22 @@ Example: Border-weight gradient with botanical metaphor: `.root { border-left: 4
 | **Metaphor?** | No | No | Yes (full pipeline) | Yes (multi-pass audit) |
 | **Content type** | API refs, changelogs | Tutorials, guides | Conceptual docs, deep explanations | Crown jewels |
 
+**CRITICAL CAVEAT -- Mechanism Count as Proxy, Not Target:**
+
+The mechanism counts above (5, 8-10, 12-15, 16-18) describe what each tier NATURALLY produces when content-mechanism fit is optimized. They are NOT targets to hit. Peak richness occurs at maximum content-mechanism fit, not maximum technique count.
+
+These numbers were BACKWARD-ENGINEERED from existing pages:
+- Variant B (Phase D best, built under "sample 2-4"): deployed 7 mechanisms across ALL 5 categories (100% category coverage)
+- OD-004 (geological confidence, showcase): deployed ~12-15 across all 5 categories
+- CD-006 (combination pilot, 39/40 score): deployed ~16-18 across all 5 categories
+
+The per-category minimum (M1) ensures BREADTH (all 5 property families), and the count emerges naturally from breadth.
+
 **Key insight:** Floor-to-Middle has the HIGHEST ROI. ~45 extra minutes yields 3-4x richness. Middle is the recommended universal floor.
 
 **For Middle-tier+ pages:** Read the FULL mechanism catalog (18 mechanisms). Identify AT LEAST ONE from each of the 5 categories (Spatial, Hierarchy, Component, Depth/Emphasis, Structure/Navigation). Justify each selection. Natural landing: 8-10 mechanisms for Middle tier.
 
-**Historical note:** The original skill instruction said 'Sample 2-4 mechanisms most relevant to YOUR metaphor. DO NOT read all mechanisms.' This was the single most limiting specification — identified by ALL 11 research agents as capping richness. Variant B deployed only 7 mechanisms across 2 categories when showcase pages deploy 12-18 across all 5. The instruction has been replaced with per-category minimum deployment.
+**Historical note:** The original skill instruction said 'Sample 2-4 mechanisms most relevant to YOUR metaphor. DO NOT read all mechanisms.' This was the single most limiting specification — identified by ALL 11 research agents as capping richness. Variant B deployed only 7 mechanisms across 2 categories when showcase pages deploy 12-18 across all 5. **As of 2026-02-15, this instruction is STILL IN THE SKILL** (M1 replacement pending Wave 2, after Middle experiment validates the per-category approach). This means the Middle experiment will test under "sample 2-4" constraint — confirming what research already concluded, but enabling skill-level prompt override to deploy 8-10 across 5 categories. See 17-conversation-clarifications.md CLARIFICATION 2 for why M1 wasn't in Wave 1.
 
 **Category Name Evolution:**
 Earlier documents (HANDOFF.md) use abstract category names: Spatial, Temporal, Material, Behavioral, Relational.
@@ -147,7 +158,7 @@ These files define WHAT YOU CANNOT DO (prohibitions) and WHAT TOOLS YOU HAVE (to
 
 2. **Do NOT skip the always-load protocol.** EVERY agent MUST read `prohibitions.md` + `tokens.css` before ANY work. Track 1's instant fail in Phase D was caused by skipping this. 527 lines mandatory overhead.
 
-3. **Do NOT use "sample 2-4 mechanisms."** Identified by ALL 11 research agents as the single most limiting specification. Replacement: per-category minimum (1+ per each of 5 property categories).
+3. **Do NOT use "sample 2-4 mechanisms."** Identified by ALL 11 research agents as the single most limiting specification. **The skill STILL contains this instruction as of 2026-02-15** (M1 pending Wave 2). When building Middle experiment, OVERRIDE at the builder-prompt level: deploy 8-10 mechanisms across all 5 categories via per-category minimum. M1 will formalize this in the skill after experiment validates the approach.
 
 4. **Do NOT treat case studies as templates.** Case studies are LITERATURE showing the language in use. Anti-gravity mechanism R3 explicitly warns against copying. Use `grammar/mechanism-catalog.md` for transferable techniques.
 
@@ -156,9 +167,9 @@ These files define WHAT YOU CANNOT DO (prohibitions) and WHAT TOOLS YOU HAVE (to
 ## IMMEDIATE NEXT STEPS
 
 1. **Read `ephemeral/doc-enrichment/02-tier-methodology.md`** for the concrete tier building plan
-2. **Ask the user** what they want to do next -- do NOT assume. Options: implement skill modifications, build experimental Middle-tier page, continue research, or something else
-3. If building: follow the always-load protocol, use the tier model, deploy mechanisms as VOCABULARY
-4. If modifying skills: see `ephemeral/continuity-docs/HANDOFF.md` Section 5 for exact modification specs
+2. **Ask the user** what they want to do next -- do NOT assume. Current state: Wave 1 skill mods COMPLETE. Options: build Middle-tier experiment (recommended next), apply remaining Wave 2 mods (after experiment), continue research, or something else.
+3. If building Middle experiment: follow the always-load protocol, use tier model, OVERRIDE "sample 2-4" at builder-prompt level (deploy 8-10 across 5 categories), measure against 4 success criteria (see 13-master-agenda.md Phase 2).
+4. If applying Wave 2 mods: see `ephemeral/session-insights/08-skill-enrichment-plan.md` M1/M6/M7 sections for exact specs. Do NOT apply blindly — evaluate Middle experiment results first.
 5. If researching: see `ephemeral/continuity-docs/HANDOFF.md` Section 11 for open questions
 
 ---
