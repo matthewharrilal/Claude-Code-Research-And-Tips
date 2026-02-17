@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Staff Engineer Mental Model for AI Agent Architecture</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ========================================
+       TOKENS (from tokens.css)
+       ======================================== */
+    :root {
+      /* Soul constraints */
+      --border-radius: 0;
+      --box-shadow: none;
+
+      /* Colors */
+      --color-primary: #E83025;
+      --color-background: #FEF9F5;
+      --color-text: #1A1A1A;
+      --color-text-secondary: #666666;
+      --color-border: #E0D5C5;
+      --color-border-subtle: #F0EBE3;
+
+      /* Background zones (Lab environments) */
+      --bg-safety: #FEF9F5;        /* Warm cream - safety briefing */
+      --bg-clean-room: #FFFFFF;     /* Pure white - measurement zones */
+      --bg-transition: #FAF5ED;     /* Breathing - protocol transitions */
+      --bg-data: #1A1A1A;          /* Dark - precision data readout */
+
+      /* Typography */
+      --font-display: 'Instrument Serif', Georgia, serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+      /* Type scale */
+      --text-xs: 0.75rem;    /* 12px */
+      --text-sm: 0.875rem;   /* 14px */
+      --text-base: 1rem;      /* 16px */
+      --text-lg: 1.125rem;    /* 18px */
+      --text-h3: 1.5rem;      /* 24px */
+      --text-h2: 2rem;        /* 32px */
+      --text-h1: 2.5rem;      /* 40px */
+
+      /* Spacing scale (4px base) */
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --space-12: 48px;
+      --space-16: 64px;
+
+      /* Border weights (lab zone encoding) */
+      --border-critical: 4px;    /* Never-trust operations */
+      --border-verify: 3px;       /* Verify-always operations */
+      --border-monitor: 1px;      /* Trust-with-oversight */
+    }
+
+    /* ========================================
+       BASE STYLES
+       ======================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.7;
+      color: var(--color-text);
+      background: var(--bg-clean-room);
+    }
+
+    .page-container {
+      max-width: 960px;    /* 66.7% of 1440px viewport */
+      margin: 0 auto;
+      padding: 0 var(--space-8);
+    }
+
+    /* ========================================
+       TYPOGRAPHY
+       ======================================== */
+    h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-h1);
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: var(--space-6);
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: var(--text-h2);
+      font-weight: 400;
+      line-height: 1.3;
+      margin-top: var(--space-12);
+      margin-bottom: var(--space-4);
+    }
+
+    h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-h3);
+      font-weight: 400;
+      font-style: italic;    /* ALL h3 must be italic */
+      line-height: 1.4;
+      margin-top: var(--space-8);
+      margin-bottom: var(--space-4);
+    }
+
+    p {
+      margin-bottom: var(--space-4);
+    }
+
+    strong {
+      font-weight: 600;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      background: var(--color-border-subtle);
+      padding: 2px 6px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--border-radius);
+    }
+
+    /* ========================================
+       LAB ZONE COMPONENTS
+       ======================================== */
+    .lab-zone {
+      margin-bottom: var(--space-12);
+      padding: var(--space-16);
+      border: var(--border-monitor) solid var(--color-border);
+      background: var(--bg-safety);
+    }
+
+    .lab-zone--clean-room {
+      background: var(--bg-clean-room);
+      padding: var(--space-12);
+    }
+
+    .lab-zone--dense {
+      padding: var(--space-8);
+      background: var(--bg-clean-room);
+    }
+
+    .lab-zone--transition {
+      background: var(--bg-transition);
+      padding: var(--space-12);
+    }
+
+    .lab-zone--critical {
+      border-left: var(--border-critical) solid var(--color-primary);
+      background: var(--bg-safety);
+      padding: var(--space-16);
+    }
+
+    .lab-zone__label {
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-4);
+      display: block;
+    }
+
+    /* ========================================
+       INSTRUMENT CARDS (2-Zone DNA)
+       ======================================== */
+    .instrument-card {
+      border-left: var(--border-critical) solid var(--color-text);
+      background: var(--bg-safety);
+      padding: var(--space-6) var(--space-5);
+      margin-bottom: var(--space-6);
+    }
+
+    .instrument-card__label {
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-3);
+    }
+
+    .instrument-card__body {
+      font-size: var(--text-base);
+      line-height: 1.7;
+    }
+
+    .instrument-card__body ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .instrument-card__body li {
+      padding: var(--space-2) 0;
+      border-bottom: var(--border-monitor) solid var(--color-border);
+    }
+
+    .instrument-card__body li:last-child {
+      border-bottom: none;
+    }
+
+    /* Tier indicators (border-weight encoding) */
+    .tier-critical {
+      border-left: var(--border-critical) solid var(--color-primary);
+      padding-left: var(--space-3);
+      font-weight: 600;
+    }
+
+    .tier-verify {
+      border-left: var(--border-verify) solid var(--color-text);
+      padding-left: var(--space-3);
+    }
+
+    .tier-monitor {
+      border-left: var(--border-monitor) solid var(--color-border);
+      padding-left: var(--space-3);
+    }
+
+    /* ========================================
+       MEASUREMENT TABLES
+       ======================================== */
+    .measurement-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--space-6) 0;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+    }
+
+    .measurement-table th {
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: left;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: var(--border-verify) solid var(--color-text);
+      background: var(--bg-transition);
+    }
+
+    .measurement-table td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: var(--border-monitor) solid var(--color-border);
+      vertical-align: top;
+    }
+
+    .measurement-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .measurement-table .multiplier {
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+
+    /* ========================================
+       ERROR CARDS (statistical readout)
+       ======================================== */
+    .error-card {
+      background: var(--bg-safety);
+      border: var(--border-monitor) solid var(--color-border);
+      padding: var(--space-5);
+      margin-bottom: var(--space-4);
+    }
+
+    .error-card__metric {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      font-weight: 600;
+      color: var(--color-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .error-card__label {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-3);
+    }
+
+    .error-card__description {
+      font-size: var(--text-sm);
+      line-height: 1.6;
+    }
+
+    /* ========================================
+       PROTOCOL CARDS (essence equivalent)
+       ======================================== */
+    .protocol-card {
+      border-left: var(--border-critical) solid var(--color-primary);
+      background: var(--bg-safety);
+      padding: var(--space-8);
+      margin: var(--space-8) 0;
+    }
+
+    .protocol-card__title {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      font-style: italic;
+      margin-bottom: var(--space-4);
+      color: var(--color-primary);
+    }
+
+    .protocol-card__body {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      font-style: italic;
+      line-height: 1.8;
+    }
+
+    /* ========================================
+       COST METER
+       ======================================== */
+    .cost-meter {
+      background: var(--bg-transition);
+      border: var(--border-verify) solid var(--color-border);
+      padding: var(--space-6);
+      margin: var(--space-6) 0;
+    }
+
+    .cost-meter__label {
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-3);
+    }
+
+    .cost-meter__value {
+      font-family: var(--font-mono);
+      font-size: var(--text-h2);
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+    }
+
+    .cost-meter__scale {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      margin-top: var(--space-3);
+    }
+
+    /* ========================================
+       RESEARCH QUESTIONS
+       ======================================== */
+    .research-question {
+      background: var(--bg-transition);
+      padding: var(--space-5);
+      margin-bottom: var(--space-4);
+      border-left: var(--border-verify) solid var(--color-border);
+    }
+
+    .research-question__prompt {
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+    }
+
+    .research-question__status {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      font-style: italic;
+    }
+
+    /* ========================================
+       RESPONSIVE (768px breakpoint)
+       ======================================== */
+    @media (max-width: 768px) {
+      .page-container {
+        max-width: 100%;
+        padding: 0 var(--space-5);
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .lab-zone {
+        padding: var(--space-8);
+      }
+
+      .lab-zone--critical {
+        padding: var(--space-8);
+      }
+
+      .measurement-table {
+        font-size: 0.7rem;
+      }
+
+      .measurement-table th,
+      .measurement-table td {
+        padding: var(--space-2) var(--space-3);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+
+    <!-- SAFETY BRIEFING ZONE -->
+    <section class="lab-zone">
+      <span class="lab-zone__label">Safety Briefing — Lab Orientation</span>
+      <h1>The Staff Engineer Mental Model for AI Agent Architecture</h1>
+      <p><strong>Calibration Notice:</strong> This is frontier thinking for practitioners who've mastered the basics and want to understand where AI-assisted development is heading. If you're comfortable with autonomous loops and exploring multi-agent systems, this document provides the mental models of staff engineers building at the cutting edge.</p>
+    </section>
+
+    <!-- CRITICAL ZONE: Paradigm Shift -->
+    <section class="lab-zone--critical">
+      <span class="lab-zone__label">Critical Mindset Shift</span>
+      <h2>The Paradigm Shift</h2>
+
+      <p>Software development is undergoing its most challenging transition ever. The traditional developer's role — writing code line-by-line, debugging syntax errors, managing state mutations — is transforming into something fundamentally different. You become a high-level orchestrator, a strategic guide who coordinates AI teams rather than writing every function.</p>
+
+      <p><strong>What changes:</strong> You don't write code anymore. Your fingers spend less time on the keyboard, more time reviewing pull requests from agents. You orchestrate, validate, verify. The muscle memory of coding — that flow state where your fingers dance across keys translating thought into syntax — becomes secondary to a different kind of thinking.</p>
+
+      <p><strong>What doesn't change:</strong> Architecture matters more than ever. System design is still your job. Quality standards remain your responsibility. You still need to understand what the code does, perhaps more deeply than before, because you're accountable for output you didn't personally write.</p>
+
+      <div class="protocol-card">
+        <div class="protocol-card__title">The Identity Challenge</div>
+        <div class="protocol-card__body">What does it mean to be a software engineer when you're not writing software? What expertise remains valuable when code generation becomes commoditized? This transition feels uncomfortable because it is. You're letting go of craft while remaining fully accountable for quality.</div>
+      </div>
+    </section>
+
+    <!-- MEASUREMENT PROTOCOL 1: Trust Gradient -->
+    <section class="lab-zone--clean-room">
+      <span class="lab-zone__label">Measurement Protocol 1 — Trust Classification</span>
+      <h2>The Trust Gradient</h2>
+
+      <p>Trust is the number one thing keeping the industry from rocketing forward. You can't trust anything — you have to validate and verify. This isn't pessimism; it's realism grounded in production statistics.</p>
+
+      <p>The numbers don't lie. Multi-agent systems fail at rates between <code>41%</code> and <code>86.7%</code>. Error amplification in independent agent architectures runs at <code>17.2x</code> compared to centralized orchestration's <code>4.4x</code>. Even optimistic assumptions — 95% success per step — yield only <code>36%</code> success for a 20-step workflow. Production aims for <code>99.9%+</code> reliability. Agents are nowhere near that.</p>
+
+      <div class="instrument-card">
+        <div class="instrument-card__label">Trust Classifier — 3-Tier Readout</div>
+        <div class="instrument-card__body">
+          <ul>
+            <li class="tier-critical"><strong>NEVER TRUST:</strong> File operations that could delete data. Database operations that mutate state. Deployments that affect users. These require human approval, always, no exceptions.</li>
+            <li class="tier-verify"><strong>VERIFY ALWAYS:</strong> Code changes, even trivial ones. API calls that interact with external systems. Git operations that affect history. Check the output, run the tests, review the diff.</li>
+            <li class="tier-monitor"><strong>TRUST WITH MONITORING:</strong> Read operations that can't cause damage. Analysis tasks that produce artifacts for review. Planning activities that generate documents, not deployments.</li>
+          </ul>
+        </div>
+      </div>
+
+      <p>This gradient isn't about lack of confidence in AI capabilities. It's about production reality. A <code>$47,000</code> lesson from a research tool that slipped into a recursive loop teaches you to implement hard caps. Eleven days of unmonitored execution teaches you that automation without bounds becomes automation without value.</p>
+    </section>
+
+    <!-- CALIBRATION REFERENCE: Wave Progression -->
+    <section class="lab-zone--clean-room">
+      <span class="lab-zone__label">Calibration Reference — Wave Progression</span>
+      <h2>The Wave Progression</h2>
+
+      <p>Understanding where AI-assisted development is heading requires understanding where it's been. Each modality wave brings roughly <strong>5x productivity gains</strong> over its predecessor:</p>
+
+      <table class="measurement-table">
+        <thead>
+          <tr>
+            <th>Wave</th>
+            <th>Modality</th>
+            <th>Productivity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Wave 1</td>
+            <td>Traditional Coding</td>
+            <td class="multiplier">1x</td>
+          </tr>
+          <tr>
+            <td>Wave 2</td>
+            <td>Code Completions</td>
+            <td class="multiplier">5x</td>
+          </tr>
+          <tr>
+            <td>Wave 3</td>
+            <td>Chat-Based Coding</td>
+            <td class="multiplier">25x</td>
+          </tr>
+          <tr>
+            <td>Wave 4</td>
+            <td>Coding Agents</td>
+            <td class="multiplier">125x</td>
+          </tr>
+          <tr>
+            <td>Wave 5</td>
+            <td>Agent Clusters</td>
+            <td class="multiplier">625x</td>
+          </tr>
+          <tr>
+            <td>Wave 6</td>
+            <td>Agent Fleets</td>
+            <td class="multiplier">3,125x</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Most of the industry operates between Wave 3 and early Wave 4. A few practitioners have reached Wave 5. Almost nobody has reached Wave 6, except experimenters willing to spend <code>$50-200/day</code> on agent infrastructure.</p>
+
+      <p><strong>The gap between waves isn't linear.</strong> Moving from Wave 3 to Wave 4 isn't learning a new tool — it's adopting a new mental model. You stop being an active coder and become a task decomposer. The competitive advantage isn't tool mastery. Everyone has access to the same models. The advantage is being ahead on the wave progression.</p>
+    </section>
+
+    <!-- ERROR ANALYSIS: Production Reality -->
+    <section class="lab-zone--dense">
+      <span class="lab-zone__label">Error Analysis — Statistical Readout</span>
+      <h2>Production Reality</h2>
+
+      <p>Theory meets practice in production, and practice teaches humility. AI project failure rates run above <strong>80%</strong> — more than double the failure rate of typical IT projects.</p>
+
+      <div class="error-card">
+        <div class="error-card__metric">36% success</div>
+        <div class="error-card__label">20 steps @ 95% per step</div>
+        <div class="error-card__description">The math of multi-step workflows is unforgiving. Production needs 99.9%. The gap is enormous.</div>
+      </div>
+
+      <div class="error-card">
+        <div class="error-card__metric">17.2x amplification</div>
+        <div class="error-card__label">Independent agent architectures</div>
+        <div class="error-card__description">Error amplification punishes poor architecture. Centralized orchestration reduces this to 4.4x — still significant but manageable.</div>
+      </div>
+
+      <div class="error-card">
+        <div class="error-card__metric">3-15% failure rate</div>
+        <div class="error-card__label">Tool calling per model invocation</div>
+        <div class="error-card__description">Multiply across dozens of calls per agent, dozens of agents per workflow, and you get frequent breakdowns.</div>
+      </div>
+
+      <p>Context degradation is the primary failure mode. Agents start strong, middle sections accumulate confusion, late-stage outputs become incoherent. Working memory gets polluted with irrelevant details.</p>
+    </section>
+
+    <!-- PROCEDURE EVOLUTION: Infrastructure -->
+    <section class="lab-zone--transition">
+      <span class="lab-zone__label">Procedure Evolution — Protocol Transition</span>
+      <h2>Infrastructure Over Wrappers</h2>
+
+      <p>Almost everyone starts with LangChain or similar frameworks. Almost everyone eventually strips them out. This pattern repeats so consistently across practitioners that it deserves examination.</p>
+
+      <p>Frameworks promise to simplify agent development. They abstract the hard parts — API calls, context management, tool integration — into higher-level primitives. In demos, this looks elegant. In production, it becomes a liability.</p>
+
+      <p><strong>Production is FastAPI and direct API calls.</strong> Simple, transparent, controllable. You write the orchestration logic yourself. You manage context explicitly. You log everything that matters. It's more code, but it's code you understand, code you can debug, code you can trust.</p>
+
+      <p>The transition from frameworks to infrastructure mirrors the transition from libraries to platforms. You stop consuming abstractions and start building your own. Your orchestrator becomes tailored to your needs — your task decomposition patterns, your quality gates, your monitoring requirements.</p>
+
+      <div class="protocol-card">
+        <div class="protocol-card__title">Simplicity Compensates for Non-Determinism</div>
+        <div class="protocol-card__body">Agent systems aren't deterministic. The same prompt with the same context can yield different outputs. Complex frameworks multiply the non-determinism, making debugging nearly impossible. Simple infrastructure keeps non-determinism manageable.</div>
+      </div>
+    </section>
+
+    <!-- CRITICAL CONTROL: Iron Law -->
+    <section class="lab-zone--critical">
+      <span class="lab-zone__label">Critical Control — Iron Law</span>
+      <h2>The Orchestrator Separation</h2>
+
+      <div class="protocol-card">
+        <div class="protocol-card__title">The Iron Law</div>
+        <div class="protocol-card__body">Orchestrators coordinate. Workers execute. Never mix these responsibilities. This separation isn't organizational preference — it's architectural necessity.</div>
+      </div>
+
+      <p>An orchestrator that writes code becomes confused about its job. Is it managing the overall workflow or solving the current implementation problem? Context fills with both strategic coordination and tactical details. The agent loses the overview while gaining expertise in individual tasks — exactly backward.</p>
+
+      <p>A worker that tries to coordinate loses focus. Instead of solving the assigned problem deeply, it worries about dependencies, about what other workers are doing, about the overall plan. Coordination overhead pollutes task execution.</p>
+
+      <div class="instrument-card">
+        <div class="instrument-card__label">Error Amplification Comparison</div>
+        <div class="instrument-card__body">
+          <ul>
+            <li class="tier-critical"><strong>17.2x:</strong> Independent agents (no orchestration) — agents making conflicting decisions, duplicating work, missing dependencies</li>
+            <li class="tier-verify"><strong>4.4x:</strong> Centralized orchestration — coordination prevents worst failure modes</li>
+          </ul>
+        </div>
+      </div>
+
+      <p>The separation enables specialization. Orchestrators can be smaller, cheaper models (Haiku or Sonnet) optimized for planning. Workers can be matched to task difficulty — Opus for complex architecture, Sonnet for standard code, Haiku for simple lookups.</p>
+
+      <p><strong>Violating the Iron Law is the second-fastest way to fail at multi-agent systems.</strong> (The fastest is running without cost caps.) Respecting it doesn't guarantee success, but violation guarantees failure.</p>
+    </section>
+
+    <!-- COST ANALYSIS: Economics -->
+    <section class="lab-zone--clean-room">
+      <span class="lab-zone__label">Cost Analysis — Economic Measurement</span>
+      <h2>The Economics of Scale</h2>
+
+      <div class="cost-meter">
+        <div class="cost-meter__label">Agent Operating Cost</div>
+        <div class="cost-meter__value">$10-12/hr</div>
+        <div class="cost-meter__scale">5 agents = $50-60/hr | $400/day | $10k/month | $120k/year</div>
+      </div>
+
+      <p>Each agent costs roughly <code>$10-12</code> per hour in tokens. Each agent provides roughly <strong>1x developer productivity</strong>. Five agents running in parallel provide <strong>5x productivity</strong> at <code>$50-60/hour</code>. The math is simple, but the implications are profound.</p>
+
+      <p>Traditional software economics optimize for developer salaries. Pay $150k/year, get ~2000 productive hours, cost is $75/hour. Agent economics invert this. <strong>Variable cost instead of fixed.</strong> Instant scaling instead of months of hiring. No management overhead, just orchestration complexity.</p>
+
+      <p>But the cost model creates new pressures. <code>$50/hour</code> burns <code>$400/day</code> if agents run constantly. Runaway processes become budget disasters. The frontier practitioners budget <strong>$50k+/year per developer</strong> in LLM spend — on top of salaries, not instead of them.</p>
+
+      <p><strong>Cost optimization becomes critical:</strong></p>
+
+      <ul>
+        <li>Using Opus for everything wastes money</li>
+        <li>Most tasks work fine with Sonnet</li>
+        <li>Simple lookups work with Haiku</li>
+        <li>Matching model to task difficulty saves 3-5x on costs</li>
+      </ul>
+
+      <p>The economics shift development culture. <strong>Code generation becomes cheap; code review becomes expensive.</strong> Writing tests becomes automated; designing test strategies becomes critical. Implementation becomes parallelizable; architecture becomes the bottleneck.</p>
+    </section>
+
+    <!-- PERSISTENT STATE: Memory Problem -->
+    <section class="lab-zone--transition">
+      <span class="lab-zone__label">Persistent State — Memory Architecture</span>
+      <h2>The Memory Problem</h2>
+
+      <p>Agents wake up with no memory of yesterday. This "50 First Dates" problem kills productivity more than any other single factor.</p>
+
+      <p><strong>Markdown files don't work.</strong> Agents try, they generate elaborate six-phase plans, they write TODO lists, they create progress documents. Then the next session starts, and they can't find the right file, or they misinterpret what was written, or they create a new plan that contradicts the old one.</p>
+
+      <p>The problem is fundamental: markdown is text for humans, not structured data for agents. It's not queryable. It requires interpretation. Different agents parse it differently. Updates conflict. State becomes ambiguous.</p>
+
+      <div class="protocol-card">
+        <div class="protocol-card__title">Structured Memory Systems</div>
+        <div class="protocol-card__body">SQLite databases where agents log their state. Git-backed issue trackers with dependency graphs. Beads-style distributed task systems with explicit status tracking. The key is structure — data you can query, update atomically, reason about programmatically.</div>
+      </div>
+
+      <p>Learning must compound. Each session should build on previous sessions, not start from scratch. The agent that debugged authentication yesterday should remember those lessons today. The orchestrator that decomposed a similar task last week should apply that pattern this week.</p>
+
+      <p>Memory isn't just about persistence — it's about indexing, retrieval, relevance. An agent with perfect memory of everything is as useless as an agent with no memory. You need the right memory at the right time.</p>
+    </section>
+
+    <!-- ACTIVE RESEARCH ZONE: Frontier Questions -->
+    <section class="lab-zone">
+      <span class="lab-zone__label">Active Research Zone — Open Questions</span>
+      <h2>The Frontier Questions</h2>
+
+      <p>What staff engineers think about now:</p>
+
+      <div class="research-question">
+        <div class="research-question__prompt">How do you manage 20-30 agents at once?</div>
+        <div class="research-question__status">Answer emerging: factory-scale monitoring, Kubernetes-like orchestration, automatic health checks and restarts.</div>
+      </div>
+
+      <div class="research-question">
+        <div class="research-question__prompt">How do agents remember across sessions?</div>
+        <div class="research-question__status">Answer emerging: structured external state, queryable task graphs, dependency tracking as first-class concept.</div>
+      </div>
+
+      <div class="research-question">
+        <div class="research-question__prompt">How do you prevent runaway costs?</div>
+        <div class="research-question__status">Answer emerging: graduated caps with notifications, anomaly detection on burn rate, circuit breakers on recursive patterns.</div>
+      </div>
+
+      <div class="research-question">
+        <div class="research-question__prompt">How do you handle coordination failures?</div>
+        <div class="research-question__status">Answer emerging: hierarchical orchestration, sub-orchestrators for domains, event-driven coordination with compensation logic.</div>
+      </div>
+
+      <div class="research-question">
+        <div class="research-question__prompt">When do you stop automating and stay interactive?</div>
+        <div class="research-question__status">Answer emerging: classification frameworks that route tasks to appropriate automation levels.</div>
+      </div>
+
+      <p>These questions don't have settled answers. They represent active research areas where practitioners are experimenting, failing, learning, sharing. The frontier is messy. The best practices are still emerging. The mental models are still forming.</p>
+
+      <p><strong>But patterns are appearing:</strong> Infrastructure over frameworks. Orchestrator/worker separation. Structured memory systems. Monitoring and caps as core requirements. Graduated trust based on risk. These patterns hold across multiple practitioners, multiple projects, multiple failures.</p>
+
+      <div class="protocol-card">
+        <div class="protocol-card__title">The Staff Engineer Mental Model</div>
+        <div class="protocol-card__body">It isn't about having answers. It's about asking the right questions, recognizing the patterns, understanding the tradeoffs, building systems that survive contact with reality.</div>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>
