@@ -4,7 +4,7 @@
 
 **Author:** prompt-architect (skill-enrichment-prep team)
 **Date:** 2026-02-15
-**Status:** READY FOR USE
+**Status:** READY FOR USE. **Execution:** Wave 1 COMPLETE (2026-02-15: PRE-1 + M2/M3/M5/M8 + DOC-1-6 applied). Wave 2 pending Middle experiment. This prompt remains the authoritative specification for Wave 2/3 execution.
 
 ---
 
@@ -1102,46 +1102,48 @@ Plus 3 anti-combination conflict types (semantic overload, perceptual contradict
 
 ---
 
-## Phase 1: Wave 1 Skill Modifications (4-6 hours)
+## Phase 1: Wave 1 Skill Modifications (COMPLETE 2026-02-15)
 
-**Execute in this order:**
-1. M2 (Fractal Gate) -- standalone, no dependencies
-2. M3 (Container Width) -- standalone, no dependencies
-3. M5 (Tier Routing) -- references fractal gate + container width
-4. M8 (Tier Framing) -- references tier routing
+**Executed in this order:**
+1. ✅ M2 (Fractal Gate) applied
+2. ✅ M3 (Container Width) applied
+3. ✅ M5 (Tier Routing) applied
+4. ✅ M8 (Tier Framing) applied
 
-**After each modification:** Read the modified section in context to verify markdown formatting, internal references, and section numbering are intact.
+**Validation completed:**
+- ✅ SKILL.md flows correctly from Phase 0 through Phase 4.7
+- ✅ Phase numbers sequential (0, 1, 2, 3, 3.5, 4, 4.7, 5)
+- ✅ Step 0D tier routing references Phase 4.0 correctly
+- ✅ Step 4.7 fractal gate references tier names from Step 0D correctly
+- ✅ PRE-1 (category labels) applied before M1 dependencies
+- ✅ DOC-1 through DOC-6 applied
 
-**Validate after all 4:**
-- Read SKILL.md from Phase 0 through Phase 4.7 -- does it flow?
-- Are phase numbers still sequential?
-- Does Step 0D (tier routing) correctly reference Phase 4.0?
-- Does Step 4.7 (fractal gate) correctly reference tier names from Step 0D?
+**Next:** Proceed to CHECKPOINT (Middle-tier experiment). Do NOT apply Wave 2 yet.
 
 ---
 
-## CHECKPOINT: Middle-Tier Experiment
+## CHECKPOINT: Middle-Tier Experiment (CURRENT POSITION as of 2026-02-15)
 
-**THIS IS WHERE SKILL MODIFICATION EXECUTION STOPS.** Deliver the modified skill files and documentation changes to the user. The Middle-tier experiment is a SEPARATE effort — it is NOT part of this prompt's execution scope. The user will build the experiment separately after reviewing and approving the skill modifications.
+**Wave 1 execution STOPPED here.** The modified skill files and documentation changes have been delivered. The Middle-tier experiment is the NEXT STEP — it is NOT part of the skill modification prompt's execution scope. The experiment will be built separately, then Wave 2 will be applied informed by results.
 
-**What the experiment validates (4 criteria):**
+**What the experiment will validate (4 criteria):**
 
-1. **Container width compliance (BINARY):** 940-960px at 1440px viewport. 100% compliance expected. If violated, M3 needs enforcement strengthening.
+1. **Container width compliance (BINARY):** 940-960px at 1440px viewport. 100% compliance expected (M3 enforces this). If violated, M3 may need STRONGER enforcement (e.g., builder-blocking gate, not just instruction).
 
-2. **Fractal coherence (BINARY for Middle):** Page scale + Component scale demonstrate same density pattern. Scale coverage table with CSS evidence required. If missing, M2 gate needs revision.
+2. **Fractal coherence (BINARY for Middle):** Page scale + Component scale demonstrate same density pattern. Scale coverage table with CSS evidence required (M2 enforces this). If missing, M2 gate may need revision.
 
-3. **Engagement threshold (SUBJECTIVE):** Does the Middle page feel "designed" (intentional spatial meaning) not just "formatted" (components arranged on page)? Compare side-by-side with Variant B — Middle should feel RICHER. Compare with Floor-tier equivalent — gap should be visible.
+3. **Engagement threshold (SUBJECTIVE):** Does the Middle page feel "designed" (intentional spatial meaning) not just "formatted" (components arranged on page)? Compare side-by-side with Variant B — Middle should feel RICHER. Compare with Floor-tier equivalent — gap should be visible. **This is the 3-4x richness multiplier test.**
 
-4. **Novelty check (THE CRITICAL QUESTION):** Does the page feel like a NEW composition using familiar tools, or does it feel DERIVATIVE of showcase pages (OD-004, DD-006) despite different content? This is the vocabulary-vs-library practical test.
+4. **Novelty check (THE CRITICAL QUESTION):** Does the page feel like a NEW composition using familiar tools, or does it feel DERIVATIVE of showcase pages (OD-004, DD-006) despite different content? This is the vocabulary-vs-library practical test. PA Mode 5 (Grammar-vs-Derivative) provides the 5-test validation protocol.
 
 **Decision matrix after experiment:**
 
 | Engagement | Novelty | Decision |
 |-----------|---------|----------|
-| Designed | Novel | PROCEED to Wave 2 as planned |
-| Designed | Derivative | REVISE M1: add combination divergence requirement. Consult user before Wave 2 |
-| Under-designed | Novel | Tier boundary may be wrong. Middle may need 10-12 mechanisms. Consult user |
-| Under-designed | Derivative | Current skill insufficient. Wave 1 modifications VALIDATED. Proceed |
+| Designed | Novel | ✅ **PROCEED to Wave 2 as planned** (M1/M6/M7). The tier model is validated. |
+| Designed | Derivative | ⚠️ **REVISE M1 + ADD M19 before Wave 2.** Middle achieves richness BUT feels like showcase copy. Need customization mandate (values/ratios must differ from library) + combination divergence requirement. Consult user. |
+| Under-designed | Novel | ⚠️ **Tier boundary wrong.** Middle may need more mechanisms (10-12 instead of 8-10) OR content needs Ceiling treatment. The novelty is good (vocabulary works) but richness insufficient. Consult user on tier boundary revision. |
+| Under-designed | Derivative | ✅ **Wave 1 VALIDATED, Wave 2 needed.** The engagement gap confirms M1 is critical (need more mechanisms). The derivative signal confirms anti-gravity works (convergence IS detectable). Proceed to Wave 2 without revision. |
 
 **When experiment contradicts predictions:**
 
@@ -1322,5 +1324,12 @@ The proven combination families (M7) are VOCABULARY, not TEMPLATES. Frame them a
 **END MASTER EXECUTION PROMPT**
 
 **Total modifications:** 11 skill + 6 documentation + 1 pre-requisite = 18 items
-**Estimated execution time:** 10-15 hours across all phases
-**Critical path:** PRE-1 -> Wave 1 (M2, M3, M5, M8) -> Middle Experiment -> Wave 2 (M1, M6, M7) -> Wave 3 (M4, M9, M10, M11)
+**Execution time:** 10-15 hours estimated → **~10 hours actual (as of Wave 1 complete)**
+**Critical path (updated 2026-02-15):**
+- ✅ PRE-1 complete (category labels applied)
+- ✅ Wave 1 complete (M2, M3, M5, M8 + DOC-1-6 applied)
+- **→ Middle Experiment (NEXT)**
+- → Wave 2 (M1, M6, M7) after experiment
+- → Wave 3 (M4, M9, M10, M11) after 10+ builds
+
+**Current position:** At checkpoint. Wave 1 delivered. Middle experiment ready to build.

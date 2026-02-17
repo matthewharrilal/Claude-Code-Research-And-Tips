@@ -9,7 +9,7 @@
 
 ## EXECUTIVE SUMMARY
 
-**Current State:** Phase D COMPLETE (CONDITIONAL PASS, Variant B best: 18/19 compliance, 4/5 novelty). Richness + rigidity research COMPLETE (11 agents, 11 reports, tier model established, modification recommendations ready). Phase E NOT YET STARTED.
+**Current State (updated 2026-02-15):** Phase D COMPLETE (CONDITIONAL PASS, Variant B best: 18/19 compliance, 4/5 novelty). Richness + rigidity research COMPLETE (11 agents, 11 reports, tier model established). **Phase 0 + Phase 1 of this agenda COMPLETE** (staleness fixes + Wave 1 skill mods applied). **Next:** Phase 2 (Middle-tier experiment). Phase E NOT YET STARTED.
 
 **Total Work Items:** 58 items organized into 8 phases
 **Critical Path:** Pre-requisites (6 items) → Wave 1 skill mods (7 items) → Middle build → Wave 2 mods → evaluation
@@ -202,7 +202,24 @@
 - [ ] **Risk:** LOW-MODERATE (new routing, may need iteration)
 - [ ] **Success:** Builder knows which pipeline to follow based on content
 
-#### 1.1.4 M1: Replace "Sample 2-4" with Per-Category Minimum
+#### 1.1.4 M1: Replace "Sample 2-4" with Per-Category Minimum — **DEFERRED TO WAVE 2**
+
+**STATUS NOTE (2026-02-15):** M1 was moved to Wave 2 (Phase 4) after Middle-tier experiment. See note below for sequencing rationale. This item remains in Phase 1 section for reference but is NOT executed in Wave 1.
+
+**M1 SEQUENCING RATIONALE AND IMPLICATIONS:**
+
+**The original rationale:** M1 was grouped with M6/M7 as "vocabulary expansion" — all three modify how mechanisms are selected. The idea: validate M1's parameters through experiment before permanent encoding.
+
+**The problem identified in conversation:** This creates a circular dependency. The experiment tests whether 8-10 mechanisms across 5 categories creates a "designed" feeling. But without M1, the builder sees "sample 2-4" and deploys 4. The experiment can't test the hypothesis it was designed to test.
+
+**Three approaches discussed:**
+1. Apply M1 before experiment — clean test of full Middle concept, but can't isolate M1's contribution
+2. Manual override in builder prompt — skill unchanged, but experiment tests the concept not the skill
+3. Two builds — one with "2-4", one with per-category — provides comparison data but costs double
+
+**What "isolated effect" means concretely:** If we change M1+M2+M3+M5 and the result is good, we can't attribute improvement to any single change. If we change only M2+M3+M5 and the result is mediocre, then add M1 and the result improves, we know M1 was the critical piece. BUT: we already have 11 agents' worth of evidence that M1 is the critical piece. The isolated test would confirm what we already know at the cost of a wasted build.
+
+**Consensus position from conversation:** M1 sequencing was arguably a mistake. M1 is categorically different from M6/M7. M6/M7 genuinely need experiment feedback. M1 is the foundational enabler. The experiment needs M1 to meaningfully test the Middle tier hypothesis.
 
 - [ ] **File:** `~/.claude/skills/tension-composition/SKILL.md`
 - [ ] **Location:** Lines 783-787 (Phase 4 mechanism selection)
@@ -249,7 +266,8 @@
 ## PHASE 2: MIDDLE-TIER EXPERIMENT
 
 **Purpose:** Build the MOST IMPORTANT experiment — validate tier model, test mechanism deployment, measure richness gain
-**Dependencies:** Phase 1 complete
+**Dependencies:** Phase 1 COMPLETE (2026-02-15: M2/M3/M5/M8 applied). **READY TO EXECUTE.**
+**Blocking Note:** M1 (per-category minimum) is NOT yet in the skill. Override "sample 2-4" at builder-prompt level.
 **Estimated Time:** 2-3 hours (build + audit + documentation)
 **Scope:** MEDIUM (1 HTML page + perceptual audit + analysis)
 
@@ -267,6 +285,28 @@
   - Contains code examples (tests mechanism #17)
   - Contains callouts/tips (tests mechanism #2)
   - NOT the same content as Variant B (we need fresh test)
+
+**WHY MIXED CONTENT MATTERS:**
+
+Pure prose content limits mechanism deployment. Variant B was prose-dominant and only exercised 2 of 5 categories (mechanism ceiling for prose = 6). Mixed content (tutorial with code examples, callouts, tables) naturally exercises more categories:
+- Code blocks need #17 (Component)
+- Callouts need #2 (Component)
+- Tables need #18 (Structure/Navigation)
+- Hierarchical steps need #1 (Hierarchy)
+- Density rhythm needs #5 (Spatial)
+
+**Content type recommendation:** Technical tutorial (e.g., "Building Your First API Endpoint") because:
+- Naturally contains narrative prose (introductions, explanations)
+- Naturally contains code blocks (3-5 of them)
+- Naturally contains callouts/tips/warnings (2-3 of them)
+- Naturally contains step sequences (numbered procedures)
+- Naturally contains reference table (configuration options or parameters)
+- Maps to CRESCENDO density pattern (tutorial = progressive complexity)
+
+**Additional requirements:**
+- Different content/domain than Variant B (scientific calibration) — fresh test
+- NOT self-referential (content about the design system itself → skill says ABORT)
+
 - [ ] **Candidate Sources:**
   - Real KortAI tutorial (if one exists)
   - Synthetic tutorial content generated for this test
@@ -281,7 +321,7 @@
 
 - [ ] **Builder Agent:** Use modified skill (Wave 1 changes applied)
 - [ ] **Tier Target:** Middle (8-10 mechanisms, no metaphor)
-- [ ] **Pipeline:** Skip Phases 1-3 per M5 routing, go directly to Phase 4 with CRESCENDO pattern
+- [ ] **Pipeline:** Skip Phases 1-3 per M5 routing, go directly to Phase 4 with content-type-based pattern selection (e.g., CRESCENDO for tutorial content — pattern is selected based on content type, NOT hardcoded)
 - [ ] **Always-Load:** prohibitions.md + tokens.css (527 lines mandatory)
 - [ ] **Container Width:** 940-960px (M3 enforced)
 - [ ] **Mechanism Selection:** Use M1 protocol (1+ per category, justify each)
@@ -306,7 +346,7 @@
 #### 2.3.2 Mechanism Count Analysis
 
 - [ ] **Count:**
-  - How many mechanisms deployed (target: 8-10)
+  - How many mechanisms deployed (natural landing: 8-10 — descriptive, NOT prescriptive, see Clarification 1)
   - Category coverage (MUST be all 5 categories per M1)
   - Which mechanisms used
 - [ ] **Compare Against:** Variant B (7 mechanisms, 2 categories)
@@ -365,6 +405,30 @@
   - **SUCCESS:** Middle is sufficient for 40-50% of pages, Ceiling scope narrows
   - **PARTIAL:** Middle is "designed" but lacks atmosphere, some content needs Ceiling
   - **FAILURE:** Middle feels formatted not designed, metaphor required for engagement
+
+**WHAT EACH VERDICT MEANS FOR THE BROADER PROJECT:**
+
+**SUCCESS verdict means:**
+- Middle is sufficient for 40-50% of pages (tutorials, guides, overviews)
+- Not every page needs metaphor derivation (reduces build time from 3-5 hours to 70-100 min)
+- The Floor-to-Middle transition has highest ROI (3-4x richness for ~45 extra minutes)
+- Ceiling is reserved for content with genuine structural tension (prose-dominant, implicit tension)
+
+**PARTIAL verdict means:**
+- Middle produces "designed" pages but lacks "atmosphere" (the sense of place)
+- Some content needs Ceiling-tier metaphor-driven coherence for full effect
+- Middle is still valuable for most content but the tier boundaries may need adjustment
+
+**FAILURE verdict means:**
+- Lookup-based mechanism deployment can't produce engagement
+- Metaphor is required even for tutorials/guides (not just conceptual content)
+- The tier model needs revision — possibly Floor/Ceiling only, dropping Middle
+
+**The significance beyond this single page:**
+- This is the first PRACTICAL test of the vocabulary-vs-library distinction
+- The Name Test and Transfer Test passed in THEORY — this tests them in PRACTICE
+- If Middle pages feel derivative (structurally similar to showcase pages despite different content), anti-gravity may need to address mechanism COMBINATION divergence, not just metaphor divergence
+
 - [ ] **Output:** `ephemeral/phase-e-middle-experiment/VERDICT.md`
 - [ ] **Success:** Central hypothesis tested, verdict documented
 
@@ -911,16 +975,17 @@ Phase 8 (Long-Term) — requires 6+ months or 20+ builds
 
 ## SUCCESS CRITERIA
 
-### Phase 0 Success
-- [ ] All 3 staleness fixes applied
-- [ ] MEMORY.md under 200 lines, loads completely
-- [ ] Category labels exist in mechanism catalog
-- [ ] Container width in ALL navigation files
+### Phase 0 Success (COMPLETE 2026-02-15)
+- ✅ All 3 staleness fixes applied (design-system/CLAUDE.md, pipeline/05-COMPLETE-ROADMAP.md updated; MEMORY.md compressed)
+- ✅ MEMORY.md under 200 lines (135 lines, loads completely)
+- ✅ Category labels exist in mechanism catalog (PRE-1 applied with 5-category table)
+- ✅ Container width documented in navigation files
 
-### Phase 1 Success
-- [ ] M1, M2, M3, M5 applied to tension-composition skill
-- [ ] Skill parses correctly, no broken references
-- [ ] Wave 1 diff documented
+### Phase 1 Success (COMPLETE 2026-02-15)
+- ✅ M2, M3, M5, M8 applied to tension-composition skill (M1 deferred to Wave 2)
+- ✅ Skill parses correctly, no broken references (verified 2026-02-15)
+- ✅ Wave 1 execution documented (this audit + conversation clarifications)
+- ✅ DOC-1 through DOC-6 applied (provenance, two-layer architecture, CSS examples, fresh-eyes fixes)
 
 ### Phase 2 Success (THE KEY MILESTONE)
 - [ ] Middle-tier page built in 70-100 min
@@ -1001,15 +1066,16 @@ Phase 8 (Long-Term) — requires 6+ months or 20+ builds
 - Phase 6: 2 hours (parallel with Phase 5)
 - **TOTAL: ~15 hours to complete Middle + Ceiling validation**
 
-### Realistic (Some Serial, 1-2 Iterations)
-- Phase 0: 3 hours (staleness fixes + verification)
-- Phase 1: 5 hours (skill mods + testing)
-- Phase 2: 3 hours (Middle build + audit + analysis)
-- Phase 3: 4 hours (doc enrichment)
+### Realistic (Some Serial, 1-2 Iterations) — UPDATED WITH ACTUALS
+
+- Phase 0: ~~3 hours estimated~~ → **~4 hours actual** (staleness fixes + category labels + verification)
+- Phase 1: ~~5 hours estimated~~ → **~6 hours actual** (skill mods + testing + 6 doc enrichments)
+- Phase 2: 3 hours (Middle build + audit + analysis) — NEXT
+- Phase 3: 4 hours (doc enrichment Priority 1) — can parallel Phase 2
 - Phase 4: 2 hours (evaluate + apply Wave 2)
 - Phase 5: 6 hours (Ceiling build + full audit + comparison)
-- Phase 6: 3 hours (doc enrichment)
-- **TOTAL: ~20 hours to complete Middle + Ceiling validation**
+- Phase 6: 3 hours (doc enrichment Priority 2)
+- **TOTAL: ~20 hours to complete Middle + Ceiling validation** (10 hours spent, 10 hours remaining)
 
 ### Pessimistic (Serial Execution, Failures Require Iteration)
 - Phase 0: 4 hours (compression harder than expected)
@@ -1039,12 +1105,12 @@ Phase 8 (Long-Term) — requires 6+ months or 20+ builds
 
 **The most important item:** Phase 2 (Middle-tier experiment). This single build answers more questions than all other work items combined.
 
-**How to use this agenda:**
-1. Execute Phase 0 completely (blocking pre-requisites)
-2. Execute Phase 1 completely (Wave 1 skill mods)
-3. Execute Phase 2 (Middle experiment) — CHECKPOINT: evaluate results before proceeding
-4. If Middle succeeds: continue to Phase 4-6
-5. If Middle fails: pivot strategy, revise tier model
+**How to use this agenda (updated 2026-02-15):**
+1. ✅ Phase 0 complete (blocking pre-requisites)
+2. ✅ Phase 1 complete (Wave 1 skill mods M2/M3/M5/M8 + DOC-1-6)
+3. **Execute Phase 2 (Middle experiment) — NEXT IMMEDIATE STEP** — CHECKPOINT: evaluate results before proceeding
+4. If Middle succeeds (engagement threshold + novelty): continue to Phase 4 (Wave 2)
+5. If Middle fails (convergence or under-designed): consult user, may need M1 + M19 before Wave 2
 6. Defer Phase 7-8 until 10+ builds or 6+ months
 
 **Confidence level:** HIGH. This agenda is comprehensive, dependency-aware, and grounded in 11 research reports + 10 session insights + 47 Phase D validation files.
