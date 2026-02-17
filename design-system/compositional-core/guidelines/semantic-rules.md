@@ -249,6 +249,154 @@ Extract clean table styling only. Mark zebra-striping as future enhancement.
 
 ---
 
+## Gap 6: Content Density Floors Per Zone
+
+**Question:** What is the minimum content a zone must contain before it warrants its own background, spacing treatment, and visual identity?
+
+### Evidence Analysis
+
+**Source 1:** Ceiling experiment (2026-02-16)
+- 4 trust zones declared. Zones 3-4 had structural containers (CSS background, borders, padding) but minimal content
+- Result: 70-80% of page was void (9/9 auditors flagged)
+- Re-audit finding: "Zones with structural containers but insufficient content to fill them"
+
+**Source 2:** Failure analysis root cause chain
+- Build plan specified 4 zones with graduated density
+- Each zone required checkpoint transitions (48-80px margins)
+- 4 zones x graduated density = multiplicative whitespace accumulation
+- Total transition whitespace: ~1,500-2,000px in transitions alone
+
+**Source 3:** OD-004 (validated exploration)
+- 4 confidence strata with distinct backgrounds and spacing
+- Each stratum contained substantial content (multiple paragraphs + components)
+- Result: Effective zone differentiation (no void problem)
+- Key difference from ceiling: OD-004 had CONTENT to fill its zones
+
+### Content Density Floor Rules
+
+#### Rule 1: Minimum Content Per Zone
+
+Before assigning a dedicated zone treatment (unique background color, distinct spacing, zone-specific border) to a section:
+
+| Zone Treatment | Minimum Content Required | What Counts |
+|----------------|--------------------------|-------------|
+| Dedicated zone (own background) | 3+ paragraphs OR 2+ components (callouts, tables, code blocks) OR 1 diagram with explanatory text | Text, callouts, tables, code blocks, diagrams |
+| Breathing zone (transition) | 1-3 sentences of transition text ONLY | Text only -- no components |
+| Bedrock zone (dark background) | 1 featured element + context paragraph | Header, footer, featured diagram |
+
+**Binary test:** Before implementing a zone, count its assigned content blocks. If content count is below the minimum for that zone type: MERGE the zone with an adjacent zone OR add content to meet the minimum.
+
+#### Rule 2: Maximum Consecutive Empty Viewport Height
+
+At no scroll position should a full viewport height (100vh at 1440px) have less than 30% content coverage.
+
+If a zone's content does not fill the zone to at least 30% coverage at the narrowest reasonable interpretation: SHRINK THE ZONE to fit its content. Zones exist to SERVE content, not to DEMONSTRATE architecture.
+
+**See also:** `--space-max-zone` in `tokens.css` (96px maximum per-property spacing value) provides token-level enforcement of this principle. No single margin or padding should exceed 96px.
+
+**Binary test:** Scroll through at viewport-height increments. If any position shows < 30% content: FAIL. Shrink the zone or add content.
+
+#### Rule 3: Zone Count Ceiling
+
+**Maximum zones by content volume:**
+
+| Content Volume | Maximum Zones | Reasoning |
+|----------------|---------------|-----------|
+| < 1,500 words | 2 zones | Insufficient content for more differentiation |
+| 1,500-3,000 words | 3 zones | Standard multi-section page |
+| 3,000-5,000 words | 4 zones | Rich content supports zone variety |
+| 5,000+ words | 5 zones | Only with substantial content per zone |
+
+**Binary test:** Count total content words. Count planned zones. If zone count exceeds the maximum for that word count: reduce zones by merging the two most similar zones.
+
+**Evidence:** Ceiling experiment had ~6,500 words across 4 zones + facility-wide section (~1,300 words per zone). At 1,300 words per zone, content was insufficient to visually fill zones at ceiling-tier spacing. With the rule above, 6,500 words allows maximum 4 zones -- but only if each zone has at least 1,625 words. The ceiling experiment's uneven distribution (most content in zones 1-2, minimal in zones 3-4) would have been caught by Rule 1.
+
+### Boundary Rule
+
+**"Zones exist to SERVE content, not to DEMONSTRATE architecture."**
+
+If your metaphor suggests 6 zones but your content fills 3: use 3 zones. The metaphor must adapt to the content volume, not the other way around. This is a BINARY gate, not a judgment call.
+
+---
+
+## Gap 7: Content-Form Fit -- Minimum Content for Form Decisions
+
+**Question:** How much content must a section contain before it warrants a particular visual treatment (zone, bento grid, progressive disclosure)?
+
+### Evidence Analysis
+
+**Source 1:** Ceiling experiment (2026-02-16)
+- Zones declared for sections with insufficient content
+- Build plan specified elaborate visual treatments for sections with 1-2 paragraphs
+- Result: Containers with generous spacing and borders around minimal text = void
+
+**Source 2:** Failure analysis (Failure 5)
+- Fix team treated void as SPACING problem (CSS margin/padding reduction)
+- Actual problem: CONTENT problem (zones that promise content but deliver little)
+- The fix reduced padding around empty containers but did not fill empty containers
+
+**Source 3:** CD-006 (validated, 39/40)
+- Each section had substantial content matched to its visual treatment
+- Bento grids contained 4+ items. Progressive disclosure had 3+ phases.
+- No "empty zone" problem because content volume matched form ambition
+
+### Selection Criteria
+
+#### Section-Level Content Minimums
+
+Before assigning a form treatment to a section, verify the section contains enough content:
+
+| Form Decision | Minimum Content Required | If Below Minimum |
+|---------------|--------------------------|------------------|
+| Own zone (dedicated background color) | 3+ paragraphs OR 2+ components | Merge into adjacent zone as subsection |
+| Bento grid (#15) | 4+ items of comparable visual weight | Use a simple list or table instead |
+| Progressive disclosure (#12) | 3+ distinct phases with unique content in each | Use section headings (h2/h3) instead |
+| Drop cap (#16) | 1 paragraph of 3+ sentences following the drop cap | Do not use drop cap on short paragraphs |
+| Full bedrock section (dark background) | 1 featured element (diagram, code block) + context paragraph | Use inline emphasis (border-left accent) instead |
+| Breathing zone | 1-3 sentences ONLY | If more content: upgrade to real zone. If less: use spacing only (no zone) |
+
+#### The "Enough Content?" Gate
+
+Before assigning ANY zone, pattern, or mechanism deployment to a section, ask:
+
+**Q: "Does this section have enough content to fill this form at minimum density?"**
+- YES -> Proceed with the form
+- NO -> Either:
+  - (a) ADD content to the section until minimum is met, OR
+  - (b) DOWNGRADE the form (zone -> subsection, bento -> list, progressive disclosure -> headings)
+
+This is a GATE (binary pass/fail), not a guideline (judgment call).
+
+#### The "Form Matches Content" Test
+
+After assigning form treatments, verify the inverse:
+
+**Q: "Is this form the SIMPLEST form that serves this content?"**
+- If a list would work: do not use bento grid
+- If headings would work: do not use progressive disclosure
+- If a subsection would work: do not use a dedicated zone
+
+Over-formed content (complex visual treatment for simple content) produces the same void problem as under-filled zones: architectural ambition exceeding content volume.
+
+### Boundary Rule
+
+"Form follows content volume. Never the reverse."
+
+A section with 1 paragraph should not have:
+- Its own zone background
+- A breathing zone before AND after it
+- A bento grid wrapper
+- Progressive disclosure treatment
+
+A section with 1 paragraph should have:
+- Standard body text styling
+- Normal section spacing (--space-between, 32px)
+- An h3 heading if needed for navigation
+
+**Binary test:** For each section, the form treatment level (zone / component pattern / standard text) must be justified by the content volume using the table above. If the form exceeds what the content minimum allows: FAIL.
+
+---
+
 ## Research Citations
 
 **Primary sources:**
@@ -270,6 +418,8 @@ Extract clean table styling only. Mark zebra-striping as future enhancement.
 - Gap 3 (Table styling): VALIDATED (clean only, zebra hypothetical)
 - Gap 4 (Breathing-room): FULLY VALIDATED (inverse density, transition triggers)
 - Gap 5 (Callout types): FULLY VALIDATED (5 colors, 8 classes)
+- Gap 6 (Content Density): VALIDATED (ceiling experiment void failure + OD-004 contrast)
+- Gap 7 (Content-Form Fit): VALIDATED (ceiling experiment + CD-006 contrast)
 
 ---
 

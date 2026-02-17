@@ -320,12 +320,78 @@ These protect the DECISION-MAKING PROCESS, not just visual outcomes.
 
 ---
 
+### 21. NEVER Allow a Full Viewport Height of Contentless Space (EXCEPT Single Breathing Zone)
+
+**Why it exists:** A full viewport (100vh at 1440px width) with less than 30% content coverage communicates "page is broken" or "content failed to load." It destroys reading momentum and makes the page feel abandoned. Breathing zones serve intentional rest; voids serve nothing.
+
+**What it protects:** Spatial confidence, reading momentum, page completeness perception
+
+**Evidence:**
+- Ceiling experiment (2026-02-16): 70-80% of scroll was empty cream void (9/9 Mode 4 auditors flagged independently)
+- Mode 4 PA audit: "24 consecutive frames of nothing" (Auditor D); "cavernous emptiness" (PA-01 universal finding)
+- Failure analysis root cause: Metaphor structural obligations created whitespace as feature, not bug. Plan demanded void. No prohibition prevented it.
+- Re-audit confirmed fix team's CSS-only patches reduced ~1,652px from ~10,000px void -- insufficient because the problem was CONTENT, not SPACING
+
+**Measurement (binary test):**
+
+Step 1: At 1440px viewport width, scroll through the entire page in viewport-height increments (position 0, 900, 1800, 2700, ...).
+
+Step 2: At each scroll position, estimate content coverage percentage:
+- "Content" = text paragraphs, headings, callouts, code blocks, tables, diagrams, images, structured elements with visible content
+- "Not content" = background color, margins, padding without child elements, empty containers
+
+Step 3: Count consecutive scroll positions where content coverage is below 30%.
+
+**Pass/Fail:**
+- 0 consecutive positions below 30%: PASS
+- 1 position below 30%: PASS (acceptable as breathing zone if intentional and labeled)
+- 2+ consecutive positions below 30%: FAIL -- void pattern, always a defect
+
+**Exception:** A SINGLE breathing zone (one scroll position, not two consecutive) with intentional transition content (1-3 sentences of text that connects the sections above and below). This exception requires:
+1. The breathing zone has visible text content (not just background)
+2. The breathing zone is between two content-bearing sections
+3. No other breathing zone appears within 2 scroll positions
+
+**Exception documentation:** If using a breathing zone near 30% threshold: "Breathing zone at [scroll position] contains [content description]. Adjacent sections at [positions] contain [content percentages]."
+
+---
+
+### 22. NEVER Concentrate All Visual Interest in the First Third of the Page
+
+**Why it exists:** Pages where all designed moments (visual peaks -- diagrams, dark-background sections, bento grids, featured callouts) cluster in the first 30% of scroll produce a "beautiful book cover attached to blank pages" perception.
+
+**What it protects:** Reading momentum, scroll engagement, visual arc across the page
+
+**Evidence:**
+- Ceiling experiment: Only 1 designed moment at 10% scroll depth (PA-36)
+- Mode 4 PA audit: "Visual novelty dies at 30% scroll depth" (PA-47)
+- Mode 4 PA audit: "Interest level: PEAK -> CLIFF -> FLATLINE" (PA-35)
+- Mode 4 PA audit: "Visual weight concentrated at top, depleted downward" (PA-32)
+
+**Rule:** For pages with 3+ sections, at least ONE designed moment (visual peak using 3+ simultaneous mechanisms at high intensity) must appear in the SECOND HALF of the page (below 50% scroll depth).
+
+**Measurement:**
+
+Step 1: Identify all designed moments on the page. A designed moment is a section that uses 3+ mechanisms at high intensity AND has a unique visual treatment not repeated elsewhere on the page. Examples: architecture diagram on dark background, bento grid with variable spans, drop cap + zone-bedrock + border-weight-max combined, full-width code block with syntax highlighting after text-only sections.
+
+Step 2: Map each designed moment's scroll position as a percentage of total page height.
+
+Step 3: Check: Is at least one designed moment at or below 50% scroll depth?
+
+**Pass/Fail:**
+- At least 1 designed moment below 50%: PASS
+- All designed moments above 50%: FAIL
+
+**Exception:** Very short pages (< 3 sections or < 2 viewport heights total) where the entire page is visible without substantial scrolling.
+
+---
+
 ## Summary Statistics
 
 - **Absolute Prohibitions:** 8 (identity-defining, zero exceptions)
-- **Conditional Prohibitions:** 12 (documented exceptions only)
+- **Conditional Prohibitions:** 14 (documented exceptions only)
 - **Meta-Prohibitions:** 2 (process-level)
-- **Total:** 22 prohibitions
+- **Total:** 24 prohibitions
 
 **Coverage:**
 - Visual breaks: 8 prohibitions (#1-8)
@@ -333,6 +399,7 @@ These protect the DECISION-MAKING PROCESS, not just visual outcomes.
 - Typographic breaks: 2 prohibitions (#7, #17)
 - Color breaks: 2 prohibitions (#15-16)
 - Interaction breaks: 1 prohibition (#14)
+- Spatial/layout breaks: 2 prohibitions (#21-22)
 - Process breaks: 2 prohibitions (#19-20)
 - General principle: 1 prohibition (#11)
 
