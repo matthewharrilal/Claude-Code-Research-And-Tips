@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pipeline v2 Implementation Guide: From Here to /build-page</title>
+  <style>
+    /* ===== BASE RESET & TYPOGRAPHY ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      font-size: 17px;
+      line-height: 1.75;
+      color: #3d3d3d;
+      background-color: #fefcf3;
+      padding: 0;
+    }
+
+    /* ===== LAYOUT ===== */
+    .page-container {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 2rem 2rem 4rem;
+    }
+
+    /* ===== HEADINGS ===== */
+    h1, h2, h3, h4 {
+      color: #5c4b3a;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 1.15rem;
+      color: #7a6b5d;
+      margin-bottom: 2rem;
+      font-style: italic;
+    }
+
+    h2 {
+      font-size: 1.65rem;
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e0d5c5;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    h4 {
+      font-size: 1.05rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ===== BASIC ELEMENTS ===== */
+    p { margin-bottom: 1rem; }
+
+    a { color: #2a7d7d; text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+    a:hover { border-bottom-color: #2a7d7d; }
+
+    strong { color: #5c4b3a; }
+
+    ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+
+    hr {
+      border: none;
+      border-top: 2px solid #e0d5c5;
+      margin: 2.5rem 0;
+    }
+
+    /* ===== TABLES ===== */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem 0;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid #e0d5c5;
+    }
+
+    th {
+      background-color: #f0ebe3;
+      color: #5c4b3a;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    td { vertical-align: top; }
+
+    /* ===== CODE BLOCKS ===== */
+    .code-block {
+      background: #f0ebe3;
+      border: 1px solid #e0d5c5;
+      border-radius: 0;
+      padding: 1rem 1.25rem;
+      position: relative;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 1rem 0 1.5rem;
+      white-space: pre;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: #2a7d7d;
+      color: white;
+      border: none;
+      border-radius: 0;
+      padding: 0.2rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+    .copy-btn:hover { background: #1f6060; }
+
+    code {
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.88em;
+      background: #f0ebe3;
+      padding: 0.1em 0.35em;
+      border: 1px solid #e0d5c5;
+    }
+
+    /* ===== YOU ARE HERE BOX ===== */
+    .you-are-here {
+      background: linear-gradient(135deg, #f0ebe3 0%, #fefcf3 100%);
+      border-left: 4px solid #2a7d7d;
+      border-radius: 0;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .you-are-here h3 {
+      color: #2a7d7d;
+      margin-top: 0;
+      font-size: 1.1rem;
+    }
+
+    .you-are-here p { margin-bottom: 0.5rem; }
+    .you-are-here p:last-child { margin-bottom: 0; }
+
+    /* ===== TABLE OF CONTENTS ===== */
+    .toc {
+      background: #f9f6f0;
+      border: 1px solid #e0d5c5;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .toc h3 {
+      margin-top: 0;
+      color: #5c4b3a;
+      margin-bottom: 1rem;
+      font-size: 1.15rem;
+    }
+
+    .toc ol { padding-left: 1.25rem; margin-bottom: 0; }
+    .toc li { margin-bottom: 0.5rem; line-height: 1.5; }
+    .toc a { font-weight: 500; }
+
+    /* ===== CHECKPOINT BOXES ===== */
+    .checkpoint {
+      background: #f0ebe3;
+      border-left: 4px solid #6b9b7a;
+      border-radius: 0;
+      padding: 1.25rem 1.5rem;
+      margin: 2.5rem 0;
+    }
+
+    .checkpoint-header {
+      color: #6b9b7a;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .checkpoint p { margin-bottom: 0.4rem; }
+    .checkpoint p:last-child { margin-bottom: 0; }
+    .checkpoint ul { margin-bottom: 0; }
+
+    /* ===== MILESTONE ===== */
+    .milestone {
+      background: linear-gradient(90deg, #6b9b7a 0%, #2a7d7d 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 0;
+      text-align: center;
+      margin: 2.5rem 0;
+      font-weight: 600;
+      font-size: 1.05rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* ===== SECTION DIVIDERS ===== */
+    .divider-procedure { border-top: 3px solid #2a7d7d; margin: 3rem 0; }
+    .divider-checkpoint { border-top: 3px solid #6b9b7a; margin: 3rem 0; }
+    .divider-warning { border-top: 3px solid #c49052; margin: 3rem 0; }
+    .divider-context { border-top: 3px solid #5c4b3a; margin: 3rem 0; }
+
+    /* ===== COLLAPSIBLE SECTIONS ===== */
+    details {
+      margin: 1.25rem 0;
+      border: 1px solid #e0d5c5;
+      background: #faf7f1;
+    }
+
+    summary {
+      padding: 0.85rem 1.25rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: #5c4b3a;
+      background: #f0ebe3;
+      user-select: none;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    summary::before {
+      content: '\25B6';
+      font-size: 0.7em;
+      transition: transform 0.2s;
+      display: inline-block;
+    }
+
+    details[open] summary::before { transform: rotate(90deg); }
+
+    .details-content {
+      padding: 1.25rem;
+    }
+
+    .details-content p:last-child { margin-bottom: 0; }
+
+    /* ===== WARNING/IMPORTANT BOXES ===== */
+    .warning-box {
+      background: #fef8f0;
+      border-left: 4px solid #c49052;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .warning-box strong { color: #c49052; }
+
+    .error-box {
+      background: #fef6f5;
+      border-left: 4px solid #c97065;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .error-box strong { color: #c97065; }
+
+    .success-box {
+      background: #f2f7f4;
+      border-left: 4px solid #6b9b7a;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .success-box strong { color: #6b9b7a; }
+
+    /* ===== MASTER CHECKLIST ===== */
+    .checklist {
+      background: #f9f6f0;
+      border: 1px solid #e0d5c5;
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+    }
+
+    .checklist h4 {
+      margin-top: 0.5rem;
+      color: #5c4b3a;
+    }
+
+    .checklist label {
+      display: block;
+      padding: 0.35rem 0;
+      cursor: pointer;
+      line-height: 1.5;
+    }
+
+    .checklist input[type="checkbox"] {
+      margin-right: 0.5rem;
+      accent-color: #6b9b7a;
+      width: 1rem;
+      height: 1rem;
+      vertical-align: middle;
+    }
+
+    .checklist .sub-item {
+      margin-left: 1.75rem;
+      font-size: 0.92rem;
+      color: #5a5a5a;
+    }
+
+    /* ===== DIAGRAM HIGHLIGHT ===== */
+    .diagram-label {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #7a6b5d;
+      font-style: italic;
+      margin-top: -0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ===== APPENDIX ===== */
+    .appendix {
+      background: #f9f6f0;
+      border: 1px solid #e0d5c5;
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+    }
+
+    .appendix h3 { margin-top: 0; color: #5c4b3a; }
+
+    /* ===== FOOTER ===== */
+    .guide-footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid #e0d5c5;
+      font-size: 0.85rem;
+      color: #7a6b5d;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="page-container">
+
+<!-- ===== TITLE ===== -->
+<h1 id="top">Pipeline v2 Implementation Guide</h1>
+<p class="subtitle">From Here to <code>/build-page</code> -- the complete story of what we build, why, and in what order.</p>
+
+<!-- ===== YOU ARE HERE ===== -->
+<div class="you-are-here">
+  <h3>You Are Here</h3>
+  <p><strong>Pipeline v2</strong> is the next-generation build pipeline for the KortAI design system. It replaces the failed multi-agent pipeline — which scored 1.5 out of 4 on perceptual quality despite using 19 agents and 11 boundary crossings — with something better. But <em>what</em> that something is hasn't been decided yet. That's what the experiments determine.</p>
+  <p>The leading candidate is the <strong>Fat Core</strong> architecture (one Opus agent that plans AND builds, surrounded by automated gates and fresh-eyes evaluation). But there are 5 possible approaches, ranging from "no pipeline at all" to "full orchestrated system." The evidence points toward Fat Core, but every time this project assumed an approach would work without testing it, it failed.</p>
+  <p>This guide follows the <strong>no-compromise</strong> philosophy: <em>run all 5 experiments, then build whatever wins, with maximum everything.</em> Cost is irrelevant. Effort is irrelevant. The only thing that matters is that it works and doesn't buckle under its own weight.</p>
+  <p>It is the distillation of 50+ research agents, 41 analysis files, and months of experimentation into one document.</p>
+</div>
+
+<!-- ===== THE PHILOSOPHY ===== -->
+<div style="background:#f0ebe3;border:2px solid #5c4b3a;padding:1.5rem;margin-bottom:2rem;">
+  <h3 style="color:#5c4b3a;margin-bottom:0.75rem;">The No-Compromise Principle</h3>
+  <p>Every shortcut in this project has cost more than doing it right. The Flagship was the most expensive, most carefully planned build — 19 agents, 530-line prompt, 7 phases — and it scored 1.5/4. Meanwhile CD-006, one Opus agent with minimal guidance, scored 39/40.</p>
+  <p><strong>The rule:</strong> Test everything. Assume nothing. Build the winner. Opus everywhere — no cost-saving model swaps. Mode 4 PA every time — 9 fresh-eyes auditors, 48 questions. Fix cycles until SHIP, not "SHIP WITH FIXES." No line caps on builder input if the experiments show the builder needs more. If it takes 50 agents to produce one perfect page, so be it.</p>
+  <p><strong>Committing to an architecture without experiments IS a compromise.</strong> The experiments cost ~$150 and take ~2 days. The pipeline implementation costs ~$500+ and takes ~2 weeks. Running experiments first means we build the RIGHT thing once, instead of building the WRONG thing and rebuilding.</p>
+</div>
+
+<!-- ===== TABLE OF CONTENTS ===== -->
+<div class="toc">
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#visual-overview">Visual Overview</a> -- the architecture at a glance</li>
+    <li><a href="#s1">Where We Are Right Now</a> -- the full inventory of what exists</li>
+    <li><a href="#s2">The Architecture: Fat Core</a> -- leading candidate, pending experiments</li>
+    <li><a href="#s3">The Files We Need to Create</a> -- 6 new files, ~1,130 lines total</li>
+    <li><a href="#s4">The Files We Need to Edit</a> -- 6 existing files, ~119 lines added</li>
+    <li><a href="#s5">The Gate System</a> -- all 15 quality gates explained</li>
+    <li><a href="#s6">The Build Flow</a> -- step by step, what happens when you type <code>/build-page</code></li>
+    <li><a href="#s7">The Experiments</a> -- ALL 5 experiments, THE FIRST THING WE DO</li>
+    <li><a href="#s8">The Implementation Order</a> -- what to build first, second, third</li>
+    <li><a href="#s9">Why This Won't Fail</a> -- lessons from 9 diagnosed failures</li>
+    <li><a href="#master-checklist">Master Checklist</a> -- every file, every edit, in order</li>
+    <li><a href="#appendix">Appendix: Key File Paths</a></li>
+    <li><a href="#after">What Comes After</a> -- the road ahead after Pipeline v2 ships</li>
+  </ol>
+</div>
+
+<!-- ===== READING PATHS ===== -->
+<div style="background:#f9f6f0;border:1px solid #e0d5c5;padding:1rem 1.25rem;margin-bottom:1.25rem;border-radius:8px;font-size:0.92rem;">
+  <strong>Reading paths:</strong>
+  <ul style="margin:0.5rem 0 0;padding-left:1.5rem;">
+    <li><strong>Just want to build?</strong> <a href="#s3">Section 3</a> + <a href="#s4">Section 4</a> + <a href="#s8">Section 8</a>, or jump straight to the <a href="#master-checklist">Master Checklist</a>.</li>
+    <li><strong>Want to understand the philosophy?</strong> <a href="#s2">Section 2</a> then <a href="#s9">Section 9</a> then <a href="#visual-overview">Visual Overview</a>.</li>
+    <li><strong>Ready to experiment?</strong> <a href="#s7">Section 7</a> then <a href="#s8">Section 8</a>.</li>
+    <li><strong>Need to look something up?</strong> <a href="#s5">Section 5</a> (gates) or <a href="#appendix">Appendix</a> (file paths).</li>
+  </ul>
+</div>
+
+<!-- ===== GLOSSARY ===== -->
+<details style="margin-bottom:2rem;">
+  <summary style="cursor:pointer;font-weight:600;color:#5c4b3a;padding:0.5rem 0;">Expand: Key terms used in this guide (~15 definitions)</summary>
+  <div style="background:#f9f6f0;border:1px solid #e0d5c5;padding:1rem 1.25rem;border-radius:0 0 8px 8px;font-size:0.92rem;">
+    <dl style="margin:0;line-height:1.6;">
+      <dt style="font-weight:600;color:#5c4b3a;margin-top:0.75rem;">Fat Core</dt>
+      <dd style="margin-left:1rem;margin-bottom:0.5rem;">Architecture where one Opus agent plans AND builds, surrounded by automated gates and fresh-eyes evaluation. Leading candidate.</dd>
+      <dt style="font-weight:600;color:#5c4b3a;">PA-05</dt>
+      <dd style="margin-left:1rem;margin-bottom:0.5rem;">Perceptual Auditing question 5: "Does this page feel <em>designed</em>?" Scored 1-4: FLAT / STYLED / COMPOSED / DESIGNED.</dd>
+      <dt style="font-weight:600;color:#5c4b3a;">TC / Tension-Composition</dt>
+      <dd style="margin-left:1rem;margin-bottom:0.5rem;">The creative planning skill (~1,930 lines) that discovers content tensions and derives visual metaphors.</dd>
+      <dt style="font-weight:600;color:#5c4b3a;">Mode 4 PA</dt>
+      <dd style="margin-left:1rem;margin-bottom:0.5rem;">Full perceptual audit: 9 independent fresh-eyes Opus auditors, each answering 5-6 of the 48 PA questions.</dd>
+      <dt style="font-weight:600;color:#5c4b3a;">Multi-coherence</dt>
+      <dd style="margin-left:1rem;margin-bottom:0.5rem;">When >= 3 CSS channels (background, typography, spacing, borders, behavior, material) shift together at a content boundary.</dd>
+      <dt style="font-weight:600;color:#5c4b3a;">Boundary crossing</dt>
+      <dd style="margin-left:1rem;margin-bottom:0.5rem;">Any point where one agent compresses understanding into a document for another agent. Each crossing loses intelligence.</dd>
+      <dt style="font-weight:600;color:#5c4b3a;">Conventions brief</dt>
+      <dd style="margin-left:1rem;margin-bottom:0.5rem;">A ~100-line document giving the builder identity constraints, perception thresholds, and creative authority — NOT step-by-step instructions.</dd>
+      <dt style="font-weight:600;color:#5c4b3a;">Perception threshold</dt>
+      <dd style="margin-left:1rem;margin-bottom:0.5rem;">Minimum delta for a CSS change to be humanly visible (e.g., >= 15 RGB points for backgrounds, >= 0.5px for letter-spacing).</dd>
+      <dt style="font-weight:600;color:#5c4b3a;">SC-01 through SC-15</dt>
+      <dd style="margin-left:1rem;margin-bottom:0.5rem;">The 15 programmatic quality gates. SC = Soul/Structure/Composition check. Run via Playwright.</dd>
+      <dt style="font-weight:600;color:#5c4b3a;">G1, G2, G3</dt>
+      <dd style="margin-left:1rem;margin-bottom:0.5rem;">Three phase-locked gate groups: G1 after skeleton, G2 after styling, G3 comprehensive final check.</dd>
+      <dt style="font-weight:600;color:#5c4b3a;">Track 1 / Track 2</dt>
+      <dd style="margin-left:1rem;margin-bottom:0.5rem;">Track 1 = token + pattern application for data-heavy pages (~45-90 min). Track 2 = metaphor + composition via /build-page for prose-heavy pages (~3-5 hrs).</dd>
+      <dt style="font-weight:600;color:#5c4b3a;">Recipe vs Checklist</dt>
+      <dd style="margin-left:1rem;margin-bottom:0.5rem;">Recipe = sequenced steps with specific CSS values ("Read/Select/Deploy/Assess"). Checklist = constraint list ("Verify/Fail if/Must be"). Recipe produces DESIGNED; checklist produces FLAT.</dd>
+    </dl>
+  </div>
+</details>
+
+<!-- ================================================================== -->
+<!-- VISUAL OVERVIEW: PV2 ARCHITECTURE DIAGRAMS                         -->
+<!-- ================================================================== -->
+<div class="divider-procedure"></div>
+<h2 id="visual-overview">The Pipeline v2 Architecture -- Visual Overview</h2>
+<div class="checkpoint" style="border-left-color:#2a7d7d;">
+  <div class="checkpoint-header" style="color:#2a7d7d;">At a Glance</div>
+  <p>Pipeline v2 flows through 4 waves: TC plans, builder builds, gates verify, PAs audit. Fat Core merges planning and building into one agent. Perception thresholds prevent invisible CSS. The diagrams below show the complete flow, intelligence stack, heatmap, and architecture comparison.</p>
+</div>
+<p>Before diving into implementation details, here is the complete architecture rendered visually. Every box, arrow, and layer below is drawn directly from the canonical PV2 diagram produced by 50+ Opus research agents. <em>This overview uses terms and concepts explained in Sections 1 and 2. You may want to skim these diagrams now and return to study them after reading those sections.</em></p>
+
+<!-- ===== 1. MAIN FLOW DIAGRAM ===== -->
+<h3 id="visual-flow">The Complete Build Flow</h3>
+<p>This is what happens when you type <code>/build-page content.md</code>. Each box represents an agent or gate. Colors indicate function: <span style="color:#2a7d7d;font-weight:600">teal</span> for process steps, <span style="color:#6b9b7a;font-weight:600">green</span> for verification/gates, <span style="color:#c49052;font-weight:600">amber</span> for decision points, and <span style="color:#c97065;font-weight:600">coral</span> for fail/return paths.</p>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:0;padding:1.5rem 0;">
+
+  <!-- USER ENTRY -->
+  <div style="background:#5c4b3a;color:#fefcf3;padding:0.65rem 1.75rem;font-weight:600;font-size:0.95rem;letter-spacing:0.03em;border:2px solid #5c4b3a;text-align:center;max-width:340px;width:100%;">
+    /build-page content.md
+  </div>
+  <div style="width:2px;height:24px;background:#5c4b3a;"></div>
+  <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #5c4b3a;"></div>
+
+  <!-- WAVE 0: TC -->
+  <div style="background:#f0ebe3;border:2px solid #2a7d7d;padding:1rem 1.25rem;max-width:480px;width:100%;margin-top:6px;">
+    <div style="font-size:0.75rem;font-weight:700;color:#2a7d7d;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.35rem;">Wave 0 -- Compositional Planning</div>
+    <div style="font-weight:600;color:#5c4b3a;margin-bottom:0.25rem;">Enriched /tension-composition (Opus)</div>
+    <div style="font-size:0.85rem;color:#5a5a5a;line-height:1.5;">Phases 0-3.5 + Phase 4T. ~660 lines (was ~1,930). 30-60 min.<br>Outputs: <strong>_build-recipe.md</strong> + <strong>Transition Table</strong> (YAML) + <strong>Fractal Echo Table</strong></div>
+  </div>
+  <div style="width:2px;height:20px;background:#2a7d7d;"></div>
+  <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #2a7d7d;"></div>
+
+  <!-- WAVE 0.5: METAPHOR VALIDATION -->
+  <div style="background:#f2f7f4;border:2px solid #6b9b7a;padding:0.85rem 1.25rem;max-width:400px;width:100%;margin-top:6px;text-align:center;">
+    <div style="font-size:0.75rem;font-weight:700;color:#6b9b7a;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">Wave 0.5 -- Verification</div>
+    <div style="font-weight:600;color:#5c4b3a;margin-bottom:0.15rem;">Fresh-Eyes Metaphor Check (Opus)</div>
+    <div style="font-size:0.85rem;color:#5a5a5a;">Binary: STRUCTURAL or ANNOUNCED? 5-10 min.</div>
+  </div>
+
+  <!-- DECISION: pass/fail -->
+  <div style="width:2px;height:14px;background:#6b9b7a;"></div>
+  <div style="display:flex;align-items:center;gap:0;max-width:480px;width:100%;">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+      <div style="background:#c49052;color:#fff;padding:0.4rem 1rem;font-weight:600;font-size:0.82rem;text-align:center;transform:rotate(0deg);clip-path:polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);width:110px;height:55px;display:flex;align-items:center;justify-content:center;">PASS?</div>
+    </div>
+  </div>
+  <div style="display:flex;max-width:480px;width:100%;justify-content:center;gap:2rem;margin-top:-4px;">
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div style="font-size:0.78rem;color:#6b9b7a;font-weight:600;">PASS</div>
+      <div style="width:2px;height:14px;background:#6b9b7a;"></div>
+      <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #6b9b7a;"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div style="font-size:0.78rem;color:#c97065;font-weight:600;">FAIL</div>
+      <div style="width:2px;height:14px;background:#c97065;"></div>
+      <div style="font-size:0.78rem;color:#c97065;font-weight:500;">Return to TC</div>
+    </div>
+  </div>
+
+  <!-- WAVE 0.9: HANDOFF GATE -->
+  <div style="background:#f2f7f4;border:2px solid #6b9b7a;padding:0.85rem 1.25rem;max-width:400px;width:100%;margin-top:8px;">
+    <div style="font-size:0.75rem;font-weight:700;color:#6b9b7a;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">Wave 0.9 -- Enriched Handoff Gate</div>
+    <div style="font-weight:600;color:#5c4b3a;margin-bottom:0.15rem;">8 Binary Checks (was 5)</div>
+    <div style="font-size:0.85rem;color:#5a5a5a;line-height:1.5;">Zone count, BG delta >= 15 RGB, grid layouts, per-category mechs,<br>transition types, fractal echo table, transition table, channel map.<br>All must PASS. Any FAIL returns to TC. ~1-2 min.</div>
+  </div>
+  <div style="width:2px;height:20px;background:#6b9b7a;"></div>
+  <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #6b9b7a;"></div>
+
+  <!-- WAVE 1: BUILD -->
+  <div style="background:#f0ebe3;border:2px solid #2a7d7d;padding:1rem 1.25rem;max-width:480px;width:100%;margin-top:6px;">
+    <div style="font-size:0.75rem;font-weight:700;color:#2a7d7d;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.35rem;">Wave 1 -- Build Execution</div>
+    <div style="font-weight:600;color:#5c4b3a;margin-bottom:0.25rem;">Opus Builder (single agent)</div>
+    <div style="font-size:0.85rem;color:#5a5a5a;line-height:1.5;">Reads 8 files (~1,300 lines). 9-phase build with telescope+microscope interlaced.<br>Inter-phase micro-gates: MG-1 (HTML), MG-2 (bg), MG-3 (border), MG-4 (type).<br>Phase 6.5: Observation Pause (CD-006 metacognitive loop). 90-150 min.<br>Output: <strong>output.html</strong> + cascade value table</div>
+  </div>
+  <div style="width:2px;height:20px;background:#2a7d7d;"></div>
+  <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #2a7d7d;"></div>
+
+  <!-- WAVE 2: VERIFICATION (two layers) -->
+  <div style="display:flex;gap:1rem;max-width:580px;width:100%;margin-top:6px;">
+    <!-- Layer 1: Gates -->
+    <div style="flex:1;background:#f2f7f4;border:2px solid #6b9b7a;padding:0.85rem 1rem;">
+      <div style="font-size:0.72rem;font-weight:700;color:#6b9b7a;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">Wave 2 Layer 1</div>
+      <div style="font-weight:600;color:#5c4b3a;font-size:0.92rem;margin-bottom:0.15rem;">15 Programmatic Gates</div>
+      <div style="font-size:0.82rem;color:#5a5a5a;line-height:1.45;">Playwright + getComputedStyle.<br>SC-01 to SC-15 (all binary).<br>+3 new: multi-coherence, sub-perceptual, borders.<br>~2 min. Catches 70% of issues.</div>
+    </div>
+    <!-- Layer 2: PA -->
+    <div style="flex:1;background:#f2f7f4;border:2px solid #6b9b7a;padding:0.85rem 1rem;">
+      <div style="font-size:0.72rem;font-weight:700;color:#6b9b7a;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.25rem;">Wave 2 Layer 2</div>
+      <div style="font-weight:600;color:#5c4b3a;font-size:0.92rem;margin-bottom:0.15rem;">9 PA Auditors (Mode 4)</div>
+      <div style="font-size:0.82rem;color:#5a5a5a;line-height:1.45;">Fresh-eyes Opus. Screenshot pre-capture.<br>48 questions, zero build context.<br>PA-05 verdict: FLAT / STYLED / COMPOSED / DESIGNED.<br>Catches remaining 30%.</div>
+    </div>
+  </div>
+  <div style="width:2px;height:20px;background:#6b9b7a;"></div>
+  <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #6b9b7a;"></div>
+
+  <!-- WAVE 3: FIX INTEGRATION -->
+  <div style="display:flex;gap:1rem;max-width:580px;width:100%;margin-top:6px;">
+    <!-- SHIP -->
+    <div style="flex:1;background:#f2f7f4;border:2px solid #6b9b7a;padding:0.75rem 1rem;text-align:center;">
+      <div style="font-size:0.72rem;font-weight:700;color:#6b9b7a;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.2rem;">All Pass + PA-05 >= 3/4</div>
+      <div style="font-weight:700;color:#6b9b7a;font-size:1.1rem;">SHIP</div>
+    </div>
+    <!-- FIX CYCLE -->
+    <div style="flex:1;background:#fef8f0;border:2px solid #c49052;padding:0.75rem 1rem;text-align:center;">
+      <div style="font-size:0.72rem;font-weight:700;color:#c49052;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.2rem;">Gates Pass + PA-05 < 3/4</div>
+      <div style="font-weight:600;color:#c49052;font-size:0.92rem;">Fix Cycle (max 3x)</div>
+      <div style="font-size:0.8rem;color:#5a5a5a;margin-top:0.15rem;">Gate-generated CSS fix recipes<br>2-PA re-check per cycle</div>
+    </div>
+    <!-- ESCALATE -->
+    <div style="flex:1;background:#fef6f5;border:2px solid #c97065;padding:0.75rem 1rem;text-align:center;">
+      <div style="font-size:0.72rem;font-weight:700;color:#c97065;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.2rem;">3 Cycles Failed</div>
+      <div style="font-weight:600;color:#c97065;font-size:0.92rem;">ESCALATE TO USER</div>
+    </div>
+  </div>
+  <div style="width:2px;height:20px;background:#5c4b3a;margin-top:8px;"></div>
+  <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #5c4b3a;"></div>
+
+  <!-- OUTPUT -->
+  <div style="background:#5c4b3a;color:#fefcf3;padding:0.65rem 1.75rem;font-weight:600;font-size:0.92rem;text-align:center;max-width:380px;width:100%;margin-top:6px;">
+    OUTPUT: output.html + _pa-report.md + _build-log.md
+  </div>
+
+</div>
+<p class="diagram-label">The complete /build-page flow -- from user command to verified output.</p>
+<p><em>This flow is explained in detail in <a href="#s6">Section 6: The Build Flow</a>. The 15 gates are documented in <a href="#s5">Section 5: The Gate System</a>. The fix integration cycle is covered in <a href="#s9">Section 9: Why This Won't Fail</a>.</em></p>
+
+
+<!-- ===== 2. THE 5-LAYER INTELLIGENCE STACK ===== -->
+<h3 id="intelligence-stack">The 5-Layer Compositional Intelligence Stack</h3>
+<p>Every stage of the pipeline either preserves or destroys these five layers of intelligence. The stack is a hierarchy: each layer depends on the one below it. PV2's central challenge is preventing layers 2-5 from evaporating at the TC-to-builder boundary.</p>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:0;padding:1.5rem 0;max-width:620px;margin:0 auto;">
+
+  <!-- L5: Anti-Scale Model -->
+  <div style="background:linear-gradient(135deg,#5c4b3a 0%,#7a6b5d 100%);color:#fefcf3;padding:1rem 1.5rem;width:55%;text-align:center;border:2px solid #5c4b3a;">
+    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;opacity:0.8;">L5 -- Governing Principle</div>
+    <div style="font-weight:700;font-size:1rem;margin:0.25rem 0 0.15rem;">Anti-Scale Model</div>
+    <div style="font-size:0.82rem;opacity:0.9;line-height:1.4;">Richness = semantic density x restraint x spatial confidence<br>Evaluates everything below. Enables <strong>4/4 DESIGNED</strong>.</div>
+    <div style="font-size:0.75rem;opacity:0.7;margin-top:0.35rem;">STATUS: Absent from pipeline. Text in research only.</div>
+  </div>
+
+  <!-- L4: Multi-Coherence -->
+  <div style="background:linear-gradient(135deg,#2a7d7d 0%,#358888 100%);color:#fefcf3;padding:0.85rem 1.5rem;width:65%;text-align:center;border:2px solid #2a7d7d;border-top:none;">
+    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;opacity:0.8;">L4 -- Binding Rule</div>
+    <div style="font-weight:700;font-size:1rem;margin:0.2rem 0 0.15rem;">Multi-Coherence</div>
+    <div style="font-size:0.82rem;opacity:0.9;line-height:1.4;">>= 3 channels shift together at each boundary, same semantic direction.<br>Coordinates channels. Enables <strong>3/4 COMPOSED</strong>.</div>
+    <div style="font-size:0.75rem;opacity:0.7;margin-top:0.3rem;">STATUS: Text in recipe Phase 8. Gate SC-13 NEW.</div>
+  </div>
+
+  <!-- L3: Channels -->
+  <div style="background:linear-gradient(135deg,#4a7c9b 0%,#5a8cab 100%);color:#fefcf3;padding:0.85rem 1.5rem;width:75%;text-align:center;border:2px solid #4a7c9b;border-top:none;">
+    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;opacity:0.8;">L3 -- Instruments</div>
+    <div style="font-weight:700;font-size:1rem;margin:0.2rem 0 0.15rem;">6 CSS Channels</div>
+    <div style="font-size:0.82rem;opacity:0.9;line-height:1.4;">Chromatic | Typographic | Spatial | Structural | Behavioral | Material<br>The instruments of visual composition. Enables <strong>2.5/4 STYLED+</strong>.</div>
+    <div style="font-size:0.75rem;opacity:0.7;margin-top:0.3rem;">STATUS: Named in catalog. Partially in recipe.</div>
+  </div>
+
+  <!-- L2: Scales -->
+  <div style="background:linear-gradient(135deg,#6b9b7a 0%,#7bab8a 100%);color:#fefcf3;padding:0.85rem 1.5rem;width:85%;text-align:center;border:2px solid #6b9b7a;border-top:none;">
+    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;opacity:0.8;">L2 -- Stages</div>
+    <div style="font-weight:700;font-size:1rem;margin:0.2rem 0 0.15rem;">5 Scales (Zoom Levels)</div>
+    <div style="font-size:0.82rem;opacity:0.9;line-height:1.4;">Navigation | Page | Section | Component | Character<br>Where pattern appears at every zoom level. Enables <strong>2/4 STYLED</strong>.</div>
+    <div style="font-size:0.75rem;opacity:0.7;margin-top:0.3rem;">STATUS: Mentioned in TC. Lost at handoff.</div>
+  </div>
+
+  <!-- L1: Perception Thresholds -->
+  <div style="background:linear-gradient(135deg,#c49052 0%,#d4a062 100%);color:#fefcf3;padding:1rem 1.5rem;width:95%;text-align:center;border:2px solid #c49052;border-top:none;">
+    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;opacity:0.8;">L1 -- Floor</div>
+    <div style="font-weight:700;font-size:1rem;margin:0.25rem 0 0.15rem;">Perception Thresholds</div>
+    <div style="font-size:0.82rem;opacity:0.9;line-height:1.4;">>= 15 RGB | >= 2px font | >= 0.03em spacing | <= 108px gap<br>Prevents invisibility. Prevents <strong>1.5/4 FLAT</strong>.</div>
+    <div style="font-size:0.75rem;opacity:0.7;margin-top:0.35rem;">STATUS: Encoded as binary gates SC-09 through SC-12.</div>
+  </div>
+
+</div>
+
+<div style="background:#f0ebe3;border-left:4px solid #c49052;padding:0.85rem 1.25rem;margin:0.5rem 0 1.5rem;">
+  <strong style="color:#c49052;">Key Insight:</strong> Each layer DEPENDS on the one below. Multi-coherence requires channels. Channels require scales. Scales require perceptible thresholds. PV2 currently encodes only L1. Layers 2-5 evaporate at the TC-to-builder boundary. The transition table and fractal echo table are the primary fixes.
+</div>
+
+<p><em>Layer definitions and their pipeline survival are explained in <a href="#s2">Section 2: The Architecture</a>. The gates enforcing each layer are in <a href="#s5">Section 5: The Gate System</a>.</em></p>
+
+
+<!-- ===== 3. INTELLIGENCE HEATMAP ===== -->
+<h3>The Intelligence Heatmap -- Where Quality Lives and Dies</h3>
+<p>This heatmap shows which intelligence layers survive at each pipeline stage. Full bars mean the layer is present and enforced. Empty bars mean the layer has been lost. The critical loss point is at the <strong>_build-recipe.md</strong> stage -- where TC's full reasoning compresses 20:1 into a document the builder reads.</p>
+
+<div style="overflow-x:auto;margin:1.5rem 0;">
+<table style="min-width:680px;">
+  <thead>
+    <tr>
+      <th style="width:22%;">Pipeline Stage</th>
+      <th style="width:15.6%;text-align:center;">L1<br><span style="font-size:0.72rem;font-weight:400;text-transform:none;">Percep. Thresh.</span></th>
+      <th style="width:15.6%;text-align:center;">L2<br><span style="font-size:0.72rem;font-weight:400;text-transform:none;">Scales (5-lvl)</span></th>
+      <th style="width:15.6%;text-align:center;">L3<br><span style="font-size:0.72rem;font-weight:400;text-transform:none;">Channels (6 CSS)</span></th>
+      <th style="width:15.6%;text-align:center;">L4<br><span style="font-size:0.72rem;font-weight:400;text-transform:none;">Multi-Coher.</span></th>
+      <th style="width:15.6%;text-align:center;">L5<br><span style="font-size:0.72rem;font-weight:400;text-transform:none;">Anti-Scale</span></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Content.md</strong></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:#e0d5c5;border:1px solid #ccc;"></span><br><span style="font-size:0.72rem;color:#999;">---</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:#e0d5c5;border:1px solid #ccc;"></span><br><span style="font-size:0.72rem;color:#999;">---</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:#e0d5c5;border:1px solid #ccc;"></span><br><span style="font-size:0.72rem;color:#999;">---</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:#e0d5c5;border:1px solid #ccc;"></span><br><span style="font-size:0.72rem;color:#999;">---</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:#e0d5c5;border:1px solid #ccc;"></span><br><span style="font-size:0.72rem;color:#999;">---</span></td>
+    </tr>
+    <tr>
+      <td><strong>TC Planner</strong><br><span style="font-size:0.82rem;color:#7a6b5d;">Wave 0</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#6b9b7a 100%,#e0d5c5 100%);border:1px solid #6b9b7a;"></span><br><span style="font-size:0.72rem;color:#6b9b7a;font-weight:600;">FULL</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#6b9b7a 100%,#e0d5c5 100%);border:1px solid #6b9b7a;"></span><br><span style="font-size:0.72rem;color:#6b9b7a;font-weight:600;">FULL</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#2a7d7d 80%,#e0d5c5 80%);border:1px solid #2a7d7d;"></span><br><span style="font-size:0.72rem;color:#2a7d7d;font-weight:600;">HIGH</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#c49052 60%,#e0d5c5 60%);border:1px solid #c49052;"></span><br><span style="font-size:0.72rem;color:#c49052;font-weight:600;">MODERATE</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#c49052 40%,#e0d5c5 40%);border:1px solid #c49052;"></span><br><span style="font-size:0.72rem;color:#c49052;font-weight:600;">LOW</span></td>
+    </tr>
+    <tr style="background:#fef6f5;">
+      <td><strong>_build-recipe.md</strong><br><span style="font-size:0.82rem;color:#c97065;font-weight:600;">CRITICAL LOSS POINT</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#6b9b7a 100%,#e0d5c5 100%);border:1px solid #6b9b7a;"></span><br><span style="font-size:0.72rem;color:#6b9b7a;font-weight:600;">FULL</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#c97065 40%,#e0d5c5 40%);border:1px solid #c97065;"></span><br><span style="font-size:0.72rem;color:#c97065;font-weight:600;">LOW</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#c49052 60%,#e0d5c5 60%);border:1px solid #c49052;"></span><br><span style="font-size:0.72rem;color:#c49052;font-weight:600;">MODERATE</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#c97065 20%,#e0d5c5 20%);border:1px solid #c97065;"></span><br><span style="font-size:0.72rem;color:#c97065;font-weight:600;">MINIMAL</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:#e0d5c5;border:1px solid #c97065;"></span><br><span style="font-size:0.72rem;color:#c97065;font-weight:600;">ABSENT</span></td>
+    </tr>
+    <tr>
+      <td><strong>Builder Input</strong><br><span style="font-size:0.82rem;color:#7a6b5d;">7 files</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#6b9b7a 100%,#e0d5c5 100%);border:1px solid #6b9b7a;"></span><br><span style="font-size:0.72rem;color:#6b9b7a;font-weight:600;">FULL</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#c97065 20%,#e0d5c5 20%);border:1px solid #c97065;"></span><br><span style="font-size:0.72rem;color:#c97065;font-weight:600;">MINIMAL</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#c49052 60%,#e0d5c5 60%);border:1px solid #c49052;"></span><br><span style="font-size:0.72rem;color:#c49052;font-weight:600;">MODERATE</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#c97065 20%,#e0d5c5 20%);border:1px solid #c97065;"></span><br><span style="font-size:0.72rem;color:#c97065;font-weight:600;">MINIMAL</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:#e0d5c5;border:1px solid #c97065;"></span><br><span style="font-size:0.72rem;color:#c97065;font-weight:600;">ABSENT</span></td>
+    </tr>
+    <tr>
+      <td><strong>CSS/HTML Output</strong><br><span style="font-size:0.82rem;color:#7a6b5d;">Wave 1</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#2a7d7d 80%,#e0d5c5 80%);border:1px solid #2a7d7d;"></span><br><span style="font-size:0.72rem;color:#2a7d7d;font-weight:600;">HIGH</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#999 50%,#e0d5c5 50%);border:1px solid #999;"></span><br><span style="font-size:0.72rem;color:#999;font-weight:600;">UNKNOWN</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#999 50%,#e0d5c5 50%);border:1px solid #999;"></span><br><span style="font-size:0.72rem;color:#999;font-weight:600;">UNKNOWN</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#999 50%,#e0d5c5 50%);border:1px solid #999;"></span><br><span style="font-size:0.72rem;color:#999;font-weight:600;">UNKNOWN</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:#e0d5c5;border:1px solid #c97065;"></span><br><span style="font-size:0.72rem;color:#c97065;font-weight:600;">ABSENT</span></td>
+    </tr>
+    <tr>
+      <td><strong>Gate Runner</strong><br><span style="font-size:0.82rem;color:#7a6b5d;">15 gates</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#6b9b7a 100%,#e0d5c5 100%);border:1px solid #6b9b7a;"></span><br><span style="font-size:0.72rem;color:#6b9b7a;font-weight:600;">FULL</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:#e0d5c5;border:1px solid #c97065;"></span><br><span style="font-size:0.72rem;color:#c97065;font-weight:600;">ABSENT*</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#c97065 20%,#e0d5c5 20%);border:1px solid #c97065;"></span><br><span style="font-size:0.72rem;color:#c97065;font-weight:600;">MINIMAL</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#c97065 20%,#e0d5c5 20%);border:1px solid #c97065;"></span><br><span style="font-size:0.72rem;color:#c97065;font-weight:600;">NEW SC-13</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:#e0d5c5;border:1px solid #c97065;"></span><br><span style="font-size:0.72rem;color:#c97065;font-weight:600;">ABSENT</span></td>
+    </tr>
+    <tr>
+      <td><strong>PA Auditors</strong><br><span style="font-size:0.82rem;color:#7a6b5d;">9 fresh eyes</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:#e0d5c5;border:1px solid #999;"></span><br><span style="font-size:0.72rem;color:#999;font-weight:600;">ABSENT+</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#c49052 60%,#e0d5c5 60%);border:1px solid #c49052;"></span><br><span style="font-size:0.72rem;color:#c49052;font-weight:600;">MODERATE</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#c49052 60%,#e0d5c5 60%);border:1px solid #c49052;"></span><br><span style="font-size:0.72rem;color:#c49052;font-weight:600;">MODERATE</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#2a7d7d 80%,#e0d5c5 80%);border:1px solid #2a7d7d;"></span><br><span style="font-size:0.72rem;color:#2a7d7d;font-weight:600;">HIGH</span></td>
+      <td style="text-align:center;"><span style="display:inline-block;width:50px;height:10px;background:linear-gradient(90deg,#c49052 60%,#e0d5c5 60%);border:1px solid #c49052;"></span><br><span style="font-size:0.72rem;color:#c49052;font-weight:600;">MODERATE</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div style="font-size:0.82rem;color:#7a6b5d;margin:-0.5rem 0 0.75rem;line-height:1.5;">
+  <strong>Legend:</strong> FULL = layer fully present and enforced. HIGH = mostly present. MODERATE = partially present. LOW/MINIMAL = barely surviving. ABSENT = completely lost. UNKNOWN = depends on builder (no enforcement). * = Fix identified but not yet implemented. + = Correct: PA measures perception, not numbers.
+</div>
+
+<div style="background:#f0ebe3;border-left:4px solid #c97065;padding:0.85rem 1.25rem;margin:0.5rem 0 1.5rem;">
+  <strong style="color:#c97065;">The Story This Tells:</strong> Intelligence ENTERS at TC (row 2) as full-spectrum, then DRAINS through the build-plan handoff (row 3). By the time the builder writes CSS, only L1 (thresholds) survives reliably. L2-L5 depend on builder judgment. The fixes: Fractal Echo Table makes L2 cross the boundary. Transition Table makes L3 cross. Multi-coherence binding in transition table makes L4 cross. L5 (Anti-Scale) remains absent -- it is judgment territory, evaluated only by PA.
+</div>
+
+<p><em>The intelligence drain and its fixes are the core of <a href="#s2">Section 2: The Architecture</a>. The Fat Core alternative eliminates most of these boundaries -- see the comparison table below.</em></p>
+
+
+<!-- ===== 4. FAT CORE VS LINEAR PIPELINE COMPARISON ===== -->
+<h3 id="arch-comparison">Architecture Comparison: Fat Core vs Linear Pipeline</h3>
+<p>The master synthesis verdict (50+ reports) recommends <strong>Fat Core</strong> as the target architecture. Here is how it compares across every measurable dimension.</p>
+
+<div style="overflow-x:auto;margin:1.5rem 0;">
+<table>
+  <thead>
+    <tr>
+      <th style="width:22%;">Dimension</th>
+      <th style="width:19.5%;">Master Prompt</th>
+      <th style="width:19.5%;">Original PV2</th>
+      <th style="width:19.5%;">Updated PV2</th>
+      <th style="width:19.5%;background:#f2f7f4;">Fat Core (NEW)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Builder input</strong></td>
+      <td>75 lines (13.4%)</td>
+      <td>1,150 lines (recipe+ref)</td>
+      <td>1,300 lines (tele+micro)</td>
+      <td style="background:#f2f7f4;"><strong>~300 lines</strong> (brief+content)</td>
+    </tr>
+    <tr>
+      <td><strong>Instruction type</strong></td>
+      <td>Checklist</td>
+      <td>Recipe</td>
+      <td>Experiment: Recipe/Brief/Hybrid/FatCore</td>
+      <td style="background:#f2f7f4;"><strong>Convention</strong> (~100 lines)</td>
+    </tr>
+    <tr>
+      <td><strong>Intelligence levels</strong></td>
+      <td>L1 only (text)</td>
+      <td>L1 only (gates)</td>
+      <td>L1-L4 checked (gates+artifacts)</td>
+      <td style="background:#f2f7f4;"><strong>L1-L5 possible</strong> (one agent)</td>
+    </tr>
+    <tr>
+      <td><strong>TC scope</strong></td>
+      <td>Absent</td>
+      <td>1,878 lines (plan+build)</td>
+      <td>~660 lines (planner only)</td>
+      <td style="background:#f2f7f4;"><strong>Merged into</strong> core agent</td>
+    </tr>
+    <tr>
+      <td><strong>Key artifact</strong></td>
+      <td>None</td>
+      <td>op-recipe</td>
+      <td>Transition Tbl + Fractal Echo</td>
+      <td style="background:#f2f7f4;"><strong>Conventions Brief</strong> (~100 ln)</td>
+    </tr>
+    <tr>
+      <td><strong>Gates</strong></td>
+      <td>0</td>
+      <td>12</td>
+      <td>15 post-build + 4 micro-gate</td>
+      <td style="background:#f2f7f4;"><strong>3 phase-locked</strong> (during build)</td>
+    </tr>
+    <tr>
+      <td><strong>Boundaries</strong></td>
+      <td>N/A</td>
+      <td>11 (4 destructive)</td>
+      <td>11 (4 destructive)</td>
+      <td style="background:#f2f7f4;"><strong>7 (0 destructive)</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Builder model</strong></td>
+      <td>Sonnet</td>
+      <td>Opus</td>
+      <td>Opus</td>
+      <td style="background:#f2f7f4;">Opus</td>
+    </tr>
+    <tr>
+      <td><strong>PA auditors</strong></td>
+      <td>0-2</td>
+      <td>9</td>
+      <td>9</td>
+      <td style="background:#f2f7f4;">9 (unchanged)</td>
+    </tr>
+    <tr>
+      <td><strong>PA-05 ceiling</strong></td>
+      <td>1.5/4 (checklist)</td>
+      <td>3/4 (recipe)</td>
+      <td>3-4/4 (recipe+WHY)</td>
+      <td style="background:#f2f7f4;"><strong>4/4 possible</strong> (convention)</td>
+    </tr>
+    <tr>
+      <td><strong>Cost/page</strong></td>
+      <td>~$5</td>
+      <td>~$15-30</td>
+      <td>~$20-60</td>
+      <td style="background:#f2f7f4;"><strong>~$15-40</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Fix recipes</strong></td>
+      <td>Generic prose</td>
+      <td>Generic prose</td>
+      <td>Gate CSS</td>
+      <td style="background:#f2f7f4;"><strong>Same agent</strong> (memory kept)</td>
+    </tr>
+    <tr>
+      <td><strong>N (evidence)</strong></td>
+      <td>1 (Flagship)</td>
+      <td>2 (Middle, Rem)</td>
+      <td>0 (UNTESTED)</td>
+      <td style="background:#f2f7f4;">0 (UNTESTED)</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div style="background:#f0ebe3;border-left:4px solid #2a7d7d;padding:0.85rem 1.25rem;margin:0.5rem 0 1.5rem;">
+  <strong style="color:#2a7d7d;">Why Fat Core:</strong> "Intelligence cannot be compressed into documents and survive handoff between agents. Put the intelligence WHERE IT WILL BE USED -- inside one capable agent with minimal constraints and maximum creative authority. Verify the output, not the process. Trust the agent, constrain the soul." -- Master Synthesis Verdict (Report 32)
+</div>
+
+<p><em>The Fat Core architecture is explained in full in <a href="#s2">Section 2</a>. The experiments that will validate it are in <a href="#s7">Section 7: The Experiments</a>. The implementation order is in <a href="#s8">Section 8</a>.</em></p>
+
+
+<!-- ================================================================== -->
+<!-- SECTION 1: WHERE WE ARE -->
+<!-- ================================================================== -->
+<div class="divider-context"></div>
+<h2 id="s1">1. Where We Are Right Now</h2>
+
+<p>The design system has been through five exploration stages and a full extraction into a six-layer ontology. Three major experiments followed: the Middle-tier (succeeded), the Ceiling (succeeded on novelty, failed on richness), and the Flagship (failed hardest). Months of retrospective analysis diagnosed exactly <em>why</em> each result happened.</p>
+
+<p>The result is a rich, validated body of material. Here is every piece of it.</p>
+
+<h3>The Two Skills</h3>
+
+<h4>Tension-Composition Skill</h4>
+<p><strong>File:</strong> <code>~/.claude/skills/tension-composition/SKILL.md</code> (~1,930 lines)</p>
+<p>The creative engine. A six-phase pipeline that takes raw content and transforms it into compositional HTML by deriving <em>tension</em> between what the content needs and what the design system demands. Phase 0 assesses content type and tier. Phases 1-3 are the creative core — questioning what the content <em>needs</em>, discovering the tension between content and design constraints, then collapsing that tension into a single governing metaphor. Phase 4 extracts mechanisms. Phase 5 checks case studies. Phases 6-7 implement and verify.</p>
+<p>It also contains the tier classification: Floor (simple assembly), Middle (pattern-based, skip metaphor), Ceiling (full pipeline with metaphor), Flagship (full pipeline plus multi-pass audit).</p>
+
+<h4>Perceptual Auditing Skill</h4>
+<p><strong>File:</strong> <code>~/.claude/skills/perceptual-auditing/SKILL.md</code> (848 lines)</p>
+<p>The quality gate. 48 perceptual audit questions in four tiers, plus quantitative guardrails with hard numeric floors, four audit modes, team structures, and detailed protocols. PA-05 is the ship-or-not question, evaluated on four sub-criteria: DESIGNED, COHERENT, PROPORTIONATE, and POLISHED.</p>
+
+<h3>The Six-Layer Ontology</h3>
+
+<table>
+  <tr><th>Layer</th><th>Name</th><th>File</th><th>Purpose</th></tr>
+  <tr><td>1</td><td>Identity</td><td><code>identity/prohibitions.md</code></td><td>22 rules defining the system by what it refuses</td></tr>
+  <tr><td>2</td><td>Vocabulary</td><td><code>vocabulary/tokens.css</code></td><td>80 design tokens -- the atoms of the system</td></tr>
+  <tr><td>3</td><td>Grammar</td><td><code>grammar/mechanism-catalog.md</code></td><td>18 reusable CSS mechanisms in 5 families</td></tr>
+  <tr><td>4</td><td>Components</td><td><code>components/components.css</code></td><td>Merged CSS library from all 27 explorations</td></tr>
+  <tr><td>5</td><td>Case Studies</td><td><code>case-studies/</code></td><td>9 process proofs showing tension-to-metaphor-to-layout</td></tr>
+  <tr><td>6</td><td>Guidelines</td><td><code>guidelines/semantic-rules.md</code></td><td>7 semantic gap rules for ambiguous decisions</td></tr>
+</table>
+
+<details>
+  <summary>Expand: Layer-by-layer detail</summary>
+  <div class="details-content">
+    <p><strong>Layer 1 (Prohibitions):</strong> 8 absolute rules (border-radius: 0, box-shadow: none, no gradients, no pure black/white, Instrument Serif for display only, etc.) plus 12 conditional and 2 meta-prohibitions. The single most important file for identity preservation.</p>
+    <p><strong>Layer 2 (Tokens):</strong> 65 CSS custom properties in a single <code>:root</code> block. 8 locked colors including Sanrok red (#E83025), warm cream background (#FEF9F5). Typography trinity (Instrument Serif, Inter, JetBrains Mono). 14 spacing values from 4px to 96px. Token types: IMMUTABLE (soul), MUTABLE (constrained), AVAILABLE (optional).</p>
+    <p><strong>Layer 3 (Mechanisms):</strong> 18 transferable CSS patterns across 5 property families -- Spatial, Hierarchy, Component, Depth/Emphasis, Structure/Navigation. Each includes CSS pattern, cross-file frequency, application modes (progressive vs. discrete), impact profiles, and zone mappings. Enriched post-Flagship with perception thresholds.</p>
+    <p><strong>Layer 4 (Components):</strong> 1,195-line merged CSS from 27 exploration files. Callout family (6 variants), tables (horizontal-only borders), code blocks (dark background), headings, body text, lists, blockquotes, breathing zones, grids, and specialized components. Each carries a confidence level based on cross-file frequency.</p>
+    <p><strong>Layer 5 (Case Studies):</strong> 9 case studies plus an anti-prescription template. Each begins with "THIS IS NOT A TEMPLATE." They show how tension led to metaphor led to layout -- process proofs, not recipes to copy.</p>
+    <p><strong>Layer 6 (Semantic Rules):</strong> 7 gap rules covering callout type selection, inline vs. block code, table styling, breathing zone triggers, callout color count, minimum zone content, and the simplest-form principle. Also includes the Semantic Value Framework (WHAT varies? WHY? WHY THESE values?).</p>
+  </div>
+</details>
+
+<h3>The Crown Jewel</h3>
+<p><strong>File:</strong> <code>design-system/validated-explorations/combination/CD-006-pilot-migration.html</code></p>
+<p>A 2,000+ line HTML page that scored 39/40. Uses all 11 component types, all 5 axis patterns, fractal density at 5 scales, and the full combination rule set. Built by a single Opus agent with inter-agent communication. CD-006 is the existence proof that the system works.</p>
+
+<h3>What Is Missing</h3>
+<p>Everything above exists and is validated. But there is no way to <em>use</em> it all in a single command. The gap between "all the pieces exist" and "type <code>/build-page</code> and get a designed page" is filled by five missing pieces:</p>
+<ol>
+  <li><strong>No orchestrator skill</strong> -- no <code>/build-page</code> command</li>
+  <li><strong>No conventions brief</strong> -- no focused ~100-line builder input</li>
+  <li><strong>No perception thresholds in gates</strong> -- programmatic checks count variation, not magnitude</li>
+  <li><strong>No gate runner</strong> -- no automated quality checking</li>
+  <li><strong>S-09 stacking rule incomplete</strong> -- individual spacing passes, stacked totals create voids</li>
+</ol>
+
+<p><strong>Pipeline v2 builds the connective tissue.</strong></p>
+
+
+<!-- ================================================================== -->
+<!-- SECTION 2: THE ARCHITECTURE -->
+<!-- ================================================================== -->
+<div class="divider-procedure"></div>
+<h2 id="s2">2. The Architecture: Fat Core (Leading Candidate — Pending Experiments)</h2>
+
+<div class="warning-box" style="border-left-color:#c49052;background:#fdf8f0;">
+  <strong>Important framing:</strong> Fat Core is the <em>recommended</em> architecture based on all evidence. But it has not been validated by experiments yet. The PV2 diagram's status is "EXPERIMENT FIRST." Everything in this section describes what we <em>expect</em> to build — the experiments in <a href="#s7">Section 7</a> determine whether we actually do. If Experiment B (the $5 conventions test) scores >= 3.0/4, the pipeline may be unnecessary entirely.
+</div>
+
+<h3>The Evidence That Changed Everything</h3>
+
+<table>
+  <tr><th>Experiment</th><th>Agents</th><th>Builder Input</th><th>PA-05</th><th>Quality</th></tr>
+  <tr><td>CD-006</td><td>1 Opus</td><td>~50 lines</td><td>~4/4 (39/40)</td><td>Crown jewel</td></tr>
+  <tr><td>Middle Tier</td><td>8</td><td>~100 lines (recipe)</td><td>4/4 DESIGNED</td><td>Best pipeline result</td></tr>
+  <tr><td>Remediation</td><td>16+</td><td>~300 lines (spec)</td><td>2.5/4</td><td>Improved but capped</td></tr>
+  <tr><td>Flagship</td><td>19</td><td>~530 lines (checklist)</td><td>1.5/4</td><td>Failed</td></tr>
+</table>
+
+<div class="warning-box">
+  <strong>The inverse correlation:</strong> Quality degrades as agent count and builder input volume increase. The best pages were built by the fewest agents reading the least instruction. The worst page was built by the most agents reading the most instruction.
+</div>
+
+<h3>Where Intelligence Goes to Die</h3>
+<p>Every time one agent compresses its understanding into a document for another agent, intelligence is lost. The Flagship had 11 boundary crossings, 4 destructive -- meaning they destroyed more than 35% of compositional intelligence passing through.</p>
+<p>The most destructive boundary was <strong>Boundary 3</strong>: the handoff from TC planner to builder. The planner spent 30-60 minutes understanding content deeply. It compressed that understanding into a build recipe. The builder received the recipe and followed steps. But recipes cannot carry compositional intent. The compression ratio was roughly 20:1 — only about 35% of the planner's compositional intelligence survived the handoff.</p>
+<p>CD-006 had no such boundary. Same agent understood AND built. Zero compression. Zero handoff. That is why it scored 39/40.</p>
+
+<h3>The Fat Core Principle</h3>
+<p><strong>Put the intelligence where it will be used.</strong> One Opus agent that both plans AND builds, surrounded by automated verification and human-caliber perceptual evaluation. The creative work happens inside one mind. The verification happens outside it.</p>
+<p>This is the architecture of a studio, not a factory. One artist. Many critics.</p>
+
+<h3>The 12 Agents</h3>
+
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+  AGENT 1: ORCHESTRATOR (Sonnet)
+    Traffic cop. Routes files, runs gates, captures screenshots.
+    Does NOT interpret content. Deliberately thin (~250 lines).
+
+  AGENT 2: CORE AGENT (Opus) -- THE CRITICAL NODE
+    Reads content directly. Discovers tensions. Derives metaphor.
+    Architects zones. Selects mechanisms. Writes HTML + CSS.
+    Plans AND builds in one continuous session.
+    Receives ~230 lines: conventions brief + tokens + prohibitions.
+
+  AGENTS 3-11: PA AUDITORS (9x Opus/Sonnet)
+    Fresh-eyes only. Receive screenshots, nothing else.
+    Each answers 5-6 PA questions independently.
+    Never see content, plan, or build process.
+
+  AGENT 12: WEAVER (Opus)
+    Reads all 9 PA reports. Synthesizes verdict:
+    SHIP / SHIP WITH FIXES / DO NOT SHIP.
+</div>
+<p class="diagram-label">The 12 agents of the Fat Core architecture</p>
+
+<h3>The 3 Phase-Locked Gates</h3>
+<table>
+  <tr><th>Gate</th><th>When</th><th>What It Checks</th></tr>
+  <tr><td>G1</td><td>After skeleton</td><td>Container width, landmarks, skip link, zones, component classes</td></tr>
+  <tr><td>G2</td><td>After styling</td><td>Soul properties, bg delta >= 15 RGB, typography, borders, warm palette</td></tr>
+  <tr><td>G3</td><td>Final</td><td>All 15 gates including multi-coherence, sub-perceptual prevention, stacked gaps</td></tr>
+</table>
+
+<details>
+  <summary>Expand: The full build sequence</summary>
+  <div class="details-content">
+    <ol>
+      <li><strong>User types</strong> <code>/build-page content.md</code></li>
+      <li><strong>Orchestrator</strong> reads content, prepares brief, spawns core agent</li>
+      <li><strong>Core agent</strong> reads content, plans zones and mechanisms, begins building</li>
+      <li><strong>G1</strong> runs after skeleton -- catches structural omissions</li>
+      <li><strong>Core agent</strong> continues: backgrounds, borders, typography, richness</li>
+      <li><strong>G2</strong> runs after styling -- catches perception threshold violations</li>
+      <li><strong>Core agent</strong> completes: accessibility, responsive, cascade table</li>
+      <li><strong>G3</strong> runs comprehensive -- final regression check</li>
+      <li><strong>Orchestrator</strong> pre-captures screenshots at 1440px and 768px</li>
+      <li><strong>9 PA auditors</strong> evaluate screenshots independently</li>
+      <li><strong>Weaver</strong> synthesizes verdict</li>
+      <li>If PA-05 >= 3/4: <strong>SHIP</strong>. If < 3/4: route fixes to the <strong>same core agent</strong>.</li>
+    </ol>
+  </div>
+</details>
+
+<h3>Why This Is Not the Flagship</h3>
+<table>
+  <tr><th>Dimension</th><th>Flagship (Failed)</th><th>Fat Core (Pipeline v2)</th></tr>
+  <tr><td>Agent count</td><td>19</td><td>12 (only 1 creative)</td></tr>
+  <tr><td>Builder input</td><td>530-line checklist</td><td>100-line conventions brief</td></tr>
+  <tr><td>Guardrail:playbook ratio</td><td>7.9:1</td><td>~1:1</td></tr>
+  <tr><td>Planning/building</td><td>Separate agents</td><td>Same agent</td></tr>
+  <tr><td>Builder model</td><td>Sonnet</td><td>Opus (non-negotiable)</td></tr>
+  <tr><td>Fix cycle agent</td><td>Different agent</td><td>Same agent (preserved memory)</td></tr>
+  <tr><td>Destructive boundaries</td><td>4</td><td>0</td></tr>
+</table>
+
+<!-- CHECKPOINT -->
+<div class="checkpoint">
+  <div class="checkpoint-header">Checkpoint: Architecture</div>
+  <p>You now understand the Fat Core architecture. One Opus agent plans AND builds. The orchestrator routes, not interprets. 9 fresh-eyes auditors verify the output. 3 phase-locked gates catch mechanical errors. The same agent handles fix cycles with full compositional memory. Total: 12 agents, 7 non-destructive boundaries.</p>
+</div>
+<p style="text-align:right;font-size:0.85rem;"><a href="#top">Back to Table of Contents</a></p>
+
+
+<!-- ================================================================== -->
+<!-- SECTION 3: FILES TO CREATE -->
+<!-- ================================================================== -->
+<div class="divider-procedure"></div>
+<h2 id="s3">3. The Files We Need to Create</h2>
+
+<p>Pipeline v2 requires <strong>6 new files</strong>. Not 40, not 20 -- six. Each exists because something went wrong before and this file prevents it from happening again.</p>
+
+<table>
+  <tr><th>#</th><th>File</th><th>Location</th><th>Size</th><th>Purpose</th></tr>
+  <tr><td>1</td><td>build-page SKILL.md</td><td><code>~/.claude/skills/build-page/SKILL.md</code></td><td>~350-500 lines</td><td>The conductor -- <code>/build-page</code> entry point</td></tr>
+  <tr><td>2</td><td>conventions-brief.md</td><td><code>design-system/compositional-core/guidelines/</code></td><td>~100 lines</td><td>The ONLY doc the builder reads</td></tr>
+  <tr><td>3</td><td>perception-thresholds.md</td><td><code>design-system/compositional-core/guidelines/</code></td><td>~80 lines</td><td>Minimum CSS differences humans can see</td></tr>
+  <tr><td>4</td><td>gate-runner.js</td><td><code>design-system/compositional-core/validation/</code></td><td>~400 lines</td><td>Automated quality checker via Playwright</td></tr>
+  <tr><td>5</td><td>gate-registry.js</td><td><code>design-system/compositional-core/validation/</code></td><td>~120 lines</td><td>Central config for all 15 gate thresholds</td></tr>
+  <tr><td>6</td><td>experiment-protocol.md</td><td><code>ephemeral/compositional-intelligence/</code></td><td>~80 lines</td><td>The 3 experiments before commitment</td></tr>
+</table>
+
+<p><strong>Total new code:</strong> ~1,130 lines. Compare to the 47,944 lines that produced the Flagship's 1.5/4.</p>
+
+<!-- File 1 -->
+<h3>File 1: build-page SKILL.md -- The Conductor</h3>
+<p>When you type <code>/build-page my-content.md</code>, this file wakes up. It is the single entry point for every page build. It reads content, classifies tier, selects agent architecture, routes files to the builder, runs gates, pre-captures screenshots, spawns PA auditors, manages fix cycles, and delivers the result.</p>
+
+<details>
+  <summary>Expand: Key design decisions</summary>
+  <div class="details-content">
+    <ul>
+      <li><strong>Thin, not thick.</strong> ~350 lines of routing logic, not 963 lines of compressed intelligence.</li>
+      <li><strong>Tier classification at the front door.</strong> Floor pages skip TC entirely. Middle pages skip metaphor.</li>
+      <li><strong>Same builder for fix cycles.</strong> Preserves compositional memory.</li>
+      <li><strong>Screenshot pre-capture.</strong> Team lead takes ALL screenshots before spawning auditors -- eliminates Playwright contention.</li>
+    </ul>
+  </div>
+</details>
+
+<!-- File 2 -->
+<h3>File 2: conventions-brief.md -- The Builder's Only Spec</h3>
+<p>The ONLY document the core builder reads (besides content, tokens, and prohibitions). ~100 lines telling the builder WHAT to achieve, not HOW. Five sections:</p>
+<ol>
+  <li><strong>Perception Thresholds</strong> (~20 lines) -- min CSS differences humans can see</li>
+  <li><strong>Soul Constraints</strong> (~20 lines) -- the 8 absolute prohibitions</li>
+  <li><strong>Spatial Rules</strong> (~20 lines) -- attention topology, disclosure, compression</li>
+  <li><strong>Quality Floor</strong> (~20 lines) -- mechanism minimums, multi-coherence, component variety</li>
+  <li><strong>Creative Authority</strong> (~20 lines) -- "Your judgment supersedes this document on all non-soul matters"</li>
+</ol>
+
+<div class="success-box">
+  <strong>The key insight:</strong> Quality degrades as builder input volume increases. CD-006 (~50 lines input) scored 39/40. Flagship (~530 lines) scored 1.5/4. The conventions brief targets the sweet spot: ~100 lines of WHAT constraints, not HOW recipes.
+</div>
+
+<!-- File 3 -->
+<h3>File 3: perception-thresholds.md -- What Humans Can See</h3>
+<p>A lookup table: for every CSS property that encodes differentiation, the smallest change a human can perceive.</p>
+
+<table>
+  <tr><th>CSS Property</th><th>Minimum Delta</th><th>Sub-Perceptual (INVISIBLE)</th></tr>
+  <tr><td>Background color</td><td>>= 15 RGB points</td><td>&lt; 15 RGB</td></tr>
+  <tr><td>Font size</td><td>>= 2px between sections</td><td>&lt; 2px</td></tr>
+  <tr><td>Letter-spacing</td><td>>= 0.5px (0.03em at 16px)</td><td>&lt; 0.5px</td></tr>
+  <tr><td>Line-height</td><td>>= 0.15 difference</td><td>&lt; 0.15</td></tr>
+  <tr><td>Padding/margins</td><td>>= 24px between zones</td><td>&lt; 24px</td></tr>
+  <tr><td>Font weight</td><td>>= 200 units</td><td>&lt; 200 units</td></tr>
+  <tr><td>Total boundary gap</td><td>&lt;= 108px stacked max</td><td>> 108px = void</td></tr>
+</table>
+
+<div class="error-box">
+  <strong>Why this exists:</strong> The Flagship's 963-line master prompt contained ZERO perception-related terms. Not "threshold." Not "delta." Not "RGB." The builder produced 227 lines of letter-spacing between 0.001em and 0.01em -- every one imperceptible. Programmatic gates passed. Human eyes saw nothing.
+</div>
+
+<!-- File 4 -->
+<h3>File 4: gate-runner.js -- The Automated Inspector</h3>
+<p>A ~400-line JavaScript module that launches headless Playwright, navigates to the built page, inspects computed styles, and returns pass/fail for 15 quality checks with specific CSS fix recipes for every failure. Total runtime: 5-15 seconds.</p>
+
+<details>
+  <summary>Expand: The fix recipe system</summary>
+  <div class="details-content">
+    <p>Every failure produces a recipe with: what was measured, what the threshold is, exact CSS to fix it, and 2-3 alternatives. Not "fix the backgrounds" but "Zone 2 bg is rgb(249,248,240), delta from Zone 1 is 5 RGB. Need >= 15. Change to <code>#f0ebe3</code> (delta becomes 17)."</p>
+  </div>
+</details>
+
+<!-- File 5 -->
+<h3>File 5: gate-registry.js -- The Settings File</h3>
+<p>~120 lines of configuration. All thresholds, selectors, and phase-gate groups in one central place. gate-runner.js reads this file. If a threshold changes, you change ONE number here.</p>
+
+<!-- File 6 -->
+<h3>File 6: experiment-protocol.md -- The Testing Plan</h3>
+<p>5 experiments in strict sequence (see <a href="#s7">Section 7</a> for full protocol). Each has exact inputs, procedure, success criteria, and a decision gate.</p>
+<ul>
+  <li><strong>Experiment A (Naked test):</strong> 1 Opus + 42-line minimal prompt, no pipeline. Establishes the baseline.</li>
+  <li><strong>Experiment B ($5 conventions test):</strong> 1 Opus + conventions brief only. If PA-05 >= 3.0 — pipeline is unnecessary.</li>
+  <li><strong>Experiment C (Fat Core):</strong> Full 12-agent architecture. Tests whether the verification shell adds value.</li>
+  <li><strong>Experiment D (Full recipe):</strong> Same architecture with 650-line recipe. Tests the recipe ceiling hypothesis.</li>
+  <li><strong>Experiment E (Head-to-head):</strong> Direct comparison: brief vs recipe, same content, blind scoring.</li>
+</ul>
+
+<h3>How These Files Relate</h3>
+
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+User types: /build-page research-synthesis.md
+                    |
+                    v
+        [1] build-page SKILL.md
+              reads content, classifies tier
+              spawns core agent with:
+                    |
+                    +--> [2] conventions-brief.md (100 lines)
+                    |         references:
+                    |              +--> [3] perception-thresholds.md
+                    |
+                    +--> tokens.css + prohibitions.md (existing)
+                    |
+                    v
+              Core agent builds HTML
+                    |
+                    v
+        [4] gate-runner.js
+              reads thresholds from:
+                    +--> [5] gate-registry.js
+              checks the HTML against:
+                    +--> [3] perception-thresholds.md (as code)
+                    |
+                    v
+              PA auditors verify (existing PA skill)
+                    |
+                    v
+              Output: designed HTML page
+</div>
+<p class="diagram-label">File dependency diagram -- perception thresholds are the lynchpin</p>
+
+
+<!-- ================================================================== -->
+<!-- SECTION 4: FILES TO EDIT -->
+<!-- ================================================================== -->
+<div class="divider-procedure"></div>
+<h2 id="s4">4. The Files We Need to Edit</h2>
+
+<p>Six existing files need editing. Total new content: ~119 lines. Every edit addresses a diagnosed failure.</p>
+
+<table>
+  <tr><th>#</th><th>File</th><th>What Changes</th><th>Lines</th><th>Problem Solved</th></tr>
+  <tr><td>1</td><td><code>tokens.css</code></td><td>Add <code>--space-max-stacked: 108px</code></td><td>~5</td><td>S-09 stacking loophole</td></tr>
+  <tr><td>2</td><td><code>semantic-rules.md</code></td><td>S-09 stacking rule + arithmetic proof</td><td>~25</td><td>No calculation for whitespace voids</td></tr>
+  <tr><td>3</td><td><code>perceptual-auditing/SKILL.md</code></td><td>Perception delta threshold table</td><td>~25</td><td>Gates counted invisible differences</td></tr>
+  <tr><td>4</td><td><code>tension-composition/SKILL.md</code></td><td>Recipe header for Phase 4</td><td>~15</td><td>Checklist framing --> flat output</td></tr>
+  <tr><td>5A-D</td><td><code>compositional-core/CLAUDE.md</code></td><td>Builder recipe, routing, comms, model</td><td>~46</td><td>13.4% visibility, no CSS recipes</td></tr>
+  <tr><td>6A-B</td><td><code>design-system/CLAUDE.md</code></td><td>Status update, build routing</td><td>~3</td><td>Stale status, wrong routing</td></tr>
+</table>
+
+<details>
+  <summary>Expand: Edit 1 -- tokens.css stacking token</summary>
+  <div class="details-content">
+    <p>Add <code>--space-max-stacked: 108px;</code> to the Spacing Maximums section. The existing 96px per-property max is necessary but not sufficient. Builders can legally use 80px padding-bottom + 80px padding-top = 160px void. The stacking token caps the total. Includes arithmetic proof: worst case BREATHING transition = 32 + 24 + 4 + 24 + 24 = 108px.</p>
+  </div>
+</details>
+
+<details>
+  <summary>Expand: Edit 2 -- semantic-rules.md S-09 stacking rule</summary>
+  <div class="details-content">
+    <p>Inserts into Rule 2 (Maximum Consecutive Empty Viewport Height). Adds binary test: <code>padding-bottom + MAX(margin-bottom, margin-top) + padding-top &lt;= 108px</code>. Includes worked example, fix options (reduce padding, insert checkpoint content, merge zones), and provenance (Flagship 210-276px voids, 9/9 auditors flagged).</p>
+  </div>
+</details>
+
+<details>
+  <summary>Expand: Edit 3 -- PA skill perception thresholds</summary>
+  <div class="details-content">
+    <p>Inserts "Minimum Perceptual Delta Thresholds" section after the Void Guardrail Specifications table. Binary rule: any CSS property encoding semantic differentiation MUST meet minimum deltas. Background >= 15 RGB, letter-spacing >= 0.5px, font-size >= 2px, font-weight >= 200 units. Also adds application rules for gate runners and builder self-check guidance.</p>
+  </div>
+</details>
+
+<details>
+  <summary>Expand: Edit 4 -- TC skill recipe header for Phase 4</summary>
+  <div class="details-content">
+    <p>Inserts a recipe header with 7 explicit sequenced steps before Phase 4.0 Perceptual Guardrails: READ guardrails, READ catalog, SELECT mechanisms per category, MAP to CSS values, ASSESS pacing, CHECK coherence, VERIFY fractal consistency. The distinction matters: Middle got a recipe (4/4 DESIGNED). Flagship got a checklist (1.5/4 FLAT).</p>
+  </div>
+</details>
+
+<details>
+  <summary>Expand: Edits 5A-D -- compositional-core/CLAUDE.md (4 changes)</summary>
+  <div class="details-content">
+    <p><strong>5A: Builder Recipe for Phase 6.</strong> Replaces 3 constraint lines with: explicit file routing list (tokens, mechanism catalog, prohibitions, build plan), model selection guidance (Opus for Ceiling/Flagship), and a 7-step builder recipe with specific CSS values.</p>
+    <p><strong>5B: Builder Routing in Phase 4.</strong> Removes "first 200 lines" restriction on mechanism catalog. Builder needs the FULL catalog -- application modes, impact profiles, anti-patterns are the CSS recipes.</p>
+    <p><strong>5C: Agent Communication Protocol.</strong> Inserts new section before Anti-Gravity Rules. Binary rule: agents MUST use SendMessage for coordination. Evidence: zero messaging = B+ quality; messaging = A quality. Minimum message counts per tier.</p>
+    <p><strong>5D: Conditional-Load consistency.</strong> Updates to "FULL file" instead of "first 200 lines" for mechanism catalog.</p>
+  </div>
+</details>
+
+<details>
+  <summary>Expand: Edits 6A-B -- design-system/CLAUDE.md</summary>
+  <div class="details-content">
+    <p><strong>6A:</strong> Updates status line from "Ceiling Preparation In Progress" to "Pipeline v2 CODIFICATION IN PROGRESS."</p>
+    <p><strong>6B:</strong> Updates build routing to point at CLAUDE.md instead of README.md. Adds Opus recommendation for Ceiling/Flagship builders.</p>
+  </div>
+</details>
+
+
+<!-- ================================================================== -->
+<!-- SECTION 5: THE GATE SYSTEM -->
+<!-- ================================================================== -->
+<div class="divider-procedure"></div>
+<h2 id="s5">5. The Gate System -- All 15 Gates</h2>
+<div class="checkpoint" style="border-left-color:#2a7d7d;">
+  <div class="checkpoint-header" style="color:#2a7d7d;">At a Glance</div>
+  <p>15 automated checks in 3 timed groups catch ~70% of quality issues. The other ~30% requires PA auditors. Every gate exists because something failed before.</p>
+</div>
+
+<p>The gate system verifies ~70% of quality that can be measured by code. The remaining ~30% -- "does this <em>feel</em> designed?" -- belongs to the perceptual audit. Gates are necessary but not sufficient.</p>
+
+<p>Every gate exists because something went wrong in an actual experiment. They are scars.</p>
+
+<h3>Phase-Locked Gate Timing</h3>
+
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+Phase A-B complete (plan + skeleton saved)
+  |
+  v
+G1: STRUCTURAL GATES (4 checks, ~2 sec)
+  SC-06  ARIA landmarks >= 3?
+  SC-07  Skip link present?
+  SC-08  Component library classes >= 3?
+  SC-12  Zone count 2-5?
+  |  PASS
+  v
+Phase C: Backgrounds + Soul + Typography + Borders
+  |
+  v
+G2: PERCEPTION + SOUL GATES (8 checks, ~3 sec)
+  SC-01  Container width 940-960px?
+  SC-02  border-radius: 0, box-shadow: none?
+  SC-03  Font trinity (3 families only)?
+  SC-04  Warm palette (R >= G >= B)?
+  SC-05  No pure black (#000) or white (#FFF)?
+  SC-09  Background delta >= 15 RGB?
+  SC-11  Typography: display-body >= 10px?
+  SC-15  Border presence?
+  |  PASS
+  v
+Phase D: Cascade table + self-verification
+  |
+  v
+G3: COMPREHENSIVE (ALL 15 gates, ~5-15 sec)
+  Includes:
+    SC-10  Stacked gap <= 108px
+    SC-13  Multi-coherence >= 3 channels per boundary
+    SC-14  Sub-perceptual prevention (no letter-spacing < 0.02em)
+  |  PASS
+  v
+Screenshot capture --> PA audit --> Fix cycle (if needed)
+</div>
+<p class="diagram-label">The 3 phase-locked gates and their timing</p>
+
+<h3>Quick Reference: All 15 Gates</h3>
+
+<table>
+  <tr><th>Gate</th><th>Name</th><th>Category</th><th>Threshold</th><th>Phase</th></tr>
+  <tr><td>SC-01</td><td>Container Width</td><td>Soul</td><td>940-960px</td><td>G2</td></tr>
+  <tr><td>SC-02</td><td>Soul Properties</td><td>Soul</td><td>border-radius: 0, box-shadow: none</td><td>G2</td></tr>
+  <tr><td>SC-03</td><td>Font Trinity</td><td>Soul</td><td>>= 2 font families from trinity</td><td>G2</td></tr>
+  <tr><td>SC-04</td><td>Warm Palette</td><td>Soul</td><td>R >= G >= B on all backgrounds</td><td>G2</td></tr>
+  <tr><td>SC-05</td><td>No Pure Extremes</td><td>Soul</td><td>No #000000 or #FFFFFF</td><td>G2</td></tr>
+  <tr><td>SC-06</td><td>ARIA Landmarks</td><td>Structure</td><td>>= 3 landmarks</td><td>G1</td></tr>
+  <tr><td>SC-07</td><td>Skip Link</td><td>Structure</td><td>Skip link exists</td><td>G1</td></tr>
+  <tr><td>SC-08</td><td>Component Library</td><td>Structure</td><td>>= 3 component classes</td><td>G1</td></tr>
+  <tr><td>SC-09</td><td>Background Delta</td><td>Perception</td><td>>= 15 RGB max-channel delta</td><td>G2</td></tr>
+  <tr><td>SC-10</td><td>Stacked Gap</td><td>Perception</td><td>&lt;= 108px total gap</td><td>G3</td></tr>
+  <tr><td>SC-11</td><td>Typography Zones</td><td>Perception</td><td>>= 10px display-body, >= 2px body-detail delta</td><td>G2</td></tr>
+  <tr><td>SC-12</td><td>Zone Count</td><td>Structure</td><td>2-5 zones</td><td>G1</td></tr>
+  <tr><td>SC-13</td><td>Multi-Coherence</td><td>Composition</td><td>>= 3/6 channels shift per boundary</td><td>G3</td></tr>
+  <tr><td>SC-14</td><td>Sub-Perceptual</td><td>Hygiene</td><td>No letter-spacing &lt; 0.02em</td><td>G3</td></tr>
+  <tr><td>SC-15</td><td>Border Presence</td><td>Perception</td><td>>= 1 border or >= 2 dividers</td><td>G2</td></tr>
+</table>
+
+<details>
+  <summary>Expand: Gate-by-gate detail (all 15 gates with fix recipes)</summary>
+  <div class="details-content">
+    <h4>SC-01: Container Width</h4>
+    <p>Selects <code>main, [role="main"], .container</code> and reads <code>getComputedStyle(el).maxWidth</code>. Must be 940-960px. THE primary failure from the Phase D validation experiments — 4/5 pages violated container width. Fix: <code>main { max-width: 960px; margin: 0 auto; }</code></p>
+
+    <h4>SC-02: Soul Properties</h4>
+    <p>Checks <code>border-radius</code> and <code>box-shadow</code> on every element. All must be 0px / none. A single rounded corner breaks identity. Fix: <code>* { border-radius: 0 !important; box-shadow: none !important; }</code></p>
+
+    <h4>SC-03: Font Trinity</h4>
+    <p>Reads <code>fontFamily</code> on headings, body, detail text. Waits for <code>document.fonts.ready</code> first. Must find >= 2 distinct families from the trinity: Instrument Serif, Inter/Georgia, system-ui.</p>
+
+    <h4>SC-04: Warm Palette</h4>
+    <p>Parses every background color to RGB. Checks R >= G >= B (warm earth tones). Cool grays (#F5F5F5 where R=G=B) are borderline; anything with G > R is definitively cold.</p>
+
+    <h4>SC-05: No Pure Extremes</h4>
+    <p>Checks <code>backgroundColor</code> and <code>color</code> for rgb(0,0,0) or rgb(255,255,255). Use #1A1A1A for text, #FEF9F5 for backgrounds.</p>
+
+    <h4>SC-06: ARIA Landmarks</h4>
+    <p>Counts <code>header, main, footer, nav, [role="complementary"]</code>. Need >= 3. Runs in G1 because landmarks must exist before CSS work.</p>
+
+    <h4>SC-07: Skip Link</h4>
+    <p>Searches for <code>a[href="#main"], a.skip-link</code>. Costs one HTML element. WCAG requirement.</p>
+
+    <h4>SC-08: Component Library</h4>
+    <p>Searches for known classes: callout, data-table, pull-quote, grid-2col, etc. Need >= 3. Reduces soul violation risk.</p>
+
+    <h4>SC-09: Background Delta</h4>
+    <p>For each adjacent zone pair, calculates <code>max(|R1-R2|, |G1-G2|, |B1-B2|)</code>. Must be >= 15. The Flagship had deltas of 1-8 -- invisible. Fix recipe includes 2-3 warm hex alternatives.</p>
+
+    <h4>SC-10: Stacked Gap</h4>
+    <p>Uses <code>getBoundingClientRect()</code> on adjacent zones. Total gap must be <= 108px. Flagship had 210-276px voids. Includes sparse zone warning.</p>
+
+    <h4>SC-11: Typography Zones</h4>
+    <p>Display-to-body delta >= 10px. Body-to-detail delta >= 2px. >= 2 font families. Flagship had everything at 16px/400.</p>
+
+    <h4>SC-12: Zone Count</h4>
+    <p>Counts <code>[data-zone]</code> or <code>main > section</code>. Must be 2-5. Mathematical ceiling for perceptible scales is 5.</p>
+
+    <h4>SC-13: Multi-Coherence (~70% confidence)</h4>
+    <p>Measures 6 channels per boundary: chromatic, typographic, spatial, structural, behavioral, material. Need >= 3 shifting. Cannot assess whether shifts are semantically coherent -- PA handles that.</p>
+
+    <h4>SC-14: Sub-Perceptual Prevention</h4>
+    <p>Flags letter-spacing > 0 but < 0.02em. Flags intra-zone bg deltas of 1-9 RGB. Flagship spent 22% of CSS on imperceptible micro-typography.</p>
+
+    <h4>SC-15: Border Presence</h4>
+    <p>Searches for border-left >= 3px or >= 2 horizontal dividers. Flagship had zero borders anywhere. Borders encode hierarchy through weight gradients.</p>
+  </div>
+</details>
+
+<h3>The 70/30 Boundary</h3>
+<table>
+  <tr><th>Code Can Verify (Gates)</th><th>Code Cannot Verify (PA)</th></tr>
+  <tr><td>Container width is 960px</td><td>Does the layout feel balanced?</td></tr>
+  <tr><td>border-radius is 0 everywhere</td><td>Does the page feel DESIGNED? (PA-05)</td></tr>
+  <tr><td>Background delta >= 15 RGB</td><td>Does the metaphor drive CSS choices?</td></tr>
+  <tr><td>Font-size delta >= 10px</td><td>Do channel shifts serve the same direction?</td></tr>
+  <tr><td>Total gap <= 108px</td><td>Does spacing create satisfying rhythm?</td></tr>
+</table>
+
+<!-- CHECKPOINT -->
+<div class="checkpoint">
+  <div class="checkpoint-header">Checkpoint: Gates</div>
+  <p>You now understand all 15 gates, their phase-lock timing, their confidence tiers (binary threshold ~95%, structural presence ~90%, compositional ~70%), and the 70/30 boundary between what code can verify and what requires perceptual judgment.</p>
+</div>
+<p style="text-align:right;font-size:0.85rem;"><a href="#top">Back to Table of Contents</a></p>
+
+
+<!-- ================================================================== -->
+<!-- SECTION 6: THE BUILD FLOW -->
+<!-- ================================================================== -->
+<div class="divider-procedure"></div>
+<h2 id="s6">6. The Build Flow</h2>
+
+<p>You type <code>/build-page content.md</code>. This section expands on the <a href="#visual-overview">Visual Overview</a> build flow diagram with full annotations and timing.</p>
+
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+/build-page content.md
+       |
+       v
+ ORCHESTRATOR (thin, ~250 lines)
+       |-- Reads content.md
+       |-- Determines: Track 1 (data-heavy, token assembly) or Track 2 (prose-heavy, metaphor composition)
+       |-- Assembles input package for the core agent
+       |
+       v
+ CORE AGENT (single Opus, plans AND builds)
+       |-- Phase A: Read content, discover tensions (10-20 min)
+       |-- Phase B: Derive metaphor, plan layout (10-20 min)
+       |-- Phase C: Write HTML skeleton (20-30 min)
+       |
+       |-- >>> G1: structure checks <<<
+       |       |-- FAIL? Fix recipe -> core agent fixes -> re-check
+       |       |-- PASS? Continue
+       |
+       |-- Phase C (cont): Apply CSS styling (40-90 min)
+       |
+       |-- >>> G2: styling checks <<<
+       |       |-- FAIL? Fix recipe -> core agent fixes -> re-check
+       |       |-- PASS? Continue
+       |
+       |-- Phase D: Refinement + cascade table (10-15 min)
+       |
+       |-- >>> G3: ALL 15 gates <<<
+       |       |-- FAIL? Fix recipe -> max 3 cycles
+       |       |-- PASS? Continue
+       |
+       v
+ SCREENSHOT CAPTURE (orchestrator, not core agent)
+       |-- 1440px + 768px viewports
+       |-- Cold look + full scroll-through
+       |
+       v
+ PERCEPTUAL AUDIT (9 fresh-eyes Opus agents, parallel)
+       |-- Each: screenshots + 5-6 assigned PA questions
+       |-- ZERO context about content, plan, or build
+       |
+       v
+ WEAVER (1 Opus agent)
+       |-- Synthesizes verdict: SHIP / SHIP WITH FIXES / DO NOT SHIP
+       |
+       v
+ FIX CYCLE (if needed, max 3 rounds)
+       |-- SAME core agent receives fix list
+       |-- Full compositional memory preserved
+       |
+       v
+ OUTPUT
+       |-- output.html (the designed page)
+       |-- _pa-report.md (verdict + all 9 reports)
+       |-- _build-log.md (gate results, fix history, timing)
+</div>
+<p class="diagram-label">Complete build flow -- from /build-page to output</p>
+
+<h3>Timing Breakdown</h3>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+TIME     STAGE                            AGENTS ACTIVE
+------   -------------------------------- ----------------
+0:00     Orchestrator reads content        1 (orchestrator)
+0:01     Core agent spawned                2 (orch + core)
+0:01     Phase A: Content understanding    2
+0:20     Phase B: Zone + mechanism plan    2
+0:40     G1 (structure). PASS.             2
+0:50     Phase C: HTML skeleton + CSS      2
+1:30     G2 (styling). PASS.              2
+1:30     Phase C continues (richness)      2
+2:00     Phase D: Verification + G3        2
+2:05     G3 PASS. Screenshots.             2
+2:10     PA auditors spawned               11-12 (9 PA + weaver)
+2:30     PA complete. Weaver synthesizes   3 (core + weaver + orch)
+2:35     PA-05 >= 3/4? SHIP.              1 (output)
+
+TYPICAL TOTAL: 150-180 min (2.5-3 hours)
+TOTAL AGENTS: 12-13 across the full run
+</div>
+
+<h3>The 7 Boundary Crossings</h3>
+<table>
+  <tr><th>#</th><th>Boundary</th><th>Loss</th><th>Type</th></tr>
+  <tr><td>B1</td><td>Content -> Core agent</td><td>LOW</td><td>Constructive</td></tr>
+  <tr><td>B2</td><td>Core plan -> Core build</td><td>ZERO</td><td>Internal (same agent)</td></tr>
+  <tr><td>B3</td><td>Core output -> Gate runner</td><td>ZERO</td><td>Measurement</td></tr>
+  <tr><td>B4</td><td>Core output -> Screenshots</td><td>TOTAL (intentional)</td><td>Necessary</td></tr>
+  <tr><td>B5</td><td>9 PA reports -> Weaver</td><td>LOW</td><td>Constructive</td></tr>
+  <tr><td>B6</td><td>PA report -> Core fixes</td><td>LOW</td><td>Constructive</td></tr>
+  <tr><td>B7</td><td>Fix cycle -> Final output</td><td>ZERO</td><td>Revision</td></tr>
+</table>
+<p>The Flagship's critical Boundary 3 (TC planner -> builder, 65% intelligence loss) is <strong>eliminated</strong>. Same agent plans AND builds.</p>
+
+<!-- CHECKPOINT -->
+<div class="checkpoint">
+  <div class="checkpoint-header">Checkpoint: Build Flow</div>
+  <p>You now understand the complete build sequence: orchestrator routes, core agent creates (Phases A-D), 3 gates catch errors, 9 PA auditors verify independently, weaver synthesizes, same agent fixes. 12 agents total, 150-180 minutes, 7 non-destructive boundaries.</p>
+</div>
+<p style="text-align:right;font-size:0.85rem;"><a href="#top">Back to Table of Contents</a></p>
+
+
+<!-- ================================================================== -->
+<!-- SECTION 7: EXPERIMENTS -->
+<!-- ================================================================== -->
+<div class="divider-procedure"></div>
+<h2 id="s7">7. The Experiments — THE FIRST THING WE DO</h2>
+
+<div class="warning-box" style="border-left-color:#c49052;background:#fdf8f0;">
+  <strong>These experiments are not optional.</strong> They are Step 1. Everything described in Sections 2-6 is what we <em>expect</em> to build. The experiments determine what we <em>actually</em> build. Five experiments, ordered cheapest first.
+</div>
+
+<p>Architecture without validation is expensive fiction. Every time this project committed to an approach without testing it first, it failed. The no-compromise approach is: test everything, then build the winner.</p>
+
+<h3>The Decision Tree</h3>
+
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+ALL 5 EXPERIMENTS -- RUN THEM ALL, CHEAPEST FIRST
+(PV2 Diagram labels in parentheses for cross-reference)
+
+START
+  |
+  v
+Exp A: The Naked Test (= Diagram "EXP A")         ~$5, ~1 hour
+  1 Opus + 42-line minimal prompt, NO pipeline
+  |
+  v
+Exp B: The $5 Conventions Test (= Diagram "EXP E") ~$5-10, ~2 hours
+  1 Opus + conventions brief + tokens + prohibitions
+  |
+  v
+Exp C: Fat Core Full Test (= Diagram "EXP D")      ~$30-50, ~4 hours
+  12 agents: orchestrator + core + 3 gates + 9 PA + weaver
+  |
+  v
+Exp D: Full Recipe Test (= Diagram "EXP B")        ~$30-50, ~4 hours
+  Same as C but with 650-line recipe instead of 100-line brief
+  |
+  v
+Exp E: Head-to-Head (= Diagram "EXP C")            ~$40-80, ~6 hours
+  Conventions brief vs recipe, same content, blind comparison
+
+ALL scored identically: Mode 4 PA (9 Opus auditors, 48 questions)
+Total: ~$110-195, ~2 days
+
+DECISION TREE (after all 5 results):
+  A >= 3.0?  --> Pipeline is UNNECESSARY. Huge finding.
+  B >= 3.0?  --> Conventions brief alone = the pipeline. No orchestrator needed.
+  C >= 3.0?  --> Fat Core is the architecture. Build it.
+  D > C?     --> Recipe adds value. Use recipe format.
+  D <= C?    --> Recipe ceiling confirmed. Brief is sufficient.
+  E settles  --> Head-to-head removes ambiguity.
+  ALL < 3.0  --> Investigation missed something fundamental.
+
+RESULTS DETERMINE: topology, builder format, codification scope.
+We build WHATEVER WINS. No pre-commitment.
+</div>
+<p class="diagram-label">All 5 experiments -- the no-compromise approach tests everything before committing to anything</p>
+
+<h3 id="exp-a">Experiment A: The Naked Test (~$5, ~1 hour)</h3>
+<p>A single Opus agent receives a 42-line minimal prompt. No conventions brief. No pipeline. No skill invocation. Just the content and basic identity constraints.</p>
+<p><strong>Tests:</strong> What's the absolute floor? What does Opus produce with almost no guidance?</p>
+<p><strong>Why run it:</strong> Establishes the baseline. Everything else is measured against this.</p>
+
+<h3 id="exp-b">Experiment B: The $5 Conventions Test (~$5-10, ~2 hours)</h3>
+<p>A single Opus agent receives: conventions brief + tokens.css + prohibitions + RESEARCH-SYNTHESIS.md. No pipeline. No orchestrator. No gates. Plans and builds in one pass. Mode 4 PA evaluation.</p>
+<p><strong>Tests the most radical question:</strong> does any pipeline infrastructure help at all, or is the conventions brief enough?</p>
+<p><strong>Why run it:</strong> If B >= 3.0/4, the entire orchestrator and gate infrastructure is unnecessary. This is the best possible outcome — maximum quality with minimum complexity.</p>
+
+<h3 id="exp-c">Experiment C: Fat Core Full Test (~$30-50, ~4 hours)</h3>
+<p>Full 12-agent architecture: orchestrator + core agent (plans AND builds) + 3 phase-locked gates + 9 PA auditors + weaver + fix cycle.</p>
+<p><strong>Tests:</strong> Does the verification shell (gates + PA + fix cycle) add measurable value over a naked single agent?</p>
+<p><strong>Why run it:</strong> If C significantly beats B, then the infrastructure justifies its cost.</p>
+
+<h3 id="exp-d">Experiment D: Full Recipe Test (~$30-50, ~4 hours)</h3>
+<p>Same Fat Core architecture as Experiment C, but the core agent gets a 650-line enriched recipe instead of the 100-line conventions brief. Everything else identical.</p>
+<p><strong>Tests:</strong> Does more builder input help or hurt? The recipe ceiling hypothesis.</p>
+<p><strong>Why run it:</strong> Settles whether the Flagship failed because of the recipe format or despite it.</p>
+
+<h3 id="exp-e">Experiment E: Head-to-Head (~$40-80, ~6 hours)</h3>
+<p>Same content, same architecture, two builds: one with conventions brief, one with recipe. Both scored by the same Mode 4 PA. Direct comparison.</p>
+<p><strong>Tests:</strong> If the recipe outperforms conventions — the brief needs enrichment. If conventions outperforms recipe — less is more, confirmed.</p>
+<p><strong>Why run it:</strong> Removes all confounding variables. Pure A/B test.</p>
+
+<details>
+  <summary>Expand: The 2D model explaining these experiments</summary>
+  <div class="details-content">
+<div class="code-block">
+                    HIGH SPECIFICITY
+                    (exact values, thresholds)
+                         |
+         Flagship        |        Fat Core
+         (1.5/4)         |        (UNTESTED -- predicted 3.0-3.5)
+         HIGH spec       |        HIGH spec
+         LOW freedom     |        MAX freedom
+                         |
+  LOW FREEDOM -----------+----------- HIGH FREEDOM
+                         |
+         Floor           |        CD-006 / Middle
+         (baseline)      |        (4/4)
+         LOW spec        |        LOW spec
+         LOW freedom     |        HIGH freedom
+                         |
+                    LOW SPECIFICITY
+</div>
+    <p>Every successful build sits in the HIGH FREEDOM quadrant. The Flagship sits in HIGH SPECIFICITY + LOW FREEDOM. The conventions brief occupies the untested upper-right: HIGH SPECIFICITY (perception thresholds) + HIGH FREEDOM (creative authority).</p>
+  </div>
+</details>
+
+<h3>Shared Protocol</h3>
+<p>All experiments use identical conditions for direct comparison:</p>
+<ul>
+  <li><strong>Content:</strong> RESEARCH-SYNTHESIS.md (~384 lines)</li>
+  <li><strong>Builder model:</strong> claude-opus-4-6 (non-negotiable)</li>
+  <li><strong>PA evaluation:</strong> Mode 4. 9 blind Opus auditors. Pre-captured screenshots at 1440px + 768px.</li>
+  <li><strong>Success threshold:</strong> PA-05 >= 3.0/4 (COMPOSED or DESIGNED)</li>
+</ul>
+
+<h3>What Happens After — Results Determine Architecture</h3>
+<table>
+  <tr><th>Outcome</th><th>What We Build</th></tr>
+  <tr><td>A >= 3.0</td><td>Pipeline is UNNECESSARY. Opus alone is enough. Publish conventions brief + minimal wrapper. Biggest finding possible.</td></tr>
+  <tr><td>B >= 3.0 (A was lower)</td><td>Conventions brief IS the pipeline. No orchestrator, no gates. Just the brief + Mode 4 PA after.</td></tr>
+  <tr><td>C >= 3.0 (B was lower)</td><td>Fat Core is the architecture. Build orchestrator + gates + full pipeline.</td></tr>
+  <tr><td>D > C</td><td>Recipe adds value. Use enriched recipe format instead of conventions brief.</td></tr>
+  <tr><td>D &lt;= C</td><td>Recipe ceiling confirmed. Brief is sufficient. Less is more.</td></tr>
+  <tr><td>E settles ties</td><td>Head-to-head resolves any ambiguity between D and C.</td></tr>
+  <tr><td>ALL &lt; 3.0</td><td>Investigation missed something fundamental. Return to research.</td></tr>
+</table>
+
+
+<div class="checkpoint">
+  <div class="checkpoint-header">Checkpoint: Experiment Plan Complete</div>
+  <p>You now know the 5 experiments, their costs ($5-$80 each, ~$150 total), their decision criteria, and the decision tree that maps results to architecture choices. The next section tells you what order to build and run everything.</p>
+  <p><strong>Bridge note:</strong> The implementation order below incorporates Experiments B and C (from this section) as Steps 3 and 6, with decision gates after each. Experiments A (naked test), D (full recipe), and E (head-to-head) can be run at any point after Step 2 is complete — they require only the conventions brief and content, no infrastructure.</p>
+</div>
+<p style="text-align:right;font-size:0.85rem;"><a href="#top">Back to Table of Contents</a></p>
+
+<!-- ================================================================== -->
+<!-- SECTION 8: IMPLEMENTATION ORDER -->
+<!-- ================================================================== -->
+<div class="divider-procedure"></div>
+<h2 id="s8">8. The Implementation Order</h2>
+
+<h3>The Dependency Diagram</h3>
+
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+Step 1: Foundation Edits          (30-45 min)
+  |     Small fixes to 3 existing files
+  |     -- perception thresholds, stacking rule, stacking token
+  |
+  v
+Step 2: Conventions Brief         (1-2 hours)
+  |     The MOST IMPORTANT new file
+  |     -- the builder's only spec document (~100 lines)
+  |
+  v
+Step 3: Experiment B              (2-3 hours)
+  |     The $5 Conventions Test
+  |     -- 1 Opus agent + conventions brief + content
+  |
+  | <-- DECISION GATE: PA-05 >= 3.0? Skip to Step 7.
+  |
+  v
+Step 4: Gate Infrastructure       (3-5 hours)
+  |     gate-registry.js + gate-runner.js
+  |     -- 15 programmatic checks via Playwright
+  |
+  v
+Step 5: Orchestrator Skill        (4-6 hours)
+  |     /build-page SKILL.md
+  |     -- the conductor that ties everything together
+  |
+  v
+Step 6: Experiment C              (3-4 hours)
+  |     Fat Core Full Test
+  |     -- orchestrator + core agent + 9 PA + weaver
+  |
+  | <-- DECISION GATE: PA-05 >= 3.0? Ship.
+  |
+  v
+Step 7: Polish                    (1-2 hours)
+        Update CLAUDE.md files, add /build-page routing
+</div>
+<p class="diagram-label">Implementation dependency chain -- total estimated: 15-23 hours</p>
+
+<h3>Step by Step</h3>
+
+<h4>Step 1: Foundation Edits (30-45 min)</h4>
+<p>Three small edits to existing files:</p>
+<ul>
+  <li><strong>1A:</strong> Perception thresholds in PA SKILL.md (~30 lines)</li>
+  <li><strong>1B:</strong> S-09 stacking rule in semantic-rules.md (~25 lines)</li>
+  <li><strong>1C:</strong> Stacking token in tokens.css (~5 lines)</li>
+</ul>
+<p><strong>Why first:</strong> Every other step references these values. They are ground truth.</p>
+
+<h4>Step 2: Conventions Brief (1-2 hours)</h4>
+<p>Write <code>conventions-brief.md</code> (~100 lines). The single most important new file.</p>
+<p><strong>Why second:</strong> The conventions brief is the core product. Everything else supports it.</p>
+
+<h4>Step 3: Experiment B — The $5 Conventions Test (2-3 hours)</h4>
+<p>One Opus agent. Conventions brief + content + tokens + prohibitions. No pipeline.</p>
+<div class="warning-box">
+  <strong>Decision gate (non-negotiable):</strong> PA-05 >= 3.0 --> skip to Step 7 (fast path, 4-8 hours total). PA-05 2.0-2.9 --> continue to Step 4. PA-05 &lt; 2.0 --> revise conventions brief.
+</div>
+
+<h4>Step 4: Gate Infrastructure (3-5 hours)</h4>
+<p>Write gate-runner.js (~400 lines) and gate-registry.js (~120 lines).</p>
+<p><strong>Why fourth:</strong> Building gates before confirming the approach (Step 3) is premature.</p>
+
+<h4>Step 5: Orchestrator Skill (4-6 hours)</h4>
+<p>Write <code>build-page/SKILL.md</code> (~350-500 lines). The conductor.</p>
+<p><strong>Why fifth:</strong> Needs both the conventions brief (Step 2) and the gate runner (Step 4).</p>
+
+<h4>Step 6: Experiment C — Fat Core Full Test (3-4 hours)</h4>
+<p>Full pipeline end-to-end: <code>/build-page</code> with all 12 agents.</p>
+
+<h4>Step 7: Polish (1-2 hours)</h4>
+<p>Update CLAUDE.md files, add routing, document experiment results.</p>
+
+<h3>The Fast Path</h3>
+<div class="success-box">
+  <strong>If Experiment B passes (PA-05 >= 3.0):</strong> Steps 1 + 2 + 3 + 7 = <strong>4-8 hours total</strong>. No orchestrator. No gate runner. Just one Opus agent, one 100-line document, and one verification pass. The conventions brief IS the pipeline.
+</div>
+
+<h3>Complete Timeline</h3>
+<table>
+  <tr><th>Step</th><th>What</th><th>Time</th><th>Running Total</th></tr>
+  <tr><td>1</td><td>Foundation Edits</td><td>30-45 min</td><td>30-45 min</td></tr>
+  <tr><td>2</td><td>Conventions Brief</td><td>1-2 hours</td><td>1.5-2.75 hours</td></tr>
+  <tr><td>3</td><td>Experiment B</td><td>2-3 hours</td><td>3.5-5.75 hours</td></tr>
+  <tr><td></td><td><em>Decision gate</em></td><td></td><td></td></tr>
+  <tr><td>4</td><td>Gate Infrastructure</td><td>3-5 hours</td><td>6.5-10.75 hours</td></tr>
+  <tr><td>5</td><td>Orchestrator Skill</td><td>4-6 hours</td><td>10.5-16.75 hours</td></tr>
+  <tr><td>6</td><td>Experiment C</td><td>3-4 hours</td><td>13.5-20.75 hours</td></tr>
+  <tr><td></td><td><em>Decision gate</em></td><td></td><td></td></tr>
+  <tr><td>7</td><td>Polish</td><td>1-2 hours</td><td>14.5-22.75 hours</td></tr>
+</table>
+
+
+<!-- ================================================================== -->
+<!-- SECTION 9: WHY THIS WONT FAIL -->
+<!-- ================================================================== -->
+<div class="divider-procedure"></div>
+<h2 id="s9">9. Why This Won't Fail</h2>
+<div class="checkpoint" style="border-left-color:#2a7d7d;">
+  <div class="checkpoint-header" style="color:#2a7d7d;">At a Glance</div>
+  <p>9 diagnosed failures from previous experiments, all caused by compressing intelligence across agent boundaries. Fat Core eliminates the compression. Each failure has a specific structural fix.</p>
+</div>
+
+<p>The Flagship scored PA-05 1.5/4. Nine diagnosed failures explain why. Fat Core is designed to make each one structurally impossible.</p>
+
+<h3>Failure 1: The Guardrail Factory</h3>
+<p><strong>What happened:</strong> The 963-line prompt had a 7.9:1 ratio of "what NOT to do" to "what TO do." 55 building guardrails. 7 building playbooks. The builder got 97 food safety rules and zero recipes.</p>
+<p><strong>How Fat Core prevents it:</strong> The conventions brief is ~1:1 guardrail-to-playbook. But more importantly, the Opus core agent brings its own compositional intelligence. It doesn't need recipes because it discovers mechanisms from content.</p>
+
+<h3>Failure 2: The 75-Line Visibility Cap</h3>
+<p><strong>What happened:</strong> The builder saw 71 of 530 builder-relevant lines (13.4%). It received 100% of guardrails and 0% of playbooks. The Extract Creator compressed by keeping constraints and dropping recipes.</p>
+<p><strong>How Fat Core prevents it:</strong> The core agent receives 230 lines -- 100% visibility of 100% of the specification. No hidden conviction layer. No 888-line gap.</p>
+
+<h3>Failure 3: Inverted Quality Routing</h3>
+<p><strong>What happened:</strong> The best CSS references (mechanism catalog, scale-channel invocation) went to the Planner who doesn't write CSS. The Builder got tokens + prohibitions + a missing file.</p>
+<p><strong>How Fat Core prevents it:</strong> Same agent plans AND builds. No routing problem because no routing.</p>
+
+<h3>Failure 4: Imperceptible Deltas</h3>
+<p><strong>What happened:</strong> Letter-spacing 0.001-0.01em. Backgrounds differing by 1-8 RGB. 22% of CSS budget on invisible micro-typography. Zero perception terms in 963 lines.</p>
+<p><strong>How Fat Core prevents it:</strong> Conventions brief Section 1 embeds exact minimum deltas. Gate runner enforces them programmatically.</p>
+
+<h3>Failure 5: S-09 Stacking Loophole</h3>
+<p><strong>What happened:</strong> Individual values all <= 96px. Stacked totals: 210-276px voids. 9/9 auditors flagged. Per-property check missed aggregate failure.</p>
+<p><strong>How Fat Core prevents it:</strong> Total boundary gap <= 108px. Gate runner measures bounding rectangles, not individual properties.</p>
+
+<h3>Failure 6: Zero Inter-Agent Messaging</h3>
+<p><strong>What happened:</strong> 19 agents. Zero SendMessage calls. Builder couldn't ask planner about ambiguities.</p>
+<p><strong>How Fat Core prevents it:</strong> Eliminates the boundary. Same agent plans AND builds. Cannot fail to communicate with itself.</p>
+
+<h3>Failure 7: 19 Agents = Compression Death</h3>
+<p><strong>What happened:</strong> 337 findings compressed through 5 boundaries. 91.2% loss. 50:1 compression from research to "sample 2-4 mechanisms."</p>
+<p><strong>How Fat Core prevents it:</strong> 12 agents, 7 boundaries, ZERO destructive. Critical Boundary 3 (65% intelligence loss) eliminated.</p>
+
+<h3>Failure 8: Checklist vs Recipe</h3>
+<p><strong>What happened:</strong> Middle got a recipe (sequenced steps, action verbs) --> 4/4. Flagship got a checklist (unordered constraints, verification verbs) --> 1.5/4.</p>
+<p><strong>How Fat Core prevents it:</strong> The conventions brief is neither recipe nor checklist -- it is constraints paired with creative authority. Section 5: "Your judgment supersedes this document on all non-soul matters."</p>
+
+<h3>Failure 9: 660:1 Meta-to-Output Ratio</h3>
+<p><strong>What happened:</strong> 660 lines of planning per 1 line of output. 135+ agents analyzed. Zero wrote a CSS playbook.</p>
+<p><strong>How Fat Core prevents it:</strong> Targets &lt; 5:1. Pipeline is Orchestrate - Build - Verify - Fix. Four phases. No room for analysis-about-analysis.</p>
+
+<details>
+  <summary>Expand: The meta-pattern across all 9 failures</summary>
+  <div class="details-content">
+    <p>Every failure was an instance of trying to ENCODE compositional intelligence into documents and pass it between agents, instead of putting the intelligence where it will be used.</p>
+    <table>
+      <tr><th>Failure</th><th>What Was Encoded</th><th>Where It Was Lost</th></tr>
+      <tr><td>Guardrail factory</td><td>"What good looks like" as constraints</td><td>Constraints lack generative force</td></tr>
+      <tr><td>Visibility cap</td><td>Prompt compressed for builder</td><td>Recipes lost, guardrails survived</td></tr>
+      <tr><td>Inverted routing</td><td>Best references to wrong agent</td><td>CSS knowledge never reached CSS writer</td></tr>
+      <tr><td>Imperceptible deltas</td><td>"Vary the channels" without magnitudes</td><td>Builder had no perception model</td></tr>
+      <tr><td>S-09 stacking</td><td>Per-property rule</td><td>Structure masked real measurement</td></tr>
+      <tr><td>Zero messaging</td><td>Protocol in text</td><td>Obligations without enforcement</td></tr>
+      <tr><td>19-agent compression</td><td>337 findings through 5 boundaries</td><td>91.2% operational content lost</td></tr>
+      <tr><td>Checklist</td><td>Criteria without build steps</td><td>Builder minimized, didn't create</td></tr>
+      <tr><td>660:1 ratio</td><td>Analysis without action synthesis</td><td>Rules accumulated, instructions didn't</td></tr>
+    </table>
+    <p><strong>Fat Core's answer:</strong> Stop compressing intelligence into documents. Put an intelligent agent at the center with minimal constraints and maximum creative authority. Verify the OUTPUT, not the PROCESS.</p>
+  </div>
+</details>
+
+<h3>What Could Still Go Wrong</h3>
+<ol>
+  <li><strong>The Core agent has a bad day.</strong> Single point of creative failure. Mitigation: PA catches output failures + fix cycle.</li>
+  <li><strong>Soul violations.</strong> Without a recipe, the agent might use wrong values. Mitigation: gate runner catches these programmatically.</li>
+  <li><strong>The conventions brief is wrong.</strong> Thresholds derived from N=2. Mitigation: experiments calibrate empirically.</li>
+  <li><strong>Untested content types.</strong> All experiments use RESEARCH-SYNTHESIS. Mitigation: future experiments with diverse content.</li>
+  <li><strong>Opus-dependence.</strong> Architecture requires Opus-class for the core agent. Mitigation: the evidence strongly favors Opus (CD-006 = Opus = 39/40).</li>
+</ol>
+
+<div class="warning-box">
+  <strong>These risks are real but manageable.</strong> The Flagship's failures were systemic -- embedded in the architecture, invisible to 135+ agents. Fat Core's risks are localized -- fixable with a PA cycle, a threshold adjustment, or a different content test.
+</div>
+
+<!-- CHECKPOINT -->
+<div class="checkpoint">
+  <div class="checkpoint-header">Checkpoint: Complete Understanding</div>
+  <p>You now have the full picture. The current state (Section 1), the architecture (Section 2), what to create (Section 3), what to edit (Section 4), the gates (Section 5), the build flow (Section 6), the experiments (Section 7), the implementation order (Section 8), and the lessons that shaped every decision (Section 9).</p>
+  <p>What remains is the master checklist below -- the definitive "do this" list.</p>
+</div>
+<p style="text-align:right;font-size:0.85rem;"><a href="#top">Back to Table of Contents</a></p>
+
+
+<!-- ================================================================== -->
+<!-- MASTER CHECKLIST -->
+<!-- ================================================================== -->
+<div class="divider-checkpoint"></div>
+
+<div class="milestone">Master Checklist -- Every File, Every Edit, In Order</div>
+
+<h2 id="master-checklist">Master Checklist</h2>
+
+<p>This is the definitive implementation list. Every item appears in implementation order. Each depends on the one before it.</p>
+
+<div class="checklist">
+  <h4>Step 1: Foundation Edits (30-45 min)</h4>
+  <label><input type="checkbox"> <strong>Edit 1A:</strong> Add perception delta thresholds to <code>~/.claude/skills/perceptual-auditing/SKILL.md</code> (~30 lines)</label>
+  <label><input type="checkbox"> <strong>Edit 1B:</strong> Add S-09 stacking rule to <code>design-system/compositional-core/guidelines/semantic-rules.md</code> (~25 lines)</label>
+  <label><input type="checkbox"> <strong>Edit 1C:</strong> Add <code>--space-max-stacked: 108px</code> to <code>design-system/compositional-core/vocabulary/tokens.css</code> (~5 lines)</label>
+</div>
+
+<div class="checklist">
+  <h4>Step 2: Create Conventions Brief (1-2 hours)</h4>
+  <label><input type="checkbox"> <strong>Create:</strong> <code>design-system/compositional-core/guidelines/conventions-brief.md</code> (~100 lines)</label>
+  <label class="sub-item"><input type="checkbox"> Section 1: Perception Thresholds (~20 lines)</label>
+  <label class="sub-item"><input type="checkbox"> Section 2: Soul Constraints (~20 lines)</label>
+  <label class="sub-item"><input type="checkbox"> Section 3: Spatial Rules (~20 lines)</label>
+  <label class="sub-item"><input type="checkbox"> Section 4: Quality Floor (~20 lines)</label>
+  <label class="sub-item"><input type="checkbox"> Section 5: Creative Authority (~20 lines)</label>
+</div>
+
+<div class="checklist">
+  <h4>Step 3: Run Experiment B — The $5 Conventions Test (2-3 hours)</h4>
+  <label><input type="checkbox"> Spawn 1 Opus agent with: RESEARCH-SYNTHESIS.md + conventions brief + tokens.css + prohibitions</label>
+  <label><input type="checkbox"> Agent plans + builds in one pass (no pipeline)</label>
+  <label><input type="checkbox"> Run Mode 4 PA: 9 blind Opus auditors + 1 weaver</label>
+  <label><input type="checkbox"> Score PA-05 and document results</label>
+  <label><input type="checkbox"> <strong>DECISION GATE:</strong> PA-05 >= 3.0 → skip to Step 7 (fast path). PA-05 2.0-2.9 → continue to Step 4. PA-05 &lt; 2.0 → investigate conventions brief.</label>
+</div>
+
+<div class="checklist">
+  <h4>Step 4: Gate Infrastructure (3-5 hours) — only if Exp B &lt; 3.0</h4>
+  <label><input type="checkbox"> <strong>Create:</strong> <code>design-system/compositional-core/validation/gate-registry.js</code> (~120 lines)</label>
+  <label><input type="checkbox"> <strong>Create:</strong> <code>design-system/compositional-core/validation/gate-runner.js</code> (~400 lines)</label>
+  <label class="sub-item"><input type="checkbox"> Soul gates: SC-01 through SC-05</label>
+  <label class="sub-item"><input type="checkbox"> Structure gates: SC-06, SC-07, SC-08, SC-12</label>
+  <label class="sub-item"><input type="checkbox"> Perception gates: SC-09, SC-10, SC-11, SC-13, SC-14, SC-15</label>
+  <label class="sub-item"><input type="checkbox"> Fix recipe system for all failures</label>
+  <label class="sub-item"><input type="checkbox"> Phase-locked gate groups (G1, G2, G3)</label>
+</div>
+
+<div class="checklist">
+  <h4>Step 5: Orchestrator Skill (4-6 hours) — only if Exp B &lt; 3.0</h4>
+  <label><input type="checkbox"> <strong>Create:</strong> <code>~/.claude/skills/build-page/SKILL.md</code> (~350-500 lines)</label>
+  <label class="sub-item"><input type="checkbox"> Content reading + tier classification</label>
+  <label class="sub-item"><input type="checkbox"> Core agent spawning with conventions brief + tokens + prohibitions</label>
+  <label class="sub-item"><input type="checkbox"> Phase-locked gate invocation (G1, G2, G3)</label>
+  <label class="sub-item"><input type="checkbox"> Screenshot pre-capture at 1440px + 768px</label>
+  <label class="sub-item"><input type="checkbox"> 9 PA auditor spawning (parallel, fresh-eyes, blind)</label>
+  <label class="sub-item"><input type="checkbox"> Weaver spawning for verdict synthesis</label>
+  <label class="sub-item"><input type="checkbox"> Fix cycle routing to SAME core agent (max 3 rounds)</label>
+  <label class="sub-item"><input type="checkbox"> Output: output.html + _pa-report.md + _build-log.md</label>
+</div>
+
+<div class="checklist">
+  <h4>Step 5.5: Create Supporting Files (included in Step 5)</h4>
+  <label><input type="checkbox"> <strong>Create:</strong> <code>design-system/compositional-core/guidelines/perception-thresholds.md</code> (~80 lines)</label>
+  <label><input type="checkbox"> <strong>Create:</strong> <code>ephemeral/compositional-intelligence/experiment-protocol.md</code> (~80 lines)</label>
+</div>
+
+<div class="checklist">
+  <h4>Step 6: Run Experiment C — Fat Core Full Test (3-4 hours) — only if Exp B &lt; 3.0</h4>
+  <label><input type="checkbox"> Type <code>/build-page design-system/research/RESEARCH-SYNTHESIS.md</code></label>
+  <label><input type="checkbox"> Full pipeline: orchestrator + core agent + gates + 9 PA + weaver</label>
+  <label><input type="checkbox"> Score PA-05 and compare to Experiment A</label>
+  <label><input type="checkbox"> <strong>DECISION GATE:</strong> C >= B + 0.5 → ship Fat Core. C ~= B → simplify. C &lt; B → debug.</label>
+</div>
+
+<div class="checklist">
+  <h4>Step 7: Polish (1-2 hours)</h4>
+  <label><input type="checkbox"> <strong>Edit 4:</strong> Add recipe header to Phase 4 in <code>~/.claude/skills/tension-composition/SKILL.md</code> (~15 lines)</label>
+  <label><input type="checkbox"> <strong>Edit 5A:</strong> Replace Phase 6 in <code>design-system/compositional-core/CLAUDE.md</code> with builder recipe + routing + model guidance (~15 net lines)</label>
+  <label><input type="checkbox"> <strong>Edit 5B:</strong> Remove 200-line restriction on mechanism catalog access (~9 lines)</label>
+  <label><input type="checkbox"> <strong>Edit 5C:</strong> Insert Agent Communication Protocol section (~20 lines)</label>
+  <label><input type="checkbox"> <strong>Edit 5D:</strong> Update conditional-load to FULL file (~2 lines)</label>
+  <label><input type="checkbox"> <strong>Edit 6A:</strong> Update status line in <code>design-system/CLAUDE.md</code></label>
+  <label><input type="checkbox"> <strong>Edit 6B:</strong> Update build routing + add Opus recommendation</label>
+  <label><input type="checkbox"> Document experiment results and final architecture decision</label>
+</div>
+
+
+<!-- ================================================================== -->
+<!-- APPENDIX -->
+<!-- ================================================================== -->
+<div class="divider-context"></div>
+<h2 id="appendix">Appendix: Key File Paths</h2>
+
+<div class="appendix">
+  <h3>Existing Files (Already Validated)</h3>
+  <table>
+    <tr><th>File</th><th>Purpose</th></tr>
+    <tr><td><code>design-system/CLAUDE.md</code></td><td>Root navigation -- first file any agent reads</td></tr>
+    <tr><td><code>design-system/compositional-core/CLAUDE.md</code></td><td>Phase-gated building protocol</td></tr>
+    <tr><td><code>design-system/compositional-core/identity/prohibitions.md</code></td><td>Layer 1: 22 identity rules (8 absolute + 12 conditional + 2 meta)</td></tr>
+    <tr><td><code>design-system/compositional-core/vocabulary/tokens.css</code></td><td>Layer 2: 80 design tokens</td></tr>
+    <tr><td><code>design-system/compositional-core/grammar/mechanism-catalog.md</code></td><td>Layer 3: 18 mechanisms</td></tr>
+    <tr><td><code>design-system/compositional-core/components/components.css</code></td><td>Layer 4: merged component library</td></tr>
+    <tr><td><code>design-system/compositional-core/case-studies/README.md</code></td><td>Layer 5: 9 case studies</td></tr>
+    <tr><td><code>design-system/compositional-core/guidelines/semantic-rules.md</code></td><td>Layer 6: 7 gap rules</td></tr>
+    <tr><td><code>~/.claude/skills/tension-composition/SKILL.md</code></td><td>Creative engine (~1,930 lines)</td></tr>
+    <tr><td><code>~/.claude/skills/perceptual-auditing/SKILL.md</code></td><td>Quality gate (848 lines)</td></tr>
+    <tr><td><code>design-system/research/RESEARCH-SYNTHESIS.md</code></td><td>Cross-research insights (experiment content)</td></tr>
+    <tr><td><code>design-system/validated-explorations/combination/CD-006-pilot-migration.html</code></td><td>Crown jewel (39/40)</td></tr>
+  </table>
+
+  <h3>New Files (To Be Created)</h3>
+  <table>
+    <tr><th>File</th><th>Purpose</th><th>Step</th></tr>
+    <tr><td><code>~/.claude/skills/build-page/SKILL.md</code></td><td>Orchestrator (<code>/build-page</code> entry point)</td><td>5</td></tr>
+    <tr><td><code>design-system/compositional-core/guidelines/conventions-brief.md</code></td><td>Builder's only spec (~100 lines)</td><td>2</td></tr>
+    <tr><td><code>design-system/compositional-core/guidelines/perception-thresholds.md</code></td><td>Minimum perceptible CSS deltas</td><td>5.5</td></tr>
+    <tr><td><code>design-system/compositional-core/validation/gate-runner.js</code></td><td>Automated quality checker</td><td>4</td></tr>
+    <tr><td><code>design-system/compositional-core/validation/gate-registry.js</code></td><td>Gate threshold config</td><td>4</td></tr>
+    <tr><td><code>ephemeral/compositional-intelligence/experiment-protocol.md</code></td><td>5 experiment definitions</td><td>5.5</td></tr>
+  </table>
+
+  <h3>Research & Continuity</h3>
+  <table>
+    <tr><th>File</th><th>Purpose</th></tr>
+    <tr><td><code>ephemeral/continuity-docs/HANDOFF.md</code></td><td>Complete state transfer document</td></tr>
+    <tr><td><code>ephemeral/pipeline-analysis/CLAUDE.md</code></td><td>Pipeline analysis corpus navigation</td></tr>
+    <tr><td><code>ephemeral/pipeline-analysis/README.md</code></td><td>41-file corpus guide</td></tr>
+  </table>
+</div>
+
+<div class="milestone">This document represents months of research, 50+ agents, 41 analysis files, and hard-won lessons distilled into one implementation guide. Test everything. Build the winner. Accept no compromises.</div>
+
+<!-- ================================================================== -->
+<!-- WHAT COMES AFTER -->
+<!-- ================================================================== -->
+<div class="divider-context"></div>
+<h2 id="after">What Comes After</h2>
+
+<p>Once Pipeline v2 is working (experiments passed, architecture chosen, /build-page functional), the design system enters its next phase. Here's the road ahead:</p>
+
+<h3>Immediate Next Steps (After Pipeline v2 Ships)</h3>
+<ol>
+  <li><strong>Hardening runs (3-5 builds):</strong> Run /build-page on 3-5 different content types — prose-heavy, data-heavy, mixed, short, long. Identify failure patterns. Tune the conventions brief and gate thresholds based on real results, not theory.</li>
+  <li><strong>Lock the pipeline:</strong> Once hardening passes, freeze the pipeline files. No more changes without experiment evidence.</li>
+  <li><strong>Document the architecture decision:</strong> Write a one-page summary of which experiments won, what the scores were, and why the chosen architecture was selected. This becomes the provenance record.</li>
+</ol>
+
+<h3>Phase E: Migration Playbook v2 (Dual-Track)</h3>
+<p>The design system has ~75-85 pages to migrate. They split into two tracks:</p>
+<ul>
+  <li><strong>Track 1 (Token + Pattern):</strong> 30-40 pages with explicit vocabulary (tables, stats, diagrams). These get token application + pattern selection. ~45-90 min per page. Parallelizable — multiple pages can build simultaneously.</li>
+  <li><strong>Track 2 (Metaphor + Composition):</strong> 35-45 pages with implicit tension (narratives, prose-heavy content). These invoke /build-page. ~3-5 hours per page. Sequential bottleneck — each page needs unique metaphor discovery.</li>
+</ul>
+
+<h3>Phase F: Pilot Migration (Must Include Track 2)</h3>
+<p>Migrate 3-5 pages from each track as a pilot. Validate that the pipeline works at scale, not just on test content. Identify any Track 1 vs Track 2 gaps.</p>
+
+<h3>Phase G: Playbook Refinement</h3>
+<p>Based on pilot results, refine the pipeline. Adjust conventions brief, gate thresholds, and PA question assignments. This is the last iteration before the freeze line.</p>
+
+<div style="background:#f0ebe3;border:3px solid #c49052;padding:1.25rem;margin:2rem 0;text-align:center;">
+  <strong style="color:#c49052;font-size:1.1rem;">═══ FREEZE LINE ═══</strong>
+  <p style="margin:0.5rem 0 0;">After Phase G, the design system locks. Token values, prohibitions, mechanisms, components — all frozen. No more changes without formal governance.</p>
+</div>
+
+<h3>Phase H: Track 1 Migration (30-40 pages)</h3>
+<p>Token application + pattern selection for data-heavy pages. ~45-90 min per page. Highly parallelizable — could run 5-10 pages simultaneously with separate agents.</p>
+<p><strong>Estimated:</strong> 2-4 weeks with parallel execution.</p>
+
+<h3>Phase I: Track 2 Migration (35-45 pages)</h3>
+<p>Full /build-page pipeline for prose-heavy pages. ~3-5 hours per page. Sequential bottleneck (each page needs unique metaphor).</p>
+<p><strong>Estimated:</strong> 4-8 weeks at 2-3 pages per day.</p>
+
+<h3>Phase J: Content Ingestion (Ongoing)</h3>
+<p>After all existing pages are migrated, new content enters through the same pipeline. /build-page becomes the standard tool for any new page. The pipeline runs indefinitely.</p>
+
+<h3>The Big Picture Timeline</h3>
+<div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+NOW ──► Experiments (2 days)
+        ──► Pipeline v2 Build (1-2 weeks)
+           ──► Hardening (3-5 builds)
+              ──► Pilot Migration (1-2 weeks)
+                 ──► Playbook Refinement (1 week)
+                    ═══ FREEZE LINE ═══
+                    ──► Track 1 Migration (2-4 weeks, parallel)
+                       ──► Track 2 Migration (4-8 weeks, sequential)
+                          ──► Content Ingestion (ongoing)
+</div>
+
+<p>Total from now to all pages migrated: roughly <strong>3-5 months</strong>. But the pipeline starts producing value immediately after experiments — every page built with /build-page is one fewer to migrate manually.</p>
+<p style="text-align:right;font-size:0.85rem;"><a href="#top">Back to Table of Contents</a></p>
+
+
+<!-- ===== FOOTER ===== -->
+<div class="guide-footer">
+  <p>Pipeline v2 Implementation Guide -- Generated 2026-02-19</p>
+  <p>Source: 9 section files synthesized from the Pipeline Analysis Corpus (41 files, ~1.7MB)</p>
+  <p>Philosophy: Test everything. Build the winner. Accept no compromises.</p>
+</div>
+
+</div><!-- /page-container -->
+
+<!-- ===== COPY BUTTON SCRIPT ===== -->
+<script>
+function copyCode(btn) {
+  const block = btn.parentElement;
+  const text = block.textContent.replace('Copy', '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
