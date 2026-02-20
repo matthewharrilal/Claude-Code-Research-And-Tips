@@ -6,20 +6,23 @@ THIS FILE IS AUTO-LOADED ON DIRECTORY ENTRY
 
 **Purpose:** Navigate the design system's 8 subfolders, enforce cross-cutting rules, and route agents to the right place based on task intent.
 
-**Current Phase:** Phase D COMPLETE (CONDITIONAL PASS, 2026-02-15). Richness + rigidity research COMPLETE (11 agents, tier model established). Middle-tier Experiment SUCCESS (2026-02-16). Ceiling Preparation In Progress.
+**Current Phase:** /build-page Pipeline ACTIVE (2026-02-19). ALWAYS FLAGSHIP -- every page built at maximum compositional intensity. Tier routing REMOVED. /build-page is the single entry point for all page building.
 
 **Key Principle:** This folder contains TWO parallel systems serving different purposes:
-- **compositional-core/** — Minimal vocabulary for building (40 items, phase-gated)
+- **compositional-core/** — Minimal vocabulary for building (40 items, phase-gated). Invoked automatically by /build-page
 - **specification/** — Complete documentation for understanding (research provenance)
+
+**Building protocol:** ALL pages are built via /build-page at Flagship tier. No tier routing. No Track 1/Track 2 classification. The orchestrator handles everything.
 
 ═══════════════════════════════════════════════════════════════════════════════
 
 ## QUICK START — What Are You Here To Do?
 
 ### I'm here to BUILD content/pages
-**→ Start:** `compositional-core/README.md`
-**→ ALWAYS load first:** `compositional-core/identity/prohibitions.md` (22 prohibitions)
-**→ Then:** `compositional-core/vocabulary/tokens.css` (65 locked tokens)
+**→ Run:** `/build-page <content-file-path>` (the ONLY way to build pages)
+**→ What it does:** Invokes the /build-page orchestrator, which handles content analysis, TC pipeline, builder deployment, gate verification, and PA audit automatically
+**→ Manual fallback:** `compositional-core/README.md` (if /build-page is unavailable)
+**→ ALWAYS loaded automatically:** `compositional-core/identity/prohibitions.md` + `compositional-core/vocabulary/tokens.css`
 
 ### I'm here to VALIDATE/AUDIT
 **→ Start:** `compositional-core/identity/prohibitions.md` (soul constraints)
@@ -87,7 +90,7 @@ compositional-core/
 ├── identity/          [Layer 1] 20 prohibitions + 3 soul constraints (ABSOLUTE vs CONDITIONAL)
 ├── vocabulary/        [Layer 2] tokens.css (:root block) + mutability classification
 ├── grammar/           [Layer 3] 18 mechanisms + 11 compositional rules + border system
-├── components/        [Layer 4] merged-components.css (31KB) + inventory with confidence
+├── components/        [Layer 4] components.css (31KB) + inventory with confidence
 ├── case-studies/      [Layer 5] 9 case studies (anti-prescription format) — NOT TEMPLATES
 └── guidelines/        [Layer 6] 7+ semantic gap rules + responsive strategy + usage criteria
 ```
@@ -229,7 +232,7 @@ validated-explorations/
 ## EVOLUTION STATE — Where We Are
 ═══════════════════════════════════════════════════════════════════════════════
 
-### CURRENT PHASE: Phase D Extraction Validation (COMPLETE — CONDITIONAL PASS) + Middle-Tier Experiment (SUCCESS)
+### CURRENT PHASE: /build-page Pipeline (ACTIVE)
 
 **Phase D Status:** COMPLETE — CONDITIONAL PASS (2026-02-15)
 **Output:** 47 files, 17MB in ephemeral/phase-d-execution/
@@ -278,21 +281,20 @@ validated-explorations/
 - ✅ Phase C: Compositional Core Extraction (6-layer ontology, 42 files)
 - 🔧 Skill Enrichment (Wave 1 COMPLETE: M2/M3/M5/M8 applied 2026-02-15. Wave 2 pending: M1 per-category minimum after Middle experiment)
 
-**CURRENT (validation + skill enrichment + experimentation):**
-- ✅ Phase D: Extraction Validation (COMPLETE — CONDITIONAL PASS, 2026-02-15)
-- ✅ Richness + Rigidity Research (COMPLETE — 11 agents, tier model established, 2026-02-15)
-- ✅ Middle-tier Experiment (COMPLETE — SUCCESS, 8 agents, 2026-02-16)
-- ✅ Middle-tier Retrospective (COMPLETE — 11 agents, 2026-02-16)
-- 🔧 Retro-Analysis Team: Apply F1 sequence (M1 permanent, inter-agent comms, landmarks, self-check, ceiling prompt)
-- 🧪 Ceiling Preparation: Build exceptional Ceiling-tier page (15+ mechanisms, full metaphor)
-- ⏳ Phase E: Migration Playbook v2 (dual-track)
-- ⏳ Phase F: Pilot Migration (MUST include Track 2)
-- ⏳ Phase G: Playbook Refinement
+**CURRENT (/build-page pipeline):**
+- Phase D: Extraction Validation (COMPLETE -- CONDITIONAL PASS, 2026-02-15)
+- Richness + Rigidity Research (COMPLETE -- 11 agents, tier model, 2026-02-15)
+- Middle-tier Experiment (COMPLETE -- SUCCESS, PA-05 4/4, 2026-02-16)
+- Flagship Experiment + Remediation (COMPLETE -- PA-05 2.5/4, 2026-02-17-18)
+- Pipeline Analysis + Architecture (COMPLETE -- 50+ agents, Pipeline v2 designed, 2026-02-18)
+- Flagship 4/4 Recipe Research (COMPLETE -- 23 reports, compositional intelligence stack, 2026-02-19)
+- /build-page Prompt Assembly: Writing the master execution prompt for the /build-page pipeline
+- /build-page Validation: Test with 2 different content files
+- Migration: All pages via /build-page at Flagship tier
 
-**FORWARD (post-freeze migration):**
-- ═══ FREEZE LINE ═══ (After Phase G, design system locks)
-- 📋 Phase H: Track 1 Migration (30-40 pages @ 45-90 min, parallelizable)
-- 📋 Phase I: Track 2 Migration (35-45 pages @ 3-5 hrs, sequential bottleneck)
+**FORWARD (post-validation migration):**
+- VALIDATION LINE (After 2 successful /build-page runs)
+- Full Migration: ALL pages via /build-page (single pipeline, single tier)
 
 **Full roadmap:** `pipeline/05-COMPLETE-ROADMAP.md` (835 lines)
 
@@ -318,40 +320,42 @@ validated-explorations/
 ## SKILLS — When to Invoke
 ═══════════════════════════════════════════════════════════════════════════════
 
-### Tension-Composition (Track 2 Building)
+### /build-page (PRIMARY -- All Page Building)
 
-**Trigger:** Build new HTML page from content tensions
+**Trigger:** "Build a page from [content]" or any page-building request
 
 **Invocation:**
 ```
-Invoke tension-composition skill
-See ~/.claude/skills/tension-composition/SKILL.md for full pipeline
+/build-page <content-file-path>
 ```
 
-**Phase-gated access:** Skill enforces library prohibition until Phase 5
+**What it orchestrates:** Content analysis -> TC pipeline (Flagship-only) -> Opus builder deployment -> 21-gate programmatic verification -> Mode 4 PA (9 auditors + 8 Tier 5 questions) -> fix cycles -> verdict
 
-**NOT invoked for:** Track 1 building (research-driven), auditing, planning
+**Success bar:** PA-05 >= 3.5 AND Tier 5 >= 6/8 AND zero soul violations
+
+**Sub-skills invoked automatically:**
+- Tension-composition (TC): Full Phases 0-5, Flagship intensity, invoked by orchestrator
+- Perceptual-auditing (PA): Full 56 questions (48 standard + 8 Tier 5), invoked after build
+
+**NOT invoked for:** Research, auditing existing pages, planning
 
 ---
 
-### Perceptual-Auditing (Post-Build Verification)
+### Tension-Composition (Sub-Skill -- Invoked by /build-page)
 
-**Trigger:** AFTER building ANY HTML page, BEFORE marking complete
+**Direct invocation:** Only if /build-page is unavailable
+**Skill file:** `~/.claude/skills/tension-composition/SKILL.md`
+**Phase-gated access:** Library prohibition until Phase 5
+**ALWAYS FLAGSHIP:** No tier routing. Full Phases 0-5 for every page.
 
-**Applies to:** Track 1 AND Track 2 (all building)
+---
 
-**Invocation:**
-```
-Invoke perceptual-auditing skill
-See ~/.claude/skills/perceptual-auditing/SKILL.md for full audit
-```
+### Perceptual-Auditing (Sub-Skill -- Invoked by /build-page)
 
-**Passing criteria:**
-- Zero soul violations (border-radius: 0, box-shadow: none, correct palette)
-- All guardrails met (940px container, 16px spacing, 32px padding, 40% compression)
-- Squint test passed (visual coherence)
-
-**Full audit required** — abbreviated audit NOT acceptable
+**Direct invocation:** Only for auditing EXISTING pages (not builds)
+**Skill file:** `~/.claude/skills/perceptual-auditing/SKILL.md`
+**Full 56-question audit required** -- 48 standard + 8 Tier 5 (PA-60 through PA-67)
+**Passing criteria:** PA-05 >= 3.5, Tier 5 >= 6/8, zero soul violations, zero void patterns
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## INGESTION PROTOCOL — What to Load
@@ -382,52 +386,25 @@ See ~/.claude/skills/perceptual-auditing/SKILL.md for full audit
 
 ### CONDITIONAL-LOAD (Based on Task)
 
-**Builder agents (Track 2 — tension-composition):**
+**Builder agents (invoked by /build-page orchestrator):**
 
-Phase 0: Load vocabulary
-- ✅ Read prohibitions.md (already loaded)
-- ✅ Read tokens.css (already loaded)
-- ❌ DO NOT read case-studies/ (PROHIBITED until Phase 5)
+The /build-page orchestrator handles all builder loading automatically. Builders receive:
+1. prohibitions.md + tokens.css (pre-loaded by orchestrator)
+2. Conventions brief with content analysis + metaphor + mechanism selections (from TC pipeline)
+3. Operational recipe with specific CSS values + sequenced build steps
+4. Gate runner for micro-gate verification during build
 
-Phases 0-3: Run pipeline BLIND
-- Invoke tension-composition skill
-- Case studies PROHIBITED
+Phase-gated access is enforced by the orchestrator:
+- Phases 0-3: TC runs BLIND (no library access)
+- Phase 3.5: Metaphor lock (GATE -- no changes after)
+- Phase 4: Mechanisms extracted (grammar/mechanism-catalog.md)
+- Phase 5: Optional case study comparison (divergence check)
+- Phase 6: Opus builder implements with operational recipe
+- Phase 7: Full verification (21 gates + 56-question PA)
 
-Phase 3.5: Lock metaphor (GATE)
-- Write metaphor commitment BEFORE consulting library
-
-Phase 4: Read mechanisms
-- `compositional-core/grammar/mechanism-catalog.md` (first 200 lines)
-- `compositional-core/components/components.css` (first 100 lines)
-- Extract TECHNIQUES, not implementations
-
-Phase 5: OPTIONALLY read case studies
-- `compositional-core/case-studies/_INDEX.md` (titles)
-- Select 2-3 most similar to YOUR metaphor
-- Complete divergence table (5 dimensions)
-
-Phase 6: Implement
-- Use exact token values
-- Apply mechanisms to YOUR metaphor
-- Generate YOUR vocabulary
-
-Phase 7: Verify
-- Invoke perceptual-auditing skill
-
----
-
-**Builder agents (Track 1 — research-driven):**
-
-Mandatory read:
-- ✅ prohibitions.md + tokens.css (already loaded)
-- `research/RESEARCH-SYNTHESIS.md` (unified framework)
-- `research/R[relevant]-*.md` (the relevant research stream)
-- `compositional-core/grammar/mechanism-catalog.md`
-
-Build approach:
-- Identify applicable R-X findings
-- Commit to specific applications
-- Annotate research applications in code
+**Manual builder invocation (if /build-page unavailable):**
+- Follow compositional-core/CLAUDE.md Flagship Build Workflow
+- ALL pages at Flagship intensity (no tier routing)
 
 ---
 
@@ -479,36 +456,24 @@ Conditional read:
 ## ROUTING LOGIC — Task-to-Folder Decision Tree
 ═══════════════════════════════════════════════════════════════════════════════
 
-### Q1: What phase are you in?
+### Q1: Build or Understand?
 
-- Phase C extraction complete → compositional-core/ is operational (LOCKED)
-- Phase D validation → Read `pipeline/09-EXTRACTION-VALIDATION-PROTOCOL.md`
-- Pre-Phase C (fortress only) → validated-explorations/ + specification/
-- Migration → compositional-core/ + pipeline/03
+- **Build a page** → `/build-page <content-path>` (ALWAYS use this)
+- **Understand the system** → specification/ + research/
+- **Audit an existing page** → Invoke perceptual-auditing skill directly
 
-### Q2: Build, Analyze, or Plan?
+### Q2: What do I need to understand?
 
-- **Build** → compositional-core/
-- **Analyze** → specification/ + compositional-core/validation/
-- **Plan** → pipeline/
-
-### Q3: Track 1 (assembly) or Track 2 (composition)?
-
-- **Track 1** (research-driven assembly) → compositional-core/vocabulary/ + grammar/
-- **Track 2** (tension-driven composition) → compositional-core/ + pipeline/07 + tension-composition skill
-
-### Q4: Raw research or extracted design system?
-
-- **Raw research** (R1-R5, 337 findings) → research/
-- **Extracted design system** (40 items, 6 layers) → compositional-core/
+- **Design philosophy** → README.md (THE KORTAI DESIGN MIND)
+- **Raw research** (337 findings) → research/RESEARCH-SYNTHESIS.md then research/R[1-5]
+- **Extracted vocabulary** (40 items) → compositional-core/
 - **Provenance chain** → specification/provenance/
 
-### Q5: What's my first file to read?
+### Q3: What's my first file to read?
 
+- **Building** → Just run `/build-page`. It handles everything.
 - **Philosophy/orientation** → README.md (THE KORTAI DESIGN MIND)
-- **Operational building** → compositional-core/README.md (phase-gated protocol)
 - **Abstract specification** → specification/BACKBONE.md (master narrative)
-- **Planning/evolution** → pipeline/README.md (roadmap overview)
 - **Soul compliance** → compositional-core/identity/prohibitions.md
 - **Research grounding** → research/RESEARCH-SYNTHESIS.md
 
@@ -576,13 +541,13 @@ Conditional read:
 
 ---
 
-### 7. Not distinguishing Track 1 from Track 2
+### 7. Trying to build without /build-page
 
-**Problem:** Using token application for prose-heavy content, or invoking skill for data tables
+**Problem:** Manually invoking TC skill, manually assembling components, or building without the orchestrator
 
-**Correct:** Read pipeline/03-MIGRATION-PIPELINE.md (explains Track 1 vs Track 2 split)
+**Correct:** Run `/build-page <content-path>`. The orchestrator handles TC pipeline, builder deployment, gate verification, and PA audit automatically.
 
-**Rule:** Track 1 = assembly (45-90 min), Track 2 = composition (3-5 hrs)
+**Rule:** /build-page is the ONLY sanctioned way to build new pages. Manual building is a fallback for when /build-page is unavailable.
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## DIRECTORY STRUCTURE (Accurate Tree)
@@ -660,7 +625,7 @@ design-system/
 - Layer 1 (Identity): `compositional-core/identity/prohibitions.md`
 - Layer 2 (Vocabulary): `compositional-core/vocabulary/tokens.css`
 - Layer 3 (Grammar): `compositional-core/grammar/mechanism-catalog.md`
-- Layer 4 (Components): `compositional-core/components/merged-components.css`
+- Layer 4 (Components): `compositional-core/components/components.css`
 - Layer 5 (Case Studies): `compositional-core/case-studies/_INDEX.md`
 - Layer 6 (Guidelines): `compositional-core/guidelines/semantic-rules.md`
 

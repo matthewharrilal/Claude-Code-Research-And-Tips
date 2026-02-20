@@ -5,7 +5,7 @@ You MUST read identity/prohibitions.md and vocabulary/tokens.css BEFORE any othe
 Violating prohibitions = INVALID work. No exceptions. No shortcuts.
 
 **Last Updated:** 2026-02-16
-**Status:** OPERATIONAL (Phase C Complete, Phase D CONDITIONAL PASS, Middle-Tier Experiment SUCCESS, Ceiling Preparation In Progress)
+**Status:** OPERATIONAL (Phase C Complete, /build-page Pipeline ACTIVE). ALWAYS FLAGSHIP -- every page at maximum compositional intensity. Tier routing REMOVED.
 
 ---
 
@@ -51,63 +51,37 @@ This IS:
 
 ---
 
-## TRACK CLASSIFICATION
+## BUILD PROTOCOL: ALWAYS FLAGSHIP
 
-**The Addition Test:** "Can existing components fulfill this WITHOUT transforming their meaning?"
-- **YES** → Track 1 (Assembly, 45-90 min)
-- **NO** → Track 2 (Composition, 3-5 hours)
+**Every page is built at Flagship tier.** No tier routing. No Track 1/Track 2 classification.
 
-### Track 1: Component Assembly
+**The Addition Test is RETIRED.** The test classified pages into assembly (Track 1) vs composition (Track 2). Under ALWAYS FLAGSHIP, every page gets full composition.
 
-**When:** Content has explicit vocabulary (tables, stats, diagrams). Components map directly to reader needs.
+**The only escape valve:** If content has ZERO cosmetic tension (pure data tables, raw API reference), the TC pipeline will detect this and produce a flat-mode build. This is automatic, not a routing decision.
 
-**Load:** prohibitions → tokens → components.css → guidelines/semantic-rules.md
+**Entry point:** `/build-page <content-path>`
 
-**Build:** Use existing components with token values.
+**What /build-page does:**
+1. Content analysis (structural heterogeneity, rhetorical variety, mechanism affinity)
+2. TC pipeline Phases 0-5 (metaphor derivation, mechanism selection, operational recipe)
+3. Opus builder deployment (with recipe, not checklist)
+4. 21-gate programmatic verification (Flagship thresholds)
+5. Mode 4 PA (9 auditors, 56 questions including 8 Tier 5)
+6. Fix cycles (max 3, same builder)
+7. Verdict: SHIP / FIX / REBUILD / ESCALATE
 
-~/.claude/skills/perceptual-auditing
-**Verify:** Soul check + perceptual audit.
-
-**NO metaphor derivation required.**
-
-### Track 2: Tension-Driven Composition
-
-**When:** Content is prose-dominant (>70% narrative). Implicit tension exists (warmth vs austerity, authority vs playfulness). No direct tool available.
-
-~/.claude/skills/tension-composition
-**Load:** prohibitions → tokens → [RUN TENSION-COMPOSITION BLIND] → mechanisms → [OPTIONAL case studies]
-
-**Build:** Derive metaphor independently, apply mechanisms to YOUR metaphor, generate YOUR vocabulary.
-
-**Verify:** Divergence check + soul check + perceptual audit.
-
-**REQUIRES independent creative derivation.**
+**Success bar:** PA-05 >= 3.5 AND Tier 5 >= 6/8 AND zero soul violations
 
 ---
 
-## TRACK 1 WORKFLOW
+## MANUAL BUILD WORKFLOW (Fallback -- only if /build-page is unavailable)
 
-**Phase 0: Load Foundation**
-1. Read prohibitions.md (constraints)
-2. Read tokens.css (palette)
-3. Read components.css (first 100 lines — 2-zone DNA patterns)
-4. Read guidelines/semantic-rules.md (when to use what)
-
-**Phase 1: Build**
-- Use exact token values: var(--color-primary), var(--space-8)
-- Apply components as-is (no custom CSS)
-- Follow responsive strategy (768px collapse)
-
-**Phase 2: Verify**
-- Invoke perceptual-auditing skill (48 PA questions)
-- Check guardrails: 940px container, 16px spacing, 32px padding, 40% compression
-- Verify soul: border-radius: 0? box-shadow: none? Colors correct?
-
-**Total reading: ~627 lines (4 files)**
+If /build-page cannot be invoked, follow the Flagship Build Workflow below manually.
+The /build-page orchestrator automates all of this.
 
 ---
 
-## TRACK 2 WORKFLOW
+## FLAGSHIP BUILD WORKFLOW (Automated by /build-page)
 
 ### Phase 0: Load Vocabulary + Library Prohibition
 
@@ -540,23 +514,18 @@ Same structural pattern (4px/3px/2px/1px progression).**
 
 **METAPHOR RICHNESS ISN'T FREE. Perceptual costs are REAL costs.**
 
-**Core guardrails (from skill enrichment):**
-1. **940px minimum container** (65% of 1440px viewport)
-   - Prevents metaphor-driven width collapse
+**Core guardrails (Flagship thresholds):**
+1. **940-960px container width** (SC-01)
+2. **>= 15 RGB max-channel delta** at zone boundaries (SC-09)
+3. **<= 120px total stacked gap** at section boundaries (SC-10)
+4. **3+ distinct typography zones**, display-body >= 10px delta (SC-11)
+5. **>= 3 of 6 channels shift** at every boundary, avg >= 4 (SC-13)
+6. **>= 3 distinct border configurations** across page (SC-15)
+7. **No sub-perceptual CSS**: no letter-spacing < 0.025em, no bg delta 1-14 RGB (SC-14)
+8. **>= 5 ARIA landmarks**, skip link present (SC-06/07)
+9. **>= 8 component library classes** (SC-08)
 
-2. **16px minimum label-to-heading gap**
-   - Prevents metaphor-driven smashing
-
-3. **32px minimum padding floor**
-   - Prevents metaphor-driven dead zones
-
-4. **40% maximum compression ratio** (densest ÷ sparsest)
-   - Prevents metaphor-driven cognitive fatigue
-
-**When metaphor conflicts with guardrails:**
-1. CHECK perceptual cost
-2. APPLY cost-benefit analysis
-3. DOCUMENT the decision
+**When metaphor conflicts with guardrails:** Guardrails win. These are perception physics, not preferences.
 
 **"The metaphor shapes experience; the guardrails prevent it from breaking experience."**
 
@@ -591,7 +560,7 @@ Same structural pattern (4px/3px/2px/1px progression).**
 - compositional-rules.md: 11 rules
 - border-grammar.md: 3-category encoding
 
-**Layer 4: components/ (IMPLEMENTS) — Track 1 always, Track 2 Phase 4+**
+**Layer 4: components/ (IMPLEMENTS) — Phase 4+**
 - components.css: merged CSS (31KB)
 - component-inventory.md: confidence levels
 
@@ -620,28 +589,34 @@ Same structural pattern (4px/3px/2px/1px progression).**
 - □ Fonts correct (display/body/mono)?
 - □ Spacing from scale (4px base)?
 
-**Perceptual audit (invoke skill):**
-- □ Run full 48 PA questions
-- □ Check guardrails: 940px container, 16px spacing, 32px padding, 40% compression
-- □ Squint test: visual coherence
-- □ Comparison test: vs KortAI reference pages
+**Perceptual audit (Flagship -- 56 questions):**
+- □ Run full 48 standard PA questions + 8 Tier 5 questions (PA-60 through PA-67)
+- □ PA-05 >= 3.5/4 (Flagship threshold)
+- □ Tier 5 >= 6/8 (COMPOSED: Flagship compositional depth)
+- □ Zero void patterns (no whitespace voids >= 200px)
+- □ Metaphor is STRUCTURAL (not ANNOUNCED or LABELED)
 
-**Guardrails:**
-- □ 940px minimum container width (65% viewport at 1440px)
-- □ 16px minimum label-to-heading spacing
-- □ 32px minimum padding floor on containers
-- □ 40% maximum compression ratio
+**Guardrails (Flagship thresholds):**
+- □ 940-960px container width (SC-01)
+- □ >= 15 RGB max-channel delta at zone boundaries (SC-09)
+- □ <= 120px total stacked gap at boundaries (SC-10)
+- □ 3+ distinct typography zones, display-body >= 10px (SC-11)
+- □ >= 3 of 6 channels shift at every boundary, avg >= 4 (SC-13)
+- □ >= 3 distinct border configurations (SC-15)
+- □ No sub-perceptual CSS (SC-14)
+- □ >= 5 ARIA landmarks (SC-06), skip link (SC-07)
+- □ >= 8 component library classes (SC-08)
 
-**Divergence (Track 2 only, if case studies consulted):**
+**Divergence (always required -- every build runs full TC):**
 - □ 5-dimension divergence table complete?
 - □ DIFFERENT on 3+ dimensions?
 - □ If convergence: strong justification documented?
 
 ---
 
-## PHASE D VALIDATION LESSONS (2026-02-15)
+## EXPERIMENT LESSONS (Phase D through Flagship)
 
-Phase D tested 5 pipeline configurations. COMPLETE — CONDITIONAL PASS. Key lessons for builders:
+Phase D through Flagship experiments (2026-02-15 to 2026-02-18) tested 7 pipeline configurations. Key lessons for builders:
 
 1. **Container width 940-960px is NON-NEGOTIABLE.** This was THE primary failure mode (4/5 pages violated it). Express narrowing through INTERNAL spacing, not external width reduction. No metaphor may override this.
 
@@ -651,9 +626,15 @@ Phase D tested 5 pipeline configurations. COMPLETE — CONDITIONAL PASS. Key les
 
 4. **Variant B demonstrated genuine pipeline identity.** The tension-composition pipeline produces real metaphor derivation (4/5 novelty). The gap is technique DENSITY (5/44 techniques), not technique ABSENCE.
 
-**Post-D Research (COMPLETE, 2026-02-15):** Richness + rigidity investigations (11 agents) established tier model (Floor/Middle/Ceiling/Flagship) and modification recommendations. Skill enrichment currently in progress to address "sample 2-4 mechanisms" limitation.
+5. **Recipe beats checklist.** Builders receiving sequenced steps with CSS values (RECIPE) produce DESIGNED output. Builders receiving constraint lists with thresholds (CHECKLIST) produce FLAT output. /build-page provides recipes.
 
-See: ephemeral/continuity-docs/HANDOFF.md for full Phase D results.
+6. **Perceptible CSS only.** Every CSS value must be perceptible to a human. Minimum deltas: backgrounds >= 15 RGB, font-size >= 2px between zones, letter-spacing >= 0.5px, padding >= 24px between zones, total stacked gap <= 120px.
+
+7. **Same builder for fix cycles.** Compositional memory is irreplaceable. The builder that produced 1.5/4 improved to 2.5/4 with targeted feedback. New agents re-derive from scratch.
+
+8. **Build boundary-by-boundary, not channel-by-channel.** Setting all CSS channels (background + typography + spacing + borders) at each zone boundary produces multi-coherence. Setting all backgrounds, then all borders, then all typography produces flat output.
+
+**Full experiment history:** See ephemeral/continuity-docs/HANDOFF.md
 
 ---
 
