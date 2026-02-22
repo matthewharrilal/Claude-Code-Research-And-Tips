@@ -61,7 +61,7 @@ THIS FILE IS AUTO-LOADED ON DIRECTORY ENTRY
 - Primary: `#E83025` (KortAI red)
 - Background: `#FEF9F5` (warm cream)
 - Text: `#1A1A1A` (near-black)
-- Accent-blue: `#2563EB`
+- Accent-blue: `#4A90D9`
 
 ### Typography Trinity (LOCKED)
 - **Display headings:** Instrument Serif (ONLY for headings)
@@ -140,9 +140,9 @@ specification/
 **Structure:**
 ```
 validated-explorations/
-├── density/           DD-001 through DD-006 (crown jewel: DD-006 fractal, 20+ refs)
+├── density/           DD-001 through DD-006 (notable: DD-006 fractal, 20+ refs)
 ├── organizational/    OD-001 through OD-006 (OD-004 confidence, OD-006 creative)
-└── combination/       CD-001 through CD-006 (crown jewel: CD-006 pilot, 39/40 score)
+└── combination/       CD-001 through CD-006 (CEILING-tier: CD-006 pilot, 39/40 — NOT Flagship)
 ```
 
 **When to use:** Visual proof-of-concept, understanding pattern implementations (inspiration, NOT templates)
@@ -329,13 +329,13 @@ validated-explorations/
 /build-page <content-file-path>
 ```
 
-**What it orchestrates:** Content analysis -> TC pipeline (Flagship-only) -> Opus builder deployment -> 21-gate programmatic verification -> Mode 4 PA (9 auditors + 8 Tier 5 questions) -> fix cycles -> verdict
+**What it orchestrates:** TC skill invocation (Phases 0-4, separate Opus agent) -> Opus builder deployment with TC brief -> 22-gate programmatic verification -> Mode 4 PA (9 auditors + 9 Tier 5 questions) -> fix cycles -> verdict
 
-**Success bar:** PA-05 >= 3.5 AND Tier 5 >= 6/8 AND zero soul violations
+**Success bar:** PA-05 >= 3.5 AND Tier 5 >= 7/9 AND zero soul violations
 
 **Sub-skills invoked automatically:**
-- Tension-composition (TC): Full Phases 0-5, Flagship intensity, invoked by orchestrator
-- Perceptual-auditing (PA): Full 56 questions (48 standard + 8 Tier 5), invoked after build
+- Tension-composition (TC): Phases 0-4 (content assessment through mechanism selection), separate Opus agent, outputs ~50-line TC brief
+- Perceptual-auditing (PA): Full 65 questions (54 standard + 2 sub-perceptual + 9 Tier 5 PA-60 through PA-68), invoked after build
 
 **NOT invoked for:** Research, auditing existing pages, planning
 
@@ -346,7 +346,7 @@ validated-explorations/
 **Direct invocation:** Only if /build-page is unavailable
 **Skill file:** `~/.claude/skills/tension-composition/SKILL.md`
 **Phase-gated access:** Library prohibition until Phase 5
-**ALWAYS FLAGSHIP:** No tier routing. Full Phases 0-5 for every page.
+**ALWAYS FLAGSHIP:** No tier routing. TC runs Phases 0-4 (sub-skill mode), builder handles layout.
 
 ---
 
@@ -354,8 +354,8 @@ validated-explorations/
 
 **Direct invocation:** Only for auditing EXISTING pages (not builds)
 **Skill file:** `~/.claude/skills/perceptual-auditing/SKILL.md`
-**Full 56-question audit required** -- 48 standard + 8 Tier 5 (PA-60 through PA-67)
-**Passing criteria:** PA-05 >= 3.5, Tier 5 >= 6/8, zero soul violations, zero void patterns
+**Full 65-question audit required** -- 54 standard + 2 sub-perceptual (PA-55, PA-56) + 9 Tier 5 (PA-60 through PA-68)
+**Passing criteria:** PA-05 >= 3.5, Tier 5 >= 7/9, zero soul violations, zero void patterns
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## INGESTION PROTOCOL — What to Load
@@ -399,8 +399,8 @@ Phase-gated access is enforced by the orchestrator:
 - Phase 3.5: Metaphor lock (GATE -- no changes after)
 - Phase 4: Mechanisms extracted (grammar/mechanism-catalog.md)
 - Phase 5: Optional case study comparison (divergence check)
-- Phase 6: Opus builder implements with operational recipe
-- Phase 7: Full verification (21 gates + 56-question PA)
+- Phase 6: Opus builder implements with TC brief + conventions brief
+- Phase 7: Full verification (22 gates + 65-question PA)
 
 **Manual builder invocation (if /build-page unavailable):**
 - Follow compositional-core/CLAUDE.md Flagship Build Workflow
@@ -644,15 +644,15 @@ design-system/
 - `research/R5-COMBINATION-THEORY.md` (39 findings — source of CD)
 
 ### Skills (External to design-system/)
-- `~/.claude/skills/tension-composition/SKILL.md` (839 lines, 42KB)
-- `~/.claude/skills/perceptual-auditing/SKILL.md` (48 PA questions)
+- `~/.claude/skills/tension-composition/SKILL.md` (~1,612 lines)
+- `~/.claude/skills/perceptual-auditing/SKILL.md` (65 PA questions)
 
 ### Pipeline (Strategic Planning)
 - `pipeline/05-COMPLETE-ROADMAP.md` (835 lines, master timeline)
 - `pipeline/03-MIGRATION-PIPELINE.md` (Track 1+2 architecture)
 - `pipeline/09-EXTRACTION-VALIDATION-PROTOCOL.md` (Phase D tests)
 
-### Validated Explorations (Crown Jewels)
+### Validated Explorations (CEILING-Tier References)
 - `validated-explorations/density/DD-006-fractal.html` (20+ inbound refs)
 - `validated-explorations/organizational/OD-006-creative.html` (726 citations)
 - `validated-explorations/combination/CD-006-pilot-migration.html` (39/40 score)

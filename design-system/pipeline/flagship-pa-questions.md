@@ -1,8 +1,8 @@
 # Flagship PA: Tier 5 Compositional Depth Questions
 
-8 questions detecting compositional depth ABOVE the PA-05 designed threshold.
+9 questions detecting compositional depth ABOVE the PA-05 designed threshold.
 PA-05 4/4 confirms a page is DESIGNED. Tier 5 confirms it is FLAGSHIP.
-Asked in EVERY Mode 4 audit alongside the 48 standard questions (56 total).
+Asked in EVERY Mode 4 audit alongside the 56 standard questions (65 total).
 
 ---
 
@@ -50,13 +50,13 @@ Asked in EVERY Mode 4 audit alongside the 48 standard questions (56 total).
 
 ## PA-63: Fractal Zoom Coherence
 
-**Question:** "Zoom into one component (a card, callout, table, or code block). Does its internal design echo the page's overall design language at a smaller scale? Then zoom back out -- is that relationship deliberate?"
+**Question:** "Zoom into one component (a card, callout, table, or code block). Does its internal design echo the page's overall design language at a smaller scale? Then find the SAME component type in a different section -- does it adapt to its surroundings, or does it look identical regardless of where it sits?"
 
-**Detects:** Fractal self-similarity across scales. Whether Component-scale design echoes Page-scale organizing principle. Middle achieves 2 scales; Flagship needs 3+ STRONG scales with the same pattern direction at each.
+**Detects:** Fractal self-similarity across scales AND parametric echo (components adapting to zone context). Whether Component-scale design echoes Page-scale organizing principle, AND whether components respond to their local environment. Middle achieves 2 scales with static components; Flagship needs 3+ scales with context-responsive components.
 
 **Scoring:**
-- YES: Auditor identifies a component whose internal structure mirrors page-level design language AND can NAME the shared language (e.g., "both use heavy-to-light weight progression")
-- NO: Components look generic (could belong to any page) OR relationship feels accidental
+- YES: Auditor identifies a component whose internal structure mirrors page-level design language AND can NAME the shared language (e.g., "both use heavy-to-light weight progression"). BONUS: if the same component type adapts visibly to different zones (denser in dense zones, airier in sparse zones), this is STRONG YES.
+- NO: Components look generic (could belong to any page) OR relationship feels accidental OR same component type is visually identical in every zone.
 
 **Auditor Assignment:** E (Grid+Layout)
 
@@ -118,27 +118,41 @@ Asked in EVERY Mode 4 audit alongside the 48 standard questions (56 total).
 
 ---
 
+## PA-68: Metaphor Spatial Coverage
+
+**Question:** "Does the page's organizing metaphor persist across ALL scroll thirds, or does it fade or disappear as you scroll? Can you identify metaphor expression in the bottom third of the page?"
+
+**Detects:** Metaphor spatial coverage and persistence. A page where metaphor appears only in sections 1-3 and vanishes in sections 4-8 has an ANNOUNCED metaphor (introduced then abandoned). A page where metaphor persists to the bottom has a STRUCTURAL metaphor (it drives composition throughout).
+
+**Scoring:**
+- YES: Auditor can identify metaphor expression in all three scroll thirds (top, middle, bottom) AND expression feels consistent (not forced or mechanical repetition)
+- NO: Metaphor concentrated in top third only, OR disappears entirely after introduction, OR bottom-third expression feels like afterthought
+
+**Auditor Assignment:** G (Metaphor+Ideology)
+
+---
+
 ## Tier 5 Aggregate Scoring
 
 | YES Count | Verdict | Meaning |
 |-----------|---------|---------|
-| 7-8 / 8 | COMPOSED | Full compositional depth. Flagship target. |
-| 5-6 / 8 | APPROACHING | Significant depth. 1-2 layers need strengthening. |
-| 3-4 / 8 | STRUCTURED | Some compositional intelligence. Multiple layers absent. |
-| 0-2 / 8 | VOCABULARY ONLY | Mechanisms deployed but not composed. Middle-equivalent. |
+| 8-9 / 9 | COMPOSED | Full compositional depth. Flagship target. |
+| 6-7 / 9 | APPROACHING | Significant depth. 1-2 layers need strengthening. |
+| 3-5 / 9 | STRUCTURED | Some compositional intelligence. Multiple layers absent. |
+| 0-2 / 9 | VOCABULARY ONLY | Mechanisms deployed but not composed. Middle-equivalent. |
 
 ## Auditor Assignment Summary
 
 | Auditor | Role | Standard Qs | Tier 5 Addition | Total |
 |---------|------|-------------|-----------------|-------|
-| A | Impression+Emotion | PA-01,04,05,18,19,20,45 | PA-65, PA-67 | 9 |
-| B | Readability+Typography | PA-02,06,07,08,29 | (none) | 5 |
-| C | Spatial+Proportion | PA-09,10,11,30,31,32,33,50,51,52,53 | PA-64, PA-66 | 13 |
-| D | Flow+Pacing | PA-12,13,34,35,36 | PA-62 | 6 |
+| A | Impression+Emotion | PA-01,03,04,05,18,19,20,45 | PA-65, PA-67 | 10 |
+| B | Readability+Typography | PA-02,06,07,08,29,56,70 | (none) | 7 |
+| C | Spatial+Proportion | PA-09,10,11,30,31,32,33,50,51,52,53,55 | PA-64, PA-66 | 14 |
+| D | Flow+Pacing | PA-12,13,34,35,36,69 | PA-62 | 7 |
 | E | Grid+Layout | PA-14,15,37,38,39 | PA-63 | 6 |
-| F | Consistency+Rhythm | PA-16,17,40,41 | PA-60, PA-61 | 6 |
-| G | Metaphor+Ideology | PA-42,43,44 | (none) | 3 |
+| F | Consistency+Rhythm | PA-16,17,24,40,41 | PA-60, PA-61 | 7 |
+| G | Metaphor+Ideology | PA-25,42,43,44 | PA-68 | 5 |
 | H | Responsive | PA-21,22,23,46,47 | (none) | 5 |
 | I | Adversarial | PA-26,27,28,48 | (none) | 4 |
 
-**Total: 48 standard + 8 Tier 5 = 56 questions across 9 auditors.**
+**Total: 56 standard + 9 Tier 5 = 65 questions across 9 auditors.**
