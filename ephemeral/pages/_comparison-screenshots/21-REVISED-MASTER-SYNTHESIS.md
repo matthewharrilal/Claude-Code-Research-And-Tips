@@ -1,11 +1,15 @@
 # The Verdict: What 32 Reports Actually Tell Us
 
-**Date:** 2026-02-22 (enriched 2026-02-22 via 6 gap audits against 13 source reports)
-**Analyst:** final-synthesis-agent (Opus 4.6), enriched by gap-audit-enrichment-agent (Opus 4.6)
-**Source material:** 32 reports, 30+ agents, ~400,000 words of analysis
-**Page A:** `yegge-gas-town/output.html` -- Master-Execution-Prompt pipeline
-**Page B:** `gas-town-steve-yegge/output.html` -- /build-page skill pipeline
-**N=2 caveat:** Only 2 pages have ever been built by the pipeline. The entire evidence base rests on this sample size.
+| | |
+|---|---|
+| **Date** | 2026-02-22 (enriched 2026-02-22 via 6 gap audits against 13 source reports) |
+| **Analyst** | final-synthesis-agent (Opus 4.6), enriched by gap-audit-enrichment-agent (Opus 4.6) |
+| **Source material** | 32 reports, 30+ agents, ~400,000 words of analysis |
+| **Page A** | `yegge-gas-town/output.html` -- Master-Execution-Prompt pipeline |
+| **Page B** | `gas-town-steve-yegge/output.html` -- /build-page skill pipeline |
+
+> [!WARNING]
+> **N=2 caveat:** Only 2 pages have ever been built by the pipeline. The entire evidence base rests on this sample size.
 
 ---
 
@@ -15,11 +19,13 @@ Page B is better. Not close. Not on-balance. Better on 18 of 24 CSS dimensions, 
 
 Page A wins on raw multi-coherence count and structural variety. Its builder independently derived a 5-zone architecture where each zone maintains an independent compositional voice, achieving an average of 5.3 channels shifting per boundary versus Page B's 4.0. Page A has 17 distinct border configurations to Page B's 9. Page A has 10 letter-spacing values to Page B's 5. Page A has 3 grid layouts to Page B's 1. Page A PASSES D-01 at Flagship threshold (14 mechanisms, all categories >= 2) and also passes D-11, D-12, and D-14 -- four Flagship-level dimensions. Report 15's visual walkthrough identifies genuine multi-coherence in Page A's role cards (border color + level label + card position all encode hierarchy) and calls Zone 4 (principles) "the PAGE'S STRONGEST SECTION visually -- the highest density of designed moments." But Page A is TWICE the height -- 15,936px (17.7 viewports) versus Page B's 7,751px (8.6 viewports) -- for similar content, meaning its semantic density is half of Page B's. Page A has a ~1200px void around its ASCII code block at ~3300-4500px (the code block renders in full-page screenshots but is invisible to viewport screenshots due to IntersectionObserver-based fade-in that doesn't trigger during programmatic scrolling; even accounting for the code block at 578px, ~600px of void remains -- the fix is removing/adjusting the IntersectionObserver animation, not adding content) and uses only 2 actual background values with a 3 RGB delta between them (literally invisible). Page B has a CSS bug (dark-on-dark blockquote text in Z1: rgb(26,26,26) on dark parent background) but zero catastrophic spatial failures.
 
-This is the central tension of the entire comparison. Page A has more compositional ambition. Page B has more compositional execution. The pipeline improvements traded ceiling for floor -- and the trade was worth it.
+> [!IMPORTANT]
+> **The central tension:** Page A has more compositional ambition. Page B has more compositional execution. The pipeline improvements traded ceiling for floor -- and the trade was worth it.
 
 But neither page is close to Flagship 4/4. And the reasons why are structural, not incremental. This document explains exactly what those structures are, exactly where quality dies, and exactly what to change.
 
-**One striking data point:** Report 26 scored both pages on 10 first-principles qualities. Exactly ONE score across both pages reaches 8/10 ("genuinely impressive, you notice and appreciate"): Page B's Content-Form Coupling at 8. The dispatch metaphor driving it is the pipeline's single biggest success -- and its only moment of genuine impression.
+> [!NOTE]
+> **One striking data point:** Report 26 scored both pages on 10 first-principles qualities. Exactly ONE score across both pages reaches 8/10 ("genuinely impressive, you notice and appreciate"): Page B's Content-Form Coupling at 8. The dispatch metaphor driving it is the pipeline's single biggest success -- and its only moment of genuine impression.
 
 ---
 
@@ -150,7 +156,8 @@ OUTPUT: 55-65% of original quality potential
   PA-05 ~3.0-3.5 / Tier 5 4-6/9
 ```
 
-**Translation:** The pipeline's empirical ceiling is PA-05 ~3.5. This matches the 55-65% quality retention estimate. The losses are concentrated in two steps: TC (25%) and Builder (20-30%). Gates, PA, and fix cycles are all DIAGNOSTIC -- they catch quality loss after it happens but cannot prevent it.
+> [!IMPORTANT]
+> **Translation:** The pipeline's empirical ceiling is PA-05 ~3.5. This matches the 55-65% quality retention estimate. The losses are concentrated in two steps: TC (25%) and Builder (20-30%). Gates, PA, and fix cycles are all DIAGNOSTIC -- they catch quality loss after it happens but cannot prevent it.
 
 **Why this matters:** Every previous analysis asked "what went wrong?" Report 31 asks "where does quality die, step by step, and how much dies at each step?" The answer is precise: the TC skill strips atmospheric, horizontal, and body-text information because those concepts are not in its output template. The builder then absorbs only 30-40% of what the conventions brief teaches because 83% of it has no corresponding checkpoint.
 
@@ -199,11 +206,15 @@ The pipeline was designed through failure analysis. Each time a page failed, a g
 
 The cliff happens at level 3 (compositional), not level 4 (experiential). Even the "working together" level is under-supported -- 8/14 compositional relationships are only PARTIAL.
 
-**The critical active suppression (Report 29's #1 priority -- the only quality ACTIVELY SUPPRESSED):** SC-10 (stacked gap <= 120px) exists to prevent the catastrophic whitespace voids from the Flagship experiment (210-276px empty gaps). But it also prevents INTENTIONAL spatial drama. A 120px breathing space with a bridge sentence in display serif -- a designed chapter-break moment -- triggers the same gate as an empty void. The pipeline cannot distinguish between designed pause and accidental void. The conventions brief caps individual values at 96px. SC-10 caps stacked values at 120px. Grand spatial pause is scored at 0/5 pipeline layers -- the only quality ACTIVELY SUPPRESSED by the pipeline's own architecture. Report 29 ranks this as the SINGLE MOST IMPORTANT fix because all other unsupported qualities are merely ABSENT (the pipeline doesn't produce them). Grand spatial pause is PRESENT in the compositional intelligence theory but the pipeline's own gates PREVENT it. Absence is a gap. Suppression is a contradiction. Report 29's S-10 suppressor name (from the anti-conditions framework) connects this to the formal taxonomy: zone-uniform specs prevent content-form coupling at the spatial level.
+> [!WARNING]
+> **The critical active suppression (Report 29's #1 priority -- the only quality ACTIVELY SUPPRESSED):** SC-10 (stacked gap <= 120px) exists to prevent the catastrophic whitespace voids from the Flagship experiment (210-276px empty gaps). But it also prevents INTENTIONAL spatial drama. A 120px breathing space with a bridge sentence in display serif -- a designed chapter-break moment -- triggers the same gate as an empty void. The pipeline cannot distinguish between designed pause and accidental void. The conventions brief caps individual values at 96px. SC-10 caps stacked values at 120px. Grand spatial pause is scored at 0/5 pipeline layers -- the only quality ACTIVELY SUPPRESSED by the pipeline's own architecture. Report 29 ranks this as the SINGLE MOST IMPORTANT fix because all other unsupported qualities are merely ABSENT (the pipeline doesn't produce them). Grand spatial pause is PRESENT in the compositional intelligence theory but the pipeline's own gates PREVENT it. Absence is a gap. Suppression is a contradiction. Report 29's S-10 suppressor name (from the anti-conditions framework) connects this to the formal taxonomy: zone-uniform specs prevent content-form coupling at the spatial level.
+
 
 **The architectural limit:** No amount of gate addition can measure "atmospheric conviction" because conviction is not binary. Gates measure BINARY properties (present/absent, above/below). Experiential qualities are GRADIENT properties (more/less convincing). The pipeline would need a fundamentally different mechanism -- a "mini-PA" checkpoint during the build that asks a fresh-eyes agent "does this zone have atmosphere?" after every 2 zones (Report 29).
 
-**What to do about it:**
+---
+
+#### What to do about it
 
 1. **SC-10 needs a content-aware exception.** Elements with explicit pause markers (`class="breathing-zone"`) that contain at least one text element are exempt from SC-10 but flagged as ADVISORY for PA review. Empty gaps > 120px = FAIL. Designed pauses > 120px with content = ADVISORY.
 
@@ -237,7 +248,9 @@ Report 31 quantified the absorption ceiling. The conventions brief is 610 lines 
 
 That is a 12:1 teaching-to-checking ratio. 83% of what the brief teaches has no checkpoint. Report 31 proposes adding a "checkpoint 2.5" BETWEEN zones: after first 2 zones complete, verify "Does the transition between Z1 and Z2 match the TC brief's planned type (SMOOTH/BRIDGE/BREATHING)? Count channels: >= 3?" This mid-build TIMING intervention catches translation errors BEFORE they compound across all remaining zones -- architecturally distinct from adding more items to the final checkpoint.
 
-**Important counterpoint** (Report 16): The brief-to-gate compression is BY DESIGN and healthy. The brief IS the intelligence carrier and the builder receives the FULL 610-line brief, not a compressed version. Report 16 finds 7 of 9 core concepts are PRESERVED in the brief AND ABSORBED by the builder. The pipeline architecture is SOUND -- only 3 targeted gaps need closing (anti-scale verification, vertical progression statement, transition execution verification). The synthesis's "35-45% quality loss" framing should not lead to a conclusion that the pipeline needs fundamental redesign. It needs specific, targeted fixes.
+> [!NOTE]
+> **Important counterpoint** (Report 16): The brief-to-gate compression is BY DESIGN and healthy. The brief IS the intelligence carrier and the builder receives the FULL 610-line brief, not a compressed version. Report 16 finds 7 of 9 core concepts are PRESERVED in the brief AND ABSORBED by the builder. The pipeline architecture is SOUND -- only 3 targeted gaps need closing (anti-scale verification, vertical progression statement, transition execution verification). The synthesis's "35-45% quality loss" framing should not lead to a conclusion that the pipeline needs fundamental redesign. It needs specific, targeted fixes.
+
 
 **Evidence the brief works:** Report 16 documents that the builder OVERRODE the TC brief's zone backgrounds because they failed perception thresholds (TC specified deltas of 13, 5, 8 RGB; builder corrected to 18, 15, 20 RGB). The brief's "physics of perception" framing worked -- the builder treated thresholds as physical laws and overrode a higher-authority document. This override behavior is the strongest empirical evidence that the RECIPE FORMAT changes builder cognition (Report 31) -- the builder treats recipe-format instructions as guidelines to be adapted to context, not checklists to be followed literally. The override is a SUCCESS SIGNAL, not just an observation about perception thresholds. Perception thresholds are the ONLY concept that gets AMPLIFIED through the pipeline (43 lines in brief -> 12 in SKILL -> 5 BLOCKING gates). Every other concept compresses. This asymmetry explains why both pages pass perception thresholds reliably -- it is pipeline AMPLIFICATION, not builder attention.
 
@@ -263,7 +276,9 @@ Here is what the builder retains versus what it loses, with specific brief secti
 
 The structural reason: the conventions brief is a WORLD MODEL (610 lines describing how composition works) delivered to an agent that needs an ACTION PLAN (50 lines of specific CSS instructions per zone). The TC brief IS the action plan, but at 80-120 lines for the entire page, it cannot cover everything the conventions brief teaches. Six intelligence types survive compression differently (Report 28, E-02): Procedural intelligence (step-by-step sequences) survives BEST. Compositional intelligence (how mechanisms interact) survives WORST. The pipeline should encode compositional intent as PROCEDURES ("Step 1: set background. Step 2: verify delta >= 15. Step 3: set border.") rather than DESCRIPTIONS ("backgrounds should have perceptible deltas"). The TC brief is not a compression of the research -- it is a CRYSTALLIZATION (Report 09). The fix is not "make the TC brief longer" but "make the TC brief's binding quality higher" -- a 99-line TC brief with strong crystallization outperforms a 200-line TC brief with weak crystallization.
 
-**The fix -- per-zone micro-briefs (estimated impact: +0.5 PA-05):**
+---
+
+#### The fix -- per-zone micro-briefs (estimated impact: +0.5 PA-05)
 
 Replace the 610-line conventions brief as the builder's primary input with per-zone micro-briefs compiled by the orchestrator. Each zone gets ~50 lines of ZONE-SPECIFIC instructions extracted from TC brief + conventions brief:
 
@@ -294,16 +309,21 @@ Report 27 cross-validated the CD-006 framing audit across all 32 files and ident
 
 **Layer 4: MEASUREMENT FRAMEWORK (NOT FIXED, most pervasive).** Report 25 (Challenge 15) identifies that the 6-channel taxonomy itself is a CD-006 artifact: "The channel taxonomy was not derived from perceptual psychology or CSS specification structure. It was derived from examining what properties CHANGE at boundaries in CD-006." The channels ARE the vocabulary used to measure multi-coherence (D-03, D-04), to evaluate boundaries (SC-13), and to write TC briefs. Every measurement that uses the 6-channel framework is implicitly measuring similarity to CD-006's specific CSS property distribution. An alternative taxonomy (e.g., 4 channels derived from perceptual psychology: luminance, texture, rhythm, density) would capture the same CSS properties differently. This is deeper than linguistic, operational, or definitional contamination because it shapes the MEASUREMENT FRAMEWORK itself -- what counts as a "channel shift" is defined by CD-006's behavior, not by perceptual science.
 
-**What to change (5 minutes, highest leverage):**
+---
+
+#### What to change (5 minutes, highest leverage)
 1. Replace "crown jewel" with "CEILING-tier reference artifact" in MEMORY.md and both CLAUDE.md files.
 2. Move the Flagship 4/4 definition from ephemeral/ to a permanent auto-loaded location. Add to CLAUDE.md: "Flagship 4/4: 14 binary dimensions, never achieved. CD-006 passes ~10/14 (Ceiling). See FLAGSHIP-4-4-DEFINITION.md."
 3. Add Flagship context to gate-runner provenance: "CD-006 had 4+ channels (Ceiling, incidental). Flagship target: 4+ DESIGNED per boundary."
 
-**Important reassurance** (Report 27, Finding C-4): In every corrected report, the central analytical contribution SURVIVES the framing correction. Richness-as-vocabulary-fluency, 9 quality propositions, 6-layer soul analysis -- all remain valid. The contamination affected FRAMING and ASPIRATION, not METHODOLOGY. Of 27 reports classified: 11 CLEAN, 7 CORRECT, 7 ERROR (concentrated in philosophical reports 09, 11, 17, 19). All quantitative/dimensional reports (01-07) are CLEAN. Post-audit reports demonstrate correct framing, showing the correction process works prospectively. The corpus remains usable.
+> [!NOTE]
+> **Important reassurance** (Report 27, Finding C-4): In every corrected report, the central analytical contribution SURVIVES the framing correction. Richness-as-vocabulary-fluency, 9 quality propositions, 6-layer soul analysis -- all remain valid. The contamination affected FRAMING and ASPIRATION, not METHODOLOGY. Of 27 reports classified: 11 CLEAN, 7 CORRECT, 7 ERROR (concentrated in philosophical reports 09, 11, 17, 19). All quantitative/dimensional reports (01-07) are CLEAN. Post-audit reports demonstrate correct framing, showing the correction process works prospectively. The corpus remains usable.
+
 
 **Counter-evidence:** CD-006 FAILS the >=15 RGB zone background threshold on 2 of 3 zone pairs (backgrounds differ by only 8-10 RGB). This shows the definition was NOT designed to match CD-006 on every dimension.
 
-**What to change (medium effort):**
+#### What to change (medium effort)
+
 4. Revise D-04 and D-13 with specific replacement text (Report 25):
    - Revised D-04: ">=3 instances where >=3 channels encode the same semantic concept simultaneously, whether unified across the page or concentrated in specific sections."
    - Revised D-13: "At least one compositional metaphor manifests in CSS (not just text labels). The metaphor creates at least 2 class name families NOT in the mechanism catalog. At least 30% of sections show metaphor influence WITHOUT textual labeling."
@@ -382,9 +402,11 @@ These are specific measurements and models for evaluating quality:
 - Richness scoring model: Variety x Intentionality x Perceptibility -- no gate computes this
 - 3 recipe types with quality ceilings: Specification ("Container must be 940-1100px" -- ceiling 2.5/4), Procedural ("Step 1: Set container. Step 2: Add zones." -- ceiling 3.0-3.5/4), Dispositional ("Build as if every section is a room you want to spend time in" -- ceiling possibly 4/4, UNTESTED). The pipeline currently produces PROCEDURAL recipes. This is one of the few concepts with an explicit TESTABLE HYPOTHESIS: run a pipeline with a dispositional recipe and measure PA-05. If PA-05 >= 3.5, dispositional recipes have higher ceiling than procedural. Report 28's formulation: "The recipe's job is not to contain the answer but to create the silence in which the builder can hear the question."
 
-**The meta-observation:** "Flagship is maximum INTENTIONAL composition, not maximum complexity" (Report 14, D-08). The 8 core concepts are STRUCTURAL -- they describe what the output should exhibit. The experiential and intentionality clusters are the CRITICAL GAPS. The Flagship framework measures structural completeness; extraordinary pages require experiential peaks AND intentional composition. A page can score perfectly on all 8 core concepts while being uniformly excellent and therefore boring.
+> [!IMPORTANT]
+> **The meta-observation:** "Flagship is maximum INTENTIONAL composition, not maximum complexity" (Report 14, D-08). The 8 core concepts are STRUCTURAL -- they describe what the output should exhibit. The experiential and intentionality clusters are the CRITICAL GAPS. The Flagship framework measures structural completeness; extraordinary pages require experiential peaks AND intentional composition. A page can score perfectly on all 8 core concepts while being uniformly excellent and therefore boring.
 
-**The anti-suppressor insight -- the DOMINANT theme of Report 28:** The majority of beyond-8 concepts are not ADDITIVES but ANTI-SUPPRESSORS -- they REMOVE barriers rather than ADD capabilities. Quality suppressors (D-01), guardrail-to-playbook inversion (E-01), interference model (E-03), builder visibility cap, builder model mismatch, checklist format, prohibition overload -- all are about things the pipeline DOES that REDUCE quality. The quality equation is multiplicative: `Quality = (Builder Skill x Content-Form Coupling x Compositional Metaphor) / Sum of Active Suppressors`. The DIVISOR means suppressor REMOVAL has multiplicative impact -- removing one suppressor multiplies the quality of everything else. This reframes the intervention strategy: the primary path to Flagship may be removing interference, not adding intelligence. The synthesis's Fixes 1-6 are all ADDITIVE. Fix 7 is SUBTRACTIVE. Report 28 argues the subtractive approach should be PRIMARY, not last. The pipeline's job is to "clear the ground (suppress errors, provide vocabulary, establish constraints) and then create silence (creative authority, single ownership, composing mode) in which the builder can compose" (Report 28, K-05). The pipeline currently does the first but actively undermines the second.
+> [!WARNING]
+> **The anti-suppressor insight -- the DOMINANT theme of Report 28:** The majority of beyond-8 concepts are not ADDITIVES but ANTI-SUPPRESSORS -- they REMOVE barriers rather than ADD capabilities. Quality suppressors (D-01), guardrail-to-playbook inversion (E-01), interference model (E-03), builder visibility cap, builder model mismatch, checklist format, prohibition overload -- all are about things the pipeline DOES that REDUCE quality. The quality equation is multiplicative: `Quality = (Builder Skill x Content-Form Coupling x Compositional Metaphor) / Sum of Active Suppressors`. The DIVISOR means suppressor REMOVAL has multiplicative impact -- removing one suppressor multiplies the quality of everything else. This reframes the intervention strategy: the primary path to Flagship may be removing interference, not adding intelligence. The synthesis's Fixes 1-6 are all ADDITIVE. Fix 7 is SUBTRACTIVE. Report 28 argues the subtractive approach should be PRIMARY, not last. The pipeline's job is to "clear the ground (suppress errors, provide vocabulary, establish constraints) and then create silence (creative authority, single ownership, composing mode) in which the builder can compose" (Report 28, K-05). The pipeline currently does the first but actively undermines the second.
 
 ---
 
@@ -463,9 +485,11 @@ Two qualities from the first-principles assessment have NO Flagship equivalent:
 
 - **Terminal Craft** -- detail quality at edges. The Flagship asks about border weights as check-items. The difference between "has a footer" and "has a footer that mirrors the header and creates genuine closure" is the difference between compliance and craft.
 
-**The measurement paradox** (Report 11): "If we removed all metrics and simply asked 'which page is better?', we would get the same answer we get with metrics." A skilled human designer looking at both pages for 30 seconds would reach the same conclusion 50+ agents reached over hours of analysis. The measurement apparatus is useful as a FLOOR DETECTOR -- it catches failures below the perceptual threshold. It is less useful as a QUALITY DISCRIMINATOR -- it struggles to distinguish between "correct" (Page A) and "alive" (Page B). The gap between correct and alive is where actual quality lives, and our metrics have trouble reaching it. This is a MEASUREMENT CAPABILITY problem, not just a cost problem. If it's a cost problem, the fix is fewer auditors. If it's a measurement capability problem, the fix is a new kind of measurement (the visitor test, the authorial recognition test, a "would you remember this page tomorrow?" PA question). Proposition 8 (Report 11): "Compositional intent -- a reason for every choice flowing from a single animating metaphor -- is the single most important quality factor our metrics miss." Until our metrics can assess whether each mechanism serves a unifying compositional intent, they will remain necessary (catching sub-perceptual failures) but insufficient (missing the alive/correct distinction).
+> [!IMPORTANT]
+> **The measurement paradox** (Report 11): "If we removed all metrics and simply asked 'which page is better?', we would get the same answer we get with metrics." A skilled human designer looking at both pages for 30 seconds would reach the same conclusion 50+ agents reached over hours of analysis. The measurement apparatus is useful as a FLOOR DETECTOR -- it catches failures below the perceptual threshold. It is less useful as a QUALITY DISCRIMINATOR -- it struggles to distinguish between "correct" (Page A) and "alive" (Page B). The gap between correct and alive is where actual quality lives, and our metrics have trouble reaching it. This is a MEASUREMENT CAPABILITY problem, not just a cost problem. If it's a cost problem, the fix is fewer auditors. If it's a measurement capability problem, the fix is a new kind of measurement (the visitor test, the authorial recognition test, a "would you remember this page tomorrow?" PA question). Proposition 8 (Report 11): "Compositional intent -- a reason for every choice flowing from a single animating metaphor -- is the single most important quality factor our metrics miss." Until our metrics can assess whether each mechanism serves a unifying compositional intent, they will remain necessary (catching sub-perceptual failures) but insufficient (missing the alive/correct distinction).
 
 **The CD-006 self-reference advantage** (Report 09): CD-006's quality comes partly from RECURSIVE SELF-REFERENCE -- the page IS its own metaphor. It achieved tautological binding (content about page-building demonstrated by the page itself). No external content can match this. CD-006's 39/40 includes a structural bonus from self-reference that non-self-referential content cannot replicate -- a crucial calibration fact when using CD-006 as the quality benchmark.
+
 
 **The deepest philosophical finding** (Report 25): "The definition conflates 'different from CD-006' with 'better than CD-006.' A page with unified structural metaphor and global multi-coherence might not be BETTER than CD-006 -- it would just be DIFFERENT. Quality and difference are not the same thing."
 
@@ -496,7 +520,8 @@ The taint audit (Report 25) traced all 14 Flagship dimensions:
 - Challenge 4 (the embarrassingly simple alternative): Perhaps Flagship 4/4 just requires Opus + good content + soul constraints -- no compositional intelligence stack at all (Report 14).
 - Challenge 5: 4/4 may be EMERGENT, not PRODUCIBLE -- an emergent property of the right conditions rather than a producible artifact of the right specification (Report 14). The Middle experiment (fewer rules, fewer mechanisms) scored higher than the Flagship (more rules, more mechanisms). More specification led to less quality.
 
-**The implication:** If D-04 and D-13 are removed, the Flagship-Ceiling distinction narrows from "qualitative register shift" to "quantitative improvement." CD-006 passes 12-13/14 instead of 10-11. Page B passes 9-10 instead of 7-8. Report 25's "CD-006-free" thought experiment shows that without D-04 global and D-13 unified, there is NO qualitative distinction between Ceiling and Flagship -- the definition collapses into a continuous spectrum. The discrete "Flagship register" may be taxonomic fiction.
+> [!WARNING]
+> **The implication:** If D-04 and D-13 are removed, the Flagship-Ceiling distinction narrows from "qualitative register shift" to "quantitative improvement." CD-006 passes 12-13/14 instead of 10-11. Page B passes 9-10 instead of 7-8. Report 25's "CD-006-free" thought experiment shows that without D-04 global and D-13 unified, there is NO qualitative distinction between Ceiling and Flagship -- the definition collapses into a continuous spectrum. The discrete "Flagship register" may be taxonomic fiction.
 
 **The compositional intelligence stack is a dependency chain, not a flat list** (Reports 14, 28): L1 Perception Thresholds -> L2 Scales -> L3 Channels -> L4 Multi-Coherence -> L5 Anti-Scale. You cannot have multi-coherence without scale coverage; channels PRODUCE multi-coherence, which REALIZES anti-scale. No pipeline file states this dependency. During building, the stack operates as a PRISM -- a single CSS decision (e.g., `background: #F0EBE3` at a zone boundary) is simultaneously an L2 Scale decision (which zoom level?), an L3 Channel decision (chromatic shift), an L4 Multi-Coherence decision (does it align with other channels shifting here?), and an L5 Anti-Scale decision (does it serve density, restraint, or spatial confidence?). The builder learns the stack layer by layer but deploys it BOUNDARY BY BOUNDARY (all layers at once per boundary). The weaver and fix cycle treat concepts as independent checkboxes, missing integration failures. PA-65 (the music analogy) IS the stack integration assessment: "Ensemble" (different parts, coordinated but independent) = full stack operating = Flagship. "Choir" (all channels identical) = channels without restraint. "Solo" (one dominant) = channels without multi-coherence. "Broken" (contradicting) = dependency chain violated.
 
@@ -521,7 +546,8 @@ Page B's TC brief contains per-boundary CSS: "at Z1->Z2, shift background by >= 
 **Fix 3: SC-14 sub-perceptual gate promoted to BLOCKING (+0.15 PA-05 est.).**
 Page A has a zone with 3 RGB delta -- invisible. Page B has zero sub-perceptual zones because the gate blocks builds below 15 RGB delta.
 
-**The meta-lesson:** The pipeline does not need more fixes. It needs DEEPER fixes. The self-challenge cycle changes the builder's COGNITIVE MODE. The boundary CSS table changes the information FORMAT. SC-14 changes the failure DETECTION. Adding 16 more rules of similar specificity would not help. The improvements come from changing how the builder thinks, what it receives, and what catches its mistakes.
+> [!IMPORTANT]
+> **The meta-lesson:** The pipeline does not need more fixes. It needs DEEPER fixes. The self-challenge cycle changes the builder's COGNITIVE MODE. The boundary CSS table changes the information FORMAT. SC-14 changes the failure DETECTION. Adding 16 more rules of similar specificity would not help. The improvements come from changing how the builder thinks, what it receives, and what catches its mistakes.
 
 **The distinction between fear-restraint and knowledge-restraint** (Report 11): Two kinds of restraint produce the same observable outcome (absent mechanisms) but for different reasons. Page A's restraint is from FEAR -- "the restraint of someone who is afraid to make mistakes." Every element is safe, conventional, well-proportioned. Page B's restraint is from KNOWLEDGE -- "the restraint of someone who knows the power of a technique and uses it precisely." Bold choices (solid offset, hard red border cuts, bento grid, checkpoint bar) are deployed sparingly because each is intentional, not because the builder avoided risk. The pipeline cannot distinguish between them: both result in mechanisms being absent. The builder self-check should test: "For each absent mechanism, is your reasoning SPECIFIC to this content (knowledge-restraint: 'Scroll Witness: too short for scroll-based interaction in this 8.6-viewport page') or GENERIC (fear-restraint: 'Scroll Witness: not needed')? Generic reasoning = deploy the mechanism."
 
@@ -609,7 +635,8 @@ The pattern is stark: bug reports (100%) and line-level surgery (90%) convert al
 
 **The minimum viable path would have been ~16,000 lines across 4 phases.** Run the pipeline. Retrospective on the failure. Remediation spec. Build the /build-page skill. That is 97.4% less research for the same 11 outcomes.
 
-**The project's most important finding -- that recipes work better than checklists, that concrete beats abstract -- was systematically violated by the research process itself.** The research was a checklist of abstract principles. The pipeline needed a recipe of concrete edits.
+> [!WARNING]
+> **The project's most important finding -- that recipes work better than checklists, that concrete beats abstract -- was systematically violated by the research process itself.** The research was a checklist of abstract principles. The pipeline needed a recipe of concrete edits.
 
 ---
 
@@ -623,7 +650,8 @@ Report 15 contains a finding buried in the numbers: **Page B exceeds CD-006 on t
 
 Page B's zone background delta values demonstrate the progressive darkening arc: Z1->Z2 delta 18 RGB, Z2->Z3 delta 15 RGB, Z3->Z4 delta 20 RGB. Page B's font-weight progression encodes the density arc: Z1 400, Z2 500, Z3 600, Z4 400 (resolution). Report 15 also identifies genuine anti-scale dynamics in Page B: "Zone 1's deliberate sparseness creates anti-scale tension against Z3's density."
 
-**The HEADLINE finding -- the structural barrier is zone count, not compositional intelligence** (Report 15): The /build-page pipeline has PARTIALLY solved the compositional intelligence problem at the per-boundary level. The TC brief's metaphor-driven mechanism mapping produces multi-coherence at Flagship density (D-03 avg 4.6, D-04 3-4 sustained instances). But the full stack is INCOMPLETE -- anti-scale is implicit rather than designed (Report 15: "PARTIAL -- Zone 1's deliberate sparseness creates anti-scale tension against Z3's density" but this is emergent, not planned), the Navigation scale is absent in both pages, and Report 15 explicitly qualifies: "The progression is INCOMPLETE (no Navigation scale, anti-scale not fully articulated) but genuinely MORE ADVANCED than any prior pipeline output." What the pipeline has NOT solved is the STRUCTURAL EXPANSION problem: both pages have only 5-6 zone transitions (Flagship requires 8+), both use only 2 axis patterns (Flagship requires 3+), neither has a Navigation scale.
+> [!IMPORTANT]
+> **The HEADLINE finding -- the structural barrier is zone count, not compositional intelligence** (Report 15): The /build-page pipeline has PARTIALLY solved the compositional intelligence problem at the per-boundary level. The TC brief's metaphor-driven mechanism mapping produces multi-coherence at Flagship density (D-03 avg 4.6, D-04 3-4 sustained instances). But the full stack is INCOMPLETE -- anti-scale is implicit rather than designed (Report 15: "PARTIAL -- Zone 1's deliberate sparseness creates anti-scale tension against Z3's density" but this is emergent, not planned), the Navigation scale is absent in both pages, and Report 15 explicitly qualifies: "The progression is INCOMPLETE (no Navigation scale, anti-scale not fully articulated) but genuinely MORE ADVANCED than any prior pipeline output." What the pipeline has NOT solved is the STRUCTURAL EXPANSION problem: both pages have only 5-6 zone transitions (Flagship requires 8+), both use only 2 axis patterns (Flagship requires 3+), neither has a Navigation scale.
 
 **The Flagship path is structural and experiential, not compositional.** The pipeline already produces Flagship-quality coherence at the per-boundary level (D-03 and D-04 are strong). What it needs is more boundaries, more experiential qualities, full-stack integration (anti-scale designed rather than emergent, Navigation scale added), and the 6 intentionality dimensions (Finding 5, Cluster 2). Report 15's honest assessment: "PROBABLY NOT with current architecture" for Flagship.
 
@@ -654,6 +682,8 @@ ZONE 3 -- DEEPENING (dispatch metaphor: field intelligence)
 
 **Difficulty:** MEDIUM (orchestrator change -- the orchestrator already reads both TC brief and conventions brief; it compiles per-zone extracts before spawning the builder).
 
+---
+
 ### Fix 2: Expanded TC Brief With Body Text + Designed Moments (+0.3 PA-05)
 
 **The problem:** The TC brief specifies channel shifts at ZONE boundaries but not within-zone section transitions, body text typography, or designed moment locations.
@@ -666,6 +696,8 @@ ZONE 3 -- DEEPENING (dispatch metaphor: field intelligence)
 Add designed moment locations ("ZONE 3 peak: data table in 2-column grid"). Add within-zone transition types ("Section 5->6 within Z3: SMOOTH, 1-2 channel shifts").
 
 **Difficulty:** LOW (TC template change only -- modify Phase 4.5 output template in TC SKILL.md).
+
+---
 
 ### Fix 3: Experiential Quality Instructions (+0.2-0.3 PA-05)
 
@@ -685,6 +717,8 @@ Add designed moment locations ("ZONE 3 peak: data table in 2-column grid"). Add 
 
 **Difficulty:** MEDIUM (requires changes to 4 files: TC SKILL.md, builder prompt section of build-page SKILL.md, gate-runner.md, conventions-brief.md).
 
+---
+
 ### Fix 4: Fix Cycle Context Preservation (+0.2 PA-05)
 
 **The problem:** Fix cycles degrade from recipe to checklist across iterations. Compositional context evaporates. 8 of 9 compositional concepts suffer TOTAL EXTINCTION in the fix cycle return path. The builder re-entering a fix cycle retains perception thresholds and loses everything else.
@@ -699,6 +733,8 @@ For cycle 2, Report 31 recommends DIAGNOSTIC auditor selection (keep the auditor
 
 **Difficulty:** LOW (fix instruction format change in build-page SKILL.md Section 7).
 
+---
+
 ### Fix 5: Section-Granularity TC Brief (+0.2 PA-05)
 
 **The problem:** The TC brief operates at ZONE granularity (3-5 zones). A 5-zone page has 12 sections. All sections within a zone receive identical treatment. This prevents content-form coupling at section granularity.
@@ -707,11 +743,15 @@ For cycle 2, Report 31 recommends DIAGNOSTIC auditor selection (keep the auditor
 
 **Difficulty:** MEDIUM (TC skill modification -- Phase 4.5 output template change).
 
+---
+
 ### Fix 6: Add 7 Missing Playbooks (~150 lines total, +0.2-0.3 PA-05)
 
 **The problem:** The pipeline has no generative phase that produces operational CSS instructions (Report 28, H-03). 7 playbooks: border-weight hierarchy, typography scale, component template, spacing scale, zone background, designed moment recipes, scale-5 detail. Each ~20 lines.
 
 **Difficulty:** LOW (add to conventions-brief.md or create as separate reference file).
+
+---
 
 ### Fix 7: Subtractive Fix -- Reduce Interference (+0.1-0.2 PA-05)
 
@@ -720,6 +760,8 @@ For cycle 2, Report 31 recommends DIAGNOSTIC auditor selection (keep the auditor
 **The change:** Either (a) move the 83% uncheckpointed content to a reference file the builder can optionally consult, leaving only checkpointed content in the primary brief (~100 lines), or (b) add checkpoints for the retained content per Fix 1's micro-brief approach. Both reduce interference without losing intelligence.
 
 **Difficulty:** LOW (file reorganization only).
+
+---
 
 ### Cumulative Impact Estimate
 
@@ -739,13 +781,17 @@ Projected with all 7 fixes: PA-05 ~4.0+, Tier 5 ~7-8/9.
 
 This would place pipeline output in Flagship territory for the first time.
 
-**Critical caveat:** These are estimated impacts based on quality loss analysis, not measured outcomes. Each fix should be tested independently. The pipeline has a history of well-intentioned changes that introduce new failure modes while solving old ones.
+> [!WARNING]
+> **Critical caveat:** These are estimated impacts based on quality loss analysis, not measured outcomes. Each fix should be tested independently. The pipeline has a history of well-intentioned changes that introduce new failure modes while solving old ones.
 
-**COMPETING FRAMING -- reader should evaluate both:** This synthesis frames the pipeline as losing 35-45% of quality potential, motivating 7 major fixes. Report 16 frames the same evidence differently: the pipeline architecture is SOUND because the conventions brief IS the intelligence carrier and the builder receives the FULL 610-line brief, not a compressed version. Report 16 finds 7 of 9 core concepts are PRESERVED and ABSORBED. The quality loss happens at the brief-to-gate level, which is BY DESIGN (gates are floor detectors, not intelligence carriers). Report 16 identifies only 3 targeted gaps needing closure: (1) Anti-scale model has NO verification -- add PA-69 + SC-18 advisory gate (perceptible-mechanism ratio >= 0.03), (2) Vertical progression is NEVER STATED -- add one sentence to the brief explaining that each boundary decision participates in all 5 stack layers simultaneously (~5 lines, zero risk, the cheapest fix in any report), (3) Transition grammar has no execution verification -- extend SC-17 to validate transition TYPE against actual CSS (~10 lines of JS per Report 29). These 3 fixes total ~20 lines of changes. The 7-fix program above totals ~500+ lines of changes. The reader should decide whether the evidence supports targeted fixes or comprehensive overhaul.
+> [!NOTE]
+> **COMPETING FRAMING -- reader should evaluate both:** This synthesis frames the pipeline as losing 35-45% of quality potential, motivating 7 major fixes. Report 16 frames the same evidence differently: the pipeline architecture is SOUND because the conventions brief IS the intelligence carrier and the builder receives the FULL 610-line brief, not a compressed version. Report 16 finds 7 of 9 core concepts are PRESERVED and ABSORBED. The quality loss happens at the brief-to-gate level, which is BY DESIGN (gates are floor detectors, not intelligence carriers). Report 16 identifies only 3 targeted gaps needing closure: (1) Anti-scale model has NO verification -- add PA-69 + SC-18 advisory gate (perceptible-mechanism ratio >= 0.03), (2) Vertical progression is NEVER STATED -- add one sentence to the brief explaining that each boundary decision participates in all 5 stack layers simultaneously (~5 lines, zero risk, the cheapest fix in any report), (3) Transition grammar has no execution verification -- extend SC-17 to validate transition TYPE against actual CSS (~10 lines of JS per Report 29). These 3 fixes total ~20 lines of changes. The 7-fix program above totals ~500+ lines of changes. The reader should decide whether the evidence supports targeted fixes or comprehensive overhaul.
 
 **Structural risk constraints** (Report 16): Fixes 1 and 2 risk crossing Report 16's identified metacognitive ceiling. Report 16 warns: (1) A builder that skims the brief at ~600 lines (attention budget problem), (2) Brief degradation from recipe to rule-list (the checklist failure mode returns), (3) Brief growing beyond ~600-800 lines crosses the metacognitive ceiling. Fix 1 (per-zone micro-briefs, +150-200 lines) and Fix 2 (expanded TC brief, +50-80 lines) both ADD volume. These should be tested against Report 16's ceiling constraint.
 
-**Note on estimate attribution:** Fixes 1-5 use Report 31's careful estimates (total +1.2-1.5 PA-05). Fixes 6-7 are the synthesis's own extrapolations (+0.3-0.5 PA-05), not sourced from any report. The total range of +1.5-2.0 includes this synthesis-originated estimation.
+
+> [!NOTE]
+> **Estimate attribution:** Fixes 1-5 use Report 31's careful estimates (total +1.2-1.5 PA-05). Fixes 6-7 are the synthesis's own extrapolations (+0.3-0.5 PA-05), not sourced from any report. The total range of +1.5-2.0 includes this synthesis-originated estimation.
 
 ---
 
@@ -804,28 +850,36 @@ Four structural reasons, not one of which is "needs more research":
 
 ## The Path to Flagship
 
-**Step 0: Test the embarrassingly simple alternative FIRST (effort: $5, 2 hours).**
+> [!IMPORTANT]
+> **Step 0: Test the embarrassingly simple alternative FIRST (effort: $5, 2 hours).**
 Before applying any fixes, test Challenge C4 (Report 14): Opus + content + soul constraints + "make this extraordinary." If Opus produces Flagship-quality output with no compositional intelligence stack at all, the entire 7-fix program is unnecessary. The meta-to-output ratio is currently at infinity:0 (infinite research, zero Flagship output). The exit is building, not analyzing. This is the cheapest experiment that might obviate all other work. Report 25 concurs: "TEST before theorizing further. Build pages."
+
 
 **Step 1: Fix the pipeline (effort: 2-3 days, no new research needed).**
 If Step 0 falls short, apply the 7 priority fixes above. Estimated cumulative impact: +1.5-2.0 PA-05. This is mechanical work -- modifying TC SKILL.md output template, adding orchestrator micro-brief compilation, editing builder prompts, revising SC-10, adding DG-5, adding playbooks, and reducing conventions brief interference.
 
+
 **Step 2: Select appropriate content (effort: 1 hour).**
 Gas Town's philosophical structure produces 4-5 natural zones. Flagship requires 8+ zone transitions and 3+ axis patterns. Select content with high structural heterogeneity: implementation-heavy content with code blocks, procedures, comparisons, reference tables, and narrative sections. 8+ natural semantic sections is a PRECONDITION for Flagship -- compositional intelligence cannot compensate for content that doesn't need it. Additionally, select content whose nature already suggests a structural metaphor that drives CSS decisions (Report 09 general principle: "the highest richness is achieved when the distance between content and metaphor approaches zero"). Content that is all prose (uniform paragraphs) caps mechanism deployment opportunities -- structural variety in the content creates natural insertion points for diverse visual treatments (Report 28, B-02).
+
 
 **Step 3: Decontaminate auto-loaded files (effort: 5 minutes).**
 Replace "crown jewel" in MEMORY.md and CLAUDE.md. Move Flagship definition to a permanent auto-loaded location. Add Flagship context to gate-runner provenance lines.
 
+
 **Step 3.5: Run a 5-minute Builder Simulation Validation (the cheapest possible test).**
 Before a full pipeline execution, give the prompt to a cold Sonnet agent and ask it to produce CSS for one zone. If the CSS is flat/uniform (all sections identical, no designed moments, no atmospheric variation), the prompt has a UTILITY problem regardless of coverage metrics. This 5-minute test would have caught the Flagship's catastrophic failure before the full 19-agent, 5-pass execution (Report 28, H-04). The 22 validation agents that produced the enriched master prompt checked COVERAGE (prompt vs research) but not UTILITY (prompt vs builder needs). Nobody asked: "If I gave this prompt to a builder, could they build a varied page?" Builder simulation is the cheapest intervention in the entire corpus -- zero file changes, 5 minutes, prevents the most expensive failure mode.
+
 
 **Step 4: Build, don't research.**
 Run the pipeline with the 7 fixes applied, appropriate content selected, and an Opus builder in composing mode. The pipeline is as ready as it can be made through specification. The remaining quality gap is between PROCEDURAL (following a recipe, ceiling ~3.5/4) and DISPOSITIONAL (thinking in the idiom, ceiling ~4/4). That gap cannot be closed by adding more rules. It can only be tested by building.
 
+
 **Step 5: If the build falls short, do a focused 9-agent retrospective.**
 Not 50 agents. Not 17 phases. 9 agents, each reading the page and the build log, each answering a specific question. Produce exact file edits. Apply them. Build again. Follow the implementation success factors: proximity to implementation (do research in the same session as fixes), specificity (exact line edits, not principles), team size <= 12, include a contrarian, and follow with an experiment.
 
-**Do not start another research phase.** The ratio is 601,718 lines to 11 improvements. The pipeline does not need more intelligence. It needs to be turned on.
+> [!WARNING]
+> **Do not start another research phase.** The ratio is 601,718 lines to 11 improvements. The pipeline does not need more intelligence. It needs to be turned on.
 
 **If you DO research despite this advice, follow the anti-waste protocol:**
 - Cap at 10 agents per research phase (beyond 12, marginal returns are negative)
@@ -834,6 +888,8 @@ Not 50 agents. Not 17 phases. 9 agents, each reading the page and the build log,
 - Run the pipeline BEFORE researching improvements (test first, fix observed failures)
 - Eliminate meta-research (no research about research, no audits of audits)
 - Include a designated contrarian agent to prevent consensus amplification
+
+---
 
 ---
 
@@ -859,6 +915,8 @@ Not 50 agents. Not 17 phases. 9 agents, each reading the page and the build log,
 | 16 | Add Content Richness Signal at intake (Report 31) | 30 min | Gives TC agent head start on compositional potential |
 | 17 | Run Builder Simulation Validation before full pipeline execution (Report 28) | 5 min | Cheapest test -- catches prompt utility failures before expensive builds |
 | 18 | Add vertical progression sentence to brief (Report 16) -- the cheapest fix in any report | 5 min | ~5 lines stating each boundary decision participates in all 5 stack layers |
+
+---
 
 ## Appendix B: Top 10 Unimplemented Recommendations (Report 30)
 
