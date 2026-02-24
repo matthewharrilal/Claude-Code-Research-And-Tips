@@ -125,6 +125,29 @@ This tier is the HEART of the brief. The Brief Assembler synthesizes this sectio
 - REFERENCE = tighter spacing, tables, possible multi-column
 - CODE = monospace heavy, structured
 
+**Content-Type Conditional (adapt Tier 3 emphasis based on page content type):**
+
+IF page is predominantly **PROSE** (essays, arguments, long-form writing):
+- Focus on typography and spacing as primary differentiators between zones
+- Metaphor should be ATMOSPHERIC (felt through rhythm and proportion, not through structural novelty)
+- Density arc drives the argument arc — dense where the argument peaks, spacious where it breathes
+- Fewer zone boundaries needed (3-4 total) — let the prose flow without excessive interruption
+- Components: pull quotes, callouts for emphasis, minimal tables/grids
+
+IF page is predominantly **MIXED** (prose + reference + code + media):
+- Deploy FULL multi-coherence framework — all 6 channels active at most boundaries
+- Metaphor should be STRUCTURAL (expressed through layout shifts, grid changes, component adaptation)
+- More zone boundaries (4-6 total) — each content type gets its own spatial treatment
+- Components: full range — callouts, tables, code blocks, grids, cards
+- Layout variety requirement is highest here — single-column must not exceed 50% of zones
+
+IF page is predominantly **VISUAL** (galleries, diagrams, image-heavy):
+- Focus on layout and spacing as primary differentiators — reduce typography guidance
+- Image containers and galleries are priority components — use grid layouts liberally
+- Typography takes a supporting role — fewer type scale shifts, let images carry zone character
+- Whitespace around images is a first-class design element (D-06 is especially relevant)
+- Fewer text-based mechanisms — spatial and material mechanisms carry the composition
+
 ### Creative Authority + Components
 
 You have 80% creative authority within identity constraints. The soul (Tier 1) and physics (Tier 2) are non-negotiable. Everything else -- how you interpret the metaphor, which mechanisms you deploy, how zones transition -- is yours.
@@ -137,9 +160,9 @@ Reference `tokens.css` for exact values. Key vocabulary: spacing scale (4-96px i
 
 ---
 
-## TIER 4: DISPOSITION (D-01 through D-08, ~40 lines MINIMUM)
+## TIER 4: DISPOSITION (D-01 through D-09, ~45 lines MINIMUM)
 
-{For each disposition D-01 through D-08, write a short instruction with PURPOSE and specific techniques relevant to this page's content. Tag each as [EXPERIMENTAL]. Include 1-2 content-specific observations per disposition.}
+{For each disposition D-01 through D-09, write a short instruction with PURPOSE and specific techniques relevant to this page's content. Tag each as [EXPERIMENTAL]. Include 1-2 content-specific observations per disposition. D-09 (The Quiet Zone) should identify which specific middle-third zone the assembler recommends as the quiet zone candidate, based on content density from the Content Map.}
 
 **CRITICAL: Each disposition MUST include at least ONE specific CSS property:value pair.** Purpose-only dispositions produce vague output. If Tier 4 falls below 35 lines, you are under-specifying technique vocabulary.
 
@@ -170,6 +193,9 @@ SUFFICIENT: "D-04: Create 1-2 second-half moments. Techniques for this content: 
 ### D-08: The Skeleton Test [EXPERIMENTAL]
 **PURPOSE:** Remove all content mentally. Does the skeleton (spacing, borders, backgrounds, typography framework) still have shape? If it looks like a uniform stack of boxes, it is applied mode. If it has rhythm and proportion, it is composed mode.
 
+### D-09: The Quiet Zone [EXPERIMENTAL]
+**PURPOSE:** Designate at least one zone in the middle third as deliberately plainer (2-3 mechanisms vs 4-5, single-column prose, no bento grid). Preserve family membership (zone background, typography, border-weight). {Content-specific: identify the recommended quiet zone candidate from the Content Map density arc — typically the zone BEFORE or AFTER the peak density zone.}
+
 ---
 
 ## CONTENT MAP APPENDIX (~30-50 lines)
@@ -190,7 +216,7 @@ SUFFICIENT: "D-04: Create 1-2 second-half moments. Techniques for this content: 
 3. Tier 1 is VERBATIM from the template text above (the 10 soul world-descriptions).
 4. Tier 2 is VERBATIM from the template text above (adapt calibration only if thresholds change).
 5. Tier 3 is SYNTHESIZED from the Content Map + reference artifacts. This requires creative judgment.
-6. Tier 4 is ADAPTED per content -- each D-01 through D-08 gets 1-2 content-specific observations.
+6. Tier 4 is ADAPTED per content -- each D-01 through D-09 gets 1-2 content-specific observations.
 7. Content Map Appendix is APPENDED verbatim from Phase 0 output.
 8. Do NOT include gate thresholds in pass/fail format.
 9. Do NOT include count-gates (">=3 channels").

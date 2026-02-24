@@ -532,6 +532,49 @@ These will be documented in a dedicated experiment protocol file (Wave 3).
 - GR-42: Builder does not receive gate thresholds (overlaps with GR-27 precondition gate)
 The orchestrator enforces these as process rules during Phase 2 spawning and Phase 3C verdict handling.
 
+### Orchestrator Decision Rules (formerly GR-23 through GR-28) — Reclassified Wave 3 (FIX-094, FIX-098)
+
+The following gates were removed from `artifact-gate-runner.md` during Wave 3 because they are orchestrator pre-build verification checks, not Playwright DOM inspection gates. They verify pipeline configuration before the builder starts. The orchestrator runs these as text-based checks during Phase 0-1.
+
+**Pre-Build Configuration Checks (GR-23-24):**
+
+- **GR-23: Builder Model = Opus** [ADVISORY]
+  - Check: Verify model ID of builder agent is `claude-opus-*`
+  - Evidence: OBSERVED/CONFOUNDED (council downgraded to STRONG RECOMMENDATION pending experiment #19)
+  - FAIL produces WARNING, not BLOCK
+  - Enforcement: Orchestrator checks model selection during Phase 2 agent spawning
+
+- **GR-24: Content Has Heterogeneity** [ADVISORY]
+  - Check: Phase 0 Content Analyst output must include heterogeneity >= "moderate" and metaphor viability >= "viable"
+  - Evidence: CONFOUNDED (maps to Content Affordance factor in master equation)
+  - Enforcement: Orchestrator checks Phase 0 output before proceeding to Phase 1
+
+**Brief Verification Checks (GR-25-28):**
+
+- **GR-25: Suppressor Count = 0** [RECOMMENDED]
+  - Check: Scan activation brief for known suppressor patterns (same regex as BV-04)
+  - Patterns: `/sample\s+\d+-\d+/i`, `/must\s+not|shall\s+not|never\s+use/i`, `/verify\s+that|fail\s+if|must\s+be/i`, `/>=?\s*\d+\s+channels?/i`
+  - Evidence: OBSERVED (20 suppressors, ALL correlate with degradation)
+  - Enforcement: Orchestrator runs after Brief Assembler output, before passing brief to builder
+
+- **GR-26: Brief Size Cap** [RECOMMENDED]
+  - Check: Total brief < 200 lines AND constraint layer <= 73 lines
+  - Evidence: OBSERVED (Middle success at 100 lines; Flagship failure at 530+ lines)
+  - Enforcement: Orchestrator counts lines after brief assembly
+
+- **GR-27: Builder Does Not Receive Gates** [RECOMMENDED]
+  - Check: Scan builder's input for gate-format language ("FAIL if", ">= N channels", "pass/fail threshold")
+  - Evidence: OBSERVED (gate visibility caused threshold gaming in Flagship)
+  - Enforcement: Orchestrator audits builder input package before spawning builder agent
+  - Note: Overlaps with GR-42 (policy gate) — both enforce the same principle
+
+- **GR-28: Recipe Format (Not Checklist)** [RECOMMENDED]
+  - Check: Scan builder brief for recipe indicators (sequenced steps, "Read/Select/Deploy/Assess" verbs, world-description voice). Flag if compliance voice ("Verify/Fail if/Must be") detected.
+  - Evidence: OBSERVED (Recipe = DESIGNED N=2; Checklist = FLAT N=2; massive effect size)
+  - Enforcement: Orchestrator validates brief format after assembly, before passing to builder
+
+**Execution timing:** GR-23 and GR-24 run during Phase 0/Phase 2 agent spawning. GR-25 through GR-28 run between Phase 1 (brief assembly) and Phase 2 (builder execution), alongside BV-01 through BV-04. Together they form the complete pre-build verification layer.
+
 ---
 
 ## SECTION 8: TOTAL BUILD SUMMARY

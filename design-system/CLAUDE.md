@@ -21,7 +21,7 @@ THIS FILE IS AUTO-LOADED ON DIRECTORY ENTRY
 ### I'm here to BUILD content/pages
 **→ Run:** `/build-page <content-file-path>` (the ONLY way to build pages)
 **→ What it does:** /build-page is a thin launcher that points to the Pipeline v3 execution manifest at `ephemeral/va-extraction/MANIFEST.md`. The manifest + 9 artifact files contain ALL pipeline intelligence (agent prompts, gate specs, PA assignments, value tables, worked examples). Follow the manifest's 11-step quickstart procedure.
-**→ Key files:** `ephemeral/va-extraction/MANIFEST.md` (1,091 lines) + 9 artifact files in same directory
+**→ Key files:** `ephemeral/va-extraction/MANIFEST.md` (~1,160 lines) + 9 artifact files + gate-runner split files + execution tracker in same directory
 **→ ALWAYS loaded automatically:** `compositional-core/identity/prohibitions.md` + `compositional-core/vocabulary/tokens.css`
 
 ### I'm here to VALIDATE/AUDIT
@@ -329,12 +329,17 @@ validated-explorations/
 /build-page <content-file-path>
 ```
 
-**Architecture (v2):** /build-page is a thin launcher. ALL pipeline intelligence lives in:
-- **Manifest:** `ephemeral/va-extraction/MANIFEST.md` (1,091 lines — 11-step quickstart, agent roster, agent prompt templates, glossary, file registry)
+**Architecture (v3.1 — Wave 3):** /build-page is a thin launcher. ALL pipeline intelligence lives in:
+- **Manifest:** `ephemeral/va-extraction/MANIFEST.md` (~1,160 lines — 12-step quickstart with execution tracker, agent roster, agent prompt templates, glossary, file registry)
 - **9 Artifacts:** `ephemeral/va-extraction/artifact-*.md` (identity, recipe, gates, PA protocol, routing, orchestrator, TC brief template, worked examples, value tables)
+- **Gate runner (split):** `gate-runner-core.js` (1,436 lines executable JS) + `gate-runner-spec.md` + `gate-runner-preconditions.md` + `gate-runner-provenance.md` + `gate-manifest.json` (37 gates: 18 REQUIRED + 8 RECOMMENDED + 5 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF)
+- **PA protocol (split):** `pa-questions.md` (412 lines) + `pa-deployment.md` (237 lines) + `pa-weaver.md` (376 lines) + `pa-guardrails.md` (151 lines) + `pa-manifest.md` (89 lines)
+- **Per-build tracking:** `EXECUTION-TRACKER-TEMPLATE.md` (copy per run) + `experiment-protocol.md` (GR-36–GR-39)
 - **Override:** `ephemeral/va-extraction/council-verdict.md` (575 lines)
 
-**Execution:** Read the manifest, follow the 11-step quickstart. Use TeamCreate. All agents Opus. The manifest's Appendix E has copy-paste-ready prompts for every agent role.
+**Execution:** Read the manifest, follow the 12-step quickstart (Step 0 = execution tracker). Use TeamCreate. All agents Opus. The manifest's Appendix E has copy-paste-ready prompts for every agent role.
+
+**Wave 3 changes (2026-02-24):** Gate runner split (monolithic→5 files), PA protocol split (monolithic→5 files), GR-23–GR-28 reclassified from gate-runner to orchestrator, D-09 "The Quiet Zone", execution tracker, experiment protocol, SHIP WITH FIXES verdict, BV gates, Wave 2 anti-pattern gates. See `ephemeral/pages/gas-town-va-pipeline/implementation/` for change logs.
 
 **Success bar:** PA-05 >= 3.5 AND zero soul violations
 

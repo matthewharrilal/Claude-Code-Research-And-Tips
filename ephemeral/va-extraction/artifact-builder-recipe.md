@@ -3,7 +3,7 @@ Date: 2026-02-23
 Status: AUTHORITATIVE (conforms to council-verdict.md)
 Items covered: 70 SCAFFOLDING (Layer 3) + 76 DISPOSITION (Layer 4) = 146 items total
 Format: RECIPE (sequenced steps with Read/Select/Deploy/Assess verbs)
-Evidence status for D-01 through D-08: EXPERIMENTAL (council verdict Part 5, item 9)
+Evidence status for D-01 through D-09: EXPERIMENTAL (council verdict Part 5, item 9)
 Framing: PURPOSE + VOCABULARY (council verdict: "activation" RETIRED)
 
 ---
@@ -171,6 +171,8 @@ Decide how callouts adapt to zone context. In composed mode, callouts should mod
 Contrast with APPLIED mode where callouts are styled identically across all zones:
 > [ITEM 64, extract-d18-d20.md, VA L1520-1521]
 > [ITEM 65, extract-d18-d20.md, VA L1523-1526]
+
+> These selections will be deployed in Step 3.4b. Write them down — you will need them.
 
 **Forward reference:** These callout selections will be applied per-zone in Step 3.4b (component adaptation to zone character). Record your padding, border-weight, background tint, and label sizing decisions here for use during deployment.
 
@@ -371,10 +373,10 @@ After deploying the scaffolding, take a screenshot and assess:
 
 ---
 
-## PHASE 4: DEPLOY DISPOSITIONAL INSTRUCTIONS (D-01 through D-08)
+## PHASE 4: DEPLOY DISPOSITIONAL INSTRUCTIONS (D-01 through D-09)
 
 > **EVIDENCE STATUS: EXPERIMENTAL** (council verdict Part 5, item 9)
-> These 8 instructions are DESIGN INTENTIONS that create conditions for quality. They do not guarantee outcomes. Per council verdict: "D-04 creates conditions for surprise (not guaranteed)."
+> These 9 instructions are DESIGN INTENTIONS that create conditions for quality. They do not guarantee outcomes. Per council verdict: "D-04 creates conditions for surprise (not guaranteed)."
 > Include in smoke test. Evaluate via experiment #20.
 
 The purpose of these instructions is to shift your building mode from APPLIED (each mechanism solves a local problem) to COMPOSED (each mechanism serves a governing logic).
@@ -546,9 +548,29 @@ Gas Town delight score: 2/10. Missing 6 techniques.
 
 > [ITEM 46, extract-d01-d03.md, VA L87]
 
+### D-09: The Quiet Zone [EXPERIMENTAL] [NEW]
+
+**PURPOSE:** Designate at least ONE zone in the middle third of the page as deliberately plainer than its neighbors. This zone is a breathing pause in the density arc — the visual equivalent of a rest in music.
+
+**VOCABULARY:**
+- Fewer mechanisms than surrounding zones: 2-3 mechanisms (vs 4-5 in adjacent zones)
+- No bento grid or multi-column layout — single-column prose only
+- Wider line-height, more generous margins — let the content speak without ornament
+- Simpler component usage — plain text blocks, minimal callouts
+
+**PRESERVE (family membership):**
+- Zone background from the value table (the quiet zone is still a ROOM, not a void)
+- Typography from the type scale (same font family, proportional sizing)
+- Border-weight hierarchy (if borders appear, they follow 4px/3px/1px)
+- The zone must still feel like it belongs to the same page
+
+**DESIGN INTENTION:** D-09 creates conditions for CONTRAST. A quiet zone makes its neighbors feel richer. Without rest, sustained density becomes noise. The quiet zone is deliberate restraint, not absence.
+
+**Anti-pattern: empty zone with uniform cream.** The quiet zone must still have CONTENT and STRUCTURE — it is plainer, not blank. A zone with a single cream background, no borders, no typography variation, and no visible content structure is a whitespace void, not a quiet zone. The difference: a quiet zone has fewer mechanisms deployed WITH INTENTION; a void has no mechanisms deployed AT ALL.
+
 ### Assess Disposition Deployment
 
-After applying D-01 through D-08, the page's emotional arc should have shape:
+After applying D-01 through D-09, the page's emotional arc should have shape:
 
 **The 4 emotional registers:**
 > [ITEM 001, extract-d21-d25.md, VA L1572-1574]
@@ -629,7 +651,9 @@ Your output should be:
 
 ---
 
-## PHASE 6: TEMPORAL COMPOSITION (Advanced)
+## PHASE 6: TEMPORAL COMPOSITION
+
+> **Note:** This phase is verified during Phase 5 self-evaluation (questions 5-7). The content below is reference — the builder verifies these aspects in Phase 5 rather than executing Phase 6 as a separate step.
 
 This phase addresses how static CSS creates a time-based experience. Every reader experiences the page temporally — they scroll.
 
@@ -899,7 +923,7 @@ Per council verdict (CF-04), all items carry evidence classification:
 
 **Items in this document by evidence status:**
 - SCAFFOLDING items: Mostly FACT (tokens.css exists, compression behavior observed) and OBSERVED (section heights, density patterns from N=2 exemplars)
-- D-01 through D-08: THEORETICAL (N=0 as a set, council verdict flags as EXPERIMENTAL)
+- D-01 through D-09: THEORETICAL (N=0 as a set, council verdict flags as EXPERIMENTAL)
 - Emotional arc: THEORETICAL (emergent, not yet observed in v3 pipeline)
 - Perception thresholds (calibration values): FACT (observed across N=3+ builds)
 - Mode determinants: OBSERVED (B8 investigation, N=2 builds analyzed)

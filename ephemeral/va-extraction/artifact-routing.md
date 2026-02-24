@@ -554,10 +554,10 @@ Plus:
 **Reader profile integration:**
 > D12-D14 ITEM 101 (L1119): Brief Assembler merges reader profile into Tier 3
 
-### Tier 4: DISPOSITION (~40 lines, 8 instructions)
-> ITEM 38 (D01-D03, L79) [classified DISPOSITION]: Tier 4: DISPOSITION (8 instructions, ~40 lines)
+### Tier 4: DISPOSITION (~48 lines, 9 instructions)
+> ITEM 38 (D01-D03, L79) [classified DISPOSITION]: Tier 4: DISPOSITION (9 instructions, ~48 lines)
 
-D-01 through D-08 are included per the DISPOSITION artifact. They are referenced here as part of the brief structure but specified in the builder recipe artifact.
+D-01 through D-09 are included per the DISPOSITION artifact. They are referenced here as part of the brief structure but specified in the builder recipe artifact. D-09 ("The Quiet Zone") was added in Wave 3.
 
 ### Content Map Appendix (~30-50 lines)
 > ITEM 47 (D01-D03, L90-92): CONTENT MAP appended to brief: per-section analysis, metaphor seeds
