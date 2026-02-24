@@ -138,24 +138,24 @@ The Gate Runner is NOT a separate LLM agent. It is Playwright JavaScript code ex
 
 | Executor | Model | Role | Receives | Produces |
 |----------|-------|------|----------|----------|
-| **Orchestrator** (Playwright JS) | N/A | Run 35 programmatic gate checks | Built HTML file + artifact-gate-runner.md | Structured JSON results (35 gates: PASS/FAIL) |
+| **Orchestrator** (Playwright JS) | N/A | Run 43 programmatic gate checks | Built HTML file + artifact-gate-runner.md | Structured JSON results (43 gates: PASS/FAIL) |
 
 
 ### Phase 3B — Perceptual Audit (Mode 4)
 
 | Agent | Model | Role | Receives | Produces |
 |-------|-------|------|----------|----------|
-| **PA Auditor A** | Opus | Impression + Emotion | Screenshots + PA-01, PA-03, PA-04, PA-05, PA-45, PA-65, PA-67 (7 questions) | Audit findings |
-| **PA Auditor B** | Opus | Readability + Typography | Screenshots + PA-02, PA-06, PA-07, PA-08, PA-29, PA-56 (6 questions) | Audit findings |
-| **PA Auditor C** | Opus | Spatial + Proportion | Screenshots + PA-09, PA-10, PA-11, PA-30-33, PA-50-53, PA-55, PA-64, PA-66 (14 questions) | Audit findings |
-| **PA Auditor D** | Opus | Flow + Pacing | Screenshots + PA-12, PA-13, PA-34-36, PA-69, PA-70, PA-71, PA-62 (9 questions) | Audit findings |
+| **PA Auditor A** | Opus | Impression + Emotion | Screenshots + PA-01, PA-03, PA-04, PA-05, PA-45, PA-65, PA-67, PA-72, PA-76 (9 questions) | Audit findings |
+| **PA Auditor B** | Opus | Readability + Typography | Screenshots + PA-02, PA-06, PA-08, PA-29, PA-55, PA-56, PA-70, PA-77 (8 questions) | Audit findings |
+| **PA Auditor C** | Opus | Spatial + Proportion | Screenshots + PA-09, PA-11, PA-30-33, PA-50, PA-51, PA-53, PA-64, PA-66 (11 questions) | Audit findings |
+| **PA Auditor D** | Opus | Flow + Pacing | Screenshots + PA-12, PA-13, PA-34-36, PA-52, PA-62, PA-69, PA-71, PA-74, PA-75 (11 questions) | Audit findings |
 | **PA Auditor E** | Opus | Grid + Layout | Screenshots + PA-14, PA-15, PA-37-39, PA-63 (6 questions) | Audit findings |
 | **PA Auditor F** | Opus | Consistency + Rhythm | Screenshots + PA-16, PA-17, PA-40, PA-41, PA-60, PA-61 (6 questions) | Audit findings |
 | **PA Auditor G** | Opus | Metaphor + Ideology | Screenshots + PA-18-20, PA-42-44, PA-68 (7 questions) | Audit findings |
-| **PA Auditor H** | Opus | Responsiveness | Screenshots + PA-21-23, PA-46, PA-47 (5 questions) | Audit findings |
+| **PA Auditor H** | Opus | Responsiveness | Screenshots + PA-22, PA-23, PA-46, PA-47, PA-73 (5 questions) | Audit findings |
 | **PA Auditor I** | Opus | Cross-Page + Adversarial | Screenshots + PA-24-28, PA-48 (6 questions) | Audit findings |
 
-**Total: 66 questions across 9 auditors.** These assignments are thematic groupings from artifact-pa-protocol.md Part 4, Section 4.2 — NOT sequential ranges.
+**Total: 69 questions across 9 auditors.** These assignments are thematic groupings from artifact-pa-protocol.md Part 4, Section 4.2 — NOT sequential ranges.
 
 ### Phase 3B — Integration
 
@@ -241,8 +241,8 @@ This section maps each artifact file to the specific agents who receive it. Sect
 **D-01 through D-08 are ALL EXPERIMENTAL** per council verdict CF-02/G. They are included in the brief but tagged with evidence level. The builder should attempt them but they are NOT gate-checked.
 
 ### artifact-gate-runner.md (~1,760 lines)
-**Layers covered:** L6 GATES (35 gates + 34 VALUES items rerouted per council verdict — see VALUES Rerouting below)
-**Total items:** 35 gates (17 REQUIRED + 8 RECOMMENDED + 6 ADVISORY + 4 BRIEF VERIFICATION)
+**Layers covered:** L6 GATES (43 gates + 34 VALUES items rerouted per council verdict — see VALUES Rerouting below)
+**Total items:** 43 gates (18 REQUIRED + 12 RECOMMENDED + 9 ADVISORY + 4 BRIEF VERIFICATION)
 
 | Section (Actual Header) | Receiving Agent | Purpose |
 |------------------------|-----------------|---------|
@@ -438,7 +438,7 @@ Before spawning the Brief Assembler, the orchestrator determines mode (APPLIED o
 
 **Steps (gate runner — runs in parallel with screenshots):**
 1. Orchestrator opens Playwright session against served HTML.
-2. Gate runner executes all post-build gates at 1440px viewport width (see artifact-gate-runner.md for the 35-gate inventory).
+2. Gate runner executes all post-build gates at 1440px viewport width (see artifact-gate-runner.md for the 43-gate inventory).
 3. Responsive gates re-run at 768px.
 4. Results collected as structured JSON.
 
@@ -469,7 +469,7 @@ Before spawning the Brief Assembler, the orchestrator determines mode (APPLIED o
 **Steps:**
 1. Orchestrator spawns **Weaver** with:
    - Integrative auditor report (PA-05 score + sub-criteria)
-   - Gate runner results (35 gates: PASS/FAIL)
+   - Gate runner results (43 gates: PASS/FAIL)
    - Individual auditor reports (for evidence)
    - Calibration references from artifact-pa-protocol.md "4.5 Weaver" (multi-coherence scale, severity scale, metaphor expression spectrum)
 2. Weaver applies verdict logic (priority order):
@@ -488,6 +488,25 @@ Before spawning the Brief Assembler, the orchestrator determines mode (APPLIED o
 **For FLAGSHIP detection:** PA-05 >= 3.5 AND Tier 5 >= 6/8 AND zero soul violations AND metaphor STRUCTURAL.
 
 **Single-pass behavior:** In single-pass mode (the default), REFINE and REBUILD are OUTPUT LABELS. The pipeline terminates with the verdict + action items. A human decides whether to run a new pipeline execution. There is no automatic re-execution. Maximum iterations across multiple runs: 1 REBUILD + 1 REFINE before requiring human intervention.
+
+### Per-Agent Output Logging
+
+Every agent spawn MUST log its output to a timestamped file in the build output directory. This enables post-run analysis and debugging.
+
+**Format:** `{phase}-{agent}-{timestamp}.md`
+
+**Required logged outputs:**
+| Phase | Agent | Output File Example |
+|-------|-------|-------------------|
+| Phase 0 | Content Analyst | `p0-content-analyst-20260224T1430.md` |
+| Phase 1 | Brief Assembler | `p1-brief-assembler-20260224T1445.md` |
+| Phase 2 | Builder | `p2-builder-20260224T1530.html` (the HTML artifact itself) |
+| Phase 3A | Gate Runner | `p3a-gate-runner-20260224T1535.json` |
+| Phase 3B | PA Auditors A-I | `p3b-pa-auditor-{A..I}-20260224T1540.md` |
+| Phase 3B | Integrative Auditor | `p3b-integrative-20260224T1555.md` |
+| Phase 3C | Weaver | `p3c-weaver-20260224T1600.md` |
+
+The orchestrator is responsible for capturing and saving each agent's output. No agent output should be ephemeral — all outputs are preserved for the full build lifecycle.
 
 ---
 
@@ -730,8 +749,8 @@ Item counts shown as "Base / Artifact-reported" where they differ.
 | L3 SCAFFOLDING | 68 | 75 (appendix) | artifact-builder-recipe.md | COVERED — Recipe phases 1-3, mechanism minimums |
 | L4 DISPOSITION | 62 | 78 (appendix) | artifact-builder-recipe.md | COVERED — D-01–D-08 + recipe phases 4-6 |
 | L5 VALUES | 94 | Distributed | DISTRIBUTED | COVERED — 34 rerouted from gates (15 orch, 10 PA, 9 doc); 26 to builder context; 34 standalone |
-| L6 GATES | 72 | 35 gates + rerouted | artifact-gate-runner.md | COVERED — 35 gates (17 REQUIRED + 8 RECOMMENDED + 6 ADVISORY + 4 BV + 1 output) |
-| L7 PA | 56 (+32 rerouted) | 88 total tracked | artifact-pa-protocol.md | COVERED — 66 questions across 9 auditors + integration + verdict |
+| L6 GATES | 72 | 43 gates + rerouted | artifact-gate-runner.md | COVERED — 43 gates (18 REQUIRED + 12 RECOMMENDED + 9 ADVISORY + 4 BV) |
+| L7 PA | 56 (+32 rerouted) | 88 total tracked | artifact-pa-protocol.md | COVERED — 69 questions across 9 auditors + integration + verdict |
 | L8 ROUTING | 63 (+62 cross-matched) | 125 total | artifact-routing.md | COVERED — Content analysis + TC brief + compression + zones |
 | L9 ORCHESTRATION | 188 (+37 rerouted/context) | 222 total | artifact-orchestrator.md | COVERED — Full pipeline sequence + mode + verdict + experiments |
 | META | 197 | Distributed | DISTRIBUTED | COVERED — Process documentation, evidence taxonomy, phase history |
@@ -767,8 +786,8 @@ To verify coverage is complete:
 - [ ] Every non-META item appears in at least one artifact file
 - [ ] DUAL-ROUTE items appear in exactly two artifacts with different framing
 - [ ] No artifact contains items from layers it doesn't own (except by council mandate)
-- [ ] All 35 gates in artifact-gate-runner.md have corresponding items in the registry
-- [ ] All 66 PA questions in artifact-pa-protocol.md have corresponding items in the registry
+- [ ] All 43 gates in artifact-gate-runner.md have corresponding items in the registry
+- [ ] All 69 PA questions in artifact-pa-protocol.md have corresponding items in the registry
 - [ ] All 8 disposition instructions (D-01–D-08) in artifact-builder-recipe.md have corresponding items
 - [ ] All 10 soul constraints in artifact-identity-perception.md have corresponding items
 - [ ] Council rerouting decisions (87 total) are reflected in artifact assignments
@@ -801,7 +820,7 @@ All claims in this manifest and its artifacts are tagged with evidence levels pe
 | Content Analyst | Raw content markdown + content analysis protocol (full "Phase 0: Content Analysis Protocol" section from artifact-routing.md) + reader model ("Reader Model — 5-Axis Input Space" section) |
 | Brief Assembler | Content Map, TC Brief Template (~165-line standalone file), soul world-description (from SC tables — World-description field ONLY), perception thresholds, recipe phases, disposition D-01–D-08 |
 | Builder | Execution Brief ONLY + tokens.css + components.css + mechanism-catalog.md + value tables (~550 lines) + CD-006 reference (optional) |
-| Gate Runner (orchestrator code) | Built HTML file + artifact-gate-runner.md (35 gates, executed as Playwright JavaScript) |
+| Gate Runner (orchestrator code) | Built HTML file + artifact-gate-runner.md (43 gates, executed as Playwright JavaScript) |
 | PA Auditors (×9) | Screenshots ONLY + assigned question subset (thematic groupings per Section 2 roster) |
 | Integrative Auditor | 9 PA auditor reports + all screenshots + PA-05 scoring criteria |
 | Weaver | Integrative report + gate results + individual auditor reports + calibration references (multi-coherence scale, severity scale, metaphor expression spectrum) |

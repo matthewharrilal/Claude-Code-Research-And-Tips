@@ -172,6 +172,8 @@ Contrast with APPLIED mode where callouts are styled identically across all zone
 > [ITEM 64, extract-d18-d20.md, VA L1520-1521]
 > [ITEM 65, extract-d18-d20.md, VA L1523-1526]
 
+**Forward reference:** These callout selections will be applied per-zone in Step 3.4b (component adaptation to zone character). Record your padding, border-weight, background tint, and label sizing decisions here for use during deployment.
+
 ### Step 2.5: Select component selection + layout
 
 Choose which components to use and how to lay them out. The brief's content map tells you what each section needs.
@@ -331,6 +333,33 @@ The page should use the metaphor + zone strategy to create page uniqueness while
 Cross-page coherence emerges naturally from tokens.css + soul + components.css. No additional cross-page spec is needed.
 > [ITEM 66, extract-d06-d08.md, VA L617-619]
 > [ITEM 67, extract-d06-d08.md, VA L618]
+
+### Step 3.4b: Adapt components to zone character (fractal coherence)
+
+Components should not look identical across all zones. Adapt shared components to each zone's density and character, creating fractal coherence — the same design language expressed at different scales.
+
+**READ:** Review your Step 2.4 callout variant selections and the zone density arc from Step 3.3.
+
+**SELECT:** For each component type (callouts, cards, tables, code blocks), choose 4 properties to modulate per zone:
+
+| Property | Sparse Zone (Z1) | Dense Zone (Z3) | Reference (CD-006) |
+|----------|-------------------|------------------|---------------------|
+| Padding | 20px 24px (generous) | 12px 16px (compressed) | Z1: 20px 24px, Z3: 12px 16px |
+| Border-weight | 3px (moderate) | 5px (heavier — compression emphasizes) | Z1: 3px, Z3: 5px |
+| Background tint | Lighter (closer to zone bg) | Slightly deeper (contrast with dense content) | Per zone background + 8-12 RGB offset |
+| Label sizing | 13px (readable) | 11px (tight) | Z1: 13px, Z3: 11px |
+
+**DEPLOY:** Write zone-specific component overrides in CSS:
+```css
+/* Zone 1 — sparse, generous */
+.zone-opening .callout { padding: 20px 24px; border-left-width: 3px; }
+/* Zone 3 — dense, compressed */
+.zone-dense .callout { padding: 12px 16px; border-left-width: 5px; }
+```
+
+**ASSESS:** Do components feel like they BELONG to their zone, or do they look pasted in from a generic library? If the same callout looks identical in Zone 1 and Zone 3, the adaptation is insufficient.
+
+> Source: OM-09 (component zone-modulation) + OM-10 (fractal coherence)
 
 ### Step 3.5: Assess scaffolding
 

@@ -121,9 +121,9 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 - NO: All transitions similar weight, OR placement uncorrelated with content
 
 **PA-63: Fractal Zoom Coherence** (Auditor E)
-> "Zoom into one component (card, callout, table, code block). Does its internal design echo the page's overall design language at a smaller scale? Then find the SAME component type in a different section — does it adapt to its surroundings, or look identical?"
-- YES: Component's internal structure mirrors page-level design language AND auditor can NAME the shared language. STRONG YES if same component adapts visibly to different zones.
-- NO: Components look generic OR same component type identical in every zone
+> "Zoom into one component. Does its design echo the page's language? Then zoom OUT to section level — does this section's internal structure also echo the same language? Then find the SAME component type in a different section — does it adapt?"
+- YES: Component's internal structure mirrors page-level design language at BOTH component and section scale AND auditor can NAME the shared language. STRONG YES if same component adapts visibly to different zones.
+- NO: Components look generic OR same component type identical in every zone OR section-level structure does not echo page language
 
 **PA-64: Restraint as Expression** (Auditor C)
 > "Is there a section that is DELIBERATELY plain — simpler than surrounding sections in a way that makes the surrounding richness more noticeable? Can you tell the difference between 'designed quiet' and 'forgot to design this part'?"
@@ -141,9 +141,9 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 - NO: All gaps interchangeable OR variety feels random
 
 **PA-67: Novelty Beyond Competence** (Auditor A)
-> "Does the page feel like it is doing something you have not seen before — not just well-executed, but inventive? What specifically is novel?"
-- YES: Auditor names specific novel element/technique AND explains why it works
-- NO: Well-executed but familiar, OR surprising elements feel gimmicky
+> "Does the page do something visually that you would not have predicted from its content type? Name the specific surprise. Does the surprise serve the content or distract from it?"
+- YES: Auditor names specific unpredictable visual element AND it serves the content (not decorative distraction)
+- NO: Entirely predictable for its content type, OR surprise is gimmicky/distracting
 
 **PA-68: Metaphor Spatial Coverage** (Auditor G)
 > "Does the page's organizing metaphor persist across ALL scroll thirds, or does it fade or disappear as you scroll? Can you identify metaphor expression in the bottom third?"
@@ -170,7 +170,7 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 
 ---
 
-## PART 3: FULL PA QUESTION INVENTORY (66 Questions)
+## PART 3: FULL PA QUESTION INVENTORY (69 Questions)
 
 ### 3.1 Tier 1: The Mandatory Five (Every Audit, Every Mode)
 
@@ -182,23 +182,21 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 | PA-04 | Where does your eye go first? Is that where it SHOULD go? | A |
 | PA-05 | Would you put your name on this? What would you fix first? (4 sub-criteria above) | A |
 
-### 3.2 Tier 2: Standard Fifteen
+### 3.2 Tier 2: Standard Twelve
 
-**Readability and Comfort (PA-06 through PA-08, PA-29):**
+**Readability and Comfort (PA-06, PA-08, PA-29):**
 
 | ID | Question | Auditor |
 |----|----------|---------|
 | PA-06 | Are any words stacking vertically, one per line, in any column? | B |
-| PA-07 | Can you read the longest paragraph without losing your place? | B |
 | PA-08 | Is there any text you have to lean in or squint to read? | B |
 | PA-29 | In the header area (first viewport), count how many different text styles you see. Are more than three fighting for attention? | B |
 
-**Spatial Balance and Proportion (PA-09 through PA-11, PA-30 through PA-33):**
+**Spatial Balance and Proportion (PA-09, PA-11, PA-30 through PA-33):**
 
 | ID | Question | Auditor |
 |----|----------|---------|
 | PA-09 | Is there dead space that serves no purpose? (with severity calibration) | C |
-| PA-10 | If you squint until you can't read text, does the layout look balanced? | C |
 | PA-11 | Are the margins generous (confident) or anxious (clutching)? | C |
 | PA-30 | At 1440px, does the layout feel DESIGNED for this width, or centered in extra space? | C |
 | PA-31 | If you covered the content and only looked at the surrounding space, would it feel designed or leftover? | C |
@@ -242,17 +240,16 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 |----|----------|---------|
 | PA-18 | Do all the grays/neutrals feel like the same family? | G |
 | PA-19 | Is there any element that feels like it's from a different website? | G |
-| PA-20 | Describe this page's personality in three words. Does it match intent? | G |
+| PA-20 | Describe this page's personality in three words. Now read one paragraph of content. Does the page's visual personality match the content's verbal personality? | G |
 
 ### 3.3 Tier 3: Deep Dive
 
-**Responsiveness (PA-21 through PA-23, PA-46 through PA-47):**
+**Responsiveness (PA-22, PA-23, PA-46 through PA-47):**
 
 | ID | Question | Auditor |
 |----|----------|---------|
-| PA-21 | Does everything look designed for this width, or squeezed? | H |
 | PA-22 | Would a user with ONLY this screen size feel served or punished? | H |
-| PA-23 | What breaks if you resize 200px narrower? | H |
+| PA-23 | Comparing the 1024px and 768px screenshots, what changed for the worse? Is there anything that looks squeezed, broken, or lost between these widths? | H |
 | PA-46 | At 768px, does element reorganization make SENSE for this content? Or just shrunk to fit? | H |
 | PA-47 | At what scroll position do you feel "seen this before"? Anything surprising in second half? | H |
 
@@ -260,21 +257,21 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 
 | ID | Question | Auditor |
 |----|----------|---------|
-| PA-24 | Does this page feel like it belongs with its siblings? | I |
-| PA-25 | If you covered the header, could you identify the design system? | I |
+| PA-24 | Looking at the design language (borders, colors, spacing, typography), does this feel like it belongs to a SYSTEM, or is it one-off custom work? | I |
+| PA-25 | If you covered the header, does the rest of the page still feel like a cohesive design? Does the identity persist throughout, or only in the header? | I |
 
 **Architectural Challenge (PA-26 through PA-27):**
 
 | ID | Question | Auditor |
 |----|----------|---------|
-| PA-26 | Is any convention CAUSING a visual problem? | I |
+| PA-26 | Is there any element that looks wrong but seems intentional — as if a rule is forcing a bad outcome? Point to it. | I |
 | PA-27 | Designing from scratch, would you design it this way? | I |
 
 **Adversarial (PA-28, PA-48):**
 
 | ID | Question | Auditor |
 |----|----------|---------|
-| PA-28 | How could someone make this look terrible while passing every rule? | I |
+| PA-28 | If you wanted to make this page look terrible while keeping its basic structure and color scheme, what 3 changes would do the most damage? What is this design most FRAGILE about? | I |
 | PA-48 | If this layout were one of five options, would this be first or last choice? Why? | I |
 
 ### 3.4 Metaphor and Ideology (PA-42 through PA-44)
@@ -296,8 +293,8 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 | ID | Question | Auditor |
 |----|----------|---------|
 | PA-50 | Count viewport-heights where < 30% is content. How many consecutive blank viewports? | C |
-| PA-51 | What percentage of total page height is content vs empty? 80%+/60-80%/40-60%/<40%? | C |
-| PA-52 | Divide page into thirds. Does each third have at least one designed moment? | C |
+| PA-51 | Does the page feel content-dense, balanced, sparse, or void-dominated? | C |
+| PA-52 | Divide page into thirds. Does each third have at least one designed moment? | D |
 | PA-53 | At 1440px, does the container use 65-80% of horizontal space, or feel like a narrow strip? | C |
 
 **S-09 Stacking Check (MANDATORY at every section boundary):**
@@ -308,7 +305,7 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 
 | ID | Question | Auditor |
 |----|----------|---------|
-| PA-55 | Look at 3 adjacent sections. Can you describe how they DIFFER visually without inspecting code? If not, variation is sub-perceptual. | C |
+| PA-55 | Look at 3 adjacent sections. Can you describe how they DIFFER visually without inspecting code? If not, variation is sub-perceptual. | B |
 | PA-56 | Check text treatment between zones. Can you FEEL the tracking difference? If not, flag as sub-perceptual. | B |
 
 ### 3.8 Pipeline Integration (PA-69, PA-70, PA-71)
@@ -316,14 +313,51 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 | ID | Question | Auditor |
 |----|----------|---------|
 | PA-69 | Pick two section transitions. Count visual properties changing. Are transition intensities varied or uniform? | D |
-| PA-70 | Compare densest analytical section to lightest overview. Does visual treatment RESPOND to the difference? | D |
+| PA-70 | Compare densest analytical section to lightest overview. Does visual treatment RESPOND to the difference? | B |
 | PA-71 | At the boundary between two adjacent zones, does the transition feel like a smooth handoff or an abrupt collision? Does the transition technique SERVE the content shift, or does it feel arbitrary? | D |
 
 ### 3.9 Tier 5: Compositional Depth (PA-60 through PA-68)
 
 See Part 2 above for full question text, scoring criteria, and auditor assignments.
 
-**Total: 66 questions** (55 standard + 2 sub-perceptual + 9 Tier 5)
+### 3.10 Extended Assessment (PA-72 through PA-77)
+
+| ID | Question | Tier | Auditor |
+|----|----------|------|---------|
+| PA-72 | If you replaced this page's content with completely different content (say, a cooking recipe instead of whatever this is), would the visual design need to change? Or would it work for anything? | 2 | A |
+| PA-73 | Is there any text, button, or interactive element that you think would be invisible, unreachable, or confusing to someone using only a keyboard or screen reader? Point to the most likely problem. | 3 | H |
+| PA-74 | Pick a boundary where the page changes. Do ALL the changes point in the same direction? For example, if background gets darker, does text get heavier, spacing tighter, borders thicker — all saying 'denser'? Or do some changes contradict others? | 2 | D |
+| PA-75 | Scroll to the very bottom. Does the page end with a DESIGNED conclusion (footer, closing statement, visual bookend), or does it just stop? Is there any area that looks like the designer ran out of time? | 2 | D |
+| PA-76 | Scroll from top to bottom at reading speed. Does the visual journey have a shape — building, peaking, resolving — or does it feel like the same room repeated? Where is the peak? Does the ending feel earned? | 2 | A |
+| PA-77 | Looking only at text sizes and weights (ignore color and spacing), can you identify 3 or more levels of importance? Does the hierarchy guide your reading order? | 2 | B |
+
+**Total: 69 questions** (49 standard + 2 sub-perceptual + 3 pipeline integration + 6 extended + 9 Tier 5)
+
+---
+
+## PART 3.5: QUALITY FRAMEWORK (10 VALUES Items Integrated)
+
+These definitions are CALIBRATION for the PA-05 scale and Tier 5 questions — not additional questions.
+
+### PA-05 Scale Calibration
+
+| Score | Label | Meaning | Historical Reference |
+|-------|-------|---------|---------------------|
+| 1/4 | FLAT | No perceptible design intent. Uniform treatment. | Flagship experiment (PA-05 1.5/4 FAILED) |
+| 2/4 | ASSEMBLED | Individual elements competent but not unified. Template quality. | Current spec baseline (20 suppressors active) |
+| 3/4 | COMPOSED | Unified design language. Intentional relationships visible. | Middle experiment (PA-05 4/4 DESIGNED), Gas Town (PA-05 3.5) |
+| 4/4 | DESIGNED | Every decision serves the content. Mechanisms in conversation. | NEVER ACHIEVED at Flagship tier |
+
+### Quality Tiers (Discrete Registers, Not Continuous Spectrum)
+
+| Tier | PA-05 Range | Mechanisms | CSS Lines | Coupling Register |
+|------|-------------|------------|-----------|-------------------|
+| FLOOR | < 2.5 | 5 | 150-250 | Register 0 (NO coupling) |
+| MIDDLE (default) | 2.5-3.0 | 8-10 | 350-500 | Register 1 (LOCAL coupling) |
+| CEILING | 3.0-3.5 | 12-15 | 700-1000 | Register 2 (STRUCTURAL coupling) |
+| FLAGSHIP | >= 3.5 | 16-18 | 1000-1500 | Register 3 (ATMOSPHERIC coupling) |
+
+> **CCS (Compositional Coherence Score):** RESEARCH CONSTRUCT — do not operationalize as a numeric pass/fail criterion until methodology is standardized. PA auditors may reference CCS qualitatively but must NOT use it as a gate check.
 
 ---
 
@@ -349,23 +383,47 @@ All agents run in PARALLEL (except Weaver, which is sequential after all auditor
 > Source: ITEM 74 (extract-d01-d03.md, VA L176-177) — PA-9
 > Source: ITEM 84 (extract-d09-d11.md, VA L893) — "PA-1 thru PA-9 (9 parallel auditors)"
 
-| Auditor | Role | Core Questions | Tier 5 Questions | Total |
-|---------|------|---------------|-------------------|-------|
-| **A** | Impression + Emotion | PA-01, PA-03, PA-04, PA-05, PA-45 | PA-65, PA-67 | 7 |
-| **B** | Readability + Typography | PA-02, PA-06, PA-07, PA-08, PA-29, PA-56 | — | 6 |
-| **C** | Spatial + Proportion | PA-09, PA-10, PA-11, PA-30, PA-31, PA-32, PA-33, PA-50, PA-51, PA-52, PA-53, PA-55 | PA-64, PA-66 | 14 |
-| **D** | Flow + Pacing | PA-12, PA-13, PA-34, PA-35, PA-36, PA-69, PA-70, PA-71 | PA-62 | 9 |
-| **E** | Grid + Layout | PA-14, PA-15, PA-37, PA-38, PA-39 | PA-63 | 6 |
-| **F** | Consistency + Rhythm | PA-16, PA-17, PA-40, PA-41 | PA-60, PA-61 | 6 |
-| **G** | Metaphor + Ideology | PA-18, PA-19, PA-20, PA-42, PA-43, PA-44 | PA-68 | 7 |
-| **H** | Responsiveness | PA-21, PA-22, PA-23, PA-46, PA-47 | — | 5 |
-| **I** | Cross-Page + Adversarial | PA-24, PA-25, PA-26, PA-27, PA-28, PA-48 | — | 6 |
+| Auditor | Role | Core Questions | Tier 5 Questions | Extended | Total |
+|---------|------|---------------|-------------------|----------|-------|
+| **A** | Impression + Emotion | PA-01, PA-03, PA-04, PA-05, PA-45 | PA-65, PA-67 | PA-72, PA-76 | 9 |
+| **B** | Readability + Typography | PA-02, PA-06, PA-08, PA-29, PA-55, PA-56, PA-70 | — | PA-77 | 8 |
+| **C** | Spatial + Proportion | PA-09, PA-11, PA-30, PA-31, PA-32, PA-33, PA-50, PA-51, PA-53 | PA-64, PA-66 | — | 11 |
+| **D** | Flow + Pacing | PA-12, PA-13, PA-34, PA-35, PA-36, PA-52, PA-69, PA-71 | PA-62 | PA-74, PA-75 | 11 |
+| **E** | Grid + Layout | PA-14, PA-15, PA-37, PA-38, PA-39 | PA-63 | — | 6 |
+| **F** | Consistency + Rhythm | PA-16, PA-17, PA-40, PA-41 | PA-60, PA-61 | — | 6 |
+| **G** | Metaphor + Ideology | PA-18, PA-19, PA-20, PA-42, PA-43, PA-44 | PA-68 | — | 7 |
+| **H** | Responsiveness | PA-22, PA-23, PA-46, PA-47 | — | PA-73 | 5 |
+| **I** | Cross-Page + Adversarial | PA-24, PA-25, PA-26, PA-27, PA-28, PA-48 | — | — | 6 |
 
-**Total: 66 questions across 9 auditors** (65 original + PA-71 transition quality)
+**Total: 69 questions across 9 auditors** (49 standard + 2 sub-perceptual + 3 pipeline integration + 6 extended + 9 Tier 5)
+
+> **Load balance note (FIX-061/062/063):** PA-52 moved C→D (pacing aligns with D's PA-35), PA-55 moved C→B (descriptive question suits B's role), PA-70 moved D→B (density/typography question suits B's role). FIX-064 (C1/C2 split) is DEFERRED CONTINGENT — only revisit if C's quality degrades at 11 questions.
 
 > Source: ITEM 65 (extract-d21-d25.md, VA L1777) — "PA question count reconciliation"
 
-### 4.3 Agent Requirements
+### 4.3 PA-05 Distributed Cross-Validation Protocol
+
+> Source: FIX-065 — PA-05 is the PRIMARY success metric. Single-evaluator risk is the biggest protocol weakness.
+
+Auditor A remains the PRIMARY evaluator for all 4 PA-05 sub-criteria. However, 4 other auditors provide SECONDARY cross-validation scores for the sub-criterion in their domain:
+
+| PA-05 Sub-Criterion | Primary (A) | Cross-Validator | Rationale |
+|---------------------|-------------|-----------------|-----------|
+| **DESIGNED** (PA-05a) | A | **F** (Consistency + Rhythm) | F assesses whether mechanisms are in conversation — core of DESIGNED |
+| **COHERENT** (PA-05b) | A | **G** (Metaphor + Ideology) | G assesses whether one design voice persists — core of COHERENT |
+| **PROPORTIONATE** (PA-05c) | A | **C** (Spatial + Proportion) | C directly owns spatial balance questions — core of PROPORTIONATE |
+| **POLISHED** (PA-05d) | A | **B** (Readability + Typography) | B assesses execution quality details — core of POLISHED |
+
+**Cross-Validation Workflow:**
+1. Each cross-validator rates ONLY their assigned sub-criterion as a SECONDARY assessment (PASS / CONDITIONAL PASS / FAIL) at the END of their own report.
+2. Cross-validators use the same criteria as Part 1.2 but apply it through their domain lens.
+3. The Weaver receives BOTH Auditor A's primary scores AND the 4 cross-validation scores.
+4. If primary and cross scores AGREE: Weaver uses the agreed score.
+5. If primary and cross scores DISAGREE: Weaver must explain the disagreement and resolve it, citing evidence from both reports.
+
+**Cross-validators do NOT see Auditor A's scores.** They assess independently. This is a blind cross-validation.
+
+### 4.4 Agent Requirements
 
 > Source: ITEM 85 (extract-d09-d11.md, VA L894) — "all PA auditors must be Opus"
 > Source: ITEM 89 (extract-d09-d11.md, VA L899) — "Weaver must be Opus"
@@ -377,18 +435,40 @@ All agents run in PARALLEL (except Weaver, which is sequential after all auditor
 | Integrative Auditor | Opus | No assigned questions, gestalt only |
 | Weaver | Opus | Reads all 10 reports, produces VERDICT |
 
-### 4.4 Integrative Auditor
+**Evidence Format Requirement (FIX-067):** Every PA question answer MUST follow this format:
+
+> **ANSWER FORMAT:** YES / NO / CONDITIONAL + for each finding: [screenshot reference, e.g., `1440/scroll-03.png`] + [1-sentence description of what you see]
+
+This applies to ALL 69 questions across ALL 9 auditors (A-I). Evidence is a STRUCTURAL part of the answer, not optional. Answers without screenshot references are INCOMPLETE.
+
+**Completion Manifest Requirement (FIX-066):** Each auditor's report MUST include a **completion table** as its FINAL section:
+
+```
+## Completion Manifest — Auditor [LETTER]
+| Question ID | Answered | Evidence Screenshot(s) |
+|-------------|----------|----------------------|
+| PA-XX       | YES      | 1440/scroll-02.png   |
+| PA-YY       | YES      | 768/cold-look.png    |
+| ...         | ...      | ...                  |
+```
+
+**Weaver's FIRST action:** Verify all 9 auditor manifests are complete. Total expected: 69 YES entries across 9 manifests. Any missing answer = report is INCOMPLETE. The Weaver must request the missing answer before proceeding to verdict.
+
+### 4.5 Integrative Auditor
 
 > Source: ITEM 75 (extract-d01-d03.md, VA L182-184)
 > Source: ITEM 73 (extract-d21-d25.md, VA L1789) — "Add integrative gestalt auditor (#14)"
 
-The Integrative Auditor has NO assigned questions. Their role:
-- Receive ALL screenshots
-- Write a free-form gestalt impression
-- Identify patterns that no individual auditor catches (because each is focused on their question set)
-- Flag cross-cutting issues (e.g., "the rhythm is consistent but the rhythm itself is monotonous")
+The Integrative Auditor has NO assigned questions and does NOT score PA-05. Their role:
+1. Receive ALL screenshots
+2. Write a free-form **gestalt impression** from screenshots (what FEELS right, what FEELS wrong — no structured questions)
+3. Identify **cross-cutting patterns** that no individual auditor catches (because each is focused on their question set)
+4. Observe the **emotional arc** using the 4-register framework (Part 6): SURPRISE, DELIGHT, AUTHORITY, EARNED CLOSURE
+5. Flag cross-cutting issues (e.g., "the rhythm is consistent but the rhythm itself is monotonous")
 
-### 4.5 Weaver
+> **CLARIFICATION (FIX-083):** PA-05 scoring is the WEAVER's responsibility (Part 4.6), NOT the Integrative Auditor's. The Integrative Auditor's gestalt impression INFORMS the Weaver's PA-05 score but does not constitute a score itself. Any prior reference (including MANIFEST) stating that the Integrative Auditor scores PA-05 is INCORRECT.
+
+### 4.6 Weaver
 
 > Source: ITEM 76 (extract-d01-d03.md, VA L191-192) — "reads 10 auditor reports -> VERDICT"
 > Source: ITEM 87 (extract-d09-d11.md, VA L897) — "Phase 3: Weaver"
@@ -396,14 +476,17 @@ The Integrative Auditor has NO assigned questions. Their role:
 
 The Weaver reads ALL 10 auditor reports (9 PA auditors + 1 Integrative) and produces:
 
-1. **PA-05 Score** (1-4 scale with sub-criteria breakdown)
+0. **Manifest Verification** — FIRST ACTION: verify all 9 auditor completion manifests total 69 answered questions. Any missing = INCOMPLETE.
+1. **PA-05 Score** (1-4 scale with sub-criteria breakdown). Includes cross-validation resolution: for each sub-criterion, compare Auditor A's primary score with the cross-validator's secondary score (Part 4.3). If they disagree, explain and resolve.
 2. **Tier 5 Score** (0-9 YES count with per-question results)
 3. **Combined Verdict** (from the PA-05 x Tier 5 matrix)
-4. **Top-5 Fixes** (classified as MECHANICAL / STRUCTURAL / COMPOSITIONAL)
+4. **Top-5 Fixes** (classified as MECHANICAL / STRUCTURAL / COMPOSITIONAL — see Part 4.7 for diagnostic vocabulary)
 5. **Ship Decision** (SHIP / SHIP WITH FIXES / REFINE / REBUILD)
 6. **Emotional Arc Assessment** (see Part 6)
 
 **Weaver Calibration References** (for CLASSIFICATION, not perception — auditors NEVER see these):
+
+> **SEQUENCING (FIX-085):** Calibration references are CLASSIFICATION tools, not evaluation rubrics. The Weaver must FIRST describe observations in own words, THEN classify using the reference scales below. Reading scales before describing evidence risks anchoring on categories rather than perceiving what is actually there.
 
 *Multi-Coherence Scale:*
 | Simultaneous Shifts at Boundary | Quality Level |
@@ -433,6 +516,23 @@ The Weaver reads ALL 10 auditor reports (9 PA auditors + 1 Integrative) and prod
 - **MECHANICAL:** CSS value wrong (margin, color, spacing). Builder fixes directly.
 - **STRUCTURAL:** Zone organization or boundary design. Builder re-reads TC brief Sections 2+4.
 - **COMPOSITIONAL:** Metaphor not expressed visually. Requires TC re-invocation (TYPE C fix cycle).
+
+### 4.7 Weaver Diagnostic Vocabulary
+
+> Source: FIX-086 — Currently the Weaver must infer diagnostic categories without guidance.
+
+When classifying fixes in the Top-5 list, the Weaver uses these diagnostic categories with their evidence signatures:
+
+| Category | Definition | Evidence Pattern | Remediation |
+|----------|-----------|-----------------|-------------|
+| **MECHANICAL** | Fix by changing a CSS value | Auditors cite SPECIFIC elements with SPECIFIC visual problems (e.g., "the gap between S3 and S4 is too large") | Builder changes the value directly |
+| **STRUCTURAL** | Reorganize zones, boundaries, or grids | Auditors cite SPATIAL RELATIONSHIP problems (e.g., "sections feel disconnected," "no visual hierarchy between zones") | Builder re-reads TC brief Sections 2+4, reorganizes zone structure |
+| **COMPOSITIONAL** | Re-invoke tension-composition | Auditors cite ABSENCE of unifying logic or metaphor (e.g., "elements feel random," "no governing idea visible," "competent but soulless") | Requires TC re-invocation (TYPE C fix cycle — new conviction, new TC brief) |
+
+**Diagnostic Decision Tree:**
+1. Can the problem be fixed by changing ONE CSS property? → MECHANICAL
+2. Can the problem be fixed by reorganizing existing elements? → STRUCTURAL
+3. Does the problem require rethinking the page's compositional logic? → COMPOSITIONAL
 
 ---
 
@@ -581,11 +681,13 @@ The Weaver synthesizes these into an emotional arc assessment using the 4-regist
 
 ## PART 7: 12 VALUES ITEMS REROUTED TO PA-AUDITOR
 
+> **WARNING (FIX-084): WEAVER USE ONLY.** The tier definitions, quality tier tables, and calibration data in this section are for the WEAVER's classification use ONLY. They MUST NOT be included in PA Auditor A-I prompts. The fresh-eyes principle (Part 13) prohibits tier context for individual auditors. Including tier targets in auditor prompts would anchor their assessments on expected outcomes rather than genuine perception.
+
 ### 7.1 Council Ruling
 
 > Source: council-verdict.md, Part 2, Pattern 5, Category B — "REROUTE to PA AUDITOR (quality assessment) — 12 items"
 
-The gate-runner checks BINARY constraints only. Quality tier assessments require judgment and belong with the PA auditor.
+The gate-runner checks BINARY constraints only. Quality tier assessments require judgment and belong with the PA auditor (specifically, the WEAVER who synthesizes all auditor reports).
 
 ### 7.2 The 12 Rerouted Items
 
@@ -660,7 +762,7 @@ Some anti-patterns cannot be detected programmatically. They require the PA audi
 | AP-07 | METAPHOR BLEED | Vocabulary leaks across zone boundaries | PA-44 (metaphor persistence), PA-68 (metaphor coverage) |
 | AP-08 | COMPONENT ORPHAN | Component styled for wrong zone | PA-63 (fractal zoom), PA-19 (different website element) |
 | AP-12 | RESTRAINT EROSION | Additions erode deliberate absences | PA-64 (restraint as expression) |
-| AP-13 | BOOKEND ASYMMETRY | Header/footer echo breaks in revision | PA-13 (clear ending), PA-24 (siblings) |
+| AP-13 | BOOKEND ASYMMETRY | Header/footer echo breaks in revision | PA-13 (clear ending), PA-24 (system coherence) |
 
 > Source: ITEM 005, 007, 009, 011, 012, 013, 019, 020 (extract-d15-d17.md)
 
@@ -689,8 +791,8 @@ These inform the Weaver's fix-type classification. COMPOSITIONAL fixes should no
 > Source: ITEM 054 (extract-d15-d17.md, VA L1277) — "SHARED DNA"
 
 PA auditors assess cross-page coherence through:
-- **PA-24:** Does this page feel like it belongs with its siblings?
-- **PA-25:** If you covered the header, could you identify the design system?
+- **PA-24:** Looking at the design language (borders, colors, spacing, typography), does this feel like it belongs to a SYSTEM, or is it one-off custom work?
+- **PA-25:** If you covered the header, does the rest of the page still feel like a cohesive design? Does the identity persist throughout, or only in the header?
 
 The shared DNA (~30 identical properties) comes from tokens.css + soul constraints + components.css. No additional cross-page gate is needed — the DNA is INHERENT.
 

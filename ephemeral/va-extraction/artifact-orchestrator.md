@@ -28,6 +28,23 @@ This is the **master control document** for the orchestrator agent. It defines t
 - **ITEM 2** (extract-d01-d03.md L13) Master Equation: Quality = Agent Capability x Content Affordance x Spec Fidelity
 - **ITEM 3** (extract-d01-d03.md L14) Zero in ANY factor = zero quality
 
+### VALUES Context (15 Planning Items)
+
+Historical PA-05 scores for orchestrator calibration:
+
+| Build | PA-05 Score | Pipeline | Notes |
+|-------|-------------|----------|-------|
+| Gas Town | 3.5/4 | Old pipeline, Opus, 610 lines | Highest achieved score |
+| Middle Experiment | 4/4 | v2 recipe format, 100 lines | PA-05 DESIGNED, 3/3 novel |
+| Flagship Experiment | 1.5/4 | Master prompt, 963 lines, all 14 suppressors | FAILED — more lines HURTS |
+| CD-006 | 39/40 (CEILING, not Flagship) | Opus builder, multi-pass | No pervading metaphor |
+
+**Suppressor removal status:** All 20 historical suppressors INACTIVE in v3. Phase 1 removals (S-01 mechanism count, S-03 judgment language, S-08 technique counting) confirmed safe. Phase 2 removals (S-09 stacking, S-07 letter-spacing) adjusted with new thresholds.
+
+**Budget expectation:** 25-40% of builds may need REFINE or REBUILD (per council REC-07). Plan for 1 REBUILD + 1 REFINE maximum before human review. Single-pass is the default — no automatic re-execution.
+
+**Key calibration:** 1.0-point gap between Flagship (1.5) and Middle (2.5) demonstrates that MORE specification lines HURTS quality. v3 improvement is FORMAT (recipe vs checklist) and STRUCTURE (layered architecture), not volume reduction.
+
 ### Input Preconditions (All 3 must be TRUE before pipeline starts)
 
 | # | Precondition | Factor | Check | Evidence |

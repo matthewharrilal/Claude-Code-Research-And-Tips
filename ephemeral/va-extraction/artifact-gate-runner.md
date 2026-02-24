@@ -25,14 +25,14 @@ Gates are categorized into 4 priority tiers. Only REQUIRED gates block the verdi
 
 | Category | Gates | Count | Verdict Impact |
 |----------|-------|-------|----------------|
-| **REQUIRED** | GR-01 through GR-15, GR-43, GR-44 (Identity + Perception + Output + Trailing Void) | 17 | ANY FAIL blocks verdict (Identity FAIL = REBUILD, Perception FAIL = REFINE) |
-| **RECOMMENDED** | GR-17 through GR-20, GR-25 through GR-28 (Anti-Pattern + Precondition) | 8 | 3+ FAIL = REBUILD. Flagged in report but do not individually block. |
-| **ADVISORY** | GR-21, GR-22, GR-23, GR-24, GR-33, GR-34 (Remaining Precondition + Mode) | 6 | Informational only. |
+| **REQUIRED** | GR-01 through GR-15, GR-43, GR-44, GR-48 (Identity + Perception + Output + Trailing Void + Meta) | 18 | ANY FAIL blocks verdict (Identity FAIL = REBUILD, Perception FAIL = REFINE, GR-48 FAIL = INCOMPLETE) |
+| **RECOMMENDED** | GR-17 through GR-20, GR-25 through GR-28, GR-45, GR-49, GR-51, GR-52 (Anti-Pattern + Precondition + Wave 2) | 12 | 3+ FAIL = REBUILD. Flagged in report but do not individually block. |
+| **ADVISORY** | GR-21, GR-22, GR-23, GR-24, GR-33, GR-34, GR-46, GR-50, GR-53 (Remaining Precondition + Mode + Wave 2) | 9 | Informational only. |
 | **BRIEF VERIFICATION** | BV-01 through BV-04 (Pre-Build) | 4 | ANY FAIL = return brief to assembler (max 2 revision cycles) |
 
-**Gate counts:** 13 removed (GR-16 absorbed, GR-29-32 verdict→orchestrator, GR-35→PA, GR-36-39 experiment→protocol, GR-40-42 policy→orchestrator). 6 added (BV-01-04 brief verification, GR-43 self-eval, GR-44 trailing void). **Total: 35 gates** (42 - 13 + 6 = 35).
+**Gate counts:** 13 removed (GR-16 absorbed, GR-29-32 verdict→orchestrator, GR-35→PA, GR-36-39 experiment→protocol, GR-40-42 policy→orchestrator). 6 added in Wave 1 (BV-01-04 brief verification, GR-43 self-eval, GR-44 trailing void). 8 new gates added in Wave 2 (GR-45, GR-46, GR-48, GR-49, GR-50, GR-51, GR-52, GR-53) plus executable code written for 2 existing gates (GR-21, GR-22). **Total: 43 gates** (42 - 13 + 6 + 8 = 43).
 
-**Practical guidance:** The executable JavaScript in this document covers all REQUIRED gates (15 identity/perception + 1 output verification) plus 4 RECOMMENDED anti-pattern gates (GR-17, GR-18, GR-19, GR-20). This covers 95%+ of verdict-relevant verification.
+**Practical guidance:** The executable JavaScript in this document covers all REQUIRED gates (15 identity/perception + 1 output verification + 1 trailing void + 1 coverage meta-gate) plus 6 anti-pattern gates (GR-17 through GR-22) plus 7 Wave 2 gates (GR-45, GR-46, GR-50, GR-51, GR-52, GR-53, GR-48). This covers 100% of verdict-relevant verification.
 
 ---
 
@@ -45,10 +45,13 @@ Gates run in Phase 3, AFTER the builder has completed its work. The builder NEVE
 **Execution order:**
 1. Orchestrator serves HTML via HTTP, opens Playwright session
 2. Gate runner executes REQUIRED gates (GR-01 through GR-15, GR-43, GR-44) at 1440px viewport width
-3. Gate runner executes RECOMMENDED anti-pattern gates (GR-17 through GR-22) at 1440px
-4. Responsive gates re-run at 768px
-5. Results collected as structured JSON
-6. FAIL gates produce fix recipes; PASS gates produce diagnostic data for PA context
+3. Gate runner executes RECOMMENDED anti-pattern gates (GR-17 through GR-22, GR-45, GR-51) at 1440px
+4. Gate runner executes RECOMMENDED measurement gates (GR-52) and ADVISORY gates (GR-46, GR-50, GR-53)
+5. Responsive gates re-run at 768px
+6. Results collected as structured JSON
+7. GR-48 (Gate Coverage Completeness) runs LAST — verifies all required gates produced results
+8. GR-49 (Result File Integrity) runs as process check on the output file
+9. FAIL gates produce fix recipes; PASS gates produce diagnostic data for PA context
 
 ### Output Format
 
@@ -321,7 +324,7 @@ These detect the 6 PROGRAMMATICALLY DETECTABLE anti-patterns from the 14 identif
 - **Pass:** All viewports have <= 4 active visual channels
 - **Fail:** Any viewport has > 4 competing channels
 - **Evidence:** THEORETICAL (anti-pattern catalog)
-- **Note:** Difficult to automate precisely. Simplified code available in Wave 2 fixes.
+- **Note:** Simplified proxy: count distinct background colors per 900px vertical slice. Full code in executable section below.
 
 ### GR-22: AP-02 Color Zone Conflict (Hierarchy Agreement) [ADVISORY]
 - **Category:** ADVISORY (demoted from RECOMMENDED — judgment-required, semantic color role analysis is partially subjective)
@@ -443,7 +446,86 @@ These are DIAGNOSTIC gates — they do not block builds but provide signal about
 
 ---
 
-## GATE SUMMARY TABLE (Updated per Wave 1 fixes)
+## SECTION 8: WAVE 2 NEW GATES
+
+### GR-45: Typography Variation [RECOMMENDED]
+- **Source:** FIX-071 (File 13, Section 2B)
+- **Category:** RECOMMENDED
+- **Description:** H2 elements must use at least 2 distinct computed font-sizes (differ by >= 4px) WITHIN the H2 population. Counters DRIFT pattern DR-02/DR-03 where all H2s flatten to a single size (e.g., 28px everywhere). Cross-level variation (H2 vs H3) does NOT satisfy this gate — the purpose is zone-differentiated heading sizes.
+- **Check method:** Collect all computed font-sizes for H2 elements. Group into 4px tolerance bands. Count distinct bands within H2 only. If < 3 H2 elements exist, fall back to combined H2+H3 check with 4px bands.
+- **Pass:** >= 2 distinct font-size bands within H2 population (4px tolerance) OR < 3 H2 elements and >= 2 bands across H2+H3 combined
+- **Fail:** All H2 elements use the same font-size (within 4px)
+- **Evidence:** OBSERVED (Flagship H2s all 28px; CD-006 H2s vary 24-36px across zones)
+
+### GR-46: Print Stylesheet [ADVISORY]
+- **Source:** FIX-078 (File 13, Section 2B)
+- **Category:** ADVISORY
+- **Description:** Check for at least one `@media print` rule in document stylesheets. Addresses OM-02 (print styling absent).
+- **Check method:** Iterate `document.styleSheets` and check for `@media print` rules (CSSMediaRule with conditionText including "print")
+- **Pass:** At least one `@media print` rule found
+- **Fail:** No print stylesheet rules
+- **Evidence:** THEORETICAL (accessibility best practice)
+
+### GR-48: Gate Coverage Completeness [REQUIRED — META-GATE]
+- **Source:** FIX-069 (File 13, Section 2B, CONFLICT-008 resolved)
+- **Category:** REQUIRED
+- **Description:** The "gate that gates the gates." Verifies that all REQUIRED gates produced results. Runs LAST, after all other gates have executed. Prevents silent gate omission (Gas Town had only 45% gate coverage).
+- **Check method:** Inspect collected gate results array. Count results by tier.
+- **Pass:** All other 17 REQUIRED gate IDs have a result (GR-48 excludes itself from the check) AND at least 4 of 12 RECOMMENDED gates have a result
+- **Fail:** Any REQUIRED gate ID missing = INCOMPLETE verdict
+- **Evidence:** OBSERVED (Gas Town had 45% gate coverage — orchestrator silently skipped gates)
+- **Note:** This gate runs AFTER all others. It checks the results array, not the DOM.
+
+### GR-49: Gate Result File Integrity [RECOMMENDED]
+- **Source:** FIX-072 (File 13, Section 2B)
+- **Category:** RECOMMENDED
+- **Description:** Verify exactly 1 gate result file exists with consistent gate IDs matching this artifact spec. No duplicates. No renumbering. Prevents SM-08 (Gas Town had 2 conflicting gate result files with different naming).
+- **Check method:** Process check — verify output file count and gate ID consistency. Not a Playwright gate.
+- **Pass:** Exactly 1 gate result file, all gate IDs match spec, no duplicate IDs
+- **Fail:** Multiple result files, or ID mismatches, or duplicate gate IDs
+- **Evidence:** OBSERVED (Gas Town had 2 conflicting gate result files)
+
+### GR-50: Conviction Statement Existence [ADVISORY]
+- **Source:** FIX-079 (File 13, Section 2B)
+- **Category:** ADVISORY
+- **Description:** Check for conviction statement file (`conviction.md` or similar) OR HTML comment containing conviction metadata with >= 3 sentences covering metaphor, emotional arc, and compositional strategy.
+- **Check method:** Search HTML for `<!-- CONVICTION:` comment block or check for adjacent conviction file. Count sentences if found.
+- **Pass:** Conviction statement found with >= 3 sentences
+- **Fail:** No conviction statement or < 3 sentences
+- **Evidence:** THEORETICAL (conviction statements correlate with intentional composition)
+- **Note:** Content quality assessment is partially subjective — gate only checks EXISTENCE and minimum length.
+
+### GR-51: Background Delta Distribution [RECOMMENDED]
+- **Source:** FIX-070 (File 13, Section 2B — renumbered from GR-43 to GR-51 to avoid collision with existing GR-43 Self-Evaluation)
+- **Category:** RECOMMENDED
+- **Description:** Check background delta DISTRIBUTION, not just individual minimums. Addresses the DRIFT pattern where all deltas cluster near the 15 RGB floor (technically passing GR-11 but perceptually flat).
+- **Check method:** Collect all zone boundary background deltas. Check: >= 50% must be >= 25 RGB AND standard deviation >= 8 AND at least 1 boundary in the middle 50% of boundaries must have delta >= 25 RGB (prevents bookend-gaming where high deltas cluster at header/footer only).
+- **Pass:** >= 50% of zone boundary deltas >= 25 RGB AND stddev >= 8 AND middleHasHighDelta === true
+- **Fail:** < 50% above 25 RGB OR stddev < 8 OR no high-delta boundary in middle 50%
+- **Evidence:** OBSERVED (Flagship used 15 RGB everywhere — GR-11 passed but page looked flat)
+
+### GR-52: Section Height Variation [RECOMMENDED — MEASUREMENT]
+- **Source:** FIX-080 (File 16, Section OM-16 Fix 2)
+- **Category:** RECOMMENDED
+- **Description:** At least 3 distinct section heights (within 50px tolerance bands). Measures bounding boxes of top-level sections. Uniform section heights produce a metronomic visual rhythm.
+- **Check method:** `getBoundingClientRect().height` for each section. Group into 50px bands. Count distinct bands.
+- **Pass:** >= 3 distinct height bands
+- **Fail:** < 3 distinct height bands
+- **Evidence:** OBSERVED (metronomic sections correlate with FLAT/ASSEMBLED PA-05 scores)
+
+### GR-53: Density Arc Direction [ADVISORY — MEASUREMENT]
+- **Source:** FIX-081 (File 16, Section OM-16 Fix 2)
+- **Category:** ADVISORY
+- **Description:** The densest section (highest elements-per-pixel ratio) should NOT be the first or last section. A mid-page density peak suggests intentional arc rather than flat distribution. Crescendo/decrescendo patterns are valid exceptions.
+- **Check method:** For each section, compute `childElements.length / boundingRect.height`. Identify which section has the maximum ratio.
+- **Pass:** Densest section is NOT first or last
+- **Fail:** Densest section IS first or last
+- **Evidence:** THEORETICAL (some valid patterns fail this check — crescendo endings are intentional)
+- **Note:** ADVISORY only. Result is informational. Does not block verdict.
+
+---
+
+## GATE SUMMARY TABLE (Updated per Wave 2 fixes)
 
 | Gate ID | Category | Tier | Description | Threshold | Evidence | Phase |
 |---------|----------|------|-------------|-----------|----------|-------|
@@ -482,15 +564,26 @@ These are DIAGNOSTIC gates — they do not block builds but provide signal about
 | GR-33 | Mode | ADVISORY | CSS naming mode | Reports only | OBSERVED | Post-build |
 | GR-34 | Mode | ADVISORY | Component modulation | Reports only | OBSERVED | Post-build |
 | **GR-43** | Output | REQUIRED | Self-evaluation comment | Comment exists | OBSERVED | Post-build |
+| **GR-45** | Anti-pattern | RECOMMENDED | Typography variation | >= 2 distinct H2 sizes (4px bands, within-level) | OBSERVED | Post-build |
+| **GR-46** | Accessibility | ADVISORY | Print stylesheet | >= 1 @media print rule | THEORETICAL | Post-build |
+| **GR-48** | Meta | REQUIRED | Gate coverage completeness | All 17 other REQUIRED + 4/12 RECOMMENDED | OBSERVED | Post-build |
+| **GR-49** | Meta | RECOMMENDED | Gate result file integrity | 1 file, consistent IDs | OBSERVED | Post-build |
+| **GR-50** | Output | ADVISORY | Conviction statement | >= 3 sentences | THEORETICAL | Post-build |
+| **GR-51** | Anti-pattern | RECOMMENDED | Bg delta distribution | >= 50% above 25 RGB, stddev >= 8 | OBSERVED | Post-build |
+| **GR-52** | Measurement | RECOMMENDED | Section height variation | >= 3 distinct bands | OBSERVED | Post-build |
+| **GR-53** | Measurement | ADVISORY | Density arc direction | Peak not first/last | THEORETICAL | Post-build |
 
-**Total gates: 35** (was 42, -13 removed, +6 added)
+**Total gates: 43** (was 35 after Wave 1, +8 new gates in Wave 2, +2 existing gates received code)
 - Brief Verification: 4 (BV-01 through BV-04) — Pre-build, text parsing
 - Identity: 10 (GR-01 through GR-10) — Post-build, REQUIRED
 - Perception: 6 (GR-11 through GR-15, GR-44) — Post-build, REQUIRED (GR-16 absorbed into verdict logic, GR-44 trailing void added)
-- Anti-pattern: 6 (GR-17 through GR-22) — Post-build, 4 RECOMMENDED + 2 ADVISORY
-- Output: 1 (GR-43) — Post-build, REQUIRED
+- Anti-pattern: 8 (GR-17 through GR-22, GR-45, GR-51) — Post-build, 6 RECOMMENDED + 2 ADVISORY
+- Output: 2 (GR-43, GR-50) — Post-build, 1 REQUIRED + 1 ADVISORY
 - Precondition: 6 (GR-23 through GR-28) — Pre-build, 4 RECOMMENDED + 2 ADVISORY
 - Mode: 2 (GR-33, GR-34) — Post-build, ADVISORY
+- Meta: 2 (GR-48, GR-49) — Post-build, 1 REQUIRED + 1 RECOMMENDED
+- Measurement: 2 (GR-52, GR-53) — Post-build, 1 RECOMMENDED + 1 ADVISORY
+- Accessibility: 1 (GR-46) — Post-build, ADVISORY
 
 **Removed gates (13 total):** GR-16 (absorbed into verdict logic), GR-29-32 (moved to orchestrator verdict logic), GR-35 (moved to PA), GR-36-39 (moved to experiment protocol), GR-40-42 (moved to orchestrator process checks).
 
@@ -729,14 +822,16 @@ Every item classified as Layer 6 GATES in classify-by-layer.md, with its final d
 | 67 | extract-d21-d25.md | ITEM 130 | L1943 | — | ORCHESTRATOR (policy recommendation) |
 
 **Traceability summary:**
-- ACTIVE gates: 35 (BV-01-04, GR-01-15, GR-17-28, GR-33-34, GR-43, GR-44; 13 gates removed in Wave 1)
+- ACTIVE gates: 43 (BV-01-04, GR-01-15, GR-17-28, GR-33-34, GR-43-53; 13 gates removed in Wave 1, 8 new added in Wave 2)
+- Wave 1 ADDED: 6 (BV-01-04 brief verification, GR-43 self-eval output, GR-44 trailing void)
+- Wave 2 ADDED: 8 new gates (GR-45 typography variation, GR-46 print stylesheet, GR-48 gate coverage, GR-49 file integrity, GR-50 conviction statement, GR-51 bg delta distribution, GR-52 section height variation, GR-53 density arc direction) + executable code for 2 existing gates (GR-21, GR-22)
 - REMOVED gates: 13 (GR-16 absorbed, GR-29-32 to orchestrator verdict, GR-35 to PA, GR-36-39 to experiment protocol, GR-40-42 to orchestrator process checks)
-- ADDED gates: 6 (BV-01-04 brief verification, GR-43 self-eval output, GR-44 trailing void)
 - RECLASSIFIED by council: 10 (Pattern 1) + 2 (Pattern 4) = 12
 - Routed to PA: 7 (anti-patterns requiring perceptual judgment)
 - Routed to META/DOCUMENTATION: 5 (old pipeline historical items)
 - Routed to ORCHESTRATOR: 4 (policy recommendations, risk estimates)
 - Total items accounted for: 72 (matches classify-by-layer.md Layer 6 count) + additional items from PERCEPTION and VALUES layers that reference gate-runner
+- **Note:** GR-47 intentionally skipped (Brief Line Budget already covered by BV-01 per CONFLICT-007). GR-51 renumbered from source GR-43 to avoid collision with existing Self-Evaluation gate.
 
 ---
 
@@ -759,10 +854,12 @@ Every item classified as Layer 6 GATES in classify-by-layer.md, with its final d
 
 ## EXECUTABLE GATE RUNNER CODE
 
-This is the pre-built JavaScript code the orchestrator should execute. Organized into 3 sections:
+This is the pre-built JavaScript code the orchestrator should execute. Organized into 5 sections:
 1. **Brief Verification (BV-01 through BV-04)** — text parsing, runs in Phase 1
-2. **Core Gate Runner (GR-01 through GR-15, GR-43)** — Playwright DOM inspection, runs in Phase 3A
+2. **Core Gate Runner (GR-01 through GR-15, GR-43, GR-44)** — Playwright DOM inspection, runs in Phase 3A
 3. **Anti-Pattern Gates (GR-17 through GR-22)** — Playwright heuristic checks, runs in Phase 3A
+4. **Wave 2 Gates (GR-45, GR-46, GR-48, GR-50, GR-51, GR-52, GR-53)** — new Playwright checks, runs in Phase 3A
+5. **Process Gates (GR-49)** — non-Playwright file/process checks, runs after Phase 3A
 
 ### Brief Verification Gates (BV-01 through BV-04) — Text Parsing
 
@@ -1554,7 +1651,8 @@ async function runGateRunner(page) {
       perception: { pass: perceptionPass, fail: perceptionFail, total: 6 },
       output: { pass: outputGates.length - outputFail, fail: outputFail, total: 1 },
       allPerceptionPass,
-      verdict
+      verdict,
+      note: 'Run runWave2Gates() and runGateCoverage() after this for complete verification'
     }
   };
 }
@@ -1721,7 +1819,532 @@ async function runAntiPatternGates(page) {
     threshold: { maxConsecutiveIdentical: 2 }
   });
 
+  // GR-21: AP-14 Cognitive Overload — Simplified proxy (Wave 2)
+  // Counts distinct background colors per 900px vertical slice.
+  // PASS if <= 4 distinct backgrounds per viewport.
+  const overloadCheck = await page.evaluate(() => {
+    function parseRGBLocal(str) {
+      const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (match) return `${match[1]},${match[2]},${match[3]}`;
+      return null;
+    }
+    const docHeight = document.documentElement.scrollHeight;
+    const sliceHeight = 900;
+    const sliceCount = Math.ceil(docHeight / sliceHeight);
+    const sliceResults = [];
+    let maxDistinct = 0;
+
+    for (let i = 0; i < sliceCount; i++) {
+      const sliceTop = i * sliceHeight;
+      const sliceBottom = sliceTop + sliceHeight;
+      const bgColors = new Set();
+
+      document.querySelectorAll('*').forEach(el => {
+        if (!window.isRenderedElement(el)) return;
+        const rect = el.getBoundingClientRect();
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const elTop = rect.top + scrollTop;
+        const elBottom = rect.bottom + scrollTop;
+        // Element overlaps with this slice
+        if (elBottom > sliceTop && elTop < sliceBottom) {
+          const bg = getComputedStyle(el).backgroundColor;
+          if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
+            const rgb = parseRGBLocal(bg);
+            if (rgb) bgColors.add(rgb);
+          }
+        }
+      });
+
+      const distinct = bgColors.size;
+      if (distinct > maxDistinct) maxDistinct = distinct;
+      sliceResults.push({ slice: i, top: sliceTop, bottom: sliceBottom, distinctBgs: distinct });
+    }
+
+    return {
+      slices: sliceResults,
+      maxDistinctPerViewport: maxDistinct,
+      pass: maxDistinct <= 4
+    };
+  });
+  results.push({
+    gate: 'GR-21', name: 'AP-14 Cognitive Overload (Bg Proxy)',
+    status: overloadCheck.pass ? 'PASS' : 'FAIL',
+    measured: { maxDistinctPerViewport: overloadCheck.maxDistinctPerViewport, sliceCount: overloadCheck.slices.length },
+    threshold: { maxDistinctBackgrounds: 4, sliceHeight: '900px' },
+    evidence: 'THEORETICAL',
+    note: 'Simplified proxy — counts distinct bg colors per 900px slice, not full visual channel analysis'
+  });
+
+  // GR-22: AP-02 Color Zone Conflict — Simplified proxy (Wave 2)
+  // Checks if primary red (#E83025) is used for borders/emphasis (correct) vs backgrounds (incorrect if > 2 uses).
+  const colorConflictCheck = await page.evaluate(() => {
+    function isRedColor(str) {
+      const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!match) return false;
+      const r = parseInt(match[1]);
+      const g = parseInt(match[2]);
+      const b = parseInt(match[3]);
+      // Primary red #E83025 = rgb(232, 48, 37) — allow tolerance
+      return r >= 220 && r <= 245 && g <= 60 && b <= 50;
+    }
+
+    let borderUses = 0;
+    let bgUses = 0;
+    let textUses = 0;
+    const bgElements = [];
+
+    document.querySelectorAll('*').forEach(el => {
+      if (!window.isRenderedElement(el)) return;
+      const style = getComputedStyle(el);
+
+      // Check borders for red
+      ['borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor'].forEach(prop => {
+        const val = style[prop];
+        if (val && isRedColor(val)) {
+          const w = parseFloat(style[prop.replace('Color', 'Width')]);
+          if (w > 0) borderUses++;
+        }
+      });
+
+      // Check background for red
+      const bg = style.backgroundColor;
+      if (bg && isRedColor(bg)) {
+        bgUses++;
+        bgElements.push({ tag: el.tagName, class: el.className });
+      }
+
+      // Check text color for red
+      const color = style.color;
+      if (color && isRedColor(color)) {
+        textUses++;
+      }
+    });
+
+    return {
+      borderUses,
+      bgUses,
+      textUses,
+      bgElements: bgElements.slice(0, 5),
+      pass: bgUses <= 2
+    };
+  });
+  results.push({
+    gate: 'GR-22', name: 'AP-02 Color Zone Conflict (Red Role)',
+    status: colorConflictCheck.pass ? 'PASS' : 'FAIL',
+    measured: colorConflictCheck,
+    threshold: { maxRedBackgrounds: 2 },
+    evidence: 'OBSERVED',
+    note: 'Simplified proxy — checks primary red is used for borders/emphasis, not backgrounds (>2 bg uses = conflict)'
+  });
+
   return results;
+}
+```
+
+### Wave 2 Gates (GR-45, GR-46, GR-50, GR-51, GR-52, GR-53)
+
+```javascript
+// Wave 2 Gates — execute after anti-pattern gates
+// These include new RECOMMENDED and ADVISORY gates added in Wave 2.
+async function runWave2Gates(page) {
+  const results = [];
+
+  // GR-45: Typography Variation — H2s must use >= 2 distinct font-sizes WITHIN H2 population
+  const typoVariation = await page.evaluate(() => {
+    const h2Sizes = new Map();
+    const h3Sizes = new Map();
+    const h2Elements = document.querySelectorAll('h2');
+    const h3Elements = document.querySelectorAll('h3');
+
+    h2Elements.forEach(el => {
+      if (!window.isRenderedElement(el)) return;
+      const fs = Math.round(parseFloat(getComputedStyle(el).fontSize));
+      h2Sizes.set(fs, (h2Sizes.get(fs) || 0) + 1);
+    });
+    h3Elements.forEach(el => {
+      if (!window.isRenderedElement(el)) return;
+      const fs = Math.round(parseFloat(getComputedStyle(el).fontSize));
+      h3Sizes.set(fs, (h3Sizes.get(fs) || 0) + 1);
+    });
+
+    // Group into 4px tolerance bands (perceptually meaningful at heading sizes)
+    function toBands(sizeMap) {
+      const sorted = [...sizeMap.keys()].sort((a, b) => a - b);
+      const bands = [];
+      for (const size of sorted) {
+        const existing = bands.find(b => Math.abs(b.center - size) <= 4);
+        if (existing) {
+          existing.count += sizeMap.get(size);
+        } else {
+          bands.push({ center: size, count: sizeMap.get(size) });
+        }
+      }
+      return bands;
+    }
+
+    const h2Bands = toBands(h2Sizes);
+    const h3Bands = toBands(h3Sizes);
+
+    // Primary check: within-H2 variation (>= 2 bands)
+    // Fallback: if < 3 H2 elements, allow combined H2+H3 check
+    const allSizes = new Map([...h2Sizes]);
+    h3Sizes.forEach((count, size) => allSizes.set(size, (allSizes.get(size) || 0) + count));
+    const combinedBands = toBands(allSizes);
+
+    const h2Count = [...h2Sizes.values()].reduce((s, c) => s + c, 0);
+    const useFallback = h2Count < 3;
+    const pass = useFallback ? combinedBands.length >= 2 : h2Bands.length >= 2;
+
+    return {
+      h2Count,
+      h3Count: [...h3Sizes.values()].reduce((s, c) => s + c, 0),
+      h2Bands: h2Bands.length,
+      h2BandDetails: h2Bands,
+      h3Bands: h3Bands.length,
+      combinedBands: combinedBands.length,
+      usedFallback: useFallback,
+      pass
+    };
+  });
+  results.push({
+    gate: 'GR-45', name: 'Typography Variation',
+    status: typoVariation.pass ? 'PASS' : 'FAIL',
+    measured: typoVariation,
+    threshold: { minDistinctBands: 2, bandTolerance: '4px', mode: 'within-H2 primary, H2+H3 fallback if <3 H2s' },
+    evidence: 'OBSERVED'
+  });
+
+  // GR-46: Print Stylesheet — check for @media print rule
+  const printCheck = await page.evaluate(() => {
+    let hasPrintRule = false;
+    let printRuleCount = 0;
+    try {
+      for (const sheet of document.styleSheets) {
+        try {
+          for (const rule of sheet.cssRules) {
+            if (rule instanceof CSSMediaRule && rule.conditionText && rule.conditionText.includes('print')) {
+              hasPrintRule = true;
+              printRuleCount++;
+            }
+          }
+        } catch (e) { /* cross-origin stylesheet */ }
+      }
+    } catch (e) {}
+    return { hasPrintRule, printRuleCount };
+  });
+  results.push({
+    gate: 'GR-46', name: 'Print Stylesheet',
+    status: printCheck.hasPrintRule ? 'PASS' : 'FAIL',
+    measured: printCheck,
+    threshold: { minPrintRules: 1 },
+    evidence: 'THEORETICAL'
+  });
+
+  // GR-50: Conviction Statement Existence
+  const convictionCheck = await page.evaluate(() => {
+    const html = document.documentElement.outerHTML;
+    // Check for conviction HTML comment
+    const convictionMatch = html.match(/<!--\s*CONVICTION:([\s\S]*?)-->/i);
+    let convictionText = '';
+    if (convictionMatch) {
+      convictionText = convictionMatch[1].trim();
+    }
+    // Count sentences (rough: split by period followed by space or end)
+    const sentences = convictionText
+      ? convictionText.split(/\.\s+|\.$/).filter(s => s.trim().length > 10).length
+      : 0;
+
+    // Check for keywords: metaphor, emotional arc, compositional strategy
+    const hasMetaphor = /metaphor/i.test(convictionText);
+    const hasArc = /arc|emotional|journey/i.test(convictionText);
+    const hasStrategy = /strateg|composition|approach/i.test(convictionText);
+
+    return {
+      found: !!convictionMatch,
+      sentences,
+      hasMetaphor,
+      hasArc,
+      hasStrategy,
+      textPreview: convictionText.substring(0, 200),
+      pass: !!convictionMatch && sentences >= 3
+    };
+  });
+  results.push({
+    gate: 'GR-50', name: 'Conviction Statement Existence',
+    status: convictionCheck.pass ? 'PASS' : 'FAIL',
+    measured: convictionCheck,
+    threshold: { minSentences: 3, requiredTopics: ['metaphor', 'arc', 'strategy'] },
+    evidence: 'THEORETICAL'
+  });
+
+  // GR-51: Background Delta Distribution
+  const bgDistribution = await page.evaluate(() => {
+    function parseRGBLocal(str) {
+      const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (match) return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) };
+      return null;
+    }
+
+    const sections = document.querySelectorAll('section, [class*="zone"], [class*="section"]');
+    const deltas = [];
+    for (let i = 0; i < sections.length - 1; i++) {
+      const aBg = parseRGBLocal(getComputedStyle(sections[i]).backgroundColor);
+      const bBg = parseRGBLocal(getComputedStyle(sections[i + 1]).backgroundColor);
+      if (aBg && bBg) {
+        const delta = Math.max(Math.abs(aBg.r - bBg.r), Math.abs(aBg.g - bBg.g), Math.abs(aBg.b - bBg.b));
+        if (delta > 0) deltas.push(delta);
+      }
+    }
+
+    if (deltas.length === 0) {
+      return { deltas: [], above25Count: 0, above25Ratio: 0, stddev: 0, pass: true, note: 'No zone boundaries found' };
+    }
+
+    // Count deltas >= 25 RGB
+    const above25 = deltas.filter(d => d >= 25);
+    const above25Ratio = above25.length / deltas.length;
+
+    // Compute standard deviation
+    const mean = deltas.reduce((sum, d) => sum + d, 0) / deltas.length;
+    const variance = deltas.reduce((sum, d) => sum + Math.pow(d - mean, 2), 0) / deltas.length;
+    const stddev = Math.sqrt(variance);
+
+    // Positional check: at least 1 boundary in the middle 50% must have delta >= 25 RGB
+    // Prevents bookend-gaming (high deltas only at header/footer)
+    const middleStart = Math.floor(deltas.length * 0.25);
+    const middleEnd = Math.ceil(deltas.length * 0.75);
+    const middleDeltas = deltas.slice(middleStart, middleEnd);
+    const middleHasHighDelta = middleDeltas.some(d => d >= 25);
+
+    return {
+      deltas,
+      above25Count: above25.length,
+      totalDeltas: deltas.length,
+      above25Ratio: above25Ratio.toFixed(2),
+      mean: mean.toFixed(1),
+      stddev: stddev.toFixed(1),
+      middleHasHighDelta,
+      middleDeltaCount: middleDeltas.length,
+      pass: above25Ratio >= 0.50 && stddev >= 8 && middleHasHighDelta
+    };
+  });
+  results.push({
+    gate: 'GR-51', name: 'Background Delta Distribution',
+    status: bgDistribution.pass ? 'PASS' : 'FAIL',
+    measured: bgDistribution,
+    threshold: { minAbove25Ratio: 0.50, minStddev: 8 },
+    evidence: 'OBSERVED'
+  });
+
+  // GR-52: Section Height Variation — at least 3 distinct height bands
+  const heightVariation = await page.evaluate(() => {
+    const sections = document.querySelectorAll('section, [class*="zone"], [class*="section"]');
+    const heights = [];
+    sections.forEach(s => {
+      if (!window.isRenderedElement(s)) return;
+      const rect = s.getBoundingClientRect();
+      if (rect.height > 0) {
+        heights.push(Math.round(rect.height));
+      }
+    });
+
+    if (heights.length < 3) {
+      return { heights, bands: heights.length, pass: heights.length >= 3, note: 'Fewer than 3 sections found' };
+    }
+
+    // Group into 50px tolerance bands
+    const sorted = [...heights].sort((a, b) => a - b);
+    const bands = [];
+    for (const h of sorted) {
+      const existingBand = bands.find(b => Math.abs(b.center - h) <= 50);
+      if (existingBand) {
+        existingBand.members.push(h);
+        existingBand.center = existingBand.members.reduce((s, v) => s + v, 0) / existingBand.members.length;
+      } else {
+        bands.push({ center: h, members: [h] });
+      }
+    }
+
+    return {
+      heights,
+      sectionCount: heights.length,
+      bands: bands.length,
+      bandDetails: bands.map(b => ({ center: Math.round(b.center), count: b.members.length })),
+      pass: bands.length >= 3
+    };
+  });
+  results.push({
+    gate: 'GR-52', name: 'Section Height Variation',
+    status: heightVariation.pass ? 'PASS' : 'FAIL',
+    measured: heightVariation,
+    threshold: { minDistinctBands: 3, bandTolerance: '50px' },
+    evidence: 'OBSERVED'
+  });
+
+  // GR-53: Density Arc Direction — densest section should not be first or last
+  const densityArc = await page.evaluate(() => {
+    const sections = document.querySelectorAll('section, [class*="zone"], [class*="section"]');
+    const densities = [];
+
+    sections.forEach((s, index) => {
+      if (!window.isRenderedElement(s)) return;
+      const rect = s.getBoundingClientRect();
+      if (rect.height <= 0) return;
+      // Count child elements as density proxy
+      const childCount = s.querySelectorAll('*').length;
+      const density = childCount / rect.height;
+      densities.push({
+        index,
+        className: s.className || s.tagName,
+        height: Math.round(rect.height),
+        childCount,
+        density: density.toFixed(4)
+      });
+    });
+
+    if (densities.length < 3) {
+      return { densities, densestIndex: -1, pass: true, note: 'Fewer than 3 sections — arc check not applicable' };
+    }
+
+    // Find densest section
+    let maxDensity = 0;
+    let densestIndex = 0;
+    densities.forEach((d, i) => {
+      const val = parseFloat(d.density);
+      if (val > maxDensity) {
+        maxDensity = val;
+        densestIndex = i;
+      }
+    });
+
+    const isFirstOrLast = densestIndex === 0 || densestIndex === densities.length - 1;
+
+    return {
+      sectionCount: densities.length,
+      densestIndex,
+      densestSection: densities[densestIndex],
+      isFirstOrLast,
+      pass: !isFirstOrLast
+    };
+  });
+  results.push({
+    gate: 'GR-53', name: 'Density Arc Direction',
+    status: densityArc.pass ? 'PASS' : 'FAIL',
+    measured: densityArc,
+    threshold: { densestNotFirstOrLast: true },
+    evidence: 'THEORETICAL',
+    note: 'ADVISORY only — crescendo/decrescendo patterns are valid exceptions'
+  });
+
+  return results;
+}
+```
+
+### Gate Coverage Completeness (GR-48) — Meta-Gate
+
+```javascript
+// GR-48: Gate Coverage Completeness — runs LAST after all other gates
+// This is the "gate that gates the gates"
+// Input: allResults — array of all gate results collected from runGateRunner, runAntiPatternGates, runWave2Gates
+function runGateCoverage(allResults) {
+  // Define expected gate IDs by tier
+  const REQUIRED_GATES = [
+    'GR-01', 'GR-02', 'GR-03', 'GR-04', 'GR-05', 'GR-06', 'GR-07', 'GR-08', 'GR-09', 'GR-10',
+    'GR-11', 'GR-12', 'GR-13', 'GR-14', 'GR-15',
+    'GR-43', 'GR-44'
+  ]; // 17 REQUIRED gates (not counting GR-48 itself)
+
+  const RECOMMENDED_GATES = [
+    'GR-17', 'GR-18', 'GR-19', 'GR-20',
+    'GR-25', 'GR-26', 'GR-27', 'GR-28',
+    'GR-45', 'GR-49', 'GR-51', 'GR-52'
+  ]; // 12 RECOMMENDED gates
+
+  const collectedGateIds = new Set(allResults.map(r => r.gate));
+
+  const missingRequired = REQUIRED_GATES.filter(id => !collectedGateIds.has(id));
+  const presentRecommended = RECOMMENDED_GATES.filter(id => collectedGateIds.has(id));
+  const missingRecommended = RECOMMENDED_GATES.filter(id => !collectedGateIds.has(id));
+
+  const requiredComplete = missingRequired.length === 0;
+  const recommendedSufficient = presentRecommended.length >= 4;
+
+  const pass = requiredComplete && recommendedSufficient;
+
+  return {
+    gate: 'GR-48', name: 'Gate Coverage Completeness',
+    status: pass ? 'PASS' : 'FAIL',
+    measured: {
+      totalCollected: collectedGateIds.size,
+      requiredPresent: REQUIRED_GATES.length - missingRequired.length,
+      requiredTotal: REQUIRED_GATES.length,
+      missingRequired,
+      recommendedPresent: presentRecommended.length,
+      recommendedTotal: RECOMMENDED_GATES.length,
+      missingRecommended
+    },
+    threshold: {
+      requiredCoverage: '17/17 (100%)',
+      recommendedCoverage: '>=4/12'
+    },
+    evidence: 'OBSERVED',
+    note: missingRequired.length > 0
+      ? 'INCOMPLETE — missing REQUIRED gates: ' + missingRequired.join(', ')
+      : 'All REQUIRED gates present'
+  };
+}
+```
+
+### Gate Result File Integrity (GR-49) — Process Check
+
+```javascript
+// GR-49: Gate Result File Integrity — non-Playwright process check
+// This runs after gate results are written to file.
+// Input: resultFiles — array of file paths found in output directory matching gate result pattern
+// Input: resultData — parsed JSON from the gate result file
+function checkGateResultIntegrity(resultFiles, resultData) {
+  const issues = [];
+
+  // Check 1: Exactly 1 gate result file
+  if (resultFiles.length === 0) {
+    issues.push('No gate result file found');
+  } else if (resultFiles.length > 1) {
+    issues.push('Multiple gate result files found: ' + resultFiles.join(', '));
+  }
+
+  if (resultData) {
+    // Check 2: No duplicate gate IDs
+    const gateIds = resultData.map(r => r.gate);
+    const seen = new Set();
+    const duplicates = [];
+    for (const id of gateIds) {
+      if (seen.has(id)) duplicates.push(id);
+      seen.add(id);
+    }
+    if (duplicates.length > 0) {
+      issues.push('Duplicate gate IDs: ' + duplicates.join(', '));
+    }
+
+    // Check 3: All gate IDs follow GR-XX or BV-XX pattern
+    const invalidIds = gateIds.filter(id => !/^(GR-\d{2}|BV-\d{2})$/.test(id));
+    if (invalidIds.length > 0) {
+      issues.push('Invalid gate ID format: ' + invalidIds.join(', '));
+    }
+
+    // Check 4: All results have required fields
+    const missingFields = resultData.filter(r => !r.gate || !r.name || !r.status || !r.measured || !r.threshold);
+    if (missingFields.length > 0) {
+      issues.push('Results missing required fields: ' + missingFields.map(r => r.gate || 'unknown').join(', '));
+    }
+  }
+
+  return {
+    gate: 'GR-49', name: 'Gate Result File Integrity',
+    status: issues.length === 0 ? 'PASS' : 'FAIL',
+    measured: { fileCount: resultFiles.length, issues },
+    threshold: { files: 1, duplicates: 0, invalidFormats: 0 },
+    evidence: 'OBSERVED'
+  };
 }
 ```
 
@@ -1740,19 +2363,48 @@ async function runAntiPatternGates(page) {
 // await page.setViewportSize({ width: 1440, height: 900 });
 // await page.goto('http://localhost:3000/output.html');
 
-// 3. Run core gates
+// 3. Run core gates (REQUIRED: GR-01 through GR-15, GR-43, GR-44)
 // const coreResults = await runGateRunner(page);
 
-// 4. If core gates pass, run anti-pattern gates
-// if (coreResults.summary.verdict === 'PROCEED_TO_PA') {
-//   const apResults = await runAntiPatternGates(page);
-//   // Check: 3+ anti-pattern FAIL = REBUILD
-// }
+// 4. Run anti-pattern gates (RECOMMENDED + ADVISORY: GR-17 through GR-22)
+// const apResults = await runAntiPatternGates(page);
 
-// 5. For responsive gates, resize and re-run perception gates at 768px
+// 5. Run Wave 2 gates (GR-45, GR-46, GR-50, GR-51, GR-52, GR-53)
+// const wave2Results = await runWave2Gates(page);
+
+// 6. For responsive gates, resize and re-run perception gates at 768px
 // await page.setViewportSize({ width: 768, height: 1024 });
 // const responsiveResults = await runGateRunner(page);
 
-// 6. Collect all results as JSON
-// const allResults = { core: coreResults, antiPattern: apResults, responsive: responsiveResults };
+// 7. Collect all gate results into a single array
+// const allGateResults = [
+//   ...coreResults.results,
+//   ...apResults,
+//   ...wave2Results,
+//   ...responsiveResults.results
+// ];
+
+// 8. Run GR-48 (Gate Coverage Completeness) — LAST
+// const coverageResult = runGateCoverage(allGateResults);
+// allGateResults.push(coverageResult);
+
+// 9. Write results to file, then run GR-49 (Result File Integrity)
+// fs.writeFileSync('gate-results.json', JSON.stringify(allGateResults, null, 2));
+// const integrityResult = checkGateResultIntegrity(['gate-results.json'], allGateResults);
+
+// 10. Determine final verdict
+// const coreVerdict = coreResults.summary.verdict;
+// const apFails = apResults.filter(r => r.status === 'FAIL').length;
+// const wave2RecommendedFails = wave2Results.filter(r =>
+//   ['GR-45', 'GR-51', 'GR-52'].includes(r.gate) && r.status === 'FAIL'
+// ).length;
+// const totalRecommendedFails = apFails + wave2RecommendedFails;
+//
+// let finalVerdict = coreVerdict;
+// if (finalVerdict === 'PROCEED_TO_PA' && totalRecommendedFails >= 3) {
+//   finalVerdict = 'REBUILD';
+// }
+// if (coverageResult.status === 'FAIL') {
+//   finalVerdict = 'INCOMPLETE';
+// }
 ```
