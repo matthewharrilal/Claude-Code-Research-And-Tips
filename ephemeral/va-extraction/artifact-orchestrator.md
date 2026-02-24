@@ -488,6 +488,33 @@ REBUILD protocol:
 - **ITEM 51** (extract-d15-d17.md L1261-1262) You cannot fix your way to Flagship. Only compose your way.
 - **ITEM 37** (extract-d15-d17.md L1230-1232) THE GAP: 3.2->4.0 = 0.8 points = revision quality deficit
 
+### Gate Logic Relocated from Gate Runner (Wave 1)
+
+The following gate logic was removed from `artifact-gate-runner.md` during Wave 1 because these checks are orchestrator decisions, not DOM inspection gates. Their logic now lives here:
+
+**GR-29 through GR-32 (Verdict Gates) — now orchestrator verdict logic above:**
+- GR-29: PA-05 >= 3.5 AND zero soul violations = SHIP
+- GR-30: PA-05 2.5-3.5 = REFINE
+- GR-31: PA-05 < 2.5 = REBUILD
+- GR-32: 3+ anti-pattern fails = REBUILD (overrides PA-05 score)
+These are applied in the Ship/Refine/Rebuild thresholds section above.
+
+**GR-35 (Layout Driver) — rerouted to PA:**
+Layout driver assessment (content-type vs metaphor) is NOT automatable. Assessed by PA auditors via PA-05 sub-criteria (DESIGNED) and Tier 5 questions. No orchestrator action needed.
+
+**GR-36 through GR-39 (Experiment Gates) — for separate experiment protocol document:**
+- GR-36: Experiment #19 (Opus isolation) active state
+- GR-37: Experiment #20 (disposition evaluation) active state
+- GR-38: Experiment #21 (3-pass validation) active state
+- GR-39: Experiment tracking and PA-05 score comparison across experimental conditions
+These will be documented in a dedicated experiment protocol file (Wave 3).
+
+**GR-40 through GR-42 (Policy Gates) — orchestrator process checks:**
+- GR-40: Single-pass is the default (no unauthorized 3-pass)
+- GR-41: REBUILD uses fresh builder (not same builder in repair mode)
+- GR-42: Builder does not receive gate thresholds (overlaps with GR-27 precondition gate)
+The orchestrator enforces these as process rules during Phase 2 spawning and Phase 3C verdict handling.
+
 ---
 
 ## SECTION 8: TOTAL BUILD SUMMARY

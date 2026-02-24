@@ -93,9 +93,66 @@ See [Reader Model — 5-Axis Input Space](#reader-model-5-axis-input-space) for 
 
 > D12-D14 ITEM 100 (L1118): Phase 0 Content Analyst outputs reader profile (~15 lines)
 
-**Output:** CONTENT MAP (~30-50 lines)
+### 7. Content Tension Identification (added from Gas Town retrospective)
+
+Identify 2-4 content tensions — opposing poles that the content navigates between. For each tension:
+- Name both poles with a representative quote from the content
+- State which pole is dominant
+- Identify which tension is **metaphor-shaping** (most structural to the page's visual architecture)
+
+If no significant tensions are present, state: "No significant tensions identified." This is acceptable for APPLIED mode content but unusual for COMPOSED mode (high heterogeneity content almost always contains tensions).
+
+Content tensions are CRITICAL for COMPOSED mode — they inform the structural metaphor and guide zone-to-zone contrast decisions. The metaphor-shaping tension becomes the page's visual spine.
+
+**Output:** CONTENT MAP (~30-66 lines, 66 acceptable for COMPOSED mode)
 > ITEM 13 (D01-D03, L35): Output: CONTENT MAP (~30-50 lines)
 > D04-D05 ITEM 13 (L399-400): Content Map (~35 lines) from Phase 0
+
+### Content Map Output Template
+
+The content map MUST follow this section structure. See `artifact-worked-examples.md` Example 1 for a fully annotated example.
+
+```
+# Content Map: {PAGE_TITLE}
+
+Content type: {PROSE/MIXED/VISUAL}
+Word count: ~{COUNT}
+
+## 1. Content Classification
+- Type: {TYPE} ({element types across N sections})
+- Structural heterogeneity: {LOW/MODERATE/HIGH}
+- Metaphor viability: {LOW/MODERATE/HIGH}
+
+## 2. Mode Determination
+{APPLIED or COMPOSED} — {1-2 sentence rationale linking heterogeneity + metaphor}
+
+## 3. Zone Architecture
+Recommended zones: {N} (content is {WORD_COUNT} words, fits {BRACKET} bracket)
+
+| Zone | Name | Density | Content Sections | Pacing | Direction |
+|------|------|---------|-----------------|--------|-----------|
+{per-zone rows — include Pacing (BREATHING/TRANSITIONAL/DENSE) and Direction (OPENING/DEEPENING/RESOLVING) columns}
+
+## 4. Content Tensions
+1. **{Tension A vs B}** — Pole A: "{quote}" / Pole B: "{quote}". Pole {X} dominant.
+{repeat for 2-4 tensions}
+Metaphor-shaping tension: #{N}
+
+## 5. Metaphor Seeds
+1. **{Metaphor Name}** — {source in content}. CSS directions: {structural implications}. Risk: {LOW/MEDIUM/HIGH}.
+{repeat for 2-3 candidates}
+Recommendation: Seed #{N} ({name}). {1-2 sentence rationale}.
+
+## 6. Density Arc
+{ASCII density arc: ZN [LEVEL] -> ZN+1 [LEVEL] -> ...}
+Section heights (estimated): {per-zone heights in px}. Pattern: {PATTERN_NAME}.
+
+## 7. Reader Profile
+- Who: {reader description}
+- Axis positions: {per-axis positions}
+- What they expect: {1 sentence}
+- What should surprise them: {1 sentence}
+```
 
 ---
 

@@ -65,6 +65,8 @@ This is the PRIMARY success metric for the entire pipeline. PA-05 measures perce
 | 3/4 PASS | 3/4 | YES WITH RESERVATIONS (note failing criterion) |
 | 2/4 or fewer | < 3/4 | NO — would not ship |
 
+**CONDITIONAL PASS guidance:** If a sub-criterion technically passes but contains a shipping-blocking defect, treat it as CONDITIONAL PASS (not a clean PASS). Score PA-05 based on the number of clean passes, not conditional passes. Example: Gas Town Auditor A scored 3/4 despite all 4 sub-criteria technically passing — the trailing void made POLISHED a "pass with critical defect," which counts as conditional, reducing the effective score.
+
 ### 1.4 The 1-4 Scale: FLAT / ASSEMBLED / COMPOSED / DESIGNED
 
 > Source: ITEM 27 (extract-d18-d20.md, VA L1412)
@@ -168,7 +170,7 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 
 ---
 
-## PART 3: FULL PA QUESTION INVENTORY (65 Questions)
+## PART 3: FULL PA QUESTION INVENTORY (66 Questions)
 
 ### 3.1 Tier 1: The Mandatory Five (Every Audit, Every Mode)
 
@@ -309,18 +311,19 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 | PA-55 | Look at 3 adjacent sections. Can you describe how they DIFFER visually without inspecting code? If not, variation is sub-perceptual. | C |
 | PA-56 | Check text treatment between zones. Can you FEEL the tracking difference? If not, flag as sub-perceptual. | B |
 
-### 3.8 Pipeline Integration (PA-69, PA-70)
+### 3.8 Pipeline Integration (PA-69, PA-70, PA-71)
 
 | ID | Question | Auditor |
 |----|----------|---------|
 | PA-69 | Pick two section transitions. Count visual properties changing. Are transition intensities varied or uniform? | D |
 | PA-70 | Compare densest analytical section to lightest overview. Does visual treatment RESPOND to the difference? | D |
+| PA-71 | At the boundary between two adjacent zones, does the transition feel like a smooth handoff or an abrupt collision? Does the transition technique SERVE the content shift, or does it feel arbitrary? | D |
 
 ### 3.9 Tier 5: Compositional Depth (PA-60 through PA-68)
 
 See Part 2 above for full question text, scoring criteria, and auditor assignments.
 
-**Total: 65 questions** (54 standard + 2 sub-perceptual + 9 Tier 5)
+**Total: 66 questions** (55 standard + 2 sub-perceptual + 9 Tier 5)
 
 ---
 
@@ -351,14 +354,14 @@ All agents run in PARALLEL (except Weaver, which is sequential after all auditor
 | **A** | Impression + Emotion | PA-01, PA-03, PA-04, PA-05, PA-45 | PA-65, PA-67 | 7 |
 | **B** | Readability + Typography | PA-02, PA-06, PA-07, PA-08, PA-29, PA-56 | — | 6 |
 | **C** | Spatial + Proportion | PA-09, PA-10, PA-11, PA-30, PA-31, PA-32, PA-33, PA-50, PA-51, PA-52, PA-53, PA-55 | PA-64, PA-66 | 14 |
-| **D** | Flow + Pacing | PA-12, PA-13, PA-34, PA-35, PA-36, PA-69, PA-70 | PA-62 | 8 |
+| **D** | Flow + Pacing | PA-12, PA-13, PA-34, PA-35, PA-36, PA-69, PA-70, PA-71 | PA-62 | 9 |
 | **E** | Grid + Layout | PA-14, PA-15, PA-37, PA-38, PA-39 | PA-63 | 6 |
 | **F** | Consistency + Rhythm | PA-16, PA-17, PA-40, PA-41 | PA-60, PA-61 | 6 |
 | **G** | Metaphor + Ideology | PA-18, PA-19, PA-20, PA-42, PA-43, PA-44 | PA-68 | 7 |
 | **H** | Responsiveness | PA-21, PA-22, PA-23, PA-46, PA-47 | — | 5 |
 | **I** | Cross-Page + Adversarial | PA-24, PA-25, PA-26, PA-27, PA-28, PA-48 | — | 6 |
 
-**Total: 65 questions across 9 auditors**
+**Total: 66 questions across 9 auditors** (65 original + PA-71 transition quality)
 
 > Source: ITEM 65 (extract-d21-d25.md, VA L1777) — "PA question count reconciliation"
 
@@ -854,7 +857,7 @@ All 56 Layer 7 items from the unified registry, plus the 12 rerouted VALUES item
 | # | Item ID | Source | VA Line | Agent | Type | Text |
 |---|---------|--------|---------|-------|------|------|
 | 53 | ITEM 037 | extract-d21-d25.md | L1664 | PA-AUDITOR | PROCESS | PA auditor can assess emotional arc AFTER build |
-| 54 | ITEM 038 | extract-d21-d25.md | L1665 | PA-AUDITOR | AGENT_ROLE | ~~Compositional Critic is the primary emotional arc check~~ OVERRIDDEN by council: PA auditor is PRIMARY |
+| 54 | ITEM 038 | extract-d21-d25.md | L1665 | PA-AUDITOR | AGENT_ROLE | PA auditor is PRIMARY for emotional arc check (council override of original Compositional Critic assignment) |
 
 ### 12.8 Ship Threshold Items (Overlap with GATES Layer)
 

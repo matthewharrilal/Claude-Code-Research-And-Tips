@@ -160,6 +160,7 @@ The FINAL prompt's "Tier A" is a DIFFERENT categorization — it refers to highe
 ```
 PA-05 scoring: -> All auditors contribute. 4 sub-criteria: Designed, Coherent, Proportionate, Polished.
                Calibration: Middle=4/4, Ceiling=1.5/4, DD-006=4/4, CD-006=4/4.
+               [NOTE: CD-006=4/4 was INCORRECT. Corrected to CD-006=~3/4 COMPOSED (39/40 soul, CEILING tier).]
 ```
 
 **FINAL prompt (C5 Gate-Then-Ranking):**
@@ -312,9 +313,10 @@ Additionally, the Perception Track / Rule Track **dual severity** concept from S
 **FINAL prompt (B9):**
 ```
 Calibration: Middle=4/4, Ceiling=1.5/4, DD-006=4/4, CD-006=4/4.
+               [NOTE: CD-006=4/4 was INCORRECT. Corrected to CD-006=~3/4 COMPOSED (39/40 soul, CEILING tier).]
 ```
 
-**COVERAGE STATUS:** PRESENT and EXPANDED (FINAL adds DD-006=4/4 and CD-006=4/4 which SKILL.md doesn't list).
+**COVERAGE STATUS:** PRESENT and EXPANDED (FINAL adds DD-006=4/4 and CD-006=~3/4 COMPOSED which SKILL.md doesn't list). NOTE: The original "CD-006=4/4" calibration was incorrect -- CD-006 is CEILING tier with 39/40 soul score, ~3/4 PA-05 COMPOSED.
 
 No gap here.
 

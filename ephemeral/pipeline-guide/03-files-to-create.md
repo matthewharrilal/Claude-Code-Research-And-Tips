@@ -111,12 +111,12 @@ This file exists because of a direct, empirical observation: **quality degrades 
 
 | Experiment | Builder Input | PA-05 Score |
 |------------|---------------|-------------|
-| CD-006 | ~50 lines | ~4/4 (39/40 overall) |
+| CD-006 | ~50 lines | ~3/4 COMPOSED (39/40 soul score, CEILING tier) |
 | Middle | ~100 lines | 4/4 DESIGNED |
 | Remediation | ~300 lines | 2.5/4 COMPOSED |
 | Flagship | ~530 lines | 1.5/4 FLAT |
 
-The pattern is unambiguous across all 4 experiments. More input means more constraints competing for the builder's attention, which means less compositional freedom, which means flatter output. CD-006 (the crown jewel at 39/40) was built by a single Opus agent with minimal guidance.
+The pattern is unambiguous across all 4 experiments. More input means more constraints competing for the builder's attention, which means less compositional freedom, which means flatter output. CD-006 (39/40 soul score, CEILING tier, ~3/4 PA-05 COMPOSED) was built by a single Opus agent with minimal guidance.
 
 The conventions brief targets the sweet spot: ~100 lines of WHAT constraints (not HOW recipes). Combined with content + tokens.css + prohibitions, the builder receives ~230 total lines. This is between Middle (100) and Remediation (300), and weighted toward the successful end.
 

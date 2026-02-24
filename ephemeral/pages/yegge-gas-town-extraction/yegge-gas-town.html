@@ -1,0 +1,2767 @@
+<!--
+  CONVICTION STATEMENT:
+  This page renders Steve Yegge's Gas Town as a REFINERY — raw ideas enter at intake (Z1),
+  get processed through heavy machinery (Z2), stored in layered tanks (Z3), governed by
+  operating principles (Z4), assembled on the production line (Z5), and dispatched as
+  decisions (Z6). The CSS encodes the refinery structurally: spacing compresses where
+  pressure builds, borders thicken where material flows under load, backgrounds darken
+  where processing intensifies. The reader FEELS the factory before reading about it.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Steve Yegge and Gas Town — The Agent Factory Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================
+       ROOT TOKENS — REFINERY VOCABULARY
+       ============================================ */
+    :root {
+      /* Soul constraints */
+      --border-radius: 0;
+      --box-shadow: none;
+
+      /* Primary colors */
+      --color-primary: #E83025;
+      --color-background: #FEF9F5;
+      --color-text: #1A1A1A;
+      --color-text-secondary: #666666;
+      --color-border: #E0D5C5;
+      --color-border-subtle: #F0EBE3;
+
+      /* Accent colors */
+      --accent-blue: #A07D50;
+      --accent-green: #4A9D6B;
+      --accent-coral: #C97065;
+      --accent-amber: #D97706;
+      --accent-purple: #7C3AED;
+
+      /* Refinery zone backgrounds (concept-named) */
+      --refinery-intake: #FEF9F5;      /* Z1: raw material enters */
+      --refinery-floor: #EDE6DA;        /* Z2: heavy processing */
+      --refinery-tank: #FFF2E0;         /* Z3: layered storage */
+      --refinery-control: #F0EBE5;      /* Z4: governance gauges */
+      --refinery-line: #E5DDD0;         /* Z5: assembly conveyor */
+      --refinery-dispatch: #F0EBE0;     /* Z6: shipping/decisions */
+
+      /* Refinery structural tokens */
+      --pipeline-connector: #E83025;    /* material flow between stages */
+      --pressure-indicator: #E83025;    /* heat in dense zones */
+      --gauge-reading: #666666;         /* monitoring labels */
+
+      /* Typography trinity */
+      --font-display: 'Instrument Serif', Georgia, serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+      /* Type scale */
+      --text-xs: 0.75rem;
+      --text-sm: 0.875rem;
+      --text-base: 1rem;
+      --text-lg: 1.125rem;
+      --text-h4: 1.25rem;
+      --text-h3: 1.5rem;
+      --text-h2: 2rem;
+      --text-h1: 2.5rem;
+      --text-display: 3rem;
+
+      /* Spacing scale (4px base unit) */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --space-12: 48px;
+      --space-16: 64px;
+      --space-20: 80px;
+      --space-24: 96px;
+
+      /* Border hierarchy */
+      --border-structural: 4px;
+      --border-accent: 3px;
+      --border-micro: 1px;
+
+      /* Syntax highlighting */
+      --syntax-keyword: #E83025;
+      --syntax-string: #6B9B7A;
+      --syntax-comment: #666666;
+      --syntax-function: #4A7C9B;
+      --syntax-number: #D97706;
+      --syntax-punctuation: #E0D5C5;
+
+      /* Transition */
+      --transition-standard: 0.3s ease;
+    }
+
+    /* ============================================
+       RESET + BASE
+       ============================================ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--color-text);
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.7;
+      color: var(--color-text);
+      background: var(--color-background);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================
+       ACCESSIBILITY
+       ============================================ */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 0;
+      background: var(--color-primary);
+      color: var(--color-background);
+      padding: 8px 16px;
+      z-index: 1000;
+      font-family: var(--font-body);
+      font-size: 14px;
+      text-decoration: none;
+      border: none;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+
+    *:focus-visible {
+      outline: 3px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    ::selection {
+      background: var(--color-primary);
+      color: var(--color-background);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* ============================================
+       CONTAINER SPINE
+       ============================================ */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding-left: var(--space-6);
+      padding-right: var(--space-6);
+    }
+
+    /* ============================================
+       HEADER — Dark refinery entrance
+       Mechanism #13: Dark Header + 3px Border
+       ============================================ */
+    header {
+      background: var(--color-text);
+      color: var(--color-background);
+      border-bottom: 3px solid var(--color-primary);
+    }
+
+    .header-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: var(--space-12) var(--space-6) var(--space-8);
+    }
+
+    .header__meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: var(--space-3);
+    }
+
+    .header__title {
+      font-family: var(--font-display);
+      font-size: var(--text-h1);
+      font-style: italic;
+      line-height: 1.15;
+      margin-bottom: var(--space-4);
+      max-width: 18ch;
+    }
+
+    .header__subtitle {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      max-width: 50ch;
+      line-height: 1.6;
+    }
+
+    .header__stats {
+      display: flex;
+      gap: var(--space-6);
+      margin-top: var(--space-6);
+      flex-wrap: wrap;
+    }
+
+    .header__stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .header__stat-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+    }
+
+    .header__stat-value {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-background);
+    }
+
+    /* ============================================
+       TABLE OF CONTENTS
+       Mechanism #8: Navigation structure
+       ============================================ */
+    .toc {
+      background: var(--refinery-intake);
+      border-bottom: 1px solid var(--color-border);
+      padding: var(--space-6) 0;
+    }
+
+    .toc__inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+    }
+
+    .toc__label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gauge-reading);
+      margin-bottom: var(--space-3);
+    }
+
+    .toc__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-1) var(--space-8);
+    }
+
+    .toc__link {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      color: var(--color-text);
+      text-decoration: none;
+      padding: var(--space-1) 0;
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-2);
+      transition: color var(--transition-standard);
+    }
+
+    .toc__link:hover {
+      color: var(--color-primary);
+    }
+
+    .toc__number {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      min-width: 24px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ============================================
+       ZONE 1 — THE SHIFT (Intake)
+       SPARSE density, philosophical opening
+       Mechanisms: #5 alternation, #7 zone bg, #16 drop cap
+       ============================================ */
+    .zone-intake {
+      background: var(--refinery-intake);
+      padding-top: var(--space-20);
+      padding-bottom: var(--space-12);
+    }
+
+    .zone-intake .section-indicator {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gauge-reading);
+      margin-bottom: var(--space-4);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .zone-intake h2 {
+      font-family: var(--font-display);
+      font-size: var(--text-h2);
+      font-style: italic;
+      line-height: 1.2;
+      margin-bottom: var(--space-6);
+      color: var(--color-text);
+    }
+
+    .zone-intake p {
+      font-size: 18px;
+      line-height: 1.8;
+      max-width: 38em;
+      margin-bottom: var(--space-6);
+      color: var(--color-text);
+    }
+
+    .zone-intake .drop-cap::first-letter {
+      font-family: var(--font-display);
+      font-size: 3.5em;
+      float: left;
+      line-height: 0.8;
+      margin-right: var(--space-2);
+      margin-top: 4px;
+      color: var(--color-primary);
+    }
+
+    /* Complexity Ladder — Z1 ASCII diagram */
+    .ladder-block {
+      background: var(--color-text);
+      color: var(--color-background);
+      border: 3px solid var(--color-border);
+      padding: var(--space-6) var(--space-8);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: var(--space-8) 0;
+      white-space: pre;
+    }
+
+    .ladder-block .highlight-line {
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    /* Pull quote — Z1 */
+    .pull-quote {
+      border-left: 4px solid var(--color-primary);
+      padding: var(--space-6) var(--space-6);
+      margin: var(--space-8) 0;
+      background: rgba(232, 48, 37, 0.03);
+    }
+
+    .pull-quote p {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-style: italic;
+      line-height: 1.4;
+      max-width: 50ch;
+      margin-bottom: 0;
+    }
+
+    .pull-quote cite {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-style: normal;
+      color: var(--color-text-secondary);
+      margin-top: var(--space-3);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* Gate callout — Z1 */
+    .callout {
+      border-left: var(--border-structural) solid var(--color-primary);
+      background: rgba(232, 48, 37, 0.03);
+      padding: var(--space-5) var(--space-6);
+      margin-bottom: var(--space-6);
+    }
+
+    .callout__label {
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-primary);
+      margin-bottom: var(--space-3);
+    }
+
+    .callout__body {
+      font-size: var(--text-base);
+      line-height: 1.7;
+    }
+
+    .callout--info {
+      border-left-color: var(--accent-blue);
+    }
+
+    .callout--info .callout__label {
+      color: var(--accent-blue);
+    }
+
+    .callout--tip {
+      border-left-color: var(--accent-green);
+      background: rgba(74, 157, 107, 0.03);
+    }
+
+    .callout--tip .callout__label {
+      color: var(--accent-green);
+    }
+
+    .callout--warning {
+      border-left-color: var(--color-primary);
+      background: rgba(232, 48, 37, 0.05);
+    }
+
+    .callout--warning .callout__label {
+      color: var(--color-primary);
+    }
+
+    .callout--essence {
+      border-left-color: var(--accent-amber);
+      background: rgba(217, 119, 6, 0.03);
+    }
+
+    .callout--essence .callout__label {
+      color: var(--accent-amber);
+    }
+
+    .callout--essence .callout__body {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-style: italic;
+    }
+
+    .callout--challenge {
+      border-left-color: var(--accent-purple);
+      background: rgba(124, 58, 237, 0.03);
+    }
+
+    .callout--challenge .callout__label {
+      color: var(--accent-purple);
+    }
+
+    /* Yegge profile — Z1 */
+    .profile-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--space-6) 0;
+    }
+
+    .profile-table th {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 3px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+
+    .profile-table td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+      font-size: var(--text-sm);
+      line-height: 1.6;
+      vertical-align: top;
+    }
+
+    .profile-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Section titles within Z1 */
+    .zone-intake h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-h3);
+      font-style: italic;
+      margin-top: var(--space-10);
+      margin-bottom: var(--space-4);
+    }
+
+    /* Z1 prerequisites list */
+    .prereq-list {
+      list-style: none;
+      padding: 0;
+      margin: var(--space-4) 0 var(--space-6);
+    }
+
+    .prereq-list li {
+      padding: var(--space-2) 0;
+      padding-left: var(--space-6);
+      position: relative;
+      font-size: 18px;
+      line-height: 1.8;
+    }
+
+    .prereq-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 14px;
+      width: 8px;
+      height: 8px;
+      background: var(--color-primary);
+    }
+
+    /* ============================================
+       TRANSITION: Z1 → Z2 (HEAVY)
+       3px border + bg shift (delta ~27)
+       ============================================ */
+    .transition-heavy {
+      border-top: 3px solid var(--pipeline-connector);
+    }
+
+    .transition-medium {
+      border-top: 3px solid var(--color-border);
+    }
+
+    .transition-light {
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* ============================================
+       ZONE 2 — THE FACTORY FLOOR
+       DENSE density, 8 roles architecture
+       Mechanisms: #15 bento grid, #2 2-zone DNA,
+       #1 border-weight, #9 color encoding, #17 code block
+       ============================================ */
+    .zone-floor {
+      background: var(--refinery-floor);
+      padding-top: var(--space-16);
+      padding-bottom: var(--space-8);
+    }
+
+    .zone-floor .section-indicator {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gauge-reading);
+      margin-bottom: var(--space-4);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .zone-floor h2 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-style: italic;
+      line-height: 1.2;
+      margin-bottom: var(--space-6);
+    }
+
+    .zone-floor h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-h4);
+      font-style: italic;
+      margin-bottom: var(--space-3);
+    }
+
+    .zone-floor p {
+      font-size: var(--text-base);
+      line-height: 1.7;
+      margin-bottom: var(--space-4);
+    }
+
+    /* Factory/Colony comparison — 2-column */
+    .factory-comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--color-border);
+      margin: var(--space-6) 0;
+    }
+
+    .factory-comparison__side {
+      background: var(--refinery-floor);
+      padding: var(--space-5);
+    }
+
+    .factory-comparison__title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-3);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .factory-comparison__items {
+      list-style: none;
+      padding: 0;
+    }
+
+    .factory-comparison__items li {
+      font-size: var(--text-sm);
+      padding: var(--space-2) 0;
+      border-bottom: 1px solid var(--color-border-subtle);
+      line-height: 1.5;
+    }
+
+    .factory-comparison__items li:last-child {
+      border-bottom: none;
+    }
+
+    /* ASCII hierarchy diagram */
+    .ascii-diagram {
+      background: var(--color-text);
+      color: var(--color-background);
+      border: 3px solid var(--color-border);
+      padding: var(--space-6) var(--space-6);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin: var(--space-6) 0;
+      white-space: pre;
+    }
+
+    .ascii-diagram .role-name {
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .ascii-diagram .structure {
+      color: var(--color-border);
+    }
+
+    .ascii-diagram .dim {
+      color: var(--syntax-comment);
+    }
+
+    /* Role cards — bento grid (#15) */
+    .role-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+      margin: var(--space-6) 0;
+    }
+
+    .role-card {
+      border: 3px solid var(--color-border);
+      padding: var(--space-5);
+      background: var(--refinery-intake);
+      position: relative;
+      transition: border-color var(--transition-standard);
+    }
+
+    .role-card:hover {
+      border-color: var(--color-text-secondary);
+    }
+
+    .role-card--town {
+      border-left: 4px solid var(--color-primary);
+    }
+
+    .role-card--rig {
+      border-left: 4px solid var(--accent-blue);
+    }
+
+    .role-card--human {
+      border-left: 4px solid var(--accent-green);
+      grid-column: 1 / -1;
+    }
+
+    .role-card__level {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-2);
+    }
+
+    .role-card--town .role-card__level { color: var(--color-primary); }
+    .role-card--rig .role-card__level { color: var(--accent-blue); }
+    .role-card--human .role-card__level { color: var(--accent-green); }
+
+    .role-card__name {
+      font-family: var(--font-display);
+      font-size: var(--text-h4);
+      font-style: italic;
+      margin-bottom: var(--space-2);
+    }
+
+    .role-card__function {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-3);
+    }
+
+    .role-card__details {
+      font-size: var(--text-sm);
+      line-height: 1.6;
+      margin-bottom: var(--space-3);
+    }
+
+    .role-card__model {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      padding-top: var(--space-2);
+      border-top: 1px solid var(--color-border-subtle);
+    }
+
+    /* Command code blocks in Z2 */
+    .zone-floor pre,
+    .zone-floor .code-block {
+      background: var(--color-text);
+      color: var(--color-background);
+      border: 3px solid var(--color-border);
+      padding: var(--space-4) var(--space-6);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin-bottom: var(--space-4);
+    }
+
+    .zone-floor pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* Communication flow diagram */
+    .comm-flow {
+      background: var(--color-text);
+      color: var(--color-background);
+      border: 3px solid var(--color-border);
+      padding: var(--space-6);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin: var(--space-6) 0;
+      white-space: pre;
+    }
+
+    .comm-flow .flow-label {
+      color: var(--accent-amber);
+    }
+
+    .comm-flow .flow-action {
+      color: var(--syntax-string);
+    }
+
+    /* ============================================
+       ZONE 3 — THE NERVOUS SYSTEM (Tank)
+       MODERATE density, Beads memory model
+       Mechanisms: #4 spacing compression, #7 zone bg,
+       #11 type scale, #18 data table
+       ============================================ */
+    .zone-tank {
+      background: var(--refinery-tank);
+      padding-top: var(--space-12);
+      padding-bottom: var(--space-8);
+    }
+
+    .zone-tank .section-indicator {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gauge-reading);
+      margin-bottom: var(--space-4);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .zone-tank h2 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-style: italic;
+      line-height: 1.2;
+      margin-bottom: var(--space-6);
+    }
+
+    .zone-tank h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-h4);
+      font-style: italic;
+      margin-top: var(--space-8);
+      margin-bottom: var(--space-3);
+    }
+
+    .zone-tank p {
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: var(--space-4);
+    }
+
+    /* Beads problem table */
+    .zone-tank table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--space-4) 0 var(--space-6);
+    }
+
+    .zone-tank th {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 3px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+
+    .zone-tank td {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--color-border);
+      font-size: 15px;
+      line-height: 1.6;
+      vertical-align: top;
+    }
+
+    .zone-tank tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Memory model diagram */
+    .memory-diagram {
+      background: var(--color-text);
+      color: var(--color-background);
+      border: 3px solid var(--color-border);
+      padding: var(--space-6);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin: var(--space-6) 0;
+      white-space: pre;
+    }
+
+    .memory-diagram .layer-hot { color: var(--color-primary); }
+    .memory-diagram .layer-warm { color: var(--accent-amber); }
+    .memory-diagram .layer-cold { color: var(--accent-blue); }
+
+    /* Beads commands */
+    .zone-tank pre {
+      background: var(--color-text);
+      color: var(--color-background);
+      border: 3px solid var(--color-border);
+      padding: var(--space-4) var(--space-6);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin-bottom: var(--space-6);
+    }
+
+    .zone-tank pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* Waves table */
+    .waves-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--space-4) 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .waves-table th {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: var(--space-3) var(--space-3);
+      border-bottom: 3px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+
+    .waves-table td {
+      padding: var(--space-3) var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      font-size: 14px;
+      line-height: 1.5;
+      vertical-align: top;
+    }
+
+    .waves-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .waves-table .current-wave {
+      background: rgba(232, 48, 37, 0.05);
+      font-weight: 600;
+    }
+
+    /* Stages table */
+    .stages-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--space-4) 0;
+    }
+
+    .stages-table th {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 3px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+
+    .stages-table td {
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--color-border-subtle);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .stages-table .target-stage {
+      background: rgba(232, 48, 37, 0.05);
+      font-weight: 600;
+    }
+
+    /* ============================================
+       ZONE 4 — THE CONTROL ROOM (Governance)
+       MODERATE density, stacked principles
+       Mechanisms: #1 border-weight progressive,
+       #4 spacing compression, #10 border-left signal
+       ============================================ */
+    .zone-control {
+      background: var(--refinery-control);
+      padding-top: var(--space-12);
+      padding-bottom: var(--space-12);
+    }
+
+    .zone-control .section-indicator {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gauge-reading);
+      margin-bottom: var(--space-4);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .zone-control h2 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-style: italic;
+      line-height: 1.2;
+      margin-bottom: var(--space-8);
+    }
+
+    .zone-control h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-h4);
+      font-style: italic;
+      margin-bottom: var(--space-2);
+    }
+
+    .zone-control p {
+      font-size: var(--text-base);
+      line-height: 1.7;
+      margin-bottom: var(--space-4);
+    }
+
+    /* Principle blocks — stacked, bordered, like gauges in a row */
+    .principle {
+      border-left: 4px solid var(--color-text);
+      padding: var(--space-5) var(--space-6);
+      margin-bottom: var(--space-8);
+      background: rgba(254, 249, 245, 0.5);
+    }
+
+    .principle:first-of-type {
+      border-top: 4px solid var(--color-text);
+    }
+
+    .principle__name {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .principle__quote {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-style: italic;
+      line-height: 1.4;
+      margin-bottom: var(--space-3);
+      color: var(--color-text);
+    }
+
+    .principle__desc {
+      font-size: var(--text-sm);
+      line-height: 1.7;
+      color: var(--color-text);
+    }
+
+    .principle__desc ul {
+      margin-top: var(--space-2);
+      margin-left: var(--space-5);
+    }
+
+    .principle__desc li {
+      margin-bottom: var(--space-1);
+      font-size: var(--text-sm);
+    }
+
+    /* Second-tier principles — lighter border */
+    .principle--secondary {
+      border-left: 3px solid var(--color-text-secondary);
+    }
+
+    .principle--secondary:first-of-type {
+      border-top: none;
+    }
+
+    .principle--secondary .principle__name {
+      color: var(--color-text-secondary);
+    }
+
+    /* ============================================
+       ZONE 5 — THE ASSEMBLY LINE
+       DENSE density, procedural/code heavy
+       Mechanisms: #17 code block, #12 progressive disclosure,
+       #4 spacing compression, #2 2-zone DNA
+       ============================================ */
+    .zone-line {
+      background: var(--refinery-line);
+      padding-top: var(--space-8);
+      padding-bottom: var(--space-8);
+    }
+
+    .zone-line .section-indicator {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: var(--space-3);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .zone-line h2 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-style: italic;
+      line-height: 1.2;
+      margin-bottom: var(--space-4);
+    }
+
+    .zone-line h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-h4);
+      font-style: italic;
+      margin-top: var(--space-6);
+      margin-bottom: var(--space-3);
+    }
+
+    .zone-line h4 {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      font-weight: 600;
+      margin-top: var(--space-4);
+      margin-bottom: var(--space-2);
+    }
+
+    .zone-line p {
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: var(--space-3);
+    }
+
+    /* Code blocks in Z5 — tighter, dominant */
+    .zone-line pre {
+      background: var(--color-text);
+      color: var(--color-background);
+      border: 3px solid var(--color-border);
+      padding: var(--space-4) var(--space-6);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin-bottom: var(--space-4);
+    }
+
+    .zone-line pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* Syntax highlighting */
+    .kw { color: var(--syntax-keyword); }
+    .st { color: var(--syntax-string); }
+    .cm { color: var(--syntax-comment); }
+    .fn { color: var(--syntax-function); }
+    .nu { color: var(--syntax-number); }
+
+    /* Checkpoint callouts in Z5 — compressed, 4px border */
+    .zone-line .callout {
+      padding: var(--space-3) var(--space-4);
+      border-left-width: 4px;
+      margin-bottom: var(--space-4);
+    }
+
+    .zone-line .callout--checkpoint {
+      border-left-color: var(--accent-green);
+      background: rgba(74, 157, 107, 0.05);
+    }
+
+    .zone-line .callout--checkpoint .callout__label {
+      color: var(--accent-green);
+    }
+
+    /* Checklist table */
+    .checklist-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--space-3) 0 var(--space-4);
+    }
+
+    .checklist-table th {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 3px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+
+    .checklist-table td {
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      font-size: 14px;
+      line-height: 1.5;
+      vertical-align: top;
+    }
+
+    .checklist-table td:first-child {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    /* tmux diagram */
+    .tmux-diagram {
+      background: var(--color-text);
+      color: var(--color-background);
+      border: 3px solid var(--color-border);
+      padding: var(--space-4) var(--space-6);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.4;
+      overflow-x: auto;
+      margin: var(--space-4) 0;
+      white-space: pre;
+    }
+
+    .tmux-diagram .window-name {
+      color: var(--accent-amber);
+    }
+
+    .tmux-diagram .agent-name {
+      color: var(--color-primary);
+    }
+
+    /* Collapsible troubleshooting */
+    .collapsible {
+      border: 1px solid var(--color-border);
+      margin-bottom: var(--space-3);
+    }
+
+    .collapsible summary {
+      padding: var(--space-3) var(--space-4);
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 500;
+      background: rgba(229, 221, 208, 0.5);
+      border-left: 3px solid var(--accent-coral);
+      user-select: none;
+    }
+
+    .collapsible summary:hover {
+      background: rgba(229, 221, 208, 0.8);
+    }
+
+    .collapsible__content {
+      padding: var(--space-3) var(--space-4);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .collapsible__content p {
+      font-size: 14px;
+      margin-bottom: var(--space-2);
+    }
+
+    .collapsible__content pre {
+      margin-bottom: var(--space-3);
+    }
+
+    /* Startup script — Z5 featured block */
+    .zone-line .featured-code {
+      position: relative;
+    }
+
+    .zone-line .featured-code::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 100%;
+      height: 100%;
+      background: var(--color-text);
+      z-index: -1;
+    }
+
+    /* Daily workflow steps */
+    .workflow-steps {
+      list-style: none;
+      padding: 0;
+      margin: var(--space-3) 0;
+    }
+
+    .workflow-steps li {
+      padding: var(--space-2) 0;
+      padding-left: var(--space-6);
+      position: relative;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .workflow-steps li::before {
+      content: attr(data-step);
+      position: absolute;
+      left: 0;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+
+    /* Recovery command ref */
+    .recovery-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--color-border);
+      margin: var(--space-4) 0;
+    }
+
+    .recovery-grid__cell {
+      background: var(--refinery-line);
+      padding: var(--space-3) var(--space-4);
+    }
+
+    .recovery-grid__label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-coral);
+      margin-bottom: var(--space-2);
+    }
+
+    .recovery-grid__cmd {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--color-text);
+    }
+
+    /* ============================================
+       D-04: SECOND-HALF MOMENT — Dark inversion
+       "Nature prefers colonies" — the philosophical pivot
+       ============================================ */
+    .inversion-block {
+      background: var(--color-text);
+      color: var(--refinery-intake);
+      padding: var(--space-12) var(--space-6);
+      margin: var(--space-8) calc(-1 * var(--space-6));
+      text-align: center;
+    }
+
+    .inversion-block__quote {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-style: italic;
+      line-height: 1.3;
+      max-width: 20ch;
+      margin: 0 auto var(--space-4);
+    }
+
+    .inversion-block__cite {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+    }
+
+    .inversion-block__sub {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      color: var(--color-border);
+      margin-top: var(--space-3);
+      max-width: 40ch;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ============================================
+       ZONE 6 — THE DISPATCH (Decisions)
+       MODERATE density, evaluation/comparison
+       Mechanisms: #15 bento grid, #6 width variation,
+       #18 data table, pull-quote
+       ============================================ */
+    .zone-dispatch {
+      background: var(--refinery-dispatch);
+      padding-top: var(--space-12);
+      padding-bottom: var(--space-12);
+    }
+
+    .zone-dispatch .section-indicator {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gauge-reading);
+      margin-bottom: var(--space-4);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+
+    .zone-dispatch h2 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-style: italic;
+      line-height: 1.2;
+      margin-bottom: var(--space-6);
+    }
+
+    .zone-dispatch h3 {
+      font-family: var(--font-display);
+      font-size: var(--text-h4);
+      font-style: italic;
+      margin-top: var(--space-8);
+      margin-bottom: var(--space-3);
+    }
+
+    .zone-dispatch p {
+      font-size: var(--text-base);
+      line-height: 1.7;
+      margin-bottom: var(--space-4);
+    }
+
+    /* Use/Don't Use split */
+    .decision-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+      margin: var(--space-6) 0;
+    }
+
+    .decision-split__yes {
+      border-left: 4px solid var(--accent-green);
+      padding: var(--space-5);
+      background: rgba(74, 157, 107, 0.03);
+    }
+
+    .decision-split__no {
+      border-left: 4px solid var(--accent-coral);
+      padding: var(--space-5);
+      background: rgba(201, 112, 101, 0.03);
+    }
+
+    .decision-split__title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-3);
+    }
+
+    .decision-split__yes .decision-split__title { color: var(--accent-green); }
+    .decision-split__no .decision-split__title { color: var(--accent-coral); }
+
+    .decision-split ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .decision-split li {
+      font-size: var(--text-sm);
+      padding: var(--space-1) 0;
+      line-height: 1.6;
+    }
+
+    /* Comparison tables — Z6 */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--space-4) 0 var(--space-6);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .comparison-table th {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: var(--space-3) var(--space-3);
+      border-bottom: 3px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+
+    .comparison-table td {
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      font-size: 14px;
+      line-height: 1.5;
+      vertical-align: top;
+    }
+
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .comparison-table .pattern-name {
+      font-weight: 600;
+    }
+
+    /* Cost table */
+    .cost-block {
+      background: var(--color-text);
+      color: var(--color-background);
+      border: 3px solid var(--color-border);
+      padding: var(--space-5) var(--space-6);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin: var(--space-4) 0;
+      white-space: pre;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cost-block .cost-label {
+      color: var(--accent-amber);
+    }
+
+    .cost-block .cost-value {
+      color: var(--syntax-string);
+    }
+
+    /* Z6 quotes section */
+    .zone-dispatch .pull-quote {
+      margin: var(--space-6) 0;
+    }
+
+    /* Z6 selection color override */
+    .zone-dispatch ::selection {
+      background: var(--color-primary);
+      color: var(--color-background);
+    }
+
+    /* Sources list */
+    .sources-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin: var(--space-4) 0;
+    }
+
+    .sources-group {
+      padding: var(--space-3);
+    }
+
+    .sources-group__title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-3);
+      padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .sources-group ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sources-group li {
+      font-size: var(--text-sm);
+      padding: var(--space-1) 0;
+      line-height: 1.5;
+    }
+
+    .sources-group a {
+      color: var(--color-text);
+      text-decoration: none;
+      border-bottom: 1px solid var(--color-border);
+      transition: color var(--transition-standard), border-color var(--transition-standard);
+    }
+
+    .sources-group a:hover {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    /* Community extensions table */
+    .extensions-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--space-4) 0;
+    }
+
+    .extensions-table th {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-align: left;
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 3px solid var(--color-border);
+      color: var(--color-text-secondary);
+    }
+
+    .extensions-table td {
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      font-size: 14px;
+    }
+
+    /* ============================================
+       FOOTER — Dark refinery exit (mirrors header)
+       Mechanism #14: Footer Mirror
+       ============================================ */
+    footer {
+      background: var(--color-text);
+      color: var(--color-background);
+      border-top: 3px solid var(--color-primary);
+    }
+
+    .footer-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: var(--space-8) var(--space-6);
+    }
+
+    .footer__closing {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-style: italic;
+      margin-bottom: var(--space-4);
+      max-width: 40ch;
+    }
+
+    .footer__meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      letter-spacing: 0.03em;
+    }
+
+    .footer__meta span {
+      margin-right: var(--space-6);
+    }
+
+    /* ============================================
+       INLINE ELEMENTS
+       ============================================ */
+    p code,
+    li code {
+      background: var(--color-border-subtle);
+      padding: 2px 6px;
+      font-family: var(--font-mono);
+      font-size: 0.875em;
+      border: 1px solid var(--color-border);
+    }
+
+    strong {
+      font-weight: 600;
+    }
+
+    /* Links */
+    a {
+      color: var(--color-text);
+    }
+
+    /* ============================================
+       RESPONSIVE — 768px breakpoint
+       ============================================ */
+    @media (max-width: 768px) {
+      .header__title {
+        font-size: var(--text-h2);
+      }
+
+      .header__stats {
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+
+      .toc__grid {
+        grid-template-columns: 1fr;
+      }
+
+      .role-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .factory-comparison {
+        grid-template-columns: 1fr;
+      }
+
+      .decision-split {
+        grid-template-columns: 1fr;
+      }
+
+      .sources-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .recovery-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .zone-intake h2 {
+        font-size: 28px;
+      }
+
+      .inversion-block__quote {
+        font-size: 24px;
+      }
+
+      .zone-intake p {
+        font-size: var(--text-base);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Skip link (accessibility) -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- ============================================
+       HEADER — Refinery entrance gate
+       ============================================ -->
+  <header role="banner">
+    <div class="header-inner">
+      <div class="header__meta">Deep Extraction · Level 7 · Agent Factory Architecture</div>
+      <h1 class="header__title">Steve Yegge and Gas Town</h1>
+      <p class="header__subtitle">The agent factory architect building team-scale productivity for solo developers.</p>
+      <div class="header__stats">
+        <div class="header__stat">
+          <span class="header__stat-label">Complexity</span>
+          <span class="header__stat-value">Level 7</span>
+        </div>
+        <div class="header__stat">
+          <span class="header__stat-label">Roles</span>
+          <span class="header__stat-value">8 Specialized</span>
+        </div>
+        <div class="header__stat">
+          <span class="header__stat-label">Memory</span>
+          <span class="header__stat-value">Beads (225K LOC)</span>
+        </div>
+        <div class="header__stat">
+          <span class="header__stat-label">Daily Cost</span>
+          <span class="header__stat-value">$50-200</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================
+       TABLE OF CONTENTS
+       ============================================ -->
+  <nav class="toc" role="navigation" aria-label="Table of contents">
+    <div class="toc__inner">
+      <div class="toc__label">Contents</div>
+      <div class="toc__grid">
+        <a href="#you-are-here" class="toc__link"><span class="toc__number">01</span> You Are Here</a>
+        <a href="#yegge" class="toc__link"><span class="toc__number">02</span> Who is Steve Yegge?</a>
+        <a href="#mental-model" class="toc__link"><span class="toc__number">03</span> The Gas Town Mental Model</a>
+        <a href="#roles" class="toc__link"><span class="toc__number">04</span> The 8 Roles Architecture</a>
+        <a href="#beads" class="toc__link"><span class="toc__number">05</span> Beads: The Memory System</a>
+        <a href="#waves" class="toc__link"><span class="toc__number">06</span> The 6 Waves of AI</a>
+        <a href="#principles" class="toc__link"><span class="toc__number">07</span> Core Principles</a>
+        <a href="#implementation" class="toc__link"><span class="toc__number">08</span> Implementation Guide</a>
+        <a href="#checkpoints" class="toc__link"><span class="toc__number">09</span> Checkpoints &amp; Verification</a>
+        <a href="#troubleshooting" class="toc__link"><span class="toc__number">10</span> Troubleshooting</a>
+        <a href="#when-to-use" class="toc__link"><span class="toc__number">11</span> When to Use Gas Town</a>
+        <a href="#quotes" class="toc__link"><span class="toc__number">12</span> Quotes &amp; Key Statements</a>
+        <a href="#comparison" class="toc__link"><span class="toc__number">13</span> Comparison with Other Patterns</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================
+       MAIN CONTENT
+       ============================================ -->
+  <main id="main-content" role="main">
+
+    <!-- ==========================================
+         ZONE 1 — THE SHIFT (Intake)
+         SPARSE · Philosophical opening
+         ========================================== -->
+    <section class="zone-intake" aria-label="The Shift: orientation and context">
+      <div class="container">
+        <div class="section-indicator">Zone 1 &mdash; The Shift</div>
+
+        <h2 id="you-are-here">You Are Here</h2>
+
+        <div class="ladder-block"><span class="highlight-line">    Level 7: Gas Town Factory          &lt;-- YOU ARE LEARNING THIS</span>
+             |
+    Level 6: Parallel Swarms + Worktrees
+             |
+    Level 5: Multi-Agent Orchestration (CC Mirror)
+             |
+    Level 4: PRD-Driven Loops (Full Ralph)
+             |
+    Level 3: Simple Loops (Basic Ralph)
+             |
+    Level 2: Subagents + Hooks
+             |
+    Level 1: CLAUDE.md + Slash Commands
+             |
+    Level 0: Single Interactive Session</div>
+
+        <p class="drop-cap">You are a developer who has mastered Levels 0-6 on the complexity ladder. You run 5+ Claude Code instances simultaneously, ship features overnight with Ralph loops, and have hit the limits of sequential processing. You have felt the pain of the "Merge Wall" with multiple agents.</p>
+
+        <p>After this document, you will understand the factory-scale agent architecture, know when Gas Town is appropriate (and when it is overkill), be able to install and configure a basic Gas Town setup, understand the 8 roles and how they coordinate, and comprehend how Beads provides memory across agent colonies.</p>
+
+        <div class="callout callout--warning">
+          <div class="callout__label">Gate</div>
+          <div class="callout__body">
+            <strong>Prerequisites:</strong> Stage 7+ on Yegge's 8-Stage Dev Evolution. Comfort with chaos and imperfection. Go language runtime installed. tmux proficiency (mandatory). Budget: $50-200/day for API costs. 100+ hours experience with multi-agent setups.
+          </div>
+        </div>
+
+        <h3 id="yegge">Who is Steve Yegge?</h3>
+
+        <p>Steve Yegge is a 40-year software development veteran whose career provides unique credibility for building Gas Town:</p>
+
+        <table class="profile-table">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Role</th>
+              <th>Relevance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Amazon</strong></td>
+              <td>Early employee</td>
+              <td>Built internal tools at scale</td>
+            </tr>
+            <tr>
+              <td><strong>Google</strong></td>
+              <td>Senior Engineer</td>
+              <td>Famous for "Stevey's Blog Rants," internal platforms</td>
+            </tr>
+            <tr>
+              <td><strong>Sourcegraph</strong></td>
+              <td>Senior role</td>
+              <td>Code intelligence, developer tooling</td>
+            </tr>
+            <tr>
+              <td><strong>Current</strong></td>
+              <td>Full-time AI dev advocate</td>
+              <td>Building the future of agent-assisted development</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>He has vibe-coded roughly 1 million lines in 2025 alone. He built Beads (225K lines of Go) and built Gas Town using Gas Town itself &mdash; recursive validation. He is transparent about limitations and warns about chaos, costs, and maturity. Decades of platform engineering means he knows what scales and what breaks.</p>
+
+        <h3 id="mental-model">The Gas Town Mental Model</h3>
+
+        <div class="pull-quote">
+          <p>Claude Code is the world's biggest fuckin' ant. Everyone is focused on making their ant run longer&hellip; when nature prefers colonies.</p>
+          <cite>Steve Yegge</cite>
+        </div>
+
+        <p>This is the fundamental shift Gas Town represents. The traditional approach takes one big ant and tries to make it run longer &mdash; context window limits everything, and you are the programmer. Gas Town builds the factory instead: multiple workers share the load, and you become the Product Manager.</p>
+
+        <p>Gas Town is not an agent &mdash; it is a <strong>factory for agents</strong>. You do not write code; you file features. You do not debug; agents debug. You are not the implementer; you are the PM. Single context windows become many workers with shared memory. When sessions end, context is not lost &mdash; workers persist and memory survives.</p>
+
+        <div class="callout callout--essence">
+          <div class="callout__label">Essence</div>
+          <div class="callout__body">Gas Town is an Idea Compiler. You just make up features, design them, file the implementation plans, and sling work around to your polecats and crew.</div>
+        </div>
+
+        <p>The Mad Max: Fury Road reference is not accidental. Post-apocalyptic resourcefulness &mdash; work with chaos, not against it. Clear role hierarchy. Survival-focused &mdash; throughput over perfection. Community-built &mdash; everyone contributes to the economy.</p>
+
+      </div>
+    </section>
+
+    <!-- TRANSITION: Z1 → Z2 (HEAVY) -->
+
+    <!-- ==========================================
+         ZONE 2 — THE FACTORY FLOOR
+         DENSE · 8 Roles Architecture
+         ========================================== -->
+    <section class="zone-floor transition-heavy" aria-label="The Factory Floor: 8 roles architecture">
+      <div class="container">
+        <div class="section-indicator">Zone 2 &mdash; The Factory Floor</div>
+
+        <h2 id="roles">The 8 Roles Architecture</h2>
+
+        <p>Gas Town organizes agents into a strict role hierarchy with three tiers: town-level (global, one instance each), rig-level (per-project, multiple instances), and human-level.</p>
+
+        <div class="ascii-diagram"><span class="structure">╔═══════════════════════════════════════════════════════════╗</span>
+<span class="structure">║</span>               <span class="dim">GAS TOWN ROLE HIERARCHY</span>                    <span class="structure">║</span>
+<span class="structure">╠═══════════════════════════════════════════════════════════╣</span>
+<span class="structure">║</span>                                                           <span class="structure">║</span>
+<span class="structure">║</span>  <span class="dim">TOWN LEVEL (Global - One instance each)</span>                 <span class="structure">║</span>
+<span class="structure">║</span>  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   <span class="structure">║</span>
+<span class="structure">║</span>  │  <span class="role-name">MAYOR</span>       │  │  <span class="role-name">DEACON</span>      │  │  <span class="role-name">DOGS</span>        │   <span class="structure">║</span>
+<span class="structure">║</span>  │  Coordination │  │  Monitoring  │  │  Quality Gates│   <span class="structure">║</span>
+<span class="structure">║</span>  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘   <span class="structure">║</span>
+<span class="structure">║</span>         └─────────────────┼─────────────────┘             <span class="structure">║</span>
+<span class="structure">║</span>                           │                               <span class="structure">║</span>
+<span class="structure">║</span>  <span class="dim">RIG LEVEL (Per-Project)</span>    ▼                               <span class="structure">║</span>
+<span class="structure">║</span>  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   <span class="structure">║</span>
+<span class="structure">║</span>  │  <span class="role-name">REFINERY</span>    │  │  <span class="role-name">WITNESS</span>     │  │  <span class="role-name">POLECAT</span>     │   <span class="structure">║</span>
+<span class="structure">║</span>  │  Decomposes  │  │  Observes    │  │  Named worker │   <span class="structure">║</span>
+<span class="structure">║</span>  └──────────────┘  └──────────────┘  └──────┬───────┘   <span class="structure">║</span>
+<span class="structure">║</span>                                            │             <span class="structure">║</span>
+<span class="structure">║</span>                                     ┌──────▼───────┐   <span class="structure">║</span>
+<span class="structure">║</span>                                     │  <span class="role-name">CREW</span>        │   <span class="structure">║</span>
+<span class="structure">║</span>                                     │  Ephemeral   │   <span class="structure">║</span>
+<span class="structure">║</span>                                     └──────────────┘   <span class="structure">║</span>
+<span class="structure">║</span>                                                         <span class="structure">║</span>
+<span class="structure">║</span>  <span class="dim">HUMAN LEVEL</span>                                            <span class="structure">║</span>
+<span class="structure">║</span>  ┌─────────────────────────────────────────────────┐   <span class="structure">║</span>
+<span class="structure">║</span>  │            <span class="role-name">OVERSEER</span> (YOU)                       │   <span class="structure">║</span>
+<span class="structure">║</span>  │    Product Manager · Decision Maker · Human     │   <span class="structure">║</span>
+<span class="structure">║</span>  └─────────────────────────────────────────────────┘   <span class="structure">║</span>
+<span class="structure">║</span>                                                         <span class="structure">║</span>
+<span class="structure">╚═══════════════════════════════════════════════════════════╝</span></div>
+
+        <!-- Role cards — bento grid -->
+        <h3>Town-Level Roles</h3>
+
+        <div class="role-grid">
+          <div class="role-card role-card--town">
+            <div class="role-card__level">Town Level</div>
+            <div class="role-card__name">Mayor</div>
+            <div class="role-card__function">Chief coordinator &mdash; your concierge and chief-of-staff</div>
+            <div class="role-card__details">Receives high-level directives from Overseer. Routes work to appropriate rigs. Manages cross-rig coordination. Handles town-level decisions.</div>
+            <div class="role-card__model">Model: Opus 4.5 &middot; <code>gt mayor up|down|status</code></div>
+          </div>
+
+          <div class="role-card role-card--town">
+            <div class="role-card__level">Town Level</div>
+            <div class="role-card__name">Deacon</div>
+            <div class="role-card__function">Health monitoring and agent coordination</div>
+            <div class="role-card__details">Monitors agent health across the town. Handles agent-to-agent handshakes. Reports anomalies to Mayor. Manages handoff protocols and worker recycling.</div>
+            <div class="role-card__model">Model: Haiku &middot; <code>gt deacon up|down|status</code></div>
+          </div>
+
+          <div class="role-card role-card--town">
+            <div class="role-card__level">Town Level</div>
+            <div class="role-card__name">Dogs</div>
+            <div class="role-card__function">Quality assurance and safety gates</div>
+            <div class="role-card__details">Reviews work before acceptance. Enforces quality standards. Guards against regressions. Can reject/rollback work. Stale branch cleanup.</div>
+            <div class="role-card__model">Model: Sonnet &middot; <code>gt dogs up|bark</code></div>
+          </div>
+
+          <div class="role-card role-card--rig">
+            <div class="role-card__level">Rig Level</div>
+            <div class="role-card__name">Refinery</div>
+            <div class="role-card__function">Breaks down large tasks into agent-sized work</div>
+            <div class="role-card__details">Receives feature requests from Mayor. Decomposes into smaller, atomic tasks. Assigns to Polecats or Crew. Manages the merge queue with sequential rebasing.</div>
+            <div class="role-card__model">Model: Opus 4.5 &middot; <code>gt refinery up &lt;rig&gt;</code></div>
+          </div>
+
+          <div class="role-card role-card--rig">
+            <div class="role-card__level">Rig Level</div>
+            <div class="role-card__name">Witness</div>
+            <div class="role-card__function">Observes and records rig activity</div>
+            <div class="role-card__details">Watches all work in assigned rig. Records history and context. Provides state to new workers. Reports anomalies to Deacon. Unsticks drifting agents.</div>
+            <div class="role-card__model">Model: Haiku &middot; <code>gt witness up &lt;rig&gt;</code></div>
+          </div>
+
+          <div class="role-card role-card--rig">
+            <div class="role-card__level">Rig Level</div>
+            <div class="role-card__name">Polecat</div>
+            <div class="role-card__function">Named, persistent agent workers with specializations</div>
+            <div class="role-card__details">Execute assigned tasks. Maintain context across sessions. Specialize in rig-specific knowledge. Report completion to Refinery. Human names (alice, bob, carol) help with mental model.</div>
+            <div class="role-card__model">Model: Sonnet &middot; <code>gt polecat up &lt;rig&gt; alice</code></div>
+          </div>
+
+          <div class="role-card role-card--rig">
+            <div class="role-card__level">Rig Level</div>
+            <div class="role-card__name">Crew</div>
+            <div class="role-card__function">Short-lived, task-specific burst workers</div>
+            <div class="role-card__details">Execute single tasks. No persistent state. Cheap and disposable. Used for parallel bursts. Spawn, complete, disappear.</div>
+            <div class="role-card__model">Model: Haiku &middot; <code>gt crew spawn &lt;rig&gt; --task "..."</code></div>
+          </div>
+
+          <div class="role-card role-card--human">
+            <div class="role-card__level">Human Level</div>
+            <div class="role-card__name">Overseer (You)</div>
+            <div class="role-card__function">Product Manager and decision maker</div>
+            <div class="role-card__details">Define features and priorities. Review inbox decisions. Approve major changes. Provide human judgment. Has identity in the system with own inbox. Can send and receive town mail.</div>
+            <div class="role-card__model">Interface: Human inbox &middot; tmux panes &middot; <code>gt</code> CLI</div>
+          </div>
+        </div>
+
+        <h3>Communication Flow</h3>
+
+        <div class="comm-flow"><span class="flow-label">[Overseer: YOU]</span>
+     │
+     │ <span class="flow-action">"Build user authentication"</span>
+     ▼
+<span class="flow-label">[Mayor]</span> ──────────────────────────────┐
+     │                                    │
+     │ routes to rig                      │ status reports
+     ▼                                    │
+<span class="flow-label">[Refinery]</span> ────────────────┐            │
+     │                     │ progress    │
+     │ decomposes into:    │            │
+     │ - task 1: DB schema │            │
+     │ - task 2: API routes│            │
+     │ - task 3: Frontend  │            │
+     ▼                     ▼            │
+<span class="flow-label">[Polecat: alice]</span> ◄──── <span class="flow-label">[Witness]</span> ──────┘
+<span class="flow-label">[Polecat: bob]</span>     observes
+<span class="flow-label">[Crew: temp-1]</span>        │
+     │                   │
+     │ on anomaly        │
+     ▼                   │
+<span class="flow-label">[Dogs]</span> ← quality check ──┘
+     │
+     │ if passes
+     ▼
+<span class="flow-action">[Complete]</span></div>
+
+      </div>
+    </section>
+
+    <!-- TRANSITION: Z2 → Z3 (MEDIUM) -->
+
+    <!-- ==========================================
+         ZONE 3 — THE NERVOUS SYSTEM (Tank)
+         MODERATE · Beads Memory + 6 Waves
+         ========================================== -->
+    <section class="zone-tank transition-medium" aria-label="The Nervous System: Beads memory and AI evolution">
+      <div class="container">
+        <div class="section-indicator">Zone 3 &mdash; The Nervous System</div>
+
+        <h2 id="beads">Beads: The Memory System</h2>
+
+        <h3>The "50 First Dates" Problem</h3>
+
+        <div class="pull-quote">
+          <p>Agents suffer from '50 First Dates' syndrome &mdash; they wake up with no memory of yesterday.</p>
+        </div>
+
+        <p>Every new Claude session starts fresh. This is the fundamental problem Beads solves. Markdown plans fail at scale because they are not queryable, have no dependency tracking, are conflict-prone, and create implicit task stacks that lead to "intelligent wandering" without clear direction.</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Problem</th>
+              <th>Consequence</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Not queryable</td>
+              <td>Agents must parse dozens of files to reconstruct work graph</td>
+            </tr>
+            <tr>
+              <td>No dependency tracking</td>
+              <td>Agents cannot compute which tasks are unblocked</td>
+            </tr>
+            <tr>
+              <td>Conflict-prone</td>
+              <td>Multiple agents editing same files</td>
+            </tr>
+            <tr>
+              <td>Implicit task stacks</td>
+              <td>"Intelligent wandering" without clear direction</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>What Beads Does</h3>
+
+        <p><strong>Beads</strong> (github.com/steveyegge/beads) is a ~225K line Go project providing git-backed storage, universal context shared across all agents, memory management, hash-based IDs (e.g., <code>bd-a1b2</code>) that prevent merge conflicts, dependency tracking, and memory decay through compaction that summarizes old closed tasks.</p>
+
+        <div class="memory-diagram">┌─────────────────────────────────────────────────────┐
+│                   BEADS MEMORY MODEL                │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  <span class="layer-hot">LAYER 1: Hot Context (RAM-cached)</span>                 │
+│  ├── Current task state                             │
+│  ├── Last N interactions                            │
+│  └── Active file references                         │
+│                                                     │
+│  <span class="layer-warm">LAYER 2: Warm Context (SQLite + Git index)</span>         │
+│  ├── Recent commit history                          │
+│  ├── Cross-agent message log                        │
+│  └── Rig state snapshots                            │
+│                                                     │
+│  <span class="layer-cold">LAYER 3: Cold Context (Git history)</span>                │
+│  ├── Full project history                           │
+│  ├── Previous run outcomes                          │
+│  └── Archived decisions                             │
+│                                                     │
+│  RETRIEVAL: Hot → Warm → Cold (only cold if needed) │
+└─────────────────────────────────────────────────────┘</div>
+
+        <h3>Key Beads Commands</h3>
+
+        <pre><code><span class="fn">bd ready</span>           <span class="cm"># List tasks with zero blockers</span>
+<span class="fn">bd create</span> <span class="st">"Title"</span>  <span class="cm"># Create new task</span>
+<span class="fn">bd dep add</span> X Y     <span class="cm"># X is blocked by Y</span>
+<span class="fn">bd show</span> &lt;id&gt;       <span class="cm"># Full task state and history</span></code></pre>
+
+        <p>Git as database provides durable, diffable, auditable storage with zero infrastructure. Everything survives crashes. Full history of all agent actions. Roll back to any point in time. Multiple agents share the same store. No heavyweight message bus required.</p>
+
+        <h2 id="waves">The 6 Waves of AI</h2>
+
+        <p>Steve frames the evolution of AI-assisted development as six overlapping waves:</p>
+
+        <table class="waves-table">
+          <thead>
+            <tr>
+              <th>Wave</th>
+              <th>Era</th>
+              <th>Description</th>
+              <th>Productivity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Pre-2022</td>
+              <td>Traditional manual coding</td>
+              <td>Baseline</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>2023</td>
+              <td>Completions-based (Copilot-style)</td>
+              <td>~2x</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>2024</td>
+              <td>Chat-based (CHOP)</td>
+              <td>~5x</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>2025 H1</td>
+              <td>Coding agents (Claude Code, Amp, Codex)</td>
+              <td>~10x</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>2025 H2</td>
+              <td>Agent clusters (multi-agent parallel)</td>
+              <td>~25x</td>
+            </tr>
+            <tr class="current-wave">
+              <td>6</td>
+              <td>2026+</td>
+              <td>Agent fleets (AI supervisors managing swarms)</td>
+              <td>~50x+</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p><strong>Gas Town is Wave 6 infrastructure.</strong></p>
+
+        <h3>The 8 Stages of Dev Evolution</h3>
+
+        <table class="stages-table">
+          <thead>
+            <tr>
+              <th>Stage</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>Zero/near-zero AI</td></tr>
+            <tr><td>2</td><td>Agent in IDE, permissions on</td></tr>
+            <tr><td>3</td><td>Agent in IDE, YOLO mode</td></tr>
+            <tr><td>4</td><td>Agent fills screen, code is just diffs</td></tr>
+            <tr><td>5</td><td>CLI single agent, YOLO</td></tr>
+            <tr><td>6</td><td>CLI multi-agent (3-5 parallel)</td></tr>
+            <tr class="target-stage"><td>7</td><td>10+ agents, hand-managed</td></tr>
+            <tr class="target-stage"><td>8</td><td>Building your own orchestrator</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout--warning">
+          <div class="callout__label">Critical Warning</div>
+          <div class="callout__body"><strong>"If you're not at Stage 7, you'll get your face ripped off by superintelligent chimpanzees."</strong> Gas Town is for Stage 7+ developers. If you are not there yet, go back to Ralph loops.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TRANSITION: Z3 → Z4 (LIGHT) -->
+
+    <!-- ==========================================
+         ZONE 4 — THE CONTROL ROOM (Governance)
+         MODERATE · Core Principles
+         ========================================== -->
+    <section class="zone-control transition-light" aria-label="The Control Room: operating principles">
+      <div class="container">
+        <div class="section-indicator">Zone 4 &mdash; The Control Room</div>
+
+        <h2 id="principles">Core Principles</h2>
+
+        <div class="principle">
+          <div class="principle__name">GUPP: The Universal Propulsion Principle</div>
+          <div class="principle__quote">"If there is work on your hook, YOU MUST RUN IT."</div>
+          <div class="principle__desc">
+            This solves the fundamental problem that "Claude Code ends." Work is "slung" to agent hooks (persistent git worktrees). When an agent starts, it checks its hook. If work exists, execution is immediate &mdash; no confirmation, no waiting. Work survives crashes and restarts.
+            <br><br>
+            <strong>The Gupp Nudge:</strong> Claude Code is "so miserably polite" that GUPP does not always work. Gas Town implements a "Gupp Nudge" &mdash; agents get a startup poke with <code>gt nudge</code> roughly 30-60 seconds after starting.
+          </div>
+        </div>
+
+        <div class="principle">
+          <div class="principle__name">Zero Framework Cognition</div>
+          <div class="principle__quote">"Claude makes all decisions. The orchestrator executes."</div>
+          <div class="principle__desc">All decisions delegated to AI. No heuristics, regex, or parsing in the orchestrator. The framework provides infrastructure, not intelligence.</div>
+        </div>
+
+        <div class="principle--secondary principle">
+          <div class="principle__name">Agents as Cattle, Not Pets</div>
+          <div class="principle__quote">Kubernetes thinking applied to agents.</div>
+          <div class="principle__desc">
+            <ul>
+              <li>Individual sessions are ephemeral</li>
+              <li>The work graph is persistent</li>
+              <li>The agent is not the session</li>
+              <li>The agent is a Bead (identity with a global address)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="principle--secondary principle">
+          <div class="principle__name">Nondeterministic Idempotence</div>
+          <div class="principle__quote">Workflows can be interrupted and resumed at any time.</div>
+          <div class="principle__desc">Path is fully nondeterministic &mdash; different runs take different routes. Workflow eventually finishes as long as you keep throwing agents at it. Agents may make mistakes but self-correct because acceptance criteria are well-specified. The system is resilient to individual component failures.</div>
+        </div>
+
+        <div class="principle--secondary principle">
+          <div class="principle__name">Token Spend as Health Metric</div>
+          <div class="principle__quote">"Token spend per developer per unit time is the new health metric."</div>
+          <div class="principle__desc">Agent cost: ~$10-12 per operating hour. Recommended daily developer LLM budget: $100-300. Yegge's personal spend: ~$300/day, ~$80,000/year. Gas Town workshops generate 12,000 LOC/day per developer.</div>
+        </div>
+
+        <div class="principle--secondary principle">
+          <div class="principle__name">Talk to the Plan, Not the Agent</div>
+          <div class="principle__quote">Persistent plans outlive ephemeral sessions.</div>
+          <div class="principle__desc">Maintain persistent, readable plans in files. Both you and agents reference these plans. "Land the Plane" pattern: at session end, clean up git, update issues, spit out prompt for next session.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TRANSITION: Z4 → Z5 (HEAVY) -->
+
+    <!-- ==========================================
+         ZONE 5 — THE ASSEMBLY LINE
+         DENSE · Implementation + Checkpoints + FAQ
+         ========================================== -->
+    <section class="zone-line transition-heavy" aria-label="The Assembly Line: implementation guide and troubleshooting">
+      <div class="container">
+        <div class="section-indicator">Zone 5 &mdash; The Assembly Line</div>
+
+        <h2 id="implementation">Implementation Guide</h2>
+
+        <h3>Prerequisites Checklist</h3>
+
+        <table class="checklist-table">
+          <thead>
+            <tr>
+              <th>Requirement</th>
+              <th>Verification</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>Go 1.21+</code></td><td><code>go version</code></td></tr>
+            <tr><td><code>tmux</code></td><td><code>tmux -V</code></td></tr>
+            <tr><td>Multiple Claude accounts</td><td>For parallel agents</td></tr>
+            <tr><td>Stage 7+ experience</td><td>100+ hours multi-agent</td></tr>
+            <tr><td>High chaos tolerance</td><td>Some bugs, some lost work</td></tr>
+            <tr><td>Budget: $50-200/day</td><td>Multiple API accounts</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Installation</h3>
+
+        <pre><code><span class="cm"># Step 1: Install Gas Town</span>
+<span class="fn">go install</span> github.com/steveyegge/gastown/cmd/gt@latest
+
+<span class="cm"># Step 2: Verify installation</span>
+<span class="fn">gt version</span>
+
+<span class="cm"># Step 3: Initialize your town (creates ~/.gt)</span>
+<span class="fn">gt init</span></code></pre>
+
+        <div class="callout callout--checkpoint">
+          <div class="callout__label">Checkpoint</div>
+          <div class="callout__body">You should see <code>Town initialized at ~/.gt</code></div>
+        </div>
+
+        <h3>Adding Your First Rig</h3>
+
+        <pre><code><span class="cm"># Add a project rig</span>
+<span class="fn">gt rig add</span> /path/to/your/project
+
+<span class="cm"># Verify</span>
+<span class="fn">gt rig list</span></code></pre>
+
+        <div class="callout callout--checkpoint">
+          <div class="callout__label">Checkpoint</div>
+          <div class="callout__body">Your project should appear in the rig list.</div>
+        </div>
+
+        <h3>Starting the Core Roles</h3>
+
+        <p>Recommended startup sequence:</p>
+
+        <pre><code><span class="cm"># 1. Start town-level roles first</span>
+<span class="fn">gt mayor up</span>
+<span class="fn">gt deacon up</span>
+<span class="fn">gt dogs up</span>
+
+<span class="cm"># 2. Start rig-level infrastructure</span>
+<span class="fn">gt witness up</span> my-project
+<span class="fn">gt refinery up</span> my-project
+
+<span class="cm"># 3. Start named workers</span>
+<span class="fn">gt polecat up</span> my-project alice
+<span class="fn">gt polecat up</span> my-project bob
+<span class="fn">gt polecat up</span> my-project carol</code></pre>
+
+        <div class="callout callout--checkpoint">
+          <div class="callout__label">Checkpoint</div>
+          <div class="callout__body"><code>gt status</code> should show all roles running.</div>
+        </div>
+
+        <h3>tmux Workflow</h3>
+
+        <p>Gas Town is tmux-native. Understand this structure:</p>
+
+        <div class="tmux-diagram">┌─────────────────────────────────────────────────────┐
+│  tmux session: gastown                              │
+├──────────────┬──────────────┬───────────────────────┤
+│              │              │                       │
+│  Window:     │  Window:     │  Window:              │
+│  <span class="window-name">mayor</span>      │  <span class="window-name">alice</span>      │  <span class="window-name">bob</span>                 │
+│  ┌────────┐  │  ┌────────┐  │  ┌─────────────────┐ │
+│  │ <span class="agent-name">Mayor</span>  │  │  │ <span class="agent-name">Polecat</span>│  │  │ <span class="agent-name">Polecat</span>         │ │
+│  │ Agent  │  │  │ Alice  │  │  │ Bob             │ │
+│  └────────┘  │  └────────┘  │  └─────────────────┘ │
+├──────────────┴──────────────┴───────────────────────┤
+│  Window: <span class="window-name">overview</span>                                    │
+│  ┌─────────────────────────────────────────────────┐│
+│  │ rpai - Agent Status Monitor                     ││
+│  └─────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────┘</div>
+
+        <h3>Startup Script</h3>
+
+        <p>Save this as <code>gastown-start.sh</code>:</p>
+
+        <pre><code><span class="cm">#!/bin/bash</span>
+<span class="kw">SESSION</span>=<span class="st">"gastown"</span>
+
+<span class="cm"># Kill existing session if requested</span>
+<span class="kw">if</span> [ <span class="st">"$1"</span> = <span class="st">"--fresh"</span> ]; <span class="kw">then</span>
+  tmux kill-session -t $SESSION <span class="nu">2</span>>/dev/null
+<span class="kw">fi</span>
+
+<span class="cm"># Create session</span>
+tmux new-session -d -s $SESSION -n <span class="st">'overview'</span>
+
+<span class="cm"># Infrastructure windows</span>
+tmux new-window -t $SESSION -n <span class="st">'mayor'</span>
+tmux new-window -t $SESSION -n <span class="st">'infra'</span>
+tmux split-window -h -t $SESSION:infra
+
+<span class="cm"># Per-rig windows</span>
+<span class="kw">for</span> RIG <span class="kw">in</span> project1 project2; <span class="kw">do</span>
+  tmux new-window -t $SESSION -n <span class="st">"rig-$RIG"</span>
+  tmux split-window -h -t <span class="st">"rig-$RIG"</span>
+<span class="kw">done</span>
+
+<span class="cm"># Polecat windows</span>
+<span class="kw">for</span> POLECAT <span class="kw">in</span> alice bob carol; <span class="kw">do</span>
+  tmux new-window -t $SESSION -n <span class="st">"$POLECAT"</span>
+<span class="kw">done</span>
+
+<span class="cm"># Inbox window</span>
+tmux new-window -t $SESSION -n <span class="st">'inbox'</span>
+
+<span class="cm"># Start roles</span>
+tmux send-keys -t $SESSION:mayor <span class="st">'gt mayor up'</span> C-m
+tmux send-keys -t $SESSION:infra.0 <span class="st">'gt deacon up'</span> C-m
+tmux send-keys -t $SESSION:infra.1 <span class="st">'gt dogs up'</span> C-m
+tmux send-keys -t $SESSION:alice <span class="st">'gt polecat up project1 alice'</span> C-m
+tmux send-keys -t $SESSION:bob <span class="st">'gt polecat up project1 bob'</span> C-m
+tmux send-keys -t $SESSION:inbox <span class="st">'watch -n 5 gt inbox'</span> C-m
+
+<span class="cm"># Attach</span>
+tmux select-window -t $SESSION:overview
+tmux attach -t $SESSION</code></pre>
+
+        <h3>Typical Daily Workflow</h3>
+
+        <pre><code><span class="cm"># Morning: Start town</span>
+./gastown-start.sh
+
+<span class="cm"># Review overnight status</span>
+<span class="fn">gt status</span>
+<span class="fn">gt inbox</span>
+
+<span class="cm"># File new feature</span>
+<span class="fn">gt inbox send</span> my-project <span class="st">"Build user authentication"</span>
+
+<span class="cm"># Refinery decomposes, assigns to polecats</span>
+<span class="cm"># You review pending decisions</span>
+<span class="fn">gt inbox respond</span> <span class="nu">5</span> --approve
+<span class="fn">gt inbox respond</span> <span class="nu">7</span> --approve
+
+<span class="cm"># Evening: Review completed work</span>
+<span class="fn">gt inbox review</span>
+<span class="fn">gt approve</span> <span class="nu">12 15 18</span>
+
+<span class="cm"># End of day (polecats persist, crew killed)</span>
+<span class="fn">gt crew purge</span> my-project</code></pre>
+
+        <h2 id="checkpoints">Checkpoints and Verification</h2>
+
+        <h3>Post-Installation Checkpoints</h3>
+
+        <table class="checklist-table">
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>Command</th>
+              <th>Expected Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Go installed</td><td><code>go version</code></td><td><code>go version go1.21+</code></td></tr>
+            <tr><td>gt installed</td><td><code>gt version</code></td><td>Version number</td></tr>
+            <tr><td>Town initialized</td><td><code>gt status</code></td><td>Shows town state</td></tr>
+            <tr><td>Rig added</td><td><code>gt rig list</code></td><td>Shows your project</td></tr>
+            <tr><td>Mayor running</td><td><code>gt mayor status</code></td><td><code>running</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>Health Checks</h3>
+
+        <pre><code><span class="cm"># Check all role status</span>
+<span class="fn">gt status</span>
+
+<span class="cm"># Check specific rig</span>
+<span class="fn">gt rig status</span> my-project
+
+<span class="cm"># View agent health</span>
+<span class="fn">gt deacon report</span></code></pre>
+
+        <p><strong>Healthy state indicators:</strong> All roles show <code>running</code>. Deacon reports no anomalies. Inbox has reasonable pending items (not 100+). Polecats are progressing on tasks.</p>
+
+        <h2 id="troubleshooting">Troubleshooting</h2>
+
+        <details class="collapsible">
+          <summary>Context Collapse &mdash; Agents stop making sense, circular reasoning</summary>
+          <div class="collapsible__content">
+            <p><strong>Cause:</strong> Beads state corruption or no auto-compact.</p>
+            <pre><code><span class="fn">gt town reset</span> --soft   <span class="cm"># Keep config, clear state</span>
+<span class="fn">gt beads sync</span> --force  <span class="cm"># Force context resync</span></code></pre>
+          </div>
+        </details>
+
+        <details class="collapsible">
+          <summary>Race Conditions / Merge Conflicts &mdash; Conflicting commits, overwritten work</summary>
+          <div class="collapsible__content">
+            <p><strong>Cause:</strong> Multiple Polecats editing same files. Use git worktrees for file isolation. Implement file ownership rules.</p>
+            <pre><code><span class="fn">git status</span>
+<span class="fn">gt refinery resolve</span> my-project</code></pre>
+          </div>
+        </details>
+
+        <details class="collapsible">
+          <summary>Runaway Crew &mdash; Cost spike, dozens of Crew spawned unexpectedly</summary>
+          <div class="collapsible__content">
+            <p><strong>Cause:</strong> Refinery misconfiguration or task explosion.</p>
+            <pre><code><span class="fn">gt crew purge</span> --all
+<span class="fn">gt config set</span> crew.max_per_rig <span class="nu">5</span>
+<span class="fn">gt config set</span> crew.idle_timeout <span class="nu">15</span></code></pre>
+          </div>
+        </details>
+
+        <details class="collapsible">
+          <summary>Mayor Deadlock &mdash; No work getting assigned, town seems stuck</summary>
+          <div class="collapsible__content">
+            <p><strong>Cause:</strong> Mayor waiting for human decision on something.</p>
+            <pre><code><span class="fn">gt inbox</span>
+<span class="fn">gt inbox respond</span> &lt;id&gt; --approve
+<span class="fn">gt inbox respond</span> &lt;id&gt; --reject</code></pre>
+          </div>
+        </details>
+
+        <details class="collapsible">
+          <summary>Beads Desync &mdash; Agents have stale context, working on old state</summary>
+          <div class="collapsible__content">
+            <p><strong>Cause:</strong> Git conflicts in Beads repo.</p>
+            <pre><code><span class="fn">gt beads sync</span> --force
+<span class="fn">gt beads reset</span></code></pre>
+          </div>
+        </details>
+
+        <details class="collapsible">
+          <summary>Agent Won't Start &mdash; <code>gt polecat up</code> returns error</summary>
+          <div class="collapsible__content">
+            <p><strong>Cause:</strong> Claude account issue, rate limiting, or config problem.</p>
+            <pre><code><span class="fn">gt config list</span>
+<span class="fn">gt config set</span> polecat.alice.account secondary
+<span class="fn">claude</span> --version</code></pre>
+          </div>
+        </details>
+
+        <h3>Recovery Command Reference</h3>
+
+        <div class="recovery-grid">
+          <div class="recovery-grid__cell">
+            <div class="recovery-grid__label">Soft Reset</div>
+            <div class="recovery-grid__cmd">gt town reset --soft</div>
+          </div>
+          <div class="recovery-grid__cell">
+            <div class="recovery-grid__label">Hard Reset</div>
+            <div class="recovery-grid__cmd">gt town reset --hard</div>
+          </div>
+          <div class="recovery-grid__cell">
+            <div class="recovery-grid__label">Kill All Agents</div>
+            <div class="recovery-grid__cmd">gt town down</div>
+          </div>
+          <div class="recovery-grid__cell">
+            <div class="recovery-grid__label">Force Beads Sync</div>
+            <div class="recovery-grid__cmd">gt beads sync --force</div>
+          </div>
+          <div class="recovery-grid__cell">
+            <div class="recovery-grid__label">Clear Inbox</div>
+            <div class="recovery-grid__cmd">gt inbox clear --all</div>
+          </div>
+          <div class="recovery-grid__cell">
+            <div class="recovery-grid__label">Emergency Stop</div>
+            <div class="recovery-grid__cmd">gt pause --all</div>
+          </div>
+          <div class="recovery-grid__cell">
+            <div class="recovery-grid__label">Restart Worker</div>
+            <div class="recovery-grid__cmd">gt polecat down &lt;rig&gt; &lt;name&gt;</div>
+          </div>
+          <div class="recovery-grid__cell">
+            <div class="recovery-grid__label">Resume Work</div>
+            <div class="recovery-grid__cmd">gt resume --all</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         D-04: SECOND-HALF MOMENT — Dark inversion
+         "Nature prefers colonies" pivot
+         ========================================== -->
+    <div class="inversion-block" role="presentation">
+      <div class="inversion-block__quote">"Nature prefers colonies."</div>
+      <div class="inversion-block__cite">Steve Yegge</div>
+      <div class="inversion-block__sub">The shift from "how it works" to "why it matters." Build a colony of coding agents, not the world's largest ant.</div>
+    </div>
+
+    <!-- TRANSITION: Z5 → Z6 (MEDIUM) -->
+
+    <!-- ==========================================
+         ZONE 6 — THE DISPATCH (Decisions)
+         MODERATE · When to use, Quotes, Comparisons
+         ========================================== -->
+    <section class="zone-dispatch transition-medium" aria-label="The Dispatch: decisions and comparisons">
+      <div class="container">
+        <div class="section-indicator">Zone 6 &mdash; The Dispatch</div>
+
+        <h2 id="when-to-use">When to Use Gas Town</h2>
+
+        <div class="decision-split">
+          <div class="decision-split__yes">
+            <div class="decision-split__title">Use Gas Town When</div>
+            <ul>
+              <li>You are at Stage 7+ (10+ agents, comfortable with chaos)</li>
+              <li>Budget is not a concern ($50-200/day)</li>
+              <li>You want team-scale output as a solo developer</li>
+              <li>You have clear product vision but need implementation velocity</li>
+              <li>You are comfortable with imperfection</li>
+              <li>You have tmux proficiency</li>
+              <li>You understand the PM to engineering team mental model</li>
+            </ul>
+          </div>
+          <div class="decision-split__no">
+            <div class="decision-split__title">Do Not Use When</div>
+            <ul>
+              <li>You are below Stage 6 on the dev evolution scale</li>
+              <li>Budget is constrained</li>
+              <li>You need polish and stability</li>
+              <li>You need predictable, controlled outcomes</li>
+              <li>You are not comfortable with chaos</li>
+              <li>The project is simple enough for Ralph loops</li>
+              <li>You have not mastered Levels 0-6</li>
+            </ul>
+          </div>
+        </div>
+
+        <h2 id="quotes">Quotes and Key Statements</h2>
+
+        <div class="pull-quote">
+          <p>Gas Town is an Idea Compiler. You just make up features, design them, file the implementation plans, and sling work around to your polecats and crew.</p>
+          <cite>Steve Yegge</cite>
+        </div>
+
+        <div class="pull-quote">
+          <p>Work becomes fluid, an uncountable that you sling around freely, like slopping shiny fish into wooden barrels at the docks.</p>
+          <cite>Steve Yegge</cite>
+        </div>
+
+        <div class="pull-quote">
+          <p>You're not a programmer anymore. You're the head chef of a kitchen with AI robotic sous chefs.</p>
+          <cite>Steve Yegge</cite>
+        </div>
+
+        <div class="callout callout--warning">
+          <div class="callout__label">On Maturity</div>
+          <div class="callout__body">"Code is 3 weeks old &mdash; smuggled 400 miles upriver in my ass." &mdash; 100% vibe-coded. "If you care about costs, don't use this." &mdash; Expensive as hell, multiple Claude accounts needed.</div>
+        </div>
+
+        <div class="callout callout--tip">
+          <div class="callout__label">On Language Choice</div>
+          <div class="callout__body">"Go is just... good. It's boring. You can always understand it!" vs TypeScript: "1/3 to 1/2 of diffs are type wrestling."</div>
+        </div>
+
+        <h2 id="comparison">Comparison with Other Patterns</h2>
+
+        <h3>Gas Town vs Ralph Wiggum</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Ralph Wiggum</th>
+              <th>Gas Town</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="pattern-name">Model</td><td>Single agent, retry loop</td><td>Multi-agent factory</td></tr>
+            <tr><td class="pattern-name">Complexity</td><td>Bash script</td><td>Full system</td></tr>
+            <tr><td class="pattern-name">Persistence</td><td>Via git/progress.txt</td><td>Beads data plane</td></tr>
+            <tr><td class="pattern-name">Parallelism</td><td>None (sequential)</td><td>Native (many agents)</td></tr>
+            <tr><td class="pattern-name">Setup</td><td>Minutes</td><td>Hours/days</td></tr>
+            <tr><td class="pattern-name">Cost</td><td>Single agent</td><td>Multiple accounts</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Gas Town vs CC Mirror</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>CC Mirror</th>
+              <th>Gas Town</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="pattern-name">Model</td><td>Task-based DAG</td><td>Agent factory</td></tr>
+            <tr><td class="pattern-name">Setup</td><td>npx command</td><td>Go install + config</td></tr>
+            <tr><td class="pattern-name">Dependencies</td><td>TaskCreate/BlockedBy</td><td>Beads + Agent Mail</td></tr>
+            <tr><td class="pattern-name">Parallelism</td><td>Auto-scheduled</td><td>Explicit workers</td></tr>
+            <tr><td class="pattern-name">Roles</td><td>None (generic agents)</td><td>8 specialized</td></tr>
+            <tr><td class="pattern-name">Cost</td><td>Single variant</td><td>Multiple accounts</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Gas Town vs Infinite Orchestra</h3>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Orchestra</th>
+              <th>Gas Town</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="pattern-name">Model</td><td>Self-improving</td><td>Production factory</td></tr>
+            <tr><td class="pattern-name">Environment</td><td>Docker container</td><td>tmux + local</td></tr>
+            <tr><td class="pattern-name">Autonomy</td><td>High (improves itself)</td><td>Human-directed</td></tr>
+            <tr><td class="pattern-name">Parallelism</td><td>Sequential (for now)</td><td>Native parallel</td></tr>
+            <tr><td class="pattern-name">24/7</td><td>Yes (designed for)</td><td>Yes (tmux)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Cost Estimation</h3>
+
+        <div class="cost-block"><span class="cost-label">Role-based cost per hour (estimates):</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Mayor (Opus):      <span class="cost-value">$15-20/hour</span>
+Refinery (Opus):   <span class="cost-value">$15-20/hour</span>
+Dogs (Sonnet):     <span class="cost-value">$5-8/hour</span>
+Polecats (Sonnet): <span class="cost-value">$5-10/hour each</span>
+Witness (Haiku):   <span class="cost-value">$1-3/hour</span>
+Deacon (Haiku):    <span class="cost-value">$1-2/hour</span>
+Crew (Haiku):      <span class="cost-value">$0.50-2/hour each</span>
+
+<span class="cost-label">Example daily cost (8 hours heavy usage):</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1 Mayor + 1 Deacon + 1 Dogs +
+2 Rigs + 3 Polecats + 5 Crew
+= <span class="cost-value">~$752/day</span> (heavy)
+Conservative = <span class="cost-value">$50-100/day</span></div>
+
+        <h3 id="sources">Sources</h3>
+
+        <div class="sources-grid">
+          <div class="sources-group">
+            <div class="sources-group__title">Blog Posts</div>
+            <ul>
+              <li><a href="https://steve-yegge.medium.com/welcome-to-gas-town-4f25ee16dd04">Welcome to Gas Town</a></li>
+              <li><a href="https://steve-yegge.medium.com/the-future-of-coding-agents-e9451a84207c">The Future of Coding Agents</a></li>
+              <li><a href="https://steve-yegge.medium.com/beads-best-practices-2db636b9760c">Beads Best Practices</a></li>
+              <li><a href="https://sourcegraph.com/blog/revenge-of-the-junior-developer">Revenge of the Junior Developer</a></li>
+              <li><a href="https://sourcegraph.com/blog/the-brute-squad">The Brute Squad</a></li>
+            </ul>
+          </div>
+          <div class="sources-group">
+            <div class="sources-group__title">GitHub Repos</div>
+            <ul>
+              <li><a href="https://github.com/steveyegge/gastown">steveyegge/gastown</a></li>
+              <li><a href="https://github.com/steveyegge/beads">steveyegge/beads</a> (225K LOC Go)</li>
+              <li><a href="https://github.com/steveyegge/mcp_agent_mail">steveyegge/mcp_agent_mail</a></li>
+              <li><a href="https://github.com/steveyegge/vc">steveyegge/vc</a></li>
+              <li><a href="https://github.com/steveyegge/efrit">steveyegge/efrit</a></li>
+            </ul>
+          </div>
+          <div class="sources-group">
+            <div class="sources-group__title">Podcasts &amp; Interviews</div>
+            <ul>
+              <li><a href="https://changelog.com/friends/96">Changelog: Adventures in Babysitting Coding Agents</a></li>
+              <li><a href="https://www.oreilly.com/radar/podcast/generative-ai-in-the-real-world-vibe-coding-with-steve-yegge/">O'Reilly: Vibe Coding with Steve Yegge</a></li>
+            </ul>
+          </div>
+          <div class="sources-group">
+            <div class="sources-group__title">Community Extensions</div>
+            <ul>
+              <li><strong>GTGUI</strong> &mdash; Age of Empires style GUI</li>
+              <li><strong>Roughneck</strong> &mdash; Run multiple Gas Towns</li>
+              <li><strong>Station</strong> &mdash; Nats-based alternative</li>
+              <li><strong>numman-ali Tutorial Skill</strong> &mdash; Claude Code learning skill</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout callout--info">
+          <div class="callout__label">Book</div>
+          <div class="callout__body"><strong>Vibe Coding</strong> by Steve Yegge and Gene Kim, published by IT Revolution.</div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================
+       FOOTER — Dark refinery exit (mirrors header)
+       ============================================ -->
+  <footer role="contentinfo">
+    <div class="footer-inner">
+      <p class="footer__closing">"Build a colony of coding agents, not the world's largest ant."</p>
+      <div class="footer__meta">
+        <span>Deep Extraction</span>
+        <span>Level 7 &middot; Agent Factory Architecture</span>
+        <span>6 Primary Sources &middot; 28+ Cross-References</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -326,7 +326,7 @@ Lock Sheet: team-lead or contextualizer produces CHALLENGEABLE section for ADV a
 | 1.5/4 | Do not ship (ceiling experiment score) | Structural rebuild required. |
 ```
 
-**What the FINAL prompt says:** B9 says "Calibration: Middle=4/4, Ceiling=1.5/4, DD-006=4/4, CD-006=4/4" and C5 has gate-then-ranking with ship/no-ship criteria. But the per-score sub-criteria definition (what 4/4 DESIGNED means, what makes 3/4 with PA-05a failing = 2/4) is absent.
+**What the FINAL prompt says:** B9 says "Calibration: Middle=4/4, Ceiling=1.5/4, DD-006=4/4, CD-006=4/4" [NOTE: CD-006=4/4 was INCORRECT and has been corrected to CD-006=~3/4 COMPOSED (39/40 soul, CEILING tier)] and C5 has gate-then-ranking with ship/no-ship criteria. But the per-score sub-criteria definition (what 4/4 DESIGNED means, what makes 3/4 with PA-05a failing = 2/4) is absent.
 
 **Insertable text (add to B9 or C5):**
 ```

@@ -21,7 +21,7 @@ Four data points define everything we know about what works:
 
 | Build | Agents | Builder Input | PA-05 Score | Key Trait |
 |-------|--------|---------------|-------------|-----------|
-| CD-006 | 1 Opus | ~50 lines (tokens + soul) | ~4/4 (39/40) | Crown jewel. Minimal input, maximum freedom. |
+| CD-006 | 1 Opus | ~50 lines (tokens + soul) | ~3/4 COMPOSED (39/40 soul score, CEILING tier -- NOT Flagship) | Minimal input, maximum freedom. |
 | Middle | 8 | ~100 lines (recipe) | 4/4 DESIGNED | Best pipeline result. Sequenced steps. |
 | Remediation | 16+ | ~300 lines (targeted spec) | 2.5/4 | Improved from Flagship. Specific CSS values. |
 | Flagship | 19 | ~530 lines (full recipe) | 1.5/4 | Failed. Zero perceptible borders, uniform type. |

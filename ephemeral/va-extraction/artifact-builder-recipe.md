@@ -37,6 +37,21 @@ Read `tokens.css` cover to cover. This file provides the CSS custom properties t
 > [ITEM 085, extract-d15-d17.md, VA L1322]
 > [ITEM 086, extract-d15-d17.md, VA L1322]
 
+### Step 1.1b: Mechanism Catalog Quick-Reference
+
+Before reading the full mechanism-catalog.md (1,200+ lines), orient with this summary of the 6 mechanism categories and their top CSS signatures:
+
+| Category | Top Mechanisms | CSS Signature |
+|----------|---------------|---------------|
+| **Spatial** | Zone padding progression, container width modulation | `padding: 80px 0` → `48px 0`; `max-width` shifts |
+| **Temporal** | Density arc, scroll rhythm, transition weight | Section heights vary; `border-width` + `gap` at boundaries |
+| **Material** | Background color pairs, border weight hierarchy | `background-color` deltas >= 15 RGB; `border: 4px/3px/1px` |
+| **Behavioral** | Hover states, focus-visible, ::selection | `:hover { border-color }`, `:focus-visible { outline: 3px }` |
+| **Relational** | Multi-coherence, component zone-adaptation | 3+ channels shift per boundary; callout padding varies per zone |
+| **Typographic** | Type scale progression, letter-spacing zones | `font-size` from 18px→15px across zones; `letter-spacing: 0.03-0.05em` |
+
+Read the full catalog for depth, but use this table to quickly identify which categories serve each zone.
+
 ### Step 1.2: Read components.css (290 lines) — shared component DNA
 
 Read `components.css` to understand the pre-built component library.
@@ -75,6 +90,15 @@ These are the things that **vary per page** — your creative territory within t
 
 > [ITEM 074, extract-d15-d17.md, VA L1306]
 
+### CD-006 Zone-by-Zone Reference (CEILING exemplar)
+
+Use this as a concrete vocabulary reference — CD-006 scored 39/40 and demonstrates COMPOSED-mode technique deployment:
+- **S1 (Opening):** Full-bleed dark header, 3px red bottom border, generous 80px padding
+- **S3 (Dense):** Dark inversion block (`background: #1E1E1E`), 4px left border callouts, 16px body text, tightened line-height 1.6
+- **S4 (Peak):** Multi-column grid layout, compressed callouts (12px 16px padding), highest density
+- **S6 (Resolving):** Return to light background, wider spacing, 3 distinct transition types across boundaries
+- **S8 (Closing):** Footer echoes header dark treatment, minimal content, earned closure
+
 ### Step 2.1: Select zone background strategy + colors
 
 Choose how background colors differentiate your page's zones. The backgrounds should make each zone feel like a distinct room.
@@ -87,6 +111,15 @@ Choose how background colors differentiate your page's zones. The backgrounds sh
 - Backgrounds that differ by <15 RGB points are invisible to the human eye
 
 > [ITEM 047, extract-d21-d25.md, VA L1697]
+
+**Targets (from Gas Town retrospective — prevents the dominant defect):**
+- 20 RGB delta = FLOOR for adjacent zones (was 15 — too close to invisible)
+- 25 RGB delta = COMPOSITIONAL TARGET (aim for this at 3+ boundaries)
+- 50+ RGB delta = DRAMATIC (1-2 boundaries per page)
+- Never use #FFFFFF for zone backgrounds — lightest acceptable: #FAFAF8
+- No cold blues (#4A90D9) or cold purples (#7C3AED) — warm alternatives: teal (#5B8A9B), plum (#7D5B8A)
+
+See `artifact-value-tables.md` for 20 pre-computed warm color pairs at all intensity levels.
 
 **Anti-pattern: threshold gaming.** Using 16 RGB and 0.026em everywhere passes the floor but creates calibrationally flat output. 15 is the floor, not the target. Subtle and dramatic should be DIFFERENT values.
 
@@ -205,6 +238,12 @@ If your selections feel like isolated decisions rather than aspects of one idea,
 ## PHASE 3: DEPLOY YOUR SCAFFOLDING
 
 Build the page zone by zone, deploying your selected vocabulary.
+
+**Layout variety requirement (from Gas Town retrospective):** At least 2 distinct layout patterns across the page. Single-column stack must not exceed 60% of zones. Use grids, multi-column layouts, or side-by-side patterns for REFERENCE and CODE zones. Gas Town scored 19/25 on spatial composition because it used single-column for all but one zone.
+
+**Component adoption requirement:** Check `components.css` for matching classes BEFORE writing custom CSS. Adopt and extend existing classes, never reinvent. Gas Town builder reinvented ~200 lines of CSS that already existed in the component library. Aim for 8+ component library classes used.
+
+**HTML background (prevents post-footer void):** Set `html { background: var(--color-text); }` or match the footer zone background. No trailing white space should be visible below the last content zone.
 
 ### Step 3.1: Deploy the 6-channel framework
 
@@ -326,6 +365,8 @@ The purpose of these instructions is to shift your building mode from APPLIED (e
 > [ITEM 80, extract-d18-d20.md, VA L1557]
 > [ITEM 81, extract-d18-d20.md, VA L1558]
 > [ITEM 82, extract-d18-d20.md, VA L1560-1562]
+
+**Typographic spectacle requirement (from Gas Town retrospective):** At least 1 typographic moment that exceeds normal hierarchy — examples: 28-32px pull quote, 36-48px display numerals, small-caps accent section, oversized drop cap. Zone-inflect H2s: at least 1 differentiating property (size, weight, decoration, color) between H2 treatments in different zones. Gas Town had identical H2s across 5 zones — this was the typography gap preventing DESIGNED.
 
 **Builder disposition toward quality:** Optimize for quality, not gate compliance. Enter COMPOSING mode (not COMPLYING/PLANNING/REPAIRING).
 > [ITEM 124, extract-d01-d03.md, VA L263]

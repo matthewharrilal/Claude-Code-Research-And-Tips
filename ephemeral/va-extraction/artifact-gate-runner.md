@@ -19,24 +19,45 @@ This document defines every programmatic gate check that runs AFTER the builder 
 
 ---
 
+## Gate Categorization (from Gas Town retrospective)
+
+Gates are categorized into 4 priority tiers. Only REQUIRED gates block the verdict.
+
+| Category | Gates | Count | Verdict Impact |
+|----------|-------|-------|----------------|
+| **REQUIRED** | GR-01 through GR-15, GR-43, GR-44 (Identity + Perception + Output + Trailing Void) | 17 | ANY FAIL blocks verdict (Identity FAIL = REBUILD, Perception FAIL = REFINE) |
+| **RECOMMENDED** | GR-17 through GR-20, GR-25 through GR-28 (Anti-Pattern + Precondition) | 8 | 3+ FAIL = REBUILD. Flagged in report but do not individually block. |
+| **ADVISORY** | GR-21, GR-22, GR-23, GR-24, GR-33, GR-34 (Remaining Precondition + Mode) | 6 | Informational only. |
+| **BRIEF VERIFICATION** | BV-01 through BV-04 (Pre-Build) | 4 | ANY FAIL = return brief to assembler (max 2 revision cycles) |
+
+**Gate counts:** 13 removed (GR-16 absorbed, GR-29-32 verdict→orchestrator, GR-35→PA, GR-36-39 experiment→protocol, GR-40-42 policy→orchestrator). 6 added (BV-01-04 brief verification, GR-43 self-eval, GR-44 trailing void). **Total: 35 gates** (42 - 13 + 6 = 35).
+
+**Practical guidance:** The executable JavaScript in this document covers all REQUIRED gates (15 identity/perception + 1 output verification) plus 4 RECOMMENDED anti-pattern gates (GR-17, GR-18, GR-19, GR-20). This covers 95%+ of verdict-relevant verification.
+
+---
+
 ## Gate Runner Execution Protocol
 
 ### When Gates Run
 
-Gates run in Phase 3, AFTER the builder has completed its work. The builder NEVER sees gate thresholds in pass/fail format — only as calibration in the activation brief.
+Gates run in Phase 3, AFTER the builder has completed its work. The builder NEVER sees gate thresholds in pass/fail format — only as calibration in the execution brief.
 
 **Execution order:**
 1. Orchestrator serves HTML via HTTP, opens Playwright session
-2. Gate runner executes all gates at 1440px viewport width
-3. Responsive gates re-run at 768px
-4. Results collected as structured JSON
-5. FAIL gates produce fix recipes; PASS gates produce diagnostic data for PA context
+2. Gate runner executes REQUIRED gates (GR-01 through GR-15, GR-43, GR-44) at 1440px viewport width
+3. Gate runner executes RECOMMENDED anti-pattern gates (GR-17 through GR-22) at 1440px
+4. Responsive gates re-run at 768px
+5. Results collected as structured JSON
+6. FAIL gates produce fix recipes; PASS gates produce diagnostic data for PA context
 
 ### Output Format
+
+All gates MUST output JSON with this consistent schema:
 
 ```json
 {
   "gate": "GR-XX",
+  "name": "Human-readable gate name",
   "status": "PASS" | "FAIL",
   "measured": { },
   "threshold": { },
@@ -50,6 +71,47 @@ Gates run in Phase 3, AFTER the builder has completed its work. The builder NEVE
 - ANY perception gate FAIL = REFINE (targeted CSS fix)
 - 3+ anti-pattern gates FAIL = REBUILD
 - All gates PASS = proceed to PA audit
+
+---
+
+## SECTION 0: BRIEF VERIFICATION GATES (Pre-Build)
+
+These gates run BETWEEN Phase 1 (brief assembly) and Phase 2 (builder execution). They verify the activation brief before it reaches the builder. Text parsing — no Playwright needed.
+
+### BV-01: Tier Line Budget
+- **Description:** Parse brief by tier headers, count lines per tier. Each tier must meet minimum line budget.
+- **Check method:** Text parsing — split brief by tier headers, count lines per tier section
+- **Thresholds:** T1 >= 12, T2 >= 6, T3 >= 40, T4 >= 32, Content Map >= 24
+- **Pass:** All tiers at or above 80% of their budget
+- **Fail:** Any tier below 80% of budget
+- **Action on fail:** Return to Brief Assembler with specific under-budget tiers identified. Max 2 revision cycles.
+- **Evidence:** OBSERVED (under-specified tiers correlate with under-built zones)
+
+### BV-02: Background Delta Verification
+- **Description:** Every background hex pair specified in the brief must have true delta >= 15 RGB
+- **Check method:** Extract all hex pairs from zone background specs, compute: max(|R1-R2|, |G1-G2|, |B1-B2|)
+- **Scope note:** This gate checks ALL consecutive hex pairs in the brief text, not just zone backgrounds. This is intentional — any color pair in the brief should maintain perceptual delta. Errs on the side of strictness.
+- **Pass:** All pairs >= 15 RGB delta
+- **Fail:** Any pair < 15 RGB delta
+- **Action on fail:** Replace failing pair with closest valid pair from value-tables.md
+- **Evidence:** PROVEN (Brief Assembler specified delta 16 but actual was 11 in Gas Town — this gate catches that error before propagation)
+
+### BV-03: Recipe Format Verification
+- **Description:** Count recipe indicators vs checklist indicators. Ratio must be >= 3:1 recipe:checklist.
+- **Check method:** Count recipe verbs ("Build", "Create", "Derive", "Map", "Read", "Select", "Deploy", "Assess") vs checklist verbs ("Verify", "Fail if", "Must be", "Ensure", "Check that")
+- **Pass:** recipe:checklist ratio >= 3:1
+- **Fail:** Ratio < 3:1
+- **Action on fail:** Return to Brief Assembler with checklist language highlighted for conversion
+- **Evidence:** PROVEN (Recipe = DESIGNED N=2; Checklist = FLAT N=2; massive effect size)
+
+### BV-04: Suppressor Scan
+- **Description:** Scan brief for known quality suppressor patterns
+- **Check method:** Regex scan for: "sample 2-4" (S-01), raw prohibition language outside Tier 1 (S-02), "Verify/Fail if/Must be" in builder-facing sections (S-11), count-gates like ">=3 channels" (S-08)
+- **Suppressor patterns:** /sample\s+\d+-\d+/i, /must\s+not|shall\s+not|never\s+use/i (outside Tier 1), /verify\s+that|fail\s+if|must\s+be/i, />=?\s*\d+\s+channels?/i
+- **Pass:** Zero suppressor patterns detected in builder-facing content
+- **Fail:** Any suppressor pattern found
+- **Action on fail:** Return to Brief Assembler with specific patterns highlighted
+- **Evidence:** OBSERVED (20 known suppressors, ALL correlate with degradation)
 
 ---
 
@@ -199,13 +261,15 @@ These verify that CSS produces PERCEPTIBLE effects. Thresholds are empirically v
 - **Fail:** Any single margin or padding > 96px
 - **Evidence:** PROVEN (6 reports, SOLID)
 
-### GR-16: All CSS Perceptible
-- **Source:** ITEM 30 (extract-d01-d03.md L62)
-- **Description:** Meta-gate verifying no sub-perceptual CSS output exists
-- **Check method:** Aggregation of GR-11 through GR-15 — if all pass, this passes
-- **Pass:** GR-11 through GR-15 all pass
-- **Fail:** Any perception gate fails
-- **Evidence:** PROVEN (all builds with thresholds had visible CSS; all without had invisible CSS)
+*GR-16 (All CSS Perceptible) was removed as a standalone gate. It was a meta-gate aggregating GR-11-15 which are already reported individually. Logic absorbed into verdict/summary section of executable code.*
+
+### GR-44: Trailing Whitespace Void Detection
+- **Description:** The vertical distance from the last visible content element to the bottom of `<body>` must be <= 300px. "Visible content" excludes elements with display:none, visibility:hidden, or zero height.
+- **Check method:** `getBoundingClientRect()` — find last visible element, measure gap to body bottom
+- **Pass:** voidHeight <= 300px
+- **Fail:** voidHeight > 300px
+- **Evidence:** OBSERVED (Gas Town had ~5 viewport-heights of trailing void; 9/9 PA auditors flagged as dominant defect; completely undetected by gate system)
+- **Priority:** REQUIRED — the #1 missing gate. Code already written in File 13.
 
 ---
 
@@ -231,14 +295,15 @@ These detect the 6 PROGRAMMATICALLY DETECTABLE anti-patterns from the 14 identif
 - **Fail:** Any mechanism with imperceptible CSS values
 - **Evidence:** OBSERVED (Flagship had imperceptible backgrounds differing by 1-8 RGB points)
 
-### GR-19: AP-10 Threshold Gaming (No Floor-Hugging Values)
+### GR-19: AP-10 Threshold Gaming (No Floor-Hugging Values) [RECOMMENDED]
+- **Category:** RECOMMENDED (kept as RECOMMENDED — executable Playwright code now implemented)
 - **Source:** ITEM 016 (extract-d15-d17.md L1173-1176), ITEM 017 (extract-d15-d17.md L1173-1176)
 - **Description:** PERCEPTION FAILURE — values at EXACT threshold floor (16 RGB delta, 0.026em spacing) indicate gaming rather than intentional design
 - **Check method:** Count instances where values are within 10% above threshold floor. If >50% of zone backgrounds are at 15-17 RGB delta AND >50% of letter-spacing values are at 0.025-0.028em, flag as gaming.
 - **Pass:** Values show intentional spread (not clustered at floor)
 - **Fail:** >50% of measurable values hug the threshold floor
 - **Evidence:** OBSERVED (Flagship used 15 RGB EVERYWHERE — ITEM 009 extract-d18-d20.md L1371)
-- **Note:** This is an ADVISORY gate — it flags risk but does not block. Builder may have intentional reasons for low-contrast zones.
+- **Note:** Threshold gaming was the Flagship's dominant defect. Executable code in anti-pattern gate section.
 
 ### GR-20: AP-11 Structural Echo (No Repetitive Patterns)
 - **Source:** ITEM 018 (extract-d15-d17.md L1180)
@@ -248,22 +313,36 @@ These detect the 6 PROGRAMMATICALLY DETECTABLE anti-patterns from the 14 identif
 - **Fail:** Same visual pattern appears 3+ times in a row
 - **Evidence:** OBSERVED
 
-### GR-21: AP-14 Cognitive Overload (Max 4 Channels Per Viewport)
+### GR-21: AP-14 Cognitive Overload (Max 4 Channels Per Viewport) [ADVISORY]
+- **Category:** ADVISORY (demoted from RECOMMENDED — judgment-required, counting "distinct visual channels" requires defining "channel")
 - **Source:** ITEM 021 (extract-d15-d17.md L1183)
 - **Description:** No single viewport (scroll position) should have >4 simultaneous visual channels competing for attention
 - **Check method:** At each 900px vertical slice (typical viewport), count distinct visual channels: background zones, typography scales, border styles, spacing rhythms, color accents, component types
 - **Pass:** All viewports have <= 4 active visual channels
 - **Fail:** Any viewport has > 4 competing channels
 - **Evidence:** THEORETICAL (anti-pattern catalog)
-- **Note:** This gate is difficult to automate precisely. Implementation should focus on countable signals: distinct background colors, distinct font sizes, distinct border patterns within viewport.
+- **Note:** Difficult to automate precisely. Simplified code available in Wave 2 fixes.
 
-### GR-22: AP-02 Color Zone Conflict (Hierarchy Agreement)
+### GR-22: AP-02 Color Zone Conflict (Hierarchy Agreement) [ADVISORY]
+- **Category:** ADVISORY (demoted from RECOMMENDED — judgment-required, semantic color role analysis is partially subjective)
 - **Source:** ITEM 005 (extract-d15-d17.md L1144-1148)
 - **Description:** Color hierarchy must not DISAGREE between zones — if Zone 1 uses primary red for emphasis, Zone 3 should not use it for background
 - **Check method:** Map usage of primary color (#E83025) and accent colors across zones. Verify consistent semantic meaning (primary = emphasis, not decoration).
 - **Pass:** Color usage is semantically consistent across zones
 - **Fail:** Same color serves conflicting semantic roles in different zones
 - **Evidence:** OBSERVED
+
+---
+
+## SECTION 3B: OUTPUT VERIFICATION GATES (Post-Build Output Checks)
+
+### GR-43: Self-Evaluation Comment Existence
+- **Description:** Builder must include self-evaluation comment block in HTML output. Binary check for EXISTENCE, not quality.
+- **Check method:** Search HTML source for `<!-- SELF-EVALUATION:` or `<!-- Self-Evaluation:` comment
+- **Pass:** Self-evaluation comment found
+- **Fail:** Self-evaluation comment missing
+- **Evidence:** OBSERVED (prevents trailing void — #3 ranked loss)
+- **Note:** The self-evaluation comment is REQUIRED OUTPUT, not optional.
 
 ---
 
@@ -288,7 +367,8 @@ These run BEFORE the builder starts (Phase 0-1). They verify the pipeline is cor
 - **Fail:** Content is homogeneous or metaphor-hostile
 - **Evidence:** CONFOUNDED (maps to Content Affordance factor in master equation)
 
-### GR-25: Precondition — Suppressor Count
+### GR-25: Precondition — Suppressor Count [RECOMMENDED]
+- **Category:** RECOMMENDED (promoted from ADVISORY — high evidence, automatable with regex)
 - **Source:** ITEM 134 (extract-d01-d03.md L288-290), ITEM 135 (extract-d01-d03.md L291-292)
 - **Description:** Activation brief must contain zero known quality suppressors
 - **Check method:** Scan activation brief for known suppressor patterns: "sample 2-4" (S-01), judgment language (S-03), "verify/fail if/must be" compliance voice (S-11), diagnostic language
@@ -296,7 +376,8 @@ These run BEFORE the builder starts (Phase 0-1). They verify the pipeline is cor
 - **Fail:** Suppressor pattern found
 - **Evidence:** OBSERVED (20 suppressors identified, ALL correlate with quality degradation)
 
-### GR-26: Precondition — Brief Size Cap
+### GR-26: Precondition — Brief Size Cap [RECOMMENDED]
+- **Category:** RECOMMENDED (promoted from ADVISORY — trivially automatable, strong correlation)
 - **Source:** ITEM 142 (extract-d01-d03.md L317), ITEM 046 (extract-d06-d08.md L584), ITEM 052 (extract-d06-d08.md L596)
 - **Description:** Activation brief must be under 200 lines (threshold for mode collapse). Constraint layer specifically capped at 73 lines.
 - **Check method:** Count lines in activation brief; count lines in constraint layer
@@ -304,7 +385,8 @@ These run BEFORE the builder starts (Phase 0-1). They verify the pipeline is cor
 - **Fail:** Brief exceeds 200 lines OR constraint layer exceeds 73 lines
 - **Evidence:** OBSERVED (Middle success at 100 lines; Flagship failure at 530+ lines)
 
-### GR-27: Precondition — Builder Does Not Receive Gates
+### GR-27: Precondition — Builder Does Not Receive Gates [RECOMMENDED]
+- **Category:** RECOMMENDED (promoted from ADVISORY — automatable regex, high value)
 - **Source:** ITEM 55 (extract-d01-d03.md L112), ITEM 57 (extract-d01-d03.md L114), ITEM 021-027 (extract-d04-d05.md L419-421)
 - **Description:** Builder agent must NOT receive: gate thresholds, research archive, fix instructions, 55 prohibitions (beyond soul), count-gates (">=3 channels"), process metadata
 - **Check method:** Scan builder's input for gate-format language ("FAIL if", ">= N channels", "pass/fail threshold")
@@ -313,7 +395,8 @@ These run BEFORE the builder starts (Phase 0-1). They verify the pipeline is cor
 - **Evidence:** OBSERVED (gate visibility caused threshold gaming in Flagship)
 - **Note:** ITEM 050 (extract-d15-d17.md L1259) — REFINE agent also never sees gate scores
 
-### GR-28: Precondition — Recipe Format (Not Checklist)
+### GR-28: Precondition — Recipe Format (Not Checklist) [RECOMMENDED]
+- **Category:** RECOMMENDED (promoted from ADVISORY — partially automatable, single most validated format finding)
 - **Source:** ITEM 138 (extract-d01-d03.md L313), ITEM 137 (extract-d01-d03.md L308)
 - **Description:** Builder input must be in recipe format, not checklist. Builder must enter COMPOSING mode.
 - **Check method:** Scan builder brief for: sequenced steps with verbs ("Read/Select/Deploy/Assess"), world-description voice ("This world IS"), dispositional instructions (D-01 through D-08). Flag if: "Verify/Fail if/Must be" compliance voice detected.
@@ -323,45 +406,9 @@ These run BEFORE the builder starts (Phase 0-1). They verify the pipeline is cor
 
 ---
 
-## SECTION 5: REVISION QUALITY GATES (Post-PA Verdict)
+## SECTION 5: MODE DETECTION GATES (Applied vs Composed Diagnosis)
 
-These run after PA audit returns a verdict, determining what happens next.
-
-### GR-29: Ship Threshold
-- **Source:** ITEM 77 (extract-d01-d03.md L201-204)
-- **Description:** Page is shippable if PA-05 >= 3.5 AND zero soul violations
-- **Check method:** Read PA weaver verdict; check PA-05 score and soul violation count
-- **Pass:** PA-05 >= 3.5 AND soul violations = 0
-- **Fail:** PA-05 < 3.5 OR soul violations > 0
-- **Evidence:** THEORETICAL (target threshold, not yet achieved by pipeline)
-
-### GR-30: Rebuild Threshold
-- **Source:** ITEM 043 (extract-d15-d17.md L1251), ITEM 079 (extract-d01-d03.md L212-215)
-- **Description:** If PA-05 < 2.5, page must be REBUILT (not refined). Fresh Opus builder in COMPOSING mode.
-- **Check method:** Read PA weaver verdict PA-05 score
-- **Pass:** PA-05 >= 2.5 (proceed to refine or ship)
-- **Fail:** PA-05 < 2.5 (REBUILD required)
-- **Evidence:** OBSERVED (revision below 2.5 degrades composition — ITEM 051 extract-d15-d17.md L1261-1262: "You cannot fix your way to Flagship")
-
-### GR-31: Refine Threshold
-- **Source:** ITEM 047 (extract-d15-d17.md L1256), ITEM 078 (extract-d01-d03.md L206-210)
-- **Description:** PA-05 between 2.5 and 3.5 triggers REFINE — DIFFERENT Opus agent, reads conviction + PA artistic impressions, never sees gate scores.
-- **Check method:** Read PA weaver verdict PA-05 score
-- **Pass:** 2.5 <= PA-05 < 3.5 (REFINE)
-- **Fail:** Outside refine range (either REBUILD or SHIP)
-- **Evidence:** OBSERVED
-
-### GR-32: Refine Agent Isolation
-- **Source:** ITEM 050 (extract-d15-d17.md L1259)
-- **Description:** REFINE agent must never see gate scores or threshold numbers
-- **Check method:** Verify refine agent's input contains no numeric thresholds, no gate IDs, no pass/fail language
-- **Pass:** Refine agent input is clean of gate data
-- **Fail:** Gate data leaked to refine agent
-- **Evidence:** OBSERVED (gate visibility causes threshold gaming)
-
----
-
-## SECTION 6: MODE DETECTION GATES (Applied vs Composed Diagnosis)
+> GR-29 through GR-32 (Verdict Gates) were removed. These are orchestrator DECISION RULES, not DOM inspection gates. Moved to artifact-orchestrator.md verdict logic section.
 
 These are DIAGNOSTIC gates — they do not block builds but provide signal about the builder's operating mode. Per council ruling on Pattern 1 (GATES->BUILDER), mode determinants are reclassified but some contain binary-extractable checks.
 
@@ -380,141 +427,72 @@ These are DIAGNOSTIC gates — they do not block builds but provide signal about
 - **Result:** ADVISORY (reports modulation level)
 - **Evidence:** OBSERVED (ITEM 064-068 extract-d18-d20.md L1520-1526 — Gas Town callouts identical vs CD-006 callouts zone-adapted)
 
-### GR-35: Layout Choice Driver (Mode Indicator)
-- **Source:** ITEM 076 (extract-d18-d20.md L1552)
-- **Description:** DIAGNOSTIC — whether layout choices are driven by content-type (Applied) or metaphor (Composed)
-- **Check method:** NOT AUTOMATABLE — requires PA auditor assessment
-- **Result:** ADVISORY (flagged for PA attention)
-- **Evidence:** OBSERVED
-- **Note:** Council reclassified ITEM 076 to PA (L7). Gate-runner only flags for PA, does not assess.
+> GR-35 (Layout Driver) was removed. Already rerouted to PA by council. Not automatable.
 
 ---
 
-## SECTION 7: EXPERIMENT STAGE GATES (Pipeline Validation)
+## SECTION 6: EXPERIMENT STAGE GATES — REMOVED
 
-These are meta-gates for the experiment protocol — they don't run on individual builds but on experiment results.
-
-### GR-36: Stage 0 Smoke Test
-- **Source:** ITEM 006 (extract-d09-d11.md L722)
-- **Description:** Pipeline v3 on Gas Town content: PA-05 >= 2.0?
-- **Check method:** PA weaver verdict from smoke test
-- **Pass:** PA-05 >= 2.0
-- **Fail:** PA-05 < 2.0 (STOP & DEBUG — brief broken)
-- **Evidence:** THEORETICAL (experiment gate)
-
-### GR-37: Stage 1 Q20 Shortcut
-- **Source:** ITEM 012 (extract-d09-d11.md L740)
-- **Description:** Old Flagship prompt + 25-line threshold appendix: delta PA-05 >= +0.5?
-- **Check method:** Compare PA-05 before/after threshold addition
-- **Pass:** Delta >= +0.5
-- **Fail:** Delta < +0.5
-- **Evidence:** THEORETICAL
-
-### GR-38: Stage 2 Head-to-Head
-- **Source:** ITEM 019 (extract-d09-d11.md L758-759)
-- **Description:** v3 > old pipeline on BOTH content types (Gas Town + RESEARCH-SYNTHESIS)?
-- **Check method:** Blind PA comparison on both content types
-- **Pass:** v3 wins on both
-- **Fail:** v3 loses on either
-- **Evidence:** THEORETICAL
-
-### GR-39: Stage 4 Flagship Existence
-- **Source:** ITEM 030 (extract-d09-d11.md L789-790)
-- **Description:** PA-05 >= 3.5 AND Tier 5 >= 6/8?
-- **Check method:** PA weaver verdict from maximum-investment build
-- **Pass:** Both thresholds met
-- **Fail:** Either threshold missed
-- **Evidence:** THEORETICAL
+> GR-36 through GR-39 (Experiment Stage Gates) were removed. These are experiment protocol gates, not build verification gates. Moved to separate experiment protocol document.
 
 ---
 
-## SECTION 8: STRUCTURAL / POLICY GATES (Pipeline Architecture)
+## SECTION 7: STRUCTURAL / POLICY GATES — REMOVED
 
-These verify pipeline architecture decisions are correctly implemented.
-
-### GR-40: Single-Pass Default
-- **Source:** Council verdict Contradiction B, ITEM 098 (extract-d01-d03.md L243)
-- **Description:** Pipeline operates in single-pass mode by default. 3-pass architecture is EXPERIMENTAL (blocked until experiment #21 validates).
-- **Check method:** Verify pipeline executed single-pass unless explicit 3-pass flag set AND experiment #21 passed
-- **Pass:** Single-pass execution OR 3-pass with experiment #21 validation
-- **Fail:** 3-pass execution without experiment #21 validation
-- **Evidence:** OBSERVED (single-pass: N=1 at 4/4, N=1 at 3.5; 3-pass: N=0)
-
-### GR-41: Rebuild Not Fix
-- **Source:** ITEM 068-069 (extract-d06-d08.md L621-623), ITEM 110 (extract-d01-d03.md L253)
-- **Description:** Failed builds must be REBUILT with fresh builder in COMPOSING mode, not FIXED with same builder in REPAIR mode
-- **Check method:** Verify that post-PA-failure rebuilds use a new builder instance (different agent ID) and receive generative language (not diagnostic)
-- **Pass:** Fresh builder instance + generative language
-- **Fail:** Same builder reused OR diagnostic language in rebuild prompt
-- **Evidence:** OBSERVED (fix cycles degrade composition — ITEM 028 extract-d15-d17.md L1199)
-
-### GR-42: Gates Hidden From Builder
-- **Source:** ITEM 054 (extract-d06-d08.md L597), ITEM 119-124 (extract-d01-d03.md L261-263)
-- **Description:** Builder must not see gate specifications, thresholds, or pass/fail results
-- **Check method:** Cross-reference with GR-27 (precondition check)
-- **Pass:** Zero gate data in builder context
-- **Fail:** Gate data found in builder context
-- **Evidence:** OBSERVED (builder optimizes for gates when visible — old pipeline failure mode)
-- **Note:** ITEM 122 (extract-d01-d03.md L262) — gates in orchestrator ONLY (new pipeline)
+> GR-40 through GR-42 (Policy Gates) were removed. These are pipeline architecture checks, not Playwright gates. GR-42 overlaps with GR-27. Moved to artifact-orchestrator.md process checks section.
 
 ---
 
-## GATE SUMMARY TABLE
+## GATE SUMMARY TABLE (Updated per Wave 1 fixes)
 
-| Gate ID | Category | Description | Threshold | Evidence | Phase |
-|---------|----------|-------------|-----------|----------|-------|
-| GR-01 | Identity | border-radius: 0 | All = 0px | FACT | Post-build |
-| GR-02 | Identity | box-shadow: none | All = none | FACT | Post-build |
-| GR-03 | Identity | Container 940-960px | 940-960px | FACT | Post-build |
-| GR-04 | Identity | No gradients | Zero gradients | FACT | Post-build |
-| GR-05 | Identity | Warm palette | All palette | FACT | Post-build |
-| GR-06 | Identity | Font trinity | 3 fonts only | FACT | Post-build |
-| GR-07 | Identity | No pure B/W | No #000/#FFF | FACT | Post-build |
-| GR-08 | Identity | No decorative elements | Zero decorative | OBSERVED | Post-build |
-| GR-09 | Identity | Border weight hierarchy | 4/3/1px | FACT | Post-build |
-| GR-10 | Identity | Cross-page DNA | Match tokens.css | FACT | Post-build |
-| GR-11 | Perception | Bg delta >= 15 RGB | >= 15 | PROVEN | Post-build |
-| GR-12 | Perception | Letter-spacing >= 0.025em | >= 0.025em | PROVEN | Post-build |
-| GR-13 | Perception | Stacked gap <= 120px | <= 120px | PROVEN | Post-build |
-| GR-14 | Perception | Total stacked gap <= 150px | <= 150px | OBSERVED | Post-build |
-| GR-15 | Perception | Single margin <= 96px | <= 96px | PROVEN | Post-build |
-| GR-16 | Perception | All CSS perceptible | GR-11-15 pass | PROVEN | Post-build |
-| GR-17 | Anti-pattern | AP-01 Density stacking | min padding >= 12px | OBSERVED | Post-build |
-| GR-18 | Anti-pattern | AP-09 Ghost mechanisms | Zero sub-perceptual | OBSERVED | Post-build |
-| GR-19 | Anti-pattern | AP-10 Threshold gaming | <50% at floor | OBSERVED | Post-build |
-| GR-20 | Anti-pattern | AP-11 Structural echo | <3 consecutive | OBSERVED | Post-build |
-| GR-21 | Anti-pattern | AP-14 Cognitive overload | <=4 channels | THEORETICAL | Post-build |
-| GR-22 | Anti-pattern | AP-02 Color zone conflict | Consistent roles | OBSERVED | Post-build |
-| GR-23 | Precondition | Builder = Opus | Opus model | CONFOUNDED | Pre-build |
-| GR-24 | Precondition | Content heterogeneity | >= moderate | CONFOUNDED | Pre-build |
-| GR-25 | Precondition | Suppressor count = 0 | Zero patterns | OBSERVED | Pre-build |
-| GR-26 | Precondition | Brief size cap | <200 lines, <=73 constraint | OBSERVED | Pre-build |
-| GR-27 | Precondition | Builder gate-free | Zero gate language | OBSERVED | Pre-build |
-| GR-28 | Precondition | Recipe format | Recipe indicators | OBSERVED | Pre-build |
-| GR-29 | Verdict | Ship threshold | PA-05>=3.5, 0 soul | THEORETICAL | Post-PA |
-| GR-30 | Verdict | Rebuild threshold | PA-05<2.5 | OBSERVED | Post-PA |
-| GR-31 | Verdict | Refine threshold | 2.5<=PA-05<3.5 | OBSERVED | Post-PA |
-| GR-32 | Verdict | Refine agent isolation | Zero gate data | OBSERVED | Post-PA |
-| GR-33 | Mode (ADVISORY) | CSS naming mode | Reports only | OBSERVED | Post-build |
-| GR-34 | Mode (ADVISORY) | Component modulation | Reports only | OBSERVED | Post-build |
-| GR-35 | Mode (ADVISORY) | Layout driver | Flags for PA | OBSERVED | Post-build |
-| GR-36 | Experiment | Stage 0 smoke test | PA-05>=2.0 | THEORETICAL | Experiment |
-| GR-37 | Experiment | Stage 1 Q20 | Delta>=+0.5 | THEORETICAL | Experiment |
-| GR-38 | Experiment | Stage 2 H2H | v3 wins both | THEORETICAL | Experiment |
-| GR-39 | Experiment | Stage 4 Flagship | PA-05>=3.5 + T5>=6/8 | THEORETICAL | Experiment |
-| GR-40 | Policy | Single-pass default | No unauthorized 3-pass | OBSERVED | Pre-build |
-| GR-41 | Policy | Rebuild not fix | Fresh builder | OBSERVED | Post-PA |
-| GR-42 | Policy | Gates hidden | Zero gate data | OBSERVED | Pre-build |
+| Gate ID | Category | Tier | Description | Threshold | Evidence | Phase |
+|---------|----------|------|-------------|-----------|----------|-------|
+| **BV-01** | Brief Verification | REQUIRED | Tier line budget | T1>=12, T2>=6, T3>=40, T4>=32, CM>=24 | OBSERVED | Pre-build |
+| **BV-02** | Brief Verification | REQUIRED | Background delta verification | All pairs >= 15 RGB | PROVEN | Pre-build |
+| **BV-03** | Brief Verification | REQUIRED | Recipe format ratio | recipe:checklist >= 3:1 | PROVEN | Pre-build |
+| **BV-04** | Brief Verification | REQUIRED | Suppressor scan | Zero patterns | OBSERVED | Pre-build |
+| GR-01 | Identity | REQUIRED | border-radius: 0 | All = 0px | FACT | Post-build |
+| GR-02 | Identity | REQUIRED | box-shadow: none | All = none | FACT | Post-build |
+| GR-03 | Identity | REQUIRED | Container 940-960px | 940-960px | FACT | Post-build |
+| GR-04 | Identity | REQUIRED | No gradients | Zero gradients | FACT | Post-build |
+| GR-05 | Identity | REQUIRED | Warm palette | All palette | FACT | Post-build |
+| GR-06 | Identity | REQUIRED | Font trinity | 3 fonts only | FACT | Post-build |
+| GR-07 | Identity | REQUIRED | No pure B/W | No #000/#FFF | FACT | Post-build |
+| GR-08 | Identity | REQUIRED | No decorative elements | Zero decorative | OBSERVED | Post-build |
+| GR-09 | Identity | REQUIRED | Border weight hierarchy | 4±0.5 / 3±0.5 / 1±0.5px | FACT | Post-build |
+| GR-10 | Identity | REQUIRED | Cross-page DNA | Match tokens.css | FACT | Post-build |
+| GR-11 | Perception | REQUIRED | Bg delta >= 15 RGB | >= 15 | PROVEN | Post-build |
+| GR-12 | Perception | REQUIRED | Letter-spacing >= 0.025em | >= 0.025em | PROVEN | Post-build |
+| GR-13 | Perception | REQUIRED | Stacked gap <= 120px | <= 120px | PROVEN | Post-build |
+| GR-14 | Perception | REQUIRED | Total stacked gap <= 150px | <= 150px | OBSERVED | Post-build |
+| GR-15 | Perception | REQUIRED | Single margin <= 96px | <= 96px | PROVEN | Post-build |
+| **GR-44** | Perception | REQUIRED | Trailing whitespace void | <= 300px void | OBSERVED | Post-build |
+| GR-17 | Anti-pattern | RECOMMENDED | AP-01 Density stacking | content >= 12px, td/th >= 4px | OBSERVED | Post-build |
+| GR-18 | Anti-pattern | RECOMMENDED | AP-09 Ghost mechanisms | Zero sub-perceptual | OBSERVED | Post-build |
+| GR-19 | Anti-pattern | RECOMMENDED | AP-10 Threshold gaming | <50% at floor | OBSERVED | Post-build |
+| GR-20 | Anti-pattern | RECOMMENDED | AP-11 Structural echo | <3 consecutive | OBSERVED | Post-build |
+| GR-21 | Anti-pattern | ADVISORY | AP-14 Cognitive overload | <=4 channels | THEORETICAL | Post-build |
+| GR-22 | Anti-pattern | ADVISORY | AP-02 Color zone conflict | Consistent roles | OBSERVED | Post-build |
+| GR-23 | Precondition | ADVISORY | Builder = Opus | Opus model | CONFOUNDED | Pre-build |
+| GR-24 | Precondition | ADVISORY | Content heterogeneity | >= moderate | CONFOUNDED | Pre-build |
+| GR-25 | Precondition | RECOMMENDED | Suppressor count = 0 | Zero patterns | OBSERVED | Pre-build |
+| GR-26 | Precondition | RECOMMENDED | Brief size cap | <200 lines, <=73 constraint | OBSERVED | Pre-build |
+| GR-27 | Precondition | RECOMMENDED | Builder gate-free | Zero gate language | OBSERVED | Pre-build |
+| GR-28 | Precondition | RECOMMENDED | Recipe format | Recipe indicators | OBSERVED | Pre-build |
+| GR-33 | Mode | ADVISORY | CSS naming mode | Reports only | OBSERVED | Post-build |
+| GR-34 | Mode | ADVISORY | Component modulation | Reports only | OBSERVED | Post-build |
+| **GR-43** | Output | REQUIRED | Self-evaluation comment | Comment exists | OBSERVED | Post-build |
 
-**Total gates: 42**
-- Identity: 10 (GR-01 through GR-10)
-- Perception: 6 (GR-11 through GR-16)
-- Anti-pattern: 6 (GR-17 through GR-22)
-- Precondition: 6 (GR-23 through GR-28)
-- Verdict: 4 (GR-29 through GR-32)
-- Mode (Advisory): 3 (GR-33 through GR-35)
-- Experiment: 4 (GR-36 through GR-39)
-- Policy: 3 (GR-40 through GR-42)
+**Total gates: 35** (was 42, -13 removed, +6 added)
+- Brief Verification: 4 (BV-01 through BV-04) — Pre-build, text parsing
+- Identity: 10 (GR-01 through GR-10) — Post-build, REQUIRED
+- Perception: 6 (GR-11 through GR-15, GR-44) — Post-build, REQUIRED (GR-16 absorbed into verdict logic, GR-44 trailing void added)
+- Anti-pattern: 6 (GR-17 through GR-22) — Post-build, 4 RECOMMENDED + 2 ADVISORY
+- Output: 1 (GR-43) — Post-build, REQUIRED
+- Precondition: 6 (GR-23 through GR-28) — Pre-build, 4 RECOMMENDED + 2 ADVISORY
+- Mode: 2 (GR-33, GR-34) — Post-build, ADVISORY
+
+**Removed gates (13 total):** GR-16 (absorbed into verdict logic), GR-29-32 (moved to orchestrator verdict logic), GR-35 (moved to PA), GR-36-39 (moved to experiment protocol), GR-40-42 (moved to orchestrator process checks).
 
 ---
 
@@ -684,11 +662,11 @@ Every item classified as Layer 6 GATES in classify-by-layer.md, with its final d
 |---|--------|---------|---------|---------|--------|
 | 1 | extract-d01-d03.md | ITEM 55 | L112 | GR-27 | ACTIVE (precondition) |
 | 2 | extract-d01-d03.md | ITEM 57 | L114 | GR-27 | ACTIVE (precondition) |
-| 3 | extract-d01-d03.md | ITEM 77 | L201-204 | GR-29 | ACTIVE (verdict) |
+| 3 | extract-d01-d03.md | ITEM 77 | L201-204 | GR-29 | REMOVED — moved to orchestrator verdict logic |
 | 4 | extract-d01-d03.md | ITEM 119 | L261 | — | META (old pipeline, historical) |
-| 5 | extract-d01-d03.md | ITEM 120 | L261 | GR-42 | RECLASSIFIED to ORCHESTRATION (council Pattern 1) |
+| 5 | extract-d01-d03.md | ITEM 120 | L261 | GR-42 | REMOVED — reclassified to ORCHESTRATION (council Pattern 1), gate removed |
 | 6 | extract-d01-d03.md | ITEM 121 | L262 | — | META (old pipeline, historical) |
-| 7 | extract-d01-d03.md | ITEM 122 | L262 | GR-42 | ACTIVE (policy) |
+| 7 | extract-d01-d03.md | ITEM 122 | L262 | GR-42 | REMOVED — gate moved to orchestrator process checks |
 | 8 | extract-d01-d03.md | ITEM 123 | L263 | — | META (old pipeline, historical) |
 | 9 | extract-d01-d03.md | ITEM 124 | L263 | — | RECLASSIFIED to DISPOSITION (council Pattern 1) |
 | 10 | extract-d01-d03.md | ITEM 127 | L278-280 | GR-23/24/25 | ACTIVE (preconditions) |
@@ -708,17 +686,17 @@ Every item classified as Layer 6 GATES in classify-by-layer.md, with its final d
 | 24 | extract-d06-d08.md | ITEM 51 | L595-597 | GR-25/26 | ACTIVE (precondition) |
 | 25 | extract-d06-d08.md | ITEM 52 | L596 | GR-26 | ACTIVE (precondition) |
 | 26 | extract-d06-d08.md | ITEM 53 | L596 | GR-25 | ACTIVE (precondition) |
-| 27 | extract-d06-d08.md | ITEM 54 | L597 | GR-42 | ACTIVE (policy) |
+| 27 | extract-d06-d08.md | ITEM 54 | L597 | GR-42 | REMOVED — gate moved to orchestrator process checks |
 | 28 | extract-d06-d08.md | ITEM 55 | L597 | GR-25 | ACTIVE (precondition) |
 | 29 | extract-d06-d08.md | ITEM 64 | L614-615 | GR-17-22 | ACTIVE (anti-pattern gates) |
 | 30 | extract-d06-d08.md | ITEM 65 | L615 | GR-17-22 | ACTIVE (anti-pattern gates) |
-| 31 | extract-d06-d08.md | ITEM 68 | L621-623 | GR-41 | ACTIVE (policy) |
-| 32 | extract-d06-d08.md | ITEM 69 | L621 | GR-41 | ACTIVE (policy) |
-| 33 | extract-d06-d08.md | ITEM 70 | L622 | GR-41 | ACTIVE (policy) |
-| 34 | extract-d09-d11.md | ITEM 6 | L722 | GR-36 | ACTIVE (experiment) |
-| 35 | extract-d09-d11.md | ITEM 12 | L740 | GR-37 | ACTIVE (experiment) |
-| 36 | extract-d09-d11.md | ITEM 19 | L758-759 | GR-38 | ACTIVE (experiment) |
-| 37 | extract-d09-d11.md | ITEM 30 | L789-790 | GR-39 | ACTIVE (experiment) |
+| 31 | extract-d06-d08.md | ITEM 68 | L621-623 | GR-41 | REMOVED — gate moved to orchestrator process checks |
+| 32 | extract-d06-d08.md | ITEM 69 | L621 | GR-41 | REMOVED — gate moved to orchestrator process checks |
+| 33 | extract-d06-d08.md | ITEM 70 | L622 | GR-41 | REMOVED — gate moved to orchestrator process checks |
+| 34 | extract-d09-d11.md | ITEM 6 | L722 | GR-36 | REMOVED — moved to experiment protocol |
+| 35 | extract-d09-d11.md | ITEM 12 | L740 | GR-37 | REMOVED — moved to experiment protocol |
+| 36 | extract-d09-d11.md | ITEM 19 | L758-759 | GR-38 | REMOVED — moved to experiment protocol |
+| 37 | extract-d09-d11.md | ITEM 30 | L789-790 | GR-39 | REMOVED — moved to experiment protocol |
 | 38 | extract-d15-d17.md | ITEM 003 | L1136 | GR-17 | ACTIVE (anti-pattern) |
 | 39 | extract-d15-d17.md | ITEM 006 | L1150 | GR-20 | ACTIVE (anti-pattern) |
 | 40 | extract-d15-d17.md | ITEM 010 | L1159 | GR-22 | ACTIVE (anti-pattern) |
@@ -731,9 +709,9 @@ Every item classified as Layer 6 GATES in classify-by-layer.md, with its final d
 | 47 | extract-d15-d17.md | ITEM 025 | L1191 | GR-17-22 | ACTIVE (anti-pattern summary) |
 | 48 | extract-d15-d17.md | ITEM 026 | L1192 | — | Routed to PA |
 | 49 | extract-d15-d17.md | ITEM 027 | L1193 | — | Routed to PA (EXPERIMENTAL Critic) |
-| 50 | extract-d15-d17.md | ITEM 043 | L1251 | GR-30 | ACTIVE (verdict) |
-| 51 | extract-d15-d17.md | ITEM 047 | L1256 | GR-31 | ACTIVE (verdict) |
-| 52 | extract-d15-d17.md | ITEM 050 | L1259 | GR-32 | ACTIVE (verdict) |
+| 50 | extract-d15-d17.md | ITEM 043 | L1251 | GR-30 | REMOVED — moved to orchestrator verdict logic |
+| 51 | extract-d15-d17.md | ITEM 047 | L1256 | GR-31 | REMOVED — moved to orchestrator verdict logic |
+| 52 | extract-d15-d17.md | ITEM 050 | L1259 | GR-32 | REMOVED — moved to orchestrator verdict logic |
 | 53 | extract-d18-d20.md | ITEM 57 | L1502 | GR-33 | RECLASSIFIED to VALUES (council); ADVISORY gate |
 | 54 | extract-d18-d20.md | ITEM 60 | L1512 | GR-33 | ACTIVE (mode indicator) |
 | 55 | extract-d18-d20.md | ITEM 61 | L1512 | GR-33 | RECLASSIFIED to VALUES (council); ADVISORY gate |
@@ -744,14 +722,16 @@ Every item classified as Layer 6 GATES in classify-by-layer.md, with its final d
 | 60 | extract-d18-d20.md | ITEM 73 | L1547 | — | META (verdict statement) |
 | 61 | extract-d18-d20.md | ITEM 74 | L1550 | GR-33 | ACTIVE (mode indicator) |
 | 62 | extract-d18-d20.md | ITEM 75 | L1551 | GR-34 | ACTIVE (mode indicator) |
-| 63 | extract-d18-d20.md | ITEM 76 | L1552 | GR-35 | ACTIVE (mode indicator, PA route) |
+| 63 | extract-d18-d20.md | ITEM 76 | L1552 | GR-35 | REMOVED — rerouted to PA |
 | 64 | extract-d18-d20.md | ITEM 77 | L1553 | — | RECLASSIFIED to VALUES (CCS not automatable) |
 | 65 | extract-d18-d20.md | ITEM 78 | L1554 | — | RECLASSIFIED to ORCHESTRATION (council Pattern 1) |
 | 66 | extract-d21-d25.md | ITEM 129 | L1942 | — | ORCHESTRATOR (policy recommendation) |
 | 67 | extract-d21-d25.md | ITEM 130 | L1943 | — | ORCHESTRATOR (policy recommendation) |
 
 **Traceability summary:**
-- ACTIVE gates: 42 (mapped to GR-01 through GR-42)
+- ACTIVE gates: 35 (BV-01-04, GR-01-15, GR-17-28, GR-33-34, GR-43, GR-44; 13 gates removed in Wave 1)
+- REMOVED gates: 13 (GR-16 absorbed, GR-29-32 to orchestrator verdict, GR-35 to PA, GR-36-39 to experiment protocol, GR-40-42 to orchestrator process checks)
+- ADDED gates: 6 (BV-01-04 brief verification, GR-43 self-eval output, GR-44 trailing void)
 - RECLASSIFIED by council: 10 (Pattern 1) + 2 (Pattern 4) = 12
 - Routed to PA: 7 (anti-patterns requiring perceptual judgment)
 - Routed to META/DOCUMENTATION: 5 (old pipeline historical items)
@@ -761,3 +741,1018 @@ Every item classified as Layer 6 GATES in classify-by-layer.md, with its final d
 ---
 
 *This artifact conforms to all council-verdict.md rulings. Where this document conflicts with any pre-council classification, this document takes precedence.*
+
+---
+
+## STACKED GAP THRESHOLD CLARIFICATION
+
+**GR-13 (120px) and GR-14 (150px) are COMPLEMENTARY gates, not conflicting thresholds.**
+
+- **GR-13** measures the CSS PROPERTY SUM: `margin-bottom + padding-bottom + margin-top + padding-top` of adjacent elements at a section boundary. Each boundary must total <= 120px.
+- **GR-14** measures the VISUAL MEASUREMENT: `getBoundingClientRect()` gap between the last element in one zone and the first element in the next zone. This captures the TOTAL visual gap including all contributing properties, which may exceed the CSS sum due to collapsing margins, nested padding, or other layout effects. Each boundary must total <= 150px.
+
+**Why both are needed:** The S-09 stacking loophole showed that individual CSS properties can each pass per-property checks while their STACKED visual effect creates 210-276px voids. GR-13 catches excessive individual values; GR-14 catches excessive accumulated visual gaps.
+
+**Example:** If Zone 3 has `padding-bottom: 48px` and Zone 4 has `padding-top: 64px`, the CSS sum is 112px (passes GR-13). But if Zone 3's last child also has `margin-bottom: 32px` and Zone 4's first child has `margin-top: 24px`, the VISUAL gap could be 168px (fails GR-14). The gate runner must measure BOTH.
+
+---
+
+## EXECUTABLE GATE RUNNER CODE
+
+This is the pre-built JavaScript code the orchestrator should execute. Organized into 3 sections:
+1. **Brief Verification (BV-01 through BV-04)** — text parsing, runs in Phase 1
+2. **Core Gate Runner (GR-01 through GR-15, GR-43)** — Playwright DOM inspection, runs in Phase 3A
+3. **Anti-Pattern Gates (GR-17 through GR-22)** — Playwright heuristic checks, runs in Phase 3A
+
+### Brief Verification Gates (BV-01 through BV-04) — Text Parsing
+
+```javascript
+// Brief Verification Gates — Run AFTER brief assembly, BEFORE builder execution
+// Input: briefText (string) — the assembled activation brief
+// Output: array of gate results
+
+function runBriefVerification(briefText) {
+  const results = [];
+  const lines = briefText.split('\n');
+
+  // BV-01: Tier Line Budget
+  const tierHeaders = {
+    'T1': { pattern: /^#+\s*Tier\s*1/im, min: 12 },
+    'T2': { pattern: /^#+\s*Tier\s*2/im, min: 6 },
+    'T3': { pattern: /^#+\s*Tier\s*3/im, min: 40 },
+    'T4': { pattern: /^#+\s*Tier\s*4/im, min: 32 },
+    'ContentMap': { pattern: /^#+\s*Content\s*Map/im, min: 24 }
+  };
+  const tierCounts = {};
+  let currentTier = null;
+  let currentCount = 0;
+  for (const line of lines) {
+    for (const [tier, config] of Object.entries(tierHeaders)) {
+      if (config.pattern.test(line)) {
+        if (currentTier) tierCounts[currentTier] = currentCount;
+        currentTier = tier;
+        currentCount = 0;
+        break;
+      }
+    }
+    if (currentTier && line.trim()) currentCount++;
+  }
+  if (currentTier) tierCounts[currentTier] = currentCount;
+
+  const budgetFailures = Object.entries(tierHeaders).filter(([tier, config]) => {
+    const count = tierCounts[tier] || 0;
+    return count < config.min * 0.8; // 80% of budget threshold
+  }).map(([tier, config]) => ({ tier, actual: tierCounts[tier] || 0, min: config.min }));
+
+  results.push({
+    gate: 'BV-01', name: 'Tier Line Budget',
+    status: budgetFailures.length === 0 ? 'PASS' : 'FAIL',
+    measured: { tierCounts, budgetFailures },
+    threshold: tierHeaders
+  });
+
+  // BV-02: Background Delta Verification
+  const hexPattern = /#([0-9a-fA-F]{6})/g;
+  const hexValues = [...briefText.matchAll(hexPattern)].map(m => m[1]);
+  const rgbFromHex = (hex) => ({
+    r: parseInt(hex.slice(0, 2), 16),
+    g: parseInt(hex.slice(2, 4), 16),
+    b: parseInt(hex.slice(4, 6), 16)
+  });
+  const bgDeltaFailures = [];
+  // Check consecutive hex pairs that appear in zone/background context
+  for (let i = 0; i < hexValues.length - 1; i++) {
+    const a = rgbFromHex(hexValues[i]);
+    const b = rgbFromHex(hexValues[i + 1]);
+    const delta = Math.max(Math.abs(a.r - b.r), Math.abs(a.g - b.g), Math.abs(a.b - b.b));
+    if (delta > 0 && delta < 15) {
+      bgDeltaFailures.push({ hex1: '#' + hexValues[i], hex2: '#' + hexValues[i + 1], delta });
+    }
+  }
+  results.push({
+    gate: 'BV-02', name: 'Background Delta Verification',
+    status: bgDeltaFailures.length === 0 ? 'PASS' : 'FAIL',
+    measured: { totalHexPairs: hexValues.length, failures: bgDeltaFailures },
+    threshold: { minDelta: 15 }
+  });
+
+  // BV-03: Recipe Format Verification
+  const recipeVerbs = (briefText.match(/\b(Build|Create|Derive|Map|Read|Select|Deploy|Assess)\b/g) || []).length;
+  const checklistVerbs = (briefText.match(/\b(Verify|Fail if|Must be|Ensure|Check that)\b/gi) || []).length;
+  const ratio = checklistVerbs > 0 ? recipeVerbs / checklistVerbs : recipeVerbs > 0 ? Infinity : 0;
+  results.push({
+    gate: 'BV-03', name: 'Recipe Format Verification',
+    status: ratio >= 3 ? 'PASS' : 'FAIL',
+    measured: { recipeVerbs, checklistVerbs, ratio: ratio === Infinity ? 'Infinity' : ratio.toFixed(1) },
+    threshold: { minRatio: '3:1' }
+  });
+
+  // BV-04: Suppressor Scan
+  const suppressorPatterns = [
+    { name: 'S-01 sample range', pattern: /sample\s+\d+-\d+/i },
+    { name: 'S-02 raw prohibition', pattern: /must\s+not|shall\s+not|never\s+use/i },
+    { name: 'S-11 compliance voice', pattern: /verify\s+that|fail\s+if|must\s+be/i },
+    { name: 'S-08 count-gate', pattern: />=?\s*\d+\s+channels?/i }
+  ];
+  const suppressorsFound = suppressorPatterns.filter(sp => sp.pattern.test(briefText));
+  results.push({
+    gate: 'BV-04', name: 'Suppressor Scan',
+    status: suppressorsFound.length === 0 ? 'PASS' : 'FAIL',
+    measured: { suppressorsFound: suppressorsFound.map(s => s.name) },
+    threshold: { maxSuppressors: 0 }
+  });
+
+  return results;
+}
+```
+
+### Core Gate Runner (GR-01 through GR-15, GR-43)
+
+```javascript
+// Gate Runner — Pipeline v3 Programmatic Verification
+// Execute via: orchestrator Playwright session against served HTML at 1440px viewport
+// Prerequisites: page served via HTTP, document.fonts.ready awaited
+
+async function runGateRunner(page) {
+  const results = [];
+
+  // Wait for fonts before any checks
+  await page.evaluate(() => document.fonts.ready);
+
+  // ========== SHARED HELPER: isRenderedElement ==========
+  // Inject shared helper into page context so all gates can use it.
+  // Filters out non-rendered elements (HEAD/META/SCRIPT/etc.) and hidden elements.
+  await page.evaluate(() => {
+    window.isRenderedElement = function(el) {
+      const NON_RENDERED_TAGS = ['HTML', 'HEAD', 'META', 'TITLE', 'SCRIPT', 'STYLE', 'LINK', 'BR'];
+      if (NON_RENDERED_TAGS.includes(el.tagName)) return false;
+      const style = getComputedStyle(el);
+      if (style.display === 'none') return false;
+      if (style.visibility === 'hidden') return false;
+      const rect = el.getBoundingClientRect();
+      if (rect.height === 0 && rect.width === 0) return false;
+      return true;
+    };
+  });
+
+  // ========== SECTION 1: IDENTITY GATES (GR-01 through GR-10) ==========
+
+  // GR-01: Border Radius Zero
+  const borderRadiusViolations = await page.evaluate(() => {
+    const violations = [];
+    document.querySelectorAll('*').forEach(el => {
+      if (!isRenderedElement(el)) return;
+      const br = getComputedStyle(el).borderRadius;
+      if (br && br !== '0px') {
+        violations.push({ tag: el.tagName, class: el.className, value: br });
+      }
+    });
+    return violations;
+  });
+  results.push({
+    gate: 'GR-01', name: 'Border Radius Zero',
+    status: borderRadiusViolations.length === 0 ? 'PASS' : 'FAIL',
+    measured: { violations: borderRadiusViolations.length, samples: borderRadiusViolations.slice(0, 5) },
+    threshold: { borderRadius: '0px' }
+  });
+
+  // GR-02: Box Shadow None
+  const boxShadowViolations = await page.evaluate(() => {
+    const violations = [];
+    document.querySelectorAll('*').forEach(el => {
+      if (!isRenderedElement(el)) return;
+      const bs = getComputedStyle(el).boxShadow;
+      if (bs && bs !== 'none') {
+        violations.push({ tag: el.tagName, class: el.className, value: bs });
+      }
+    });
+    return violations;
+  });
+  results.push({
+    gate: 'GR-02', name: 'Box Shadow None',
+    status: boxShadowViolations.length === 0 ? 'PASS' : 'FAIL',
+    measured: { violations: boxShadowViolations.length, samples: boxShadowViolations.slice(0, 5) },
+    threshold: { boxShadow: 'none' }
+  });
+
+  // GR-03: Container Width 940-960px
+  const containerWidth = await page.evaluate(() => {
+    const candidates = [
+      ...document.querySelectorAll('[class*="spine"], [class*="container"], [class*="wrapper"], main, article'),
+      ...document.querySelectorAll('[style*="max-width"]')
+    ];
+    const widths = candidates.map(el => ({
+      tag: el.tagName, class: el.className,
+      maxWidth: getComputedStyle(el).maxWidth,
+      computedWidth: el.getBoundingClientRect().width
+    })).filter(w => {
+      const mw = parseFloat(w.maxWidth);
+      return !isNaN(mw) && mw >= 800 && mw <= 1200;
+    });
+    return widths;
+  });
+  const containerPass = containerWidth.some(c => {
+    const mw = parseFloat(c.maxWidth);
+    return mw >= 940 && mw <= 960;
+  });
+  results.push({
+    gate: 'GR-03', name: 'Container Width 940-960px',
+    status: containerPass ? 'PASS' : 'FAIL',
+    measured: { containers: containerWidth },
+    threshold: { minWidth: 940, maxWidth: 960 }
+  });
+
+  // GR-04: No Gradients
+  const gradientViolations = await page.evaluate(() => {
+    const violations = [];
+    document.querySelectorAll('*').forEach(el => {
+      if (!isRenderedElement(el)) return;
+      const bg = getComputedStyle(el).backgroundImage;
+      if (bg && bg !== 'none' && bg.includes('gradient')) {
+        violations.push({ tag: el.tagName, class: el.className, value: bg.substring(0, 100) });
+      }
+    });
+    return violations;
+  });
+  results.push({
+    gate: 'GR-04', name: 'No Gradients',
+    status: gradientViolations.length === 0 ? 'PASS' : 'FAIL',
+    measured: { violations: gradientViolations.length, samples: gradientViolations.slice(0, 5) },
+    threshold: { gradients: 0 }
+  });
+
+  // GR-05: Warm Palette Compliance
+  const paletteCheck = await page.evaluate(() => {
+    const pureBlack = [];
+    const pureWhite = [];
+    const coldColors = [];
+
+    function parseRGB(str) {
+      const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (match) return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) };
+      return null;
+    }
+
+    function isCold(rgb) {
+      return rgb && rgb.b > rgb.r + 10 && rgb.b > rgb.g + 10;
+    }
+
+    document.querySelectorAll('*').forEach(el => {
+      if (!isRenderedElement(el)) return;
+      const style = getComputedStyle(el);
+      ['color', 'backgroundColor', 'borderColor'].forEach(prop => {
+        const val = style[prop];
+        if (!val || val === 'transparent' || val === 'rgba(0, 0, 0, 0)') return;
+        const rgb = parseRGB(val);
+        if (!rgb) return;
+        if (rgb.r === 0 && rgb.g === 0 && rgb.b === 0) {
+          pureBlack.push({ tag: el.tagName, prop, class: el.className });
+        }
+        if (rgb.r === 255 && rgb.g === 255 && rgb.b === 255) {
+          pureWhite.push({ tag: el.tagName, prop, class: el.className });
+        }
+        if (isCold(rgb)) {
+          coldColors.push({ tag: el.tagName, prop, class: el.className, value: val });
+        }
+      });
+    });
+    return { pureBlack: pureBlack.length, pureWhite: pureWhite.length, coldColors: coldColors.length,
+             samples: { black: pureBlack.slice(0, 3), white: pureWhite.slice(0, 3), cold: coldColors.slice(0, 3) } };
+  });
+  results.push({
+    gate: 'GR-05', name: 'Warm Palette Compliance',
+    status: (paletteCheck.pureBlack === 0 && paletteCheck.pureWhite === 0 && paletteCheck.coldColors === 0) ? 'PASS' : 'FAIL',
+    measured: paletteCheck,
+    threshold: { pureBlack: 0, pureWhite: 0, coldColors: 0 }
+  });
+
+  // GR-06: Font Trinity
+  const fontCheck = await page.evaluate(async () => {
+    await document.fonts.ready;
+    const allowedFamilies = ['instrument serif', 'inter', 'jetbrains mono'];
+    const violations = [];
+    const found = new Set();
+
+    document.querySelectorAll('*').forEach(el => {
+      if (!isRenderedElement(el)) return;
+      const ff = getComputedStyle(el).fontFamily.toLowerCase();
+      const primary = ff.split(',')[0].trim().replace(/['"]/g, '');
+      if (primary) {
+        const isAllowed = allowedFamilies.some(f => primary.includes(f)) ||
+          ['system-ui', '-apple-system', 'sans-serif', 'serif', 'monospace', 'ui-sans-serif', 'ui-serif', 'ui-monospace'].includes(primary);
+        if (!isAllowed) {
+          violations.push({ tag: el.tagName, class: el.className, font: primary });
+        }
+        allowedFamilies.forEach(f => { if (primary.includes(f)) found.add(f); });
+      }
+    });
+    return { violations: violations.length, found: [...found], samples: violations.slice(0, 5) };
+  });
+  const allThreePresent = fontCheck.found.length === 3;
+  // Binary PASS/FAIL only — no PASS* status
+  results.push({
+    gate: 'GR-06', name: 'Font Trinity',
+    status: (fontCheck.violations === 0 && allThreePresent) ? 'PASS' : 'FAIL',
+    measured: fontCheck,
+    threshold: { allowedFonts: ['Instrument Serif', 'Inter', 'JetBrains Mono'], allPresent: true }
+  });
+
+  // GR-07: No Pure Black / Pure White
+  // Standalone executable code for pure B/W check (separate from GR-05 palette check)
+  const pureBWCheck = await page.evaluate(() => {
+    const pureBlack = [];
+    const pureWhite = [];
+    function parseRGBLocal(str) {
+      const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (match) return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) };
+      return null;
+    }
+    document.querySelectorAll('*').forEach(el => {
+      if (!isRenderedElement(el)) return;
+      const style = getComputedStyle(el);
+      ['color', 'backgroundColor', 'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor'].forEach(prop => {
+        const val = style[prop];
+        if (!val || val === 'transparent' || val === 'rgba(0, 0, 0, 0)') return;
+        const rgb = parseRGBLocal(val);
+        if (!rgb) return;
+        if (rgb.r === 0 && rgb.g === 0 && rgb.b === 0) {
+          pureBlack.push({ tag: el.tagName, class: el.className, prop });
+        }
+        if (rgb.r === 255 && rgb.g === 255 && rgb.b === 255) {
+          pureWhite.push({ tag: el.tagName, class: el.className, prop });
+        }
+      });
+    });
+    return { pureBlack: pureBlack.length, pureWhite: pureWhite.length,
+             samples: { black: pureBlack.slice(0, 5), white: pureWhite.slice(0, 5) } };
+  });
+  results.push({
+    gate: 'GR-07', name: 'No Pure Black / Pure White',
+    status: (pureBWCheck.pureBlack === 0 && pureBWCheck.pureWhite === 0) ? 'PASS' : 'FAIL',
+    measured: pureBWCheck,
+    threshold: { pureBlack: 0, pureWhite: 0 }
+  });
+
+  // GR-08: No Decorative Elements
+  // Heuristic code for decorative element detection
+  const decorativeCheck = await page.evaluate(() => {
+    const decorative = [];
+    // Check for <hr> without adjacent heading (standalone decorative dividers)
+    document.querySelectorAll('hr').forEach(hr => {
+      const prev = hr.previousElementSibling;
+      const next = hr.nextElementSibling;
+      const prevIsHeading = prev && /^H[1-6]$/.test(prev.tagName);
+      const nextIsHeading = next && /^H[1-6]$/.test(next.tagName);
+      // Standalone hr (not a heading separator) = decorative
+      if (!prevIsHeading && !nextIsHeading) {
+        decorative.push({ type: 'standalone-hr', tag: 'HR' });
+      }
+    });
+    // Check for empty divs used as spacers (height > 10px but no text content)
+    document.querySelectorAll('div').forEach(div => {
+      if (div.textContent.trim() === '' && div.children.length === 0) {
+        const rect = div.getBoundingClientRect();
+        if (rect.height > 10) {
+          decorative.push({ type: 'empty-spacer-div', height: Math.round(rect.height), class: div.className });
+        }
+      }
+    });
+    // Check for icon-only elements without functional purpose (aria-hidden, no text, contains svg/img)
+    document.querySelectorAll('[aria-hidden="true"], .icon, [class*="icon"]').forEach(el => {
+      if (el.textContent.trim() === '' && !el.closest('button') && !el.closest('a')) {
+        decorative.push({ type: 'icon-only-decorative', tag: el.tagName, class: el.className });
+      }
+    });
+    return { decorative: decorative.length, samples: decorative.slice(0, 5) };
+  });
+  results.push({
+    gate: 'GR-08', name: 'No Decorative Elements',
+    status: decorativeCheck.decorative === 0 ? 'PASS' : 'FAIL',
+    measured: decorativeCheck,
+    threshold: { decorativeElements: 0 },
+    note: 'Heuristic detection — covers standalone hrs, empty spacer divs, icon-only decorative elements'
+  });
+
+  // Header DNA (sub-check of GR-10, kept as diagnostic — was previously mislabeled as GR-07)
+  const headerCheck = await page.evaluate(() => {
+    const header = document.querySelector('header') || document.querySelector('[class*="header"]') || document.querySelector('[role="banner"]');
+    if (!header) return { found: false };
+
+    const style = getComputedStyle(header);
+    const bg = style.backgroundColor;
+    const bbWidth = parseFloat(style.borderBottomWidth);
+    const bbColor = style.borderBottomColor;
+
+    const match = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    const isDark = match ? (parseInt(match[1]) + parseInt(match[2]) + parseInt(match[3])) < 200 : false;
+
+    const isRedBorder = bbColor && bbColor.match(/rgba?\((\d+)/) && parseInt(bbColor.match(/rgba?\((\d+)/)[1]) > 200;
+    const is3px = bbWidth >= 2.5 && bbWidth <= 3.5;
+
+    return {
+      found: true, isDark, bbWidth, bbColor, isRedBorder, is3px, bg,
+      pass: isDark && isRedBorder && is3px
+    };
+  });
+  // Header DNA result folded into GR-10 measured data (not a separate gate)
+
+  // GR-09: Border Weight Hierarchy (4/3/1px)
+  // Tolerance-band matching for 4/3/1 hierarchy (replaces simple length check)
+  const borderWeights = await page.evaluate(() => {
+    const weights = new Map();
+    document.querySelectorAll('*').forEach(el => {
+      if (!isRenderedElement(el)) return;
+      const style = getComputedStyle(el);
+      ['borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth'].forEach(prop => {
+        const w = parseFloat(style[prop]);
+        if (w > 0) {
+          const key = w.toFixed(1);
+          if (!weights.has(key)) weights.set(key, []);
+          weights.get(key).push({ tag: el.tagName, class: el.className, prop, width: w });
+        }
+      });
+    });
+    return Object.fromEntries(weights);
+  });
+  const weightValues = Object.keys(borderWeights).map(Number).sort((a, b) => b - a);
+  // Tolerance-band matching — subpixel rendering means 3px may compute as 2.67px
+  const hasPrimary = weightValues.some(w => w >= 3.5 && w <= 4.5);
+  const hasSecondary = weightValues.some(w => w >= 2.5 && w <= 3.5);
+  const hasTertiary = weightValues.some(w => w >= 0.5 && w <= 1.5);
+  const hasHierarchy = hasPrimary && (hasSecondary || hasTertiary);
+  results.push({
+    gate: 'GR-09', name: 'Border Weight Hierarchy',
+    status: hasHierarchy ? 'PASS' : 'FAIL',
+    measured: { distinctWeights: weightValues, counts: Object.fromEntries(Object.entries(borderWeights).map(([k, v]) => [k, v.length])), hasPrimary, hasSecondary, hasTertiary },
+    threshold: { expectedHierarchy: '4px / 3px / 1px', toleranceBands: '4±0.5 / 3±0.5 / 1±0.5' },
+    note: 'Tolerance bands account for subpixel rendering (e.g., 2.67px for 3px)'
+  });
+
+  // Typography Foundations (line-height 1.7, h3 italic) — sub-checks folded into GR-10
+  const typographyCheck = await page.evaluate(() => {
+    const body = document.body;
+    const bodyLH = parseFloat(getComputedStyle(body).lineHeight) / parseFloat(getComputedStyle(body).fontSize);
+
+    const h3s = document.querySelectorAll('h3');
+    let h3Italic = true;
+    h3s.forEach(h3 => {
+      if (getComputedStyle(h3).fontStyle !== 'italic') h3Italic = false;
+    });
+
+    return { bodyLineHeight: bodyLH.toFixed(2), h3Italic, h3Count: h3s.length };
+  });
+  // Typography results are folded into GR-10 Cross-Page DNA (no separate gate result)
+
+  // GR-10: Cross-Page DNA Properties
+  // Cross-page DNA sub-checks: callout 4px border, ::selection red, :focus-visible 3px, p max-width 70ch
+  const dnaCheck = await page.evaluate(() => {
+    // Sub-check 1: Skip link exists
+    const skipLink = document.querySelector('[class*="skip"], a[href="#main"], a[href="#content"]');
+
+    // Sub-check 2: Heading hierarchy
+    const headings = [...document.querySelectorAll('h1, h2, h3, h4, h5, h6')].map(h => ({
+      tag: h.tagName, text: h.textContent.substring(0, 50)
+    }));
+    let hierarchyOk = true;
+    for (let i = 1; i < headings.length; i++) {
+      const prev = parseInt(headings[i - 1].tag[1]);
+      const curr = parseInt(headings[i].tag[1]);
+      if (curr > prev + 1) hierarchyOk = false;
+    }
+
+    // Sub-check 3: Callout 4px left border
+    const callouts = document.querySelectorAll('.callout, blockquote, [class*="callout"]');
+    let calloutBorderOk = true;
+    callouts.forEach(c => {
+      const blw = parseFloat(getComputedStyle(c).borderLeftWidth);
+      if (blw < 3.5 || blw > 4.5) calloutBorderOk = false;
+    });
+
+    // Sub-check 4: ::selection red background (check via stylesheet rules)
+    let selectionRedOk = false;
+    try {
+      for (const sheet of document.styleSheets) {
+        try {
+          for (const rule of sheet.cssRules) {
+            if (rule.selectorText && rule.selectorText.includes('::selection')) {
+              const bgProp = rule.style.backgroundColor || rule.style.background || '';
+              if (bgProp.toLowerCase().includes('e83025') || bgProp.toLowerCase().includes('red') ||
+                  (bgProp.match && bgProp.match(/rgba?\(232/) !== null)) {
+                selectionRedOk = true;
+              }
+            }
+          }
+        } catch(e) { /* cross-origin stylesheet */ }
+      }
+    } catch(e) {}
+
+    // Sub-check 5: :focus-visible 3px solid primary (check via stylesheet rules)
+    let focusVisibleOk = false;
+    try {
+      for (const sheet of document.styleSheets) {
+        try {
+          for (const rule of sheet.cssRules) {
+            if (rule.selectorText && rule.selectorText.includes(':focus-visible')) {
+              const outline = rule.style.outline || rule.style.outlineWidth || '';
+              if (outline.includes('3px')) focusVisibleOk = true;
+            }
+          }
+        } catch(e) {}
+      }
+    } catch(e) {}
+
+    // Sub-check 6: p max-width 70ch
+    const paragraphs = document.querySelectorAll('p');
+    let pMaxWidthOk = true;
+    paragraphs.forEach(p => {
+      const mw = getComputedStyle(p).maxWidth;
+      if (mw !== 'none') {
+        // Accept 70ch or equivalent pixel value (~1120px at 16px)
+        if (mw === '70ch') { /* ok */ }
+        else {
+          const px = parseFloat(mw);
+          if (px > 0 && px > 1200) pMaxWidthOk = false;
+        }
+      }
+    });
+
+    const ariaLabels = document.querySelectorAll('[aria-label]').length;
+    const landmarks = document.querySelectorAll('[role], header, main, nav, footer, section, article, aside').length;
+
+    return {
+      skipLink: !!skipLink, hierarchyOk, calloutBorderOk, selectionRedOk,
+      focusVisibleOk, pMaxWidthOk, ariaLabels, landmarks,
+      headingCount: headings.length, calloutCount: callouts.length
+    };
+  });
+  const bodyLHOk = parseFloat(typographyCheck.bodyLineHeight) >= 1.6;
+  const h3ItalicOk = typographyCheck.h3Italic;
+  const dnaSubChecks = [dnaCheck.skipLink, dnaCheck.hierarchyOk, dnaCheck.calloutBorderOk, dnaCheck.selectionRedOk, dnaCheck.focusVisibleOk, dnaCheck.pMaxWidthOk, bodyLHOk, h3ItalicOk, headerCheck.pass];
+  const dnaCriticalPass = dnaSubChecks.every(Boolean);
+  results.push({
+    gate: 'GR-10', name: 'Cross-Page DNA Properties',
+    status: dnaCriticalPass ? 'PASS' : 'FAIL',
+    measured: {
+      ...dnaCheck,
+      bodyLineHeight: typographyCheck.bodyLineHeight, bodyLHOk,
+      h3Italic: h3ItalicOk, h3Count: typographyCheck.h3Count,
+      headerDNA: headerCheck
+    },
+    threshold: { skipLink: true, hierarchyOk: true, calloutBorder: '4px', selectionRed: true, focusVisible: '3px solid primary', pMaxWidth: '70ch', bodyLineHeight: '>=1.6', h3FontStyle: 'italic', headerDarkBg: true, headerRedBorder: '3px' },
+    note: '::selection and :focus-visible checked via stylesheet rules (not computed style). Typography and header DNA folded in.'
+  });
+
+  // ========== SECTION 2: PERCEPTION GATES (GR-11 through GR-15, GR-44) ==========
+
+  // GR-11: Background Delta >= 15 RGB
+  const bgDeltaCheck = await page.evaluate(() => {
+    const sections = document.querySelectorAll('section, [class*="zone"], [class*="section"]');
+    if (sections.length < 2) return { zones: 0, pass: true, deltas: [] };
+
+    function parseRGB(str) {
+      const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (match) return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) };
+      return null;
+    }
+
+    const backgrounds = [];
+    sections.forEach(s => {
+      const bg = getComputedStyle(s).backgroundColor;
+      const rgb = parseRGB(bg);
+      if (rgb) backgrounds.push({ element: s.className || s.tagName, rgb, raw: bg });
+    });
+
+    const deltas = [];
+    for (let i = 0; i < backgrounds.length - 1; i++) {
+      const a = backgrounds[i].rgb;
+      const b = backgrounds[i + 1].rgb;
+      const delta = Math.max(Math.abs(a.r - b.r), Math.abs(a.g - b.g), Math.abs(a.b - b.b));
+      deltas.push({
+        from: backgrounds[i].element, to: backgrounds[i + 1].element,
+        delta, fromColor: backgrounds[i].raw, toColor: backgrounds[i + 1].raw,
+        pass: delta >= 15
+      });
+    }
+    return { zones: backgrounds.length, deltas, allPass: deltas.every(d => d.pass) };
+  });
+  results.push({
+    gate: 'GR-11', name: 'Background Delta >= 15 RGB',
+    status: bgDeltaCheck.allPass ? 'PASS' : 'FAIL',
+    measured: bgDeltaCheck,
+    threshold: { minDelta: 15 }
+  });
+
+  // GR-12: Letter Spacing >= 0.025em
+  const letterSpacingCheck = await page.evaluate(() => {
+    const violations = [];
+    document.querySelectorAll('*').forEach(el => {
+      const ls = getComputedStyle(el).letterSpacing;
+      if (ls && ls !== 'normal' && ls !== '0px') {
+        const px = parseFloat(ls);
+        const fs = parseFloat(getComputedStyle(el).fontSize);
+        const em = px / fs;
+        if (em > 0 && em < 0.025) {
+          violations.push({ tag: el.tagName, class: el.className, letterSpacing: ls, fontSize: fs + 'px', em: em.toFixed(4) });
+        }
+      }
+    });
+    return { violations: violations.length, samples: violations.slice(0, 5) };
+  });
+  results.push({
+    gate: 'GR-12', name: 'Letter Spacing >= 0.025em',
+    status: letterSpacingCheck.violations === 0 ? 'PASS' : 'FAIL',
+    measured: letterSpacingCheck,
+    threshold: { minLetterSpacing: '0.025em' }
+  });
+
+  // GR-13: Stacked Gap <= 120px (CSS property sum at section boundaries)
+  const stackedGapCheck = await page.evaluate(() => {
+    const sections = document.querySelectorAll('section, [class*="zone"], [class*="section"]');
+    const gaps = [];
+    for (let i = 0; i < sections.length - 1; i++) {
+      const curr = sections[i];
+      const next = sections[i + 1];
+      // Measure CSS property sum
+      const currStyle = getComputedStyle(curr);
+      const nextStyle = getComputedStyle(next);
+      const cssSum = parseFloat(currStyle.paddingBottom) + parseFloat(currStyle.marginBottom) +
+                     parseFloat(nextStyle.paddingTop) + parseFloat(nextStyle.marginTop);
+      gaps.push({
+        from: curr.className || curr.tagName,
+        to: next.className || next.tagName,
+        cssSum: Math.round(cssSum),
+        pass: cssSum <= 120
+      });
+    }
+    return { gaps, allPass: gaps.every(g => g.pass) };
+  });
+  results.push({
+    gate: 'GR-13', name: 'Stacked Gap <= 120px (CSS sum)',
+    status: stackedGapCheck.allPass ? 'PASS' : 'FAIL',
+    measured: stackedGapCheck,
+    threshold: { maxCSSSum: 120 }
+  });
+
+  // GR-14: Total Visual Gap <= 150px (getBoundingClientRect measurement)
+  // Structural transition handling — if child between zones has position:relative/absolute
+  // and distinct background from both adjacent zones, exclude that gap (intentional transition element)
+  const visualGapCheck = await page.evaluate(() => {
+    function parseRGBLocal(str) {
+      const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (match) return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) };
+      return null;
+    }
+    function rgbDelta(a, b) {
+      if (!a || !b) return 999;
+      return Math.max(Math.abs(a.r - b.r), Math.abs(a.g - b.g), Math.abs(a.b - b.b));
+    }
+
+    const sections = document.querySelectorAll('section, [class*="zone"], [class*="section"]');
+    const gaps = [];
+    for (let i = 0; i < sections.length - 1; i++) {
+      const curr = sections[i];
+      const next = sections[i + 1];
+      const currRect = curr.getBoundingClientRect();
+      const nextRect = next.getBoundingClientRect();
+      const visualGap = nextRect.top - currRect.bottom;
+
+      // Check for structural transition element between zones
+      let isStructuralTransition = false;
+      const currBg = parseRGBLocal(getComputedStyle(curr).backgroundColor);
+      const nextBg = parseRGBLocal(getComputedStyle(next).backgroundColor);
+      // Check siblings between curr and next for transition elements
+      let sibling = curr.nextElementSibling;
+      while (sibling && sibling !== next) {
+        const sibStyle = getComputedStyle(sibling);
+        const sibPos = sibStyle.position;
+        if (sibPos === 'relative' || sibPos === 'absolute') {
+          const sibBg = parseRGBLocal(sibStyle.backgroundColor);
+          if (sibBg && rgbDelta(sibBg, currBg) >= 15 && rgbDelta(sibBg, nextBg) >= 15) {
+            isStructuralTransition = true;
+            break;
+          }
+        }
+        sibling = sibling.nextElementSibling;
+      }
+
+      gaps.push({
+        from: curr.className || curr.tagName,
+        to: next.className || next.tagName,
+        gap: Math.round(visualGap),
+        isStructuralTransition,
+        pass: isStructuralTransition || visualGap <= 150
+      });
+    }
+    return { gaps, allPass: gaps.every(g => g.pass) };
+  });
+  results.push({
+    gate: 'GR-14', name: 'Total Visual Gap <= 150px',
+    status: visualGapCheck.allPass ? 'PASS' : 'FAIL',
+    measured: visualGapCheck,
+    threshold: { maxVisualGap: 150 }
+  });
+
+  // GR-15: Single Margin <= 96px
+  const singleMarginCheck = await page.evaluate(() => {
+    const violations = [];
+    document.querySelectorAll('*').forEach(el => {
+      const style = getComputedStyle(el);
+      ['marginTop', 'marginBottom', 'paddingTop', 'paddingBottom'].forEach(prop => {
+        const val = parseFloat(style[prop]);
+        if (val > 96) {
+          violations.push({ tag: el.tagName, class: el.className, prop, value: val + 'px' });
+        }
+      });
+    });
+    return { violations: violations.length, samples: violations.slice(0, 5) };
+  });
+  results.push({
+    gate: 'GR-15', name: 'Single Margin <= 96px',
+    status: singleMarginCheck.violations === 0 ? 'PASS' : 'FAIL',
+    measured: singleMarginCheck,
+    threshold: { maxSingleValue: '96px' }
+  });
+
+  // ========== SECTION 2B: TRAILING VOID DETECTION ==========
+
+  // GR-44: Trailing Whitespace Void Detection
+  // GR-44: Trailing Whitespace Void detection
+  // The #1 defect flagged by 9/9 PA auditors, completely undetected by gate system.
+  // Source: File 13, Section 2B (GR-44 spec + full JS code)
+  const trailingVoid = await page.evaluate(() => {
+    const body = document.body;
+    const bodyRect = body.getBoundingClientRect();
+    const bodyBottom = bodyRect.bottom;
+
+    // Find the last visible content element
+    const allElements = [...document.querySelectorAll('body *')];
+    let lastVisibleBottom = 0;
+
+    for (const el of allElements) {
+      if (['SCRIPT', 'STYLE', 'META', 'LINK'].includes(el.tagName)) continue;
+      const style = getComputedStyle(el);
+      if (style.display === 'none' || style.visibility === 'hidden') continue;
+      const rect = el.getBoundingClientRect();
+      if (rect.height === 0) continue;
+      if (rect.bottom > lastVisibleBottom) {
+        lastVisibleBottom = rect.bottom;
+      }
+    }
+
+    const voidHeight = bodyBottom - lastVisibleBottom;
+    return {
+      bodyBottom: Math.round(bodyBottom),
+      lastContentBottom: Math.round(lastVisibleBottom),
+      voidHeight: Math.round(voidHeight),
+      pass: voidHeight <= 300
+    };
+  });
+  results.push({
+    gate: 'GR-44', name: 'Trailing Whitespace Void',
+    status: trailingVoid.pass ? 'PASS' : 'FAIL',
+    measured: trailingVoid,
+    threshold: { maxVoidHeight: '300px' }
+  });
+
+  // ========== SECTION 3: OUTPUT VERIFICATION ==========
+
+  // GR-43: Self-Evaluation Comment Existence
+  // GR-43: Check for self-evaluation comment in HTML output
+  const selfEvalCheck = await page.evaluate(() => {
+    const html = document.documentElement.outerHTML;
+    const hasSelfEval = html.includes('<!-- SELF-EVALUATION:') || html.includes('<!-- Self-Evaluation:');
+    return { hasSelfEval };
+  });
+  results.push({
+    gate: 'GR-43', name: 'Self-Evaluation Comment Existence',
+    status: selfEvalCheck.hasSelfEval ? 'PASS' : 'FAIL',
+    measured: selfEvalCheck,
+    threshold: { selfEvaluationComment: true }
+  });
+
+  // ========== SUMMARY (GR-16 logic absorbed into verdict) ==========
+  const identityGates = results.filter(r => ['GR-01','GR-02','GR-03','GR-04','GR-05','GR-06','GR-07','GR-08','GR-09','GR-10'].includes(r.gate));
+  const identityPass = identityGates.filter(g => g.status === 'PASS').length;
+  const identityFail = identityGates.filter(g => g.status === 'FAIL').length;
+  const perceptionGates = results.filter(r => ['GR-11', 'GR-12', 'GR-13', 'GR-14', 'GR-15', 'GR-44'].includes(r.gate));
+  const perceptionPass = perceptionGates.filter(g => g.status === 'PASS').length;
+  const perceptionFail = perceptionGates.filter(g => g.status === 'FAIL').length;
+  // GR-16 absorbed — "All CSS Perceptible" is now verdict logic, not a standalone gate
+  const allPerceptionPass = perceptionGates.every(g => g.status === 'PASS');
+  const outputGates = results.filter(r => ['GR-43'].includes(r.gate));
+  const outputFail = outputGates.filter(g => g.status === 'FAIL').length;
+
+  let verdict = 'PROCEED_TO_PA';
+  if (identityFail > 0) verdict = 'REBUILD';
+  else if (perceptionFail > 0 || !allPerceptionPass) verdict = 'REFINE';
+  else if (outputFail > 0) verdict = 'REFINE';
+
+  return {
+    results,
+    summary: {
+      identity: { pass: identityPass, fail: identityFail, total: 10 },
+      perception: { pass: perceptionPass, fail: perceptionFail, total: 6 },
+      output: { pass: outputGates.length - outputFail, fail: outputFail, total: 1 },
+      allPerceptionPass,
+      verdict
+    }
+  };
+}
+
+// Usage in Playwright orchestrator:
+// const gateResults = await runGateRunner(page);
+// console.log(JSON.stringify(gateResults, null, 2));
+```
+
+### Anti-Pattern Gate Implementations (GR-17 through GR-22)
+
+These are more heuristic and may require tolerance tuning per content type.
+
+```javascript
+// Anti-Pattern Gates — execute after core gates pass
+async function runAntiPatternGates(page) {
+  const results = [];
+
+  // GR-17: Density Stacking (min padding >= 12px for content, >= 4px for table cells)
+  // Split td/th into separate check with 4px minimum (was 12px — 262 false positives from tables)
+  const densityCheck = await page.evaluate(() => {
+    const violations = [];
+    // Content elements: 12px minimum
+    document.querySelectorAll('p, li, blockquote, .callout').forEach(el => {
+      const style = getComputedStyle(el);
+      ['paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight'].forEach(prop => {
+        const val = parseFloat(style[prop]);
+        if (val > 0 && val < 12) {
+          violations.push({ tag: el.tagName, class: el.className, prop, value: val + 'px', minExpected: '12px' });
+        }
+      });
+    });
+    // Table cells: 4px minimum (dense data presentation intentionally uses smaller padding)
+    document.querySelectorAll('td, th').forEach(el => {
+      const style = getComputedStyle(el);
+      ['paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight'].forEach(prop => {
+        const val = parseFloat(style[prop]);
+        if (val > 0 && val < 4) {
+          violations.push({ tag: el.tagName, class: el.className, prop, value: val + 'px', minExpected: '4px' });
+        }
+      });
+    });
+    return { violations: violations.length, samples: violations.slice(0, 5) };
+  });
+  results.push({
+    gate: 'GR-17', name: 'AP-01 Density Stacking',
+    status: densityCheck.violations === 0 ? 'PASS' : 'FAIL',
+    measured: densityCheck,
+    threshold: { minPadding: '12px on content elements' }
+  });
+
+  // GR-18: Ghost Mechanisms (sub-perceptual CSS values)
+  // Cross-references with GR-11 (bg delta) and GR-12 (letter-spacing)
+  const ghostCheck = await page.evaluate(() => {
+    const ghosts = [];
+    document.querySelectorAll('*').forEach(el => {
+      const style = getComputedStyle(el);
+      // Check for border-width between 0 and 0.5px
+      ['borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth'].forEach(prop => {
+        const w = parseFloat(style[prop]);
+        if (w > 0 && w < 0.5) {
+          ghosts.push({ tag: el.tagName, class: el.className, prop, value: w + 'px', type: 'sub-perceptual-border' });
+        }
+      });
+      // Check for opacity between 0.01 and 0.1
+      const opacity = parseFloat(style.opacity);
+      if (opacity > 0 && opacity < 0.1) {
+        ghosts.push({ tag: el.tagName, class: el.className, value: opacity, type: 'sub-perceptual-opacity' });
+      }
+    });
+    return { ghosts: ghosts.length, samples: ghosts.slice(0, 5) };
+  });
+  results.push({
+    gate: 'GR-18', name: 'AP-09 Ghost Mechanisms',
+    status: ghostCheck.ghosts === 0 ? 'PASS' : 'FAIL',
+    measured: ghostCheck,
+    threshold: { ghostMechanisms: 0 }
+  });
+
+  // GR-19: AP-10 Threshold Gaming (>50% of deltas cluster at floor)
+  // GR-19: Executable Playwright JS for threshold gaming detection
+  const gamingCheck = await page.evaluate(() => {
+    function parseRGBLocal(str) {
+      const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (match) return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) };
+      return null;
+    }
+    // Collect all adjacent zone background deltas
+    const sections = document.querySelectorAll('section, [class*="zone"], [class*="section"]');
+    const deltas = [];
+    for (let i = 0; i < sections.length - 1; i++) {
+      const aBg = parseRGBLocal(getComputedStyle(sections[i]).backgroundColor);
+      const bBg = parseRGBLocal(getComputedStyle(sections[i + 1]).backgroundColor);
+      if (aBg && bBg) {
+        const delta = Math.max(Math.abs(aBg.r - bBg.r), Math.abs(aBg.g - bBg.g), Math.abs(aBg.b - bBg.b));
+        if (delta > 0) deltas.push(delta);
+      }
+    }
+    // Check: if >50% of deltas cluster within 10% of the 15 RGB floor (delta 15-17)
+    const floorRange = deltas.filter(d => d >= 15 && d <= 17);
+    const floorRatio = deltas.length > 0 ? floorRange.length / deltas.length : 0;
+
+    // Collect letter-spacing gaming
+    const lsValues = [];
+    document.querySelectorAll('*').forEach(el => {
+      const ls = getComputedStyle(el).letterSpacing;
+      if (ls && ls !== 'normal' && ls !== '0px') {
+        const px = parseFloat(ls);
+        const fs = parseFloat(getComputedStyle(el).fontSize);
+        if (fs > 0) {
+          const em = px / fs;
+          if (em > 0) lsValues.push(em);
+        }
+      }
+    });
+    const lsFloorRange = lsValues.filter(v => v >= 0.025 && v <= 0.028);
+    const lsFloorRatio = lsValues.length > 0 ? lsFloorRange.length / lsValues.length : 0;
+
+    const isGaming = floorRatio > 0.50 || (floorRatio > 0.30 && lsFloorRatio > 0.50);
+
+    return {
+      bgDeltas: deltas, bgFloorCount: floorRange.length, bgFloorRatio: floorRatio.toFixed(2),
+      lsValues: lsValues.length, lsFloorCount: lsFloorRange.length, lsFloorRatio: lsFloorRatio.toFixed(2),
+      isGaming
+    };
+  });
+  results.push({
+    gate: 'GR-19', name: 'AP-10 Threshold Gaming',
+    status: gamingCheck.isGaming ? 'FAIL' : 'PASS',
+    measured: gamingCheck,
+    threshold: { maxFloorRatio: 0.50, floorRange: '15-17 RGB' }
+  });
+
+  // GR-20: Structural Echo (3+ consecutive identical sections)
+  const echoCheck = await page.evaluate(() => {
+    const sections = document.querySelectorAll('section, [class*="zone"]');
+    const signatures = [];
+    sections.forEach(s => {
+      const style = getComputedStyle(s);
+      signatures.push({
+        bg: style.backgroundColor,
+        padding: style.padding,
+        borderBottom: style.borderBottom
+      });
+    });
+    let maxConsecutive = 1;
+    let currentRun = 1;
+    for (let i = 1; i < signatures.length; i++) {
+      if (signatures[i].bg === signatures[i-1].bg &&
+          signatures[i].padding === signatures[i-1].padding &&
+          signatures[i].borderBottom === signatures[i-1].borderBottom) {
+        currentRun++;
+        maxConsecutive = Math.max(maxConsecutive, currentRun);
+      } else {
+        currentRun = 1;
+      }
+    }
+    return { maxConsecutive, pass: maxConsecutive < 3 };
+  });
+  results.push({
+    gate: 'GR-20', name: 'AP-11 Structural Echo',
+    status: echoCheck.pass ? 'PASS' : 'FAIL',
+    measured: echoCheck,
+    threshold: { maxConsecutiveIdentical: 2 }
+  });
+
+  return results;
+}
+```
+
+### Gate Runner Usage Instructions
+
+```
+// Full execution sequence for the orchestrator:
+
+// 1. Serve HTML via HTTP
+// npx serve -p 3000 ./output-directory
+
+// 2. Open Playwright session
+// const { chromium } = require('playwright');
+// const browser = await chromium.launch();
+// const page = await browser.newPage();
+// await page.setViewportSize({ width: 1440, height: 900 });
+// await page.goto('http://localhost:3000/output.html');
+
+// 3. Run core gates
+// const coreResults = await runGateRunner(page);
+
+// 4. If core gates pass, run anti-pattern gates
+// if (coreResults.summary.verdict === 'PROCEED_TO_PA') {
+//   const apResults = await runAntiPatternGates(page);
+//   // Check: 3+ anti-pattern FAIL = REBUILD
+// }
+
+// 5. For responsive gates, resize and re-run perception gates at 768px
+// await page.setViewportSize({ width: 768, height: 1024 });
+// const responsiveResults = await runGateRunner(page);
+
+// 6. Collect all results as JSON
+// const allResults = { core: coreResults, antiPattern: apResults, responsive: responsiveResults };
+```

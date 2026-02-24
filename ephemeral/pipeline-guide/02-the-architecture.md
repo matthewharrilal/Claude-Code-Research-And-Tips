@@ -6,7 +6,7 @@ Before designing anything, look at the data:
 
 | Experiment | Agents | Builder Input | PA-05 Score | Quality |
 |-----------|--------|---------------|-------------|---------|
-| CD-006 | 1 Opus (+ human) | ~50 lines (tokens + soul) | ~4/4 (39/40 overall) | Crown jewel |
+| CD-006 | 1 Opus (+ human) | ~50 lines (tokens + soul) | ~3/4 COMPOSED (39/40 soul score, CEILING tier) | Best empirical reference |
 | Middle Tier | 8 | ~100 lines (recipe) | 4/4 DESIGNED | Best pipeline result |
 | Remediation | 16+ | ~300 lines (targeted spec) | 2.5/4 COMPOSED | Improved but capped |
 | Flagship | 19 | ~530 lines (full recipe) | 1.5/4 FLAT | Failure |
@@ -184,7 +184,7 @@ The Flagship failed for specific, diagnosable reasons. Fat Core is designed to a
 
 **The Flagship separated planning from building.** The TC planner understood the content deeply, then compressed that understanding into a recipe that the builder followed mechanically. The compression destroyed 65% of the compositional intelligence. Fat Core eliminates this boundary entirely. The agent that plans IS the agent that builds.
 
-**The Flagship used Sonnet for building.** CD-006, the crown jewel at 39/40, was built by Opus. Sonnet complies with rules. Opus complies with rules AND creates beyond them. The difference between COMPOSED (3/4) and DESIGNED (4/4) lives in the four capabilities that exist in the agent, not in any document: content-form resonance, proportional intelligence, creative surprise, and emergent coherence. These require Opus.
+**The Flagship used Sonnet for building.** CD-006 (39/40 soul score, CEILING tier, ~3/4 PA-05 COMPOSED) was built by Opus. Sonnet complies with rules. Opus complies with rules AND creates beyond them. The difference between COMPOSED (3/4) and DESIGNED (4/4) lives in the four capabilities that exist in the agent, not in any document: content-form resonance, proportional intelligence, creative surprise, and emergent coherence. These require Opus.
 
 **The Flagship had a recipe. Fat Core has conventions.** A recipe tells the builder HOW to execute, step by step. It caps quality at its own level of specificity -- if the recipe says "use border-left 4px solid," the builder uses border-left 4px solid, even when the content demands something different. Conventions tell the builder WHAT to achieve: "structural borders encode hierarchy." The builder decides how. This is the difference between a ceiling of 3/4 (recipe) and a ceiling of 4/4 (conventions + capable agent).
 

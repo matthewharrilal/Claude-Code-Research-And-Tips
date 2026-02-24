@@ -20,8 +20,8 @@ THIS FILE IS AUTO-LOADED ON DIRECTORY ENTRY
 
 ### I'm here to BUILD content/pages
 **→ Run:** `/build-page <content-file-path>` (the ONLY way to build pages)
-**→ What it does:** Invokes the /build-page orchestrator, which handles content analysis, TC pipeline, builder deployment, gate verification, and PA audit automatically
-**→ Manual fallback:** `compositional-core/README.md` (if /build-page is unavailable)
+**→ What it does:** /build-page is a thin launcher that points to the Pipeline v3 execution manifest at `ephemeral/va-extraction/MANIFEST.md`. The manifest + 9 artifact files contain ALL pipeline intelligence (agent prompts, gate specs, PA assignments, value tables, worked examples). Follow the manifest's 11-step quickstart procedure.
+**→ Key files:** `ephemeral/va-extraction/MANIFEST.md` (1,091 lines) + 9 artifact files in same directory
 **→ ALWAYS loaded automatically:** `compositional-core/identity/prohibitions.md` + `compositional-core/vocabulary/tokens.css`
 
 ### I'm here to VALIDATE/AUDIT
@@ -329,33 +329,24 @@ validated-explorations/
 /build-page <content-file-path>
 ```
 
-**What it orchestrates:** TC skill invocation (Phases 0-4, separate Opus agent) -> Opus builder deployment with TC brief -> 22-gate programmatic verification -> Mode 4 PA (9 auditors + 9 Tier 5 questions) -> fix cycles -> verdict
+**Architecture (v2):** /build-page is a thin launcher. ALL pipeline intelligence lives in:
+- **Manifest:** `ephemeral/va-extraction/MANIFEST.md` (1,091 lines — 11-step quickstart, agent roster, agent prompt templates, glossary, file registry)
+- **9 Artifacts:** `ephemeral/va-extraction/artifact-*.md` (identity, recipe, gates, PA protocol, routing, orchestrator, TC brief template, worked examples, value tables)
+- **Override:** `ephemeral/va-extraction/council-verdict.md` (575 lines)
 
-**Success bar:** PA-05 >= 3.5 AND Tier 5 >= 7/9 AND zero soul violations
+**Execution:** Read the manifest, follow the 11-step quickstart. Use TeamCreate. All agents Opus. The manifest's Appendix E has copy-paste-ready prompts for every agent role.
 
-**Sub-skills invoked automatically:**
-- Tension-composition (TC): Phases 0-4 (content assessment through mechanism selection), separate Opus agent, outputs ~50-line TC brief
-- Perceptual-auditing (PA): Full 65 questions (54 standard + 2 sub-perceptual + 9 Tier 5 PA-60 through PA-68), invoked after build
+**Success bar:** PA-05 >= 3.5 AND zero soul violations
 
 **NOT invoked for:** Research, auditing existing pages, planning
 
 ---
 
-### Tension-Composition (Sub-Skill -- Invoked by /build-page)
+### Perceptual-Auditing (Standalone Skill -- For Auditing EXISTING Pages)
 
-**Direct invocation:** Only if /build-page is unavailable
-**Skill file:** `~/.claude/skills/tension-composition/SKILL.md`
-**Phase-gated access:** Library prohibition until Phase 5
-**ALWAYS FLAGSHIP:** No tier routing. TC runs Phases 0-4 (sub-skill mode), builder handles layout.
-
----
-
-### Perceptual-Auditing (Sub-Skill -- Invoked by /build-page)
-
-**Direct invocation:** Only for auditing EXISTING pages (not builds)
+**Direct invocation:** Only for auditing EXISTING pages (not builds -- /build-page handles PA internally via the manifest)
 **Skill file:** `~/.claude/skills/perceptual-auditing/SKILL.md`
-**Full 65-question audit required** -- 54 standard + 2 sub-perceptual (PA-55, PA-56) + 9 Tier 5 (PA-60 through PA-68)
-**Passing criteria:** PA-05 >= 3.5, Tier 5 >= 7/9, zero soul violations, zero void patterns
+**Passing criteria:** PA-05 >= 3.5, zero soul violations, zero void patterns
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## INGESTION PROTOCOL — What to Load

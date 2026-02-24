@@ -99,10 +99,10 @@
 
 ## SECTION 2: "The Architecture: Fat Core"
 
-### Claim 16: Evidence table (CD-006: 1 Opus, ~50 lines, ~4/4)
-- **Guide says (line 464):** CD-006: 1 Opus, ~50 lines builder input, ~4/4 (39/40)
-- **Source (Report 32, line 134):** "CD-006 | ~50 lines (tokens + soul) | ~4/4 (39/40 overall) | Crown jewel"
-- **Verdict: ACCURATE**
+### Claim 16: Evidence table (CD-006: 1 Opus, ~50 lines, ~3/4 COMPOSED)
+- **Guide says (line 464):** CD-006: 1 Opus, ~50 lines builder input, ~3/4 COMPOSED (39/40 soul score, CEILING tier)
+- **Source (Report 32, line 134):** Originally "CD-006 | ~50 lines (tokens + soul) | ~4/4 (39/40 overall) | Crown jewel" -- NOTE: The ~4/4 characterization was INCORRECT. CD-006 is CEILING tier with 39/40 soul score, ~3/4 PA-05 COMPOSED.
+- **Verdict: CORRECTED** (original source had mischaracterization)
 
 ### Claim 17: Evidence table (Middle: 8 agents, ~100 lines, 4/4 DESIGNED)
 - **Guide says (line 465):** Middle Tier: 8 agents, ~100 lines (recipe), 4/4 DESIGNED
