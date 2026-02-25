@@ -17,6 +17,105 @@ This artifact incorporates the following authoritative rulings:
 
 ---
 
+## 0. EXPERIENTIAL PASS PROTOCOL (MANDATORY — Primacy Position)
+
+> **POSITIONAL ENFORCEMENT:** This section is numbered 0, not 2.5, because it must
+> be the FIRST operational instruction encountered by every auditor. The experiential
+> pass primes the auditor into READER mode before any analytical questions are
+> encountered. Moving this section to a later position defeats its purpose.
+> This directive is embedded in the PA Auditor prompt template (MANIFEST.md Appendix E).
+> It does NOT rely on the orchestrator reading this file to inject it — it is already
+> positionally first in the template.
+
+### 0.1 The Experiential Directive
+
+Before answering any assigned questions, each auditor performs an experiential pass:
+
+> **EXPERIENTIAL PASS — Execute BEFORE reading your assigned questions.**
+>
+> You are about to audit a designed HTML page. Before you evaluate anything,
+> you must EXPERIENCE the page as a reader.
+>
+> **CRITICAL: VISUAL VERIFICATION, NOT CODE INTERPRETATION.**
+> You are a multimodal model processing screenshots as rendered pixels.
+> Your instinct is to DECODE text from context — inferring what a label
+> "should" say from structure, HTML knowledge, or common sense. This is
+> exactly what makes you miss what a human catches in 2 seconds.
+>
+> **THE RULE:** If you cannot read the text FROM THE SCREENSHOT ALONE —
+> without inferring from structure, context, or what "makes sense" — then
+> the text is illegible. Report it. Do not say "the text reads 'Level 3:
+> Simple Loops'" if what you actually see in the rendered pixels is
+> ambiguous, blurred, or low-contrast. Say what you SEE, not what you
+> KNOW it says. A human visitor has never seen the HTML. They have only
+> the pixels. Judge readability from the pixels.
+>
+> **STEP 1: READ EVERY WORD — FROM THE PIXELS.**
+> Move through screenshots top to bottom. For every text element — headings,
+> body text, chart labels, axis annotations, captions, navigation items, button
+> text, text inside colored blocks — attempt to read it FROM WHAT YOU SEE IN
+> THE SCREENSHOT, not from what you know the content says. Write down what the
+> PIXELS show you, including partial or uncertain characters.
+>
+> For each failure:
+>   CANNOT READ: [location] — [what you see in pixels] — [why it fails]
+>
+> Example:
+>   CANNOT READ: Bar chart, 3rd bar — pixels show "L___3: S___le L__ps" —
+>   cream text on tan bar merges at this size against dark surround.
+>   (I know from context this should be "Level 3: Simple Loops" but the
+>   RENDERED TEXT is not legible at this size and contrast.)
+>
+> **STEP 2: EXTRACT INFORMATION FROM EVERY CHART/DIAGRAM.**
+> For each data visualization: What is it about? What data points can you
+> extract? Could you explain it to someone who can't see it? Where your
+> explanation becomes vague ("some kind of progression"), that vagueness
+> IS the finding.
+>
+> **STEP 3: FOLLOW THE STRUCTURE.**
+> Try to navigate to specific content. Where does your eye get confused about
+> what comes next? How many hierarchy levels can you confidently distinguish
+> (not count — distinguish)?
+>
+> **STEP 4: RANK YOUR FINDINGS.**
+>   - CANNOT READ / CANNOT EXTRACT → comprehension failure (highest priority)
+>   - Uncomfortable but legible → discomfort (middle)
+>   - Structure unclear → confusion (lower)
+>
+> This ranking CARRIES FORWARD into your analytical answers.
+> An illegible label is NEVER lower priority than an imperceptible background delta.
+> If your experiential pass found a comprehension failure, that finding appears in
+> your final report regardless of which analytical questions you were assigned.
+
+Report in a section at the TOP of the audit report: **"## 0. Experiential Pass."**
+
+### 0.2 Why Primacy Matters
+
+The experiential pass exploits the LLM primacy effect: the first instruction shapes how
+all subsequent instructions are interpreted. If the auditor's first act is attempting to
+READ the page, every subsequent PA question will be filtered through "could I use this?"
+rather than "does this have property X?" This is the difference between:
+
+- **ANALYSIS:** "The contrast ratio appears low" (measuring a property)
+- **EXPERIENCE:** "I tried to read the third bar label and cannot make out whether it says 'Simple Loops' or 'Single Loops'" (attempting use and failing)
+
+### 0.3 Priority Override
+
+Comprehension failures from the experiential pass ALWAYS outrank property measurement
+findings from the question set. A page that scores well on 68 questions but has
+illegible chart labels has a BLOCKING defect regardless of its PA-05 score.
+
+A human will notice the illegible text in 2 seconds and will never notice a 4%-opacity
+background tint. The pipeline must match this priority ordering.
+
+### 0.4 Contamination Check
+
+The experiential pass section in the auditor's output must NOT reference assigned
+question numbers (no "PA-XX" references). If the auditor mentions PA question IDs
+in their experiential pass, the pass was contaminated by analytical priming.
+
+---
+
 ## 1. 9-AUDITOR DEPLOYMENT ARCHITECTURE (Mode 4)
 
 ### 1.1 Architecture Overview
@@ -217,23 +316,11 @@ Auditors receive file paths to saved PNG screenshots and use the Read tool (whic
 
 **Key rule:** Assessment is purely VISUAL. Describe what you SEE using perceptual language ("The background shifts from warm cream to cooler gray") not CSS language ("background-color changes from #FEF9F5 to #F0EBE3").
 
-### 2.5 Experiential Pass (MANDATORY — Before Questions)
+### 2.5 Experiential Pass — See Section 0
 
-Before answering any assigned questions, each auditor performs an experiential pass:
-
-> Look at these screenshots as a READER, not as an evaluator. Try to
-> READ every piece of text you see — headings, body text, labels,
-> chart annotations, captions, metadata, footer text.
+> **RELOCATED:** The experiential pass directive has been moved to **Section 0** (primacy position) at the top of this document. It is also embedded directly in the PA Auditor prompt template in MANIFEST.md Appendix E. This ensures it is the FIRST operational instruction every auditor encounters, not something buried at line 220+ that the orchestrator might miss.
 >
-> Report THREE things:
-> 1. **Illegible text:** Every place where you could not read the text.
-> 2. **Effortful text:** Every place where you had to slow down or squint.
-> 3. **Skipped text:** Every place where you skipped text because it
->    looked too small, dense, or low-contrast.
->
-> Report in a section at the TOP of your audit report: "## 0. Experiential Pass."
-> This is about TEXT READABILITY, not visual evaluation.
-> Do this BEFORE reading your assigned questions.
+> See Section 0.1 for the full directive. See Section 0.2 for the rationale (LLM primacy effect).
 
 ---
 

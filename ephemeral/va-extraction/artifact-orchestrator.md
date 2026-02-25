@@ -435,6 +435,46 @@ The builder follows a zone-by-zone construction sequence with self-evaluation ch
 
 The orchestrator (or lead) serves the HTML page via HTTP, takes screenshots at all 3 viewports (cold look + scroll-through), and saves them as files. Auditors read saved images via Read tool. This eliminates Playwright contention entirely and enables 9+ parallel auditors.
 
+**Pre-screenshot gate:** Run GR-61 (DPR Validation) BEFORE capturing any screenshots. If FAIL, adjust viewport; if still FAIL, abort screenshot capture.
+
+**Post-screenshot gate:** Run GR-62 (Screenshot Quality) AFTER all screenshots are saved. If FAIL, re-capture. Do NOT deploy auditors on blank/corrupt screenshots.
+
+### Phase 3A+: Orchestrator Experiential Scan (MANDATORY — before deploying auditors)
+
+After capturing all screenshots and BEFORE spawning any PA auditors, the orchestrator
+performs a rapid experiential scan of the built page:
+
+1. **30-SECOND READ TEST (VISUAL VERIFICATION):** Open the page at 1440px. Scroll at
+   reading speed from top to bottom. Do not analyze. Attempt to READ the page as a
+   visitor would — from the RENDERED PIXELS, not from your knowledge of the HTML source.
+   If you know what a label "should" say but cannot read it as rendered, it is illegible. Note:
+   - Any text you cannot read
+   - Any visual element whose meaning is not immediately clear
+   - Any moment where you lose orientation (where am I on the page?)
+   - Any section where your attention drops off entirely
+
+2. **INFORMATION EXTRACTION TEST:** Return to the top. For every chart, table, diagram,
+   or data visualization — can you extract the specific claim it makes within 5 seconds?
+   If not, note which element and why.
+
+3. **NAVIGATION TEST:** If the page has a TOC, section markers, or any wayfinding
+   elements — can you use them to jump to a specific section? Does the heading hierarchy
+   make the page's structure self-evident?
+
+**USABILITY CIRCUIT BREAKER (enhanced):** If the orchestrator's experiential scan finds
+ANY text that is completely illegible or ANY core content that is inaccessible:
+- Tag finding as BLOCKING-USABILITY
+- Include in the prompt for ALL PA auditors as a pre-seeded finding: "The orchestrator
+  observed [specific description]. Verify or contradict this finding."
+- If the Weaver returns SHIP WITH FIXES, verify the usability finding is Fix #1.
+
+Record result in execution tracker: `EXPERIENTIAL_SCAN: CLEAN` or `EXPERIENTIAL_SCAN: BLOCKING-USABILITY: [description]`
+
+> Source: Gas Town incident (2026-02-25) — orchestrator passed illegible chart text
+> through to PA audit without flagging it, where it was ranked Fix #5. This scan
+> takes ~2 minutes and prevents the expensive PA audit from running on a page with
+> fundamental usability failures.
+
 ### Phase 3B: PA Audit (parallel auditors)
 
 - **ITEM 83** (extract-d09-d11.md L892) Phase 3: PA Audit (parallel)
@@ -452,7 +492,7 @@ The orchestrator (or lead) serves the HTML page via HTTP, takes screenshots at a
 - **ITEM 86** (extract-d09-d11.md L895) + Integrative auditor
   - Views all screenshots with zero prior context; reports gestalt impressions
 
-**USABILITY CIRCUIT BREAKER:** Before passing reports to Weaver, orchestrator scans all 9 auditor reports for BLOCKING-severity findings related to: text legibility, information accessibility, content completeness, or navigation. If ANY auditor flags BLOCKING usability: (1) elevate to BLOCKING-USABILITY, (2) annotate for Weaver as "must be Fix #1", (3) if SHIP WITH FIXES verdict, verify usability fix is in the fix list.
+**USABILITY CIRCUIT BREAKER (Post-PA):** Before passing reports to Weaver, orchestrator scans all 9 auditor reports for BLOCKING-severity findings related to: text legibility, information accessibility, content completeness, or navigation. If ANY auditor flags BLOCKING usability: (1) elevate to BLOCKING-USABILITY, (2) annotate for Weaver as "must be Fix #1", (3) if SHIP WITH FIXES verdict, verify usability fix is in the fix list. GR-64 verifies this programmatically after the Weaver report. This is the second circuit breaker — the first is the orchestrator's own Phase 3A+ experiential scan above.
 
 ### Phase 3C: Weaver (verdict synthesis)
 

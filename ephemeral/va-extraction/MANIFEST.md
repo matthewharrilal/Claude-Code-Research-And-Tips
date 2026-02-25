@@ -139,7 +139,7 @@ The Gate Runner is NOT a separate LLM agent. It is Playwright JavaScript code ex
 
 | Executor | Model | Role | Receives | Produces |
 |----------|-------|------|----------|----------|
-| **Orchestrator** (Playwright JS) | N/A | Run 38 programmatic gate checks (34 Playwright + 4 BV) | Built HTML file + gate-runner-core.js | Structured JSON results (38 gates: PASS/FAIL) + 6 orchestrator decision rules |
+| **Orchestrator** (Playwright JS) | N/A | Run 42 programmatic gate checks (38 Playwright + 4 BV) | Built HTML file + gate-runner-core.js | Structured JSON results (42 gates: PASS/FAIL) + 6 orchestrator decision rules |
 
 
 ### Phase 3B — Perceptual Audit (Mode 4)
@@ -242,11 +242,11 @@ This section maps each artifact file to the specific agents who receive it. Sect
 **D-01 through D-09 are ALL EXPERIMENTAL** per council verdict CF-02/G. D-09 (The Quiet Zone) was added in Wave 3 — designate at least one zone in the middle third as deliberately plainer (2-3 mechanisms vs 4-5, no bento grid, single-column prose). All dispositions are included in the brief and tagged with evidence level. None are gate-checked. **BACKGROUND HEX LOCK** (zone backgrounds from the brief are LOCKED) is a separate constraint enforced by BV-02, not a disposition.
 
 ### artifact-gate-runner.md (split into 5 files — see gate-manifest.json)
-**Layers covered:** L6 GATES (38 gate-runner gates + 6 orchestrator decision rules + 34 VALUES items rerouted per council verdict — see VALUES Rerouting below)
-**Total items:** 38 gate-runner gates (16 REQUIRED + 9 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF VERIFICATION) + 6 orchestrator decision rules (GR-23–GR-28)
+**Layers covered:** L6 GATES (42 gate-runner gates + 6 orchestrator decision rules + 34 VALUES items rerouted per council verdict — see VALUES Rerouting below)
+**Total items:** 42 gate-runner gates (18 REQUIRED + 11 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF VERIFICATION) + 6 orchestrator decision rules (GR-23–GR-28)
 
 **Wave 3 split files:** The monolithic gate runner (2,410 lines) was split into 5 operational files:
-- `gate-runner-core.js` (1,436 lines) — All executable Playwright JavaScript (6 functions)
+- `gate-runner-core.js` (~1,550 lines) — All executable Playwright JavaScript (9 functions)
 - `gate-runner-spec.md` (188 lines) — Human-readable gate specifications
 - `gate-runner-preconditions.md` (83 lines) — Text-based pre-build checks
 - `gate-runner-provenance.md` (151 lines) — History, traceability, wave change logs
@@ -291,9 +291,9 @@ The original `artifact-gate-runner.md` is now a redirect pointer. `artifact-gate
 The original `artifact-pa-protocol-MONOLITHIC.md` preserves the pre-split version.
 
 **INFORMATION ISOLATION:** The split enforces role-based access:
-- **PA Auditors** receive: pa-questions.md (their subset) + pa-guardrails.md
-- **Weaver** receives: pa-weaver.md + all auditor reports
-- **Orchestrator** receives: pa-deployment.md + pa-manifest.md
+- **PA Auditors** receive: pa-questions.md (their subset) + pa-guardrails.md (includes visual verification principle + experiential pass requirement)
+- **Weaver** receives: pa-weaver.md (includes experiential anchor protocol) + all auditor reports
+- **Orchestrator** receives: pa-deployment.md (includes experiential pass deployment protocol) + pa-manifest.md
 
 | Split File | Receiving Agent | Purpose |
 |------------------------|-----------------|---------|
@@ -459,7 +459,7 @@ Before spawning the Brief Assembler, the orchestrator determines mode (APPLIED o
 
 **Steps (gate runner — runs in parallel with screenshots):**
 1. Orchestrator opens Playwright session against served HTML.
-2. Gate runner executes all post-build gates at 1440px viewport width (see artifact-gate-runner.md for the 43-gate inventory).
+2. Gate runner executes all post-build gates at 1440px viewport width (see gate-manifest.json for the 42-gate inventory: 18 REQUIRED + 11 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BV).
 3. Responsive gates re-run at 768px.
 4. Results collected as structured JSON.
 
@@ -492,7 +492,7 @@ Before spawning the Brief Assembler, the orchestrator determines mode (APPLIED o
 **Steps:**
 1. Orchestrator spawns **Weaver** with:
    - Integrative auditor report (gestalt synthesis)
-   - Gate runner results (38 gates: PASS/FAIL)
+   - Gate runner results (42 gates: PASS/FAIL)
    - All 9 individual auditor reports (for evidence)
    - Calibration references from pa-weaver.md (multi-coherence scale, severity scale, metaphor expression spectrum)
 2. Weaver scores PA-05 (per FIX-083): sub-criteria (Designed | Coherent | Proportionate | Polished), Tier 5 score (PA-60–PA-77), fix-type classification (MECHANICAL / STRUCTURAL / COMPOSITIONAL), emotional arc synthesis.
@@ -775,7 +775,7 @@ Item counts shown as "Base / Artifact-reported" where they differ.
 | L3 SCAFFOLDING | 68 | 75 (appendix) | artifact-builder-recipe.md | COVERED — Recipe phases 1-3, mechanism minimums |
 | L4 DISPOSITION | 62 | 78 (appendix) | artifact-builder-recipe.md | COVERED — D-01–D-09 + recipe phases 4-6 |
 | L5 VALUES | 94 | Distributed | DISTRIBUTED | COVERED — 34 rerouted from gates (15 orch, 10 PA, 9 doc); 26 to builder context; 34 standalone |
-| L6 GATES | 72 | 38 gates + rerouted | artifact-gate-runner.md | COVERED — 38 gates (16 REQUIRED + 9 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BV) + 6 orchestrator decision rules |
+| L6 GATES | 72 | 42 gates + rerouted | artifact-gate-runner.md | COVERED — 42 gates (18 REQUIRED + 11 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BV) + 6 orchestrator decision rules |
 | L7 PA | 56 (+32 rerouted) | 88 total tracked | pa-questions.md + pa-deployment.md + pa-weaver.md | COVERED — 69 questions across 9 auditors + integration + verdict |
 | L8 ROUTING | 63 (+62 cross-matched) | 125 total | artifact-routing.md | COVERED — Content analysis + TC brief + compression + zones |
 | L9 ORCHESTRATION | 188 (+37 rerouted/context) | 222 total | artifact-orchestrator.md | COVERED — Full pipeline sequence + mode + verdict + experiments |
@@ -812,7 +812,7 @@ To verify coverage is complete:
 - [ ] Every non-META item appears in at least one artifact file
 - [ ] DUAL-ROUTE items appear in exactly two artifacts with different framing
 - [ ] No artifact contains items from layers it doesn't own (except by council mandate)
-- [ ] All 38 gates in gate-runner-core.js have corresponding items in the registry
+- [ ] All 42 gates in gate-runner-core.js have corresponding items in the registry
 - [ ] All 69 PA questions in pa-questions.md have corresponding items in the registry
 - [ ] All 9 disposition instructions (D-01–D-09) in artifact-builder-recipe.md have corresponding items
 - [ ] All 10 soul constraints in artifact-identity-perception.md have corresponding items
@@ -846,7 +846,7 @@ All claims in this manifest and its artifacts are tagged with evidence levels pe
 | Content Analyst | Raw content markdown + content analysis protocol (full "Phase 0: Content Analysis Protocol" section from artifact-routing.md) + reader model ("Reader Model — 5-Axis Input Space" section) |
 | Brief Assembler | Content Map, TC Brief Template (~165-line standalone file), soul world-description (from SC tables — World-description field ONLY), perception thresholds, recipe phases, disposition D-01–D-09 |
 | Builder | Execution Brief ONLY + tokens.css + components.css + mechanism-catalog.md + value tables (~550 lines) + CD-006 reference (optional) |
-| Gate Runner (orchestrator code) | Built HTML file + gate-runner-core.js (38 gates, executed as Playwright JavaScript) |
+| Gate Runner (orchestrator code) | Built HTML file + gate-runner-core.js (42 gates, executed as Playwright JavaScript) |
 | PA Auditors (×9) | Screenshots ONLY + assigned question subset from pa-questions.md (thematic groupings per pa-deployment.md) + pa-guardrails.md |
 | Integrative Auditor | 9 PA auditor reports + all screenshots (PA-05 scoring is WEAVER's responsibility per FIX-083) |
 | Weaver | Integrative report + gate results + individual auditor reports + calibration references (multi-coherence scale, severity scale, metaphor expression spectrum) |
@@ -1086,7 +1086,7 @@ REFERENCE FILES:
 
 ### Gate Runner (Phase 3A)
 
-The Gate Runner is NOT a separate LLM agent — it is Playwright JavaScript executed by the orchestrator. See `gate-runner-core.js` for the 6 executable functions. Execution order: `runBriefVerification(briefText)` for BV-01–BV-04, then `runGateRunner(page)` for GR-01–GR-15, GR-43, GR-44, then `runAntiPatternGates(page)` for GR-17–GR-22, then `runWave2Gates(page)` for GR-45, GR-46, GR-50–GR-53, then `runGateCoverage(allResults)` for GR-48, then `checkGateResultIntegrity(files, data)` for GR-49. See `gate-manifest.json` for the full execution order and tier breakdown.
+The Gate Runner is NOT a separate LLM agent — it is Playwright JavaScript executed by the orchestrator. See `gate-runner-core.js` for the 9 executable functions. Execution order: `runBriefVerification(briefText)` for BV-01–BV-04, then `checkDPR(page)` for GR-61 (pre-screenshot), then `runGateRunner(page)` for GR-01–GR-15, GR-43, GR-44, GR-63, then `runAntiPatternGates(page)` for GR-17–GR-22, then `runWave2Gates(page)` for GR-45, GR-46, GR-50–GR-53, then `checkScreenshotQuality(screenshotDir)` for GR-62 (post-screenshot), then `runGateCoverage(allResults)` for GR-48, then `checkGateResultIntegrity(files, data)` for GR-49, then `checkUsabilityPriority(auditorReports, weaverReport)` for GR-64 (post-weaver). See `gate-manifest.json` for the full execution order and tier breakdown.
 
 ### PA Auditor Prompts (Phase 3B — 9 Auditors)
 
@@ -1098,6 +1098,25 @@ You are PA Auditor {LETTER} — {SPECIALTY}.
 You are evaluating a web page design. You will see screenshots at multiple viewports. Judge ONLY what you SEE.
 
 IMPORTANT: You are a FRESH-EYES auditor. No knowledge of build process, design intent, or content meaning.
+
+## 0. EXPERIENTIAL PASS (MANDATORY — COMPLETE BEFORE ANY QUESTIONS)
+
+Before answering a single question, you must attempt to USE this page as a reader would:
+
+STEP 1 — READ EVERY WORD. Start at the top of the 1440px cold-look screenshot. Read each heading, paragraph, label, caption, and annotation in the order they appear. For any text you cannot read FROM THE RENDERED PIXELS ALONE — without inferring from structure, context, or what "makes sense" — note it immediately. You are looking at PIXELS, not decoding HTML. If characters blur together, if labels dissolve into backgrounds, if annotations are too small to parse, those are FINDINGS. Report what you SEE, not what you KNOW it says.
+
+STEP 2 — EXTRACT INFORMATION. For every chart, diagram, table, or infographic, attempt to answer: "What is the ONE thing this element wants me to know?" If you cannot answer within 5 seconds of looking, the element fails its communicative purpose.
+
+STEP 3 — FOLLOW THE STRUCTURE. If there is a table of contents, numbered sections, or navigation, attempt to use them. Can you find content promised by navigation? Does the reading order match the visual hierarchy?
+
+STEP 4 — RANK YOUR FINDINGS. List comprehension failures in severity order:
+- BLOCKING: Cannot read text, cannot extract information, cannot navigate
+- SIGNIFICANT: Requires effort (squinting, re-reading, scrolling back)
+- MINOR: Suboptimal but functional
+
+Write your experiential findings as "## 0. Experiential Pass" — this section MUST appear FIRST in your report, before any PA question answers.
+
+## 1. QUESTION ANSWERS
 
 Read each screenshot image file. First the cold-look (no scrolling), then scroll-through in order.
 
@@ -1113,6 +1132,8 @@ SCREENSHOTS:
 {List of screenshot file paths — 1440px cold-look + scroll, 1024px cold-look + scroll, 768px cold-look + scroll}
 ```
 
+**CRITICAL:** The Experiential Pass is in **primacy position** (before questions) by design. LLMs interpret subsequent instructions through the lens of their first instruction. If analytical questions come first, the auditor enters analyst mode and never leaves it. The experiential pass forces reader mode FIRST, and those findings carry forward as the highest-priority lens for all subsequent analysis. See pa-deployment.md Section 0 for the full protocol and rationale.
+
 For the full per-auditor question text, see `ephemeral/pipeline-retro/07-context-gap.md` Section 4.5.
 
 ### Integrative Auditor Prompt (Phase 3B)
@@ -1120,8 +1141,31 @@ For the full per-auditor question text, see `ephemeral/pipeline-retro/07-context
 ```
 You are the Integrative Auditor. You have NO assigned questions. Read ALL 9 PA auditor reports + ALL screenshots.
 
-1. GESTALT: What patterns emerge across reports that no single auditor catches? Convergence? Contradictions? Blind spots?
-2. TOP-5 FIXES (if not shipping): Classify as MECHANICAL / STRUCTURAL / COMPOSITIONAL.
+## 0. YOUR OWN EXPERIENTIAL PASS (BEFORE READING ANY REPORTS)
+
+Before reading a single auditor report, look at the screenshots yourself as a reader would:
+
+1. Read the 1440px cold-look screenshot top to bottom. Note any text you cannot read FROM THE PIXELS ALONE — not from what you know it says. Report what you SEE, not what you KNOW.
+2. Attempt to extract the main message from any chart, diagram, or infographic within 5 seconds.
+3. Follow any navigation or table of contents. Does the page deliver on its structural promises?
+4. Write a 3-sentence first impression: What works? What fails? What did you feel?
+
+This is your ANCHOR. It cannot be overridden by auditor scores or gate results.
+
+## 1. EXPERIENTIAL PASS AGGREGATION
+
+Before any analytical synthesis, check: How many of the 9 auditors flagged the SAME experiential issue?
+- 3+ auditors flag same element → CONFIRMED finding (must be Fix #1 regardless of other scores)
+- 1-2 auditors flag same element → POSSIBLE issue (investigate further)
+- Your own experiential pass DISAGREEING with auditor consensus → note explicitly (you may be seeing something they missed, or vice versa)
+
+## 2. GESTALT SYNTHESIS
+
+What patterns emerge across reports that no single auditor catches? Convergence? Contradictions? Blind spots?
+
+## 3. TOP-5 FIXES (if not shipping)
+
+Classify as MECHANICAL / STRUCTURAL / COMPOSITIONAL. Usability/comprehension failures from the experiential pass aggregation ALWAYS rank above property-level CSS findings.
 
 NOTE: PA-05 scoring and Tier 5 synthesis are performed by the **Weaver** (per FIX-083), NOT the Integrative Auditor. Do NOT score PA-05 here.
 
@@ -1135,11 +1179,25 @@ SCREENSHOTS: {file paths}
 ```
 You are the Weaver. Read the Integrative Auditor report + Gate Runner results. Produce TWO outputs.
 
-VERDICT LOGIC (priority order):
+## 0. YOUR OWN EXPERIENTIAL ANCHOR (BEFORE ANY ANALYSIS)
+
+Before reading any reports or gate results, view the screenshots yourself:
+
+1. Read the 1440px cold-look top to bottom as a READER. Note anything you cannot read FROM THE PIXELS ALONE — report what you SEE, not what you KNOW it says.
+2. Write a 3-sentence first impression capturing what the page FEELS like. This is your experiential anchor — it CANNOT be overridden by gate scores or auditor numbers.
+3. Check: Does the Integrative Auditor's experiential aggregation AGREE with your impression? Note any divergence.
+
+## 1. EXPERIENTIAL PASS AGGREGATION
+
+Review the Integrative Auditor's experiential pass findings. If 3+ of 9 auditors flagged the same text element as illegible, that is a CONFIRMED usability failure and MUST appear as Fix #1 in any fix list, regardless of all other scores. See pa-weaver.md Section 0.3 for the full aggregation table.
+
+## 2. VERDICT LOGIC (priority order — experiential findings OVERRIDE analytical scores)
+
+PRIORITY 0 (HIGHEST): If a CONFIRMED experiential finding exists (3+ auditors), verdict CANNOT be SHIP.
 a. ANY identity gate FAIL => REBUILD (unless ALL failures are MECHANICAL — see below)
 b. 3+ anti-pattern gates FAIL => REBUILD
 c. ANY perception gate FAIL => REFINE
-d. PA-05 >= 3.5 AND all gates PASS => SHIP
+d. PA-05 >= 3.5 AND all gates PASS AND no confirmed experiential failures => SHIP
 e. PA-05 >= 3.0 AND all required gates PASS AND fixes are MECHANICAL only => SHIP WITH FIXES
 f. PA-05 2.5-3.5 => REFINE
 g. PA-05 < 2.5 => REBUILD
@@ -1151,7 +1209,7 @@ Compute Tier 5 Score (0-9) from Tier 5 questions (PA-60 through PA-77).
 Classify each fix as: MECHANICAL (CSS-only) / STRUCTURAL (HTML changes) / COMPOSITIONAL (re-think needed).
 Synthesize emotional arc across all 4 registers.
 
-OUTPUT A — DIAGNOSTIC (for orchestrator): VERDICT + gate failures + PA-05 (with sub-criteria) + Tier 5 score + fix-type classification + classified fix list
+OUTPUT A — DIAGNOSTIC (for orchestrator): VERDICT + experiential anchor + gate failures + PA-05 (with sub-criteria) + Tier 5 score + fix-type classification + classified fix list (usability fixes FIRST)
 OUTPUT B — ARTISTIC IMPRESSION (for REFINE/REBUILD builder): NO numbers/gates, describe what the page FEELS like using emotional arc registers (Surprise, Delight, Authority, Earned Closure).
 
 CALIBRATION (for your use, NOT shared with auditors):

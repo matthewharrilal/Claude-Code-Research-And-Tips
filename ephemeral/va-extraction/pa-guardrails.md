@@ -22,12 +22,18 @@ Each auditor's report MUST include a **completion table** as its FINAL section:
 
 ```
 ## Completion Manifest — Auditor [LETTER]
+| Section              | Completed | Evidence                          |
+|----------------------|-----------|-----------------------------------|
+| Experiential Pass    | YES/NO    | ## 0. Experiential Pass present   |
 | Question ID | Answered | Evidence Screenshot(s) |
 |-------------|----------|----------------------|
 | PA-XX       | YES      | 1440/scroll-02.png   |
 | PA-YY       | YES      | 768/cold-look.png    |
 | ...         | ...      | ...                  |
 ```
+
+The Experiential Pass row is MANDATORY. A report without `## 0. Experiential Pass` as its
+first analytical section is INCOMPLETE. See pa-deployment.md Section 0 for the full directive.
 
 ---
 
@@ -38,6 +44,24 @@ Assessment is purely VISUAL. Describe what you SEE using perceptual language:
 - NO: "background-color changes from #FEF9F5 to #F0EBE3"
 
 Use perceptual language, not CSS language. Do not use judgment language — describe evidence.
+
+### 3.1 Visual Verification, Not Code Interpretation
+
+When you encounter text in a screenshot, you must LOOK AT IT as rendered pixels — not
+decode it from your knowledge of what the HTML says.
+
+- **CODE INTERPRETATION (WRONG):** You see a dark bar chart. You infer from context that
+  the label says "Level 3: Simple Loops (Basic Ralph)." You report the text as readable
+  because you know what it says.
+- **VISUAL VERIFICATION (RIGHT):** You look at the rendered screenshot. You see cream-colored
+  marks on a tan bar against a dark background. You try to read those marks AS THEY APPEAR.
+  You can make out "L" and "3" and something that might be "Simple" but the rest dissolves
+  into the bar. You report: CANNOT READ.
+
+**THE RULE:** If you cannot read the text FROM THE SCREENSHOT ALONE — without inferring
+from structure, context, HTML source, or what "makes sense" — then the text is illegible.
+Report it. Say what you SEE, not what you KNOW it says. A human visitor has never seen
+the HTML. They have only the pixels. Judge readability from the pixels.
 
 ---
 

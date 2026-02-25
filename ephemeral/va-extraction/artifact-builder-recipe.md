@@ -619,6 +619,46 @@ Per council verdict: "D-04 creates conditions for surprise (not guaranteed)" —
 
 ## PHASE 5: SELF-EVALUATE AND REFINE
 
+### Step 5.0: Experience your page as a reader (MANDATORY — before any evaluation)
+
+Before assessing anything as a builder, USE your page as a reader would.
+
+**CRITICAL: VISUAL VERIFICATION.** When you take a screenshot to assess your page,
+read the text FROM THE RENDERED PIXELS — not from your knowledge of what the HTML
+source says. You wrote the HTML; you know what every label says. A reader does not.
+If the rendered text is too small, too low-contrast, or too crowded to read visually,
+it is illegible — even though you can "read" it by recalling the source code.
+
+**READ:** Scroll through from top to bottom at reading speed. Attempt to read every
+piece of text — headings, body paragraphs, labels, captions, chart annotations,
+callout text, metadata, footer text. Do not skim. Attempt comprehension.
+
+Report THREE things:
+1. **Failed reading:** Every place where text was illegible, too small, too low-contrast,
+   or obscured by layout.
+2. **Effortful reading:** Every place where you had to slow down, re-read, or squint.
+3. **Skipped text:** Every place where you instinctively wanted to skip because the text
+   looked too dense, too small, or too low-contrast to bother with.
+
+**EXTRACT:** For every chart, diagram, table, or visual element — attempt to extract
+the specific information it communicates. Report where extraction fails: axis labels
+too small, legend entries unclear, data series indistinguishable, flow connections
+ambiguous.
+
+**NAVIGATE:** Attempt to use the page's navigation structure. Follow the heading
+hierarchy. If a TOC exists, trace each entry to its destination. Report breakdowns.
+
+Place your experiential findings in a `<!-- EXPERIENTIAL-CHECK: ... -->` HTML comment
+at the top of your file, immediately after your conviction statement.
+
+**Priority rule:** Any comprehension failure found in Step 5.0 OVERRIDES and takes
+priority over findings from Steps 5.1-5.7 below. A page with beautiful compositional
+intelligence that cannot be read is a failed page.
+
+> Source: Gas Town incident (2026-02-25) — pipeline ranked illegible chart text as Fix #5
+> behind 4 imperceptible CSS issues. The builder's experiential self-check is the first
+> line of defense. GR-63 verifies this comment exists.
+
 ### Step 5.1: Assess text legibility across the page
 
 Read through every zone of your page at normal browser zoom. Assess: Can body text be comfortably read at arm's length? Are all diagram labels, chart annotations, and navigation elements legible? Look at dense zones where text may have been compressed — do captions, footnotes, and secondary text remain readable? If any text feels strained or requires leaning in, increase font-size or line-height for that element.

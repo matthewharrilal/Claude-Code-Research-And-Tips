@@ -1,8 +1,8 @@
 {
-  "version": "3.1.0",
+  "version": "4.0.0",
   "date": "2026-02-25",
   "description": "Gate Runner manifest — table of contents for the split gate architecture",
-  "authority": "Council Verdict (2026-02-23), Wave 3 (2026-02-24), Wave 0 Surgery (2026-02-25)",
+  "authority": "Council Verdict (2026-02-23), Wave 3 (2026-02-24), Wave 0 Surgery (2026-02-25), Wave 4 Experiential Enforcement (2026-02-25)",
 
   "files": {
     "core": "gate-runner-core.js",
@@ -16,23 +16,27 @@
 
   "tiers": {
     "required": {
-      "count": 16,
+      "count": 18,
       "gates": [
         "GR-01", "GR-02", "GR-03", "GR-04", "GR-05",
         "GR-06", "GR-08", "GR-09", "GR-10",
         "GR-11", "GR-13", "GR-14", "GR-15",
-        "GR-44", "GR-60", "GR-48"
+        "GR-44", "GR-60",
+        "GR-61", "GR-62",
+        "GR-48"
       ],
-      "verdictImpact": "ANY FAIL blocks verdict. Identity FAIL = REBUILD. Perception FAIL = REFINE. GR-48 FAIL = INCOMPLETE.",
-      "note": "15 gates verified by GR-48 coverage check + GR-48 itself (self-referential, excluded from its own coverage array)"
+      "verdictImpact": "ANY FAIL blocks verdict. Identity FAIL = REBUILD. Perception FAIL = REFINE. GR-48 FAIL = INCOMPLETE. GR-61/GR-62 FAIL = BLOCK screenshot capture/PA deployment.",
+      "note": "17 gates verified by GR-48 coverage check + GR-48 itself (self-referential, excluded from its own coverage array). Wave 4: GR-61 (DPR) and GR-62 (Screenshot Quality) added — guard screenshot integrity for all downstream PA audits."
     },
     "recommended": {
-      "count": 9,
+      "count": 11,
       "gates": [
         "GR-07", "GR-17", "GR-18", "GR-20",
-        "GR-43", "GR-45", "GR-49", "GR-51", "GR-52"
+        "GR-43", "GR-45", "GR-49", "GR-51", "GR-52",
+        "GR-63", "GR-64"
       ],
-      "verdictImpact": "3+ FAIL = REBUILD. Flagged in report but do not individually block."
+      "verdictImpact": "3+ FAIL = REBUILD. Flagged in report but do not individually block.",
+      "note": "Wave 4: GR-63 (Builder Experiential Marker) and GR-64 (Usability Priority Verification) added — enforce experiential pass evidence and usability-first fix ordering."
     },
     "advisory": {
       "count": 7,
@@ -58,6 +62,8 @@
     "REBUILD": "ANY identity gate (GR-01-06, GR-08-10) FAIL, OR 3+ recommended gates FAIL",
     "REFINE": "ANY perception gate (GR-11, GR-13-15, GR-44, GR-60) FAIL",
     "INCOMPLETE": "GR-48 FAIL (missing required gate results)",
+    "BLOCK_SCREENSHOTS": "GR-61 FAIL (DPR not validated — do NOT capture screenshots)",
+    "BLOCK_PA_DEPLOYMENT": "GR-62 FAIL (blank/corrupt screenshots — do NOT deploy auditors)",
     "PROCEED_TO_PA": "All required gates PASS and <3 recommended FAIL"
   },
 
@@ -73,9 +79,27 @@
       "step": 2,
       "phase": "Post-build (Phase 3A)",
       "function": "runGateRunner(page)",
-      "gates": ["GR-01", "GR-02", "GR-03", "GR-04", "GR-05", "GR-05b", "GR-06", "GR-07", "GR-08", "GR-09", "GR-10", "GR-11", "GR-13", "GR-14", "GR-15", "GR-60", "GR-44", "GR-43"],
+      "gates": ["GR-01", "GR-02", "GR-03", "GR-04", "GR-05", "GR-05b", "GR-06", "GR-07", "GR-08", "GR-09", "GR-10", "GR-11", "GR-13", "GR-14", "GR-15", "GR-60", "GR-44", "GR-43", "GR-63"],
       "requires": "Playwright page at 1440px viewport",
-      "note": "GR-05b (ADVISORY) and GR-07/GR-43 (RECOMMENDED) execute in runGateRunner but at lower tiers. GR-06 now checks rendered fonts via document.fonts.check(). GR-12 removed (absorbed into GR-18). GR-60 added."
+      "note": "GR-63 (RECOMMENDED, Wave 4) checks for builder experiential marker HTML comment. GR-05b (ADVISORY) and GR-07/GR-43 (RECOMMENDED) execute at lower tiers."
+    },
+    {
+      "step": 2.5,
+      "phase": "Pre-screenshot (Phase 3A prep)",
+      "function": "checkDPR(page)",
+      "gates": ["GR-61"],
+      "requires": "Playwright page — run BEFORE any screenshot capture",
+      "blocking": "If FAIL, do NOT proceed to screenshot capture. Adjust viewport or abort.",
+      "note": "Wave 4: Guards screenshot integrity. Wrong DPR invalidates all PA auditor assessments."
+    },
+    {
+      "step": 2.7,
+      "phase": "Post-screenshot (Phase 3A validation)",
+      "function": "checkScreenshotQuality(screenshotDir)",
+      "gates": ["GR-62"],
+      "requires": "Saved screenshot files in screenshots/ directory (1440/, 1024/, 768/ subdirs)",
+      "blocking": "If FAIL, re-capture screenshots. Do NOT deploy PA auditors on blank/corrupt screenshots.",
+      "note": "Wave 4: Guards PA audit integrity. Blank screenshots = invalid PA verdict."
     },
     {
       "step": 3,
@@ -95,15 +119,23 @@
       "step": 5,
       "phase": "Responsive check",
       "function": "runGateRunner(page) at 768px",
-      "gates": ["GR-01 through GR-15 (minus GR-12), GR-60, GR-44, GR-43, GR-07 (re-run)"],
+      "gates": ["GR-01 through GR-15 (minus GR-12), GR-60, GR-44, GR-43, GR-63, GR-07 (re-run)"],
       "requires": "Playwright page at 768px viewport"
+    },
+    {
+      "step": 5.5,
+      "phase": "Post-weaver (Phase 3C validation)",
+      "function": "checkUsabilityPriority(auditorReports, weaverReport)",
+      "gates": ["GR-64"],
+      "requires": "All 9 auditor report texts + weaver report text",
+      "note": "Wave 4: Verifies weaver followed Priority Override Rule (pa-weaver.md Section 5.0). If 3+ auditors flagged usability, Fix #1 must address it."
     },
     {
       "step": 6,
       "phase": "Meta-verification",
       "function": "runGateCoverage(allResults)",
       "gates": ["GR-48"],
-      "requires": "All previous gate results collected"
+      "requires": "All previous gate results collected (including GR-61, GR-62)"
     },
     {
       "step": 7,
@@ -133,22 +165,22 @@
         "details": {}
       }
     ],
-    "verdict": "PROCEED_TO_PA|REFINE|REBUILD|INCOMPLETE",
+    "verdict": "PROCEED_TO_PA|REFINE|REBUILD|INCOMPLETE|BLOCK_SCREENSHOTS|BLOCK_PA_DEPLOYMENT",
     "coverageStatus": {
-      "requiredPresent": "15/15",
-      "recommendedPresent": "N/9"
+      "requiredPresent": "17/17",
+      "recommendedPresent": "N/11"
     }
   },
 
   "totalGateCount": {
-    "inGateRunner": 32,
-    "inOrchestrator": 6,
+    "inGateRunner": 34,
+    "inOrchestrator": 8,
     "removed": 14,
-    "total": 38,
+    "total": 42,
     "briefVerification": 4,
     "diagnosticOnly": 2,
-    "grandTotal": 38,
-    "note": "Wave 0: GR-12 absorbed into GR-18, GR-60 added. Wave 2: GR-05b added (ADVISORY sub-perceptual split), GR-06 updated to rendered font check."
+    "grandTotal": 42,
+    "note": "Wave 0: GR-12 absorbed into GR-18, GR-60 added. Wave 2: GR-05b added, GR-06 updated. Wave 4: GR-61 (DPR), GR-62 (Screenshot Quality), GR-63 (Experiential Marker), GR-64 (Usability Priority) added."
   },
 
   "notes": [
@@ -160,8 +192,9 @@
     "GR-40-42 moved to orchestrator process checks (Wave 1)",
     "GR-47 intentionally skipped (BV-01 covers same check per CONFLICT-007)",
     "GR-51 renumbered from source GR-43 to avoid collision",
-    "GR-48 is self-referential: excluded from its own REQUIRED_GATES coverage array (15 gates) but counted in tier total (16)",
+    "GR-48 is self-referential: excluded from its own REQUIRED_GATES coverage array (17 gates) but counted in tier total (18)",
     "Wave 0 (2026-02-25): GR-05+GR-07 consolidated (GR-07 demoted to RECOMMENDED), GR-12 absorbed into GR-18, GR-43 demoted to RECOMMENDED, GR-19 demoted to ADVISORY, GR-60 WCAG AA added as REQUIRED, GR-21 threshold 4->6, GR-22 skip-link exemption, GR-44/GR-14/GR-17 bug fixes",
-    "Wave 2 (2026-02-25): GR-05b ADVISORY result added (ME-010 sub-perceptual cold colors now reported separately). GR-06 updated to check rendered fonts via document.fonts.check() instead of declared font-family stack (ME-011, eliminates 181 false violations from fallback fonts)."
+    "Wave 2 (2026-02-25): GR-05b ADVISORY result added (ME-010 sub-perceptual cold colors now reported separately). GR-06 updated to check rendered fonts via document.fonts.check() instead of declared font-family stack (ME-011, eliminates 181 false violations from fallback fonts).",
+    "Wave 4 (2026-02-25): EXPERIENTIAL ENFORCEMENT — 4 new gates. GR-61 DPR Validation (REQUIRED, pre-screenshot). GR-62 Screenshot Quality (REQUIRED, post-screenshot). GR-63 Builder Experiential Marker (RECOMMENDED, DOM check for <!-- EXPERIENTIAL-CHECK: --> comment). GR-64 Usability Priority Verification (RECOMMENDED, post-weaver text scan ensuring Fix #1 addresses usability when 3+ auditors flag it). Motivation: Gas Town incident — pipeline ranked illegible chart text as Fix #5 behind 4 imperceptible CSS issues. These gates enforce experiential quality verification at structural level."
   ]
 }

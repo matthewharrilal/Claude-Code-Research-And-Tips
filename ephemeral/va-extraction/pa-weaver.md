@@ -6,6 +6,66 @@ Split: Contains weaver protocol ONLY. How the weaver synthesizes reports, verdic
 
 ---
 
+## 0. WEAVER EXPERIENTIAL ANCHOR (MANDATORY — Before All Other Actions)
+
+> **POSITIONAL ENFORCEMENT:** This section is numbered 0 because the Weaver must
+> perform its own experiential reading BEFORE reading any auditor report, gate result,
+> or calibration scale. This prevents analytical contamination from auditor language.
+> The experiential anchor is also embedded in the Weaver prompt template (MANIFEST.md Appendix E).
+
+### 0.1 View the Screenshots Yourself
+
+Open the 1440px screenshot set. Scroll through from cold-look to the last scroll shot.
+Attempt to USE the page as a reader.
+
+**CRITICAL: VISUAL VERIFICATION, NOT CODE INTERPRETATION.** You are looking at rendered
+pixels. Your instinct is to DECODE text from context — inferring what a label "should"
+say from the auditor reports you are about to read. Resist this. Report what the PIXELS
+show you. If you cannot read text from the screenshot alone — without inferring from
+structure or auditor descriptions — then that text is illegible.
+
+1. **Read:** Can you read every heading, paragraph, label, caption, chart annotation
+   FROM THE PIXELS ALONE? Note every failure — say what you SEE, not what you KNOW.
+2. **Extract:** Can you extract information from every visual element? Note every failure.
+3. **Navigate:** Does the page's structure guide you through the content? Note every
+   breakdown.
+
+### 0.2 Write Your Experiential Anchor
+
+Write a 3-sentence first impression based on attempting to USE the page. This is your
+EXPERIENTIAL ANCHOR.
+
+This anchor has special status in the verdict:
+- It CANNOT be overridden by auditor scores or gate results
+- If your anchor identifies a comprehension failure, that becomes Fix #1 regardless of
+  all other analysis
+- If 0/9 auditors caught something your anchor found, your anchor takes precedence
+  (the Weaver has the fullest context and the freshest eyes on the complete screenshot set)
+
+### 0.3 Experiential Pass Aggregation (Enhanced)
+
+After writing your own anchor, aggregate experiential pass results from all 9 auditors:
+
+| Auditor Agreement | Classification | Weaver Action |
+|-------------------|---------------|---------------|
+| Weaver anchor + >= 1/9 auditor | CONFIRMED CRITICAL | Fix #1, BLOCKING |
+| >= 3/9 flag same element | CONFIRMED illegibility | Fix #1 per Priority Override |
+| Weaver anchor + 0/9 auditors | WEAVER-ONLY finding | Investigate — cite screenshot evidence |
+| 1-2/9 flag same element | POSSIBLE issue | Investigate — cite specific reports |
+| 0/9 flag + no weaver anchor | All text readable | No experiential action needed |
+
+Report format: "Experiential: N CONFIRMED, M POSSIBLE, text fully readable at 0/9."
+
+### 0.4 Then Proceed to Verification
+
+AFTER completing Sections 0.1-0.3, proceed to the existing workflow below:
+1. Manifest Verification (the current "FIRST ACTION" — now SECOND)
+2. PA-05 Scoring
+3. Tier 5 Scoring
+...
+
+---
+
 ## 1. WEAVER ROLE
 
 > Source: ITEM 76 (extract-d01-d03.md, VA L191-192) — "reads 10 auditor reports -> VERDICT"
@@ -188,17 +248,9 @@ The Weaver synthesizes these into an emotional arc assessment using the 4-regist
 
 ---
 
-## 4.5 Experiential Pass Aggregation
+## 4.5 Experiential Pass Aggregation — See Section 0.3
 
-Before synthesizing emotional arc or ordering fixes, aggregate experiential pass results across all 9 auditors:
-
-| Auditor Agreement | Classification | Weaver Action |
-|-------------------|---------------|---------------|
-| >= 3/9 flag same text element | CONFIRMED illegibility | Fix #1 per Priority Override Rule |
-| 1-2/9 flag same text element | POSSIBLE issue | Investigate — cite specific auditor reports |
-| 0/9 flag any text element | All text readable | No experiential action needed |
-
-Report format: "Experiential: N CONFIRMED, M POSSIBLE, text fully readable at 0/9."
+> **RELOCATED:** The experiential pass aggregation has been moved to **Section 0.3** (primacy position) at the top of this document, with enhanced aggregation including the Weaver's own experiential anchor. The aggregation now runs BEFORE any analytical synthesis, not after emotional arc analysis. See Section 0.3 for the full table.
 
 ---
 
