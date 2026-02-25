@@ -1,7 +1,7 @@
 # Pipeline v3 Visual Architecture — Execution Manifest
 
 **Date:** 2026-02-23
-**Status:** AUTHORITATIVE — This file governs all Pipeline v3 execution.
+**Status:** AUTHORITATIVE — This file is the ROUTING authority (what goes where, who receives what). artifact-orchestrator.md is the EXECUTION authority (step-by-step protocol for running each phase).
 **Scope:** Maps 885 extracted items across 9 artifact files to 15 agents in a 4-phase pipeline.
 **Immutability:** This file is an ORCHESTRATION SPEC. It is NOT modified during execution. Per-build state goes in EXECUTION-TRACKER-TEMPLATE.md (see Wave 3).
 
@@ -11,17 +11,17 @@
 
 This is the minimum viable procedure. Each step references the detailed section below.
 
-**Prerequisites:** Verify these files exist before starting:
+**Prerequisites (verified in Step 1):**
 - `design-system/compositional-core/vocabulary/tokens.css` (183 lines)
-- `design-system/compositional-core/components/components.css` (290 lines)
+- `design-system/compositional-core/components/components.css`
 - `design-system/compositional-core/grammar/mechanism-catalog.md`
-- `council-verdict.md` (575 lines — authoritative override document)
+- `council-verdict.md` (575 lines) — Optional; the 9 artifacts are self-sufficient for execution. Read only to resolve ambiguities where artifacts conflict.
 - Raw content markdown (the pipeline input)
-- TC Brief Template (`ephemeral/va-extraction/artifact-tc-brief-template.md`, ~165 lines)
+- TC Brief Template (`ephemeral/va-extraction/artifact-tc-brief-template.md`, ~223 lines)
 
 **Procedure:**
-0. Copy `EXECUTION-TRACKER-TEMPLATE.md` to your output directory. Fill in BUILD_DATE, CONTENT_PATH, SLUG. This is your working document for the run.
-1. Verify all prerequisite files exist. (Phase 0 preconditions)
+0. Create output directory at `ephemeral/builds/{SLUG}-{DATE}/`. Copy `EXECUTION-TRACKER-TEMPLATE.md` to this output directory. Fill in BUILD_DATE, CONTENT_PATH, SLUG. This is your working document for the run.
+1. Verify all prerequisite files exist. (Phase 0 preconditions — see Appendix D for file paths and expected line counts.)
 2. Spawn **Content Analyst** (Opus) with raw content markdown + content analysis protocol from artifact-routing.md. Receive **Content Map** (~30-50 lines). (Section 4, Phase 0)
 3. Determine mode: APPLIED (default) or COMPOSED (requires heterogeneity + metaphor viability).
 4. Spawn **Brief Assembler** (Opus) with Content Map + TC Brief Template + soul world-description + perception thresholds + recipe phases + disposition D-01-D-09. Receive **Execution Brief** (~100-165 lines). (Section 4, Phase 1)
@@ -117,7 +117,7 @@ Item counts shown are base layer classification counts. Some layers have additio
 
 | Agent | Model | Role | Receives | Produces |
 |-------|-------|------|----------|----------|
-| **Brief Assembler** | Opus (recommended) | Merge TC brief template + content map into execution brief | Content Map + TC Brief Template (~165 lines) | Execution Brief (~100–165 lines) |
+| **Brief Assembler** | Opus (recommended) | Merge TC brief template + content map into execution brief | Content Map + TC Brief Template (~223 lines) | Execution Brief (~100–165 lines) |
 
 ### Phase 2 — Building
 
@@ -139,7 +139,7 @@ The Gate Runner is NOT a separate LLM agent. It is Playwright JavaScript code ex
 
 | Executor | Model | Role | Receives | Produces |
 |----------|-------|------|----------|----------|
-| **Orchestrator** (Playwright JS) | N/A | Run 42 programmatic gate checks (38 Playwright + 4 BV) | Built HTML file + gate-runner-core.js | Structured JSON results (42 gates: PASS/FAIL) + 6 orchestrator decision rules |
+| **Orchestrator** (Playwright JS) | N/A | Run 42 programmatic gate checks (36 GR + 4 BV + 2 diagnostic) | Built HTML file + gate-runner-core.js | Structured JSON results (42 gates: PASS/FAIL) + 6 orchestrator decision rules |
 
 
 ### Phase 3B — Perceptual Audit (Mode 4)
@@ -197,7 +197,7 @@ This section maps each artifact file to the specific agents who receive it. Sect
 
 **CRITICAL:** The builder must NOT receive the raw prohibition list. Soul constraints are reframed as world-description ("Every surface is sharp. Corners are cut, not curved.") not as prohibitions ("Do NOT use border-radius"). This prevents suppressor S-02 (prohibition-induced rigidity). The Brief Assembler must extract ONLY the "World-description" field from each SC-XX table and EXCLUDE the "Gate check" and "CSS rule" fields from builder-facing content.
 
-### artifact-routing.md (843 lines)
+### artifact-routing.md (900 lines)
 **Layers covered:** L8 ROUTING (125 items: 63 base classified + 62 cross-matched + 3 council-added)
 **Total items:** 125
 
@@ -212,13 +212,13 @@ This section maps each artifact file to the specific agents who receive it. Sect
 | "Content-Volume-to-Zone-Count Map" (TOC #11) | **Brief Assembler** | How many zones to allocate based on content volume |
 | "Temporal Composition — Scroll Rhythm" (TOC #5) | **Builder** (via brief Tier 3) | Scroll rhythm decisions: OPENING → DEEPENING → RESOLVING |
 
-**PREREQUISITE:** The TC Brief Template (~165 lines) must be authored before the first pipeline run. artifact-routing.md "Brief Template Structure" (TOC #10) defines the template's tier structure and line budgets, but the actual template text must be created as a standalone file. The Brief Assembler needs the ACTUAL template, not just the structural description.
+**PREREQUISITE:** The TC Brief Template (~223 lines) must be authored before the first pipeline run. artifact-routing.md "Brief Template Structure" (TOC #10) defines the template's tier structure and line budgets, but the actual template text must be created as a standalone file. The Brief Assembler needs the ACTUAL template, not just the structural description.
 
 **CRITICAL SECTION:** The TC Brief Template is the single most important routing document. It defines the EXACT structure of what the builder receives. Every line has been calibrated against pipeline failure modes. The Brief Assembler must follow it EXACTLY — no additions, no omissions, no reordering.
 
-### artifact-builder-recipe.md (840 lines)
+### artifact-builder-recipe.md (~828 lines)
 **Layers covered:** L3 SCAFFOLDING (75 items per appendix), L4 DISPOSITION (78 items per appendix)
-**Total items:** 146 (per header; appendix lists 75+78=153 — discrepancy is an artifact-internal issue)
+**Total items:** 146 per section headers; 153 per appendix (75 L3 + 78 L4). The 7-item discrepancy is because the appendix counts include secondary-classified items that are cross-matched from other layers. Both numbers are correct for their scope.
 
 | Section (Actual Header) | Receiving Agent | Purpose |
 |------------------------|-----------------|---------|
@@ -233,7 +233,7 @@ This section maps each artifact file to the specific agents who receive it. Sect
 
 **FORMAT IS CRITICAL:** This artifact uses RECIPE format (sequenced steps: "Read → Select → Deploy → Assess") NOT checklist format ("Verify → Fail if → Must be"). Recipe format = DESIGNED output. Checklist format = FLAT output. This distinction is the single most important formatting decision in the pipeline.
 
-**BRIEF ASSEMBLER EXTRACTION GUIDE:** The 840-line recipe cannot fit in the ~90-line compositional + disposition tiers. The Brief Assembler should:
+**BRIEF ASSEMBLER EXTRACTION GUIDE:** The ~828-line recipe cannot fit in the ~90-line compositional + disposition tiers. The Brief Assembler should:
 - **INCLUDE VERBATIM:** Phase 1 file-reading instructions (Step 1.1-1.3), mechanism minimums, disposition D-01-D-09 instructions
 - **SUMMARIZE:** Phase 2 creative decision framework (key questions, not full detail)
 - **REFERENCE (not inline):** Phase 3-6 deploy steps (builder has mechanism-catalog.md as direct file)
@@ -243,14 +243,14 @@ This section maps each artifact file to the specific agents who receive it. Sect
 
 ### artifact-gate-runner.md (split into 5 files — see gate-manifest.json)
 **Layers covered:** L6 GATES (42 gate-runner gates + 6 orchestrator decision rules + 34 VALUES items rerouted per council verdict — see VALUES Rerouting below)
-**Total items:** 42 gate-runner gates (18 REQUIRED + 11 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF VERIFICATION) + 6 orchestrator decision rules (GR-23–GR-28)
+**Total items:** 42 gate-runner gates (20 REQUIRED + 9 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF VERIFICATION) + 6 orchestrator decision rules (GR-23–GR-28)
 
 **Wave 3 split files:** The monolithic gate runner (2,410 lines) was split into 5 operational files:
-- `gate-runner-core.js` (~1,550 lines) — All executable Playwright JavaScript (9 functions)
-- `gate-runner-spec.md` (188 lines) — Human-readable gate specifications
+- `gate-runner-core.js` (~1,654 lines) — All executable Playwright JavaScript (9 functions)
+- `gate-runner-spec.md` (~223 lines) — Human-readable gate specifications (Waves 1-4)
 - `gate-runner-preconditions.md` (83 lines) — Text-based pre-build checks
 - `gate-runner-provenance.md` (151 lines) — History, traceability, wave change logs
-- `gate-manifest.json` (159 lines) — JSON TOC, tiers, execution order
+- `gate-manifest.json` (~200 lines) — JSON TOC, tiers, execution order
 The original `artifact-gate-runner.md` is now a redirect pointer. `artifact-gate-runner-MONOLITHIC.md` preserves the original.
 
 | Section (Actual Header) | Receiving Agent | Purpose |
@@ -282,18 +282,19 @@ The original `artifact-gate-runner.md` is now a redirect pointer. `artifact-gate
 **Layers covered:** L7 PA (56 items + rerouted = 88 total tracked)
 **Total items:** 88
 
-**Wave 3 split files:** The monolithic PA protocol (1,141 lines) was split into 5 operational files:
-- `pa-questions.md` (412 lines) — All 69 PA question definitions with scoring guidance
-- `pa-deployment.md` (237 lines) — Auditor assignments, screenshot protocol, deployment instructions
-- `pa-weaver.md` (376 lines) — Weaver protocol, verdict categories, diagnostic vocabulary
-- `pa-guardrails.md` (151 lines) — Auditor anti-patterns, quality bars, scoring thresholds
+**Wave 3 split files:** The monolithic PA protocol (1,141 lines) was split into 6 operational files:
+- `pa-questions.md` (~431 lines) — All 69 PA question definitions with scoring guidance
+- `pa-deployment.md` (~363 lines) — 9-auditor assignments, Section 0 experiential pass protocol, screenshot protocol, visual verification
+- `pa-weaver.md` (~455 lines) — Section 0 experiential anchor, Weaver protocol, verdicts, calibration (INFORMATION ISOLATION)
+- `pa-guardrails.md` (~113 lines) — Auditor constraints, Section 3.1 visual verification, scoring anchors
+- `pa-guardrails-weaver.md` (~59 lines) — Weaver/Orchestrator-only guardrails: anti-patterns, revision degradation, S-09 stacking, Tier 1 equivalents, Tier 5 provisional scoring. PA Auditors must NOT receive this file.
 - `pa-manifest.md` (89 lines) — Per-run tracking template, completeness verification
 The original `artifact-pa-protocol-MONOLITHIC.md` preserves the pre-split version.
 
 **INFORMATION ISOLATION:** The split enforces role-based access:
-- **PA Auditors** receive: pa-questions.md (their subset) + pa-guardrails.md (includes visual verification principle + experiential pass requirement)
-- **Weaver** receives: pa-weaver.md (includes experiential anchor protocol) + all auditor reports
-- **Orchestrator** receives: pa-deployment.md (includes experiential pass deployment protocol) + pa-manifest.md
+- **PA Auditors** receive: pa-questions.md (their subset) + pa-guardrails.md (includes visual verification principle + experiential pass requirement). PA Auditors must NOT receive pa-guardrails-weaver.md.
+- **Weaver** receives: pa-weaver.md (includes experiential anchor protocol) + pa-guardrails-weaver.md (anti-patterns, revision degradation, S-09 stacking) + all auditor reports
+- **Orchestrator** receives: pa-deployment.md (includes experiential pass deployment protocol) + pa-guardrails-weaver.md (anti-patterns context for verdict) + pa-manifest.md
 
 | Split File | Receiving Agent | Purpose |
 |------------------------|-----------------|---------|
@@ -301,6 +302,7 @@ The original `artifact-pa-protocol-MONOLITHIC.md` preserves the pre-split versio
 | `pa-deployment.md` — Auditor assignments, screenshot protocol | **Orchestrator** | Deploy PA: assignments, model recs, cross-validation, screenshot capture |
 | `pa-weaver.md` — Weaver protocol, verdicts | **Weaver** | SHIP/SHIP WITH FIXES/REFINE/REBUILD thresholds, diagnostic vocabulary, emotional arc |
 | `pa-guardrails.md` — Auditor constraints | **PA Auditors** | Evidence format, fresh-eyes principle, language constraints, completion manifest |
+| `pa-guardrails-weaver.md` — Weaver/Orchestrator guardrails | **Weaver**, **Orchestrator** | Anti-patterns, revision degradation, S-09 stacking, Tier 1 equivalents, Tier 5 provisional. NOT for PA Auditors. |
 | `pa-manifest.md` — Run tracking | **Orchestrator** | Per-run auditor report checklist, PA-05 cross-validation status |
 
 **PA-05 IS THE PRIMARY SUCCESS METRIC.** Everything in the pipeline ultimately serves PA-05. Sub-criteria:
@@ -315,7 +317,7 @@ The original `artifact-pa-protocol-MONOLITHIC.md` preserves the pre-split versio
 
 **SCREENSHOT PRE-CAPTURE PATTERN:** The orchestrator takes ALL screenshots (cold look + full scroll at **3 viewports: 1440px, 1024px, and 768px**) BEFORE spawning any PA auditors. Auditors read saved images via Read tool. This eliminates Playwright contention and enables all 9 auditors to run in parallel.
 
-### artifact-orchestrator.md (971 lines + ~42 lines Wave 3 additions)
+### artifact-orchestrator.md (~1,100 lines)
 **Layers covered:** L9 ORCHESTRATION (188 items + 15 council-rerouted + 19 VALUES context + 6 reclassified decision rules = 228 items)
 **Total items:** 228
 
@@ -335,13 +337,13 @@ The original `artifact-pa-protocol-MONOLITHIC.md` preserves the pre-split versio
 
 **MODE SELECTION (APPLIED vs COMPOSED):** The orchestrator selects the mode based on content analysis output. The builder receives ONE mode — implicit in the recipe format and brief structure, not as a "Mode: APPLIED" label. APPLIED = content-first, design serves readability. COMPOSED = design-first, content and form are co-equal. Default is APPLIED; COMPOSED requires content with high structural heterogeneity and metaphor viability.
 
-**HONEST COMPLEXITY ACCOUNTING (CF-01):** Total builder input is ~3,600 lines (not "~165 lines"):
-- Constraint layer: ~165 lines (recipe format)
-- Disposition layer: ~40 lines (8 instructions)
+**HONEST COMPLEXITY ACCOUNTING (CF-01):** Total builder input is ~3,600 lines (not "~223 lines"):
+- Constraint layer: ~73 lines within the brief (recipe format); TC Brief Template is ~223 lines
+- Disposition layer: ~40 lines (9 instructions, D-01 through D-09)
 - Content map: ~35 lines
 - tokens.css: 183 lines (direct file)
-- components.css: 290 lines (direct file)
-- Value tables: ~550 lines (CSS vocabulary)
+- components.css: ~1,195 lines (direct file)
+- Value tables: ~262 lines (CSS vocabulary)
 - Content source material: varies
 - CD-006 reference (optional): ~1,200 lines
 
@@ -388,7 +390,7 @@ Before spawning the Brief Assembler, the orchestrator determines mode (APPLIED o
 **Steps:**
 1. Orchestrator spawns **Brief Assembler** with:
    - Content Map (from Phase 0)
-   - TC Brief Template (~165 lines, from artifact-tc-brief-template.md)
+   - TC Brief Template (~223 lines, from artifact-tc-brief-template.md)
    - Soul constraints as world-description (from artifact-identity-perception.md "1.2 Soul Constraints" — extract ONLY "World-description" fields)
    - Perception thresholds as natural laws (from artifact-identity-perception.md "2.2 Core Thresholds")
    - Builder recipe phases (from artifact-builder-recipe.md "PHASE 1" through "PHASE 6")
@@ -425,9 +427,9 @@ Before spawning the Brief Assembler, the orchestrator determines mode (APPLIED o
    - Execution Brief (~100–165 lines)
    - Reference files (see Appendix D for paths):
      - `tokens.css` (183 lines)
-     - `components.css` (290 lines)
+     - `components.css` (~1,195 lines)
      - `mechanism-catalog.md`
-     - Value tables (~550 lines — CSS vocabulary for the 6-channel framework)
+     - Value tables (~262 lines — CSS vocabulary for the 6-channel framework)
      - CD-006 reference HTML (optional — the design system's highest-scoring existing artifact, ~1,200 lines)
    - Mode implicit in brief format (APPLIED or COMPOSED — not as a separate label)
    - NO gate thresholds, NO prohibition lists, NO raw research
@@ -435,7 +437,7 @@ Before spawning the Brief Assembler, the orchestrator determines mode (APPLIED o
    - **Read Vocabulary:** tokens.css → components.css → mechanism-catalog.md
    - **Select Creative Decisions:** Choose metaphor, density arc, channel shifts
    - **Deploy Scaffolding:** HTML structure, grid layouts, component adoption
-   - **Deploy Disposition:** D-01 through D-09 (D-01–D-08 experimental; D-09 background hex lock is ENFORCED)
+   - **Deploy Disposition:** D-01 through D-09 (all 9 EXPERIMENTAL; D-09 = The Quiet Zone). Background Hex Lock is a separate BV-02 constraint, not a disposition.
    - **Self-Evaluate:** Answer 7 required self-evaluation questions (zone transitions, transition types, skeleton test, scroll surprise, section heights, density arc, ending) as HTML comment block
 3. Builder outputs structured conviction statement (3 sentences: metaphor, emotional arc, compositional strategy) as HTML comment at top of file.
 4. Builder produces single HTML file with inline CSS + conviction + self-evaluation comments.
@@ -459,7 +461,7 @@ Before spawning the Brief Assembler, the orchestrator determines mode (APPLIED o
 
 **Steps (gate runner — runs in parallel with screenshots):**
 1. Orchestrator opens Playwright session against served HTML.
-2. Gate runner executes all post-build gates at 1440px viewport width (see gate-manifest.json for the 42-gate inventory: 18 REQUIRED + 11 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BV).
+2. Gate runner executes all post-build gates at 1440px viewport width (see gate-manifest.json for the 42-gate inventory: 20 REQUIRED + 9 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BV).
 3. Responsive gates re-run at 768px.
 4. Results collected as structured JSON.
 
@@ -497,11 +499,12 @@ Before spawning the Brief Assembler, the orchestrator determines mode (APPLIED o
    - Calibration references from pa-weaver.md (multi-coherence scale, severity scale, metaphor expression spectrum)
 2. Weaver scores PA-05 (per FIX-083): sub-criteria (Designed | Coherent | Proportionate | Polished), Tier 5 score (PA-60–PA-77), fix-type classification (MECHANICAL / STRUCTURAL / COMPOSITIONAL), emotional arc synthesis.
 3. Weaver applies verdict logic (priority order):
-   - ANY Identity gate FAIL → **REBUILD** (highest priority)
+   - **PRIORITY 0:** If a CONFIRMED experiential finding exists (3+ auditors flag same element), verdict CANNOT be SHIP.
+   - ANY Identity gate FAIL → **REBUILD** (highest priority after experiential)
    - 3+ Anti-Pattern gates FAIL → **REBUILD**
    - ANY Perception gate FAIL → **REFINE**
-   - PA-05 >= 3.5 AND all gates PASS → **SHIP**
-   - PA-05 >= 3.0 AND all required gates PASS AND fixes MECHANICAL only → **SHIP WITH FIXES**
+   - PA-05 >= 3.5 AND all gates PASS AND no confirmed experiential failures → **SHIP**
+   - PA-05 >= 3.0 AND all required gates PASS AND fixes MECHANICAL only AND <=3 MECHANICAL fixes → **SHIP WITH FIXES**
    - PA-05 2.5–3.5 → **REFINE** (with specific action items)
    - PA-05 < 2.5 → **REBUILD** (fundamental rework needed)
    - MECHANICAL EXCEPTION: If ALL identity gate failures are MECHANICAL (<=5 CSS lines, no HTML change, no design decision — auto-classified by gate runner), treat as REFINE, not REBUILD.
@@ -606,7 +609,7 @@ In experimental 3-pass mode (not yet validated): REFINE verdict triggers a targe
 | Missing input files | Precondition Gates GR-23–GR-28 | ABORT. Locate missing files before re-running. See Appendix D for required file paths. |
 | Invalid content (empty/corrupt) | Content Analyst Phase 0 | ABORT. Provide valid content. |
 | Missing reference files (tokens.css, etc.) | Precondition Gates | ABORT. Verify design system files exist at paths listed in Appendix D. |
-| TC Brief Template not authored | Brief Assembler Phase 1 | ABORT. Verify artifact-tc-brief-template.md (~165 lines) exists before running pipeline. |
+| TC Brief Template not authored | Brief Assembler Phase 1 | ABORT. Verify artifact-tc-brief-template.md (~223 lines) exists before running pipeline. |
 
 ### Phase 0 Failures
 
@@ -698,7 +701,7 @@ These sections are HIGH-PRIORITY reading for the listed agent. Skimming or omitt
 | The Execution Brief (produced by Phase 1) | ALL | Builder's sole execution document |
 | tokens.css | ALL | Vocabulary — read FIRST |
 | components.css | ALL | Available components |
-| mechanism-catalog.md | ALL | Available mechanisms — the recipe's "Step 1.3: Read the ~165-line template" section references this implicitly |
+| mechanism-catalog.md | ALL | Available mechanisms — referenced by recipe Phase 1 (READ YOUR VOCABULARY) |
 
 **NOTE:** The builder does NOT read any artifact files directly. The builder reads ONLY the Execution Brief + reference files (tokens.css, components.css, mechanism-catalog.md, value tables, optionally CD-006). All pipeline intelligence reaches the builder through the brief.
 
@@ -742,7 +745,7 @@ These rulings from `council-verdict.md` are AUTHORITATIVE and override all other
 
 | ID | Mandate | Impact |
 |----|---------|--------|
-| CF-01 | ~165-line constraint layer within ~3,600 total builder input. FORMAT improvement (recipe vs checklist), not volume reduction. | Every item has a home; honest accounting required |
+| CF-01 | ~73-line constraint layer within ~3,600 total builder input. FORMAT improvement (recipe vs checklist), not volume reduction. | Every item has a home; honest accounting required |
 | CF-02 | Compositional Critic REMOVED from default pipeline | 15 agents, not 16 |
 | CF-03 | Phased suppressor removal: 20→0 active suppressors | Zero suppression in current pipeline |
 | CF-04 | N=4 evidence taxonomy: FACT/PROVEN/OBSERVED/CONFOUNDED/THEORETICAL/SPECULATIVE | All claims must be tagged |
@@ -775,7 +778,7 @@ Item counts shown as "Base / Artifact-reported" where they differ.
 | L3 SCAFFOLDING | 68 | 75 (appendix) | artifact-builder-recipe.md | COVERED — Recipe phases 1-3, mechanism minimums |
 | L4 DISPOSITION | 62 | 78 (appendix) | artifact-builder-recipe.md | COVERED — D-01–D-09 + recipe phases 4-6 |
 | L5 VALUES | 94 | Distributed | DISTRIBUTED | COVERED — 34 rerouted from gates (15 orch, 10 PA, 9 doc); 26 to builder context; 34 standalone |
-| L6 GATES | 72 | 42 gates + rerouted | artifact-gate-runner.md | COVERED — 42 gates (18 REQUIRED + 11 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BV) + 6 orchestrator decision rules |
+| L6 GATES | 72 | 42 gates + rerouted | artifact-gate-runner.md | COVERED — 42 gates (20 REQUIRED + 9 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BV) + 6 orchestrator decision rules |
 | L7 PA | 56 (+32 rerouted) | 88 total tracked | pa-questions.md + pa-deployment.md + pa-weaver.md | COVERED — 69 questions across 9 auditors + integration + verdict |
 | L8 ROUTING | 63 (+62 cross-matched) | 125 total | artifact-routing.md | COVERED — Content analysis + TC brief + compression + zones |
 | L9 ORCHESTRATION | 188 (+37 rerouted/context) | 222 total | artifact-orchestrator.md | COVERED — Full pipeline sequence + mode + verdict + experiments |
@@ -844,12 +847,12 @@ All claims in this manifest and its artifacts are tagged with evidence levels pe
 | Agent | Files / Inputs |
 |-------|---------------|
 | Content Analyst | Raw content markdown + content analysis protocol (full "Phase 0: Content Analysis Protocol" section from artifact-routing.md) + reader model ("Reader Model — 5-Axis Input Space" section) |
-| Brief Assembler | Content Map, TC Brief Template (~165-line standalone file), soul world-description (from SC tables — World-description field ONLY), perception thresholds, recipe phases, disposition D-01–D-09 |
-| Builder | Execution Brief ONLY + tokens.css + components.css + mechanism-catalog.md + value tables (~550 lines) + CD-006 reference (optional) |
+| Brief Assembler | Content Map, TC Brief Template (~223-line standalone file), soul world-description (from SC tables — World-description field ONLY), perception thresholds, recipe phases, disposition D-01–D-09 |
+| Builder | Execution Brief ONLY + tokens.css + components.css + mechanism-catalog.md + value tables (~262 lines) + CD-006 reference (optional) |
 | Gate Runner (orchestrator code) | Built HTML file + gate-runner-core.js (42 gates, executed as Playwright JavaScript) |
 | PA Auditors (×9) | Screenshots ONLY + assigned question subset from pa-questions.md (thematic groupings per pa-deployment.md) + pa-guardrails.md |
 | Integrative Auditor | 9 PA auditor reports + all screenshots (PA-05 scoring is WEAVER's responsibility per FIX-083) |
-| Weaver | Integrative report + gate results + individual auditor reports + calibration references (multi-coherence scale, severity scale, metaphor expression spectrum) |
+| Weaver | Integrative report + gate results + individual auditor reports + pa-guardrails-weaver.md (pipeline-vocabulary guardrails) + calibration references (multi-coherence scale, severity scale, metaphor expression spectrum) |
 
 **What each agent MUST NOT receive:**
 
@@ -868,8 +871,8 @@ All claims in this manifest and its artifacts are tagged with evidence levels pe
 
 | Term | Definition |
 |------|-----------|
-| **Execution Brief** | The ~100–165 line document the builder receives. Contains soul (as world-description), perception (as natural laws), composition, disposition, and content map. Sole execution spec for builder. (Previously called "Activation Brief" — name retained in some artifacts as legacy.) |
-| **TC Brief Template** | ~165-line template defining the structure of the Execution Brief. Described structurally in artifact-routing.md "Brief Template Structure." Must be authored as a standalone file before first pipeline run. Merged with Content Map by Brief Assembler. |
+| **Execution Brief** | The ~100–165 line document the builder receives (produced by merging the ~223-line TC Brief Template with the Content Map). Contains soul (as world-description), perception (as natural laws), composition, disposition, and content map. Constraint layer within brief: ~73 lines. Sole execution spec for builder. (Previously called "Activation Brief" — name retained in some artifacts as legacy.) |
+| **TC Brief Template** | ~223-line template defining the structure of the Execution Brief. Described structurally in artifact-routing.md "Brief Template Structure." Must be authored as a standalone file before first pipeline run. Merged with Content Map by Brief Assembler. |
 | **Content Map** | ~30–50 line output of Phase 0 describing content structure, type, heterogeneity, and metaphor viability. Describes "what the content IS, not what the design SHOULD BE." |
 | **Soul Constraints** | 10 non-negotiable design rules (SC-01–SC-10): sharp surfaces, no shadows, container discipline, warm palette, font trinity, no gradients, zero decorative elements, border-weight hierarchy, header DNA, typography foundations. Delivered as world-description to builder, binary checks to gate runner. |
 | **Perception Thresholds** | 6 empirically validated minimums (PT-01–PT-06): >=15 RGB background delta, >=0.025em letter-spacing, <=120px stacked gap, <=96px single margin, etc. Dual-routed to builder (calibration) and gate runner (binary). |
@@ -887,7 +890,7 @@ All claims in this manifest and its artifacts are tagged with evidence levels pe
 | **Survival Function** | S(x) = 1/(1+C(x)). Curation function governing compression during brief assembly — how much of each input survives into the brief. |
 | **Council** | The council-verdict.md document (575 lines). A neutral judge's resolution of contradictions between 11 extraction reports. All rulings are incorporated into the 9 artifacts. The council document itself is the ultimate authority when artifacts conflict. |
 | **CCS (Compositional Coherence Score)** | RESEARCH CONSTRUCT measuring mechanism interdependence. Scale 0.00-1.00. NOT operational — methodology varies by +/-0.15 depending on evaluator. Do not gate-check until methodology is standardized. |
-| **Value Tables** | ~225 lines of CSS vocabulary for the 6-channel framework. Provided to the builder as reference material (not constraints). Part of the ~3,600 total builder input. See `artifact-value-tables.md`. |
+| **Value Tables** | ~262 lines of CSS vocabulary for the 6-channel framework. Provided to the builder as reference material (not constraints). Part of the ~3,600 total builder input. See `artifact-value-tables.md`. |
 | **TC (Tension-Composition)** | The design system's core methodology. "TC Brief" = a brief that integrates content tensions with compositional frameworks. "TC Brief Template" = the template for producing such briefs. The "TC" prefix distinguishes pipeline-specific briefs from general execution documents. |
 | **Register** | The character of a content section: NARRATIVE (flowing prose — generous line-height, wider measure), REFERENCE (tables, specs, lists — tighter spacing, possible multi-column), CODE (code blocks, commands — monospace, structured, tight line-height). Mixed sections get combined labels (e.g., NARRATIVE+CODE). Register determines CSS treatment per zone. |
 | **Boundary** | The transition point between two adjacent zones. Multi-coherence is measured AT boundaries — how many of the 6 channels shift simultaneously. Light boundary (1-2 shifts) = legato. Medium boundary (3 shifts) = breathing rest. Heavy boundary (4+ shifts) = full stop. |
@@ -913,42 +916,43 @@ All external files referenced in this manifest, with their repository locations:
 | File | Path | Size | Required By |
 |------|------|------|-------------|
 | tokens.css | `design-system/compositional-core/vocabulary/tokens.css` | 183 lines | Builder (direct file route) |
-| components.css | `design-system/compositional-core/components/components.css` | 290 lines | Builder (direct file route) |
+| components.css | `design-system/compositional-core/components/components.css` | ~1,195 lines | Builder (direct file route) |
 | mechanism-catalog.md | `design-system/compositional-core/grammar/mechanism-catalog.md` | varies | Builder (direct file route) |
 
 ### Pipeline Artifacts (This VA Extraction)
 
 | File | Path | Size | Required By |
 |------|------|------|-------------|
-| artifact-orchestrator.md | `ephemeral/va-extraction/artifact-orchestrator.md` | 1,058 lines | Orchestrator |
+| artifact-orchestrator.md | `ephemeral/va-extraction/artifact-orchestrator.md` | ~1,100 lines | Orchestrator |
 | artifact-identity-perception.md | `ephemeral/va-extraction/artifact-identity-perception.md` | 556 lines | Brief Assembler, Gate Runner |
-| artifact-builder-recipe.md | `ephemeral/va-extraction/artifact-builder-recipe.md` | 934 lines | Brief Assembler |
+| artifact-builder-recipe.md | `ephemeral/va-extraction/artifact-builder-recipe.md` | ~828 lines | Brief Assembler |
 | artifact-gate-runner.md | `ephemeral/va-extraction/artifact-gate-runner.md` | redirect (22 lines) | Gate Runner — points to split files |
-| gate-runner-core.js | `ephemeral/va-extraction/gate-runner-core.js` | 1,436 lines | Gate Runner (orchestrator code) — executable Playwright JS |
-| gate-runner-spec.md | `ephemeral/va-extraction/gate-runner-spec.md` | 188 lines | Human-readable gate specifications |
+| gate-runner-core.js | `ephemeral/va-extraction/gate-runner-core.js` | ~1,626 lines | Gate Runner (orchestrator code) — executable Playwright JS |
+| gate-runner-spec.md | `ephemeral/va-extraction/gate-runner-spec.md` | ~223 lines | Human-readable gate specifications (Waves 1-4) |
 | gate-runner-preconditions.md | `ephemeral/va-extraction/gate-runner-preconditions.md` | 83 lines | Text-based pre-build checks |
 | gate-runner-provenance.md | `ephemeral/va-extraction/gate-runner-provenance.md` | 151 lines | Gate history and traceability |
-| gate-manifest.json | `ephemeral/va-extraction/gate-manifest.json` | 159 lines | JSON TOC, tiers, execution order |
-| EXECUTION-TRACKER-TEMPLATE.md | `ephemeral/va-extraction/EXECUTION-TRACKER-TEMPLATE.md` | 319 lines | Per-build accountability tracking template |
-| experiment-protocol.md | `ephemeral/va-extraction/experiment-protocol.md` | ~40 lines | Experiment gates GR-36–GR-39 |
+| gate-manifest.json | `ephemeral/va-extraction/gate-manifest.json` | ~200 lines | JSON TOC, tiers, execution order |
+| EXECUTION-TRACKER-TEMPLATE.md | `ephemeral/va-extraction/EXECUTION-TRACKER-TEMPLATE.md` | ~595 lines | Per-build accountability tracking template |
+| experiment-protocol.md | `ephemeral/va-extraction/experiment-protocol.md` | ~51 lines | Experiment gates GR-36–GR-39 |
 | artifact-pa-protocol.md | `ephemeral/va-extraction/artifact-pa-protocol.md` | redirect (22 lines) | PA Protocol — points to split files |
-| pa-questions.md | `ephemeral/va-extraction/pa-questions.md` | 412 lines | PA Auditors (question definitions) |
-| pa-deployment.md | `ephemeral/va-extraction/pa-deployment.md` | 237 lines | Orchestrator (auditor assignments, screenshot protocol) |
-| pa-weaver.md | `ephemeral/va-extraction/pa-weaver.md` | 376 lines | Weaver ONLY (verdicts, calibration — INFORMATION ISOLATION) |
-| pa-guardrails.md | `ephemeral/va-extraction/pa-guardrails.md` | 151 lines | PA Auditors (constraints, scoring anchors) |
+| pa-questions.md | `ephemeral/va-extraction/pa-questions.md` | ~431 lines | PA Auditors (question definitions) |
+| pa-deployment.md | `ephemeral/va-extraction/pa-deployment.md` | ~363 lines | Orchestrator (auditor assignments, Section 0 experiential pass, screenshot protocol) |
+| pa-weaver.md | `ephemeral/va-extraction/pa-weaver.md` | ~455 lines | Weaver ONLY (Section 0 experiential anchor, verdicts, calibration — INFORMATION ISOLATION) |
+| pa-guardrails.md | `ephemeral/va-extraction/pa-guardrails.md` | ~113 lines | PA Auditors (constraints, visual verification, scoring anchors) |
+| pa-guardrails-weaver.md | `ephemeral/va-extraction/pa-guardrails-weaver.md` | ~59 lines | Weaver + Orchestrator ONLY (anti-patterns, revision degradation, S-09, Tier 1 equiv, Tier 5 provisional) |
 | pa-manifest.md | `ephemeral/va-extraction/pa-manifest.md` | 89 lines | Per-run PA tracking template |
-| artifact-routing.md | `ephemeral/va-extraction/artifact-routing.md` | 843 lines | Content Analyst, Brief Assembler |
-| council-verdict.md | `ephemeral/va-extraction/council-verdict.md` | 575 lines | Orchestrator (override authority) |
-| artifact-tc-brief-template.md | `ephemeral/va-extraction/artifact-tc-brief-template.md` | ~165 lines | Brief Assembler |
-| artifact-worked-examples.md | `ephemeral/va-extraction/artifact-worked-examples.md` | ~183 lines | All agents (reference) |
-| artifact-value-tables.md | `ephemeral/va-extraction/artifact-value-tables.md` | ~226 lines | Builder (reference) |
+| artifact-routing.md | `ephemeral/va-extraction/artifact-routing.md` | ~900 lines | Content Analyst, Brief Assembler |
+| council-verdict.md | `ephemeral/va-extraction/council-verdict.md` | 575 lines | Orchestrator (override authority — optional, artifacts are self-sufficient) |
+| artifact-tc-brief-template.md | `ephemeral/va-extraction/artifact-tc-brief-template.md` | ~223 lines | Brief Assembler |
+| artifact-worked-examples.md | `ephemeral/va-extraction/artifact-worked-examples.md` | ~182 lines | All agents (reference) |
+| artifact-value-tables.md | `ephemeral/va-extraction/artifact-value-tables.md` | ~262 lines | Builder (reference) |
 
 ### External Dependencies (Must Exist Before Pipeline Runs)
 
 | File | Path | Size | Required By | Status |
 |------|------|------|-------------|--------|
-| TC Brief Template | `ephemeral/va-extraction/artifact-tc-brief-template.md` | ~165 lines | Brief Assembler | EXISTS (created 2026-02-23) |
-| Value Tables | `ephemeral/va-extraction/artifact-value-tables.md` | ~226 lines | Builder | EXISTS (created 2026-02-23) |
+| TC Brief Template | `ephemeral/va-extraction/artifact-tc-brief-template.md` | ~223 lines | Brief Assembler | EXISTS (created 2026-02-23) |
+| Value Tables | `ephemeral/va-extraction/artifact-value-tables.md` | ~262 lines | Builder | EXISTS (created 2026-02-23) |
 | CD-006 reference | `design-system/validated-explorations/combination/CD-006-pilot-migration.html` | ~1,200 lines | Builder (optional) | EXISTS |
 | Raw content markdown | User-provided | varies | Content Analyst | Pipeline INPUT |
 
@@ -963,7 +967,7 @@ All external files referenced in this manifest, with their repository locations:
 
 ### Known Limitations
 
-1. **Orchestrator artifact is dense.** At 1,058 lines, artifact-orchestrator.md covers execution protocol (Sections 0-8, ~500 lines), orchestrator decision rules (Section 9, ~87 lines, GR-23-28), and historical/theoretical context (Sections 10+, ~470 lines). For execution, focus on Sections 0-9.
+1. **Orchestrator artifact is dense.** At ~1,100 lines, artifact-orchestrator.md covers execution protocol (Sections 0-8, ~500 lines), orchestrator decision rules (Section 9, ~87 lines, GR-23-28), and historical/theoretical context (Sections 10+, ~470 lines). For execution, focus on Sections 0-9.
 
 ---
 
@@ -1034,7 +1038,7 @@ You are the Builder for Pipeline v3. Create a single self-contained HTML page wi
 Read and internalize these files IN ORDER:
 1. The Execution Brief below (your primary guide)
 2. tokens.css (183 lines) — shared design vocabulary
-3. components.css (290 lines) — pre-built component library
+3. components.css (~1,195 lines) — pre-built component library
 4. mechanism-catalog.md — available compositional mechanisms
 5. Value Tables (artifact-value-tables.md) — BACKGROUND COLOR PAIRS are Tier 2 LOCKED (see brief; do NOT modify zone background hex values). For all OTHER values: use as REFERENCE — your creative judgment applies, but pre-computed values are perceptually validated.
 6. CD-006 reference (COMPOSED mode ONLY, optional for APPLIED) — study for compositional patterns (metaphor, zone modulation, transitions). Do NOT copy its specific colors, spacing values, or layout choices.
@@ -1093,7 +1097,7 @@ The Gate Runner is NOT a separate LLM agent — it is Playwright JavaScript exec
 All 9 auditor prompts follow this pattern:
 
 ```
-You are PA Auditor {LETTER} — {SPECIALTY}.
+You are PA Auditor {LETTER}.
 
 You are evaluating a web page design. You will see screenshots at multiple viewports. Judge ONLY what you SEE.
 
@@ -1101,7 +1105,7 @@ IMPORTANT: You are a FRESH-EYES auditor. No knowledge of build process, design i
 
 ## 0. EXPERIENTIAL PASS (MANDATORY — COMPLETE BEFORE ANY QUESTIONS)
 
-Before answering a single question, you must attempt to USE this page as a reader would:
+Before answering a single question, you must attempt to USE this page as a reader would. This pass is ROLE-NEUTRAL — do not filter through any specialty lens.
 
 STEP 1 — READ EVERY WORD. Start at the top of the 1440px cold-look screenshot. Read each heading, paragraph, label, caption, and annotation in the order they appear. For any text you cannot read FROM THE RENDERED PIXELS ALONE — without inferring from structure, context, or what "makes sense" — note it immediately. You are looking at PIXELS, not decoding HTML. If characters blur together, if labels dissolve into backgrounds, if annotations are too small to parse, those are FINDINGS. Report what you SEE, not what you KNOW it says.
 
@@ -1116,7 +1120,7 @@ STEP 4 — RANK YOUR FINDINGS. List comprehension failures in severity order:
 
 Write your experiential findings as "## 0. Experiential Pass" — this section MUST appear FIRST in your report, before any PA question answers.
 
-## 1. QUESTION ANSWERS
+## 1. QUESTION ANSWERS — Your specialty: {SPECIALTY}
 
 Read each screenshot image file. First the cold-look (no scrolling), then scroll-through in order.
 
@@ -1198,7 +1202,7 @@ a. ANY identity gate FAIL => REBUILD (unless ALL failures are MECHANICAL — see
 b. 3+ anti-pattern gates FAIL => REBUILD
 c. ANY perception gate FAIL => REFINE
 d. PA-05 >= 3.5 AND all gates PASS AND no confirmed experiential failures => SHIP
-e. PA-05 >= 3.0 AND all required gates PASS AND fixes are MECHANICAL only => SHIP WITH FIXES
+e. PA-05 >= 3.0 AND all required gates PASS AND fixes are MECHANICAL only AND <=3 MECHANICAL fixes => SHIP WITH FIXES
 f. PA-05 2.5-3.5 => REFINE
 g. PA-05 < 2.5 => REBUILD
 MECHANICAL EXCEPTION: If ALL identity failures are MECHANICAL (<=5 CSS lines, no HTML change, no design decision), treat as REFINE, not REBUILD.
@@ -1216,6 +1220,9 @@ CALIBRATION (for your use, NOT shared with auditors):
 Multi-Coherence: 0-1 shifts=FLAT, 2=FUNCTIONAL, 3=DESIGNED, 4-5=COMPOSED, 6=FLAGSHIP
 Dead Space Severity: 1-2vh=LOOKS-WRONG, 3-5vh=WOULD-NOT-SHIP, 6+=CATASTROPHIC
 Metaphor: STRUCTURAL > ATMOSPHERIC > LABELED > ANNOUNCED
+
+PIPELINE-VOCABULARY GUARDRAILS (from pa-guardrails-weaver.md):
+{pa-guardrails-weaver.md content — Tier 1 equivalents, Tier 5 provisional scoring, anti-patterns, revision degradation warnings, S-09 stacking check}
 
 ---
 INTEGRATIVE REPORT: {integrative_report}

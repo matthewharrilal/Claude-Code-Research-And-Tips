@@ -25,17 +25,14 @@ Before writing any CSS, read these files to internalize the design vocabulary.
 Read `tokens.css` cover to cover. This file provides the CSS custom properties that form family DNA across all pages in the design system.
 
 **What survives compression and appears here:**
-- Hex colors (#E83025) [ITEM 7, extract-d12-d14.md, VA L980]
-- Pixel measurements (64px) [ITEM 8, extract-d12-d14.md, VA L981]
-- Border weights (4px/3px/1px) [ITEM 9, extract-d12-d14.md, VA L982]
-- Font sizes (1rem, 0.875rem) [ITEM 10, extract-d12-d14.md, VA L983]
-- Spacing scale (4-96px) [ITEM 11, extract-d12-d14.md, VA L984]
-- Token names (--color-primary) [ITEM 12, extract-d12-d14.md, VA L985]
+- Hex colors (#E83025)
+- Pixel measurements (64px)
+- Border weights (4px/3px/1px)
+- Font sizes (1rem, 0.875rem)
+- Spacing scale (4-96px)
+- Token names (--color-primary)
 
 > These are your building blocks. They ensure ~80% cross-page coherence automatically.
-> [ITEM 084, extract-d15-d17.md, VA L1318-1319]
-> [ITEM 085, extract-d15-d17.md, VA L1322]
-> [ITEM 086, extract-d15-d17.md, VA L1322]
 
 ### Step 1.1b: Mechanism Catalog Quick-Reference
 
@@ -56,21 +53,12 @@ Read the full catalog for depth, but use this table to quickly identify which ca
 
 Read `components.css` to understand the pre-built component library.
 
-> [ITEM 087, extract-d15-d17.md, VA L1323]
-> [ITEM 088, extract-d15-d17.md, VA L1323]
-
 These two files are provided as **direct file routes** — they bypass the brief and go straight to you uncompressed.
-> [ITEM 20, extract-d04-d05.md, VA L415-416]
-> [ITEM 52, extract-d01-d03.md, VA L107]
-> [ITEM 53, extract-d01-d03.md, VA L108]
-> [ITEM 18, extract-d04-d05.md, VA L413]
-> [ITEM 19, extract-d04-d05.md, VA L413]
 
-### Step 1.3: Read the 73-line template — shared identity
+### Step 1.3: Read the Execution Brief — shared identity
 
-The 73-line template embeds soul constraints. It provides the identity frame.
-> [ITEM 089, extract-d15-d17.md, VA L1324]
-> [ITEM 090, extract-d15-d17.md, VA L1324]
+The Execution Brief (assembled by the Brief Assembler from the 73-line template + content map) embeds soul constraints. It provides the identity frame. You receive the assembled brief, not the raw template.
+> Provenance: ITEM 089 (extract-d15-d17.md L1324), ITEM 090 (extract-d15-d17.md L1324) — see Appendix B.
 
 ### Step 1.4: Assess — do you know the vocabulary?
 
@@ -88,8 +76,6 @@ If any answer is unclear, re-read the relevant file before proceeding.
 
 These are the things that **vary per page** — your creative territory within the 80% authority zone. Each page is unique because of these decisions.
 
-> [ITEM 074, extract-d15-d17.md, VA L1306]
-
 ### CD-006 Zone-by-Zone Reference (CEILING exemplar)
 
 Use this as a concrete vocabulary reference — CD-006 scored 39/40 and demonstrates COMPOSED-mode technique deployment:
@@ -103,14 +89,10 @@ Use this as a concrete vocabulary reference — CD-006 scored 39/40 and demonstr
 
 Choose how background colors differentiate your page's zones. The backgrounds should make each zone feel like a distinct room.
 
-> [ITEM 075, extract-d15-d17.md, VA L1306]
-
 **Calibration (from perception thresholds — delivered as calibration, not pass/fail):**
 - 15 RGB delta = FLOOR (minimum to be perceptible)
 - 25-50 RGB delta = COMPOSITIONAL (creates distinct atmosphere per zone)
 - Backgrounds that differ by <15 RGB points are invisible to the human eye
-
-> [ITEM 047, extract-d21-d25.md, VA L1697]
 
 **Targets (from Gas Town retrospective — prevents the dominant defect):**
 - 20 RGB delta = FLOOR for adjacent zones (was 15 — too close to invisible)
@@ -123,54 +105,31 @@ See `artifact-value-tables.md` for 20 pre-computed warm color pairs at all inten
 
 **Anti-pattern: threshold gaming.** Using 16 RGB and 0.026em everywhere passes the floor but creates calibrationally flat output. 15 is the floor, not the target. Subtle and dramatic should be DIFFERENT values.
 
-> [ITEM 016, extract-d15-d17.md, VA L1173-1176]
-> [ITEM 017, extract-d15-d17.md, VA L1173-1176]
-> [ITEM 9, extract-d18-d20.md, VA L1371]
-> [ITEM 10, extract-d18-d20.md, VA L1372-1373]
-> [ITEM 6, extract-d18-d20.md, VA L1347-1357]
-
 ### Step 2.2: Select type scale values + naming
 
 Choose how typography varies across zones and content types.
-
-> [ITEM 076, extract-d15-d17.md, VA L1307]
 
 ### Step 2.3: Select structural metaphor vocabulary
 
 Derive a governing metaphor from the content. Name your CSS custom properties by CONCEPT, not by position.
 
-> [ITEM 077, extract-d15-d17.md, VA L1308]
-
 **COMPOSED mode indicator:** `--dispatch-open`, `--dispatch-tactical` (named by concept)
 **APPLIED mode indicator:** `--bg-z1`, `--bg-z2` (named by position — avoid this)
 
-> [ITEM 58, extract-d18-d20.md, VA L1507-1509]
-> [ITEM 59, extract-d18-d20.md, VA L1507-1509]
-
 Concept-based names PREDICT other CSS properties — if your naming scheme carries meaning, the rest of your CSS decisions flow from it.
 
-> [ITEM 63, extract-d18-d20.md, VA L1513-1515]
-
-**THE SMOKING GUN:** CSS custom properties naming is the strongest single indicator of composed vs applied mode.
-> [ITEM 57, extract-d18-d20.md, VA L1502]
-
-When CSS custom properties are named by concept rather than function, the builder is in COMPOSED mode.
-> [ITEM 61, extract-d18-d20.md, VA L1512]
+**THE SMOKING GUN:** CSS custom properties naming is the strongest single indicator of composed vs applied mode. When CSS custom properties are named by concept rather than function, the builder is in COMPOSED mode.
 
 ### Step 2.4: Select callout variant semantics
 
 Decide how callouts adapt to zone context. In composed mode, callouts should modulate per zone:
 
-> [ITEM 078, extract-d15-d17.md, VA L1309]
-
 **Reference values for zone-adapted callouts:**
-- Zone 1 (opening): padding 20px 24px (generous) [ITEM 66, extract-d18-d20.md, VA L1524]
-- Zone 3 (dense): padding 12px 16px (compressed) [ITEM 67, extract-d18-d20.md, VA L1525]
-- Zone 3 border-left-width: 5px (heavier — the compression emphasizes) [ITEM 68, extract-d18-d20.md, VA L1526]
+- Zone 1 (opening): padding 20px 24px (generous)
+- Zone 3 (dense): padding 12px 16px (compressed)
+- Zone 3 border-left-width: 5px (heavier — the compression emphasizes)
 
-Contrast with APPLIED mode where callouts are styled identically across all zones:
-> [ITEM 64, extract-d18-d20.md, VA L1520-1521]
-> [ITEM 65, extract-d18-d20.md, VA L1523-1526]
+Contrast with APPLIED mode where callouts are styled identically across all zones.
 
 > These selections will be deployed in Step 3.4b. Write them down — you will need them.
 
@@ -180,33 +139,27 @@ Contrast with APPLIED mode where callouts are styled identically across all zone
 
 Choose which components to use and how to lay them out. The brief's content map tells you what each section needs.
 
-> [ITEM 079, extract-d15-d17.md, VA L1310]
-
 **Reader model axis values (select based on content analysis):**
 
 Axis 1 — Info Density:
-- line-height: 1.5 (expert) ... 1.8 (general) [ITEM 83, extract-d12-d14.md, VA L1089]
-- font-size: 15px (expert) ... 18px (general) [ITEM 84, extract-d12-d14.md, VA L1090]
-
-> [ITEM 82, extract-d12-d14.md, VA L1088-1091]
+- line-height: 1.5 (expert) ... 1.8 (general)
+- font-size: 15px (expert) ... 18px (general)
 
 Axis 2 — Visual Complexity:
-- 3-4 components/viewport (expert) ... 2 (general) [ITEM 86, extract-d12-d14.md, VA L1094]
-- Compound grids (expert) ... Simple stacks (general) [ITEM 87, extract-d12-d14.md, VA L1095]
+- 3-4 components/viewport (expert) ... 2 (general)
+- Compound grids (expert) ... Simple stacks (general)
 
 Axis 4 — Navigation:
-- Optional TOC (expert) ... Mandatory TOC + map (general) [ITEM 92, extract-d12-d14.md, VA L1102]
-- Expert scrolls linearly ... Reader needs wayfinding [ITEM 93, extract-d12-d14.md, VA L1103]
+- Optional TOC (expert) ... Mandatory TOC + map (general)
+- Expert scrolls linearly ... Reader needs wayfinding
 
 Axis 5 — Entry Velocity:
-- Minimal header (expert) ... Expansive header (general) [ITEM 95, extract-d12-d14.md, VA L1106]
-- 30-50% less header height (expert) ... Full orientation (general) [ITEM 96, extract-d12-d14.md, VA L1107]
+- Minimal header (expert) ... Expansive header (general)
+- 30-50% less header height (expert) ... Full orientation (general)
 
 ### Step 2.6: Select container width
 
 Choose based on content density. Both are within identity constraints.
-
-> [ITEM 080, extract-d15-d17.md, VA L1311]
 
 Container must be 940-960px (soul constraint). 1100px is available for some layouts but the 940-960 range is the default.
 
@@ -214,22 +167,16 @@ Container must be 940-960px (soul constraint). 1100px is available for some layo
 
 Choose how interactive elements respond.
 
-> [ITEM 081, extract-d15-d17.md, VA L1312]
-
 ### Step 2.8: Select transition type vocabulary
 
 Choose how zones transition into each other. You need at least 3 distinct transition types (not 1 uniform divider).
 
-> [ITEM 082, extract-d15-d17.md, VA L1313]
-
 **Reference: Three transition weights**
-- Light transition: 1px border + 48px gap = legato [ITEM 64, extract-d12-d14.md, VA L1053]
-- Medium transition: 3px border + 80px gap = breathing rest [ITEM 65, extract-d12-d14.md, VA L1054]
-- Heavy transition: colored bg + text = full stop [ITEM 66, extract-d12-d14.md, VA L1055]
+- Light transition: 1px border + 48px gap = legato
+- Medium transition: 3px border + 80px gap = breathing rest
+- Heavy transition: colored bg + text = full stop
 
 CD-006 uses 3 distinct transition types. Gas Town uses 1 (uniform dividers) = TEMPORAL MONOTONY.
-> [ITEM 67, extract-d12-d14.md, VA L1057]
-> [ITEM 68, extract-d12-d14.md, VA L1058]
 
 ### Step 2.9: Assess — are your selections coherent?
 
@@ -253,19 +200,13 @@ Build the page zone by zone, deploying your selected vocabulary.
 
 Your page has 6 channels that shift across zone boundaries. Use the value tables from the brief to deploy these.
 
-> [ITEM 56, extract-d06-d08.md, VA L599-600]
-> [ITEM 57, extract-d06-d08.md, VA L600]
-> [ITEM 101, extract-d06-d08.md, VA L667-677]
-
 The 4 CSS-fixable dimensions from the 10-dimension gap analysis:
-1. Scale Hierarchy (3.0/5 current) [ITEM 82, extract-d06-d08.md, VA L667-668]
-2. Channel Shifts (3.0/5 current) [ITEM 83, extract-d06-d08.md, VA L670-671]
-3. Emotional Arc (3.5/5 current) [ITEM 84, extract-d06-d08.md, VA L673-674]
-4. Spatial Confidence (3.5/5 current) [ITEM 85, extract-d06-d08.md, VA L676-677]
+1. Scale Hierarchy (3.0/5 current)
+2. Channel Shifts (3.0/5 current)
+3. Emotional Arc (3.5/5 current)
+4. Spatial Confidence (3.5/5 current)
 
 CSS-only improvements target these 4. The remaining 6 require prompt enrichment or architecture changes.
-> [ITEM 86, extract-d06-d08.md, VA L681-685]
-> [ITEM 87, extract-d06-d08.md, VA L683]
 
 ### Step 3.2: Deploy zone heights (scroll rhythm dimension A)
 
@@ -274,24 +215,22 @@ Plan section heights to create a deliberate scroll rhythm. This is the "measure 
 **Reference section heights from exemplars:**
 
 Gas Town (crescendo pattern: SHORT -> LONG -> LONGEST -> MODERATE):
-- Z1: ~600px [ITEM 34, extract-d12-d14.md, VA L1028]
-- Z2: ~1800px [ITEM 35, extract-d12-d14.md, VA L1029]
-- Z3: ~2400px [ITEM 36, extract-d12-d14.md, VA L1030]
-- Z4: ~1200px [ITEM 37, extract-d12-d14.md, VA L1031]
+- Z1: ~600px
+- Z2: ~1800px
+- Z3: ~2400px
+- Z4: ~1200px
 
 CD-006 (regular 4/4 time: uniform sections):
-- S1: ~900px [ITEM 38, extract-d12-d14.md, VA L1028]
-- S2: ~1000px [ITEM 39, extract-d12-d14.md, VA L1029]
-- S3: ~1000px [ITEM 40, extract-d12-d14.md, VA L1030]
-- S4: ~1100px [ITEM 41, extract-d12-d14.md, VA L1031]
-- S5: ~1000px [ITEM 42, extract-d12-d14.md, VA L1032]
-- S6: ~900px [ITEM 43, extract-d12-d14.md, VA L1034]
-- S7: ~900px [ITEM 44, extract-d12-d14.md, VA L1034]
-- S8: ~700px [ITEM 45, extract-d12-d14.md, VA L1035]
+- S1: ~900px
+- S2: ~1000px
+- S3: ~1000px
+- S4: ~1100px
+- S5: ~1000px
+- S6: ~900px
+- S7: ~900px
+- S8: ~700px
 
 Choose your pattern based on content: crescendo, 4/4 time, or another rhythmic structure.
-> [ITEM 46, extract-d12-d14.md, VA L1033] (Gas Town crescendo)
-> [ITEM 47, extract-d12-d14.md, VA L1036] (CD-006 uniform)
 
 ### Step 3.3: Deploy visual density arc (scroll rhythm dimension B)
 
@@ -300,41 +239,32 @@ Plan how density varies across zones. This is the "dynamics" — loud and quiet.
 **Reference density patterns:**
 
 Gas Town (CRESCENDO + RELEASE):
-- Z1: SPARSE [ITEM 49, extract-d12-d14.md, VA L1041]
-- Z2: MODERATE [ITEM 50, extract-d12-d14.md, VA L1042]
-- Z3: DENSE [ITEM 51, extract-d12-d14.md, VA L1043]
-- Z4: MODERATE [ITEM 52, extract-d12-d14.md, VA L1044]
+- Z1: SPARSE
+- Z2: MODERATE
+- Z3: DENSE
+- Z4: MODERATE
 
 CD-006 (PLATEAU + TAPER):
-- S1: MEDIUM [ITEM 53, extract-d12-d14.md, VA L1041]
-- S2: HIGH [ITEM 54, extract-d12-d14.md, VA L1042]
-- S3: HIGH [ITEM 55, extract-d12-d14.md, VA L1043]
-- S4: V.HIGH [ITEM 56, extract-d12-d14.md, VA L1044]
-- S5: HIGH [ITEM 57, extract-d12-d14.md, VA L1045]
-- S6: MEDIUM [ITEM 58, extract-d12-d14.md, VA L1046]
-- S7: MEDIUM [ITEM 59, extract-d12-d14.md, VA L1047]
-- S8: LOW [ITEM 60, extract-d12-d14.md, VA L1048]
-
-> [ITEM 61, extract-d12-d14.md, VA L1046] (Gas Town density pattern)
-> [ITEM 62, extract-d12-d14.md, VA L1049] (CD-006 density pattern)
+- S1: MEDIUM
+- S2: HIGH
+- S3: HIGH
+- S4: V.HIGH
+- S5: HIGH
+- S6: MEDIUM
+- S7: MEDIUM
+- S8: LOW
 
 ### Step 3.4: Deploy the page — Build Order
 
 Build zone by zone following the density arc (OPENING -> DEEPENING -> RESOLVING):
 
 **Pass 1 output target:** Complete HTML/CSS with skeleton strong and metaphor established.
-> [ITEM 7, extract-d06-d08.md, VA L495-496]
 
 **Single-pass output target:** Complete HTML page with 800-1200 CSS lines.
-> [ITEM 68, extract-d01-d03.md, VA L152]
-> [ITEM 78, extract-d09-d11.md, VA L884]
 
 The page should use the metaphor + zone strategy to create page uniqueness while drawing on shared tokens/components for family DNA.
-> [ITEM 091, extract-d15-d17.md, VA L1325]
 
 Cross-page coherence emerges naturally from tokens.css + soul + components.css. No additional cross-page spec is needed.
-> [ITEM 66, extract-d06-d08.md, VA L617-619]
-> [ITEM 67, extract-d06-d08.md, VA L618]
 
 ### Step 3.4b: Adapt components to zone character (fractal coherence)
 
@@ -394,27 +324,9 @@ After deploying the scaffolding, take a screenshot and assess:
 
 The purpose of these instructions is to shift your building mode from APPLIED (each mechanism solves a local problem) to COMPOSED (each mechanism serves a governing logic).
 
-> [ITEM 38, extract-d01-d03.md, VA L79]
-> [ITEM 139, extract-d01-d03.md, VA L314]
-> [ITEM 140, extract-d01-d03.md, VA L315]
-> [ITEM 90, extract-d01-d03.md, VA L237]
-> [ITEM 92, extract-d01-d03.md, VA L238]
-> [ITEM 141, extract-d01-d03.md, VA L316]
-> [ITEM 38, extract-d06-d08.md, VA L575-577]
-> [ITEM 39, extract-d06-d08.md, VA L575]
-> [ITEM 40, extract-d06-d08.md, VA L576]
-> [ITEM 95, extract-d06-d08.md, VA L700-701]
-> [ITEM 96, extract-d06-d08.md, VA L700]
-> [ITEM 79, extract-d18-d20.md, VA L1556-1558]
-> [ITEM 80, extract-d18-d20.md, VA L1557]
-> [ITEM 81, extract-d18-d20.md, VA L1558]
-> [ITEM 82, extract-d18-d20.md, VA L1560-1562]
-
 **Typographic spectacle requirement (from Gas Town retrospective):** At least 1 typographic moment that exceeds normal hierarchy — examples: 28-32px pull quote, 36-48px display numerals, small-caps accent section, oversized drop cap. Zone-inflect H2s: at least 1 differentiating property (size, weight, decoration, color) between H2 treatments in different zones. Gas Town had identical H2s across 5 zones — this was the typography gap preventing DESIGNED.
 
 **Builder disposition toward quality:** Optimize for quality, not gate compliance. Enter COMPOSING mode (not COMPLYING/PLANNING/REPAIRING).
-> [ITEM 124, extract-d01-d03.md, VA L263]
-> [ITEM 137, extract-d01-d03.md, VA L308]
 
 ### D-01: Content-Register Reading [EXPERIMENTAL]
 
@@ -425,12 +337,7 @@ The purpose of these instructions is to shift your building mode from APPLIED (e
 - REFERENCE sections: tighter spacing, possible multi-column, navigation aids
 - CODE sections: monospace, fixed width, syntax highlighting from token vocabulary
 
-> [ITEM 39, extract-d01-d03.md, VA L80]
-> [ITEM 83, extract-d18-d20.md, VA L1561]
-
 This is the content-form coupling mechanism: SPECIFIED via TC brief routing + D-01.
-> [ITEM 41, extract-d06-d08.md, VA L579-581]
-> [ITEM 43, extract-d06-d08.md, VA L580]
 
 ### D-02: Room Perception at Boundaries [EXPERIMENTAL]
 
@@ -443,54 +350,36 @@ This is the content-form coupling mechanism: SPECIFIED via TC brief routing + D-
 - Border weight shift (4px -> 3px -> 1px hierarchy)
 
 This replaces the old threshold rule ("Use >= 15 RGB delta") with a perceptual instruction.
-> [ITEM 40, extract-d01-d03.md, VA L81]
-> [ITEM 24, extract-d12-d14.md, VA L1002]
-> [ITEM 84, extract-d18-d20.md, VA L1561]
 
 ### D-03: The Signing Frame [EXPERIMENTAL]
 
 **PURPOSE:** Build as if you will sign this page. Every element should express certainty — the page knows what it is.
 
 **VOCABULARY (Authority techniques):**
-- Consistent border-weight hierarchy (4px ALWAYS = primary) [ITEM 017, extract-d21-d25.md, VA L1615]
-- Restraint: knowing what NOT to use [ITEM 018, extract-d21-d25.md, VA L1616]
-- Dense, purposeful header (dark bg, tight spacing) [ITEM 019, extract-d21-d25.md, VA L1617]
-- Zero decorative elements [ITEM 020, extract-d21-d25.md, VA L1618]
+- Consistent border-weight hierarchy (4px ALWAYS = primary)
+- Restraint: knowing what NOT to use
+- Dense, purposeful header (dark bg, tight spacing)
+- Zero decorative elements
 
-**DESIGN INTENTION:** D-03 creates conditions for AUTHORITY in the emotional arc.
-> [ITEM 41, extract-d01-d03.md, VA L82]
-> [ITEM 033, extract-d21-d25.md, VA L1659]
-> [ITEM 016, extract-d21-d25.md, VA L1611-1612]
-
-Authority should be HIGH throughout (soul ensures the baseline).
-> [ITEM 028, extract-d21-d25.md, VA L1641-1642]
+**DESIGN INTENTION:** D-03 creates conditions for AUTHORITY in the emotional arc. Authority should be HIGH throughout (soul ensures the baseline).
 
 Gas Town scored 7/10 authority — lost for uniform component styling.
-> [ITEM 021, extract-d21-d25.md, VA L1620-1622]
 
 ### D-04: The Second-Half Moment [EXPERIMENTAL]
 
 **PURPOSE:** Somewhere in the second half of the page, create a moment that breaks the established pattern — a surprise that rewards the reader who has scrolled this far.
 
 **VOCABULARY (Surprise techniques):**
-- Scale break: headline 2.5x body size [ITEM 003, extract-d21-d25.md, VA L1583]
-- Color inversion: dark zone mid-page [ITEM 004, extract-d21-d25.md, VA L1584]
-- Layout rupture: grid after 4+ single-column viewports [ITEM 005, extract-d21-d25.md, VA L1585]
-- Structural inversion: border-RIGHT in a border-LEFT page [ITEM 006, extract-d21-d25.md, VA L1586]
+- Scale break: headline 2.5x body size
+- Color inversion: dark zone mid-page
+- Layout rupture: grid after 4+ single-column viewports
+- Structural inversion: border-RIGHT in a border-LEFT page
 
 **DESIGN INTENTION:** D-04 creates conditions for SURPRISE. Requires COMPOSING mode. 1-2 moments only, in the SECOND HALF.
-> [ITEM 42, extract-d01-d03.md, VA L83]
-> [ITEM 034, extract-d21-d25.md, VA L1660]
-> [ITEM 002, extract-d21-d25.md, VA L1579-1580]
-> [ITEM 029, extract-d21-d25.md, VA L1644-1645]
-> [ITEM 008, extract-d21-d25.md, VA L1592-1595]
 
 Gas Town: ZERO surprise moments. Consistency as default = flatline.
-> [ITEM 007, extract-d21-d25.md, VA L1588-1590]
 
 D-04 + D-06 together create conditions for surprise.
-> [ITEM 49, extract-d06-d08.md, VA L591-593]
-> [ITEM 50, extract-d06-d08.md, VA L591]
 
 ### D-05: The Reader's Scroll [EXPERIMENTAL]
 
@@ -502,19 +391,12 @@ D-04 + D-06 together create conditions for surprise.
 - C. Transition weight = "articulation" (staccato vs legato between zones)
 
 **DESIGN INTENTION:** D-05 creates conditions for CLOSURE — the ending should feel earned by the journey.
-> [ITEM 43, extract-d01-d03.md, VA L84]
-> [ITEM 035, extract-d21-d25.md, VA L1661]
-> [ITEM 071, extract-d12-d14.md, VA L1065]
 
 Scroll rhythm EMERGES from height x density x transitions. The pipeline creates CONDITIONS, not specifications.
-> [ITEM 74, extract-d12-d14.md, VA L1069-1070]
-> [ITEM 75, extract-d12-d14.md, VA L1071]
 
 Closure should appear only in final 2-3 viewports. Must be EARNED.
-> [ITEM 031, extract-d21-d25.md, VA L1650-1651]
 
 Gas Town: 5/10 closure. Z4 too similar to Z2, no final moment.
-> [ITEM 027, extract-d21-d25.md, VA L1633-1635]
 
 ### D-06: Negative Space as Shape [EXPERIMENTAL] [NEW]
 
@@ -526,40 +408,27 @@ Gas Town: 5/10 closure. Z4 too similar to Z2, no final moment.
 - The gap between zones is a design element, not a default
 
 **DESIGN INTENTION:** D-06 prevents uniform gaps. Combined with D-04, creates conditions for surprise by making silence (space) as intentional as sound (content).
-> [ITEM 44, extract-d01-d03.md, VA L85]
-> [ITEM 072, extract-d12-d14.md, VA L1066]
-> [ITEM 60, extract-d06-d08.md, VA L605]
-> [ITEM 59, extract-d06-d08.md, VA L604-605]
 
 **Calibration:** Stacked gap must stay <= 120px total. But within that, VARY the gaps. 80-120px gap before footer for breathing space.
-> [ITEM 026, extract-d21-d25.md, VA L1631]
-> [ITEM 049, extract-d21-d25.md, VA L1699]
 
 ### D-07: Edge Intentionality [EXPERIMENTAL] [NEW]
 
 **PURPOSE:** Every edge of every element should be intentional. Borders, margins, alignment — each edge is a decision, not a default.
 
 **VOCABULARY (Delight techniques):**
-- Hover states revealing hidden content (table row tint, link border) [ITEM 010, extract-d21-d25.md, VA L1601]
-- Typographic micro-refinement (tabular-nums, text-indent) [ITEM 011, extract-d21-d25.md, VA L1602]
-- Zone-specific ::selection colors [ITEM 012, extract-d21-d25.md, VA L1603]
-- Print-specific styling (@media print) [ITEM 013, extract-d21-d25.md, VA L1604]
-- First/last child edge treatments [ITEM 014, extract-d21-d25.md, VA L1605]
+- Hover states revealing hidden content (table row tint, link border)
+- Typographic micro-refinement (tabular-nums, text-indent)
+- Zone-specific ::selection colors
+- Print-specific styling (@media print)
+- First/last child edge treatments
 
 **DESIGN INTENTION:** D-07 creates conditions for DELIGHT — small unexpected refinements that reward attention. Distributed throughout, more in high-density zones.
-> [ITEM 45, extract-d01-d03.md, VA L86]
-> [ITEM 036, extract-d21-d25.md, VA L1662]
-> [ITEM 009, extract-d21-d25.md, VA L1597-1598]
-> [ITEM 030, extract-d21-d25.md, VA L1647-1648]
 
 Gas Town delight score: 2/10. Missing 6 techniques.
-> [ITEM 015, extract-d21-d25.md, VA L1607-1609]
 
 ### D-08: The Skeleton Test [EXPERIMENTAL] [NEW]
 
 **PURPOSE:** Mentally remove all content from your page. Does the skeleton (spacing, borders, backgrounds, typography framework) still have shape? If the skeleton looks like a uniform stack of boxes, the page is APPLIED. If the skeleton has rhythm, proportion, and intentionality, the page is COMPOSED.
-
-> [ITEM 46, extract-d01-d03.md, VA L87]
 
 ### D-09: The Quiet Zone [EXPERIMENTAL] [NEW]
 
@@ -586,32 +455,19 @@ Gas Town delight score: 2/10. Missing 6 techniques.
 After applying D-01 through D-09, the page's emotional arc should have shape:
 
 **The 4 emotional registers:**
-> [ITEM 001, extract-d21-d25.md, VA L1572-1574]
 
 1. **AUTHORITY** (constant) — should be HIGH throughout (D-03 creates conditions)
-   > [ITEM 028, extract-d21-d25.md, VA L1641-1642]
-
 2. **SURPRISE** (rare peak) — 1-2 moments only, in SECOND HALF (D-04 creates conditions)
-   > [ITEM 029, extract-d21-d25.md, VA L1644-1645]
-
 3. **DELIGHT** (steady) — distributed throughout, more in high-density zones (D-07 creates conditions)
-   > [ITEM 030, extract-d21-d25.md, VA L1647-1648]
-
 4. **EARNED CLOSURE** — only in final 2-3 viewports, must be EARNED (D-05 creates conditions)
-   > [ITEM 031, extract-d21-d25.md, VA L1650-1651]
 
 **Closure techniques:**
-- Footer echoes header (bookending) [ITEM 023, extract-d21-d25.md, VA L1628]
-- Density arc resolves (Z4 releases what Z3 compressed) [ITEM 024, extract-d21-d25.md, VA L1629]
-- Final drop cap or typographic moment [ITEM 025, extract-d21-d25.md, VA L1630]
-- Breathing space before footer (80-120px gap) [ITEM 026, extract-d21-d25.md, VA L1631]
-
-> [ITEM 022, extract-d21-d25.md, VA L1624-1625]
+- Footer echoes header (bookending)
+- Density arc resolves (Z4 releases what Z3 compressed)
+- Final drop cap or typographic moment
+- Breathing space before footer (80-120px gap)
 
 **Emotional arc is EMERGENT, not SPECIFIED.** It cannot be gate-checked. The PA auditor will assess it after build. The disposition-emotion links are DESIGN INTENTIONS, not guaranteed causal links.
-> [ITEM 032, extract-d21-d25.md, VA L1656-1657]
-> [ITEM 062, extract-d06-d08.md, VA L610-612]
-> [ITEM 063, extract-d06-d08.md, VA L612]
 
 Per council verdict: "D-04 creates conditions for surprise (not guaranteed)" — all D-emotion links are design intentions.
 
@@ -693,26 +549,18 @@ Is the page in COMPOSED mode or APPLIED mode? Check:
 - Mode determinant 3: Are layout choices driven by metaphor or by content-type alone?
 - Mode determinant 5: Can you articulate the governing logic in one sentence?
 
-> [ITEM 74, extract-d18-d20.md, VA L1550]
-> [ITEM 75, extract-d18-d20.md, VA L1551]
-> [ITEM 76, extract-d18-d20.md, VA L1552]
-> [ITEM 78, extract-d18-d20.md, VA L1554]
-
 ### Step 5.7: Assess output targets
 
 Your output should be:
 - Complete HTML page
-- 800-1200 CSS lines [ITEM 68, extract-d01-d03.md, VA L152]
-- Responsive (1440px + 768px) [ITEM 67, extract-d01-d03.md, VA L146-149]
+- 800-1200 CSS lines
+- Responsive (1440px + 768px)
 - Accessible
 - With designed moments (D-04, D-07)
 
 **For experimental 3-pass architecture (BLOCKED until experiment #21 validates):**
-- Pass 2 output: Enriched page — mechanisms coupled, density arc embedded [ITEM 23, extract-d06-d08.md, VA L525-526]
-- Pass 3 output: Finished page — responsive, accessible, designed moments [ITEM 29, extract-d06-d08.md, VA L542-543]
-
-> [ITEM 88, extract-d06-d08.md, VA L687-689] (prompt enrichment tier fixes)
-> [ITEM 90, extract-d06-d08.md, VA L691-694] (architecture change tier fixes)
+- Pass 2 output: Enriched page — mechanisms coupled, density arc embedded
+- Pass 3 output: Finished page — responsive, accessible, designed moments
 
 ---
 
@@ -722,54 +570,33 @@ Your output should be:
 
 This phase addresses how static CSS creates a time-based experience. Every reader experiences the page temporally — they scroll.
 
-> [ITEM 29, extract-d12-d14.md, VA L1018]
-> [ITEM 30, extract-d12-d14.md, VA L1019]
-> [ITEM 32, extract-d12-d14.md, VA L1023]
-
 ### Step 6.1: Deploy the density arc
 
 The density arc has three movements: OPENING -> DEEPENING -> RESOLVING.
 
-> [ITEM 34, extract-d01-d03.md, VA L70-71]
-
 Phase 0 (Content Analyst) maps the section-by-section density arc. Phase 1 (Brief Assembler) includes the density arc description in the brief. D-05 activates temporal awareness.
-
-> [ITEM 69, extract-d12-d14.md, VA L1063]
-> [ITEM 70, extract-d12-d14.md, VA L1064]
 
 ### Step 6.2: Deploy multi-coherence
 
 The multi-coherence framework: 6 channels, 4 directions, boundary-by-boundary.
 
-> [ITEM 32, extract-d01-d03.md, VA L66-67]
-
 Intentional Composition: ACTIVATED + EMERGENT via multi-coherence.
-> [ITEM 48, extract-d06-d08.md, VA L587-589]
 
 ### Step 6.3: Deploy structural metaphor
 
 Derive from content, embody in CSS. The metaphor should be STRUCTURAL (expressed through the CSS itself), not ANNOUNCED (only present in labels/comments).
 
-> [ITEM 33, extract-d01-d03.md, VA L68-69]
-
 ### Step 6.4: Deploy content-form coupling
 
 Per-section decisions linking content character to CSS treatment.
-
-> [ITEM 35, extract-d01-d03.md, VA L72-73]
 
 ### Step 6.5: Deploy creative authority + components
 
 80% creative authority / 20% constraint. Use the component library from components.css.
 
-> [ITEM 36, extract-d01-d03.md, VA L74-75]
-> [ITEM 85, extract-d18-d20.md, VA L1562]
-
 ### Step 6.6: Deploy CSS value tables
 
 The CSS value tables provide specific ranges for each channel per zone. Use them as vocabulary, not as a checklist to satisfy.
-
-> [ITEM 37, extract-d01-d03.md, VA L76]
 
 ---
 
@@ -800,6 +627,8 @@ The following amendments from the council verdict affect this document:
 ---
 
 ## APPENDIX B: COMPLETE ITEM CROSS-REFERENCE
+
+> **Note:** All inline ITEM citations have been moved from the recipe body to this appendix. The recipe text (Phases 1-6) contains operational CSS guidance only. This appendix preserves full provenance for every item: source file, extraction line reference, and short description. Use this for audit trail verification, not during building.
 
 ### Layer 3: SCAFFOLDING Items (75 items)
 
@@ -996,4 +825,4 @@ Per council verdict (CF-04), all items carry evidence classification:
 
 ---
 
-*End of Builder Recipe. 146 items from Layers 3-4, zero compression, all item IDs and VA line refs included. Conforms to council-verdict.md rulings.*
+*End of Builder Recipe. 146 items from Layers 3-4. Inline provenance citations moved to Appendix B for readability; all item IDs and VA line refs preserved there. Conforms to council-verdict.md rulings.*

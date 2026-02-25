@@ -15,12 +15,12 @@ Human-readable specification for every gate: ID, name, tier, what it checks, pas
 
 | Category | Gates | Count | Verdict Impact |
 |----------|-------|-------|----------------|
-| **REQUIRED** | GR-01–GR-06, GR-08–GR-11, GR-13–GR-15, GR-44, GR-60, GR-61, GR-62, GR-48 | 18 | ANY FAIL blocks verdict |
-| **RECOMMENDED** | GR-07, GR-17, GR-18, GR-20, GR-43, GR-45, GR-49, GR-51, GR-52, GR-63, GR-64 | 11 | 3+ FAIL = REBUILD |
+| **REQUIRED** | GR-01–GR-06, GR-08–GR-11, GR-13–GR-15, GR-44, GR-60, GR-61, GR-62, GR-63, GR-64, GR-48 | 20 | ANY FAIL blocks verdict |
+| **RECOMMENDED** | GR-07, GR-17, GR-18, GR-20, GR-43, GR-45, GR-49, GR-51, GR-52 | 9 | 3+ FAIL = REBUILD |
 | **ADVISORY** | GR-05b, GR-19, GR-21, GR-22, GR-46, GR-50, GR-53 | 7 | Informational only |
 | **BRIEF VERIFICATION** | BV-01 through BV-04 | 4 | ANY FAIL = return brief to assembler |
 
-**Total executable gates: 42** (18 REQUIRED + 11 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF)
+**Total executable gates: 42** (20 REQUIRED + 9 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF)
 
 ---
 
@@ -52,6 +52,8 @@ Human-readable specification for every gate: ID, name, tier, what it checks, pas
 
 - ANY identity gate (GR-01–GR-06, GR-08–GR-10) FAIL = REBUILD (unless ALL failures are MECHANICAL — <=5 CSS lines, no HTML change, no design decision)
 - ANY perception gate (GR-11, GR-13–GR-15, GR-44, GR-60) FAIL = REFINE (targeted CSS fix)
+- GR-63 FAIL = REFINE (send back to builder to perform experiential self-check)
+- GR-64 FAIL = if weaver verdict is SHIP or SHIP WITH FIXES, downgrade to REFINE
 - 3+ recommended gates FAIL = REBUILD
 - GR-48 FAIL = INCOMPLETE
 - All gates PASS = proceed to PA audit
@@ -132,7 +134,7 @@ Human-readable specification for every gate: ID, name, tier, what it checks, pas
 |------|------|------|-----------|----------|
 | GR-45 | Typography Variation | RECOMMENDED | >= 2 distinct H2 font-size bands (4px tolerance). Fallback to H2+H3 if <3 H2s. | OBSERVED |
 | GR-46 | Print Stylesheet | ADVISORY | >= 1 @media print rule in stylesheets | THEORETICAL |
-| GR-48 | Gate Coverage | REQUIRED | All 17 REQUIRED gates have results (excl. GR-48 itself) + >= 5/11 RECOMMENDED | OBSERVED |
+| GR-48 | Gate Coverage | REQUIRED | All 19 REQUIRED gates have results (excl. GR-48 itself) + >= 5/9 RECOMMENDED | OBSERVED |
 | GR-49 | Result File Integrity | RECOMMENDED | Exactly 1 result file, consistent IDs, no duplicates | OBSERVED |
 | GR-51 | Bg Delta Distribution | RECOMMENDED | >= 50% of deltas >= 25 RGB, stddev >= 8, middle boundaries have high deltas | OBSERVED |
 | GR-52 | Section Height Variation | RECOMMENDED | >= 3 distinct height bands (50px tolerance) | OBSERVED |
@@ -146,10 +148,10 @@ Human-readable specification for every gate: ID, name, tier, what it checks, pas
 
 | Gate | Name | Tier | Threshold | Evidence |
 |------|------|------|-----------|----------|
-| GR-61 | DPR Validation | REQUIRED | `window.devicePixelRatio === 1` before screenshot capture. If DPR > 1, attempt viewport correction. BLOCKING if uncorrectable. | FACT |
-| GR-62 | Screenshot Quality | REQUIRED | Per viewport (1440/1024/768): no more than 2 consecutive blank screenshots, blank ratio <= 20%. Blank = file size < 5KB. BLOCKING if fail. | OBSERVED |
-| GR-63 | Builder Experiential Marker | RECOMMENDED | HTML contains `<!-- EXPERIENTIAL-CHECK: [text] -->` comment with text >= 20 chars mentioning legibility/readability. Evidence of builder Step 5.0 self-use. | OBSERVED |
-| GR-64 | Usability Priority Verification | RECOMMENDED | If >= 3/9 auditors flagged usability issues (cannot read/illegible/unreadable/cannot use), Weaver Fix #1 must contain usability-related term. Auto-passes if < 3 auditors flagged. | OBSERVED |
+| GR-61 | DPR Validation | REQUIRED | `window.devicePixelRatio === 1` before screenshot capture. If DPR > 1, recreate browser context with `{ deviceScaleFactor: 1 }`. Do NOT divide viewport by DPR (viewport is CSS pixels). BLOCKING if uncorrectable. | FACT |
+| GR-62 | Screenshot Quality | REQUIRED | Per viewport (1440/1024/768): minimum 3 PNG files per directory, no more than 2 consecutive blank screenshots, blank ratio <= 20%. Blank = file size < 5KB. BLOCKING if fail. | OBSERVED |
+| GR-63 | Builder Experiential Marker | REQUIRED | HTML contains `<!-- EXPERIENTIAL-CHECK: [text] -->` with text >= 100 chars mentioning legibility + visual clarity + structural reference (zone/section/header/footer). Evidence of builder Step 5.0 self-use. | OBSERVED |
+| GR-64 | Usability Priority Verification | REQUIRED | If >= 3/9 auditors flagged usability issues (cannot read/illegible/unreadable/cannot use), Weaver Fix #1 must contain usability-related term. Auto-passes if < 3 auditors flagged. If FAIL and weaver verdict is SHIP/SHIP WITH FIXES, downgrade to REFINE. | OBSERVED |
 
 **Execution points:**
 - GR-61: Runs in orchestrator Playwright session BEFORE screenshot capture (Step 2.5)
@@ -158,10 +160,10 @@ Human-readable specification for every gate: ID, name, tier, what it checks, pas
 - GR-64: Runs in orchestrator AFTER Weaver report, as text scan (Step 5.5)
 
 **Blocking behavior:**
-- GR-61 FAIL → Do NOT capture screenshots. Fix DPR first.
+- GR-61 FAIL → Do NOT capture screenshots. Recreate browser context with `{ deviceScaleFactor: 1 }`.
 - GR-62 FAIL → Do NOT deploy PA auditors. Re-capture screenshots.
-- GR-63 FAIL → Flagged in report. Does not block PA deployment.
-- GR-64 FAIL → Flagged in report. Indicates weaver violated Priority Override Rule.
+- GR-63 FAIL → REFINE verdict. Send back to builder to perform genuine experiential self-check.
+- GR-64 FAIL → If weaver said SHIP/SHIP WITH FIXES, downgrade to REFINE.
 
 ---
 
@@ -209,10 +211,10 @@ Human-readable specification for every gate: ID, name, tier, what it checks, pas
 | GR-60 | Perception | REQUIRED | Post-build | Playwright |
 | GR-61 | Experiential | REQUIRED | Pre-screenshot | Playwright |
 | GR-62 | Experiential | REQUIRED | Post-screenshot | Node.js filesystem |
-| GR-63 | Experiential | RECOMMENDED | Post-build | Playwright |
-| GR-64 | Experiential | RECOMMENDED | Post-weaver | JavaScript text scan |
+| GR-63 | Experiential | REQUIRED | Post-build | Playwright |
+| GR-64 | Experiential | REQUIRED | Post-weaver | JavaScript text scan |
 
-**Tier totals (gate-runner scope):** 18 REQUIRED, 11 RECOMMENDED, 7 ADVISORY, 2 DIAGNOSTIC (GR-33, GR-34), 4 BRIEF = 42 executable gates
+**Tier totals (gate-runner scope):** 20 REQUIRED, 9 RECOMMENDED, 7 ADVISORY, 2 DIAGNOSTIC (GR-33, GR-34), 4 BRIEF = 42 executable gates
 
 **NOTE (FIX-094):** GR-23 through GR-28 (precondition gates) and GR-33, GR-34 (mode detection) are documented here for reference. GR-23-28 are operationally reclassified as orchestrator decision rules (see `artifact-orchestrator.md` Section 9). GR-33 and GR-34 remain in gate-runner as ADVISORY diagnostic gates with Playwright code.
 

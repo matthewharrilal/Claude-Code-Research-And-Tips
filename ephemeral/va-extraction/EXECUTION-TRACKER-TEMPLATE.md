@@ -62,27 +62,28 @@
 | ID | File | Expected | Accessible |
 |----|------|----------|------------|
 | PF-1a | MANIFEST.md | `ephemeral/va-extraction/MANIFEST.md` | [ ] |
-| PF-1b | artifact-orchestrator.md | ~1,060 lines | [ ] |
+| PF-1b | artifact-orchestrator.md | ~1,100 lines | [ ] |
 | PF-1c | artifact-identity-perception.md | 556 lines | [ ] |
-| PF-1d | artifact-builder-recipe.md | ~959 lines | [ ] |
-| PF-1e | gate-runner-core.js | ~1,550 lines, 9 functions | [ ] |
-| PF-1f | gate-runner-spec.md | ~210 lines | [ ] |
+| PF-1d | artifact-builder-recipe.md | ~828 lines | [ ] |
+| PF-1e | gate-runner-core.js | ~1,654 lines, 9 functions | [ ] |
+| PF-1f | gate-runner-spec.md | ~223 lines | [ ] |
 | PF-1g | gate-runner-preconditions.md | 83 lines | [ ] |
-| PF-1h | gate-manifest.json | ~180 lines | [ ] |
-| PF-1i | pa-questions.md | ~432 lines | [ ] |
-| PF-1j | pa-deployment.md | ~320 lines | [ ] |
-| PF-1k | pa-weaver.md | ~450 lines | [ ] |
-| PF-1l | pa-guardrails.md | ~176 lines | [ ] |
+| PF-1h | gate-manifest.json | ~200 lines | [ ] |
+| PF-1i | pa-questions.md | ~431 lines | [ ] |
+| PF-1j | pa-deployment.md | ~363 lines | [ ] |
+| PF-1k | pa-weaver.md | ~455 lines | [ ] |
+| PF-1l | pa-guardrails.md | ~113 lines | [ ] |
+| PF-1l2 | pa-guardrails-weaver.md | ~59 lines | [ ] |
 | PF-1m | pa-manifest.md | 89 lines | [ ] |
-| PF-1n | artifact-routing.md | 843 lines | [ ] |
-| PF-1o | artifact-tc-brief-template.md | ~165 lines | [ ] |
-| PF-1p | artifact-value-tables.md | ~226 lines | [ ] |
+| PF-1n | artifact-routing.md | ~900 lines | [ ] |
+| PF-1o | artifact-tc-brief-template.md | ~223 lines | [ ] |
+| PF-1p | artifact-value-tables.md | ~262 lines | [ ] |
 
 ### L2: PF-2 Reference File Verification
 | ID | File | Expected | Accessible |
 |----|------|----------|------------|
 | PF-2a | tokens.css | 183 lines | [ ] |
-| PF-2b | components.css | 290 lines | [ ] |
+| PF-2b | components.css | ~1,195 lines | [ ] |
 | PF-2c | mechanism-catalog.md | present | [ ] |
 | PF-2d | council-verdict.md | 575 lines | [ ] |
 | PF-2e | Raw content markdown | at CONTENT_PATH | [ ] |
@@ -203,9 +204,9 @@
 |----|-------|------|
 | P2-1a | Received Execution Brief (from Phase 1) | [ ] |
 | P2-1b | Received tokens.css (183 lines) | [ ] |
-| P2-1c | Received components.css (290 lines) | [ ] |
+| P2-1c | Received components.css (~1,195 lines) | [ ] |
 | P2-1d | Received mechanism-catalog.md | [ ] |
-| P2-1e | Received value tables (~226 lines) | [ ] |
+| P2-1e | Received value tables (~262 lines) | [ ] |
 | P2-1f | CD-006 reference provided | ___ (YES / NO / N/A) |
 | P2-1g | Did NOT receive gate thresholds | [ ] |
 | P2-1h | Did NOT receive raw prohibition list | [ ] |

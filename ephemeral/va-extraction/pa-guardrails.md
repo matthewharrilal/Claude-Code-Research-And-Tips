@@ -1,8 +1,8 @@
-# PA GUARDRAILS — Anti-Patterns, Quality Bars, Scoring Thresholds
+# PA GUARDRAILS — Evidence Format, Visual Verification, Cross-Viewport Method, Information Isolation
 ## Pipeline v3 Layer 7 — Guardrails Reference
-Date: 2026-02-24
+Date: 2026-02-25
 Status: AUTHORITATIVE — split from artifact-pa-protocol-MONOLITHIC.md
-Split: Contains guardrails ONLY. Anti-patterns, quality bars, scoring thresholds, PA-05 cross-validation requirements, auditor constraints. Provided to auditors alongside pa-questions.md.
+Split: Contains AUDITOR-FACING guardrails ONLY. Evidence format, completion manifest, assessment language, PA-05 cross-validation, cross-viewport method, fresh-eyes principle. Provided to auditors alongside pa-questions.md. Pipeline vocabulary (tiers, channels, mechanisms, anti-patterns, thresholds) has been moved to pa-guardrails-weaver.md (Weaver/Orchestrator only).
 
 ---
 
@@ -79,57 +79,7 @@ You do NOT see Auditor A's scores. This is a blind cross-validation.
 
 ---
 
-## 5. TIER 1 EQUIVALENT QUESTIONS
-
-PA-17 (visual rhythm) and PA-41 (pattern repetition without variation) are TIER 1 EQUIVALENT. FAIL on either = verdict cannot exceed "YES WITH RESERVATIONS."
-
----
-
-## 6. TIER 5 PROVISIONAL SCORING NOTE
-
-Tier 5 scoring thresholds (8-9 = COMPOSED, 6-7 = APPROACHING, etc.) are PROVISIONAL with N=1 validation (derived from compositional intelligence stack theory, not from observed Flagship artifacts). Treat these thresholds as hypotheses until at least N=3 data points exist. Boundary cases (e.g., exactly 6 or exactly 8) should be reported with the caveat "threshold is provisional."
-
----
-
-## 7. PA-ASSESSED ANTI-PATTERNS
-
-Some anti-patterns cannot be detected programmatically. They require the PA auditor's perceptual judgment:
-
-| AP | Anti-Pattern | What It Detects | PA Questions That Catch It |
-|----|-------------|-----------------|---------------------------|
-| AP-02 | COLOR ZONE CONFLICT | Hierarchy DISAGREEMENT between color zones | PA-18 (color family), PA-55 (zone differences) |
-| AP-03 | TRANSITION MONOTONY | All zones use identical dividers | PA-17 (rhythm), PA-69 (transition variation), PA-62 (Tier 5) |
-| AP-05 | SPACING FLAT-LINE | Density arc compresses uniformly | PA-69 (transition variation), PA-66 (negative space variety) |
-| AP-06 | CHANNEL ISOLATION | 6 channels shift not at same boundaries | PA-69 (transition properties), PA-61 (multi-voice) |
-| AP-07 | METAPHOR BLEED | Vocabulary leaks across zone boundaries | PA-44 (metaphor persistence), PA-68 (metaphor coverage) |
-| AP-08 | COMPONENT ORPHAN | Component styled for wrong zone | PA-63 (fractal zoom), PA-19 (different website element) |
-| AP-12 | RESTRAINT EROSION | Additions erode deliberate absences | PA-64 (restraint as expression) |
-| AP-13 | BOOKEND ASYMMETRY | Header/footer echo breaks in revision | PA-13 (clear ending), PA-24 (system coherence) |
-
----
-
-## 8. REVISION DEGRADATION WARNINGS
-
-Fix cycles can DEGRADE composition. Watch for:
-
-| Warning | What Degrades |
-|---------|--------------|
-| Multi-channel encoding decouples | Fix to one channel breaks alignment with others |
-| Density arcs flatten | Individual zone correction breaks overall arc |
-| Bookending symmetry breaks | Modifying one end breaks header/footer echo |
-| Component-context coupling breaks | CSS changes disconnect components from zones |
-| Restraint coherence degrades | Changing mechanisms shifts what "restraint" means |
-
----
-
-## 9. S-09 STACKING CHECK (MANDATORY at every section boundary)
-
-> Total boundary gap = section bottom padding + divider margins + divider height + next section top padding
-> <= 120px: PASS | > 120px: VOID-RISK | > 200px: CATASTROPHIC VOID
-
----
-
-## 10. CROSS-VIEWPORT COMPARISON METHOD
+## 5. CROSS-VIEWPORT COMPARISON METHOD
 
 For questions requiring multi-viewport evidence (PA-22, PA-23, PA-46):
 1. Review 1440px screenshots first
@@ -140,31 +90,19 @@ For questions requiring multi-viewport evidence (PA-22, PA-23, PA-46):
 
 ---
 
-## 11. FRESH-EYES PRINCIPLE (NON-NEGOTIABLE)
+## 6. FRESH-EYES PRINCIPLE (NON-NEGOTIABLE)
 
-**PA auditors MUST be context-starved.** Do NOT provide:
-- Mechanism counts
-- Pattern names
-- Build plan details
-- Prior experiment results
-- Tier 5 expected scores
-- Compositional stack theory
+You receive only screenshots, PA questions, and this guardrails file. No additional context about the design system, build process, or scoring methodology is provided. This is intentional.
 
-If the auditor knows "this should have 12 mechanisms," they will see 12 mechanisms everywhere.
+**Your job is to react to what you see.** You are a first-time viewer of this page. Describe what you observe, what works, and what fails -- using only the evidence in the screenshots.
 
-**Zero context = genuine first impressions.**
+If you find yourself thinking "this was probably meant to do X" -- stop. Report what you SEE, not what you infer about intent.
 
-The auditor receives ONLY:
-1. The rendered page (saved screenshots)
-2. The PA questions (pa-questions.md)
-3. The PA guardrails (this file)
-4. Nothing else
-
-### 11.1 The One Rule
+### 6.1 The One Rule
 
 > "React to what you see before you check what you know."
 
-### 11.2 The Three Laws
+### 6.2 The Three Laws
 
 1. The answer must require a screenshot (not answerable from source code alone)
 2. The answer must be describable in plain language (no CSS vocabulary)

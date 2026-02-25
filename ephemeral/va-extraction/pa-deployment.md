@@ -1,6 +1,6 @@
 # PA DEPLOYMENT — Auditor Assignments + Screenshot Protocol
 ## Pipeline v3 Layer 7 — Deployment Reference
-Date: 2026-02-24
+Date: 2026-02-25
 Status: AUTHORITATIVE — split from artifact-pa-protocol-MONOLITHIC.md
 Split: Contains deployment information ONLY. Auditor assignments, screenshot protocol, model recommendations. What the orchestrator needs to SET UP the PA.
 
@@ -156,18 +156,6 @@ All agents run in PARALLEL (except Weaver, which is sequential after all auditor
 
 > Source: ITEM 65 (extract-d21-d25.md, VA L1777) — "PA question count reconciliation"
 
-### 1.2.1 Cross-Viewport Comparison Requirements
-
-The following questions REQUIRE multi-viewport evidence. Auditors assigned these questions MUST compare screenshots across viewports, not assess a single viewport in isolation:
-
-| Question | Required Viewports | Comparison Method |
-|----------|-------------------|-------------------|
-| PA-22 | 1440px, 1024px, 768px | "Would a user with ONLY this screen size feel served?" — answer separately per viewport, then synthesize |
-| PA-23 | 1024px vs 768px | Side-by-side comparison: what changed for the worse between these two widths? |
-| PA-46 | 768px vs 1440px | Does 768px reorganization make sense, or is it just a shrunk version of 1440px? |
-
-**Method:** For each cross-viewport question, auditors should (1) review the 1440px screenshots first, (2) review 768px screenshots, (3) compare observations side-by-side, then (4) check 1024px as an intermediate reference point. Document evidence from EACH viewport separately before drawing conclusions.
-
 ### 1.3 PA-05 Distributed Cross-Validation Protocol
 
 > Source: FIX-065 — PA-05 is the PRIMARY success metric. Single-evaluator risk is the biggest protocol weakness.
@@ -308,19 +296,14 @@ Auditors receive file paths to saved PNG screenshots and use the Read tool (whic
 
 **Workflow:**
 1. Receive file paths
-2. Read each screenshot using Read tool
-3. Apply Cold Look Protocol to cold-look screenshots independently
-4. Read scroll-through screenshots in sequence
-5. Apply Zone Sweep (5 dimension passes) on scroll-through sequence
-6. Answer assigned questions using evidence from screenshots
+2. **Experiential Pass** (Section 0) — read screenshots as a reader BEFORE any analytical work
+3. Read each screenshot using Read tool
+4. Apply Cold Look Protocol to cold-look screenshots independently
+5. Read scroll-through screenshots in sequence
+6. Apply Zone Sweep (5 dimension passes) on scroll-through sequence
+7. Answer assigned questions using evidence from screenshots
 
 **Key rule:** Assessment is purely VISUAL. Describe what you SEE using perceptual language ("The background shifts from warm cream to cooler gray") not CSS language ("background-color changes from #FEF9F5 to #F0EBE3").
-
-### 2.5 Experiential Pass — See Section 0
-
-> **RELOCATED:** The experiential pass directive has been moved to **Section 0** (primacy position) at the top of this document. It is also embedded directly in the PA Auditor prompt template in MANIFEST.md Appendix E. This ensures it is the FIRST operational instruction every auditor encounters, not something buried at line 220+ that the orchestrator might miss.
->
-> See Section 0.1 for the full directive. See Section 0.2 for the rationale (LLM primacy effect).
 
 ---
 
@@ -342,8 +325,9 @@ If the auditor knows "this should have 12 mechanisms," they will see 12 mechanis
 
 The auditor receives ONLY:
 1. The rendered page (saved screenshots)
-2. The PA questions
-3. Nothing else
+2. The PA questions (pa-questions.md)
+3. The PA guardrails (pa-guardrails.md)
+4. Nothing else
 
 ### 3.1 The One Rule
 
@@ -357,6 +341,14 @@ If an agent's first action is describing what they SEE and FEEL, the skill is wo
 1. The answer must require a screenshot (not answerable from source code alone)
 2. The answer must be describable in plain language (no CSS vocabulary)
 3. A non-designer must be able to validate the answer
+
+---
+
+## 4. PRIORITY OVERRIDE
+
+Comprehension failures (illegible text, unusable navigation) outrank ALL property measurement findings. A page that scores well on 68 questions but has illegible chart labels has a BLOCKING defect regardless of its PA-05 score.
+
+A human will notice illegible text in 2 seconds and will never notice a 4%-opacity background tint. The pipeline must match this priority ordering.
 
 ---
 

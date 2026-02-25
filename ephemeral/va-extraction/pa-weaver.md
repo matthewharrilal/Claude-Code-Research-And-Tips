@@ -1,6 +1,6 @@
 # PA WEAVER — Synthesis + Verdict Protocol
 ## Pipeline v3 Layer 7 — Weaver Reference
-Date: 2026-02-24
+Date: 2026-02-25
 Status: AUTHORITATIVE — split from artifact-pa-protocol-MONOLITHIC.md
 Split: Contains weaver protocol ONLY. How the weaver synthesizes reports, verdict categories, fix-type classification, emotional arc synthesis, diagnostic vocabulary. INFORMATION ISOLATION: this content should NOT be visible to auditors.
 
@@ -248,13 +248,7 @@ The Weaver synthesizes these into an emotional arc assessment using the 4-regist
 
 ---
 
-## 4.5 Experiential Pass Aggregation — See Section 0.3
-
-> **RELOCATED:** The experiential pass aggregation has been moved to **Section 0.3** (primacy position) at the top of this document, with enhanced aggregation including the Weaver's own experiential anchor. The aggregation now runs BEFORE any analytical synthesis, not after emotional arc analysis. See Section 0.3 for the full table.
-
----
-
-## 5.0 PRIORITY OVERRIDE RULE
+## 4.5 PRIORITY OVERRIDE RULE
 
 Before ordering fixes: "Is there ANY finding from ANY auditor that describes
 something a reader CANNOT READ or CANNOT USE?"

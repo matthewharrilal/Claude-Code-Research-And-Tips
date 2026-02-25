@@ -19,7 +19,7 @@ This is the **master control document** for the orchestrator agent. It defines t
 
 ---
 
-## SECTION 0: MASTER EQUATION AND PRECONDITIONS
+## SECTION 0: MASTER EQUATION AND PRECONDITIONS (Pre-Pipeline)
 
 ### Quality Equation
 > Quality = Agent Capability x Content Affordance x Spec Fidelity
@@ -72,7 +72,7 @@ Historical PA-05 scores for orchestrator calibration:
 
 ---
 
-## SECTION 1: TOPOLOGY AND ARCHITECTURE
+## SECTION 1: TOPOLOGY AND ARCHITECTURE (Pre-Pipeline)
 
 ### Agent Topology: FLAT (each agent, direct I/O)
 
@@ -146,7 +146,7 @@ Reclassified from ROUTING/GATE-RUNNER to ORCHESTRATOR per council Pattern 4. The
 
 Total builder input: ~3,600 lines (not "73 lines")
 - Constraint layer: 73 lines (recipe format)
-- Disposition layer: ~40 lines (8 instructions)
+- Disposition layer: ~40 lines (9 instructions, D-01 through D-09)
 - Content map: ~35 lines
 - tokens.css: 183 lines (direct file)
 - components.css: 290 lines (direct file)
@@ -158,7 +158,7 @@ Council ruling (CF-01): "73-line constraint layer within ~3,600 total builder in
 
 ---
 
-## SECTION 2: PHASE 0 — CONTENT ANALYSIS (~15 minutes)
+## SECTION 2 (Phase 0): CONTENT ANALYSIS (~15 minutes)
 
 ### Agent
 
@@ -206,7 +206,7 @@ If the content lacks heterogeneity or metaphor viability (Precondition 2 fails),
 
 ---
 
-## SECTION 3: PHASE 1 — BRIEF ASSEMBLY (~15 minutes)
+## SECTION 3 (Phase 1): BRIEF ASSEMBLY (~15 minutes)
 
 ### Agent
 
@@ -267,8 +267,8 @@ The brief contains 4 tiers:
 - **ITEM 36** (extract-d01-d03.md L74-75) Creative Authority + Components (8 lines) creative freedom within identity constraints
 - **ITEM 37** (extract-d01-d03.md L76) CSS Value Table (6 lines)
 
-**Tier 4: DISPOSITION (8 instructions, ~40 lines)**
-- **ITEM 38** (extract-d01-d03.md L79) Tier 4: DISPOSITION (8 instructions, ~40 lines)
+**Tier 4: DISPOSITION (9 instructions D-01–D-09, ~40 lines)**
+- **ITEM 38** (extract-d01-d03.md L79) Tier 4: DISPOSITION (9 instructions D-01–D-09, ~40 lines)
 
 **Content Map Appended:**
 - **ITEM 47** (extract-d01-d03.md L90-92) CONTENT MAP appended to brief: per-section analysis, metaphor seeds
@@ -294,7 +294,7 @@ The brief contains 4 tiers:
 
 ---
 
-## SECTION 4: MODE SELECTION (Orchestrator Decision)
+## SECTION 4 (Phase 1.5): MODE SELECTION (Orchestrator Decision)
 
 ### Applied vs Composed Mode
 
@@ -347,7 +347,7 @@ The orchestrator decides mode based on Phase 0 content analysis:
 
 ---
 
-## SECTION 5: PHASE 2 — BUILDING (The Core Creative Act, ~45 minutes)
+## SECTION 5 (Phase 2): BUILDING (The Core Creative Act, ~45 minutes)
 
 ### Agent
 
@@ -422,7 +422,7 @@ The builder follows a zone-by-zone construction sequence with self-evaluation ch
 
 ---
 
-## SECTION 6: PHASE 3 — PERCEPTUAL AUDIT (Verification Only, ~30 minutes)
+## SECTION 6 (Phase 3): PERCEPTUAL AUDIT (Verification Only, ~30 minutes)
 
 ### Phase 3A: Screenshot Capture (orchestrator does this)
 
@@ -468,7 +468,26 @@ ANY text that is completely illegible or ANY core content that is inaccessible:
   observed [specific description]. Verify or contradict this finding."
 - If the Weaver returns SHIP WITH FIXES, verify the usability finding is Fix #1.
 
-Record result in execution tracker: `EXPERIENTIAL_SCAN: CLEAN` or `EXPERIENTIAL_SCAN: BLOCKING-USABILITY: [description]`
+**FRESH-EYES EXCEPTION (circuit breaker only):** The pre-seeded finding above is an
+EXPLICIT EXCEPTION to the fresh-eyes principle (pa-deployment.md Section 3,
+pa-guardrails.md Section 6). This is the ONLY permitted context injection into
+auditor prompts. The exception is narrowly scoped:
+- ONLY BLOCKING-USABILITY findings from the orchestrator's own experiential scan
+- ONLY the specific observation, framed as "verify or contradict"
+- NOT gate results, NOT pipeline vocabulary, NOT architectural context
+- Document this exception in the execution tracker (P3A+-5)
+If the orchestrator has zero BLOCKING-USABILITY findings, no context is injected and
+auditors receive pure fresh-eyes prompts (screenshots + questions + guardrails only).
+
+Record result in execution tracker fields P3A+-1a through P3A+-1d:
+- P3A+-1a: Any text illegible at arm's length?
+- P3A+-1b: Any visual elements unclear within 5 seconds?
+- P3A+-1c: Navigation structure self-evident?
+- P3A+-1d: Visual verification — reported what PIXELS show, not what HTML says?
+
+Then record the overall result: `EXPERIENTIAL_SCAN: CLEAN` or `EXPERIENTIAL_SCAN: BLOCKING-USABILITY: [description]`
+
+**ENFORCEMENT:** The orchestrator MUST record experiential scan results in the execution tracker BEFORE spawning any PA auditors. If the `EXPERIENTIAL_SCAN` field is empty when PA auditors are deployed, the pipeline has violated sequencing. This is not a gate (no programmatic check) — it is a process discipline requirement that the execution tracker makes auditable after the fact.
 
 > Source: Gas Town incident (2026-02-25) — orchestrator passed illegible chart text
 > through to PA audit without flagging it, where it was ranked Fix #5. This scan
@@ -504,7 +523,7 @@ Record result in execution tracker: `EXPERIENTIAL_SCAN: CLEAN` or `EXPERIENTIAL_
 
 ---
 
-## SECTION 7: VERDICT AND DECISION TREE
+## SECTION 7 (Phase 4): VERDICT AND DECISION TREE
 
 ### Ship / Refine / Rebuild Thresholds
 
@@ -695,6 +714,16 @@ These 15 items were originally classified as VALUES routed to GATE-RUNNER. The c
 
 - **Rerouted ITEM 81** (extract-d01-d03.md L230) OLD PIPELINE (v1/v2) PA-05: 1.5-3.5/4 [historical]
 - **Rerouted ITEM 82** (extract-d01-d03.md L230) NEW PIPELINE (v3) Target PA-05: 3.5-4.0/4 (hypothesis)
+
+---
+
+<!-- ============================================================= -->
+<!-- === STOP HERE FOR EXECUTION ================================= -->
+<!-- Sections 0-9 above contain everything needed to run the       -->
+<!-- pipeline. Sections 10+ below are HISTORICAL CONTEXT,          -->
+<!-- EXPERIMENTAL features, and PROVENANCE. Do not read further     -->
+<!-- unless you need background for a specific decision.            -->
+<!-- ============================================================= -->
 
 ---
 
@@ -900,7 +929,7 @@ The pipeline must address all 13 concepts. Each is handled via one of three mech
 
 ### Concept Routing (per concept)
 
-**Builder Cognitive Mode** — ACTIVATED via D-01 to D-08 + recipe format
+**Builder Cognitive Mode** — ACTIVATED via D-01 to D-09 + recipe format
 - **ITEM 38** (extract-d06-d08.md L575-577)
 - **ITEM 39** (extract-d06-d08.md L575) (11 concepts collapsed)
 

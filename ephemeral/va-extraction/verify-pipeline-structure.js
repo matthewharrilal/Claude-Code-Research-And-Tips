@@ -117,6 +117,7 @@ function checkFileExistence() {
     'FE-19': ['tokens.css', path.join(DESIGN_SYSTEM, 'compositional-core/vocabulary/tokens.css')],
     'FE-20': ['components.css', path.join(DESIGN_SYSTEM, 'compositional-core/components/components.css')],
     'FE-21': ['mechanism-catalog.md', path.join(DESIGN_SYSTEM, 'compositional-core/grammar/mechanism-catalog.md')],
+    'FE-22': ['pa-guardrails-weaver.md', path.join(BASE, 'pa-guardrails-weaver.md')],
   };
 
   for (const [id, [name, filepath]] of Object.entries(files)) {
@@ -151,16 +152,25 @@ function checkSectionPresence() {
     check('pa-weaver sections', 'SP-12', 'Section 0.1: View Screenshots Yourself present', hasPattern(paWeaver, '0\\.1.*View.*Screenshots'));
     check('pa-weaver sections', 'SP-13', 'Section 0.2: Write Experiential Anchor present', hasPattern(paWeaver, '0\\.2.*Write.*Experiential'));
     check('pa-weaver sections', 'SP-14', 'Section 0.3: Enhanced Experiential Pass Aggregation present', hasPattern(paWeaver, 'Experiential Pass Aggregation'));
-    check('pa-weaver sections', 'SP-15', 'Section 5.0: PRIORITY OVERRIDE present', hasSection(paWeaver, '5.0 PRIORITY OVERRIDE'));
+    check('pa-weaver sections', 'SP-15', 'Section 4.5: PRIORITY OVERRIDE present', hasSection(paWeaver, '4.5 PRIORITY OVERRIDE'));
   }
 
   // pa-guardrails.md
   const paGuard = readFile(path.join(BASE, 'pa-guardrails.md'));
   if (paGuard) {
     check('pa-guardrails sections', 'SP-16', 'Section 3.1: Visual Verification present', hasSection(paGuard, '3.1 Visual Verification'));
-    check('pa-guardrails sections', 'SP-17', 'Section 11: FRESH-EYES PRINCIPLE present', hasSection(paGuard, '11. FRESH-EYES PRINCIPLE'));
+    check('pa-guardrails sections', 'SP-17', 'Section 6: FRESH-EYES PRINCIPLE present', hasSection(paGuard, '6. FRESH-EYES PRINCIPLE'));
     check('pa-guardrails sections', 'SP-18', 'Completion Manifest requires Experiential Pass', hasString(paGuard, 'Experiential Pass'));
-    check('pa-guardrails sections', 'SP-19', 'Section 9: S-09 STACKING CHECK present', hasSection(paGuard, '9. S-09 STACKING CHECK'));
+  }
+
+  // pa-guardrails-weaver.md (weaver-only guardrails, split from pa-guardrails.md)
+  const paGuardWeaver = readFile(path.join(BASE, 'pa-guardrails-weaver.md'));
+  if (paGuardWeaver) {
+    check('pa-guardrails-weaver sections', 'SP-19', 'Section 1: TIER 1 EQUIVALENT QUESTIONS present', hasSection(paGuardWeaver, '1. TIER 1 EQUIVALENT QUESTIONS'));
+    check('pa-guardrails-weaver sections', 'SP-19b', 'Section 2: TIER 5 PROVISIONAL SCORING NOTE present', hasSection(paGuardWeaver, '2. TIER 5 PROVISIONAL SCORING NOTE'));
+    check('pa-guardrails-weaver sections', 'SP-19c', 'Section 3: PA-ASSESSED ANTI-PATTERNS present', hasSection(paGuardWeaver, '3. PA-ASSESSED ANTI-PATTERNS'));
+    check('pa-guardrails-weaver sections', 'SP-19d', 'Section 4: REVISION DEGRADATION WARNINGS present', hasSection(paGuardWeaver, '4. REVISION DEGRADATION WARNINGS'));
+    check('pa-guardrails-weaver sections', 'SP-19e', 'Section 5: S-09 STACKING CHECK present', hasSection(paGuardWeaver, '5. S-09 STACKING CHECK'));
   }
 
   // artifact-builder-recipe.md
@@ -261,8 +271,8 @@ function checkGateCountConsistency() {
   if (manifest) {
     check('Gate Counts', 'GC-01', 'MANIFEST.md: "42 programmatic gate checks"', hasString(manifest, '42 programmatic gate checks'));
     check('Gate Counts', 'GC-02', 'MANIFEST.md: "42 gate-runner gates" in layers', hasString(manifest, '42 gate-runner gates'));
-    check('Gate Counts', 'GC-03', 'MANIFEST.md: "18 REQUIRED" in totals', hasString(manifest, '18 REQUIRED'));
-    check('Gate Counts', 'GC-04', 'MANIFEST.md: "11 RECOMMENDED" in totals', hasString(manifest, '11 RECOMMENDED'));
+    check('Gate Counts', 'GC-03', 'MANIFEST.md: "20 REQUIRED" in totals', hasString(manifest, '20 REQUIRED'));
+    check('Gate Counts', 'GC-04', 'MANIFEST.md: "9 RECOMMENDED" in totals', hasString(manifest, '9 RECOMMENDED'));
     check('Gate Counts', 'GC-05', 'MANIFEST.md: "42 gates" in Appendix B', hasPattern(manifest, '42 gates.*Playwright'));
     check('Gate Counts', 'GC-06', 'MANIFEST.md: "9 functions" for gate-runner-core.js', hasString(manifest, '9 functions'));
     check('Gate Counts', 'GC-07', 'MANIFEST.md: "All 42 gates" in verification', hasString(manifest, 'All 42 gates'));
@@ -270,16 +280,16 @@ function checkGateCountConsistency() {
   }
 
   if (gateCore) {
-    check('Gate Counts', 'GC-09', 'gate-runner-core.js: REQUIRED (18) in header', hasPattern(gateCore, 'REQUIRED.*18|18.*REQUIRED'));
-    check('Gate Counts', 'GC-10', 'gate-runner-core.js: RECOMMENDED (11) in header', hasPattern(gateCore, 'RECOMMENDED.*11|11.*RECOMMENDED'));
+    check('Gate Counts', 'GC-09', 'gate-runner-core.js: REQUIRED (20) in header', hasPattern(gateCore, 'REQUIRED.*20|20.*REQUIRED'));
+    check('Gate Counts', 'GC-10', 'gate-runner-core.js: RECOMMENDED (9) in header', hasPattern(gateCore, 'RECOMMENDED.*9|9.*RECOMMENDED'));
     check('Gate Counts', 'GC-11', 'gate-runner-core.js: ADVISORY (7) in header', hasPattern(gateCore, 'ADVISORY.*7|7.*ADVISORY'));
     check('Gate Counts', 'GC-12', 'gate-runner-core.js: 9 execution steps in header', hasPattern(gateCore, '(9 functions|checkUsabilityPriority|checkGateResultIntegrity)'));
     check('Gate Counts', 'GC-13', 'gate-runner-core.js: GR-05b regex supports letter suffix', hasPattern(gateCore, 'GR-\\\\d\\{2\\}\\[a-z\\]\\?'));
   }
 
   if (gateSpec) {
-    check('Gate Counts', 'GC-14', 'gate-runner-spec.md: "18 REQUIRED"', hasString(gateSpec, '18 REQUIRED'));
-    check('Gate Counts', 'GC-15', 'gate-runner-spec.md: "11 RECOMMENDED"', hasString(gateSpec, '11 RECOMMENDED'));
+    check('Gate Counts', 'GC-14', 'gate-runner-spec.md: "20 REQUIRED"', hasString(gateSpec, '20 REQUIRED'));
+    check('Gate Counts', 'GC-15', 'gate-runner-spec.md: "9 RECOMMENDED"', hasString(gateSpec, '9 RECOMMENDED'));
   }
 
   if (gateJson) {
@@ -288,8 +298,8 @@ function checkGateCountConsistency() {
       check('Gate Counts', 'GC-16', 'gate-manifest.json: valid JSON', true);
       const reqCount = json?.tiers?.required?.count;
       const recCount = json?.tiers?.recommended?.count;
-      check('Gate Counts', 'GC-17', 'gate-manifest.json: required.count = 18', reqCount === 18, `got ${reqCount}`);
-      check('Gate Counts', 'GC-18', 'gate-manifest.json: recommended.count = 11', recCount === 11, `got ${recCount}`);
+      check('Gate Counts', 'GC-17', 'gate-manifest.json: required.count = 20', reqCount === 20, `got ${reqCount}`);
+      check('Gate Counts', 'GC-18', 'gate-manifest.json: recommended.count = 9', recCount === 9, `got ${recCount}`);
     } catch (e) {
       check('Gate Counts', 'GC-16', 'gate-manifest.json: valid JSON', false, e.message);
     }
@@ -298,8 +308,8 @@ function checkGateCountConsistency() {
   if (skill) {
     check('Gate Counts', 'GC-19', 'SKILL.md: "42 gates" present', hasPattern(skill, '42 gates'));
     check('Gate Counts', 'GC-20', 'SKILL.md: "9 functions" present', hasPattern(skill, '9.*functions'));
-    check('Gate Counts', 'GC-21', 'SKILL.md: "18 REQUIRED" present', hasString(skill, '18 REQ'));
-    check('Gate Counts', 'GC-22', 'SKILL.md: "11 RECOMMENDED" present', hasString(skill, '11 REC'));
+    check('Gate Counts', 'GC-21', 'SKILL.md: "20 REQUIRED" present', hasString(skill, '20 REQ'));
+    check('Gate Counts', 'GC-22', 'SKILL.md: "9 RECOMMENDED" present', hasString(skill, '9 REC'));
   }
 }
 
@@ -392,8 +402,8 @@ function checkWave4Gates() {
     // Coverage arrays
     check('Wave 4 Gates', 'W4-06', 'gate-runner-core.js: GR-61 in REQUIRED_GATES', hasPattern(gateCore, "REQUIRED.*GR-61|GR-61.*REQUIRED|'GR-61'"));
     check('Wave 4 Gates', 'W4-07', 'gate-runner-core.js: GR-62 in REQUIRED_GATES', hasPattern(gateCore, "REQUIRED.*GR-62|GR-62.*REQUIRED|'GR-62'"));
-    check('Wave 4 Gates', 'W4-08', 'gate-runner-core.js: GR-63 in RECOMMENDED_GATES', hasPattern(gateCore, "'GR-63'"));
-    check('Wave 4 Gates', 'W4-09', 'gate-runner-core.js: GR-64 in RECOMMENDED_GATES', hasPattern(gateCore, "'GR-64'"));
+    check('Wave 4 Gates', 'W4-08', 'gate-runner-core.js: GR-63 in REQUIRED_GATES', hasPattern(gateCore, "'GR-63'"));
+    check('Wave 4 Gates', 'W4-09', 'gate-runner-core.js: GR-64 in REQUIRED_GATES', hasPattern(gateCore, "'GR-64'"));
   }
 
   if (gateSpec) {
@@ -464,7 +474,7 @@ function checkFreshEyes() {
     check('Fresh-Eyes', 'FE-A2', 'MANIFEST: auditors receive screenshots ONLY', hasPattern(manifest, 'Screenshots ONLY'));
   }
   if (paGuard) {
-    check('Fresh-Eyes', 'FE-A3', 'pa-guardrails: Section 11 FRESH-EYES exists', hasSection(paGuard, '11. FRESH-EYES PRINCIPLE'));
+    check('Fresh-Eyes', 'FE-A3', 'pa-guardrails: Section 6 FRESH-EYES exists', hasSection(paGuard, '6. FRESH-EYES PRINCIPLE'));
     check('Fresh-Eyes', 'FE-A4', 'pa-guardrails: "Zero context = genuine first impressions"', hasString(paGuard, 'Zero context'));
     check('Fresh-Eyes', 'FE-A5', 'pa-guardrails: Three Laws present', hasPattern(paGuard, 'Three Laws|The One Rule'));
   }

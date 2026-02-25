@@ -40,7 +40,7 @@
 ### L2: Gate Count Consistency
 - [ ] Section 2 Agent Roster Gate Runner row: "42 programmatic gate checks"
 - [ ] Section 3 gate-runner layers: "42 gate-runner gates"
-- [ ] Section 3 gate-runner totals: "18 REQUIRED + 11 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF VERIFICATION"
+- [ ] Section 3 gate-runner totals: "20 REQUIRED + 9 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF VERIFICATION"
 - [ ] Section 3 gate-runner-core.js: "9 functions" (not 6)
 - [ ] Section 3 gate-runner-core.js: "~1,550 lines" (not 1,436)
 - [ ] Section 4 Phase 3A: "42-gate inventory"
@@ -153,7 +153,7 @@
 - [ ] Section 2: WEAVER CALIBRATION REFERENCES
 - [ ] Section 3: WEAVER DIAGNOSTIC VOCABULARY
 - [ ] Section 4: EMOTIONAL ARC FRAMEWORK
-- [ ] Section 5.0: PRIORITY OVERRIDE RULE
+- [ ] Section 4.5: PRIORITY OVERRIDE RULE
 - [ ] Section 5: SHIP DECISION AND FEEDBACK LOOP
 
 ### L2: Experiential Anchor Content
@@ -166,7 +166,7 @@
 - [ ] Section 0.3: 3+ auditors threshold = CONFIRMED illegibility → Fix #1
 - [ ] Section 0.4: "SECOND, not first" — verification workflow follows experiential anchor
 - [ ] Old Section 4.5 replaced with forward reference to Section 0.3
-- [ ] Section 5.0: comprehension failures outrank analytical findings
+- [ ] Section 4.5: comprehension failures outrank analytical findings
 
 ### L2: Calibration Content
 - [ ] Multi-coherence scale: FLAT/FUNCTIONAL/DESIGNED/COMPOSED/FLAGSHIP
@@ -195,13 +195,9 @@
 - [ ] Section 3: ASSESSMENT LANGUAGE CONSTRAINTS
 - [ ] Section 3.1: Visual Verification, Not Code Interpretation
 - [ ] Section 4: PA-05 CROSS-VALIDATION
-- [ ] Section 5: TIER 1 EQUIVALENT QUESTIONS
-- [ ] Section 6: TIER 5 PROVISIONAL SCORING NOTE
-- [ ] Section 7: PA-ASSESSED ANTI-PATTERNS
-- [ ] Section 8: REVISION DEGRADATION WARNINGS
-- [ ] Section 9: S-09 STACKING CHECK
-- [ ] Section 10: CROSS-VIEWPORT COMPARISON METHOD
-- [ ] Section 11: FRESH-EYES PRINCIPLE (NON-NEGOTIABLE)
+- [ ] Section 5: CROSS-VIEWPORT COMPARISON METHOD (was Section 10, renumbered after split)
+- [ ] Section 6: FRESH-EYES PRINCIPLE (NON-NEGOTIABLE) (was Section 11, renumbered after split)
+- [ ] **Note:** Sections 5-9 (Tier 1 Equivalents, Tier 5 Scoring, Anti-Patterns, Degradation Warnings, S-09 Stacking) moved to pa-guardrails-weaver.md (weaver-only)
 
 ### L2: Visual Verification Content (Section 3.1)
 - [ ] "Visual Verification, Not Code Interpretation" header present
@@ -215,7 +211,7 @@
 - [ ] Experiential Pass row is MANDATORY in completion table
 - [ ] Report without `## 0. Experiential Pass` is INCOMPLETE — stated explicitly
 
-### L2: Fresh-Eyes Content (Section 11)
+### L2: Fresh-Eyes Content (Section 6)
 - [ ] Auditor receives ONLY: screenshots + pa-questions.md + pa-guardrails.md + nothing else
 - [ ] "Zero context = genuine first impressions"
 - [ ] Three Laws present (screenshot required, plain language, non-designer can validate)
@@ -225,6 +221,38 @@
 - [ ] Fresh-eyes file list matches MANIFEST.md Section 3 information isolation
 - [ ] S-09 stacking threshold (120px) matches gate-runner-core.js GR-14
 - [ ] Anti-pattern table matches gate-runner-spec.md categories
+
+---
+
+## 4b. pa-guardrails-weaver.md (Weaver/Orchestrator Guardrails)
+
+### L0: File Health
+- [ ] File exists at `ephemeral/va-extraction/pa-guardrails-weaver.md`
+- [ ] Status: AUTHORITATIVE — split from pa-guardrails.md
+- [ ] Split purpose: Contains pipeline-vocabulary guardrail sections that PA Auditors must NOT receive
+
+### L1: Required Sections
+- [ ] Section 1: TIER 1 EQUIVALENT QUESTIONS
+- [ ] Section 2: TIER 5 PROVISIONAL SCORING NOTE
+- [ ] Section 3: PA-ASSESSED ANTI-PATTERNS (Full Context)
+- [ ] Section 4: REVISION DEGRADATION WARNINGS
+- [ ] Section 5: S-09 STACKING CHECK (MANDATORY at every section boundary)
+
+### L2: Content Checks
+- [ ] Anti-pattern table has 8 rows (AP-02, AP-03, AP-05, AP-06, AP-07, AP-08, AP-12, AP-13)
+- [ ] Each anti-pattern row has: AP code, name, detection description, PA question references
+- [ ] S-09 threshold: <=120px PASS, >120px VOID-RISK, >200px CATASTROPHIC VOID
+- [ ] Tier 1 equivalents: PA-17 and PA-41 stated explicitly
+- [ ] Tier 1 equivalent consequence: verdict cannot exceed "YES WITH RESERVATIONS"
+- [ ] Tier 5 scoring thresholds: 8-9 COMPOSED, 6-7 APPROACHING (stated as PROVISIONAL with N=1)
+- [ ] Revision degradation table has 5 warning rows
+
+### L3: Cross-Artifact Consistency
+- [ ] S-09 stacking threshold (120px) matches gate-runner-core.js GR-14
+- [ ] S-09 stacking threshold (120px) matches pa-guardrails.md (if referenced there)
+- [ ] Anti-pattern AP codes match gate-runner-spec.md categories
+- [ ] Tier 1 equivalent questions (PA-17, PA-41) exist in pa-questions.md
+- [ ] Routing: Weaver and Orchestrator ONLY — matches MANIFEST.md Section 3 information isolation
 
 ---
 
@@ -381,32 +409,32 @@
 - [ ] `checkUsabilityPriority(auditorReports, weaverReport)` — GR-64
 
 ### L2: Gate Coverage Arrays
-- [ ] REQUIRED_GATES array contains 17+ entries (GR-01–GR-10, GR-05b, GR-11, GR-13–GR-15, GR-61, GR-62)
-- [ ] RECOMMENDED_GATES array contains 11 entries (including GR-63, GR-64)
+- [ ] REQUIRED_GATES array contains 19+ entries (GR-01–GR-10, GR-05b, GR-11, GR-13–GR-15, GR-44, GR-60–GR-64)
+- [ ] RECOMMENDED_GATES array contains 9 entries (GR-07, GR-17, GR-18, GR-20, GR-43, GR-45, GR-49, GR-51, GR-52)
 - [ ] ADVISORY_GATES array contains 7 entries
-- [ ] GR-48 coverage threshold: "17/17 (100%)" for required, ">=5/11" for recommended
+- [ ] GR-48 coverage threshold: "19/19 (100%)" for required, ">=5/9" for recommended
 - [ ] GR-05b regex: `/^(GR-\d{2}[a-z]?|BV-\d{2})$/` (supports letter suffix)
 
 ### L2: File Header
-- [ ] Header states: 18 REQUIRED
-- [ ] Header states: 11 RECOMMENDED
+- [ ] Header states: 20 REQUIRED
+- [ ] Header states: 9 RECOMMENDED
 - [ ] Header states: 7 ADVISORY
 - [ ] Header states: 9 functions
-- [ ] Total: 42 gates (37 in file + 4 BV + 1 diagnostic)
+- [ ] Total: 42 gates (36 GR in file + 4 BV in file = 40 executable + 2 diagnostic)
 
 ### L2: Wave 4 Gates (Experiential Enforcement)
 - [ ] GR-61 (checkDPR): checks `window.devicePixelRatio === 1`, REQUIRED tier
 - [ ] GR-62 (checkScreenshotQuality): filesystem check, blank detection, REQUIRED tier
-- [ ] GR-63: checks `<!-- EXPERIENTIAL-CHECK: ... -->` HTML comment, RECOMMENDED tier
-- [ ] GR-63: requires legibility keyword AND minimum length (20 chars)
-- [ ] GR-64 (checkUsabilityPriority): scans reports for usability patterns, RECOMMENDED tier
+- [ ] GR-63: checks `<!-- EXPERIENTIAL-CHECK: ... -->` HTML comment, REQUIRED tier
+- [ ] GR-63: requires legibility + visual clarity + structural reference + minimum length (100 chars)
+- [ ] GR-64 (checkUsabilityPriority): scans reports for usability patterns, REQUIRED tier
 - [ ] GR-64: if 3+ auditors flag usability, verifies Fix #1 contains usability term
 
 ### L3: Cross-Artifact Consistency
 - [ ] Gate IDs match gate-manifest.json
 - [ ] Gate IDs match gate-runner-spec.md
-- [ ] REQUIRED count (18) matches MANIFEST.md and gate-manifest.json
-- [ ] RECOMMENDED count (11) matches MANIFEST.md and gate-manifest.json
+- [ ] REQUIRED count (20) matches gate-manifest.json
+- [ ] RECOMMENDED count (9) matches gate-manifest.json
 - [ ] Function count (9) matches MANIFEST.md and SKILL.md
 
 ---
@@ -425,14 +453,14 @@
 ### L2: Wave 4 Content
 - [ ] GR-61 spec: DPR Validation, REQUIRED, pre-screenshot timing
 - [ ] GR-62 spec: Screenshot Quality, REQUIRED, post-screenshot timing
-- [ ] GR-63 spec: Builder Experiential Marker, RECOMMENDED, post-build timing
-- [ ] GR-64 spec: Usability Priority, RECOMMENDED, post-weaver timing
+- [ ] GR-63 spec: Builder Experiential Marker, REQUIRED, post-build timing
+- [ ] GR-64 spec: Usability Priority, REQUIRED, post-weaver timing
 - [ ] Motivation paragraph referencing Gas Town incident
 - [ ] Blocking behavior documented for each gate
 
 ### L2: Tier Totals
-- [ ] 18 REQUIRED (was 16)
-- [ ] 11 RECOMMENDED (was 9)
+- [ ] 20 REQUIRED (was 18, GR-63 + GR-64 promoted)
+- [ ] 9 RECOMMENDED (was 11, GR-63 + GR-64 promoted out)
 - [ ] 7 ADVISORY
 - [ ] 2 DIAGNOSTIC
 - [ ] 4 BRIEF VERIFICATION
@@ -459,13 +487,13 @@
 - [ ] `notes` array
 
 ### L2: Tier Counts
-- [ ] `tiers.required.count` = 18
-- [ ] `tiers.recommended.count` = 11
+- [ ] `tiers.required.count` = 20
+- [ ] `tiers.recommended.count` = 9
 - [ ] `tiers.advisory.count` = 7
 - [ ] `tiers.diagnostic.count` = 2
 - [ ] `tiers.brief.count` = 4
 - [ ] GR-61, GR-62 in required gates list
-- [ ] GR-63, GR-64 in recommended gates list
+- [ ] GR-63, GR-64 in required gates list
 
 ### L2: Execution Steps
 - [ ] Step for checkDPR (pre-screenshot timing)
@@ -549,7 +577,7 @@
 
 ### L2: Gate Count Accuracy
 - [ ] Gate runner split files: "9 executable Playwright JS functions (42 gates)"
-- [ ] Gate runner split files: "18 REQUIRED + 11 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF"
+- [ ] Gate runner split files: "20 REQUIRED + 9 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF"
 - [ ] Execution rules: "9 functions, 42 gates" for gate-runner-core.js
 - [ ] DPR + Screenshots rule: GR-61 and GR-62 mentioned
 - [ ] Experiential scan rule present (~2 min, BLOCKING-USABILITY tagging)
@@ -576,8 +604,8 @@ These rules must hold TRUE across ALL artifacts simultaneously. A violation in A
 
 ### INV-1: Gate Count Consistency
 All of these must state the same numbers:
-- [ ] MANIFEST.md: 42 gates (18R + 11R + 7A + 2D + 4BV)
-- [ ] gate-runner-core.js header: 18 REQUIRED, 11 RECOMMENDED, 7 ADVISORY
+- [ ] MANIFEST.md: 42 gates (20R + 9R + 7A + 2D + 4BV)
+- [ ] gate-runner-core.js header: 20 REQUIRED, 9 RECOMMENDED, 7 ADVISORY
 - [ ] gate-runner-spec.md totals: 42
 - [ ] gate-manifest.json: tiers sum to 42
 - [ ] SKILL.md: 42 gates, 9 functions
@@ -616,7 +644,7 @@ All of these must state PA auditors receive ONLY screenshots + questions + guard
 - [ ] MANIFEST.md: Section 3 information isolation
 - [ ] MANIFEST.md: Appendix B routing
 - [ ] pa-deployment.md: fresh-eyes section
-- [ ] pa-guardrails.md: Section 11
+- [ ] pa-guardrails.md: Section 6
 - [ ] artifact-orchestrator.md: Phase 3B routing
 - [ ] EXECUTION-TRACKER-TEMPLATE.md: P3B-1 routing verification
 

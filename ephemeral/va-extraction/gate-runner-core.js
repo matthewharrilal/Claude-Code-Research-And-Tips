@@ -15,9 +15,9 @@
 // 5.5 checkUsabilityPriority(reports,w)  — Post-weaver usability priority check (GR-64)
 // 6. checkGateResultIntegrity(files,data) — Process check (GR-49)
 //
-// Total executable gates: 37 (in this file) + 4 BV + 2 diagnostic = 43 total pipeline gates
-//   REQUIRED (18): GR-01–GR-06, GR-08–GR-11, GR-13–GR-15, GR-44, GR-60, GR-61, GR-62, GR-48
-//   RECOMMENDED (11): GR-07, GR-17, GR-18, GR-20, GR-43, GR-45, GR-49, GR-51, GR-52, GR-63, GR-64
+// Total executable gates: 36 GR (in this file) + 4 BV (in this file) = 40 in-file executable + 2 diagnostic (GR-33, GR-34, no code) = 42 total pipeline gates
+//   REQUIRED (20): GR-01–GR-06, GR-08–GR-11, GR-13–GR-15, GR-44, GR-60, GR-61, GR-62, GR-63, GR-64, GR-48
+//   RECOMMENDED (9): GR-07, GR-17, GR-18, GR-20, GR-43, GR-45, GR-49, GR-51, GR-52
 //   ADVISORY (7): GR-05b, GR-19, GR-21, GR-22, GR-46, GR-50, GR-53
 // Plus Brief Verification (4): BV-01 through BV-04
 // Plus Diagnostic (2): GR-33, GR-34 (report-only, no code in this file)
@@ -71,8 +71,21 @@ function runBriefVerification(briefText) {
   });
 
   // BV-02: Background Delta Verification
+  // Scope: Only check hex values within a "Zone Backgrounds" section of the brief
+  // to avoid false positives from border colors, accent colors, or code examples.
+  const bgSectionMatch = briefText.match(/(?:Zone\s*Backgrounds?|Background\s*(?:Colors?|Hex)|Backgrounds?\s*per\s*Zone)([\s\S]*?)(?=^#+\s|\n---|\n\*\*[A-Z]|$)/im);
+  if (!bgSectionMatch) {
+    results.push({
+      gate: 'BV-02', name: 'Background Delta Verification',
+      status: 'FAIL',
+      measured: { scopedToSection: false },
+      threshold: { minDelta: 15 },
+      note: "Brief must contain a 'Zone Backgrounds' section for hex delta verification. No such section found."
+    });
+  } else {
+  const bgSectionText = bgSectionMatch[0];
   const hexPattern = /#([0-9a-fA-F]{6})/g;
-  const hexValues = [...briefText.matchAll(hexPattern)].map(m => m[1]);
+  const hexValues = [...bgSectionText.matchAll(hexPattern)].map(m => m[1]);
   const rgbFromHex = (hex) => ({
     r: parseInt(hex.slice(0, 2), 16),
     g: parseInt(hex.slice(2, 4), 16),
@@ -90,9 +103,11 @@ function runBriefVerification(briefText) {
   results.push({
     gate: 'BV-02', name: 'Background Delta Verification',
     status: bgDeltaFailures.length === 0 ? 'PASS' : 'FAIL',
-    measured: { totalHexPairs: hexValues.length, failures: bgDeltaFailures },
-    threshold: { minDelta: 15 }
+    measured: { totalHexPairs: hexValues.length, failures: bgDeltaFailures, scopedToSection: true },
+    threshold: { minDelta: 15 },
+    note: 'Scoped to Zone Backgrounds section'
   });
+  } // end else (bgSectionMatch found)
 
   // BV-03: Recipe Format Verification
   const recipeVerbs = (briefText.match(/\b(Build|Create|Derive|Map|Read|Select|Deploy|Assess)\b/g) || []).length;
@@ -783,30 +798,35 @@ async function runGateRunner(page) {
 
   // GR-63: Builder Experiential Marker — evidence of legibility self-check
   // Source: artifact-builder-recipe.md Step 5.0, pa-deployment.md Section 0
+  // Tier: REQUIRED — builder that skipped self-check should not proceed to expensive PA audit
   const experientialCheck = await page.evaluate(() => {
     const html = document.documentElement.outerHTML;
     const marker = html.match(/<!--\s*EXPERIENTIAL-CHECK:\s*([\s\S]*?)-->/i);
-    if (!marker) return { found: false, text: '', hasLegibility: false, hasVisualClarity: false, hasMinLength: false, pass: false };
+    if (!marker) return { found: false, text: '', hasLegibility: false, hasVisualClarity: false, hasStructuralRef: false, hasNegativeFinding: false, hasMinLength: false, pass: false };
     const text = marker[1].trim();
     const hasLegibility = /legib|read|text|font|arm.?s?\s*length/i.test(text);
     const hasVisualClarity = /chart|diagram|table|visual|label|annotation|component/i.test(text);
-    const hasMinLength = text.length >= 20;
+    const hasStructuralRef = /zone|section|header|footer|Z[1-9]|S[1-9]|nav|hero|sidebar/i.test(text);
+    const hasNegativeFinding = /but|however|difficult|hard|squint|effort|strain|small|tight|could|improve|adjust/i.test(text);
+    const hasMinLength = text.length >= 100;
     return {
       found: true,
-      text: text.substring(0, 300),
+      text: text.substring(0, 500),
       textLength: text.length,
       hasLegibility,
       hasVisualClarity,
+      hasStructuralRef,
+      hasNegativeFinding,
       hasMinLength,
-      pass: hasLegibility && hasMinLength
+      pass: hasLegibility && hasVisualClarity && hasStructuralRef && hasNegativeFinding && hasMinLength
     };
   });
   results.push({
     gate: 'GR-63', name: 'Builder Experiential Marker',
     status: experientialCheck.pass ? 'PASS' : 'FAIL',
     measured: experientialCheck,
-    threshold: { markerPresent: true, minLength: 20, legibilityMentioned: true },
-    note: 'Builder must include <!-- EXPERIENTIAL-CHECK: [report] --> with evidence of legibility assessment'
+    threshold: { markerPresent: true, minLength: 100, legibilityMentioned: true, visualClarityMentioned: true, structuralRefRequired: true },
+    note: 'Builder must include <!-- EXPERIENTIAL-CHECK: [report] --> with evidence of legibility + visual clarity assessment referencing specific page structures (>= 100 chars)'
   });
 
   // ========== VERDICT SUMMARY (GR-16 logic absorbed) ==========
@@ -820,6 +840,10 @@ async function runGateRunner(page) {
   const recommendedGates = results.filter(r => ['GR-07', 'GR-43'].includes(r.gate));
   const recommendedFail = recommendedGates.filter(g => g.status === 'FAIL').length;
 
+  // REQUIRED experiential gates checked in this function (GR-63)
+  const experientialGR63 = results.find(r => r.gate === 'GR-63');
+  const experientialFail = experientialGR63 && experientialGR63.status === 'FAIL';
+
   // MECHANICAL EXCEPTION: auto-classify identity failures
   // Mechanical = fix requires <=5 CSS lines, no HTML structural change, no design decision
   const mechanicalIdentityGates = ['GR-05', 'GR-06', 'GR-07', 'GR-08', 'GR-10'];
@@ -831,6 +855,7 @@ async function runGateRunner(page) {
   if (identityFail > 0 && !allIdentityFailsMechanical) verdict = 'REBUILD';
   else if (identityFail > 0 && allIdentityFailsMechanical) verdict = 'REFINE';
   else if (perceptionFail > 0 || !allPerceptionPass) verdict = 'REFINE';
+  else if (experientialFail) verdict = 'REFINE'; // GR-63 REQUIRED: send back to builder
   else if (recommendedFail > 0) verdict = 'REFINE';
 
   return {
@@ -838,10 +863,11 @@ async function runGateRunner(page) {
     summary: {
       identity: { pass: identityPass, fail: identityFail, total: 9, allMechanical: allIdentityFailsMechanical },
       perception: { pass: perceptionPass, fail: perceptionFail, total: 6 },
+      experiential: { GR63: experientialGR63 ? experientialGR63.status : 'NOT_RUN' },
       recommended: { pass: recommendedGates.length - recommendedFail, fail: recommendedFail, total: 2 },
       allPerceptionPass,
       verdict,
-      note: 'Run runAntiPatternGates(), runWave2Gates(), and runGateCoverage() after this for complete verification'
+      note: `GR-63 experiential: ${experientialGR63 ? experientialGR63.status : 'NOT_RUN'}. Run runAntiPatternGates(), runWave2Gates(), and runGateCoverage() after this for complete verification`
     }
   };
 }
@@ -1359,14 +1385,14 @@ function runGateCoverage(allResults) {
     'GR-01', 'GR-02', 'GR-03', 'GR-04', 'GR-05', 'GR-06', 'GR-08', 'GR-09', 'GR-10',
     'GR-11', 'GR-13', 'GR-14', 'GR-15',
     'GR-44', 'GR-60',
-    'GR-61', 'GR-62'
-  ]; // 17 REQUIRED gates (not counting GR-48 itself). Added GR-61 (DPR), GR-62 (Screenshot Quality).
+    'GR-61', 'GR-62',
+    'GR-63', 'GR-64'
+  ]; // 19 REQUIRED gates (not counting GR-48 itself). GR-63 promoted (experiential marker). GR-64 promoted (usability priority).
 
   const RECOMMENDED_GATES = [
     'GR-07', 'GR-17', 'GR-18', 'GR-20',
-    'GR-43', 'GR-45', 'GR-49', 'GR-51', 'GR-52',
-    'GR-63', 'GR-64'
-  ]; // 11 RECOMMENDED gates. Added GR-63 (Experiential Marker), GR-64 (Usability Priority).
+    'GR-43', 'GR-45', 'GR-49', 'GR-51', 'GR-52'
+  ]; // 9 RECOMMENDED gates. GR-63 and GR-64 promoted to REQUIRED.
 
   const collectedGateIds = new Set(allResults.map(r => r.gate));
 
@@ -1392,8 +1418,8 @@ function runGateCoverage(allResults) {
       missingRecommended
     },
     threshold: {
-      requiredCoverage: '17/17 (100%)',
-      recommendedCoverage: '>=5/11'
+      requiredCoverage: '19/19 (100%)',
+      recommendedCoverage: '>=5/9'
     },
     evidence: 'OBSERVED',
     note: missingRequired.length > 0
@@ -1464,22 +1490,22 @@ async function checkDPR(page) {
       threshold: { devicePixelRatio: 1 }
     };
   }
-  // Attempt viewport correction for high-DPR displays
+  // DPR > 1 (e.g., Retina display). Playwright viewport is already in CSS pixels,
+  // so do NOT divide viewport dimensions by DPR (that would shrink the layout).
+  // Instead, set deviceScaleFactor: 1 on the browser context. If that is not possible
+  // at this point (context already created), document the DPR and advise the orchestrator
+  // to recreate the browser context with { deviceScaleFactor: 1 }.
+  // Attempt: Playwright allows setting deviceScaleFactor via context, not page.
+  // We cannot change it here — flag it for the orchestrator.
   const viewport = page.viewportSize();
-  await page.setViewportSize({
-    width: Math.round(viewport.width / dpr),
-    height: Math.round(viewport.height / dpr)
-  });
-  const dprAfter = await page.evaluate(() => window.devicePixelRatio);
   return {
     gate: 'GR-61', name: 'DPR Validation',
-    status: dprAfter === 1 ? 'PASS' : 'FAIL',
-    measured: { originalDPR: dpr, correctedDPR: dprAfter, correctionAttempted: true,
-      originalViewport: `${viewport.width}x${viewport.height}` },
+    status: 'FAIL',
+    measured: { devicePixelRatio: dpr, correctionAttempted: false,
+      viewport: `${viewport.width}x${viewport.height}`,
+      note: 'Playwright viewport is in CSS pixels — do NOT divide by DPR.' },
     threshold: { devicePixelRatio: 1 },
-    note: dprAfter === 1
-      ? 'DPR corrected by viewport adjustment'
-      : 'BLOCKING — DPR could not be corrected. DO NOT proceed with screenshot capture.'
+    note: 'BLOCKING — DPR is ' + dpr + '. Recreate browser context with { deviceScaleFactor: 1 } before screenshot capture. Do NOT resize viewport by DPR (viewport is already CSS pixels).'
   };
 }
 
@@ -1503,8 +1529,9 @@ function checkScreenshotQuality(screenshotDir) {
       continue;
     }
     const files = fs.readdirSync(vpDir).filter(f => f.endsWith('.png')).sort();
-    if (files.length === 0) {
-      results.viewports[vp] = { exists: true, fileCount: 0, pass: false, reason: 'No screenshots found' };
+    if (files.length < 3) {
+      results.viewports[vp] = { exists: true, fileCount: files.length, pass: false,
+        reason: files.length === 0 ? 'No screenshots found' : 'Fewer than 3 screenshots (minimum required)' };
       results.allPass = false;
       continue;
     }
@@ -1540,8 +1567,9 @@ function checkScreenshotQuality(screenshotDir) {
 }
 
 // GR-64: Usability Priority Verification — runs AFTER weaver report
-// Source: pa-weaver.md Section 5.0 (Priority Override Rule), artifact-orchestrator.md (circuit breaker)
-// Tier: RECOMMENDED — verifies weaver followed priority override when auditors flagged usability issues
+// Source: pa-weaver.md Section 4.5 (Priority Override Rule), artifact-orchestrator.md (circuit breaker)
+// Tier: REQUIRED — verifies weaver followed priority override when auditors flagged usability issues
+// Decision rule: If GR-64 FAIL and weaver verdict is SHIP or SHIP WITH FIXES, downgrade to REFINE.
 // Input: auditorReports (array of 9 report strings), weaverReport (string)
 function checkUsabilityPriority(auditorReports, weaverReport) {
   const USABILITY_PATTERNS = [
@@ -1588,7 +1616,7 @@ function checkUsabilityPriority(auditorReports, weaverReport) {
     threshold: { minAuditorFlags: TRIGGER_THRESHOLD },
     note: usabilityInFixOne
       ? 'Priority Override Rule satisfied — Fix #1 addresses usability'
-      : 'VIOLATION: 3+ auditors flagged usability but Fix #1 does not address it. See pa-weaver.md Section 5.0.'
+      : 'BLOCKING: 3+ auditors flagged usability but Fix #1 does not address it. If weaver verdict is SHIP or SHIP WITH FIXES, downgrade to REFINE. See pa-weaver.md Section 4.5.'
   };
 }
 
