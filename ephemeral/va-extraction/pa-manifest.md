@@ -24,11 +24,11 @@ Split: Per-run tracking template. Orchestrator copies this for each PA execution
 |---------|------|-----------|-----------------|--------------------|---------------|
 | A | Impression + Emotion | 9 | [ ] | [ ] /9 | [ ] |
 | B | Readability + Typography | 8 | [ ] | [ ] /8 | [ ] |
-| C | Spatial + Proportion | 11 | [ ] | [ ] /11 | [ ] |
+| C | Spatial + Proportion | 10 | [ ] | [ ] /10 | [ ] |
 | D | Flow + Pacing | 11 | [ ] | [ ] /11 | [ ] |
-| E | Grid + Layout | 6 | [ ] | [ ] /6 | [ ] |
-| F | Consistency + Rhythm | 6 | [ ] | [ ] /6 | [ ] |
-| G | Metaphor + Ideology | 7 | [ ] | [ ] /7 | [ ] |
+| E | Grid + Layout | 7 | [ ] | [ ] /7 | [ ] |
+| F | Consistency + Rhythm | 5 | [ ] | [ ] /5 | [ ] |
+| G | Metaphor + Ideology | 8 | [ ] | [ ] /8 | [ ] |
 | H | Responsiveness | 5 | [ ] | [ ] /5 | [ ] |
 | I | Cross-Page + Adversarial | 6 | [ ] | [ ] /6 | [ ] |
 | Integrative | Gestalt (no questions) | 0 | [ ] | N/A | [ ] |

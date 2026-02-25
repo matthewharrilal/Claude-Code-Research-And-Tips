@@ -363,6 +363,19 @@ Components should not look identical across all zones. Adapt shared components t
 
 > Source: OM-09 (component zone-modulation) + OM-10 (fractal coherence)
 
+### Step 3.4c: Deploy builder signal declarations
+
+After building the page, add HTML comment declarations that communicate page characteristics to downstream validation agents. These declarations help the screenshot validation system distinguish your intentional design choices from rendering bugs.
+
+**DEPLOY:** If your page uses scroll-triggered animations or reveal-on-scroll effects that hide content until the reader scrolls to it, add this HTML comment inside `<body>`:
+```html
+<!-- SCROLL-REVEALS: true -->
+```
+
+If your page does NOT use scroll-triggered reveals, no declaration is needed — absence of the comment signals that all content should be visible without scrolling interaction.
+
+> Source: MUST-12 (ADV-1C-3). This declaration allows screenshot validation to distinguish intentional hidden content from broken screenshots caused by device-pixel-ratio bugs.
+
 ### Step 3.5: Assess scaffolding
 
 After deploying the scaffolding, take a screenshot and assess:
@@ -606,21 +619,33 @@ Per council verdict: "D-04 creates conditions for surprise (not guaranteed)" —
 
 ## PHASE 5: SELF-EVALUATE AND REFINE
 
-### Step 5.1: Screenshot and assess vs conviction
+### Step 5.1: Assess text legibility across the page
+
+Read through every zone of your page at normal browser zoom. Assess: Can body text be comfortably read at arm's length? Are all diagram labels, chart annotations, and navigation elements legible? Look at dense zones where text may have been compressed — do captions, footnotes, and secondary text remain readable? If any text feels strained or requires leaning in, increase font-size or line-height for that element.
+
+> Source: ME-004 (builder legibility self-check). Legibility is the foundation — a page that cannot be read cannot communicate.
+
+### Step 5.2: Assess visual component clarity
+
+Scan every chart, diagram, table, and visual element on the page. Assess: Can you identify what each visual element is communicating within 5 seconds of looking at it? Are axis labels, legends, and data annotations large enough to read without zooming? If any visual component requires decoding effort — squinting at small labels, guessing what colors represent, tracing unlabeled connections — increase the relevant text sizes, add labels, or simplify the visual until its message is immediate.
+
+> Source: ME-004 (visual component clarity check). Visual elements that cannot be quickly understood become decoration, not communication.
+
+### Step 5.3: Screenshot and assess vs conviction
 
 Take a Playwright screenshot and compare against your conviction statement ("This page is about X. Metaphor Y. Arc Z.").
 
 > This is the builder self-evaluation loop. You SEE your own output (Tier 4 info via EXPERIENCE).
 
-### Step 5.2: Apply the Skeleton Test (D-08)
+### Step 5.4: Apply the Skeleton Test (D-08)
 
 Mentally strip content. Does the skeleton have shape?
 
-### Step 5.3: Apply the Reader's Scroll (D-05)
+### Step 5.5: Apply the Reader's Scroll (D-05)
 
 Scroll through as a reader. Does the journey have pacing?
 
-### Step 5.4: Check mode indicators
+### Step 5.6: Check mode indicators
 
 Is the page in COMPOSED mode or APPLIED mode? Check:
 - Mode determinant 1: Are custom property names concept-based or position-based?
@@ -633,7 +658,7 @@ Is the page in COMPOSED mode or APPLIED mode? Check:
 > [ITEM 76, extract-d18-d20.md, VA L1552]
 > [ITEM 78, extract-d18-d20.md, VA L1554]
 
-### Step 5.5: Assess output targets
+### Step 5.7: Assess output targets
 
 Your output should be:
 - Complete HTML page
@@ -653,7 +678,7 @@ Your output should be:
 
 ## PHASE 6: TEMPORAL COMPOSITION
 
-> **Note:** This phase is verified during Phase 5 self-evaluation (questions 5-7). The content below is reference — the builder verifies these aspects in Phase 5 rather than executing Phase 6 as a separate step.
+> **Note:** This phase is verified during Phase 5 self-evaluation (Steps 5.5-5.7). The content below is reference — the builder verifies these aspects in Phase 5 rather than executing Phase 6 as a separate step.
 
 This phase addresses how static CSS creates a time-based experience. Every reader experiences the page temporally — they scroll.
 

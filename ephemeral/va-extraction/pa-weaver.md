@@ -188,6 +188,33 @@ The Weaver synthesizes these into an emotional arc assessment using the 4-regist
 
 ---
 
+## 4.5 Experiential Pass Aggregation
+
+Before synthesizing emotional arc or ordering fixes, aggregate experiential pass results across all 9 auditors:
+
+| Auditor Agreement | Classification | Weaver Action |
+|-------------------|---------------|---------------|
+| >= 3/9 flag same text element | CONFIRMED illegibility | Fix #1 per Priority Override Rule |
+| 1-2/9 flag same text element | POSSIBLE issue | Investigate — cite specific auditor reports |
+| 0/9 flag any text element | All text readable | No experiential action needed |
+
+Report format: "Experiential: N CONFIRMED, M POSSIBLE, text fully readable at 0/9."
+
+---
+
+## 5.0 PRIORITY OVERRIDE RULE
+
+Before ordering fixes: "Is there ANY finding from ANY auditor that describes
+something a reader CANNOT READ or CANNOT USE?"
+
+If yes: that finding is Fix #1, regardless of gate status.
+
+Fix priority order: (1) Human readability/usability, (2) Visual perception,
+(3) Identity compliance. After emotional arc analysis, check whether any fix
+would improve the weakest register — if so, it ranks higher.
+
+---
+
 ## 5. SHIP DECISION AND FEEDBACK LOOP
 
 ### 5.1 Ship Thresholds
@@ -251,7 +278,7 @@ The Weaver should watch for these anti-patterns in auditor reports:
 |----|-------------|-----------------|---------------------------|
 | AP-02 | COLOR ZONE CONFLICT | Hierarchy DISAGREEMENT between color zones | PA-18, PA-55 |
 | AP-03 | TRANSITION MONOTONY | All zones use identical dividers | PA-17, PA-69, PA-62 |
-| AP-05 | SPACING FLAT-LINE | Density arc compresses uniformly | PA-40, PA-66 |
+| AP-05 | SPACING FLAT-LINE | Density arc compresses uniformly | PA-69, PA-66 |
 | AP-06 | CHANNEL ISOLATION | 6 channels shift not at same boundaries | PA-69, PA-61 |
 | AP-07 | METAPHOR BLEED | Vocabulary leaks across zone boundaries | PA-44, PA-68 |
 | AP-08 | COMPONENT ORPHAN | Component styled for wrong zone | PA-63, PA-19 |

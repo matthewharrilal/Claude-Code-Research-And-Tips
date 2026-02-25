@@ -75,7 +75,7 @@ Some anti-patterns cannot be detected programmatically. They require the PA audi
 |----|-------------|-----------------|---------------------------|
 | AP-02 | COLOR ZONE CONFLICT | Hierarchy DISAGREEMENT between color zones | PA-18 (color family), PA-55 (zone differences) |
 | AP-03 | TRANSITION MONOTONY | All zones use identical dividers | PA-17 (rhythm), PA-69 (transition variation), PA-62 (Tier 5) |
-| AP-05 | SPACING FLAT-LINE | Density arc compresses uniformly | PA-40 (spacing consistency), PA-66 (negative space variety) |
+| AP-05 | SPACING FLAT-LINE | Density arc compresses uniformly | PA-69 (transition variation), PA-66 (negative space variety) |
 | AP-06 | CHANNEL ISOLATION | 6 channels shift not at same boundaries | PA-69 (transition properties), PA-61 (multi-voice) |
 | AP-07 | METAPHOR BLEED | Vocabulary leaks across zone boundaries | PA-44 (metaphor persistence), PA-68 (metaphor coverage) |
 | AP-08 | COMPONENT ORPHAN | Component styled for wrong zone | PA-63 (fractal zoom), PA-19 (different website element) |

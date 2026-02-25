@@ -35,8 +35,8 @@ This is the minimum viable procedure. Each step references the detailed section 
 6. Serve HTML via HTTP. Capture screenshots at 3 viewports (1440px, 1024px, 768px): cold look + scroll-through. Disable animations first. (Section 4, Phase 3A)
 7. Run **Gate Runner** programmatically (Playwright JavaScript, executed by orchestrator — NOT a separate LLM agent) against built HTML. (Section 4, Phase 3B)
 8. Spawn 9 **PA Auditors** (A-I, all Opus) in parallel, each with screenshots + assigned questions ONLY. (Section 4, Phase 3B)
-9. Spawn **Integrative Auditor** (Opus) with all 9 reports. Receive PA-05 score.
-10. Spawn **Weaver** (Opus) with integrative report + gate results. Receive verdict: **SHIP / SHIP WITH FIXES / REFINE / REBUILD**.
+9. Spawn **Integrative Auditor** (Opus) with all 9 reports. Receive gestalt synthesis report (cross-auditor patterns, convergence, contradictions, blind spots).
+10. Spawn **Weaver** (Opus) with integrative report + gate results. Weaver scores PA-05, Tier 5, and issues verdict: **SHIP / SHIP WITH FIXES / REFINE / REBUILD**.
 11. If SHIP WITH FIXES: pipeline terminates with mechanical fix list. If REFINE or REBUILD: pipeline terminates with action items for a new manual run. (Single-pass default — no automatic re-execution.)
 
 **Maximum iterations:** 1 REBUILD + 1 REFINE before requiring human review. If a second REBUILD is triggered, the pipeline terminates with diagnostic output.
@@ -139,7 +139,7 @@ The Gate Runner is NOT a separate LLM agent. It is Playwright JavaScript code ex
 
 | Executor | Model | Role | Receives | Produces |
 |----------|-------|------|----------|----------|
-| **Orchestrator** (Playwright JS) | N/A | Run 37 programmatic gate checks (33 Playwright + 4 BV) | Built HTML file + gate-runner-core.js | Structured JSON results (37 gates: PASS/FAIL) + 6 orchestrator decision rules |
+| **Orchestrator** (Playwright JS) | N/A | Run 38 programmatic gate checks (34 Playwright + 4 BV) | Built HTML file + gate-runner-core.js | Structured JSON results (38 gates: PASS/FAIL) + 6 orchestrator decision rules |
 
 
 ### Phase 3B — Perceptual Audit (Mode 4)
@@ -147,12 +147,12 @@ The Gate Runner is NOT a separate LLM agent. It is Playwright JavaScript code ex
 | Agent | Model | Role | Receives | Produces |
 |-------|-------|------|----------|----------|
 | **PA Auditor A** | Opus | Impression + Emotion | Screenshots + PA-01, PA-03, PA-04, PA-05, PA-45, PA-65, PA-67, PA-72, PA-76 (9 questions) | Audit findings |
-| **PA Auditor B** | Opus | Readability + Typography | Screenshots + PA-02, PA-06, PA-08, PA-29, PA-55, PA-56, PA-70, PA-77 (8 questions) | Audit findings |
-| **PA Auditor C** | Opus | Spatial + Proportion | Screenshots + PA-09, PA-11, PA-30-33, PA-50, PA-51, PA-53, PA-64, PA-66 (11 questions) | Audit findings |
+| **PA Auditor B** | Opus | Readability + Typography | Screenshots + PA-02, PA-08, PA-29, PA-55, PA-56, PA-70, PA-77, PA-81 (8 questions) | Audit findings |
+| **PA Auditor C** | Opus | Spatial + Proportion | Screenshots + PA-11, PA-30-33, PA-50, PA-51, PA-53, PA-64, PA-66 (10 questions) | Audit findings |
 | **PA Auditor D** | Opus | Flow + Pacing | Screenshots + PA-12, PA-13, PA-34-36, PA-52, PA-62, PA-69, PA-71, PA-74, PA-75 (11 questions) | Audit findings |
-| **PA Auditor E** | Opus | Grid + Layout | Screenshots + PA-14, PA-15, PA-37-39, PA-63 (6 questions) | Audit findings |
-| **PA Auditor F** | Opus | Consistency + Rhythm | Screenshots + PA-16, PA-17, PA-40, PA-41, PA-60, PA-61 (6 questions) | Audit findings |
-| **PA Auditor G** | Opus | Metaphor + Ideology | Screenshots + PA-18-20, PA-42-44, PA-68 (7 questions) | Audit findings |
+| **PA Auditor E** | Opus | Grid + Layout | Screenshots + PA-14, PA-15, PA-37-39, PA-63, PA-80 (7 questions) | Audit findings |
+| **PA Auditor F** | Opus | Consistency + Rhythm | Screenshots + PA-16, PA-17, PA-41, PA-60, PA-61 (5 questions) | Audit findings |
+| **PA Auditor G** | Opus | Metaphor + Ideology | Screenshots + PA-18-20, PA-42-44, PA-54, PA-68 (8 questions) | Audit findings |
 | **PA Auditor H** | Opus | Responsiveness | Screenshots + PA-22, PA-23, PA-46, PA-47, PA-73 (5 questions) | Audit findings |
 | **PA Auditor I** | Opus | Cross-Page + Adversarial | Screenshots + PA-24-28, PA-48 (6 questions) | Audit findings |
 
@@ -242,8 +242,8 @@ This section maps each artifact file to the specific agents who receive it. Sect
 **D-01 through D-09 are ALL EXPERIMENTAL** per council verdict CF-02/G. D-09 (The Quiet Zone) was added in Wave 3 — designate at least one zone in the middle third as deliberately plainer (2-3 mechanisms vs 4-5, no bento grid, single-column prose). All dispositions are included in the brief and tagged with evidence level. None are gate-checked. **BACKGROUND HEX LOCK** (zone backgrounds from the brief are LOCKED) is a separate constraint enforced by BV-02, not a disposition.
 
 ### artifact-gate-runner.md (split into 5 files — see gate-manifest.json)
-**Layers covered:** L6 GATES (37 gate-runner gates + 6 orchestrator decision rules + 34 VALUES items rerouted per council verdict — see VALUES Rerouting below)
-**Total items:** 37 gate-runner gates (18 REQUIRED + 8 RECOMMENDED + 5 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF VERIFICATION) + 6 orchestrator decision rules (GR-23–GR-28)
+**Layers covered:** L6 GATES (38 gate-runner gates + 6 orchestrator decision rules + 34 VALUES items rerouted per council verdict — see VALUES Rerouting below)
+**Total items:** 38 gate-runner gates (16 REQUIRED + 9 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF VERIFICATION) + 6 orchestrator decision rules (GR-23–GR-28)
 
 **Wave 3 split files:** The monolithic gate runner (2,410 lines) was split into 5 operational files:
 - `gate-runner-core.js` (1,436 lines) — All executable Playwright JavaScript (6 functions)
@@ -257,7 +257,7 @@ The original `artifact-gate-runner.md` is now a redirect pointer. `artifact-gate
 |------------------------|-----------------|---------|
 | "SECTION 0: BRIEF VERIFICATION GATES" (BV-01–BV-04) | **Orchestrator** (text parsing) | Pre-build brief verification: tier line budget, background delta, recipe format, suppressor scan |
 | "SECTION 1: IDENTITY GATES" (GR-01–GR-10) | **Gate Runner** (orchestrator code) | Soul constraint verification: border-radius, box-shadow, container, palette, fonts |
-| "SECTION 2: PERCEPTION GATES" (GR-11–GR-15, GR-44) | **Gate Runner** (orchestrator code) | Threshold verification: RGB delta, letter-spacing, stacked gap, single margin, trailing void |
+| "SECTION 2: PERCEPTION GATES" (GR-11–GR-15, GR-44, GR-60) | **Gate Runner** (orchestrator code) | Threshold verification: RGB delta, letter-spacing, stacked gap, single margin, trailing void, WCAG contrast |
 | "SECTION 3: ANTI-PATTERN GATES" (GR-17–GR-22, GR-45, GR-51) | **Gate Runner** (orchestrator code) | Detect: density stacking, ghost mechanisms, threshold gaming, whitespace voids, uniform typography, CSS budget misallocation |
 | "SECTION 3B: OUTPUT VERIFICATION" (GR-43) | **Gate Runner** (orchestrator code) | Self-evaluation comment existence |
 | "SECTION 4: PRECONDITION GATES" (GR-23–GR-28) | **Orchestrator** (decision rules) | Pre-build checks: builder model, content heterogeneity, suppressor count, brief size, builder gate-free, recipe format. Reclassified from gate-runner to orchestrator in Wave 3 — these are text/config checks, not DOM inspection. |
@@ -272,17 +272,9 @@ The original `artifact-gate-runner.md` is now a redirect pointer. `artifact-gate
 
 **EXECUTION TIMING:** Gates run AFTER the builder completes (Phase 3A), in parallel with screenshot capture. The builder NEVER sees gate thresholds. This is by design — exposing thresholds to the builder causes threshold gaming (building to exact minimums rather than building with intent).
 
-**VERDICT LOGIC (Priority Order):**
-1. ANY Identity gate FAIL → **REBUILD** (soul violation, cannot be patched) — HIGHEST PRIORITY
-2. 3+ Anti-Pattern gates FAIL → **REBUILD** (systemic problem, patch won't fix)
-3. ANY Perception gate FAIL → **REFINE** (can be fixed with targeted CSS edits)
-4. <3 Anti-Pattern gates FAIL → **REFINE** (isolated issues)
-5. PA-05 >= 3.5 AND all gates PASS → **SHIP**
-6. PA-05 >= 3.0 AND all required gates PASS AND fixes are MECHANICAL only → **SHIP WITH FIXES**
-7. PA-05 2.5-3.5 → **REFINE**
-8. PA-05 < 2.5 → **REBUILD**
+**VERDICT LOGIC:** See Phase 3C (Section 4) for the authoritative 8-rule priority list. Summary: Identity FAIL = REBUILD. Perception FAIL = REFINE. PA-05 drives SHIP/REFINE/REBUILD. SHIP WITH FIXES requires ALL fixes MECHANICAL.
 
-In combinations: Identity failures override all else. Anti-pattern 3+ overrides perception. Perception failures trigger REFINE regardless of PA-05 score. SHIP WITH FIXES requires ALL fixes to be CSS-only (MECHANICAL).
+**MECHANICAL EXCEPTION:** If ALL identity gate failures are auto-classified MECHANICAL by the gate runner (criteria: fix requires <=5 CSS lines, no HTML structural change, no design decision), verdict is REFINE, not REBUILD. Gate runner auto-classifies; orchestrator does NOT override classification.
 
 **VALUES REROUTING (34 items):** Per council verdict Pattern 5, 34 Layer 5 VALUES items originally classified as GATE-RUNNER were rerouted AWAY from the gate runner: 15 to ORCHESTRATOR (planning/calibration), 10 to PA_AUDITOR (quality assessment framework), 9 to DOCUMENTATION (historical data). These are tracked in artifact-gate-runner.md Appendix A.
 
@@ -491,6 +483,8 @@ Before spawning the Brief Assembler, the orchestrator determines mode (APPLIED o
 
 **Output:** Gestalt synthesis report + 9 individual audit reports.
 
+**USABILITY CIRCUIT BREAKER:** Before passing to Weaver, orchestrator scans all 9 auditor reports for BLOCKING-severity findings related to: text legibility, information accessibility, content completeness, or navigation. If ANY auditor flags BLOCKING usability: (1) elevate to BLOCKING-USABILITY, (2) annotate for Weaver as "must be Fix #1", (3) if SHIP WITH FIXES verdict, verify usability fix is in the fix list.
+
 ### Phase 3C: Verdict (~5 min, 1 agent)
 
 **Trigger:** Integrative report and gate results are available.
@@ -498,7 +492,7 @@ Before spawning the Brief Assembler, the orchestrator determines mode (APPLIED o
 **Steps:**
 1. Orchestrator spawns **Weaver** with:
    - Integrative auditor report (gestalt synthesis)
-   - Gate runner results (37 gates: PASS/FAIL)
+   - Gate runner results (38 gates: PASS/FAIL)
    - All 9 individual auditor reports (for evidence)
    - Calibration references from pa-weaver.md (multi-coherence scale, severity scale, metaphor expression spectrum)
 2. Weaver scores PA-05 (per FIX-083): sub-criteria (Designed | Coherent | Proportionate | Polished), Tier 5 score (PA-60–PA-77), fix-type classification (MECHANICAL / STRUCTURAL / COMPOSITIONAL), emotional arc synthesis.
@@ -510,6 +504,7 @@ Before spawning the Brief Assembler, the orchestrator determines mode (APPLIED o
    - PA-05 >= 3.0 AND all required gates PASS AND fixes MECHANICAL only → **SHIP WITH FIXES**
    - PA-05 2.5–3.5 → **REFINE** (with specific action items)
    - PA-05 < 2.5 → **REBUILD** (fundamental rework needed)
+   - MECHANICAL EXCEPTION: If ALL identity gate failures are MECHANICAL (<=5 CSS lines, no HTML change, no design decision — auto-classified by gate runner), treat as REFINE, not REBUILD.
 4. Weaver produces TWO outputs:
    - **Diagnostic verdict** for the orchestrator: SHIP/SHIP WITH FIXES/REFINE/REBUILD + PA-05 (with sub-criteria) + Tier 5 score + gate-format action items + fix-type classifications
    - **Artistic impression** for a potential REFINE/REBUILD builder: generative language, no threshold numbers, no gate scores
@@ -643,11 +638,11 @@ In experimental 3-pass mode (not yet validated): REFINE verdict triggers a targe
 |---------|-----------|----------|
 | Screenshot capture fails | Playwright error | Retry. Check HTTP server. Check `file://` not used. |
 | PA Auditor produces empty report | Orchestrator check | Re-spawn that auditor with same inputs. |
-| Identity gate FAIL | Gate Runner GR-01–GR-10 | **REBUILD.** Soul violations cannot be patched. |
-| Perception gate FAIL | Gate Runner GR-11–GR-15, GR-44 | **REFINE.** Targeted CSS edits to fix threshold violations. |
+| Identity gate FAIL | Gate Runner GR-01–GR-10 | **REBUILD** (unless ALL failures are MECHANICAL — see MECHANICAL EXCEPTION in verdict logic). |
+| Perception gate FAIL | Gate Runner GR-11–GR-15, GR-44, GR-60 | **REFINE.** Targeted CSS edits to fix threshold violations. |
 | 3+ Anti-pattern gates FAIL | Gate Runner GR-17–GR-22 | **REBUILD.** Systemic quality problem. |
-| PA-05 < 2.5 | Integrative Auditor | **REBUILD.** Fundamental compositional failure. |
-| PA-05 2.5–3.5 | Integrative Auditor | **REFINE.** Specific action items from auditor reports. |
+| PA-05 < 2.5 | Weaver (per FIX-083) | **REBUILD.** Fundamental compositional failure. |
+| PA-05 2.5–3.5 | Weaver (per FIX-083) | **REFINE.** Specific action items from auditor reports. |
 
 ### Known Historical Failure Modes
 
@@ -712,7 +707,7 @@ These sections are HIGH-PRIORITY reading for the listed agent. Skimming or omitt
 | File | Section (Actual Header) | Why Critical |
 |------|------------------------|-------------|
 | artifact-gate-runner.md | "SECTION 1: IDENTITY GATES" (GR-01–GR-10) | ANY fail = REBUILD |
-| artifact-gate-runner.md | "SECTION 2: PERCEPTION GATES" (GR-11–GR-15, GR-44) | ANY fail = REFINE |
+| artifact-gate-runner.md | "SECTION 2: PERCEPTION GATES" (GR-11–GR-15, GR-44, GR-60) | ANY fail = REFINE |
 | artifact-gate-runner.md | "SECTION 3: ANTI-PATTERN GATES" (GR-17–GR-22) | 3+ fail = REBUILD |
 | artifact-orchestrator.md | "Gate Logic Relocated from Gate Runner" | Score-to-verdict mapping (GR-29–GR-32 moved to orchestrator verdict logic in Wave 1) |
 
@@ -780,7 +775,7 @@ Item counts shown as "Base / Artifact-reported" where they differ.
 | L3 SCAFFOLDING | 68 | 75 (appendix) | artifact-builder-recipe.md | COVERED — Recipe phases 1-3, mechanism minimums |
 | L4 DISPOSITION | 62 | 78 (appendix) | artifact-builder-recipe.md | COVERED — D-01–D-09 + recipe phases 4-6 |
 | L5 VALUES | 94 | Distributed | DISTRIBUTED | COVERED — 34 rerouted from gates (15 orch, 10 PA, 9 doc); 26 to builder context; 34 standalone |
-| L6 GATES | 72 | 37 gates + rerouted | artifact-gate-runner.md | COVERED — 37 gates (18 REQUIRED + 8 RECOMMENDED + 5 ADVISORY + 2 DIAGNOSTIC + 4 BV) + 6 orchestrator decision rules |
+| L6 GATES | 72 | 38 gates + rerouted | artifact-gate-runner.md | COVERED — 38 gates (16 REQUIRED + 9 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BV) + 6 orchestrator decision rules |
 | L7 PA | 56 (+32 rerouted) | 88 total tracked | pa-questions.md + pa-deployment.md + pa-weaver.md | COVERED — 69 questions across 9 auditors + integration + verdict |
 | L8 ROUTING | 63 (+62 cross-matched) | 125 total | artifact-routing.md | COVERED — Content analysis + TC brief + compression + zones |
 | L9 ORCHESTRATION | 188 (+37 rerouted/context) | 222 total | artifact-orchestrator.md | COVERED — Full pipeline sequence + mode + verdict + experiments |
@@ -817,7 +812,7 @@ To verify coverage is complete:
 - [ ] Every non-META item appears in at least one artifact file
 - [ ] DUAL-ROUTE items appear in exactly two artifacts with different framing
 - [ ] No artifact contains items from layers it doesn't own (except by council mandate)
-- [ ] All 37 gates in gate-runner-core.js have corresponding items in the registry
+- [ ] All 38 gates in gate-runner-core.js have corresponding items in the registry
 - [ ] All 69 PA questions in pa-questions.md have corresponding items in the registry
 - [ ] All 9 disposition instructions (D-01–D-09) in artifact-builder-recipe.md have corresponding items
 - [ ] All 10 soul constraints in artifact-identity-perception.md have corresponding items
@@ -851,7 +846,7 @@ All claims in this manifest and its artifacts are tagged with evidence levels pe
 | Content Analyst | Raw content markdown + content analysis protocol (full "Phase 0: Content Analysis Protocol" section from artifact-routing.md) + reader model ("Reader Model — 5-Axis Input Space" section) |
 | Brief Assembler | Content Map, TC Brief Template (~165-line standalone file), soul world-description (from SC tables — World-description field ONLY), perception thresholds, recipe phases, disposition D-01–D-09 |
 | Builder | Execution Brief ONLY + tokens.css + components.css + mechanism-catalog.md + value tables (~550 lines) + CD-006 reference (optional) |
-| Gate Runner (orchestrator code) | Built HTML file + gate-runner-core.js (37 gates, executed as Playwright JavaScript) |
+| Gate Runner (orchestrator code) | Built HTML file + gate-runner-core.js (38 gates, executed as Playwright JavaScript) |
 | PA Auditors (×9) | Screenshots ONLY + assigned question subset from pa-questions.md (thematic groupings per pa-deployment.md) + pa-guardrails.md |
 | Integrative Auditor | 9 PA auditor reports + all screenshots (PA-05 scoring is WEAVER's responsibility per FIX-083) |
 | Weaver | Integrative report + gate results + individual auditor reports + calibration references (multi-coherence scale, severity scale, metaphor expression spectrum) |
@@ -1126,13 +1121,9 @@ For the full per-auditor question text, see `ephemeral/pipeline-retro/07-context
 You are the Integrative Auditor. You have NO assigned questions. Read ALL 9 PA auditor reports + ALL screenshots.
 
 1. GESTALT: What patterns emerge across reports that no single auditor catches? Convergence? Contradictions? Blind spots?
-2. PA-05 SYNTHESIS: Rate each sub-criterion PASS/FAIL:
-   a. DESIGNED — Intentional composition vs template assembly
-   b. COHERENT — Unified design language vs multiple vocabularies
-   c. PROPORTIONATE — Spatial balance (horizontal + vertical + breathing)
-   d. POLISHED — Execution quality (no missing elements, transitions typed)
-3. TIER 5 SYNTHESIS: Count YES across PA-60 through PA-68. Score: {N}/9.
-4. TOP-5 FIXES (if not shipping): Classify as MECHANICAL / STRUCTURAL / COMPOSITIONAL.
+2. TOP-5 FIXES (if not shipping): Classify as MECHANICAL / STRUCTURAL / COMPOSITIONAL.
+
+NOTE: PA-05 scoring and Tier 5 synthesis are performed by the **Weaver** (per FIX-083), NOT the Integrative Auditor. Do NOT score PA-05 here.
 
 ---
 AUDITOR REPORTS: {all 9 reports}
@@ -1145,13 +1136,14 @@ SCREENSHOTS: {file paths}
 You are the Weaver. Read the Integrative Auditor report + Gate Runner results. Produce TWO outputs.
 
 VERDICT LOGIC (priority order):
-a. ANY identity gate FAIL => REBUILD
+a. ANY identity gate FAIL => REBUILD (unless ALL failures are MECHANICAL — see below)
 b. 3+ anti-pattern gates FAIL => REBUILD
 c. ANY perception gate FAIL => REFINE
 d. PA-05 >= 3.5 AND all gates PASS => SHIP
 e. PA-05 >= 3.0 AND all required gates PASS AND fixes are MECHANICAL only => SHIP WITH FIXES
 f. PA-05 2.5-3.5 => REFINE
 g. PA-05 < 2.5 => REBUILD
+MECHANICAL EXCEPTION: If ALL identity failures are MECHANICAL (<=5 CSS lines, no HTML change, no design decision), treat as REFINE, not REBUILD.
 
 PA-05 SCORING (Weaver responsibility per FIX-083):
 Score PA-05 using sub-criteria: Designed | Coherent | Proportionate | Polished

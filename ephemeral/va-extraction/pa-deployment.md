@@ -42,18 +42,18 @@ All agents run in PARALLEL (except Weaver, which is sequential after all auditor
 | Auditor | Role | Core Questions | Tier 5 Questions | Extended | Total |
 |---------|------|---------------|-------------------|----------|-------|
 | **A** | Impression + Emotion | PA-01, PA-03, PA-04, PA-05, PA-45 | PA-65, PA-67 | PA-72, PA-76 | 9 |
-| **B** | Readability + Typography | PA-02, PA-06, PA-08, PA-29, PA-55, PA-56, PA-70 | — | PA-77 | 8 |
-| **C** | Spatial + Proportion | PA-09, PA-11, PA-30, PA-31, PA-32, PA-33, PA-50, PA-51, PA-53 | PA-64, PA-66 | — | 11 |
+| **B** | Readability + Typography | PA-02, PA-08, PA-29, PA-55, PA-56, PA-70, PA-81 | — | PA-77 | 8 |
+| **C** | Spatial + Proportion | PA-11, PA-30, PA-31, PA-32, PA-33, PA-50, PA-51, PA-53 | PA-64, PA-66 | — | 10 |
 | **D** | Flow + Pacing | PA-12, PA-13, PA-34, PA-35, PA-36, PA-52, PA-69, PA-71 | PA-62 | PA-74, PA-75 | 11 |
-| **E** | Grid + Layout | PA-14, PA-15, PA-37, PA-38, PA-39 | PA-63 | — | 6 |
-| **F** | Consistency + Rhythm | PA-16, PA-17, PA-40, PA-41 | PA-60, PA-61 | — | 6 |
-| **G** | Metaphor + Ideology | PA-18, PA-19, PA-20, PA-42, PA-43, PA-44 | PA-68 | — | 7 |
+| **E** | Grid + Layout | PA-14, PA-15, PA-37, PA-38, PA-39, PA-80 | PA-63 | — | 7 |
+| **F** | Consistency + Rhythm | PA-16, PA-17, PA-41 | PA-60, PA-61 | — | 5 |
+| **G** | Metaphor + Ideology | PA-18, PA-19, PA-20, PA-42, PA-43, PA-44, PA-54 | PA-68 | — | 8 |
 | **H** | Responsiveness | PA-22, PA-23, PA-46, PA-47 | — | PA-73 | 5 |
 | **I** | Cross-Page + Adversarial | PA-24, PA-25, PA-26, PA-27, PA-28, PA-48 | — | — | 6 |
 
 **Total: 69 questions across 9 auditors** (49 standard + 2 sub-perceptual + 3 pipeline integration + 6 extended + 9 Tier 5)
 
-> **Load balance note (FIX-061/062/063):** PA-52 moved C->D (pacing aligns with D's PA-35), PA-55 moved C->B (descriptive question suits B's role), PA-70 moved D->B (density/typography question suits B's role). FIX-064 (C1/C2 split) is DEFERRED CONTINGENT — only revisit if C's quality degrades at 11 questions.
+> **Load balance note (FIX-061/062/063):** PA-52 moved C->D (pacing aligns with D's PA-35), PA-55 moved C->B (descriptive question suits B's role), PA-70 moved D->B (density/typography question suits B's role). FIX-064 (C1/C2 split) is DEFERRED CONTINGENT — only revisit if C's quality degrades at 10 questions. **Wave 3 changes (ME-037):** PA-06 retired from B (near-zero failure rate), PA-09 retired from C (subsumed by PA-33), PA-40 retired from F (subsumed by PA-69). PA-81 added to B (information extraction), PA-80 added to E (navigation usability), PA-54 added to G (content promise vs delivery). Net zero: 69 questions maintained.
 
 > Source: ITEM 65 (extract-d21-d25.md, VA L1777) — "PA question count reconciliation"
 
@@ -160,7 +160,16 @@ For each of 3 viewport widths (1440px, 1024px, 768px):
 
 1. **Cold Look** — 1 full-page screenshot at viewport top (no scrolling)
 2. **Scroll-Through** — Sequential screenshots at 80% viewport-height steps, covering the entire page
-3. **Disable animations first:** `animation: none !important; opacity: 1 !important;`
+3. **Disable animations first** — inject this CSS override before capturing:
+```css
+*, *::before, *::after {
+  animation: none !important;
+  transition: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}
+```
 4. **Wait for fonts:** `document.fonts.ready` is CRITICAL before capturing
 
 ### 2.3 File Naming Convention
@@ -182,6 +191,18 @@ screenshots/
     ...
 ```
 
+### 2.3a Screenshot Validation Gate
+
+Before deploying ANY auditors, validate screenshots:
+1. No more than 2 consecutive scroll screenshots are blank at any viewport
+2. Blank screenshots do not exceed 20% of total at any viewport
+3. Full-page screenshot content matches scroll-through content — if full-page
+   shows content NOT visible in scroll-through, pre-capture CSS overrides failed.
+   REPEAT capture with expanded overrides.
+4. If ANY check fails: DO NOT deploy auditors. Re-capture first.
+
+**DPR Validation:** Orchestrator must verify `window.devicePixelRatio === 1` before capture. If DPR > 1, set viewport to effective CSS pixels (e.g., 1440px viewport, not 2880px device pixels).
+
 ### 2.4 Auditor Screenshot-Reading Protocol
 
 Auditors receive file paths to saved PNG screenshots and use the Read tool (which renders images visually). They CANNOT interact with the page.
@@ -195,6 +216,24 @@ Auditors receive file paths to saved PNG screenshots and use the Read tool (whic
 6. Answer assigned questions using evidence from screenshots
 
 **Key rule:** Assessment is purely VISUAL. Describe what you SEE using perceptual language ("The background shifts from warm cream to cooler gray") not CSS language ("background-color changes from #FEF9F5 to #F0EBE3").
+
+### 2.5 Experiential Pass (MANDATORY — Before Questions)
+
+Before answering any assigned questions, each auditor performs an experiential pass:
+
+> Look at these screenshots as a READER, not as an evaluator. Try to
+> READ every piece of text you see — headings, body text, labels,
+> chart annotations, captions, metadata, footer text.
+>
+> Report THREE things:
+> 1. **Illegible text:** Every place where you could not read the text.
+> 2. **Effortful text:** Every place where you had to slow down or squint.
+> 3. **Skipped text:** Every place where you skipped text because it
+>    looked too small, dense, or low-contrast.
+>
+> Report in a section at the TOP of your audit report: "## 0. Experiential Pass."
+> This is about TEXT READABILITY, not visual evaluation.
+> Do this BEFORE reading your assigned questions.
 
 ---
 

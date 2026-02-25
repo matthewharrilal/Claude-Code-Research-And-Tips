@@ -452,6 +452,8 @@ The orchestrator (or lead) serves the HTML page via HTTP, takes screenshots at a
 - **ITEM 86** (extract-d09-d11.md L895) + Integrative auditor
   - Views all screenshots with zero prior context; reports gestalt impressions
 
+**USABILITY CIRCUIT BREAKER:** Before passing reports to Weaver, orchestrator scans all 9 auditor reports for BLOCKING-severity findings related to: text legibility, information accessibility, content completeness, or navigation. If ANY auditor flags BLOCKING usability: (1) elevate to BLOCKING-USABILITY, (2) annotate for Weaver as "must be Fix #1", (3) if SHIP WITH FIXES verdict, verify usability fix is in the fix list.
+
 ### Phase 3C: Weaver (verdict synthesis)
 
 - **ITEM 76** (extract-d01-d03.md L191-192) Agent 15: WEAVER (Opus) reads 10 auditor reports -> VERDICT

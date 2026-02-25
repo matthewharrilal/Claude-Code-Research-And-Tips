@@ -156,19 +156,18 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 
 ### 3.2 Tier 2: Standard Twelve
 
-**Readability and Comfort (PA-06, PA-08, PA-29):**
+**Readability and Comfort (PA-08, PA-29, PA-81):**
 
 | ID | Question | Auditor |
 |----|----------|---------|
-| PA-06 | Are any words stacking vertically, one per line, in any column? | B |
 | PA-08 | Is there any text you have to lean in or squint to read? | B |
 | PA-29 | In the header area (first viewport), count how many different text styles you see. Are more than three fighting for attention? | B |
+| PA-81 | For every chart, diagram, or infographic: can you answer "What is the ONE thing this element wants me to know?" in under 5 seconds? If not, the element fails its communicative purpose. Additionally: Is there a legend/key, and is it readable? Does the item count match text claims? Are axis labels and data labels readable? Note whether the element is a raster image or HTML/SVG. | B |
 
-**Spatial Balance and Proportion (PA-09, PA-11, PA-30 through PA-33):**
+**Spatial Balance and Proportion (PA-11, PA-30 through PA-33):**
 
 | ID | Question | Auditor |
 |----|----------|---------|
-| PA-09 | Is there dead space that serves no purpose? (with severity calibration) | C |
 | PA-11 | Are the margins generous (confident) or anxious (clutching)? | C |
 | PA-30 | At 1440px, does the layout feel DESIGNED for this width, or centered in extra space? | C |
 | PA-31 | If you covered the content and only looked at the surrounding space, would it feel designed or leftover? | C |
@@ -195,13 +194,12 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 | PA-38 | Pick any card/callout/info-box. Is there a clear reading order? | E |
 | PA-39 | In the first screenful, how much is header vs actual content? Doorway or lobby? | E |
 
-**Consistency and Rhythm (PA-16 through PA-17, PA-40 through PA-41):**
+**Consistency and Rhythm (PA-16 through PA-17, PA-41):**
 
 | ID | Question | Auditor |
 |----|----------|---------|
 | PA-16 | Pick two elements that should look identical. Do they? | F |
 | PA-17 | Is there a visual rhythm (like a beat in music), or random? **TIER 1 EQUIVALENT** | F |
-| PA-40 | Does spacing between sections feel consistent, or is there a sudden jump? Does content justify it? | F |
 | PA-41 | Are any visual patterns repeated 4+ times without variation? Purpose or monotony? **TIER 1 EQUIVALENT** | F |
 
 > PA-17 and PA-41 are TIER 1 EQUIVALENT. FAIL on either = verdict cannot exceed "YES WITH RESERVATIONS."
@@ -246,13 +244,14 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 | PA-28 | If you wanted to make this page look terrible while keeping its basic structure and color scheme, what 3 changes would do the most damage? What is this design most FRAGILE about? | I |
 | PA-48 | If this layout were one of five options, would this be first or last choice? Why? | I |
 
-### 3.4 Metaphor and Ideology (PA-42 through PA-44)
+### 3.4 Metaphor and Ideology (PA-42 through PA-44, PA-54)
 
 | ID | Question | Auditor |
 |----|----------|---------|
 | PA-42 | Any section where you understand WHY it looks this way (metaphor) but it still looks WRONG? | G |
 | PA-43 | Could the same metaphor idea be communicated with less visual cost? | G |
 | PA-44 | Without labels/headings/text annotations, could you still sense the metaphor from visual structure alone? Does it persist across the ENTIRE page? | G |
+| PA-54 | Does the page deliver on its structural promises? Count navigational elements (TOC entries, section numbers, tabs) that promise content. How many are fulfilled by visible content? If < 80%, flag as STRUCTURAL PROMISE VIOLATION. | G |
 
 ### 3.5 Quality and Excellence (PA-45)
 
@@ -288,6 +287,12 @@ PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (v
 | PA-70 | Compare densest analytical section to lightest overview. Does visual treatment RESPOND to the difference? | B |
 | PA-71 | At the boundary between two adjacent zones, does the transition feel like a smooth handoff or an abrupt collision? Does the transition technique SERVE the content shift, or does it feel arbitrary? | D |
 
+### 3.8a Navigation Usability (PA-80)
+
+| ID | Question | Auditor |
+|----|----------|---------|
+| PA-80 | Starting from the middle of the page, can you reach any other section using visible navigation? If the page has TOC/nav, do links appear functional? Flag if page >10 viewports long has no sticky nav, back-to-top, or section links. | E |
+
 ### 3.9 Tier 5: Compositional Depth (PA-60 through PA-68)
 
 See Section 2 above for full question text, scoring criteria, and auditor assignments.
@@ -308,6 +313,12 @@ See Section 2 above for full question text, scoring criteria, and auditor assign
 ---
 
 ## 4. QUALITY FRAMEWORK (10 VALUES Items Integrated)
+
+> **WARNING — WEAVER AND ORCHESTRATOR USE ONLY (FIX-084 extension)**
+> This section contains tier definitions, PA-05 score ranges, and quality targets.
+> It MUST NOT be included in PA Auditor A-I prompts — doing so violates the fresh-eyes principle
+> and anchors PA-05 scoring. The orchestrator MUST send only Sections 1-3 + Appendices A-B to auditors.
+> Section 4 goes to the Weaver (who already has this information in pa-weaver.md).
 
 These definitions are CALIBRATION for the PA-05 scale and Tier 5 questions — not additional questions.
 
@@ -407,6 +418,14 @@ These are MINIMUM deltas for CSS changes to be PERCEPTIBLE. Changes below these 
 | Visual weight distribution | Every third has >= 1 designed moment | All = PASS |
 | Width utilization | 65-80% of viewport at 1440px | In range = PASS |
 
+### Experiential Pass Aggregation (WEAVER-ONLY)
+
+| Metric | Threshold | Meaning |
+|--------|-----------|---------|
+| >= 3/9 auditors flag same text element | CONFIRMED illegibility | Weaver: Fix #1 |
+| 1-2/9 flag a text element | POSSIBLE issue | Weaver investigates |
+| 0/9 across all auditors | All text readable | No action needed |
+
 ---
 
-*End of PA Questions artifact. 69 questions defined (PA-01 through PA-77, with gaps). Split from artifact-pa-protocol-MONOLITHIC.md.*
+*End of PA Questions artifact. 69 questions defined (PA-01 through PA-81, with gaps). Split from artifact-pa-protocol-MONOLITHIC.md.*

@@ -25,11 +25,11 @@ All must be checked before Phase 0 begins.
 
 - [ ] Raw content markdown exists at CONTENT_PATH
 - [ ] MANIFEST.md accessible at `ephemeral/va-extraction/MANIFEST.md`
-- [ ] artifact-orchestrator.md accessible (971 lines)
+- [ ] artifact-orchestrator.md accessible (1,060 lines)
 - [ ] artifact-identity-perception.md accessible (556 lines)
-- [ ] artifact-builder-recipe.md accessible (840 lines)
-- [ ] Gate runner split files accessible: gate-runner-core.js (1,436 lines), gate-runner-spec.md (188 lines), gate-runner-preconditions.md (83 lines), gate-manifest.json (159 lines)
-- [ ] PA split files accessible: pa-questions.md (412 lines), pa-deployment.md (237 lines), pa-weaver.md (376 lines), pa-guardrails.md (151 lines), pa-manifest.md (89 lines)
+- [ ] artifact-builder-recipe.md accessible (959 lines)
+- [ ] Gate runner split files accessible: gate-runner-core.js (1,431 lines), gate-runner-spec.md (194 lines), gate-runner-preconditions.md (83 lines), gate-manifest.json (167 lines)
+- [ ] PA split files accessible: pa-questions.md (431 lines), pa-deployment.md (276 lines), pa-weaver.md (403 lines), pa-guardrails.md (151 lines), pa-manifest.md (89 lines)
 - [ ] artifact-routing.md accessible (843 lines)
 - [ ] artifact-tc-brief-template.md accessible (~165 lines)
 - [ ] artifact-value-tables.md accessible (~226 lines)
@@ -155,14 +155,14 @@ All must be checked before Phase 0 begins.
 
 | Category | Gates | Pass | Fail | Result |
 |----------|-------|------|------|--------|
-| Identity (GR-01–GR-10) | 10 | ___ | ___ | ___ |
-| Perception (GR-11–GR-15, GR-44) | 6 | ___ | ___ | ___ |
+| Identity (GR-01–GR-10, GR-05b) | 11 | ___ | ___ | ___ |
+| Perception (GR-11, GR-13–GR-15, GR-44, GR-60) | 6 | ___ | ___ | ___ |
 | Anti-Pattern (GR-17–GR-22) | 6 | ___ | ___ | ___ |
 | Wave 2 (GR-45, GR-46, GR-50–GR-53) | 6 | ___ | ___ | ___ |
 | Meta (GR-48, GR-49) | 2 | ___ | ___ | ___ |
 | Mode Detection (GR-33, GR-34) | 2 | ___ | ___ | ___ |
 | Output (GR-43) | 1 | ___ | ___ | ___ |
-| **Total** | **33** | ___ | ___ | ___ |
+| **Total** | **34** | ___ | ___ | ___ |
 
 Note: GR-23–GR-28 are now orchestrator decision rules (Wave 3 reclassification), not gate-runner gates. BV-01–BV-04 are tracked in Phase 1 above.
 
@@ -178,12 +178,12 @@ Note: GR-23–GR-28 are now orchestrator decision rules (Wave 3 reclassification
 | Auditor | Specialty | Questions | Output Path | Status |
 |---------|-----------|-----------|-------------|--------|
 | A | Impression + Emotion | PA-01,03,04,05,45,65,67,72,76 (9) | ___ | ___ |
-| B | Readability + Typography | PA-02,06,08,29,55,56,70,77 (8) | ___ | ___ |
-| C | Spatial + Proportion | PA-09,11,30-33,50,51,53,64,66 (11) | ___ | ___ |
+| B | Readability + Typography | PA-02,08,29,55,56,70,77,81 (8) | ___ | ___ |
+| C | Spatial + Proportion | PA-11,30-33,50,51,53,64,66 (10) | ___ | ___ |
 | D | Flow + Pacing | PA-12,13,34-36,52,62,69,71,74,75 (11) | ___ | ___ |
-| E | Grid + Layout | PA-14,15,37-39,63 (6) | ___ | ___ |
-| F | Consistency + Rhythm | PA-16,17,40,41,60,61 (6) | ___ | ___ |
-| G | Metaphor + Ideology | PA-18-20,42-44,68 (7) | ___ | ___ |
+| E | Grid + Layout | PA-14,15,37-39,63,80 (7) | ___ | ___ |
+| F | Consistency + Rhythm | PA-16,17,41,60,61 (5) | ___ | ___ |
+| G | Metaphor + Ideology | PA-18-20,42-44,54,68 (8) | ___ | ___ |
 | H | Responsiveness | PA-22,23,46,47,73 (5) | ___ | ___ |
 | I | Cross-Page + Adversarial | PA-24-28,48 (6) | ___ | ___ |
 

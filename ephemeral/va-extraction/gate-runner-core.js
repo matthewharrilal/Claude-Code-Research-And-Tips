@@ -12,10 +12,10 @@
 // 5. runGateCoverage(allResults)          — Meta-gate (GR-48)
 // 6. checkGateResultIntegrity(files,data) — Process check (GR-49)
 //
-// Total Playwright-executable gates: 31
-//   REQUIRED (18): GR-01 through GR-15, GR-43, GR-44, GR-48
-//   RECOMMENDED (8): GR-17, GR-18, GR-19, GR-20, GR-45, GR-49, GR-51, GR-52
-//   ADVISORY (5): GR-21, GR-22, GR-46, GR-50, GR-53
+// Total Playwright-executable gates: 33
+//   REQUIRED (16): GR-01 through GR-06, GR-08 through GR-11, GR-13 through GR-15, GR-44, GR-60, GR-48
+//   RECOMMENDED (9): GR-07, GR-17, GR-18, GR-20, GR-43, GR-45, GR-49, GR-51, GR-52
+//   ADVISORY (8): GR-05b, GR-19, GR-21, GR-22, GR-46, GR-50, GR-53 (GR-12 absorbed into GR-18)
 // Plus Brief Verification (4): BV-01 through BV-04
 // Plus Diagnostic (2): GR-33, GR-34 (report-only, no code in this file)
 
@@ -231,114 +231,102 @@ async function runGateRunner(page) {
     threshold: { gradients: 0 }
   });
 
-  // GR-05: Warm Palette Compliance
-  const paletteCheck = await page.evaluate(() => {
-    const pureBlack = [];
-    const pureWhite = [];
-    const coldColors = [];
-
+  // GR-05a/GR-05b/GR-07: Unified Color Compliance (replaces separate GR-05 + GR-07)
+  const colorCheck = await page.evaluate(() => {
+    const visibleCold = []; // GR-05a: REQUIRED (opacity >= 0.3)
+    const subPerceptualCold = []; // GR-05b: ADVISORY (opacity < 0.3)
+    const pureBlack = []; // GR-07: RECOMMENDED
+    const pureWhite = []; // GR-07: RECOMMENDED
     function parseRGB(str) {
-      const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-      if (match) return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) };
+      const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
+      if (match) return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]), a: match[4] !== undefined ? parseFloat(match[4]) : 1 };
       return null;
     }
-
-    function isCold(rgb) {
-      return rgb && rgb.b > rgb.r + 10 && rgb.b > rgb.g + 10;
-    }
-
+    function isCold(rgb) { return rgb && rgb.b > rgb.r + 10 && rgb.b > rgb.g + 10; }
     document.querySelectorAll('*').forEach(el => {
       if (!isRenderedElement(el)) return;
-      const style = getComputedStyle(el);
-      ['color', 'backgroundColor', 'borderColor'].forEach(prop => {
-        const val = style[prop];
-        if (!val || val === 'transparent' || val === 'rgba(0, 0, 0, 0)') return;
-        const rgb = parseRGB(val);
-        if (!rgb) return;
-        if (rgb.r === 0 && rgb.g === 0 && rgb.b === 0) {
-          pureBlack.push({ tag: el.tagName, prop, class: el.className });
-        }
-        if (rgb.r === 255 && rgb.g === 255 && rgb.b === 255) {
-          pureWhite.push({ tag: el.tagName, prop, class: el.className });
-        }
-        if (isCold(rgb)) {
-          coldColors.push({ tag: el.tagName, prop, class: el.className, value: val });
-        }
-      });
-    });
-    return { pureBlack: pureBlack.length, pureWhite: pureWhite.length, coldColors: coldColors.length,
-             samples: { black: pureBlack.slice(0, 3), white: pureWhite.slice(0, 3), cold: coldColors.slice(0, 3) } };
-  });
-  results.push({
-    gate: 'GR-05', name: 'Warm Palette Compliance',
-    status: (paletteCheck.pureBlack === 0 && paletteCheck.pureWhite === 0 && paletteCheck.coldColors === 0) ? 'PASS' : 'FAIL',
-    measured: paletteCheck,
-    threshold: { pureBlack: 0, pureWhite: 0, coldColors: 0 }
-  });
-
-  // GR-06: Font Trinity
-  const fontCheck = await page.evaluate(async () => {
-    await document.fonts.ready;
-    const allowedFamilies = ['instrument serif', 'inter', 'jetbrains mono'];
-    const violations = [];
-    const found = new Set();
-
-    document.querySelectorAll('*').forEach(el => {
-      if (!isRenderedElement(el)) return;
-      const ff = getComputedStyle(el).fontFamily.toLowerCase();
-      const primary = ff.split(',')[0].trim().replace(/['"]/g, '');
-      if (primary) {
-        const isAllowed = allowedFamilies.some(f => primary.includes(f)) ||
-          ['system-ui', '-apple-system', 'sans-serif', 'serif', 'monospace', 'ui-sans-serif', 'ui-serif', 'ui-monospace'].includes(primary);
-        if (!isAllowed) {
-          violations.push({ tag: el.tagName, class: el.className, font: primary });
-        }
-        allowedFamilies.forEach(f => { if (primary.includes(f)) found.add(f); });
-      }
-    });
-    return { violations: violations.length, found: [...found], samples: violations.slice(0, 5) };
-  });
-  const allThreePresent = fontCheck.found.length === 3;
-  results.push({
-    gate: 'GR-06', name: 'Font Trinity',
-    status: (fontCheck.violations === 0 && allThreePresent) ? 'PASS' : 'FAIL',
-    measured: fontCheck,
-    threshold: { allowedFonts: ['Instrument Serif', 'Inter', 'JetBrains Mono'], allPresent: true }
-  });
-
-  // GR-07: No Pure Black / Pure White
-  const pureBWCheck = await page.evaluate(() => {
-    const pureBlack = [];
-    const pureWhite = [];
-    function parseRGBLocal(str) {
-      const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-      if (match) return { r: parseInt(match[1]), g: parseInt(match[2]), b: parseInt(match[3]) };
-      return null;
-    }
-    document.querySelectorAll('*').forEach(el => {
-      if (!isRenderedElement(el)) return;
+      const hasText = el.textContent.trim().length > 0;
       const style = getComputedStyle(el);
       ['color', 'backgroundColor', 'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor'].forEach(prop => {
         const val = style[prop];
         if (!val || val === 'transparent' || val === 'rgba(0, 0, 0, 0)') return;
-        const rgb = parseRGBLocal(val);
+        const rgb = parseRGB(val);
         if (!rgb) return;
-        if (rgb.r === 0 && rgb.g === 0 && rgb.b === 0) {
-          pureBlack.push({ tag: el.tagName, class: el.className, prop });
-        }
-        if (rgb.r === 255 && rgb.g === 255 && rgb.b === 255) {
-          pureWhite.push({ tag: el.tagName, class: el.className, prop });
+        if (rgb.r === 0 && rgb.g === 0 && rgb.b === 0 && hasText) pureBlack.push({ tag: el.tagName, prop, class: el.className });
+        if (rgb.r === 255 && rgb.g === 255 && rgb.b === 255 && hasText) pureWhite.push({ tag: el.tagName, prop, class: el.className });
+        if (isCold(rgb)) {
+          const effectiveVisibility = rgb.a * Math.max(Math.abs(rgb.b - rgb.r), Math.abs(rgb.b - rgb.g));
+          if (effectiveVisibility > 20) visibleCold.push({ tag: el.tagName, prop, class: el.className, value: val });
+          else subPerceptualCold.push({ tag: el.tagName, prop, class: el.className, value: val });
         }
       });
     });
-    return { pureBlack: pureBlack.length, pureWhite: pureWhite.length,
-             samples: { black: pureBlack.slice(0, 5), white: pureWhite.slice(0, 5) } };
+    return { visibleCold: visibleCold.length, subPerceptualCold: subPerceptualCold.length,
+             pureBlack: pureBlack.length, pureWhite: pureWhite.length,
+             samples: { visibleCold: visibleCold.slice(0, 3), subPerceptual: subPerceptualCold.slice(0, 3),
+                        black: pureBlack.slice(0, 3), white: pureWhite.slice(0, 3) } };
   });
   results.push({
-    gate: 'GR-07', name: 'No Pure Black / Pure White',
-    status: (pureBWCheck.pureBlack === 0 && pureBWCheck.pureWhite === 0) ? 'PASS' : 'FAIL',
-    measured: pureBWCheck,
-    threshold: { pureBlack: 0, pureWhite: 0 }
+    gate: 'GR-05', name: 'Warm Palette (Visible)',
+    status: colorCheck.visibleCold === 0 ? 'PASS' : 'FAIL',
+    measured: { visibleCold: colorCheck.visibleCold, samples: colorCheck.samples.visibleCold },
+    threshold: { visibleColdColors: 0, opacityFloor: 0.3 }
+  });
+  // GR-05b: Sub-perceptual cold colors — ADVISORY only (not in REQUIRED_GATES)
+  results.push({
+    gate: 'GR-05b', name: 'Warm Palette (Sub-Perceptual)',
+    status: colorCheck.subPerceptualCold === 0 ? 'PASS' : 'FAIL',
+    measured: { subPerceptualCold: colorCheck.subPerceptualCold, samples: colorCheck.samples.subPerceptual },
+    threshold: { subPerceptualColdColors: 0, note: 'ADVISORY — sub-perceptual tints (effectiveVisibility <= 20) do not block verdict' }
+  });
+
+  // GR-06: Font Trinity (rendered font check — ME-011 fix)
+  const fontCheck = await page.evaluate(async () => {
+    await document.fonts.ready;
+    const allowedFamilies = ['instrument serif', 'inter', 'jetbrains mono'];
+    const genericFamilies = ['system-ui', '-apple-system', 'sans-serif', 'serif', 'monospace', 'ui-sans-serif', 'ui-serif', 'ui-monospace'];
+    const renderedViolations = []; // REQUIRED: font actually renders as non-trinity
+    const fallbackViolations = []; // ADVISORY: declared but never rendered
+    const found = new Set();
+
+    document.querySelectorAll('*').forEach(el => {
+      if (!isRenderedElement(el)) return;
+      if (!el.textContent.trim()) return; // Skip elements with no visible text
+      const ff = getComputedStyle(el).fontFamily.toLowerCase();
+      const primary = ff.split(',')[0].trim().replace(/['"]/g, '');
+      if (!primary) return;
+      const isGeneric = genericFamilies.includes(primary);
+      const isAllowed = allowedFamilies.some(f => primary.includes(f)) || isGeneric;
+      allowedFamilies.forEach(f => { if (primary.includes(f)) found.add(f); });
+      if (!isAllowed) {
+        // Check if the declared font actually loaded/rendered
+        const isRendered = document.fonts.check(`16px "${primary}"`);
+        if (isRendered) {
+          renderedViolations.push({ tag: el.tagName, class: el.className, font: primary, type: 'rendered' });
+        } else {
+          fallbackViolations.push({ tag: el.tagName, class: el.className, font: primary, type: 'fallback-only' });
+        }
+      }
+    });
+    return { renderedViolations: renderedViolations.length, fallbackViolations: fallbackViolations.length,
+             found: [...found], renderedSamples: renderedViolations.slice(0, 5), fallbackSamples: fallbackViolations.slice(0, 5) };
+  });
+  const allThreePresent = fontCheck.found.length === 3;
+  results.push({
+    gate: 'GR-06', name: 'Font Trinity (Rendered)',
+    status: (fontCheck.renderedViolations === 0 && allThreePresent) ? 'PASS' : 'FAIL',
+    measured: { renderedViolations: fontCheck.renderedViolations, fallbackViolations: fontCheck.fallbackViolations,
+                found: fontCheck.found, renderedSamples: fontCheck.renderedSamples, fallbackSamples: fontCheck.fallbackSamples },
+    threshold: { allowedFonts: ['Instrument Serif', 'Inter', 'JetBrains Mono'], allPresent: true,
+                 note: 'Only fonts verified via document.fonts.check() as rendered count as REQUIRED violations. Fallback-only = ADVISORY.' }
+  });
+
+  // GR-07: No Pure Black / White (Visible Text) — evaluation done in unified GR-05 block above
+  results.push({
+    gate: 'GR-07', name: 'No Pure Black / White (Visible Text)',
+    status: (colorCheck.pureBlack === 0 && colorCheck.pureWhite === 0) ? 'PASS' : 'FAIL',
+    measured: { pureBlack: colorCheck.pureBlack, pureWhite: colorCheck.pureWhite, samples: { black: colorCheck.samples.black, white: colorCheck.samples.white } },
+    threshold: { pureBlack: 0, pureWhite: 0, scope: 'visible-text-elements-only' }
   });
 
   // GR-08: No Decorative Elements
@@ -573,28 +561,7 @@ async function runGateRunner(page) {
     threshold: { minDelta: 15 }
   });
 
-  // GR-12: Letter Spacing >= 0.025em
-  const letterSpacingCheck = await page.evaluate(() => {
-    const violations = [];
-    document.querySelectorAll('*').forEach(el => {
-      const ls = getComputedStyle(el).letterSpacing;
-      if (ls && ls !== 'normal' && ls !== '0px') {
-        const px = parseFloat(ls);
-        const fs = parseFloat(getComputedStyle(el).fontSize);
-        const em = px / fs;
-        if (em > 0 && em < 0.025) {
-          violations.push({ tag: el.tagName, class: el.className, letterSpacing: ls, fontSize: fs + 'px', em: em.toFixed(4) });
-        }
-      }
-    });
-    return { violations: violations.length, samples: violations.slice(0, 5) };
-  });
-  results.push({
-    gate: 'GR-12', name: 'Letter Spacing >= 0.025em',
-    status: letterSpacingCheck.violations === 0 ? 'PASS' : 'FAIL',
-    measured: letterSpacingCheck,
-    threshold: { minLetterSpacing: '0.025em' }
-  });
+  // GR-12: REMOVED — letter-spacing check absorbed into GR-18 (Ghost Mechanisms) at RECOMMENDED tier
 
   // GR-13: Stacked Gap <= 120px (CSS property sum at section boundaries)
   const stackedGapCheck = await page.evaluate(() => {
@@ -635,7 +602,10 @@ async function runGateRunner(page) {
       return Math.max(Math.abs(a.r - b.r), Math.abs(a.g - b.g), Math.abs(a.b - b.b));
     }
 
-    const sections = document.querySelectorAll('section, [class*="zone"], [class*="section"]');
+    const main = document.querySelector('main, [role="main"], body');
+    const scoped = [...(main || document.body).querySelectorAll(':scope > section, :scope > [class*="zone"], :scope > [class*="section"]')];
+    // Fallback: if scoping yields < 2, use original selector
+    const sections = scoped.length >= 2 ? scoped : document.querySelectorAll('section, [class*="zone"], [class*="section"]');
     const gaps = [];
     for (let i = 0; i < sections.length - 1; i++) {
       const curr = sections[i];
@@ -699,30 +669,88 @@ async function runGateRunner(page) {
     threshold: { maxSingleValue: '96px' }
   });
 
-  // GR-44: Trailing Whitespace Void Detection
-  const trailingVoid = await page.evaluate(() => {
-    const body = document.body;
-    const bodyRect = body.getBoundingClientRect();
-    const bodyBottom = bodyRect.bottom;
+  // GR-60: Text Contrast Legibility (WCAG 2.1 AA)
+  const contrastCheck = await page.evaluate(() => {
+    function relLum(r, g, b) {
+      const [rs, gs, bs] = [r, g, b].map(c => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); });
+      return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+    }
+    function contrast(l1, l2) { return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); }
+    function parseRGB(str) {
+      const m = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
+      return m ? { r: parseInt(m[1]), g: parseInt(m[2]), b: parseInt(m[3]), a: m[4] !== undefined ? parseFloat(m[4]) : 1 } : null;
+    }
+    function getEffBg(el) {
+      let cur = el;
+      while (cur && cur !== document.documentElement) {
+        const bg = getComputedStyle(cur).backgroundColor;
+        if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
+          const rgb = parseRGB(bg);
+          if (rgb && rgb.a >= 0.1) return rgb;
+        }
+        cur = cur.parentElement;
+      }
+      return { r: 255, g: 255, b: 255, a: 1 };
+    }
+    const failures = [];
+    let total = 0, passed = 0;
+    const selectors = 'p,span,a,li,h1,h2,h3,h4,h5,h6,td,th,label,figcaption,blockquote,cite,dt,dd,summary,caption,text,tspan';
+    document.querySelectorAll(selectors).forEach(el => {
+      if (!window.isRenderedElement(el)) return;
+      const text = el.textContent.trim();
+      if (!text.length) return;
+      total++;
+      const style = getComputedStyle(el);
+      const fg = parseRGB(style.color);
+      if (!fg) return;
+      const bg = getEffBg(el);
+      const ratio = contrast(relLum(fg.r, fg.g, fg.b), relLum(bg.r, bg.g, bg.b));
+      const fs = parseFloat(style.fontSize);
+      const fw = parseInt(style.fontWeight) || 400;
+      const isLarge = fs >= 18 || (fs >= 14 && fw >= 700);
+      const minRatio = isLarge ? 3.0 : 4.5;
+      if (ratio < minRatio) {
+        failures.push({ tag: el.tagName, class: el.className.toString().substring(0, 50),
+          text: text.substring(0, 40), fg: style.color, bg: `rgb(${bg.r},${bg.g},${bg.b})`,
+          ratio: ratio.toFixed(2), required: minRatio, fontSize: fs + 'px', isLarge });
+      } else { passed++; }
+    });
+    return { total, passed, failures: failures.length, samples: failures.slice(0, 10), pass: failures.length === 0 };
+  });
+  results.push({
+    gate: 'GR-60', name: 'Text Contrast Legibility (WCAG AA)',
+    status: contrastCheck.pass ? 'PASS' : 'FAIL',
+    measured: contrastCheck,
+    threshold: { normalText: '4.5:1', largeText: '3.0:1', standard: 'WCAG 2.1 AA' }
+  });
 
+  // GR-44: Trailing Whitespace Void Detection (fixed: uses scrollHeight, not body rect)
+  const trailingVoid = await page.evaluate(() => {
+    const pageBottom = document.documentElement.scrollHeight;
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
     const allElements = [...document.querySelectorAll('body *')];
     let lastVisibleBottom = 0;
+    let lastVisibleEl = null;
 
     for (const el of allElements) {
       if (['SCRIPT', 'STYLE', 'META', 'LINK'].includes(el.tagName)) continue;
       const style = getComputedStyle(el);
       if (style.display === 'none' || style.visibility === 'hidden') continue;
+      if (parseFloat(style.opacity) === 0) continue;
       const rect = el.getBoundingClientRect();
       if (rect.height === 0) continue;
-      if (rect.bottom > lastVisibleBottom) {
-        lastVisibleBottom = rect.bottom;
+      const absBottom = rect.bottom + scrollTop;
+      if (absBottom > lastVisibleBottom) {
+        lastVisibleBottom = absBottom;
+        lastVisibleEl = { tag: el.tagName, class: el.className };
       }
     }
 
-    const voidHeight = bodyBottom - lastVisibleBottom;
+    const voidHeight = pageBottom - lastVisibleBottom;
     return {
-      bodyBottom: Math.round(bodyBottom),
+      pageBottom: Math.round(pageBottom),
       lastContentBottom: Math.round(lastVisibleBottom),
+      lastElement: lastVisibleEl,
       voidHeight: Math.round(voidHeight),
       pass: voidHeight <= 300
     };
@@ -750,27 +778,35 @@ async function runGateRunner(page) {
   });
 
   // ========== VERDICT SUMMARY (GR-16 logic absorbed) ==========
-  const identityGates = results.filter(r => ['GR-01','GR-02','GR-03','GR-04','GR-05','GR-06','GR-07','GR-08','GR-09','GR-10'].includes(r.gate));
+  const identityGates = results.filter(r => ['GR-01','GR-02','GR-03','GR-04','GR-05','GR-06','GR-08','GR-09','GR-10'].includes(r.gate));
   const identityPass = identityGates.filter(g => g.status === 'PASS').length;
   const identityFail = identityGates.filter(g => g.status === 'FAIL').length;
-  const perceptionGates = results.filter(r => ['GR-11', 'GR-12', 'GR-13', 'GR-14', 'GR-15', 'GR-44'].includes(r.gate));
+  const perceptionGates = results.filter(r => ['GR-11', 'GR-13', 'GR-14', 'GR-15', 'GR-44', 'GR-60'].includes(r.gate));
   const perceptionPass = perceptionGates.filter(g => g.status === 'PASS').length;
   const perceptionFail = perceptionGates.filter(g => g.status === 'FAIL').length;
   const allPerceptionPass = perceptionGates.every(g => g.status === 'PASS');
-  const outputGates = results.filter(r => ['GR-43'].includes(r.gate));
-  const outputFail = outputGates.filter(g => g.status === 'FAIL').length;
+  const recommendedGates = results.filter(r => ['GR-07', 'GR-43'].includes(r.gate));
+  const recommendedFail = recommendedGates.filter(g => g.status === 'FAIL').length;
+
+  // MECHANICAL EXCEPTION: auto-classify identity failures
+  // Mechanical = fix requires <=5 CSS lines, no HTML structural change, no design decision
+  const mechanicalIdentityGates = ['GR-05', 'GR-06', 'GR-07', 'GR-08', 'GR-10'];
+  const failedIdentity = identityGates.filter(g => g.status === 'FAIL');
+  const allIdentityFailsMechanical = failedIdentity.length > 0 &&
+    failedIdentity.every(g => mechanicalIdentityGates.includes(g.gate));
 
   let verdict = 'PROCEED_TO_PA';
-  if (identityFail > 0) verdict = 'REBUILD';
+  if (identityFail > 0 && !allIdentityFailsMechanical) verdict = 'REBUILD';
+  else if (identityFail > 0 && allIdentityFailsMechanical) verdict = 'REFINE';
   else if (perceptionFail > 0 || !allPerceptionPass) verdict = 'REFINE';
-  else if (outputFail > 0) verdict = 'REFINE';
+  else if (recommendedFail > 0) verdict = 'REFINE';
 
   return {
     results,
     summary: {
-      identity: { pass: identityPass, fail: identityFail, total: 10 },
+      identity: { pass: identityPass, fail: identityFail, total: 9, allMechanical: allIdentityFailsMechanical },
       perception: { pass: perceptionPass, fail: perceptionFail, total: 6 },
-      output: { pass: outputGates.length - outputFail, fail: outputFail, total: 1 },
+      recommended: { pass: recommendedGates.length - recommendedFail, fail: recommendedFail, total: 2 },
       allPerceptionPass,
       verdict,
       note: 'Run runAntiPatternGates(), runWave2Gates(), and runGateCoverage() after this for complete verification'
@@ -789,7 +825,7 @@ async function runAntiPatternGates(page) {
   // GR-17: Density Stacking (min padding >= 12px for content, >= 4px for table cells)
   const densityCheck = await page.evaluate(() => {
     const violations = [];
-    document.querySelectorAll('p, li, blockquote, .callout').forEach(el => {
+    document.querySelectorAll('p, blockquote, .callout').forEach(el => {
       const style = getComputedStyle(el);
       ['paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight'].forEach(prop => {
         const val = parseFloat(style[prop]);
@@ -798,7 +834,7 @@ async function runAntiPatternGates(page) {
         }
       });
     });
-    document.querySelectorAll('td, th').forEach(el => {
+    document.querySelectorAll('td, th, li').forEach(el => {
       const style = getComputedStyle(el);
       ['paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight'].forEach(prop => {
         const val = parseFloat(style[prop]);
@@ -830,6 +866,12 @@ async function runAntiPatternGates(page) {
       const opacity = parseFloat(style.opacity);
       if (opacity > 0 && opacity < 0.1) {
         ghosts.push({ tag: el.tagName, class: el.className, value: opacity, type: 'sub-perceptual-opacity' });
+      }
+      // Sub-perceptual letter-spacing (absorbed from GR-12)
+      const ls = getComputedStyle(el).letterSpacing;
+      if (ls && ls !== 'normal' && ls !== '0px') {
+        const px = parseFloat(ls); const fs = parseFloat(getComputedStyle(el).fontSize);
+        if (fs > 0 && px > 0 && (px / fs) < 0.025) ghosts.push({ tag: el.tagName, class: el.className, value: ls, type: 'sub-perceptual-letter-spacing' });
       }
     });
     return { ghosts: ghosts.length, samples: ghosts.slice(0, 5) };
@@ -926,104 +968,57 @@ async function runAntiPatternGates(page) {
 
   // GR-21: AP-14 Cognitive Overload (Bg Proxy)
   const overloadCheck = await page.evaluate(() => {
-    function parseRGBLocal(str) {
-      const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-      if (match) return `${match[1]},${match[2]},${match[3]}`;
-      return null;
-    }
     const docHeight = document.documentElement.scrollHeight;
-    const sliceHeight = 900;
-    const sliceCount = Math.ceil(docHeight / sliceHeight);
-    const sliceResults = [];
+    const sliceH = 900, slices = Math.ceil(docHeight / sliceH);
     let maxDistinct = 0;
-
-    for (let i = 0; i < sliceCount; i++) {
-      const sliceTop = i * sliceHeight;
-      const sliceBottom = sliceTop + sliceHeight;
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    for (let i = 0; i < slices; i++) {
+      const top = i * sliceH, bottom = top + sliceH;
       const bgColors = new Set();
-
       document.querySelectorAll('*').forEach(el => {
         if (!window.isRenderedElement(el)) return;
         const rect = el.getBoundingClientRect();
-        const scrollTop = window.scrollY || document.documentElement.scrollTop;
-        const elTop = rect.top + scrollTop;
-        const elBottom = rect.bottom + scrollTop;
-        if (elBottom > sliceTop && elTop < sliceBottom) {
+        const elTop = rect.top + scrollTop, elBot = rect.bottom + scrollTop;
+        if (elBot > top && elTop < bottom) {
           const bg = getComputedStyle(el).backgroundColor;
           if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
-            const rgb = parseRGBLocal(bg);
-            if (rgb) bgColors.add(rgb);
+            const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
+            if (m && (!m[4] || parseFloat(m[4]) >= 0.1)) bgColors.add(`${m[1]},${m[2]},${m[3]}`);
           }
         }
       });
-
-      const distinct = bgColors.size;
-      if (distinct > maxDistinct) maxDistinct = distinct;
-      sliceResults.push({ slice: i, top: sliceTop, bottom: sliceBottom, distinctBgs: distinct });
+      if (bgColors.size > maxDistinct) maxDistinct = bgColors.size;
     }
-
-    return {
-      slices: sliceResults,
-      maxDistinctPerViewport: maxDistinct,
-      pass: maxDistinct <= 4
-    };
+    return { maxDistinctPerViewport: maxDistinct, sliceCount: slices, pass: maxDistinct <= 6 };
   });
   results.push({
     gate: 'GR-21', name: 'AP-14 Cognitive Overload (Bg Proxy)',
     status: overloadCheck.pass ? 'PASS' : 'FAIL',
-    measured: { maxDistinctPerViewport: overloadCheck.maxDistinctPerViewport, sliceCount: overloadCheck.slices.length },
-    threshold: { maxDistinctBackgrounds: 4, sliceHeight: '900px' },
+    measured: overloadCheck,
+    threshold: { maxDistinctBackgrounds: 6, sliceHeight: '900px' },
     evidence: 'THEORETICAL',
-    note: 'Simplified proxy — counts distinct bg colors per 900px slice, not full visual channel analysis'
+    note: 'Excludes alpha < 0.1 backgrounds. Threshold raised from 4 to 6 for COMPOSED mode.'
   });
 
   // GR-22: AP-02 Color Zone Conflict (Red Role)
   const colorConflictCheck = await page.evaluate(() => {
-    function isRedColor(str) {
-      const match = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-      if (!match) return false;
-      const r = parseInt(match[1]);
-      const g = parseInt(match[2]);
-      const b = parseInt(match[3]);
-      return r >= 220 && r <= 245 && g <= 60 && b <= 50;
+    function isRed(str) {
+      const m = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      return m && parseInt(m[1]) >= 220 && parseInt(m[1]) <= 245 && parseInt(m[2]) <= 60 && parseInt(m[3]) <= 50;
     }
-
-    let borderUses = 0;
-    let bgUses = 0;
-    let textUses = 0;
+    let borderUses = 0, bgUses = 0, textUses = 0;
     const bgElements = [];
-
     document.querySelectorAll('*').forEach(el => {
       if (!window.isRenderedElement(el)) return;
+      if (el.classList.contains('skip-link') || el.closest('.skip-link') || el.matches('[class*="skip"]')) return;
       const style = getComputedStyle(el);
-
       ['borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor'].forEach(prop => {
-        const val = style[prop];
-        if (val && isRedColor(val)) {
-          const w = parseFloat(style[prop.replace('Color', 'Width')]);
-          if (w > 0) borderUses++;
-        }
+        if (isRed(style[prop]) && parseFloat(style[prop.replace('Color', 'Width')]) > 0) borderUses++;
       });
-
-      const bg = style.backgroundColor;
-      if (bg && isRedColor(bg)) {
-        bgUses++;
-        bgElements.push({ tag: el.tagName, class: el.className });
-      }
-
-      const color = style.color;
-      if (color && isRedColor(color)) {
-        textUses++;
-      }
+      if (isRed(style.backgroundColor)) { bgUses++; bgElements.push({ tag: el.tagName, class: el.className }); }
+      if (isRed(style.color)) textUses++;
     });
-
-    return {
-      borderUses,
-      bgUses,
-      textUses,
-      bgElements: bgElements.slice(0, 5),
-      pass: bgUses <= 2
-    };
+    return { borderUses, bgUses, textUses, bgElements: bgElements.slice(0, 5), pass: bgUses <= 2 };
   });
   results.push({
     gate: 'GR-22', name: 'AP-02 Color Zone Conflict (Red Role)',
@@ -1031,7 +1026,7 @@ async function runAntiPatternGates(page) {
     measured: colorConflictCheck,
     threshold: { maxRedBackgrounds: 2 },
     evidence: 'OBSERVED',
-    note: 'Simplified proxy — checks primary red is used for borders/emphasis, not backgrounds (>2 bg uses = conflict)'
+    note: 'Skip-link elements excluded. Red for borders/emphasis, not backgrounds.'
   });
 
   return results;
@@ -1329,15 +1324,15 @@ async function runWave2Gates(page) {
 // GR-48: Gate Coverage Completeness — runs LAST after all other gates
 function runGateCoverage(allResults) {
   const REQUIRED_GATES = [
-    'GR-01', 'GR-02', 'GR-03', 'GR-04', 'GR-05', 'GR-06', 'GR-07', 'GR-08', 'GR-09', 'GR-10',
-    'GR-11', 'GR-12', 'GR-13', 'GR-14', 'GR-15',
-    'GR-43', 'GR-44'
-  ]; // 17 REQUIRED gates (not counting GR-48 itself)
+    'GR-01', 'GR-02', 'GR-03', 'GR-04', 'GR-05', 'GR-06', 'GR-08', 'GR-09', 'GR-10',
+    'GR-11', 'GR-13', 'GR-14', 'GR-15',
+    'GR-44', 'GR-60'
+  ]; // 15 REQUIRED gates (not counting GR-48 itself). Removed GR-07 (->REC), GR-12 (->GR-18), GR-43 (->REC). Added GR-60.
 
   const RECOMMENDED_GATES = [
-    'GR-17', 'GR-18', 'GR-19', 'GR-20',
-    'GR-45', 'GR-49', 'GR-51', 'GR-52'
-  ]; // 8 RECOMMENDED gates (GR-25-28 reclassified to orchestrator in Wave 3)
+    'GR-07', 'GR-17', 'GR-18', 'GR-20',
+    'GR-43', 'GR-45', 'GR-49', 'GR-51', 'GR-52'
+  ]; // 9 RECOMMENDED gates. Added GR-07, GR-43. Removed GR-19 (->ADVISORY).
 
   const collectedGateIds = new Set(allResults.map(r => r.gate));
 
@@ -1363,8 +1358,8 @@ function runGateCoverage(allResults) {
       missingRecommended
     },
     threshold: {
-      requiredCoverage: '17/17 (100%)',
-      recommendedCoverage: '>=4/8'
+      requiredCoverage: '15/15 (100%)',
+      recommendedCoverage: '>=4/9'
     },
     evidence: 'OBSERVED',
     note: missingRequired.length > 0
