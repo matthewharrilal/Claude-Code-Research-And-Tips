@@ -68,7 +68,7 @@ Split: Per-run tracking template. Orchestrator copies this for each PA execution
 | PA-05 Score | [ ] /4 |
 | Tier 5 Score | [ ] /9 |
 | Combined Verdict | [ ] |
-| Ship Decision | SHIP / SHIP WITH FIXES / REFINE / REBUILD |
+| Ship Decision | RELEASE / POLISH / IMPROVE / RETHINK |
 | Fix-Type Summary | N MECHANICAL, N STRUCTURAL, N COMPOSITIONAL |
 | Emotional Arc Shape | [ ] |
 

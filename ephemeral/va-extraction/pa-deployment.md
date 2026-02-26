@@ -156,6 +156,8 @@ All agents run in PARALLEL (except Weaver, which is sequential after all auditor
 
 > Source: ITEM 65 (extract-d21-d25.md, VA L1777) — "PA question count reconciliation"
 
+> **APPLIED mode note:** Auditors F and G assess questions that assume compositional depth (PA-16 visual rhythm, PA-44 metaphor from structure, PA-65 music analogy, PA-68 metaphor persistence). The Weaver MUST be informed of the page's mode (APPLIED or COMPOSED) so that "no metaphor detected" and "uniform rhythm" are interpreted as CORRECT APPLIED outcomes, not as defects. The mode is communicated to the Weaver via the gate results file (which includes mode from Phase 0 routing).
+
 ### 1.3 PA-05 Distributed Cross-Validation Protocol
 
 > Source: FIX-065 — PA-05 is the PRIMARY success metric. Single-evaluator risk is the biggest protocol weakness.
@@ -186,9 +188,9 @@ Auditor A remains the PRIMARY evaluator for all 4 PA-05 sub-criteria. However, 4
 
 | Agent | Model | Requirement |
 |-------|-------|-------------|
-| Auditors A-I | Opus | All 9 auditors STRONG RECOMMENDATION Opus (perceptual judgment quality degrades with smaller models, but not a hard requirement) |
-| Integrative Auditor | Opus | No assigned questions, gestalt only |
-| Weaver | Opus | Reads all 10 reports, produces VERDICT |
+| Auditors A-I | Opus | REQUIRED — all 9 auditors MUST be Opus. Perceptual judgment quality degrades with smaller models. Non-negotiable. |
+| Integrative Auditor | Opus | REQUIRED — no assigned questions, gestalt only |
+| Weaver | Opus | REQUIRED — reads all 10 reports, produces VERDICT |
 
 **Evidence Format Requirement (FIX-067):** Every PA question answer MUST follow this format:
 
@@ -220,6 +222,15 @@ The Integrative Auditor has NO assigned questions and does NOT score PA-05. Thei
 5. Flag cross-cutting issues (e.g., "the rhythm is consistent but the rhythm itself is monotonous")
 
 > **CLARIFICATION (FIX-083):** PA-05 scoring is the WEAVER's responsibility, NOT the Integrative Auditor's. The Integrative Auditor's gestalt impression INFORMS the Weaver's PA-05 score but does not constitute a score itself. Any prior reference (including MANIFEST) stating that the Integrative Auditor scores PA-05 is INCORRECT.
+
+**Output filename:** `p3b-pa-integrative.md` (with `pa-` prefix, consistent with auditor files `p3b-pa-auditor-A.md` through `p3b-pa-auditor-I.md`).
+
+### 1.6 Integrative Auditor Spawn Dependency
+
+The Integrative Auditor MUST NOT be spawned until ALL 9 PA Auditor reports exist as files.
+Verification: `ls p3b-pa-auditor-*.md | wc -l` returns 9.
+If fewer than 9 reports exist, the orchestrator waits. Do not spawn the Integrative with partial reports.
+This is a STRUCTURAL dependency, not a timing preference.
 
 ---
 
@@ -288,7 +299,7 @@ Before deploying ANY auditors, validate screenshots:
    REPEAT capture with expanded overrides.
 4. If ANY check fails: DO NOT deploy auditors. Re-capture first.
 
-**DPR Validation:** Orchestrator must verify `window.devicePixelRatio === 1` before capture. If DPR > 1, set viewport to effective CSS pixels (e.g., 1440px viewport, not 2880px device pixels).
+**DPR-Safe Capture:** Use `captureScreenshots(page, htmlUrl, outputDir)` from `gate-runner-core.js` Section 8 instead of manual capture. This function creates a DPR-1 browser context per viewport, handles animation disabling, font loading, and scroll-through capture automatically. It prevents the black screenshot issue caused by fractional DPR (0.667 on Retina Mac) that makes light-on-dark text invisible. GR-61 is informational when using `captureScreenshots` (DPR=1 guaranteed by construction).
 
 ### 2.4 Auditor Screenshot-Reading Protocol
 
@@ -349,6 +360,90 @@ If an agent's first action is describing what they SEE and FEEL, the skill is wo
 Comprehension failures (illegible text, unusable navigation) outrank ALL property measurement findings. A page that scores well on 68 questions but has illegible chart labels has a BLOCKING defect regardless of its PA-05 score.
 
 A human will notice illegible text in 2 seconds and will never notice a 4%-opacity background tint. The pipeline must match this priority ordering.
+
+---
+
+## 5. ITERATION DEPLOYMENT NOTES
+
+### 5.1 IMPROVE as Compositional Discovery
+
+IMPROVE is compositional discovery, not defect repair. The IMPROVE builder deepens existing relationships and makes the governing metaphor more perceptible. Enhancement vectors: feedback incorporation (auditor observations become creative input), error-as-signal (defects reveal compositional gaps), asymptotic refinement (each pass approaches but cannot exceed the metaphor's ceiling).
+
+### 5.2 Weaver Context for Iteration Cycles
+
+For cycle >= 2, include the Finding Status Map (see pa-weaver.md Section 5.5) in the Weaver's context alongside PA reports. The Weaver needs previous-cycle findings to track REGRESSION vs IMPROVEMENT.
+
+---
+
+---
+
+## 6. MINI-PA DEPLOYMENT (Mode 2.5 — Iteration Validation)
+
+### 6.1 When to Use
+
+Mode 2.5 is for IMPROVE validation only. It is NOT appropriate for:
+- Initial PA (always Mode 4)
+- RETHINK assessment (always Mode 4)
+- FLAGSHIP confirmation (always Mode 4)
+
+Mode 2.5 IS appropriate for:
+- IMPROVE cycle validation when previous PA-05 >= 3.0
+- Staged iteration final check when previous PA-05 >= 3.0
+- Quick regression screening after mechanical fixes
+
+### 6.2 Auditor Deployment (3 of 9)
+
+| Auditor | Role | Questions |
+|---------|------|-----------|
+| **A** | Impression + Emotion | PA-01, PA-02, PA-03, PA-05, PA-45, PA-65 |
+| **C** | Spatial + Proportion | PA-11, PA-30, PA-31, PA-50, PA-66 |
+| **G** | Metaphor + Ideology | PA-18, PA-19, PA-42, PA-54, PA-68 |
+
+**Total: 16 questions across 3 auditors.**
+
+**APPLIED mode question adjustments (Mini-PA):**
+- Auditor A: Drop PA-65 (N/A for APPLIED). Keep PA-01, PA-02, PA-03, PA-05, PA-45. Total: 6 (COMPOSED) or 5 (APPLIED).
+- Auditor G: Drop PA-68 (N/A for APPLIED). Keep PA-18, PA-19, PA-42, PA-54. Total: 5 (COMPOSED) or 4 (APPLIED).
+- Auditor C: Drop PA-66 (N/A for APPLIED). Keep PA-11, PA-30, PA-31, PA-50. Total: 5 (COMPOSED) or 4 (APPLIED).
+
+**Auditor Selection Rationale:**
+- **Auditor A** (Impression + Emotion): ALWAYS included. Owns PA-05 (the primary metric), PA-01 (first impression), PA-45 (best moment). Cannot produce a PA-05 score without A.
+- **Auditor C** (Spatial + Proportion): Catches the most common IMPROVE-relevant failures — spatial balance, whitespace voids, proportional relationships. PA-05c (PROPORTIONATE) cross-validator.
+- **Auditor G** (Metaphor + Ideology): Catches compositional coherence issues — is the metaphor visible? Does identity persist? PA-05b (COHERENT) cross-validator.
+
+### 6.3 Screenshot Capture (Reduced)
+
+1 viewport only: 1440px.
+Same capture protocol as Mode 4 (Section 2): cold look + scroll-through + animation disable + font wait.
+Save to: `screenshots/mini-pa/1440/`
+
+### 6.4 Weaver Protocol (Modified)
+
+Same weaver protocol (pa-weaver.md) with adjustments:
+- PA-05: Auditor A primary only (no cross-validation)
+- Tier 5: Score from available questions (3 of 9 Tier 5 Qs assessable: PA-65, PA-66, PA-68)
+- Report as "Tier 5: X/3 (of 3 assessable, Mini-PA)"
+- Finding Status Map: REQUIRED if this is cycle >= 2
+- Experiential anchor: REQUIRED (non-negotiable even in Mini-PA)
+- PA-02 cross-validation: If Auditor A flags PA-02 (readability issue), Weaver must escalate to Mode 4 (readability regression in IMPROVE is likely structural, requiring Auditor B's full question set).
+
+### 6.5 Mini-PA Limitations
+
+Mode 2.5 CANNOT detect: responsive failures (no 768px/1024px viewport), typography DETAIL issues (Auditor B excluded — but readability catch-all PA-02 is covered by Auditor A), flow/pacing problems (Auditor D excluded), grid regressions (Auditor E excluded), cross-page coherence (Auditor I excluded), consistency/rhythm (Auditor F excluded).
+
+These are acceptable omissions for IMPROVE validation because:
+1. Responsive issues don't change in a CSS-only IMPROVE pass (same HTML structure)
+2. Typography/flow/grid are structural — IMPROVE should not be changing them
+3. If IMPROVE IS changing them, that's a sign it should be RETHINK, not IMPROVE
+4. Initial Mode 4 PA already identified these issues; IMPROVE is about IMPROVEMENT, not DISCOVERY
+
+### 6.6 Escalation to Mode 4
+
+If ANY of these triggers fire, abort Mini-PA verdict and run full Mode 4:
+1. PA-05 decreased vs previous cycle
+2. Any auditor flags a NEW BLOCKING issue not in original PA
+3. Target is FLAGSHIP (PA-05 >= 3.5 required)
+4. Mini-PA PA-05 >= 3.5 (FLAGSHIP must be Mode 4 confirmed)
 
 ---
 

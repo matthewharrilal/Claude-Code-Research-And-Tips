@@ -2,7 +2,7 @@
 ## Pipeline v3 Layer 7 — Questions Reference
 Date: 2026-02-24
 Status: AUTHORITATIVE — split from artifact-pa-protocol-MONOLITHIC.md
-Split: Contains question definitions ONLY (PA-01 through PA-77). No deployment, guardrails, or weaver content.
+Split: Contains question definitions ONLY (PA-01 through PA-81, 69 questions). No deployment, guardrails, or weaver content.
 
 ---
 
@@ -92,6 +92,27 @@ PA-05 is what the user sees. CCS is DIAGNOSTIC (explains WHY PA-05 is what it is
 PA-05's 4 sub-criteria detect whether a page crosses the "designed" threshold (vocabulary fluency). Tier 5 detects compositional depth ABOVE that threshold — the difference between "mechanisms deployed correctly" and "mechanisms in conversation."
 
 **Epistemic status:** These questions and thresholds are INITIAL HYPOTHESES — derived from compositional intelligence stack, not from observed Flagship artifacts. Thresholds may need adjustment.
+
+### 2.1a Mode-Conditional Scoring
+
+**COMPOSED mode:** All 9 Tier 5 questions scored. Denominator = 9.
+
+**APPLIED mode:** 4 questions scored N/A (metaphor-dependent):
+- PA-65 (Compositional Voice / Music Analogy) — N/A: "choir in unison" is correct for APPLIED
+- PA-66 (Negative Space Variety) — N/A: uniform gaps are correct for reference content
+- PA-67 (Novelty Beyond Competence) — N/A: predictability IS the value for reference content
+- PA-68 (Metaphor Spatial Coverage) — N/A: no metaphor to persist
+
+Remaining 5 questions scored normally: PA-60, PA-61, PA-62, PA-63, PA-64.
+APPLIED Tier 5 denominator = 5.
+
+**APPLIED Tier 5 scoring thresholds (adjusted denominator):**
+| YES Count | Verdict |
+|-----------|---------|
+| 5/5 | COMPOSED (exceptional APPLIED — consider whether mode should be COMPOSED) |
+| 3-4/5 | APPROACHING |
+| 2/5 | STRUCTURED |
+| 0-1/5 | VOCABULARY ONLY |
 
 ### 2.2 The Nine Tier 5 Questions
 
@@ -361,6 +382,10 @@ These definitions are CALIBRATION for the PA-05 scale and Tier 5 questions — n
 | **Tier 5: 3-5** | NOT SHIP-READY | STRUCTURED | STRUCTURED |
 | **Tier 5: 6-7** | (unlikely) | APPROACHING | APPROACHING |
 | **Tier 5: 8-9** | (impossible in practice) | (unlikely) | **COMPOSED** (target) |
+
+> **APPLIED mode PA-05 ceiling:** 3.0/4. This is NOT a penalty — it reflects that DESIGNED (4/4) requires compositional depth that APPLIED mode intentionally does not pursue. An APPLIED page at PA-05 3.0 is EXCELLENT. The PA-05 ceiling is a mode property, not a quality judgment.
+>
+> Specifically: PA-05a (DESIGNED) has a practical ceiling of CONDITIONAL PASS for APPLIED, because "mechanisms in conversation" requires a governing logic that APPLIED mode replaces with local problem-solving. PA-05b (COHERENT), PA-05c (PROPORTIONATE), PA-05d (POLISHED) can all achieve clean PASS in APPLIED mode.
 
 ---
 

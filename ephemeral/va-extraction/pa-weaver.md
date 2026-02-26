@@ -56,9 +56,17 @@ After writing your own anchor, aggregate experiential pass results from all 9 au
 
 Report format: "Experiential: N CONFIRMED, M POSSIBLE, text fully readable at 0/9."
 
-### 0.4 Then Proceed to Verification
+### 0.4 Tier 5 Scoring in All Rounds
 
-AFTER completing Sections 0.1-0.3, proceed to the existing workflow below:
+Score Tier 5 (PA-60 through PA-77) in EVERY PA round, including initial rounds with known defects.
+Tier 5 questions assess metaphor persistence, compositional intelligence, and emergent properties.
+These are evaluable even when rendering defects are present.
+A defective page with strong Tier 5 scores indicates IMPROVE potential.
+A defective page with weak Tier 5 scores indicates RETHINK risk.
+
+### 0.5 Then Proceed to Verification
+
+AFTER completing Sections 0.1-0.4, proceed to the existing workflow below:
 1. Manifest Verification (the current "FIRST ACTION" — now SECOND)
 2. PA-05 Scoring
 3. Tier 5 Scoring
@@ -80,11 +88,12 @@ The Weaver reads ALL 10 auditor reports (9 PA auditors + 1 Integrative) and prod
 2. **Tier 5 Score** (0-9 YES count with per-question results)
 3. **Combined Verdict** (from the PA-05 x Tier 5 matrix)
 4. **Top-5 Fixes** (classified as MECHANICAL / STRUCTURAL / COMPOSITIONAL — see Section 3 for diagnostic vocabulary)
-5. **Fix-Type Classification Summary** (REQUIRED) — aggregate count of fixes by type: N MECHANICAL, N STRUCTURAL, N COMPOSITIONAL. This classification directly determines the Ship Decision: SHIP WITH FIXES requires ALL fixes to be MECHANICAL and <= 3 total. Any STRUCTURAL or COMPOSITIONAL fix disqualifies SHIP WITH FIXES and requires REFINE or REBUILD respectively. Include a 1-sentence remediation path per fix type present.
+5. **Fix-Type Classification Summary** (REQUIRED) — aggregate count of fixes by type: N MECHANICAL, N STRUCTURAL, N COMPOSITIONAL. This classification directly determines the Ship Decision: POLISH requires ALL fixes to be MECHANICAL and <= 3 total. Any STRUCTURAL or COMPOSITIONAL fix disqualifies POLISH and requires IMPROVE or RETHINK respectively. Include a 1-sentence remediation path per fix type present.
 6. **Emotional Arc Synthesis** (REQUIRED) — using the 4-register framework (Section 4), synthesize across all auditor reports to produce: (a) a score for each register (SURPRISE, DELIGHT, AUTHORITY, EARNED CLOSURE) on a 1-10 scale, (b) the overall arc shape ("building-peaking-resolving" vs "flat" vs "front-loaded"), and (c) the single strongest and weakest emotional register with evidence citations from auditor reports.
-7. **Ship Decision** (SHIP / SHIP WITH FIXES / REFINE / REBUILD)
+7. **Ship Decision** (RELEASE / POLISH / IMPROVE / RETHINK)
+8. **Improvement Vector** (REQUIRED) — Based on all auditor reports, identify the single change (not a fix — a creative improvement) that would most elevate this page. Frame as aspiration, not defect: "The page would come alive if..." or "The strongest unrealized potential is..." This is distinct from the fix list. Fixes address defects; the improvement vector addresses POTENTIAL.
 
-> **Note:** Items 5 and 6 were previously implicit in weaver output but are now REQUIRED sections. The Weaver's verdict is INCOMPLETE if either is missing.
+> **Note:** Items 5, 6, and 8 were previously implicit or absent in weaver output but are now REQUIRED sections. The Weaver's verdict is INCOMPLETE if any is missing.
 
 ---
 
@@ -165,12 +174,7 @@ When classifying fixes in the Top-5 list, the Weaver uses these diagnostic categ
 
 ### 4.1 Council Ruling: PA Auditor Is Primary
 
-> Source: council-verdict.md, CF-02 — "PA auditor is the primary check; Compositional Critic is an experimental alternative pending validation"
-> Source: council-verdict.md, Contradiction C — "PA auditor assesses emotional arc post-build (not gate-runner, not Compositional Critic)"
-> Source: ITEM 037 (extract-d21-d25.md, VA L1664) — "PA auditor can assess emotional arc AFTER build"
-> Source: ITEM 032 (extract-d21-d25.md, VA L1656-1657) — "Emotional arc is EMERGENT, not SPECIFIED. Cannot be gate-checked"
-
-**CRITICAL:** The Compositional Critic was previously listed as the "primary emotional arc check" (ITEM 038, extract-d21-d25.md, VA L1665). Per council ruling CF-02, this is OVERRIDDEN. The Compositional Critic has zero evidence (N=0) and is classified as EXPERIMENTAL. The PA auditor is the primary quality check.
+> Sources: CF-02, Contradiction C, ITEM 032/037 — PA auditor is the PRIMARY emotional arc check. Compositional Critic OVERRIDDEN (N=0, EXPERIMENTAL). Emotional arc is EMERGENT, not SPECIFIED — cannot be gate-checked.
 
 ### 4.2 Four Emotional Registers
 
@@ -179,48 +183,24 @@ When classifying fixes in the Top-5 list, the Weaver uses these diagnostic categ
 Emotional arc has 4 registers, each with CSS signatures and assessment criteria:
 
 **1. SURPRISE** — moment page does something unexpected
-> Source: ITEM 002 (extract-d21-d25.md, VA L1579-1580)
 - CSS signatures: scale break (headline 2.5x body), color inversion (dark zone mid-page), layout rupture (grid after 4+ single-column viewports), structural inversion (border-RIGHT in border-LEFT page)
-> Source: ITEM 003 through ITEM 006 (extract-d21-d25.md, VA L1583-1586)
 - Expected: 1-2 moments only, in SECOND HALF (D-04)
-> Source: ITEM 029 (extract-d21-d25.md, VA L1644-1645)
-- Gas Town: ZERO surprise moments
-> Source: ITEM 007 (extract-d21-d25.md, VA L1588-1590)
 - Disposition link: D-04 'Second-half moment' creates CONDITIONS for surprise (not guaranteed)
-> Source: ITEM 034 (extract-d21-d25.md, VA L1660)
 
 **2. DELIGHT** — small unexpected refinements that reward attention
-> Source: ITEM 009 (extract-d21-d25.md, VA L1597-1598)
 - CSS signatures: hover states revealing hidden content, typographic micro-refinement (tabular-nums, text-indent), zone-specific ::selection colors, print-specific styling, first/last child edge treatments
-> Source: ITEM 010 through ITEM 014 (extract-d21-d25.md, VA L1601-1605)
 - Expected: distributed throughout, more in high-density zones
-> Source: ITEM 030 (extract-d21-d25.md, VA L1647-1648)
-- Gas Town: 2/10 delight score, missing 6 techniques
-> Source: ITEM 015 (extract-d21-d25.md, VA L1607-1609)
 - Disposition link: D-07 'Edge intentionality' creates conditions for delight
-> Source: ITEM 036 (extract-d21-d25.md, VA L1662)
 
 **3. AUTHORITY** — page knows what it is, every element expresses certainty
-> Source: ITEM 016 (extract-d21-d25.md, VA L1611-1612)
 - CSS signatures: consistent border-weight hierarchy (4px ALWAYS = primary), restraint (knowing what NOT to use), dense purposeful header (dark bg, tight spacing), zero decorative elements
-> Source: ITEM 017 through ITEM 020 (extract-d21-d25.md, VA L1615-1618)
 - Expected: should be HIGH throughout (soul ensures)
-> Source: ITEM 028 (extract-d21-d25.md, VA L1641-1642)
-- Gas Town: 7/10 authority, loses for uniform component styling
-> Source: ITEM 021 (extract-d21-d25.md, VA L1620-1622)
 - Disposition link: D-03 'Would you sign this?' creates conditions for authority
-> Source: ITEM 033 (extract-d21-d25.md, VA L1659)
 
 **4. EARNED CLOSURE** — ending feels earned by the journey
-> Source: ITEM 022 (extract-d21-d25.md, VA L1624-1625)
 - CSS signatures: footer echoes header (bookending), density arc resolves (Z4 releases what Z3 compressed), final drop cap or typographic moment, breathing space before footer (80-120px gap)
-> Source: ITEM 023 through ITEM 026 (extract-d21-d25.md, VA L1628-1631)
 - Expected: only in final 2-3 viewports, must be EARNED
-> Source: ITEM 031 (extract-d21-d25.md, VA L1650-1651)
-- Gas Town: 5/10 closure, Z4 too similar to Z2, no final moment
-> Source: ITEM 027 (extract-d21-d25.md, VA L1633-1635)
 - Disposition link: D-05 'Scroll as reader' creates conditions for closure
-> Source: ITEM 035 (extract-d21-d25.md, VA L1661)
 
 ### 4.3 How PA Questions Map to Emotional Registers
 
@@ -263,26 +243,49 @@ would improve the weakest register — if so, it ranks higher.
 
 ## 5. SHIP DECISION AND FEEDBACK LOOP
 
+### 5.0 Rendering vs Composition Failure Classification
+
+When scoring PA-05 and issuing verdict, distinguish:
+
+**Rendering gaps** (IMPROVE can address):
+- Contrast/visibility issues (wrong opacity, DPR artifacts)
+- Missing interactive states (no hovers, no focus indicators)
+- Spacing anomalies (stacked margins, excessive gaps)
+- Typography sizing (too small footer text, inconsistent weights)
+- Color calibration (backgrounds too similar, insufficient delta)
+
+**Composition gaps** (RETHINK needed):
+- No discernible zone structure (content reads as single column blob)
+- Zero mechanism deployment (flat HTML with no spatial/temporal devices)
+- Metaphor absence when content demands metaphor
+- Fundamental content misrepresentation (wrong emphasis, missing sections)
+- Soul violations that require HTML restructuring (wrong container, decorative elements)
+
+If ALL flagged issues are rendering gaps: verdict is IMPROVE (standard path). If ANY issue is a composition gap: verdict is RETHINK.
+IMPROVE is the pipeline's highest-value phase: +1.0 to +1.5 PA-05 per pass. The IMPROVE pass consistently produces larger quality jumps than any other single intervention.
+
 ### 5.1 Ship Thresholds
 
 > Source: ITEM 77 (extract-d01-d03.md, VA L201-204)
 
 | Condition | Decision |
 |-----------|----------|
-| PA-05 >= 3.5/4 AND zero soul violations | **SHIP** |
-| PA-05 >= 3/4 AND all identity gates PASS AND <= 3 MECHANICAL fixes needed | **SHIP WITH FIXES** (see 5.1.1) |
-| PA-05 2.5-3.5 | **REFINE** (see 5.2) |
-| PA-05 < 2.5 | **REBUILD** (see 5.3) |
+| PA-05 >= 3.5/4 AND zero soul violations AND (cycle >= 1 OR builder_ideas == 0) | **RELEASE** |
+| PA-05 >= 3/4 AND all identity gates PASS AND <= 3 MECHANICAL fixes needed | **POLISH** (see 5.1.1) |
+| Cycle 0 complete (standard two-cycle default) OR PA-05 2.5-3.5 | **IMPROVE** (see 5.2) |
+| PA-05 < 2.5 | **RETHINK** (see 5.3) |
 
-#### 5.1.1 SHIP WITH FIXES Protocol
+> Note: You cannot RELEASE from Cycle 0 if the builder reported improvement ideas — those ideas are evidence that the page has more potential. IMPROVE is the standard path, not a failure signal.
 
-**SHIP WITH FIXES** is distinct from both SHIP and REFINE. It means: the page is compositionally sound and meets quality threshold, but has a small number of identifiable mechanical defects. Criteria:
+#### 5.1.1 POLISH Protocol
+
+**POLISH** is distinct from both RELEASE and IMPROVE. It means: the page is compositionally sound and meets quality threshold, but has a small number of identifiable mechanical defects. Criteria:
 - PA-05 >= 3/4 (COMPOSED or higher)
 - All identity gates (soul, prohibitions) PASS
 - <= 3 fixes needed, ALL classified as MECHANICAL (not STRUCTURAL or COMPOSITIONAL)
 - Fixes are applied by the SAME builder (no fresh agent needed), then verified by a single spot-check auditor
 
-### 5.2 REFINE Protocol
+### 5.2 IMPROVE Protocol
 
 > Source: ITEM 78 (extract-d01-d03.md, VA L206-210) — "DIFFERENT Opus agent, reads conviction"
 
@@ -291,7 +294,7 @@ would improve the weakest register — if so, it ranks higher.
 - Refine agent NEVER sees gate scores or threshold numbers
 > Source: ITEM 050 (extract-d15-d17.md, VA L1259)
 
-### 5.3 REBUILD Protocol
+### 5.3 RETHINK Protocol
 
 > Source: ITEM 79 (extract-d01-d03.md, VA L212-215) — "FRESH builder in COMPOSING mode"
 
@@ -308,6 +311,22 @@ would improve the weakest register — if so, it ranks higher.
 PA verdict goes back to Phase 2 as CONTEXT in generative language. NOT: "SC-09 FAILED: stacked gap 210px exceeds 120px." YES: "The middle sags — energy dissipates by S5."
 
 > Source: ITEM 14, ITEM 15 (extract-d06-d08.md, VA L509-514)
+
+### 5.5 Finding Status Map (Iteration Cycles >= 2)
+
+For cycle >= 2, the Weaver MUST include a Finding Status Map in the diagnostic output:
+
+| Pass N-1 Finding | Status | Evidence |
+|------------------|--------|----------|
+| [finding text] | FIXED / IMPROVED / UNCHANGED / REGRESSION | [screenshot ref] |
+
+Status definitions: FIXED = no longer visible. IMPROVED = visible but reduced severity. UNCHANGED = same severity. REGRESSION = worse than previous pass.
+If ANY finding is REGRESSION: flag as BLOCKING and recommend HALT (compositional averaging risk).
+Enforced by GR-82 (RECOMMENDED). See gate-runner-core.js.
+
+### 5.6 Forward Assessment
+
+Do NOT predict post-fix PA-05 SCORES (numeric predictions anchor expectations). Instead, describe the PAGE'S TRAJECTORY: "The composition has strong bones — the metaphor is structural, transitions are varied, the density arc has shape. The unrealized potential is in [specific area]." Frame what the page COULD BECOME, not what score it might reach. Enforced by GR-81 (ADVISORY — no numeric predictions).
 
 ---
 
@@ -331,11 +350,11 @@ The Weaver should watch for these anti-patterns in auditor reports:
 | AP-12 | RESTRAINT EROSION | Additions erode deliberate absences | PA-64 |
 | AP-13 | BOOKEND ASYMMETRY | Header/footer echo breaks in revision | PA-13, PA-24 |
 
-### 6.2 Revision Degradation Warnings
+### 6.2 Improvement Pass Awareness (Watch for Unintended Side Effects)
 
 > Source: ITEM 028 (extract-d15-d17.md, VA L1199) — "REVISION QUALITY — WHY FIX CYCLES DEGRADE COMPOSITION"
 
-PA auditors should be aware that fix cycles can DEGRADE composition. Watch for:
+IMPROVE passes deepen composition, but changes can have side effects. Watch for:
 
 | Warning | What Degrades | Source |
 |---------|--------------|--------|
