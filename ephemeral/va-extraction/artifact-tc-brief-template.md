@@ -42,7 +42,7 @@ Text breathes at 1.7 line-height. Prose never exceeds 70 characters per line. Th
 
 **Template text (adapt calibration values from artifact-identity-perception.md "2.3 Perception Calibration Table"):**
 
-Adjacent backgrounds differ by at least 15 RGB points. Below that, the human eye cannot distinguish them. 15 is the floor, not the target. Calibration: 15 = subtle, 25 = confident, 50 = dramatic. Use the full range.
+Adjacent backgrounds differ by at least 15 RGB points. Below that, the human eye cannot distinguish them. 15 is the floor, not the target. Calibration: 15 = subtle (floor), 20 = minimum compositional (aim here), 25 = confident, 50 = dramatic. Use the full range.
 
 Letter-spacing below 0.025em is invisible. When applying letter-spacing, stay above 0.025em. Compositional range: 0.03-0.05em.
 
@@ -51,6 +51,10 @@ When padding-bottom + margin-bottom + padding-top between content blocks exceeds
 No single margin or padding value exceeds 96px. If a transition needs more separation, use a structural element, not more whitespace.
 
 Container width: 940-960px. Content beyond 960px loses the reader's eye.
+
+### Signal Declarations
+
+Place signal declarations as HTML comments in the first 20 lines of output. These declare which behavioral systems are active. Format: `<!-- SIGNAL-NAME: true/false -->`. At minimum, declare: `<!-- SCROLL-REVEALS: true -->` if any scroll-triggered animations exist, `<!-- HOVER-STATES: true -->` if hover interactions exist, `<!-- RESPONSIVE: true -->` if breakpoint-specific CSS exists.
 
 ---
 
@@ -89,7 +93,7 @@ This tier is the HEART of the brief. The Brief Assembler synthesizes this sectio
 
 ### Multi-Coherence (6 channels, boundary-by-boundary)
 
-{Describe the 6 coherence channels:}
+**The 6 coherence channels:**
 1. **Background color** -- zone-to-zone deltas using the full 15-50 RGB range (VALUES LOCKED above)
 2. **Typography** -- font-size, weight, letter-spacing shifts at boundaries
 3. **Spacing** -- padding and margin shifts encoding density changes
@@ -97,14 +101,15 @@ This tier is the HEART of the brief. The Brief Assembler synthesizes this sectio
 5. **Color accents** -- accent color or tint shifts signaling zone character
 6. **Components** -- component density and variant shifts per zone
 
-{For each zone boundary from the Content Map, describe what shifts. Each boundary should shift at least 3 of 6 channels, average 4+.}
-
-{Specify at least 3 distinct transition types:}
-- light (1px border + 48px gap = legato)
-- medium (3px border + 80px gap = breathing rest)
-- heavy (colored background + text = full stop)
-
-{MAP transition types to specific zone boundaries from the Content Map. The builder must receive WHICH transition at WHICH boundary, not just the vocabulary of transition types. Example: "Z1->Z2 = light (similar density), Z2->Z3 = heavy (entering peak density), Z3->Z4 = medium (releasing from peak)." This boundary-specific mapping is what distinguishes COMPOSED from APPLIED mode briefs.}
+**Boundary requirements (numbered):**
+1. At each zone boundary, deploy >= 3 distinct channels (background, typography, spacing, border, accent, component type). A boundary with fewer than 3 channels is a wall with a window, not a doorway.
+2. Average across all boundaries: >= 4 channels per boundary.
+3. At edge-zone boundaries (first and last zone transitions), deploy >= 3 channels. Edge zones receive equal investment to dramatic boundaries.
+4. Specify >= 3 distinct transition types and MAP each to a specific boundary:
+   - light (1px border + 48px gap = legato)
+   - medium (3px border + 80px gap = breathing rest)
+   - heavy (colored background + text = full stop)
+5. Every boundary mapping is EXPLICIT: "Z1->Z2 = light (similar density), Z2->Z3 = heavy (entering peak density), Z3->Z4 = medium (releasing from peak)." The builder receives WHICH transition at WHICH boundary.
 
 ### Structural Metaphor: {Metaphor Name from Content Map}
 
@@ -190,6 +195,19 @@ SUFFICIENT: "D-04: Create 1-2 second-half moments. Techniques for this content: 
 ### D-07: Edge Intentionality [EXPERIMENTAL]
 **PURPOSE:** Every edge is a decision. Techniques: hover states, typographic micro-refinement (tabular-nums, text-indent), zone-specific ::selection colors, first/last child edge treatments. Distribute more in high-density zones.
 
+### Hover Behavior Vocabulary (MANDATORY — 100% loss rate in prior builds)
+
+Interactive elements reveal depth on hover. Deploy >= 3 hover interactions across the page. Cards lift (`transform: translateY(-2px); border-color: var(--color-accent);`). Links surface underlines (`text-decoration-color` transition from transparent). Expandable sections hint at content (`background` shifts toward zone accent on hover). Every hover uses `transition: 0.2s ease`.
+
+```css
+/* Card hover — lift + accent border */
+.card:hover { transform: translateY(-2px); border-color: var(--color-accent); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+/* Link hover — underline reveal */
+a:hover { text-decoration: underline; text-decoration-color: currentColor; }
+/* Expandable hover — background hint */
+details summary:hover { background: color-mix(in srgb, var(--zone-bg) 85%, var(--color-accent)); }
+```
+
 ### D-08: The Skeleton Test [EXPERIMENTAL]
 **PURPOSE:** Remove all content mentally. Does the skeleton (spacing, borders, backgrounds, typography framework) still have shape? If it looks like a uniform stack of boxes, it is applied mode. If it has rhythm and proportion, it is composed mode.
 
@@ -198,26 +216,20 @@ SUFFICIENT: "D-04: Create 1-2 second-half moments. Techniques for this content: 
 
 ---
 
-## CONTENT MAP APPENDIX (~30-50 lines)
+## CONTENT MAP APPENDIX (~15 lines, compressed)
 
-{Append the full Content Map from Phase 0, including:}
-- Zone architecture table
-- Content tensions
-- Metaphor seeds with recommendation
-- Density arc
-- Reader profile
+{Append a COMPRESSED Content Map from Phase 0. Include ONLY: zone architecture table (zone ID | name | density | register), recommended metaphor seed (1 line), density arc ASCII (3 lines), reader profile (1 line). Omit content tensions and alternate metaphor seeds — those are already synthesized into Tier 3.}
 
 ---
 
 ## ASSEMBLY RULES
 
-1. Total brief should be ~100-165 lines. Err toward more compositional detail, not less.
+1. Total brief: ~100-165 lines. Err toward more compositional detail, not less.
 2. PRESERVE RECIPE FORMAT: Use verbs like "Build," "Create," "Derive," "Map" -- NOT "Verify," "Fail if," "Must be."
 3. Tier 1 is VERBATIM from the template text above (the 10 soul world-descriptions).
 4. Tier 2 is VERBATIM from the template text above (adapt calibration only if thresholds change).
 5. Tier 3 is SYNTHESIZED from the Content Map + reference artifacts. This requires creative judgment.
 6. Tier 4 is ADAPTED per content -- each D-01 through D-09 gets 1-2 content-specific observations.
-7. Content Map Appendix is APPENDED verbatim from Phase 0 output.
+7. Content Map Appendix is COMPRESSED (zone table + metaphor + arc + reader only).
 8. Do NOT include gate thresholds in pass/fail format.
-9. Do NOT include count-gates (">=3 channels").
-10. For COMPOSED mode: multi-coherence boundary descriptions are ESSENTIAL.
+9. For COMPOSED mode: multi-coherence boundary descriptions are ESSENTIAL.
