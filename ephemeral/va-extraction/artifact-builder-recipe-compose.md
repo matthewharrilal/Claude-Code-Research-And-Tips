@@ -1,30 +1,37 @@
-# Builder Recipe: Scaffolding + Disposition (Layers 3-4) — REDIRECT
+# Builder Recipe: COMPOSE PASS (Pass A of 2)
 Date: 2026-02-26
-Status: ARCHIVED — replaced by two-pass split files
-Architecture: TWO-PASS (Pass A: Compose, Pass B: Enrich)
+Status: AUTHORITATIVE (conforms to council-verdict.md)
+Pass: A (COMPOSE — structural/compositional dispositions)
+Dispositions: D-01, D-02, D-03, D-04, D-05, D-06, D-09 (7 of 9)
+Items covered: 70 SCAFFOLDING (Layer 3) + 76 DISPOSITION (Layer 4) = 146 items total
+Format: RECIPE (sequenced steps with Read/Select/Deploy/Assess verbs)
+Evidence status for D-01 through D-09: EXPERIMENTAL (council verdict Part 5, item 9)
+Framing: PURPOSE + VOCABULARY (council verdict: "activation" RETIRED)
 
 ---
 
-## This file has been split into two operational files:
+## How to Use This Document
 
-1. **`artifact-builder-recipe-compose.md`** — Pass A (COMPOSE): D-01 through D-06, D-09. Structural/compositional dispositions. Full Phases 1-6 + partial Phase 5 self-eval.
-2. **`artifact-builder-recipe-enrich.md`** — Pass B (ENRICH): D-07 (Edge Intentionality) + D-08 (Skeleton Test) + Accessibility + Full self-evaluation. ADD-ONLY constraint.
+This is **Pass A of a two-pass build.** You produce the compositional skeleton. A separate Pass B agent will add enrichment (hover states, accessibility, micro-refinements). Do NOT attempt D-07 or D-08.
 
-**Orchestrator:** Route the Compose Builder to `artifact-builder-recipe-compose.md`. Route the Enrich Builder to `artifact-builder-recipe-enrich.md`.
+**What Pass A produces:**
+- Complete HTML with all zones, transitions, backgrounds, typography hierarchy
+- Layout grids, density arc, surprise moments, quiet zones
+- 7 of 9 dispositions (D-01 through D-06, D-09)
+- Conviction statement: `<!-- CONVICTION: ... -->` (3 sentences)
+- RESIDUAL artifact: `<!-- RESIDUAL: ... -->`
 
-**IMPROVE:** IMPROVE targets Pass A only. After IMPROVE Compose completes, re-run Pass B on the new HTML.
+**What Pass A does NOT produce (Pass B handles these):**
+- Hover states, ::selection colors, print styles (D-07)
+- Skeleton test assessment (D-08)
+- Accessibility (skip link, ARIA, focus-visible, contrast)
+- Full experiential self-evaluation (Steps 5.0-5.2, 5.4)
 
----
+This is a **sequenced recipe**, not a checklist. Work through it in order. Each phase builds on the previous one. You have **80% creative authority** within identity constraints — this recipe provides PURPOSE (why) and VOCABULARY (what's available), and you decide HOW to combine them to serve the page.
 
-## Reference: Original content preserved below
+> **Mode note:** This recipe serves both COMPOSED and APPLIED modes. The Execution Brief specifies your mode. COMPOSED sections are marked. If your brief says APPLIED: follow the APPLIED alternatives where noted; skip metaphor-specific steps; name properties by position (`--bg-z1`) not concept. APPLIED mode quality target: PA-05 2.5-3.0 (MIDDLE tier). COMPOSED mode quality target: PA-05 3.0+ (CEILING/FLAGSHIP).
 
-The content below is the original recipe with two-pass annotations applied. It is preserved for reference and audit trail purposes. The operational files above are the authoritative versions.
-
----
-
-# ═══════════════════════════════════════════════════════════
-# PASS A: COMPOSE (D-01 through D-06, D-09)
-# ═══════════════════════════════════════════════════════════
+Per council verdict (CF-01): this recipe is part of ~3,600 total builder input lines (including reference files shared with v2). The improvement is FORMAT (recipe vs checklist) and STRUCTURE (layered constraint architecture), not volume reduction.
 
 ---
 
@@ -107,7 +114,7 @@ Choose how background colors differentiate your page's zones. The backgrounds sh
 - Backgrounds that differ by <15 RGB points are invisible to the human eye
 
 **Targets (from Gas Town retrospective — prevents the dominant defect):**
-- 20 RGB delta = FLOOR for adjacent zones (was 15 — too close to invisible)
+- 20 RGB delta = BUILDER MINIMUM for adjacent zones (gate floor is 15, but 15-19 feels flat)
 - 25 RGB delta = COMPOSITIONAL TARGET (aim for this at 3+ boundaries)
 - 50+ RGB delta = DRAMATIC (1-2 boundaries per page)
 - Never use #FFFFFF for zone backgrounds — lightest acceptable: #FAFAF8
@@ -125,6 +132,8 @@ Choose how typography varies across zones and content types.
 
 Derive a governing metaphor from the content. Name your CSS custom properties by CONCEPT, not by position.
 
+> **APPLIED MODE:** Skip metaphor derivation. Name CSS custom properties by position (`--bg-z1`, `--bg-z2`, `--text-primary`). This is correct for APPLIED mode — position-naming signals that mechanisms solve LOCAL problems, not a governing concept. Proceed to Step 2.4.
+
 **COMPOSED mode indicator:** `--dispatch-open`, `--dispatch-tactical` (named by concept)
 **APPLIED mode indicator:** `--bg-z1`, `--bg-z2` (named by position — avoid this)
 
@@ -135,6 +144,8 @@ Concept-based names PREDICT other CSS properties — if your naming scheme carri
 ### Step 2.4: Select callout variant semantics
 
 Decide how callouts adapt to zone context. In composed mode, callouts should modulate per zone:
+
+> **APPLIED MODE:** Style callouts uniformly across all zones. Consistent component appearance is a FEATURE of APPLIED mode, not a defect. Use one padding value, one border-weight, one background tint for all callouts. Proceed to Step 2.5.
 
 **Reference values for zone-adapted callouts:**
 - Zone 1 (opening): padding 20px 24px (generous)
@@ -197,6 +208,22 @@ Before building, review all selections together. Do they serve a single governin
 If your selections feel like isolated decisions rather than aspects of one idea, revisit the structural metaphor (Step 2.3) and let it unify them.
 
 **Creative check:** Before proceeding to Phase 3, pause. Are you EXCITED about building this page? Can you see the finished product in your mind? If the selections feel like compliance rather than creation, revisit the structural metaphor (Step 2.3). The metaphor should make you want to build, not just make you able to build.
+
+### Disposition Forward-Reference (Read Now, Deploy in Phase 4)
+
+These 7 dispositions shape your building. Internalize them NOW — they guide the choices you make in Phase 3 and the assessment you perform in Phase 4:
+
+| ID | One-Sentence Purpose | Affects Phase 3 Decisions | APPLIED Mode |
+|----|---------------------|--------------------------|--------------|
+| D-01 | CSS should respond to each section's character (NARRATIVE/REFERENCE/CODE) | Zone typography, density, layout type | Apply as written |
+| D-02 | Zone transitions should feel like entering a different room | Background deltas, boundary channel shifts | SUBTLE (15-25 RGB) |
+| D-03 | Build as if you will sign this page — express certainty | Restraint in mechanism selection, border hierarchy | Apply as written |
+| D-04 | Create a second-half surprise moment that breaks the pattern | 1-2 scale/color/layout ruptures, placed in scroll bottom 50% | **SKIP** |
+| D-05 | The scroll should feel like a journey with pacing | Section heights, visual density variation | Apply as written |
+| D-06 | Whitespace is deliberate shape, not default | Vary padding between zones, compress/breathe intentionally | Apply as written |
+| D-09 | Designate one mid-page zone as deliberately plainer | Choose quiet zone during Phase 2 zone selection | Optional |
+
+**Full deployment instructions are in Phase 4.** This table ensures you CONSIDER these purposes while making creative decisions, even if you deploy them later.
 
 ---
 
@@ -350,6 +377,11 @@ As you build, embed `<!-- INTENT ... -->` HTML comments that explain WHY you mad
 
 **Self-test:** Before finishing, count your INTENT comments. If you have fewer than 15, you have under-narrated (major decisions are unrecorded). If you have more than 25, you have over-narrated (narration is consuming creative attention).
 
+**IMPROVE narration:** If this is an IMPROVE pass, read the existing INTENT comments before making changes. When you modify a decision, UPDATE the INTENT comment (do not delete the original — append your reasoning):
+```html
+<!-- INTENT [D-02] Z3 body text | [CYCLE-0] rgba(254,249,245,0.9) for atmospheric depth | [IMPROVE] changed to #FEF9F5 full opacity — PA auditor flagged dark-zone fatigue, legibility > atmosphere -->
+```
+
 ### Step 3.5: Assess scaffolding
 
 After deploying the scaffolding, take a screenshot and assess:
@@ -362,11 +394,18 @@ After deploying the scaffolding, take a screenshot and assess:
 
 ## PHASE 4: DEPLOY DISPOSITIONAL INSTRUCTIONS (D-01 through D-09)
 
+> **NOTE:** You previewed these dispositions in the Phase 2 forward-reference table.
+> Now APPLY them deliberately. For each disposition below, assess whether your
+> Phase 3 building already embodies it (often it will if you internalized the table)
+> or whether you need to adjust your work.
+
 > **EVIDENCE STATUS: EXPERIMENTAL** (council verdict Part 5, item 9)
 > These 9 instructions are DESIGN INTENTIONS that create conditions for quality. They do not guarantee outcomes. Per council verdict: "D-04 creates conditions for surprise (not guaranteed)."
 > Include in smoke test. Evaluate via experiment #20.
 
 The purpose of these instructions is to shift your building mode from APPLIED (each mechanism solves a local problem) to COMPOSED (each mechanism serves a governing logic).
+
+> **APPLIED MODE:** Skip D-04 (Second-Half Moment) entirely — consistency IS the value for reference/catalog content. For D-02 (Room Perception), use SUBTLE zone differentiation (15-25 RGB) rather than dramatic (25-50 RGB). For D-09 (Quiet Zone), this is optional — uniform density across zones is acceptable for APPLIED mode. Apply D-01 (Content-Register Reading), D-03 (Signing Frame), D-05 (Reader's Scroll), and D-06 (Negative Space) as written — these serve all modes.
 
 **Typographic spectacle requirement (from Gas Town retrospective):** At least 1 typographic moment that exceeds normal hierarchy — examples: 28-32px pull quote, 36-48px display numerals, small-caps accent section, oversized drop cap. Zone-inflect H2s: at least 1 differentiating property (size, weight, decoration, color) between H2 treatments in different zones. Gas Town had identical H2s across 5 zones — this was the typography gap preventing DESIGNED.
 
@@ -424,6 +463,8 @@ Gas Town scored 7/10 authority — lost for uniform component styling.
 Gas Town: ZERO surprise moments. Consistency as default = flatline.
 
 D-04 + D-06 together create conditions for surprise.
+
+> **APPLIED MODE:** SKIP D-04. Reference and catalog content should be predictable. A "surprise" in a documentation page is a failure of user expectations, not a design achievement. Your quality comes from CONSISTENCY and CLARITY, not compositional drama.
 
 ### D-05: The Reader's Scroll [EXPERIMENTAL]
 
@@ -522,6 +563,8 @@ Is the page in COMPOSED mode or APPLIED mode? Check:
 - Mode determinant 3: Are layout choices driven by metaphor or by content-type alone?
 - Mode determinant 5: Can you articulate the governing logic in one sentence?
 
+> **APPLIED MODE expected indicators:** Position-based custom property names, uniform component styling, no governing metaphor (articulate "well-organized reference" instead), layout driven by content-type not concept. These are CORRECT outcomes for APPLIED mode, not defects.
+
 ### Step 5.7: Assess Pass A output targets
 
 Your output should be:
@@ -556,10 +599,6 @@ Place as an HTML comment AFTER your self-evaluation block:
 This is not a confession of failure. This is professional craft: the gap between "what I built" and "what I see it could become." CONVICTION captures what went right. IMPROVEMENTS captures what comes next. A different Opus builder will read these ideas during the IMPROVE pass and use them as a starting point for deepening your work.
 
 There is no penalty for having ideas. Zero ideas triggers single-pass RELEASE evaluation; four or more ideas confirms the standard IMPROVE path.
-
-> Source: Molly Panopticon autopsy (2026-02-25) — builder had 21 improvement ideas
-> but never surfaced them. The pipeline never asked. The capability existed; the
-> prompt was missing.
 
 ---
 
@@ -613,7 +652,7 @@ The following amendments from the council verdict affect this document:
 
 5. **Value tables are "structured reference material"** (not "positive scaffolding" or "activation"). The creative authority is in HOW the builder combines these values to serve the page's governing logic. [Council verdict, Contradiction A resolution]
 
-6. **Single-pass = DEFAULT.** 3-pass items tagged EXPERIMENTAL/BLOCKED-UNTIL-EXPERIMENT-21. [Council verdict, Contradiction B]
+6. **Two-pass = DEFAULT (v5).** Pass A (Compose: D-01..D-06, D-09) + Pass B (Enrich: D-07, D-08, accessibility, self-eval). Replaces single-pass default from council verdict Contradiction B. 3-pass items remain EXPERIMENTAL/BLOCKED-UNTIL-EXPERIMENT-21.
 
 7. **Perception thresholds delivered as CALIBRATION** (not pass/fail): "Backgrounds must differ by at least 15 RGB points to be perceptible" rather than "FAIL if adjacent zone background delta < 15 RGB." [Council verdict, Pattern 1 resolution]
 
