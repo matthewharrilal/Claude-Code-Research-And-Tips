@@ -21,7 +21,7 @@ THIS FILE IS AUTO-LOADED ON DIRECTORY ENTRY
 ### I'm here to BUILD content/pages
 **→ Run:** `/build-page <content-file-path>` (the ONLY way to build pages)
 **→ What it does:** /build-page is a thin launcher that points to the Pipeline v3 execution manifest at `ephemeral/va-extraction/MANIFEST.md`. The manifest + 9 artifact files contain ALL pipeline intelligence (agent prompts, gate specs, PA assignments, value tables, worked examples). Follow the manifest's 11-step quickstart procedure.
-**→ Key files:** `ephemeral/va-extraction/MANIFEST.md` (~1,160 lines) + 9 artifact files + gate-runner split files + execution tracker in same directory
+**→ Key files:** `ephemeral/va-extraction/MANIFEST.md` (~1,300 lines) + 9 artifact files + gate-runner split files + execution tracker in same directory
 **→ ALWAYS loaded automatically:** `compositional-core/identity/prohibitions.md` + `compositional-core/vocabulary/tokens.css`
 
 ### I'm here to VALIDATE/AUDIT
@@ -330,10 +330,10 @@ validated-explorations/
 ```
 
 **Architecture (v3.1 — Wave 3):** /build-page is a thin launcher. ALL pipeline intelligence lives in:
-- **Manifest:** `ephemeral/va-extraction/MANIFEST.md` (~1,160 lines — 12-step quickstart with execution tracker, agent roster, agent prompt templates, glossary, file registry)
+- **Manifest:** `ephemeral/va-extraction/MANIFEST.md` (~1,300 lines — 12-step quickstart with execution tracker, agent roster, agent prompt templates, glossary, file registry)
 - **9 Artifacts:** `ephemeral/va-extraction/artifact-*.md` (identity, recipe, gates, PA protocol, routing, orchestrator, TC brief template, worked examples, value tables)
-- **Gate runner (split):** `gate-runner-core.js` (1,436 lines executable JS) + `gate-runner-spec.md` + `gate-runner-preconditions.md` + `gate-runner-provenance.md` + `gate-manifest.json` (37 gates: 18 REQUIRED + 8 RECOMMENDED + 5 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF)
-- **PA protocol (split):** `pa-questions.md` (412 lines) + `pa-deployment.md` (237 lines) + `pa-weaver.md` (376 lines) + `pa-guardrails.md` (151 lines) + `pa-manifest.md` (89 lines)
+- **Gate runner (split):** `gate-runner-core.js` (~2,270 lines executable JS) + `gate-runner-spec.md` + `gate-runner-preconditions.md` + `gate-runner-provenance.md` + `gate-manifest.json` (54 gates: 21 REQUIRED + 13 RECOMMENDED + 10 ADVISORY + 2 DIAGNOSTIC + 7 BV + 1 UTILITY)
+- **PA protocol (split):** `pa-questions.md` (~431 lines) + `pa-deployment.md` (~376 lines) + `pa-weaver.md` (~466 lines) + `pa-guardrails.md` (~113 lines) + `pa-guardrails-weaver.md` (~59 lines) + `pa-manifest.md` (89 lines)
 - **Per-build tracking:** `EXECUTION-TRACKER-TEMPLATE.md` (copy per run) + `experiment-protocol.md` (GR-36–GR-39)
 - **Override:** `ephemeral/va-extraction/council-verdict.md` (575 lines)
 
@@ -396,7 +396,7 @@ Phase-gated access is enforced by the orchestrator:
 - Phase 4: Mechanisms extracted (grammar/mechanism-catalog.md)
 - Phase 5: Optional case study comparison (divergence check)
 - Phase 6: Opus builder implements with TC brief + conventions brief
-- Phase 7: Full verification (22 gates + 65-question PA)
+- Phase 7: Full verification (54 gates + 69-question PA)
 
 **Manual builder invocation (if /build-page unavailable):**
 - Follow compositional-core/CLAUDE.md Flagship Build Workflow
