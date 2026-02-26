@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 /**
+ * ⚠️ STALE — DO NOT EXECUTE ⚠️
+ * Gate counts in this script (47) are outdated. Current canonical count: 54 gates (see gate-manifest.json).
+ * Tier breakdowns and REQUIRED_GATES arrays are also stale. Running this will produce false failures.
+ * Written before Pipeline v4 convergence reframe (2026-02-25).
+ *
  * Pipeline v3 — Structural Integrity Verifier (ENFORCED Layer)
  *
  * Programmatic verification of ~200 binary checks across all pipeline artifacts.
@@ -267,29 +272,30 @@ function checkGateCountConsistency() {
   const skill = readFile(SKILL_PATH);
   const tracker = readFile(path.join(BASE, 'EXECUTION-TRACKER-TEMPLATE.md'));
 
-  // Total gate count: 42
+  // Total gate count: 47 (canonical source: gate-manifest.json)
+  // 20 REQUIRED + 10 RECOMMENDED + 9 ADVISORY + 2 DIAGNOSTIC + 5 BV + 1 UTILITY
   if (manifest) {
-    check('Gate Counts', 'GC-01', 'MANIFEST.md: "42 programmatic gate checks"', hasString(manifest, '42 programmatic gate checks'));
-    check('Gate Counts', 'GC-02', 'MANIFEST.md: "42 gate-runner gates" in layers', hasString(manifest, '42 gate-runner gates'));
+    check('Gate Counts', 'GC-01', 'MANIFEST.md: "47 programmatic gate checks"', hasString(manifest, '47 programmatic gate checks'));
+    check('Gate Counts', 'GC-02', 'MANIFEST.md: "47 gate-runner gates" in layers', hasString(manifest, '47 gate-runner gates'));
     check('Gate Counts', 'GC-03', 'MANIFEST.md: "20 REQUIRED" in totals', hasString(manifest, '20 REQUIRED'));
-    check('Gate Counts', 'GC-04', 'MANIFEST.md: "9 RECOMMENDED" in totals', hasString(manifest, '9 RECOMMENDED'));
-    check('Gate Counts', 'GC-05', 'MANIFEST.md: "42 gates" in Appendix B', hasPattern(manifest, '42 gates.*Playwright'));
+    check('Gate Counts', 'GC-04', 'MANIFEST.md: "10 RECOMMENDED" in totals', hasString(manifest, '10 RECOMMENDED'));
+    check('Gate Counts', 'GC-05', 'MANIFEST.md: "47 gates" in Appendix B', hasPattern(manifest, '47 gates'));
     check('Gate Counts', 'GC-06', 'MANIFEST.md: "9 functions" for gate-runner-core.js', hasString(manifest, '9 functions'));
-    check('Gate Counts', 'GC-07', 'MANIFEST.md: "All 42 gates" in verification', hasString(manifest, 'All 42 gates'));
-    check('Gate Counts', 'GC-08', 'MANIFEST.md: "42-gate inventory" in Phase 3A', hasString(manifest, '42-gate inventory'));
+    check('Gate Counts', 'GC-07', 'MANIFEST.md: "47 gates" in verification', hasString(manifest, 'All 47 gates'));
+    check('Gate Counts', 'GC-08', 'MANIFEST.md: references gate-manifest.json as canonical', hasString(manifest, 'gate-manifest.json'));
   }
 
   if (gateCore) {
     check('Gate Counts', 'GC-09', 'gate-runner-core.js: REQUIRED (20) in header', hasPattern(gateCore, 'REQUIRED.*20|20.*REQUIRED'));
-    check('Gate Counts', 'GC-10', 'gate-runner-core.js: RECOMMENDED (9) in header', hasPattern(gateCore, 'RECOMMENDED.*9|9.*RECOMMENDED'));
-    check('Gate Counts', 'GC-11', 'gate-runner-core.js: ADVISORY (7) in header', hasPattern(gateCore, 'ADVISORY.*7|7.*ADVISORY'));
+    check('Gate Counts', 'GC-10', 'gate-runner-core.js: RECOMMENDED (10) in header', hasPattern(gateCore, 'RECOMMENDED.*10|10.*RECOMMENDED'));
+    check('Gate Counts', 'GC-11', 'gate-runner-core.js: ADVISORY (9) in header', hasPattern(gateCore, 'ADVISORY.*9|9.*ADVISORY'));
     check('Gate Counts', 'GC-12', 'gate-runner-core.js: 9 execution steps in header', hasPattern(gateCore, '(9 functions|checkUsabilityPriority|checkGateResultIntegrity)'));
     check('Gate Counts', 'GC-13', 'gate-runner-core.js: GR-05b regex supports letter suffix', hasPattern(gateCore, 'GR-\\\\d\\{2\\}\\[a-z\\]\\?'));
   }
 
   if (gateSpec) {
     check('Gate Counts', 'GC-14', 'gate-runner-spec.md: "20 REQUIRED"', hasString(gateSpec, '20 REQUIRED'));
-    check('Gate Counts', 'GC-15', 'gate-runner-spec.md: "9 RECOMMENDED"', hasString(gateSpec, '9 RECOMMENDED'));
+    check('Gate Counts', 'GC-15', 'gate-runner-spec.md: "10 RECOMMENDED"', hasString(gateSpec, '10 RECOMMENDED'));
   }
 
   if (gateJson) {
@@ -298,18 +304,20 @@ function checkGateCountConsistency() {
       check('Gate Counts', 'GC-16', 'gate-manifest.json: valid JSON', true);
       const reqCount = json?.tiers?.required?.count;
       const recCount = json?.tiers?.recommended?.count;
+      const advCount = json?.tiers?.advisory?.count;
       check('Gate Counts', 'GC-17', 'gate-manifest.json: required.count = 20', reqCount === 20, `got ${reqCount}`);
-      check('Gate Counts', 'GC-18', 'gate-manifest.json: recommended.count = 9', recCount === 9, `got ${recCount}`);
+      check('Gate Counts', 'GC-18', 'gate-manifest.json: recommended.count = 10', recCount === 10, `got ${recCount}`);
+      check('Gate Counts', 'GC-18b', 'gate-manifest.json: advisory.count = 9', advCount === 9, `got ${advCount}`);
     } catch (e) {
       check('Gate Counts', 'GC-16', 'gate-manifest.json: valid JSON', false, e.message);
     }
   }
 
   if (skill) {
-    check('Gate Counts', 'GC-19', 'SKILL.md: "42 gates" present', hasPattern(skill, '42 gates'));
+    check('Gate Counts', 'GC-19', 'SKILL.md: "47 gates" present', hasPattern(skill, '47 gates'));
     check('Gate Counts', 'GC-20', 'SKILL.md: "9 functions" present', hasPattern(skill, '9.*functions'));
     check('Gate Counts', 'GC-21', 'SKILL.md: "20 REQUIRED" present', hasString(skill, '20 REQ'));
-    check('Gate Counts', 'GC-22', 'SKILL.md: "9 RECOMMENDED" present', hasString(skill, '9 REC'));
+    check('Gate Counts', 'GC-22', 'SKILL.md: "10 RECOMMENDED" present', hasString(skill, '10 REC'));
   }
 }
 

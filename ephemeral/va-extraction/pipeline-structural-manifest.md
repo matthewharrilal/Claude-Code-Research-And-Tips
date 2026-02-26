@@ -1,3 +1,7 @@
+# ⚠️ STALE — DO NOT USE FOR VERIFICATION ⚠️
+# Gate counts in this file (42) are outdated. Current canonical count: 54 gates (see gate-manifest.json).
+# Tier breakdowns are also stale. This file was written before Pipeline v4 convergence reframe.
+
 # Pipeline v3 — Structural Integrity Manifest
 
 > **Purpose:** Permanent structural health checks for every pipeline artifact. NOT a per-run tracker (that's EXECUTION-TRACKER-TEMPLATE.md). This file verifies that the pipeline's documentation is internally consistent, complete, and correctly cross-referenced. Run these checks after any pipeline surgery/enrichment.
@@ -312,7 +316,7 @@
 - [ ] Phase 2: SELECT YOUR PER-PAGE CREATIVE DECISIONS (Steps 2.1–2.9)
 - [ ] Phase 3: DEPLOY YOUR SCAFFOLDING (Steps 3.1–3.5)
 - [ ] Phase 4: DEPLOY DISPOSITIONAL INSTRUCTIONS (D-01 through D-09)
-- [ ] Phase 5: SELF-EVALUATE AND REFINE
+- [ ] Phase 5: SELF-EVALUATE AND IMPROVE
 - [ ] Phase 6: TEMPORAL COMPOSITION
 - [ ] Appendix A: Council Verdict Amendments
 - [ ] Appendix B: Complete Item Cross-Reference

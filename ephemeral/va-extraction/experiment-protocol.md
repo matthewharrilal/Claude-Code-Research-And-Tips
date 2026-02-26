@@ -8,7 +8,7 @@
 
 **Purpose:** Verify basic pipeline execution completes without crashes.
 **Criteria:** Pipeline runs end-to-end (Phases 0–3C) and produces a verdict. No ABORT.
-**Pass condition:** Pipeline completes. Verdict is SHIP, REFINE, or REBUILD (not ABORT/ERROR).
+**Pass condition:** Pipeline completes. Verdict is RELEASE, IMPROVE, or RETHINK (not ABORT/ERROR).
 **Cost:** ~80–105 minutes (1 full pipeline run).
 
 ## Stage 1: Q20 Experiment (GR-37)
@@ -45,7 +45,7 @@
 
 ## Execution Notes
 
-- Experiments run OUTSIDE normal pipeline execution — they are NOT part of a build.
+- Experiments run OUTSIDE normal pipeline execution — they are NOT part of a build. Note: Standard IMPROVE iteration (spawn different builder, re-audit) is NOT an experiment. It is a validated operational procedure with N=2 evidence (Yegge Gas Town +1.5 PA-05). Experiment #21 (3-pass Compositional Critic) is a DIFFERENT mechanism that remains experimental.
 - The orchestrator references this file when planning validation campaigns.
 - Results are recorded in the execution tracker under a dedicated experiment section.
 - Stage numbers are NOT sequential requirements — run whichever stage matches your validation need.
