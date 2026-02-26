@@ -67,17 +67,17 @@ Authority: Council Verdict (2026-02-23)
 | Gate | Original Location | New Location | Reason |
 |------|------------------|-------------|--------|
 | GR-16 | Gate Runner | Verdict logic (absorbed) | Meta-gate aggregating GR-11-15 |
-| GR-29 | Gate Runner | Orchestrator (Section 7) | PA-05 >= 3.5 = SHIP -- orchestrator verdict |
-| GR-30 | Gate Runner | Orchestrator (Section 7) | PA-05 2.5-3.5 = REFINE -- orchestrator verdict |
-| GR-31 | Gate Runner | Orchestrator (Section 7) | PA-05 < 2.5 = REBUILD -- orchestrator verdict |
-| GR-32 | Gate Runner | Orchestrator (Section 7) | 3+ AP FAIL = REBUILD -- orchestrator verdict |
+| GR-29 | Gate Runner | Orchestrator (Section 7) | PA-05 >= 3.5 = RELEASE -- orchestrator verdict |
+| GR-30 | Gate Runner | Orchestrator (Section 7) | PA-05 2.5-3.5 = IMPROVE -- orchestrator verdict |
+| GR-31 | Gate Runner | Orchestrator (Section 7) | PA-05 < 2.5 = RETHINK -- orchestrator verdict |
+| GR-32 | Gate Runner | Orchestrator (Section 7) | 3+ AP FAIL = RETHINK -- orchestrator verdict |
 | GR-35 | Gate Runner | PA Auditors | Layout driver -- not automatable |
 | GR-36 | Gate Runner | Experiment Protocol | Experiment #19 state |
 | GR-37 | Gate Runner | Experiment Protocol | Experiment #20 state |
 | GR-38 | Gate Runner | Experiment Protocol | Experiment #21 state |
 | GR-39 | Gate Runner | Experiment Protocol | Experiment tracking |
 | GR-40 | Gate Runner | Orchestrator | Single-pass default policy |
-| GR-41 | Gate Runner | Orchestrator | Fresh builder on REBUILD policy |
+| GR-41 | Gate Runner | Orchestrator | Fresh builder on RETHINK policy |
 | GR-42 | Gate Runner | Orchestrator | Builder gate-free policy (overlaps GR-27) |
 
 ### Reclassified Gates (6 total, Wave 3 FIX-094)
@@ -125,7 +125,7 @@ Full rerouting tables preserved in `artifact-gate-runner-MONOLITHIC.md` Appendic
 
 ## Item Traceability Summary
 
-- **Active Playwright gates:** 31 (BV-01-04, GR-01-15, GR-17-22, GR-33-34, GR-43-53 minus GR-47)
+- **Active Playwright gates:** 52 in-file executable (44 GR + 7 BV + 1 utility A-03; see gate-manifest.json for canonical counts)
 - **Active orchestrator gates:** 6 (GR-23-28, reclassified Wave 3)
 - **Removed gates:** 13 (Wave 1)
 - **Council-reclassified:** 12 (Pattern 1: 10, Pattern 4: 2)

@@ -1,7 +1,7 @@
 # Gate Runner Specification — Human-Readable Gate Reference
-Date: 2026-02-25
+Date: 2026-02-26
 Extracted from: artifact-gate-runner-MONOLITHIC.md
-Authority: Council Verdict (2026-02-23), Wave 0 Surgery (2026-02-25)
+Authority: Council Verdict (2026-02-23), Wave 0 Surgery (2026-02-25), Pipeline v4 (2026-02-25), D2 Crack Gates (2026-02-26)
 
 ---
 
@@ -15,46 +15,59 @@ Human-readable specification for every gate: ID, name, tier, what it checks, pas
 
 | Category | Gates | Count | Verdict Impact |
 |----------|-------|-------|----------------|
-| **REQUIRED** | GR-01–GR-06, GR-08–GR-11, GR-13–GR-15, GR-44, GR-60, GR-61, GR-62, GR-63, GR-64, GR-48 | 20 | ANY FAIL blocks verdict |
-| **RECOMMENDED** | GR-07, GR-17, GR-18, GR-20, GR-43, GR-45, GR-49, GR-51, GR-52 | 9 | 3+ FAIL = REBUILD |
-| **ADVISORY** | GR-05b, GR-19, GR-21, GR-22, GR-46, GR-50, GR-53 | 7 | Informational only |
-| **BRIEF VERIFICATION** | BV-01 through BV-04 | 4 | ANY FAIL = return brief to assembler |
+| **REQUIRED** | GR-01–GR-06, GR-08–GR-11, GR-13–GR-15, GR-18, GR-44, GR-60, GR-61, GR-62, GR-63, GR-64, GR-48, GR-79 | 22 | ANY FAIL blocks verdict |
+| **RECOMMENDED** | GR-07, GR-17, GR-20, GR-43, GR-45, GR-49, GR-51, GR-52, GR-55, GR-67, GR-78, GR-80, GR-82, GR-83, GR-84 | 15 | 3+ FAIL = RETHINK |
+| **ADVISORY** | GR-05b, GR-19, GR-21, GR-22, GR-46, GR-50, GR-53, GR-66, GR-81 | 9 | Informational only |
+| **BRIEF VERIFICATION** | BV-01 through BV-08 | 8 | ANY FAIL = return brief to assembler. BV-06: FAIL = pipeline regressed. BV-07: FAIL = builder input too large. BV-08: FAIL = compression loss detected, flag for IMPROVE. |
 
-**Total executable gates: 42** (20 REQUIRED + 9 RECOMMENDED + 7 ADVISORY + 2 DIAGNOSTIC + 4 BRIEF)
+**Total executable gates: 57** (22 REQUIRED + 15 RECOMMENDED + 9 ADVISORY + 2 DIAGNOSTIC + 8 BRIEF + 1 utility — see gate-manifest.json for canonical registry)
 
 ---
 
-## Execution Protocol
+## Execution Protocol (B-01: 4-phase architecture)
 
-1. Orchestrator serves HTML via HTTP, opens Playwright session at 1440px
-2. Execute REQUIRED gates (GR-01–GR-06, GR-08–GR-11, GR-13–GR-15, GR-44, GR-60)
-3. Execute RECOMMENDED anti-pattern gates (GR-17 through GR-22, GR-45, GR-51)
-4. Execute RECOMMENDED measurement gates (GR-52) and ADVISORY gates (GR-46, GR-50, GR-53)
-5. Responsive gates re-run at 768px
-6. Results collected as structured JSON
-7. GR-48 (Gate Coverage Completeness) runs LAST
-8. GR-49 (Result File Integrity) runs as process check on output file
+**Unified:** `runAllGates(page, briefText)` — calls all phases, returns unified JSON.
 
-## Output Schema
+**Phased (for orchestrator control):**
+1. `runBriefVerification(briefText)` — Phase 1 (BV-01 through BV-05)
+2. `checkBriefOutputDiff(briefText, htmlText)` — Post-build brief-output diff (BV-08, text-only, can run in parallel with Playwright setup)
+3. `verifyIntentComments(htmlText)` — Post-build narration check (GR-83, text-only)
+4. `runPhase3Gates(page)` — Phase 3A (all Playwright DOM gates: core + anti-pattern + wave2)
+5. `checkDPR(page)` — Pre-screenshot validation (GR-61)
+6. `captureScreenshots(page, htmlUrl, dir)` — DPR-safe screenshot capture (Section 8, creates DPR-1 contexts)
+7. `checkScreenshotQuality(screenshotDir)` — Post-screenshot (GR-62)
+8. `checkVisibleContent(screenshotDir)` — Visible content check (A-03)
+9. PA audit + Weaver (orchestrator)
+10. `runPostWeaverGates(auditorReports, weaverReport)` — Post-weaver (GR-64)
+11. `runMetaGates(allResults)` — Meta (GR-48 + GR-49) — **AUTOMATIC, no opt-out**
+
+## Output Schema (B-03: source field required)
 
 ```json
 {
   "gate": "GR-XX",
   "name": "Human-readable gate name",
   "status": "PASS | FAIL",
+  "source": "code | manual | skip",
   "measured": { },
   "threshold": { },
+  "details": { },
   "evidence": "FACT | OBSERVED | CONFOUNDED | THEORETICAL"
 }
 ```
 
+**Source field values:**
+- `code` — gate executed by gate-runner-core.js programmatically
+- `manual` — gate result provided by human or orchestrator judgment
+- `skip` — gate intentionally skipped with documented reason
+
 ## Verdict Logic
 
-- ANY identity gate (GR-01–GR-06, GR-08–GR-10) FAIL = REBUILD (unless ALL failures are MECHANICAL — <=5 CSS lines, no HTML change, no design decision)
-- ANY perception gate (GR-11, GR-13–GR-15, GR-44, GR-60) FAIL = REFINE (targeted CSS fix)
-- GR-63 FAIL = REFINE (send back to builder to perform experiential self-check)
-- GR-64 FAIL = if weaver verdict is SHIP or SHIP WITH FIXES, downgrade to REFINE
-- 3+ recommended gates FAIL = REBUILD
+- ANY identity gate (GR-01–GR-06, GR-08–GR-10) FAIL = RETHINK (unless ALL failures are MECHANICAL — <=5 CSS lines, no HTML change, no design decision)
+- ANY perception gate (GR-11, GR-13–GR-15, GR-18, GR-44, GR-60) FAIL = IMPROVE (targeted CSS fix)
+- GR-63 FAIL = IMPROVE (send back to builder to perform experiential self-check)
+- GR-64 FAIL = if weaver verdict is RELEASE or POLISH, downgrade to IMPROVE
+- 3+ recommended gates FAIL = RETHINK
 - GR-48 FAIL = INCOMPLETE
 - All gates PASS = proceed to PA audit
 
@@ -102,7 +115,7 @@ Human-readable specification for every gate: ID, name, tier, what it checks, pas
 | Gate | Name | Tier | Threshold | Evidence |
 |------|------|------|-----------|----------|
 | GR-17 | AP-01 Density Stacking | RECOMMENDED | Content padding >= 12px, table cell >= 4px | OBSERVED |
-| GR-18 | AP-09 Ghost Mechanisms | RECOMMENDED | Zero sub-perceptual borders (<0.5px) or opacity (<0.1) | OBSERVED |
+| GR-18 | AP-09 Ghost Mechanisms | REQUIRED | Zero sub-perceptual borders (<0.5px) or opacity (<0.1). FAIL = IMPROVE (ghost mechanism detected — builder CSS fix needed). Promoted from RECOMMENDED (SIG-05). | OBSERVED |
 | GR-19 | AP-10 Threshold Gaming | ADVISORY | <50% of bg deltas at floor (15-17 RGB) | OBSERVED |
 | GR-20 | AP-11 Structural Echo | RECOMMENDED | <3 consecutive sections with identical bg+padding+border | OBSERVED |
 | GR-21 | AP-14 Cognitive Overload | ADVISORY | <= 6 distinct bg colors per 900px viewport slice | THEORETICAL |
@@ -151,7 +164,7 @@ Human-readable specification for every gate: ID, name, tier, what it checks, pas
 | GR-61 | DPR Validation | REQUIRED | `window.devicePixelRatio === 1` before screenshot capture. If DPR > 1, recreate browser context with `{ deviceScaleFactor: 1 }`. Do NOT divide viewport by DPR (viewport is CSS pixels). BLOCKING if uncorrectable. | FACT |
 | GR-62 | Screenshot Quality | REQUIRED | Per viewport (1440/1024/768): minimum 3 PNG files per directory, no more than 2 consecutive blank screenshots, blank ratio <= 20%. Blank = file size < 5KB. BLOCKING if fail. | OBSERVED |
 | GR-63 | Builder Experiential Marker | REQUIRED | HTML contains `<!-- EXPERIENTIAL-CHECK: [text] -->` with text >= 100 chars mentioning legibility + visual clarity + structural reference (zone/section/header/footer). Evidence of builder Step 5.0 self-use. | OBSERVED |
-| GR-64 | Usability Priority Verification | REQUIRED | If >= 3/9 auditors flagged usability issues (cannot read/illegible/unreadable/cannot use), Weaver Fix #1 must contain usability-related term. Auto-passes if < 3 auditors flagged. If FAIL and weaver verdict is SHIP/SHIP WITH FIXES, downgrade to REFINE. | OBSERVED |
+| GR-64 | Usability Priority Verification | REQUIRED | If >= 3/9 auditors flagged usability issues (cannot read/illegible/unreadable/cannot use), Weaver Fix #1 must contain usability-related term. Auto-passes if < 3 auditors flagged. If FAIL and weaver verdict is RELEASE/POLISH, downgrade to IMPROVE. | OBSERVED |
 
 **Execution points:**
 - GR-61: Runs in orchestrator Playwright session BEFORE screenshot capture (Step 2.5)
@@ -162,8 +175,57 @@ Human-readable specification for every gate: ID, name, tier, what it checks, pas
 **Blocking behavior:**
 - GR-61 FAIL → Do NOT capture screenshots. Recreate browser context with `{ deviceScaleFactor: 1 }`.
 - GR-62 FAIL → Do NOT deploy PA auditors. Re-capture screenshots.
-- GR-63 FAIL → REFINE verdict. Send back to builder to perform genuine experiential self-check.
-- GR-64 FAIL → If weaver said SHIP/SHIP WITH FIXES, downgrade to REFINE.
+- GR-63 FAIL → IMPROVE verdict. Send back to builder to perform genuine experiential self-check.
+- GR-64 FAIL → If weaver said RELEASE/POLISH, downgrade to IMPROVE.
+
+---
+
+## SECTION 8: PIPELINE V4 GATES
+
+| Gate | Name | Tier | Threshold | Evidence |
+|------|------|------|-----------|----------|
+| BV-05 | Recipe Keyword Scan | BRIEF | All 9 dispositions (D-01 through D-09) have >= 1 keyword in brief. Hover vocabulary present. Compression ratio <= 50:1. | OBSERVED |
+| GR-55 | Multi-Coherence Channel Count | RECOMMENDED | >= 3 perceptible CSS channel differences at each adjacent zone boundary. Perceptibility thresholds: background >= 15 RGB delta, font-family any difference, font-size >= 2px, letter-spacing >= 0.5px, border structural change, padding >= 8px total. Promoted from ADVISORY (SIG-11). | OBSERVED |
+| GR-66 | Component Class Count | ADVISORY | >= 8 distinct component CSS classes in HTML (.callout, .table-wrapper, .pull-quote, etc.) | OBSERVED |
+| GR-67 | Footer Text Size | RECOMMENDED | All text in footer or last zone has font-size >= 11px | OBSERVED |
+| A-03 | Visible Content Check | UTILITY | No 3+ consecutive screenshots < 5KB in any viewport directory | OBSERVED |
+
+---
+
+## SECTION 8B: D2 CRACK DIMENSION GATES — Brief-Output Diff + Narration
+
+> **Motivation (D2 Crack):** The pipeline checks builder OUTPUT in isolation (is the background delta >= 15?) but never compares output against INPUT (did the builder implement what the brief specified?). A mechanism listed in the brief that doesn't appear in the CSS is invisible to the pipeline. These gates close the D2 compression loss crack.
+
+| Gate | Name | Tier | Threshold | Evidence |
+|------|------|------|-----------|----------|
+| BV-08 | Brief-Output Diff | RECOMMENDED (BV) | >= 80% coverage per dimension across 6 dimensions: zones (+-1 tolerance), backgrounds (hex match), typography (+-1px font-size, +-0.1 line-height, +-0.005em letter-spacing), components (synonym matching), metaphor naming (CSS custom property match), disposition CSS (property-name presence). FAIL flags droppedItems for IMPROVE. | OBSERVED |
+| GR-83 | INTENT Comment Count | RECOMMENDED | HTML contains >= 15 INTENT comments (target 17-22). Must include >= 1 D-XX disposition narration. Checks for METAPHOR, NOT-IMPL, and D-01 through D-09 coverage. < 10 = FAIL, 10-14 = WARNING, 15-30 = PASS, > 30 = WARNING (over-narration). | OBSERVED |
+| GR-84 | IMPROVEMENTS Comment | RECOMMENDED | HTML contains `<!-- IMPROVEMENTS: ... -->` comment with >= 5 items (lines starting with number/dash/bracket), >= 1 tagged HIGH, >= 2 distinct tags (D-XX, STRUCTURAL, MECHANICAL, ACCESSIBILITY, COMPOSITIONAL). Feeds IMPROVE cycle decision. SIG-01. | OBSERVED |
+
+**Execution points:**
+- BV-08: Runs AFTER builder produces HTML, BEFORE Playwright gates. Text-only (no Playwright needed). Can run in parallel with Playwright setup. Input: `(briefText, htmlText)`.
+- GR-83: Runs alongside BV-08. Text-only. Input: `(htmlText)`.
+- GR-84: Runs alongside GR-83 at step 1.95. Text-only. Input: `(htmlText)`. When `highCount >= 3` and weaver verdict is RELEASE, orchestrator overrides to IMPROVE.
+
+**Key outputs:**
+- BV-08 produces a `droppedItems` array — the actionable list of brief specs not found in output. This array is passed to the IMPROVE builder when BV-08 FAILs.
+- GR-83 enables BV-08 to distinguish deliberate omissions (INTENT [NOT-IMPL]) from accidental losses.
+- `parseIntentComments(html)` is a shared utility that extracts structured INTENT data for both gates.
+
+**Integration with IMPROVE:**
+When BV-08 FAILs, the orchestrator includes droppedItems in the IMPROVE builder's input addendum.
+
+---
+
+## SECTION 9: EXCEPTION PATTERNS (B-14)
+
+| Gate | Exception | Action |
+|------|-----------|--------|
+| GR-05 | Monospace font in code/pre elements | Treat cold-color violation as ADVISORY |
+| GR-08 | Sub-pixel heights at DPR > 1 | Skip element if height < 1px |
+| GR-11 | Non-adjacent zone pairs | Only adjacent pairs compared (B-04 fix) |
+| GR-15 | Auto centering margins | Skip element if margin-left:auto AND margin-right:auto (B-05 fix) |
+| GR-19 | Boundary/divider/separator elements | Skip pairs involving boundary-class elements (B-11 fix) |
 
 ---
 
@@ -191,7 +253,7 @@ Human-readable specification for every gate: ID, name, tier, what it checks, pas
 | GR-14 | Perception | REQUIRED | Post-build | Playwright |
 | GR-15 | Perception | REQUIRED | Post-build | Playwright |
 | GR-17 | Anti-pattern | RECOMMENDED | Post-build | Playwright |
-| GR-18 | Anti-pattern | RECOMMENDED | Post-build | Playwright |
+| GR-18 | Anti-pattern | REQUIRED | Post-build | Playwright |
 | GR-19 | Anti-pattern | ADVISORY | Post-build | Playwright |
 | GR-20 | Anti-pattern | RECOMMENDED | Post-build | Playwright |
 | GR-21 | Anti-pattern | ADVISORY | Post-build | Playwright |
@@ -213,10 +275,27 @@ Human-readable specification for every gate: ID, name, tier, what it checks, pas
 | GR-62 | Experiential | REQUIRED | Post-screenshot | Node.js filesystem |
 | GR-63 | Experiential | REQUIRED | Post-build | Playwright |
 | GR-64 | Experiential | REQUIRED | Post-weaver | JavaScript text scan |
+| GR-55 | Multi-Coherence | RECOMMENDED | Post-build | Playwright |
+| GR-66 | Component Count | ADVISORY | Post-build | Playwright |
+| GR-67 | Footer Text | RECOMMENDED | Post-build | Playwright |
+| BV-05 | Brief Verification | REQUIRED | Pre-build | Text parsing |
+| A-03 | Visible Content | UTILITY | Post-screenshot | Node.js filesystem |
+| BV-06 | Anti-Regression | BV | Pipeline startup | Text scan |
+| BV-07 | Builder Input Budget | BV | Pre-build | Line count |
+| GR-78 | Residual Artifact | RECOMMENDED | Post-build | HTML text scan |
+| GR-79 | IMPROVE Completion | REQUIRED | Post-IMPROVE | Node.js filesystem |
+| GR-80 | Iteration Log Auto-Fill | RECOMMENDED | Post-iteration | Tracker text scan |
+| GR-81 | Prediction Suppression | ADVISORY | Post-weaver | Text scan |
+| GR-82 | Finding Status Map | RECOMMENDED | Post-weaver | Text scan |
+| BV-08 | Brief-Output Diff | RECOMMENDED (BV) | Post-build | Text parsing |
+| GR-83 | INTENT Comment Count | RECOMMENDED | Post-build | HTML text scan |
+| GR-84 | IMPROVEMENTS Comment | RECOMMENDED | Post-build | HTML text scan |
 
-**Tier totals (gate-runner scope):** 20 REQUIRED, 9 RECOMMENDED, 7 ADVISORY, 2 DIAGNOSTIC (GR-33, GR-34), 4 BRIEF = 42 executable gates
+**Tier totals (gate-runner scope):** 22 REQUIRED, 15 RECOMMENDED, 9 ADVISORY, 2 DIAGNOSTIC (GR-33, GR-34), 8 BV, 1 UTILITY = 57 executable gates
 
-**NOTE (FIX-094):** GR-23 through GR-28 (precondition gates) and GR-33, GR-34 (mode detection) are documented here for reference. GR-23-28 are operationally reclassified as orchestrator decision rules (see `artifact-orchestrator.md` Section 9). GR-33 and GR-34 remain in gate-runner as ADVISORY diagnostic gates with Playwright code.
+**NOTE (FIX-094):** GR-23 through GR-28 (precondition gates) and GR-33, GR-34 (mode detection) are documented here for reference. GR-23-28 are operationally reclassified as orchestrator decision rules (see `artifact-orchestrator.md` Section 7 "Orchestrator Decision Rules"). GR-33 and GR-34 remain in gate-runner as ADVISORY diagnostic gates with Playwright code.
+
+**Orchestrator-procedural gates (GR-65, GR-70, GR-75):** These are NOT executable gates. They are manual orchestrator checks embedded in artifact-orchestrator.md Sections 5 and 7. They do NOT appear in tier arrays or gate-runner-core.js. GR-65 compares Pass A vs Pass B structure. GR-70 checks PA-05 non-regression. GR-75 enforces iteration counter.
 
 ---
 

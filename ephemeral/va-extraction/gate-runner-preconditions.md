@@ -51,10 +51,10 @@ These gates run BETWEEN Phase 1 (brief assembly) and Phase 2 (builder execution)
 
 These verify pipeline configuration BEFORE the builder starts. Text-based checks on agent config and brief content.
 
-### GR-23: Builder Model = Opus [ADVISORY]
+### GR-23: Builder Model = Opus [REQUIRED]
 - **Check:** Verify model ID of builder agent is claude-opus-*
-- **Evidence:** OBSERVED/CONFOUNDED (council downgraded to STRONG RECOMMENDATION)
-- **FAIL produces WARNING, not BLOCK**
+- **FAIL produces BLOCK — pipeline MUST NOT proceed to Phase 2 with a non-Opus builder**
+- **Exception:** Sonnet permitted ONLY for declared [SONNET-TEST] runs, which must be logged in execution tracker
 
 ### GR-24: Content Has Heterogeneity [ADVISORY]
 - **Check:** Phase 0 Content Analyst output must include heterogeneity >= "moderate" and metaphor viability >= "viable"
@@ -78,6 +78,6 @@ These verify pipeline configuration BEFORE the builder starts. Text-based checks
 
 ---
 
-**Executable code:** See `gate-runner-core.js` functions `runBriefVerification()` (BV-01 through BV-04). GR-23 through GR-28 are text-based checks implemented by the orchestrator during Phase 0-1, not in the Playwright gate runner.
+**Executable code:** See `gate-runner-core.js` functions `runBriefVerification()` (BV-01 through BV-07). GR-23 through GR-28 are text-based checks implemented by the orchestrator during Phase 0-1, not in the Playwright gate runner.
 
 **NOTE (FIX-094):** GR-23 through GR-28 are reclassified as ORCHESTRATOR DECISION RULES per Wave 3. They remain documented here for reference but their operational home is `artifact-orchestrator.md` Section 9.
