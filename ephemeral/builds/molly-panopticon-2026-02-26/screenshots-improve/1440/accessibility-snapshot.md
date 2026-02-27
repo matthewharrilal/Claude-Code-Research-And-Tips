@@ -1,0 +1,417 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - navigation "Zone navigation" [ref=e3]:
+    - link "1" [ref=e4] [cursor=pointer]:
+      - /url: "#z1-philosophy"
+    - link "2" [ref=e5] [cursor=pointer]:
+      - /url: "#z2-architecture"
+    - link "3" [ref=e6] [cursor=pointer]:
+      - /url: "#z3-implementation"
+    - link "4" [ref=e7] [cursor=pointer]:
+      - /url: "#z4-tower-view"
+    - link "5" [ref=e8] [cursor=pointer]:
+      - /url: "#z5-templates"
+    - link "6" [ref=e9] [cursor=pointer]:
+      - /url: "#z6-courtyard"
+    - link "7" [ref=e10] [cursor=pointer]:
+      - /url: "#z7-build"
+    - link "8" [ref=e11] [cursor=pointer]:
+      - /url: "#z8-departure"
+  - banner [ref=e12]:
+    - generic [ref=e13]:
+      - generic [ref=e14]: Deep Extraction — Multi-Agent Architecture
+      - heading "The Personal Panopticon" [level=1] [ref=e15]
+      - paragraph [ref=e16]: "Molly Cantillon's architecture for self-legibility: 8 parallel Claude instances, each watching a different domain of life. You are the guard and the prisoner."
+      - generic [ref=e17]: "Source: @mollycantillon — Founder at NOX, ex-Stanford — 2.4K likes, 418K views, 3.8K bookmarks"
+  - main [ref=e18]:
+    - generic [ref=e20]:
+      - generic [ref=e21]: Zone 1 — The Tower Approach
+      - heading "The Philosophy of Self-Legibility" [level=2] [ref=e22]
+      - paragraph [ref=e23]: Molly Cantillon's Personal Panopticon begins not with technology but with a profound observation about power and knowledge asymmetry. Pre-modern states were essentially blind to their citizens. They couldn't see population distributions, land ownership, economic activity, or individual behavior in any systematic way. This blindness limited their power.
+      - paragraph [ref=e24]: "To overcome this, states built what she calls the \"apparatus of sight\": censuses that counted people, surname systems that tracked lineages, cadastral maps that documented property, and registration systems that monitored movement. These tools made populations \"legible\" to power."
+      - paragraph [ref=e25]: The modern twist? Corporations have perfected this apparatus far beyond what states ever achieved. Every digital interaction generates behavioral data. Every purchase, click, scroll, pause, and abandonment creates a signal.
+      - paragraph [ref=e26]:
+        - strong [ref=e27]: "The asymmetry is total:"
+        - text: They can see you. You cannot see yourself the same way they do. You have no dashboard of your own patterns, no alert system for your own behavioral drift, no synthesis of your own scattered data streams.
+      - heading "What Self-Legibility Actually Means" [level=3] [ref=e28]
+      - paragraph [ref=e29]: "Self-legibility is the act of building your own surveillance infrastructure—not to control yourself punitively, but to SEE yourself with the same clarity that institutions achieve. It's reversing the panopticon: instead of an external observer watching you from a tower, you ARE the observer. You build your own watchtower over your own life."
+      - generic [ref=e30]:
+        - paragraph [ref=e31]: "\"The feeling is hard to name. It is the violent gap between how blind you were and how obvious everything feels now with an observer that reads all the feeds, catches what you've unconsciously dropped, notices patterns across domains you'd kept stubbornly separate, and—crucially—tells you what to do about it.\""
+        - generic [ref=e32]: Molly Cantillon
+      - paragraph [ref=e33]: The word "violent" here is deliberate. There's a shock to seeing yourself clearly for the first time. The distance between how you THOUGHT you were living and how you ARE living can be jarring.
+      - heading "The $2,000 Forgotten Subscriptions Story" [level=3] [ref=e34]
+      - paragraph [ref=e35]: "The signature proof point: Cantillon found $2,000 in forgotten subscriptions. These weren't recent charges she'd missed. They were accumulated subscriptions that had slipped below conscious attention, each individually small enough to not trigger alarm, collectively significant."
+      - paragraph [ref=e36]: The Personal Panopticon doesn't require superhuman discipline. It provides superhuman attention span. It reads every bank statement, flags every recurring charge, tracks every subscription, and surfaces what human attention would naturally miss.
+      - generic [ref=e37]:
+        - paragraph [ref=e38]: "\"It feels borderline unfair seeing around corners, being in ten places at once, surveilling yourself with the attention span of a thousand clones.\""
+        - generic [ref=e39]: Molly Cantillon
+      - paragraph [ref=e40]: "\"Attention span of a thousand clones\" is the key phrase. You haven't become smarter or more disciplined. You've multiplied your capacity to attend."
+    - generic [ref=e42]:
+      - generic [ref=e43]: Zone 2 — The Cell Interior
+      - heading "The 8-Domain Architecture" [level=2] [ref=e44]
+      - paragraph [ref=e45]: Cantillon's architecture runs 8 parallel Claude instances, each isolated in its own directory, each owning a distinct life domain. The domains are the cells of the panopticon, visible from the central tower.
+      - generic [ref=e46]:
+        - generic [ref=e47]:
+          - generic [ref=e48]: ~/nox
+          - generic [ref=e49]: Company / Product
+          - paragraph [ref=e50]: Her startup NOX. Product decisions, engineering, operations. Cron pulls Amplitude analytics, cross-references with GitHub issues.
+        - generic [ref=e51]:
+          - generic [ref=e52]: ~/metrics
+          - generic [ref=e53]: Analytics / Data
+          - paragraph [ref=e54]: Quantitative insights. Separate from decisions because data processing is a distinct cognitive mode.
+        - generic [ref=e55]:
+          - generic [ref=e56]: ~/email
+          - generic [ref=e57]: Communications
+          - paragraph [ref=e58]: Inbox management. Auto-drafts replies. Human approves/edits before send. Managing inbox is different from doing work.
+        - generic [ref=e59]:
+          - generic [ref=e60]: ~/growth
+          - generic [ref=e61]: Marketing / Acquisition
+          - paragraph [ref=e62]: Audience building. Auto-generates winning copy variants. Monitors performance, iterates on language.
+        - generic [ref=e63]:
+          - generic [ref=e64]: ~/trades
+          - generic [ref=e65]: Personal Finance
+          - paragraph [ref=e66]: Market intelligence. Overnight runs pull brokerage data, congressional disclosures, Polymarket odds, X sentiment. Morning brief.
+        - generic [ref=e67]:
+          - generic [ref=e68]: ~/health
+          - generic [ref=e69]: Fitness / Wellness
+          - paragraph [ref=e70]: Body optimization. WHOOP integration, Apple Health exports. Generates workout plans for erratic travel schedules.
+        - generic [ref=e71]:
+          - generic [ref=e72]: ~/writing
+          - generic [ref=e73]: Content Creation
+          - paragraph [ref=e74]: Creative output. Separate from company work because creative work needs different conditions and rhythms.
+        - generic [ref=e75]:
+          - generic [ref=e76]: ~/personal
+          - generic [ref=e77]: Life Admin
+          - paragraph [ref=e78]: Everything else. Personal projects, relationships. Found $2,000 in forgotten subscriptions here.
+      - heading "Why These 8 Domains?" [level=3] [ref=e79]
+      - paragraph [ref=e80]: The taxonomy is not arbitrary. It reflects natural boundaries in life management. Four work domains (nox, metrics, email, growth) and four life domains (trades, health, writing, personal).
+      - generic [ref=e81]:
+        - generic [ref=e82]: "Principle 1: Clear Boundaries"
+        - paragraph [ref=e83]: A domain should have clear entry and exit criteria. When should ~/trades be consulted versus ~/personal? The answer should be obvious. If you frequently wonder "which domain handles this?", the taxonomy is wrong.
+      - generic [ref=e84]:
+        - generic [ref=e85]: "Principle 2: Different Optimization Functions"
+        - paragraph [ref=e86]: Each domain optimizes for something different. ~/health optimizes for physical wellbeing. ~/trades optimizes for risk-adjusted returns. These objectives can conflict. Isolation prevents one domain's optimization from corrupting another's.
+      - generic [ref=e87]:
+        - generic [ref=e88]: "Principle 3: Different Time Horizons"
+        - paragraph [ref=e89]: ~/trades operates on daily/weekly cycles (market movements). ~/health operates on monthly/quarterly cycles (fitness adaptations). ~/nox operates on product/sprint cycles. Matching the domain to its natural rhythm matters.
+      - generic [ref=e90]:
+        - generic [ref=e91]: "Principle 4: Different Data Sources"
+        - paragraph [ref=e92]: "Each domain has its own feeds: ~/trades pulls brokerage data, congressional disclosures, Polymarket odds. ~/health reads WHOOP exports, Apple Health data. ~/metrics tracks Amplitude events, GitHub activity."
+      - heading "How Isolation Works" [level=3] [ref=e93]
+      - paragraph [ref=e94]: Each Claude instance operates in its own directory. The directory IS the memory. Files persist between sessions. The agent can read what it wrote yesterday. Conversations are ephemeral. Files are durable.
+      - code [ref=e96]: "~/trades/ briefs/ # Daily morning briefs data/ # Market data pulls .secrets/ # Brokerage credentials trades.log # Decision history positions.json # Current portfolio"
+      - paragraph [ref=e97]: "A critical architectural principle: instances operate INDEPENDENTLY. There is no shared context. ~/trades does not see ~/health's recovery scores. ~/email does not see ~/nox's product decisions. This isolation serves context purity, security boundaries, blast radius containment, and parallel execution."
+      - paragraph [ref=e98]: "When information MUST cross domains, handoffs are explicit:"
+      - code [ref=e100]: ~/shared/ handoff-trades-to-personal.json handoff-health-to-nox.json daily-synthesis.md
+      - paragraph [ref=e101]: This is similar to API contracts between microservices. Domains communicate through defined interfaces, not shared state.
+    - generic [ref=e103]:
+      - generic [ref=e104]: Zone 3 — The Deep Cell
+      - heading "Implementation Details" [level=2] [ref=e105]
+      - heading "Running 8 Parallel Instances" [level=3] [ref=e106]
+      - paragraph [ref=e107]: "The basic mechanism is simple: 8 terminal sessions (or tmux panes), each running Claude Code in its corresponding directory."
+      - code [ref=e109]: "# Terminal 1 # Terminal 2 # Terminal 3 cd ~/nox && claude cd ~/trades && claude cd ~/health && claude"
+      - paragraph [ref=e110]: "For management, tmux provides the natural interface:"
+      - generic [ref=e111]:
+        - generic [ref=e113]: launch-panopticon.sh
+        - code [ref=e115]: "#!/bin/bash DOMAINS=\"nox metrics email growth trades health writing personal\" for domain in $DOMAINS; do cd ~/$domain tmux new-session -d -s $domain \"claude\" done echo \"All domains launched. Use 'tmux attach -t <domain>' to connect.\""
+      - paragraph [ref=e116]: "Key tmux commands:"
+      - code [ref=e118]: "tmux ls # List all domain sessions tmux attach -t trades # Attach to specific domain Ctrl-b d # Detach (keeps running) tmux kill-session -t health # Kill a domain session"
+      - heading "Automation Layer" [level=3] [ref=e119]
+      - paragraph [ref=e120]: "Beyond manual interaction, automation drives scheduled operations:"
+      - code [ref=e122]: "# Keep system awake during long runs caffeinate -i # Simple alias for natural language CLI alias c='claude' # Usage: c \"Show me everyone who hasn't paid an invoice in 90 days\" # Cron jobs for scheduled runs # ~/trades gets overnight data pulls, outputs morning brief 0 5 * * * cd ~/trades && claude \"Pull overnight market data, generate morning brief\""
+      - paragraph [ref=e123]: Additional infrastructure includes human-in-the-loop checkpointing (push notifications via Twilio when agents complete significant tasks), GUI automation as a last resort for services without APIs, and comprehensive thought trace logging for debugging, recursive self-improvement, and audit trails.
+    - generic [ref=e125]:
+      - generic [ref=e126]: Zone 4 — The Tower View
+      - heading "Evidence, Philosophy, and Critique" [level=2] [ref=e127]
+      - paragraph [ref=e128]: "After seeing the cells, the reader ascends to the tower. From here, three views: what was built (evidence), what it means (philosophy), and what's wrong with it (critique)."
+      - generic [ref=e130]:
+        - generic [ref=e131]: Inside the Tower
+        - heading "What She Built" [level=3] [ref=e132]
+        - paragraph [ref=e133]: The tower is dark inside. But the evidence shines.
+        - table [ref=e134]:
+          - rowgroup [ref=e135]:
+            - row "Domain Automation" [ref=e136]:
+              - columnheader "Domain" [ref=e137]
+              - columnheader "Automation" [ref=e138]
+          - rowgroup [ref=e139]:
+            - row "~/nox (Product) Cron pulls Amplitude analytics, cross-references with GitHub issues, surfaces what needs building. Product decisions informed by user data automatically." [ref=e140]:
+              - cell "~/nox (Product)" [ref=e141]
+              - cell "Cron pulls Amplitude analytics, cross-references with GitHub issues, surfaces what needs building. Product decisions informed by user data automatically." [ref=e142]
+            - row "~/nox (Support) Fully autonomous customer support department. Agent handles support tickets, escalating only edge cases." [ref=e143]:
+              - cell "~/nox (Support)" [ref=e144]
+              - cell "Fully autonomous customer support department. Agent handles support tickets, escalating only edge cases." [ref=e145]
+            - row "~/growth Auto-generates winning copy variants. Monitors performance, iterates on language." [ref=e146]:
+              - cell "~/growth" [ref=e147]
+              - cell "Auto-generates winning copy variants. Monitors performance, iterates on language." [ref=e148]
+            - row "~/email Inbox zero automation. Auto-drafts replies. Human approves/edits before send." [ref=e149]:
+              - cell "~/email" [ref=e150]
+              - cell "Inbox zero automation. Auto-drafts replies. Human approves/edits before send." [ref=e151]
+            - row "~/health Generates workout plans accommodating erratic travel. WHOOP triggers projector after 6 hours sleep." [ref=e152]:
+              - cell "~/health" [ref=e153]
+              - cell "Generates workout plans accommodating erratic travel. WHOOP triggers projector after 6 hours sleep." [ref=e154]
+            - 'row "~/trades Overnight: brokerage data, congressional disclosures, Polymarket odds, X sentiment. Morning: synthesized brief in ~/trades/briefs/." [ref=e155]':
+              - cell "~/trades" [ref=e156]
+              - 'cell "Overnight: brokerage data, congressional disclosures, Polymarket odds, X sentiment. Morning: synthesized brief in ~/trades/briefs/." [ref=e157]'
+            - row "~/personal Audited all recurring charges. Found $2,000 in forgotten subscriptions." [ref=e158]:
+              - cell "~/personal" [ref=e159]
+              - cell "Audited all recurring charges. Found $2,000 in forgotten subscriptions." [ref=e160]
+        - paragraph [ref=e161]: "And then there's Jmail: \"Parsed Epstein files overnight, 18M users searched it.\" This reveals the scale. Jmail serves eighteen million users. The Panopticon isn't a hobby project. It's the operational framework for someone running production systems at scale."
+        - generic [ref=e162]:
+          - paragraph [ref=e163]: "\"The bottleneck is no longer ability. The bottleneck is activation energy: who has the nerve to try, and the stubbornness to finish.\""
+          - generic [ref=e164]: Molly Cantillon
+      - heading "The Philosophical Warnings" [level=3] [ref=e165]
+      - paragraph [ref=e166]: "Cantillon explicitly invokes Goodhart's Law: \"Optimize for a metric and you game your way to hollow victory.\" The danger of self-surveillance is over-optimization. When WHOOP says you're recovered but you feel like death, which do you trust?"
+      - paragraph [ref=e167]: "Her answer: maintain a \"meta-level outside the system.\""
+      - generic [ref=e168]:
+        - paragraph [ref=e169]: "\"When WHOOP says recovered but you feel like death—notice the gap. Keep a 'meta-level outside the system' that can argue with the brief. Be ready to delete ~/health tomorrow if it stops serving. 'We must continue to live outside it.'\""
+        - generic [ref=e170]: Molly Cantillon
+      - paragraph [ref=e171]: The Panopticon is a TOOL, not a master. Human judgment remains sovereign. If the system's recommendations contradict lived experience, the system might be wrong.
+      - generic [ref=e172]:
+        - generic [ref=e173]: The Anthropic Trade-off
+        - paragraph [ref=e174]: "\"Sometimes the tower has a landlord. Anthropic sees every query you make. The value exchange is explicit: their visibility into your thinking for access to a thousand-clone attention span. In this case, chosen beats imposed.\" She's not naive about privacy. Using Claude means Anthropic sees everything. But this is a CHOSEN relationship, unlike surveillance capitalism. You know what you're trading."
+      - heading "The Technical Critique" [level=3] [ref=e175]
+      - paragraph [ref=e176]: "The sharpest technical critique came from @flutterwhat:"
+      - generic [ref=e177]:
+        - paragraph [ref=e178]: "\"Swarm of eight instances in parallel\" is a cute way to say \"I made eight folders and accidentally reinvented ~/bin plus crontab -e with worse failure modes and telemetry going to Anthropic.\""
+        - generic [ref=e179]: "@flutterwhat"
+      - paragraph [ref=e180]: "Valid. The underlying technology is not novel: directories (very old), cron jobs (very old), terminal multiplexing (very old). What Cantillon built isn't a new technology. It's a new ORGANIZATION of existing technologies, informed by a specific philosophy."
+      - paragraph [ref=e181]: "The response: the insight is in the TAXONOMY, not the tech. Anyone can make folders. The question is: what folders? What belongs in each? What happens at the boundaries? Unix philosophy says \"do one thing well.\" But Unix doesn't tell you what the \"one thing\" should be for your life."
+      - generic [ref=e182]:
+        - generic [ref=e183]: Self-Surveillance as Self-Imprisonment
+        - paragraph [ref=e184]: "Community pushback: \"@provisionalidea: 'A panopticon still, but the tower belongs to you' so still a prison?\" The concern is valid. Self-optimization can become self-policing. Cantillon's response is the \"meta-level outside the system.\" You're not just the observed; you're also the observer AND the human who can shut it all down."
+    - generic [ref=e186]:
+      - generic [ref=e187]: Zone 5 — Cells Up Close
+      - heading "Domain Templates and the Correlation Layer" [level=2] [ref=e188]
+      - paragraph [ref=e189]: Inspecting the individual cells in detail. Each domain gets its own CLAUDE.md file with tailored rules—the DNA of each cell.
+      - group [ref=e190]:
+        - generic "▶ ~/trades/CLAUDE.md Personal Finance & Trading" [ref=e191] [cursor=pointer]:
+          - text: ▶
+          - generic [ref=e192]: ~/trades/CLAUDE.md
+          - generic [ref=e193]: Personal Finance & Trading
+        - code [ref=e197]: "# Domain: Personal Finance & Trading ## Data Sources - Brokerage exports in ./data/ - Congressional disclosures from House API - Polymarket odds via MCP - X sentiment from firehose ## Morning Brief Protocol 1. Pull overnight data 2. Cross-reference against positions 3. Flag material changes 4. Output to ./briefs/YYYY-MM-DD.md ## Risk Rules - NEVER execute actual trades - Flag any position >5% of portfolio - Always note data freshness"
+      - group [ref=e198]:
+        - generic "▶ ~/health/CLAUDE.md Fitness & Wellness" [ref=e199] [cursor=pointer]:
+          - text: ▶
+          - generic [ref=e200]: ~/health/CLAUDE.md
+          - generic [ref=e201]: Fitness & Wellness
+      - group [ref=e202]:
+        - generic "▶ ~/email/CLAUDE.md Communications" [ref=e203] [cursor=pointer]:
+          - text: ▶
+          - generic [ref=e204]: ~/email/CLAUDE.md
+          - generic [ref=e205]: Communications
+      - heading "The Correlation Layer" [level=3] [ref=e206]
+      - paragraph [ref=e207]: "Despite strict isolation, some scenarios require cross-domain awareness: morning brief synthesis, schedule conflicts, resource allocation, and pattern recognition across domains."
+      - generic [ref=e208]: Panopticon Instances ~/trades ────┐ ~/health ─────┐ ~/email ──────┼──▶ ~/correlation/ ~/nox ──────┤ (Read-only access) ~/growth ─────┘ │ ~/personal────┘ ▼ Cross-Domain Query │ ▼ daily-synthesis.md
+      - paragraph [ref=e209]: The correlation agent has read-only access to all domain outputs, no write access to any domain directory, and outputs only to ~/correlation/output/. This creates a "meta-observer" that sees across domains without violating isolation.
+      - code [ref=e211]: "# Morning synthesis (6 AM) 0 6 * * * cd ~/trades && claude \"Generate morning brief\" > briefs/$(date +%Y-%m-%d).md 5 6 * * * cd ~/health && claude \"Analyze overnight recovery\" > status/current.json 10 6 * * * cd ~/correlation && claude \"Synthesize daily brief from all domains\""
+    - generic [ref=e213]:
+      - generic [ref=e214]: Zone 6 — The Quiet Courtyard
+      - heading "Anti-Patterns and Extensions" [level=2] [ref=e215]
+      - paragraph [ref=e216]: A pause in the courtyard between the tower and the outer wall. Before building your own panopticon, understand what can go wrong—and what comes next.
+      - generic [ref=e217]:
+        - generic [ref=e218]: Over-Isolation (Can't Coordinate)
+        - paragraph [ref=e219]:
+          - strong [ref=e220]: "Symptoms:"
+          - text: Domains become silos with no awareness of each other. Duplicate work. Conflicting decisions. No synthesized view.
+        - paragraph [ref=e221]:
+          - strong [ref=e222]: "Solution:"
+          - text: Implement the correlation engine. Schedule cross-domain synthesis. Create explicit handoff protocols.
+      - generic [ref=e223]:
+        - generic [ref=e224]: Under-Isolation (Context Bleed)
+        - paragraph [ref=e225]:
+          - strong [ref=e226]: "Symptoms:"
+          - text: Single Claude instance handling everything. Long context with mixed domain information. Agent confuses domain contexts. Privacy breaches.
+        - paragraph [ref=e227]:
+          - strong [ref=e228]: "Solution:"
+          - text: Strict directory separation. Separate tmux sessions per domain. Domain-specific CLAUDE.md files.
+      - generic [ref=e229]:
+        - generic [ref=e230]: Domain Sprawl
+        - paragraph [ref=e231]:
+          - strong [ref=e232]: "Symptoms:"
+          - text: Too many micro-domains. Overhead of managing 15+ instances. Unclear boundaries. Constant handoffs for simple tasks.
+        - paragraph [ref=e233]:
+          - strong [ref=e234]: "Solution:"
+          - text: Start with 3-5 core domains. Expand only when clear need emerges. Use subagents within domains instead of new domains.
+      - generic [ref=e235]:
+        - generic [ref=e236]: Ignoring the Meta-Level
+        - paragraph [ref=e237]:
+          - strong [ref=e238]: "Symptoms:"
+          - text: Over-optimizing domain metrics. WHOOP says recovered but you feel like death. Trusting the brief over lived experience.
+        - paragraph [ref=e239]:
+          - strong [ref=e240]: "Solution:"
+          - text: Maintain a "meta-level outside the system." Periodic human review. Be ready to delete a domain if it stops serving.
+      - heading "Extensions" [level=3] [ref=e241]
+      - paragraph [ref=e242]: "Two promising extensions emerge from the architecture. The first is combining the Panopticon with persistent cross-domain memory (like Claude-Mem), enabling queries like \"show me decisions I regretted across all domains\" or finding patterns: \"every time ~/health shows poor sleep, ~/trades has losses.\""
+      - paragraph [ref=e243]: "The second is a Skeptical Panopticon: each domain spawns a built-in Skeptic agent that challenges the primary agent's conclusions before reporting to the human. This avoids overconfidence traps and provides calibrated outputs."
+    - generic [ref=e245]:
+      - generic [ref=e246]: Zone 7 — Building Your Own Tower
+      - heading "Building Your Own Panopticon" [level=2] [ref=e247]
+      - paragraph [ref=e248]: You've seen the architecture. You've inspected the cells. Now you become the architect. Four phases, each with a checkpoint to verify your construction.
+      - generic [ref=e249]: "Phase 1: Core Setup (Day 1)"
+      - list [ref=e250]:
+        - listitem [ref=e251]:
+          - strong [ref=e252]: Choose 3-5 initial domains.
+          - text: Don't start with 8. Start with the domains where you feel most blind.
+        - listitem [ref=e253]:
+          - strong [ref=e254]: "Create directory structure:"
+      - code [ref=e256]: "mkdir -p ~/{domain1,domain2,domain3}"
+      - list [ref=e257]:
+        - listitem [ref=e258]:
+          - strong [ref=e259]: Write basic CLAUDE.md for each domain.
+          - text: What data sources? What outputs? What rules?
+      - generic [ref=e260]:
+        - generic [ref=e261]: "Checkpoint: After Step 3"
+        - generic [ref=e262]: "Where you are: Empty domain directories with basic CLAUDE.md files defining each domain's purpose."
+        - paragraph [ref=e264]:
+          - strong [ref=e265]: "Verify your state:"
+      - code [ref=e267]: ls -la ~/domain1 ~/domain2 ~/domain3 cat ~/domain1/CLAUDE.md
+      - generic [ref=e268]:
+        - generic [ref=e269]: Expected Structure
+        - generic [ref=e270]: ~/ ├── domain1/ │ └── CLAUDE.md ← created in step 3 ├── domain2/ │ └── CLAUDE.md ← created in step 3 └── domain3/ └── CLAUDE.md ← YOU JUST CREATED THIS
+      - list [ref=e271]:
+        - listitem [ref=e272]:
+          - strong [ref=e273]: Set up tmux sessions
+          - text: for each domain.
+      - code [ref=e275]: for d in domain1 domain2 domain3; do tmux new-session -d -s $d "cd ~/$d && claude" done
+      - list [ref=e276]:
+        - listitem [ref=e277]:
+          - strong [ref=e278]: Test running parallel instances.
+      - generic [ref=e279]:
+        - generic [ref=e280]: "Checkpoint: After Step 5"
+        - generic [ref=e281]: "Where you are: Parallel Claude instances running in isolated tmux sessions."
+        - paragraph [ref=e283]:
+          - strong [ref=e284]: "Verify:"
+          - code [ref=e285]: tmux ls
+          - text: should show one session per domain. You can attach with
+          - code [ref=e286]: tmux attach -t domain1
+          - text: .
+      - generic [ref=e287]: "Phase 2: Automation (Week 1)"
+      - list [ref=e288]:
+        - listitem [ref=e289]: Create domain startup script
+        - listitem [ref=e290]: Set up cron jobs for scheduled runs
+        - listitem [ref=e291]: Implement basic handoff protocol in ~/shared/
+        - listitem [ref=e292]: Add domain-specific slash commands
+      - generic [ref=e293]:
+        - generic [ref=e294]: "Checkpoint: After Phase 2"
+        - generic [ref=e295]: "Where you are: Your Panopticon runs on autopilot. Cron triggers domain agents. Results accumulate."
+        - paragraph [ref=e297]:
+          - text: Check
+          - code [ref=e298]: crontab -l | grep domain
+          - text: for cron entries. Check
+          - code [ref=e299]: ls -la ~/shared/
+          - text: for handoff directory. Run
+          - code [ref=e300]: ./start-panopticon.sh && sleep 5 && tmux ls
+          - text: to verify startup script.
+      - generic [ref=e301]: "Phase 3: Correlation (Week 2)"
+      - list [ref=e302]:
+        - listitem [ref=e303]: Set up ~/correlation/ meta-observer
+        - listitem [ref=e304]: Create morning synthesis workflow
+        - listitem [ref=e305]: Implement cross-domain flagging
+        - listitem [ref=e306]: Add notification system for completions
+      - generic [ref=e307]:
+        - generic [ref=e308]: "Checkpoint: After Phase 3"
+        - generic [ref=e309]: "Where you are: A meta-observer sees across all domains and synthesizes insights."
+        - paragraph [ref=e311]: This is where the "violent gap" begins. Patterns across domains become visible. The Panopticon sees you. But you are not finished.
+      - generic [ref=e312]:
+        - generic [ref=e313]: Full Architecture
+        - generic [ref=e314]: ~/ ├── domain1/ ├── domain2/ ├── domain3/ ├── shared/ ← Cross-domain communication │ └── handoff-template.json ├── correlation/ ← Meta-observer │ ├── CLAUDE.md │ ├── feeds/ ← Symlinks to domain outputs │ └── output/ │ └── daily-synthesis.md └── start-panopticon.sh ← Startup automation
+      - generic [ref=e315]: "Phase 4: Refinement (Ongoing)"
+      - list [ref=e316]:
+        - listitem [ref=e317]: Tune CLAUDE.md rules based on experience
+        - listitem [ref=e318]: Prune domains that don't add value
+        - listitem [ref=e319]: Add/remove subagents as needed
+        - listitem [ref=e320]: Maintain meta-level perspective
+      - generic [ref=e321]:
+        - generic [ref=e322]: "Checkpoint: After Phase 4"
+        - generic [ref=e323]: Your tower is complete. All four walls stand.
+        - paragraph [ref=e325]: The architecture is running. The correlation engine synthesizes. The cron jobs fire. The briefs accumulate. The patterns surface.
+      - generic [ref=e327]:
+        - paragraph [ref=e328]: Notice what you have built. Eight directories. Eight observers. Eight agents reading your bank statements, your health data, your email, your code, your creative output, your market positions, your personal life. A correlation engine that sees across all of them. Cron jobs that run while you sleep.
+        - paragraph [ref=e329]: You have built a panopticon. And you are inside it.
+        - generic [ref=e330]:
+          - paragraph [ref=e331]: "\"The feeling is hard to name. It is the violent gap between how blind you were and how obvious everything feels now.\""
+          - generic [ref=e332]: Molly Cantillon
+        - paragraph [ref=e333]: "The difference between Cantillon's panopticon and Bentham's: you hold the keys. You can delete ~/health tomorrow. You can shut down the correlation engine. You can walk away. But you won't. Because now you can see."
+    - generic [ref=e335]:
+      - generic [ref=e336]: Zone 8 — Departing the Grounds
+      - heading "Synthesis and Departure" [level=2] [ref=e337]
+      - paragraph [ref=e338]: The reader leaves with the complete picture. Eight zones traversed. The tower inspected, ascended, and understood.
+      - heading "The Mental Model" [level=3] [ref=e339]
+      - generic [ref=e340]:
+        - generic [ref=e341]:
+          - generic [ref=e342]: The Core Insight
+          - paragraph [ref=e343]: Institutions built apparatus of sight that makes YOU legible to THEM. You remain blind to yourself. Claude Code lets you build your own apparatus, reversing the asymmetry.
+        - generic [ref=e344]:
+          - generic [ref=e345]: The Architecture
+          - paragraph [ref=e346]: "8 parallel isolated instances, each owning a life domain: 4 work (nox, metrics, email, growth) + 4 life (trades, health, writing, personal). Filesystem as memory. Explicit handoffs."
+        - generic [ref=e347]:
+          - generic [ref=e348]: The Implementation
+          - paragraph [ref=e349]: "Standard Unix tools: directories, cron, tmux, bash scripts. No complex orchestration. No proprietary framework. Simple systems are debuggable."
+        - generic [ref=e350]:
+          - generic [ref=e351]: The Philosophy
+          - paragraph [ref=e352]: Self-surveillance is power. But power requires restraint. Maintain a "meta-level outside the system." Be ready to delete any domain. "We must continue to live outside it."
+        - generic [ref=e353]:
+          - generic [ref=e354]: The Trade-off
+          - paragraph [ref=e355]: Using Claude means Anthropic sees everything. But "chosen beats imposed." This is a conscious trade, not manipulation. The data flow is visible and understood.
+        - generic [ref=e356]:
+          - generic [ref=e357]: The Warning
+          - paragraph [ref=e358]: Over-optimization is self-imprisonment. When metrics contradict lived experience, trust experience. The system is a tool, not a master.
+      - heading "Panopticon vs. Gas Town" [level=3] [ref=e359]
+      - table [ref=e360]:
+        - rowgroup [ref=e361]:
+          - row "Aspect Panopticon Gas Town" [ref=e362]:
+            - columnheader "Aspect" [ref=e363]
+            - columnheader "Panopticon" [ref=e364]
+            - columnheader "Gas Town" [ref=e365]
+        - rowgroup [ref=e366]:
+          - row "Purpose Personal life automation Code factory at scale" [ref=e367]:
+            - cell "Purpose" [ref=e368]:
+              - strong [ref=e369]: Purpose
+            - cell "Personal life automation" [ref=e370]
+            - cell "Code factory at scale" [ref=e371]
+          - row "Scale Individual Team/project" [ref=e372]:
+            - cell "Scale" [ref=e373]:
+              - strong [ref=e374]: Scale
+            - cell "Individual" [ref=e375]
+            - cell "Team/project" [ref=e376]
+          - row "Parallelism 8 concurrent domains Unlimited polecats" [ref=e377]:
+            - cell "Parallelism" [ref=e378]:
+              - strong [ref=e379]: Parallelism
+            - cell "8 concurrent domains" [ref=e380]
+            - cell "Unlimited polecats" [ref=e381]
+          - row "Coordination Human-mediated handoffs Imperator/orchestrator" [ref=e382]:
+            - cell "Coordination" [ref=e383]:
+              - strong [ref=e384]: Coordination
+            - cell "Human-mediated handoffs" [ref=e385]
+            - cell "Imperator/orchestrator" [ref=e386]
+          - row "Persistence Directory-based Git worktrees" [ref=e387]:
+            - cell "Persistence" [ref=e388]:
+              - strong [ref=e389]: Persistence
+            - cell "Directory-based" [ref=e390]
+            - cell "Git worktrees" [ref=e391]
+      - heading "Key Quotes" [level=3] [ref=e392]
+      - generic [ref=e393]:
+        - generic [ref=e394]:
+          - paragraph [ref=e395]: "\"Goodhart says optimize for a metric and you game your way to hollow victory.\""
+          - generic [ref=e396]: On the danger of self-surveillance
+        - generic [ref=e397]:
+          - paragraph [ref=e398]: "\"Sometimes the tower has a landlord.\""
+          - generic [ref=e399]: On the Anthropic trade-off
+      - heading "Unanswered Questions" [level=3] [ref=e400]
+      - paragraph [ref=e401]: What's the actual cron configuration for overnight runs? How are credentials managed across 8 instances without leakage? What's the monthly API cost of running 8 parallel instances? How does she handle context overflow within a single domain? Does each domain have its own skills, or is there a shared skill library?
+      - paragraph [ref=e402]: These questions remain open. The architecture is clear. The implementation details at the edges are still emerging.
+      - generic [ref=e403]:
+        - paragraph [ref=e404]: "\"We must continue to live outside it.\""
+        - generic [ref=e405]: Molly Cantillon — on the only rule that matters
+  - contentinfo [ref=e406]:
+    - generic [ref=e407]:
+      - generic [ref=e408]:
+        - generic [ref=e409]: Source
+        - paragraph [ref=e410]: "@mollycantillon — Founder at NOX, ex-Stanford. Original post: 2026-01-07. 2.4K likes, 418K views, 3.8K bookmarks."
+      - generic [ref=e411]:
+        - generic [ref=e412]: Architecture
+        - paragraph [ref=e413]: 8 parallel Claude instances × filesystem-as-memory × cron automation × explicit handoffs = self-legibility at scale.
+      - generic [ref=e414]:
+        - generic [ref=e415]: Extraction
+        - paragraph [ref=e416]: Deep extraction, Yegge-level depth. 950 lines of source material. 17 parts mapped to 8 zones via the Reversed Panopticon metaphor.
