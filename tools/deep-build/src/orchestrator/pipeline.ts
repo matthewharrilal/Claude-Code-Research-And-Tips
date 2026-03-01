@@ -266,10 +266,17 @@ async function runPhaseA(
       ? state.currentPass
       : 1;
 
+    let lastBuilderFailed = false;
     for (let passWithin = startPass; passWithin <= PASSES_PER_SUBSET; passWithin++) {
       const globalPassNumber = (subsetId - 1) * PASSES_PER_SUBSET + passWithin;
       const rotationIndex = getRotationIndex(passWithin);
       const role = PASS_ROLES[passWithin] ?? 'builder';
+
+      // Skip verifier if the preceding builder pass failed (no artifact to verify)
+      if (role === 'verifier' && lastBuilderFailed) {
+        deps.log('warn', `Pass ${globalPassNumber} (S${subsetId}P${passWithin}) [verifier] skipped — previous builder failed`);
+        continue;
+      }
 
       const passDef: PassDefinition = {
         passNumber: globalPassNumber,
@@ -298,8 +305,10 @@ async function runPhaseA(
 
         if (result.success) {
           deps.log('info', `Pass ${globalPassNumber} complete. Cost: $${result.cost.toFixed(2)}`);
+          if (role === 'builder') lastBuilderFailed = false;
         } else {
           deps.log('warn', `Pass ${globalPassNumber} failed: ${result.error}`);
+          if (role === 'builder') lastBuilderFailed = true;
         }
       } catch (error) {
         if (error instanceof BudgetExceededError) {
@@ -775,7 +784,12 @@ export async function createDefaultDeps(config: PipelineConfig): Promise<Pipelin
         if (pass.passNumber > 1) {
           const prevPassDir = path.join(cfg.outputDir, '_passes', `pass-${String(pass.passNumber - 1).padStart(3, '0')}`);
           const prevBackup = path.join(prevPassDir, 'artifact-backup.html');
-          prevArtifact = readFileChecked(prevBackup) ?? '';
+          try {
+            prevArtifact = readFileChecked(prevBackup);
+          } catch {
+            // Previous builder may have failed — no backup artifact exists. Diff against empty.
+            prevArtifact = '';
+          }
         }
         const diff = diffArtifact(prevArtifact, currentArtifact);
         const assembled = assembleVerifierPrompt(pass, state, cfg, diff.summary);
