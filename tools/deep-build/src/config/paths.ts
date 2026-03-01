@@ -5,6 +5,7 @@
 
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import fs from 'node:fs';
 
 /** Directory containing this source file (src/config/) */
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -29,12 +30,7 @@ export function resolveProjectRoot(): string {
   let dir = PACKAGE_ROOT;
   for (let i = 0; i < 10; i++) {
     const gitDir = path.join(dir, '.git');
-    try {
-      const fs = require('node:fs');
-      if (fs.existsSync(gitDir)) return dir;
-    } catch {
-      // fs not available, fall through
-    }
+    if (fs.existsSync(gitDir)) return dir;
     const parent = path.dirname(dir);
     if (parent === dir) break;
     dir = parent;

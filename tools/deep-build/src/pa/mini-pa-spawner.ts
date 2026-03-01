@@ -12,6 +12,7 @@ import { spawnClaude } from '../agents/claude-cli.js';
 import { AUDITOR_FOCUS, getQuestionsForAuditor } from '../config/pa-questions.js';
 import { MINI_PA_AUDITORS } from '../config/constants.js';
 import { ensureDir, readFileChecked } from '../utils.js';
+import { ValidationError } from '../types/errors.js';
 
 /**
  * Build the mini-PA auditor prompt (same structure as full PA, but shorter).
@@ -120,12 +121,16 @@ export async function spawnMiniPA(
   // Use only the desktop screenshot
   const desktopScreenshot = screenshotPaths.find((s) => s.viewport.label === 'desktop');
   if (!desktopScreenshot) {
-    throw new Error('Mini-PA requires a desktop viewport screenshot');
+    throw new ValidationError('Mini-PA requires a desktop viewport screenshot');
   }
 
   console.log(`[mini-pa] Spawning ${MINI_PA_AUDITORS.length} auditors (${MINI_PA_AUDITORS.join(', ')})...`);
 
   const auditorIds = [...MINI_PA_AUDITORS] as AuditorId[];
+
+  // Include screenshot directory so auditors can read screenshot files
+  const screenshotDir = path.dirname(desktopScreenshot.path);
+  const additionalDirs = [...new Set([outputDir, path.dirname(htmlPath), screenshotDir])];
 
   const results = await Promise.allSettled(
     auditorIds.map(async (auditorId): Promise<AuditorReport> => {
@@ -136,7 +141,7 @@ export async function spawnMiniPA(
         role: 'pa-auditor',
         prompt,
         workspaceDir: config.workspaceDir,
-        additionalDirs: [outputDir, path.dirname(htmlPath)],
+        additionalDirs,
       });
 
       const reportText = response.result;

@@ -12,6 +12,7 @@ import type { PipelineConfig } from '../types/pipeline.js';
 import { spawnClaude } from '../agents/claude-cli.js';
 import { AUDITOR_FOCUS, getQuestionsForAuditor } from '../config/pa-questions.js';
 import { ensureDir, readFileChecked } from '../utils.js';
+import { OrchestratorError } from '../types/errors.js';
 
 const PARALLEL_AUDITORS: AuditorId[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const MIN_SUCCESSFUL_AUDITORS = 5;
@@ -174,6 +175,10 @@ export async function spawnAuditors(
   // Phase 1: Spawn A-H in parallel
   console.log('[pa] Spawning 8 parallel auditors (A-H)...');
 
+  // Collect unique directories containing screenshots so auditors can read them via --add-dir
+  const screenshotDirs = [...new Set(screenshotPaths.map(s => path.dirname(s.path)))];
+  const additionalDirs = [...new Set([outputDir, path.dirname(htmlPath), ...screenshotDirs])];
+
   const parallelResults = await Promise.allSettled(
     PARALLEL_AUDITORS.map(async (auditorId): Promise<AuditorReport> => {
       const prompt = buildAuditorPrompt(auditorId, screenshotPaths, htmlPath, guardrailsPath);
@@ -183,7 +188,7 @@ export async function spawnAuditors(
         role: 'pa-auditor',
         prompt,
         workspaceDir: config.workspaceDir,
-        additionalDirs: [outputDir, path.dirname(htmlPath)],
+        additionalDirs,
       });
 
       const reportText = response.result;
@@ -248,7 +253,10 @@ export async function spawnAuditors(
   console.log(`[pa] A-H complete: ${successCount}/8 succeeded, ${failCount}/8 failed, ${substantiveCount}/8 substantive`);
 
   if (substantiveCount === 0) {
-    throw new Error('[pa] All 8 parallel auditors (A-H) failed or returned empty reports. Cannot proceed to weaver with zero substantive reports.');
+    throw new OrchestratorError(
+      '[pa] All 8 parallel auditors (A-H) failed or returned empty reports. Cannot proceed to weaver with zero substantive reports.',
+      'invalid-response',
+    );
   }
 
   if (substantiveCount < MIN_SUCCESSFUL_AUDITORS) {
@@ -266,7 +274,7 @@ export async function spawnAuditors(
       role: 'integrative-auditor',
       prompt: integrativePrompt,
       workspaceDir: config.workspaceDir,
-      additionalDirs: [outputDir, path.dirname(htmlPath)],
+      additionalDirs,
     });
 
     const intReportText = intResponse.result;

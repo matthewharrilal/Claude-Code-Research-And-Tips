@@ -3,7 +3,7 @@
  * All mutations return new state objects (immutable pattern).
  */
 
-import type { PipelineState, InFlightPass } from '../types/state.js';
+import type { PipelineState } from '../types/state.js';
 import { atomicWriteFile, readFileChecked, safeJsonParse } from '../utils.js';
 import { StateCorruptionError } from '../types/errors.js';
 
@@ -99,43 +99,5 @@ export function validateState(state: PipelineState): { valid: boolean; errors: s
   return { valid: errors.length === 0, errors };
 }
 
-/**
- * Mark a pass as in-flight (started but not yet completed).
- * Used for crash recovery — if the process dies, resume knows which pass to re-run.
- */
-export function setInFlightPass(
-  state: PipelineState,
-  pass: { passNumber: number; role: string },
-): PipelineState {
-  return {
-    ...state,
-    inFlightPass: {
-      passNumber: pass.passNumber,
-      startedAt: new Date().toISOString(),
-      role: pass.role,
-    },
-  };
-}
-
-/**
- * Clear the in-flight pass marker after successful completion.
- */
-export function clearInFlightPass(state: PipelineState): PipelineState {
-  const { inFlightPass: _, ...rest } = state;
-  return rest as PipelineState;
-}
-
-/**
- * Update the pipeline phase with an optional reason.
- */
-export function updatePhase(
-  state: PipelineState,
-  phase: PipelineState['currentPhase'],
-  reason?: string,
-): PipelineState {
-  return {
-    ...state,
-    currentPhase: phase,
-    phaseReason: reason,
-  };
-}
+// NOTE: inFlightPass is set/cleared inline in pass-executor.ts.
+// Phase transitions are handled inline in pipeline.ts.

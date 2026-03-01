@@ -26,7 +26,7 @@ async function findAvailablePort(startPort: number): Promise<number> {
     if (available) return port;
     port++;
   }
-  throw new Error(`No available port found in range ${startPort}-${startPort + 99}`);
+  throw new PlaywrightError(`No available port found in range ${startPort}-${startPort + 99}`);
 }
 
 /**
@@ -37,7 +37,7 @@ export async function startArtifactServer(
   htmlPath: string,
 ): Promise<{ url: string; kill: () => void }> {
   if (!fs.existsSync(htmlPath)) {
-    throw new Error(`HTML artifact not found: ${htmlPath}`);
+    throw new FileNotFoundError(htmlPath);
   }
 
   const port = await findAvailablePort(8765);

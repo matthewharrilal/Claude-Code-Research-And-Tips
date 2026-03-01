@@ -350,6 +350,7 @@ async function runPhaseA(
       atomicWriteFile(retroPath, retroResponse.result ?? '');
       state = updateCostFromResponse(state, retroResponse, 'retrospective');
     } catch (error) {
+      if (error instanceof BudgetExceededError) throw error;
       deps.log('warn', `Retrospective for subset ${subsetId} failed (non-fatal): ${error}`);
     }
 
@@ -370,6 +371,7 @@ async function runPhaseA(
           result: verifierResponse.result?.includes('CRITICAL') ? 'CRITICAL' : 'OK',
         });
       } catch (error) {
+        if (error instanceof BudgetExceededError) throw error;
         deps.log('warn', `Cross-subset verification failed (non-fatal): ${error}`);
       }
     }
@@ -413,6 +415,7 @@ async function runPhaseB(
     try {
       gateResults = await deps.runGates(state.artifactPath, config);
     } catch (error) {
+      if (error instanceof BudgetExceededError) throw error;
       deps.log('warn', `Gate runner failed (non-fatal): ${error}`);
       gateResults = {};
     }
@@ -553,7 +556,13 @@ async function runPhaseB(
       try {
         // Read weaver synthesis report from disk (saved by weaver-spawner)
         const weaverReportPath = path.join(config.outputDir, '_pa', 'weaver-synthesis.md');
-        const weaverReportText = readFileChecked(weaverReportPath) ?? weaverVerdict.narrativeSummary;
+        let weaverReportText: string;
+        try {
+          weaverReportText = readFileChecked(weaverReportPath);
+        } catch {
+          deps.log('warn', 'Weaver report not found on disk, using narrative summary from verdict');
+          weaverReportText = weaverVerdict.narrativeSummary;
+        }
         const refineResponse = await deps.spawnRefineBuilder(
           weaverReportText,
           state,
@@ -561,7 +570,9 @@ async function runPhaseB(
         );
         state = updateCostFromResponse(state, refineResponse, 'refine-builder');
 
-        // Extract and write refined HTML
+        // Extract refined HTML from response text.
+        // The refine builder has Read/Write/Edit tools, so it may have written
+        // the artifact directly to disk. Check both response and disk.
         const refinedHtml = extractRefinedHtml(refineResponse.result ?? '');
         if (refinedHtml) {
           atomicWriteFile(state.artifactPath, refinedHtml);
@@ -570,10 +581,24 @@ async function runPhaseB(
             currentArtifactHash: sha256(refinedHtml),
             artifactSizeHistory: [...state.artifactSizeHistory, refinedHtml.length],
           };
+        } else if (fs.existsSync(state.artifactPath)) {
+          // Refine builder may have written directly to disk via Edit/Write tools.
+          // Update hash from whatever is on disk now.
+          const diskArtifact = fs.readFileSync(state.artifactPath, 'utf-8');
+          const diskHash = sha256(diskArtifact);
+          if (diskHash !== state.currentArtifactHash) {
+            deps.log('info', 'Refine builder wrote artifact to disk directly (no HTML in response)');
+            state = {
+              ...state,
+              currentArtifactHash: diskHash,
+              artifactSizeHistory: [...state.artifactSizeHistory, diskArtifact.length],
+            };
+          }
         }
         await deps.saveState(state, config);
         deps.log('info', `Refinement complete. Cost: $${(refineResponse.total_cost_usd ?? 0).toFixed(2)}`);
       } catch (error) {
+        if (error instanceof BudgetExceededError) throw error;
         deps.log('error', `Refine builder failed: ${error}`);
         // Continue to next PA cycle even if refinement fails
       }
@@ -909,7 +934,7 @@ export async function createDefaultDeps(config: PipelineConfig): Promise<Pipelin
         const idChar = basename.replace('auditor-', '').toUpperCase();
         const auditorId = (idChar || 'A') as import('../types/pa.js').AuditorId;
         let reportText = '';
-        try { reportText = fs.readFileSync(p, 'utf-8'); } catch { /* file may not exist if auditor failed */ }
+        try { reportText = fs.readFileSync(p, 'utf-8'); } catch { console.error(`[pipeline] Auditor report file unreadable (auditor may have failed): ${p}`); }
         return {
           auditorId,
           focusArea: AUDITOR_FOCUS[auditorId] ?? '',

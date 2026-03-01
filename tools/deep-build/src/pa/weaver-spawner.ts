@@ -12,6 +12,7 @@ import type { WeaverVerdict } from '../types/state.js';
 import type { PipelineConfig } from '../types/pipeline.js';
 import { spawnClaude } from '../agents/claude-cli.js';
 import { ensureDir, readFileChecked } from '../utils.js';
+import { OrchestratorError } from '../types/errors.js';
 
 /**
  * Build the weaver prompt.
@@ -143,7 +144,10 @@ function parseWeaverVerdict(responseText: string): WeaverVerdict {
   }
 
   if (candidates.length === 0) {
-    throw new Error('Weaver response does not contain a ```json block with WeaverVerdict');
+    throw new OrchestratorError(
+      'Weaver response does not contain a ```json block with WeaverVerdict',
+      'invalid-response',
+    );
   }
 
   const required = ['pa05Score', 'tier5', 'top5Fixes', 'emotionalArc', 'soulViolations', 'verdict', 'mode', 'narrativeSummary'];
@@ -163,7 +167,10 @@ function parseWeaverVerdict(responseText: string): WeaverVerdict {
       // Validate all required fields
       const missing = required.filter(f => !(f in parsed));
       if (missing.length > 0) {
-        throw new Error(`WeaverVerdict missing required field(s): ${missing.join(', ')}`);
+        throw new OrchestratorError(
+          `WeaverVerdict missing required field(s): ${missing.join(', ')}`,
+          'invalid-response',
+        );
       }
       return parsed as unknown as WeaverVerdict;
     }
@@ -175,12 +182,18 @@ function parseWeaverVerdict(responseText: string): WeaverVerdict {
   try {
     parsed = JSON.parse(candidates[candidates.length - 1]);
   } catch (err) {
-    throw new Error(`Failed to parse WeaverVerdict JSON from ${candidates.length} candidate(s): ${err instanceof Error ? err.message : String(err)}`);
+    throw new OrchestratorError(
+      `Failed to parse WeaverVerdict JSON from ${candidates.length} candidate(s): ${err instanceof Error ? err.message : String(err)}`,
+      'invalid-response',
+    );
   }
 
   const missing = required.filter(f => !(f in parsed));
   if (missing.length > 0) {
-    throw new Error(`WeaverVerdict missing required field(s): ${missing.join(', ')}. Found keys: ${Object.keys(parsed).join(', ')}`);
+    throw new OrchestratorError(
+      `WeaverVerdict missing required field(s): ${missing.join(', ')}. Found keys: ${Object.keys(parsed).join(', ')}`,
+      'invalid-response',
+    );
   }
 
   return parsed as unknown as WeaverVerdict;
