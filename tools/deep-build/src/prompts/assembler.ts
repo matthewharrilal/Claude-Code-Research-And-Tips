@@ -31,20 +31,6 @@ export function loadTemplate(templateName: string): PromptTemplate {
   return { name: templateName, content, filePath };
 }
 
-/**
- * Load all .md templates from the templates directory.
- */
-export function loadAllTemplates(): Map<string, PromptTemplate> {
-  const map = new Map<string, PromptTemplate>();
-  if (!fs.existsSync(TEMPLATES_DIR)) return map;
-  for (const entry of fs.readdirSync(TEMPLATES_DIR)) {
-    if (entry.endsWith('.md')) {
-      map.set(entry, loadTemplate(entry));
-    }
-  }
-  return map;
-}
-
 // ---------------------------------------------------------------------------
 // Formatting helpers
 // ---------------------------------------------------------------------------
@@ -428,87 +414,9 @@ export function assembleContentAnalysisPrompt(
   return buildAssembledPrompt(template, vars, null, null, null);
 }
 
-export function assemblePaAuditorPrompt(
-  auditorId: string,
-  assignedQuestions: string[],
-  screenshotPaths: string[],
-  htmlPath: string,
-  guardrailsPath: string,
-): AssembledPrompt {
-  const template = loadTemplate('pa-auditor.md');
-  const vars = new Map<PromptVariableName, string>();
-
-  vars.set('AUDITOR_ID', auditorId);
-  vars.set('ASSIGNED_QUESTIONS', assignedQuestions.join('\n'));
-  vars.set('SCREENSHOT_PATHS', screenshotPaths.map(p => `- ${p}`).join('\n'));
-  vars.set('CURRENT_ARTIFACT', loadFileOrEmpty(htmlPath));
-  vars.set('PA_GUARDRAILS', loadFileOrEmpty(guardrailsPath));
-
-  // Experiential protocol: Section 0 instructions (inline in template, not a variable we load)
-  // The template itself contains the experiential protocol text.
-  // We only set it if the template uses it as a variable.
-  vars.set('EXPERIENTIAL_PROTOCOL',
-    'Look at the screenshots FIRST. Form your own impressions before reading any questions or guidelines. ' +
-    'Write 3-5 sentences capturing your raw experiential response. Only then proceed to the assigned questions.',
-  );
-
-  return buildAssembledPrompt(template, vars, null, null, null);
-}
-
-export function assemblePaIntegrativePrompt(
-  auditorReportPaths: string[],
-  screenshotPaths: string[],
-  htmlPath: string,
-  guardrailsPath: string,
-): AssembledPrompt {
-  const template = loadTemplate('pa-integrative.md');
-  const vars = new Map<PromptVariableName, string>();
-
-  // Concatenate all auditor reports
-  const reports = auditorReportPaths.map(p => {
-    const content = loadFileOrEmpty(p);
-    const name = path.basename(p, '.md');
-    return `<!-- === Auditor Report: ${name} === -->\n${content}`;
-  }).join('\n\n---\n\n');
-
-  vars.set('AUDITOR_REPORTS', reports);
-  vars.set('SCREENSHOT_PATHS', screenshotPaths.map(p => `- ${p}`).join('\n'));
-  vars.set('CURRENT_ARTIFACT', loadFileOrEmpty(htmlPath));
-  vars.set('PA_GUARDRAILS', loadFileOrEmpty(guardrailsPath));
-
-  return buildAssembledPrompt(template, vars, null, null, null);
-}
-
-export function assembleWeaverPrompt(
-  auditorReportPaths: string[],
-  screenshotPaths: string[],
-  convictionBrief: string,
-  builderReflection: string,
-  gateResults: string,
-  researchFiles: string,
-  htmlPath: string,
-  weaverGuardrailsPath: string,
-): AssembledPrompt {
-  const template = loadTemplate('pa-weaver.md');
-  const vars = new Map<PromptVariableName, string>();
-
-  const reports = auditorReportPaths.map(p => {
-    const content = loadFileOrEmpty(p);
-    const name = path.basename(p, '.md');
-    return `<!-- === Auditor Report: ${name} === -->\n${content}`;
-  }).join('\n\n---\n\n');
-
-  vars.set('AUDITOR_REPORTS', reports);
-  vars.set('SCREENSHOT_PATHS', screenshotPaths.map(p => `- ${p}`).join('\n'));
-  vars.set('CONVICTION_BRIEF', convictionBrief);
-  vars.set('BUILDER_REFLECTION', builderReflection);
-  vars.set('GATE_RESULTS', gateResults);
-  vars.set('RESEARCH_FILES', researchFiles);
-  vars.set('CURRENT_ARTIFACT', loadFileOrEmpty(htmlPath));
-  vars.set('PA_GUARDRAILS_WEAVER', loadFileOrEmpty(weaverGuardrailsPath));
-
-  return buildAssembledPrompt(template, vars, null, null, null);
-}
+// Note: assemblePaAuditorPrompt, assemblePaIntegrativePrompt, and assembleWeaverPrompt
+// were removed — PA prompt assembly is handled inline by auditor-spawner.ts and
+// weaver-spawner.ts respectively, each with their own buildXxxPrompt() functions.
 
 export function assembleRefineBuilderPrompt(
   weaverSynthesis: string,

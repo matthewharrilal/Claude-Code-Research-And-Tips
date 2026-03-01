@@ -9,7 +9,6 @@
  */
 
 import type { PipelineState, ConvictionEntry } from '../types/state.js';
-import type { ConvictionAdditionRaw } from '../types/pass.js';
 import { MAX_CONVICTION_ENTRIES } from '../config/constants.js';
 
 const CONVICTION_DIMENSIONS = [
@@ -103,28 +102,6 @@ export function extractConvictionFromResponse(
   }
 
   return entries;
-}
-
-/**
- * Parse a ConvictionAdditionRaw from extracted conviction text block.
- * Used by response-handler as an intermediate format before creating entries.
- */
-export function parseConvictionBlock(block: string): ConvictionAdditionRaw {
-  const raw: ConvictionAdditionRaw = {};
-
-  for (const dim of CONVICTION_DIMENSIONS) {
-    const label = dim.toUpperCase();
-    const pattern = new RegExp(
-      `^${label}:\\s*(.+?)(?=^(?:BUILT|TRYING|REJECTED|SURPRISED|WANTED|UNRESOLVED):|$)`,
-      'ms',
-    );
-    const match = block.match(pattern);
-    if (match && match[1]?.trim()) {
-      raw[dim] = match[1].trim();
-    }
-  }
-
-  return raw;
 }
 
 // formatConvictionLayer is in prompts/assembler.ts (canonical implementation).

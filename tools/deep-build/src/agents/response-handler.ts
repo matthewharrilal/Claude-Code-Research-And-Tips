@@ -1,52 +1,15 @@
 /**
  * Response handler for claude -p JSON output.
- * Extracts HTML artifacts, conviction additions, discovery logs,
- * and verifier observations from the result text.
+ * Extracts HTML artifacts and discovery logs from the result text.
+ *
+ * Note: parseClaudeResponse() was removed — claude-cli.ts handles JSON parsing
+ * via safeJsonParse directly. extractConvictionAddition() was removed — conviction
+ * extraction is handled by conviction-manager.ts:extractConvictionFromResponse().
+ * extractVerifierObservations() was removed — pass-executor.ts assigns
+ * verifierObservations directly from resultText.
  */
 
-import type { ClaudeResponse, ConvictionAdditionRaw } from '../types/pass.js';
-import { ClaudeInvocationError, HtmlExtractionError } from '../types/errors.js';
-import { safeJsonParse } from '../utils.js';
-
-/**
- * Parse raw JSON string from claude -p stdout into a ClaudeResponse.
- * Handles is_error checking, rate-limit detection, and truncated JSON.
- */
-export function parseClaudeResponse(rawJson: string): ClaudeResponse {
-  // Let safeJsonParse handle ALL truncation recovery — it has three-stage
-  // fallback (normal parse → lastIndexOf('}') → truncated response recovery).
-  // Doing lastIndexOf('}') here BEFORE safeJsonParse can silently discard data
-  // that safeJsonParse's recovery logic needs to see.
-  const response = safeJsonParse<ClaudeResponse>(rawJson.trim(), 'claude -p response');
-
-  // Check is_error FIRST
-  if (response.is_error) {
-    const resultText = response.result || '';
-
-    // Detect rate-limit patterns
-    if (isRateLimitPattern(resultText)) {
-      throw new ClaudeInvocationError(
-        `Claude returned rate-limit error: ${resultText.slice(0, 300)}`,
-        'rate-limit',
-      );
-    }
-
-    // Detect model overload
-    if (isOverloadPattern(resultText)) {
-      throw new ClaudeInvocationError(
-        `Claude returned overload error: ${resultText.slice(0, 300)}`,
-        'model-overload',
-      );
-    }
-
-    throw new ClaudeInvocationError(
-      `Claude returned error (subtype: ${response.subtype}): ${resultText.slice(0, 500)}`,
-      'invalid-response',
-    );
-  }
-
-  return response;
-}
+import { HtmlExtractionError } from '../types/errors.js';
 
 /**
  * Extract HTML artifact from builder result text.
@@ -100,56 +63,6 @@ export function extractHtml(resultText: string): { html: string; method: 'marker
 }
 
 /**
- * Extract conviction addition from builder result text.
- * Returns null if markers are missing (not an error condition).
- *
- * Expected format between markers:
- *   BUILT: ...
- *   TRYING: ...
- *   REJECTED: ...
- *   SURPRISED: ...
- *   WANTED: ...
- *   UNRESOLVED: ...
- */
-export function extractConvictionAddition(resultText: string): ConvictionAdditionRaw | null {
-  const match = resultText.match(
-    /<!--\s*CONVICTION_ADDITION_START\s*-->\s*([\s\S]*?)\s*<!--\s*CONVICTION_ADDITION_END\s*-->/
-  );
-
-  if (!match || !match[1].trim()) {
-    console.warn('[response-handler] No conviction addition markers found in response');
-    return null;
-  }
-
-  const block = match[1].trim();
-  const conviction: ConvictionAdditionRaw = {};
-
-  const dimensions: Array<{ key: keyof ConvictionAdditionRaw; pattern: RegExp }> = [
-    { key: 'built', pattern: /BUILT:\s*(.*?)(?=\n(?:TRYING|REJECTED|SURPRISED|WANTED|UNRESOLVED):|$)/s },
-    { key: 'trying', pattern: /TRYING:\s*(.*?)(?=\n(?:REJECTED|SURPRISED|WANTED|UNRESOLVED):|$)/s },
-    { key: 'rejected', pattern: /REJECTED:\s*(.*?)(?=\n(?:SURPRISED|WANTED|UNRESOLVED):|$)/s },
-    { key: 'surprised', pattern: /SURPRISED:\s*(.*?)(?=\n(?:WANTED|UNRESOLVED):|$)/s },
-    { key: 'wanted', pattern: /WANTED:\s*(.*?)(?=\n(?:UNRESOLVED):|$)/s },
-    { key: 'unresolved', pattern: /UNRESOLVED:\s*(.*?)$/s },
-  ];
-
-  for (const { key, pattern } of dimensions) {
-    const dimMatch = block.match(pattern);
-    if (dimMatch && dimMatch[1].trim()) {
-      conviction[key] = dimMatch[1].trim();
-    }
-  }
-
-  // If we found markers but no dimensions, still return the raw block
-  if (Object.keys(conviction).length === 0) {
-    console.warn('[response-handler] Conviction markers found but no dimensions parsed');
-    return null;
-  }
-
-  return conviction;
-}
-
-/**
  * Extract discovery log entries from builder result text.
  * Returns empty array if markers are missing (not an error condition).
  *
@@ -174,39 +87,4 @@ export function extractDiscoveryLog(resultText: string): string[] {
     .filter(line => line.length > 0)
     .map(line => line.replace(/^[-*•]\s*/, '').trim())
     .filter(line => line.length > 0);
-}
-
-/**
- * Extract verifier observations from result text.
- * Verifiers return holistic observation text — the full result is the observation.
- * Returns null if result is empty.
- */
-export function extractVerifierObservations(resultText: string): string | null {
-  const trimmed = resultText.trim();
-  if (!trimmed) {
-    console.warn('[response-handler] Verifier returned empty result text');
-    return null;
-  }
-  return trimmed;
-}
-
-/**
- * Check if text contains rate-limit patterns.
- */
-function isRateLimitPattern(text: string): boolean {
-  const lower = text.toLowerCase();
-  return lower.includes('rate limit') ||
-    lower.includes('rate_limit') ||
-    lower.includes('429') ||
-    lower.includes('too many requests');
-}
-
-/**
- * Check if text contains overload patterns.
- */
-function isOverloadPattern(text: string): boolean {
-  const lower = text.toLowerCase();
-  return lower.includes('overloaded') ||
-    lower.includes('503') ||
-    lower.includes('capacity');
 }

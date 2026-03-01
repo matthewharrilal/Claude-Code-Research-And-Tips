@@ -34,15 +34,6 @@ export const TIER5_MINIMUM = 6;
 /** Maximum conviction layer entries (FIFO merge when exceeded) */
 export const MAX_CONVICTION_ENTRIES = 10;
 
-/** Maximum discovery log entries */
-export const MAX_DISCOVERY_ENTRIES = 100;
-
-/** Token limit for assembled prompts (~100K tokens) */
-export const TOKEN_LIMIT = 100_000;
-
-/** Token warning threshold (start considering trims) */
-export const TOKEN_WARNING = 90_000;
-
 /** Token trim threshold (actively trim) */
 export const TOKEN_TRIM = 95_000;
 
@@ -74,11 +65,8 @@ export const CROSS_SUBSET_VERIFY_AFTER = [2, 4, 6];
 /** Stall detection: consecutive no-improvement cycles before force SHIP */
 export const STALL_THRESHOLD = 2;
 
-/** Mini-PA auditor IDs (subset of A-H) */
+/** Mini-PA auditor IDs — A (PA-05 owner), C (spatial/void), G (metaphor) */
 export const MINI_PA_AUDITORS = ['A', 'C', 'G'] as const;
-
-/** Mini-PA uses only desktop viewport */
-export const MINI_PA_VIEWPORT_INDEX = 0;
 
 /** Per-role max-turns configuration */
 export const MAX_TURNS: Record<string, number> = {
@@ -105,7 +93,7 @@ export const ALLOWED_TOOLS: Record<string, string> = {
   'pa-auditor': 'Read,Glob,Grep',
   'integrative-auditor': 'Read,Glob,Grep',
   'weaver': 'Read,Glob',
-  'refine-builder': 'Read,Write,Edit,Bash,Glob,Grep',
+  'refine-builder': 'Read,Write,Edit,Glob,Grep',
 };
 
 /** Roles that need --strict-mcp-config (deny Playwright) */

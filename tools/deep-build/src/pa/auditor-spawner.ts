@@ -14,7 +14,10 @@ import { AUDITOR_FOCUS, getQuestionsForAuditor } from '../config/pa-questions.js
 import { ensureDir, readFileChecked } from '../utils.js';
 import { OrchestratorError } from '../types/errors.js';
 
-const PARALLEL_AUDITORS: AuditorId[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+// pa-deployment.md Section 1.2: 9 domain auditors (A-I) run in parallel.
+// The Integrative Auditor (Section 1.5) is a separate 10th agent with no
+// assigned questions, spawned sequentially after all 9 domain auditors.
+const PARALLEL_AUDITORS: AuditorId[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
 const MIN_SUCCESSFUL_AUDITORS = 5;
 
 /**
@@ -107,16 +110,18 @@ function buildIntegrativePrompt(
     .map((s) => `- ${s.viewport.label} (${s.viewport.width}x${s.viewport.height}): ${s.path}`)
     .join('\n');
 
-  return `You are PA Auditor I: Cross-cutting Synthesis (Integrative).
+  return `You are the Integrative Auditor (gestalt impression, no assigned questions).
 
 ## Your Task
 
-You have received reports from ${reports.filter((r) => r.success).length} independent auditors. Your job is to:
+You have received reports from ${reports.filter((r) => r.success).length} independent auditors (A-I). Your job is to:
 1. Read the screenshots for your own experiential anchor
-2. Identify CROSS-CUTTING patterns that span multiple auditors' domains
-3. Find contradictions between auditors
-4. Identify issues that fell between the cracks (no auditor's primary domain)
-5. Synthesize a unified severity ranking
+2. Write a free-form gestalt impression (what FEELS right, what FEELS wrong)
+3. Identify CROSS-CUTTING patterns that span multiple auditors' domains
+4. Find contradictions between auditors
+5. Identify issues that fell between the cracks (no auditor's primary domain)
+6. Observe the emotional arc (SURPRISE, DELIGHT, AUTHORITY, EARNED CLOSURE)
+7. Synthesize a unified severity ranking
 
 ## Screenshots
 
@@ -133,7 +138,10 @@ ${htmlPath}
 
 ## Output Format
 
-# Auditor I: Cross-cutting Synthesis
+# Integrative Auditor: Cross-cutting Synthesis
+
+## Gestalt Impression
+[Free-form response: what feels right, what feels wrong, overall emotional arc]
 
 ## Cross-cutting Patterns
 [Issues that appear across 3+ auditor domains]
@@ -172,8 +180,8 @@ export async function spawnAuditors(
   const paDir = path.join(outputDir, '_pa');
   ensureDir(paDir);
 
-  // Phase 1: Spawn A-H in parallel
-  console.log('[pa] Spawning 8 parallel auditors (A-H)...');
+  // Phase 1: Spawn A-I in parallel (9 domain auditors per pa-deployment.md Section 1.2)
+  console.log('[pa] Spawning 9 parallel auditors (A-I)...');
 
   // Collect unique directories containing screenshots so auditors can read them via --add-dir
   const screenshotDirs = [...new Set(screenshotPaths.map(s => path.dirname(s.path)))];
@@ -250,11 +258,11 @@ export async function spawnAuditors(
     }
   }
 
-  console.log(`[pa] A-H complete: ${successCount}/8 succeeded, ${failCount}/8 failed, ${substantiveCount}/8 substantive`);
+  console.log(`[pa] A-I complete: ${successCount}/9 succeeded, ${failCount}/9 failed, ${substantiveCount}/9 substantive`);
 
   if (substantiveCount === 0) {
     throw new OrchestratorError(
-      '[pa] All 8 parallel auditors (A-H) failed or returned empty reports. Cannot proceed to weaver with zero substantive reports.',
+      '[pa] All 9 parallel auditors (A-I) failed or returned empty reports. Cannot proceed to weaver with zero substantive reports.',
       'invalid-response',
     );
   }
@@ -263,11 +271,13 @@ export async function spawnAuditors(
     console.error(`[pa] WARNING: Only ${substantiveCount} substantive auditors (minimum ${MIN_SUCCESSFUL_AUDITORS}). Weaver will receive partial data.`);
   }
 
-  // Phase 2: Spawn integrative auditor (I) sequentially — reads A-H reports
-  console.log('[pa] Spawning integrative auditor (I)...');
+  // Phase 2: Spawn integrative auditor sequentially — reads A-I reports
+  // per pa-deployment.md Section 1.5: separate 10th agent, no assigned questions
+  console.log('[pa] Spawning integrative auditor...');
 
   const integrativePrompt = buildIntegrativePrompt(reports, screenshotPaths, htmlPath);
-  const integrativeReportPath = path.join(paDir, 'auditor-i.md');
+  // pa-deployment.md Section 1.5: output filename is pa-integrative.md (distinct from auditor-i.md)
+  const integrativeReportPath = path.join(paDir, 'pa-integrative.md');
 
   try {
     const intResponse = await spawnClaude({
@@ -280,9 +290,12 @@ export async function spawnAuditors(
     const intReportText = intResponse.result;
     fs.writeFileSync(integrativeReportPath, intReportText, 'utf-8');
 
+    // The integrative auditor is NOT one of the 9 domain auditors (A-I).
+    // We add it to the reports array for the weaver to consume, reusing
+    // the AuditorReport type with a synthetic focusArea.
     reports.push({
-      auditorId: 'I',
-      focusArea: AUDITOR_FOCUS.I,
+      auditorId: 'I' as AuditorId, // Reuse 'I' slot for weaver compatibility
+      focusArea: 'Integrative (gestalt, no assigned questions)',
       reportText: intReportText,
       questionsAnswered: [],
       reportPath: integrativeReportPath,
@@ -293,11 +306,11 @@ export async function spawnAuditors(
     });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
-    console.error(`[pa] Integrative auditor (I) failed: ${errorMsg}`);
+    console.error(`[pa] Integrative auditor failed: ${errorMsg}`);
 
     reports.push({
-      auditorId: 'I',
-      focusArea: AUDITOR_FOCUS.I,
+      auditorId: 'I' as AuditorId,
+      focusArea: 'Integrative (gestalt, no assigned questions)',
       reportText: '',
       questionsAnswered: [],
       reportPath: integrativeReportPath,

@@ -927,17 +927,27 @@ export async function createDefaultDeps(config: PipelineConfig): Promise<Pipelin
         evaluatedAt: new Date().toISOString(),
       };
       // Reconstruct AuditorReport objects with correct IDs from filenames.
-      // Filename pattern: auditor-{id}.md (e.g., auditor-a.md, auditor-i.md)
+      // Domain auditors: auditor-{id}.md (e.g., auditor-a.md, auditor-i.md)
+      // Integrative auditor: pa-integrative.md (distinct from domain auditor I)
       const { AUDITOR_FOCUS } = await import('../config/pa-questions.js');
       const auditorReports = auditorReportPaths.map(p => {
-        const basename = path.basename(p, '.md'); // e.g., "auditor-a"
-        const idChar = basename.replace('auditor-', '').toUpperCase();
-        const auditorId = (idChar || 'A') as import('../types/pa.js').AuditorId;
+        const basename = path.basename(p, '.md');
+        let auditorId: import('../types/pa.js').AuditorId;
+        let focusArea: string;
+        if (basename === 'pa-integrative') {
+          // Integrative auditor has no assigned questions, gestalt only
+          auditorId = 'I' as import('../types/pa.js').AuditorId;
+          focusArea = 'Integrative (gestalt, no assigned questions)';
+        } else {
+          const idChar = basename.replace('auditor-', '').toUpperCase();
+          auditorId = (idChar || 'A') as import('../types/pa.js').AuditorId;
+          focusArea = AUDITOR_FOCUS[auditorId] ?? '';
+        }
         let reportText = '';
         try { reportText = fs.readFileSync(p, 'utf-8'); } catch { console.error(`[pipeline] Auditor report file unreadable (auditor may have failed): ${p}`); }
         return {
           auditorId,
-          focusArea: AUDITOR_FOCUS[auditorId] ?? '',
+          focusArea,
           reportText,
           questionsAnswered: [] as string[],
           reportPath: p,
