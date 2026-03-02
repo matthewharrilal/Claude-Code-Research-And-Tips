@@ -1,10 +1,10 @@
 # Compositional-Core — Phase-Gated Protocol CLAUDE.md
 
 **STOP — READ THIS BEFORE TOUCHING ANYTHING.**
-You MUST read identity/prohibitions.md and vocabulary/tokens.css BEFORE any other action.
-Violating prohibitions = INVALID work. No exceptions. No shortcuts.
+You MUST read identity/identity.md, identity/vocabulary.md, and vocabulary/tokens.css BEFORE any other action.
+Violating soul principles = INVALID work. No exceptions. No shortcuts.
 
-**Last Updated:** 2026-02-16
+**Last Updated:** 2026-03-01
 **Status:** OPERATIONAL (Phase C Complete, /build-page Pipeline ACTIVE). ALWAYS FLAGSHIP -- every page at maximum compositional intensity. Tier routing REMOVED.
 
 ---
@@ -25,29 +25,49 @@ This IS:
 
 ## ALWAYS-LOAD — BEFORE ANY ACTION
 
-**MANDATORY:** Read these 2 files FIRST, for ANY task in compositional-core/:
+**MANDATORY:** Read these 4 files FIRST, for ANY task in compositional-core/:
 
-### 1. identity/prohibitions.md (353 lines)
+### 1. identity/identity.md (87 lines)
 
-22 prohibitions define KortAI through REFUSAL:
-- 8 ABSOLUTE (NEVER, zero exceptions): border-radius: 0, box-shadow: none, no drop-shadow, opacity: 1 on containers, no gradients, no pure black/white, serif ONLY for display, no decorative complexity
-- 12 CONDITIONAL (documented exceptions): no 2px borders (epidemic), no accent borders < 4px, + 10 structural rules
-- 2 META (process-level): no justification without research, no patterns without tension
+KortAI's character, soul principles, and refusals:
+- **Character:** Editorial purist, austere, warm earth tones + sharp geometry
+- **2 Soul Principles:** Angular geometry (border-radius: 0), no shadow/depth simulation (box-shadow: none)
+- **3 Identity Signatures:** Warm palette, typography trinity, 4px left-border callout system
+- **Internal Tensions:** Warmth vs severity, solid offset vs anti-shadow, vocabulary ceiling
+- **Refusals:** Absolute (no rounded corners, no shadows, no gradients, no semi-transparent backgrounds, no cool grays, no hover lift) + Conditional (documented exceptions)
+- **Diagnostics:** Bootstrap Test — if layout could exist in Bootstrap without modification, it lacks KortAI identity
 
-**WHY FIRST:** Defines identity through REFUSALS. Violating these = not KortAI.
+**WHY FIRST:** Defines identity through CHARACTER and REFUSALS. Violating soul principles = not KortAI.
 
-### 2. vocabulary/tokens.css (174 lines)
+### 2. identity/vocabulary.md (55 lines)
 
-65 tokens in :root block:
-- Soul constraints: --radius-sharp: 0 (NEVER override), box-shadow: none
-- Color palette: 8 values (warm editorial)
-- Typography trinity: 3 fonts (Instrument Serif, Inter, JetBrains Mono)
-- Spacing scale: 4px base unit, 6 anchors, 14 values
-- Border weights: 4px/3px/1px (semantic encoding)
+Design decisions & rationale — WHY the system makes each choice:
+- Palette decisions (warm cream, 2-color text hierarchy, semantic accents, zone backgrounds)
+- Typography decisions (literary feel, single type scale, h3 always italic)
+- Spacing decisions (4px base, inside vs between ratio, gestalt aliases)
+- Border decisions (3 weights not 4, 2px deliberately skipped)
+- Container width (860-1100px range, consistent within page)
 
-**WHY SECOND:** Source-first extraction grounds vocabulary in implementation reality.
+**WHY SECOND:** Connects every design token to its rationale. Understanding BEFORE vocabulary.
 
-**Total always-load: 527 lines (2 files)**
+### 3. vocabulary/tokens.css (124 lines)
+
+65 CSS tokens in :root block:
+- Color palette (8 values), typography trinity (3 fonts)
+- Spacing scale (4px base unit), border weights (4px/3px/1px)
+
+**WHY THIRD:** Implementation values grounded by identity and rationale.
+
+### 4. components/components.css (779 lines)
+
+CSS implementations for all components:
+- Callout system (5 types: info, tip, warning, essence, challenge)
+- Code blocks, tables, header/footer, bento grid, file tree
+- Dark zones, breathing zones, structural patterns
+
+**WHY FOURTH:** Reference layer — how mechanisms are implemented in CSS.
+
+**Total always-load: ~1,045 lines (4 files)**
 
 ---
 
@@ -86,14 +106,15 @@ The /build-page orchestrator automates all of this.
 ### Phase 0: Load Vocabulary + Library Prohibition
 
 **MANDATORY:**
-1. Read prohibitions.md (all 353 lines)
-2. Read tokens.css (all 174 lines)
+1. Read identity/identity.md (87 lines)
+2. Read identity/vocabulary.md (55 lines)
+3. Read vocabulary/tokens.css (124 lines)
 
 **PROHIBITED until Phase 5 (ABSOLUTE — violation invalidates entire derivation):**
 - ❌ case-studies/ directory
 - ❌ Prior explorations (DD-001 through CD-006)
 - ❌ Tension-test layouts
-- ❌ grammar/mechanism-catalog.md (permitted at Phase 4, NOT before)
+- ❌ grammar/mechanisms.md or grammar/grammar.md (permitted at Phase 4, NOT before)
 
 **WHY:** Library patterns are VALIDATION tools, not GENERATION tools. Reading before metaphor commitment = pattern-matching. This is the single highest-risk failure mode.
 
@@ -142,8 +163,10 @@ The /build-page orchestrator automates all of this.
 ### Phase 4: Mechanism Extraction
 
 **NOW PERMITTED:**
-- grammar/mechanism-catalog.md (first 200 lines)
-- components/components.css (all lines)
+- grammar/mechanisms.md (88 lines — all mechanisms)
+- grammar/grammar.md (149 lines — compositional rules + sequencing)
+- components/components.css (779 lines — CSS implementations)
+- components/components.md (37 lines — inventory with velocity/weight)
 
 **EXTRACT techniques (reusable):**
 - "Border-weight gradient encodes hierarchy" (technique)
@@ -188,7 +211,7 @@ opacity: 1; /* NO transparency on containers */
 
 **Check:**
 - 48 PA questions (Tier 1 mandatory five + Tier 2 standard fifteen)
-- Guardrails: 940px container, 16px spacing, 32px padding, 40% compression
+- Guardrails: 860-1100px container (consistent per page), 16px spacing, 32px padding, 40% compression
 - Soul: border-radius: 0? box-shadow: none? Colors correct?
 
 **Core principle:** "The metaphor shapes experience; the guardrails prevent it from breaking experience."
@@ -209,7 +232,7 @@ opacity: 1; /* NO transparency on containers */
 
 ### R2: Mechanism/Metaphor Separation
 
-**RULE:** Mechanisms go in grammar/mechanism-catalog.md. Metaphors go in case-studies/*.md. DO NOT mix them in the same file.
+**RULE:** Mechanisms go in grammar/mechanisms.md. Metaphors go in case-studies/*.md. DO NOT mix them in the same file.
 
 **WHY:** Mechanisms are TOOLS (extractable). Metaphors are DECISIONS (75-80% constraint). Separation prevents conflation.
 
@@ -334,7 +357,7 @@ He APPLIED them to NEW material with HIS voice.
 
 #### Mechanism (Vocabulary — Transferable)
 
-**From:** `compositional-core/grammar/mechanism-catalog.md` (Mechanism #1)
+**From:** `compositional-core/grammar/mechanisms.md` (Mechanism #1)
 
 ```css
 /**
@@ -384,7 +407,7 @@ He APPLIED them to NEW material with HIS voice.
   border-left: 2px solid var(--color-text-secondary);
   /* WHY 2px? Topsoil = loose, unconsolidated. Speculative knowledge.
      50% of bedrock weight (2/4px) = half as certain. CRITICAL: 2px
-     is SEMANTIC (hierarchy) not decorative (per prohibitions.md). */
+     is SEMANTIC (hierarchy) not decorative (per identity.md). */
 }
 
 .stratum--surface {
@@ -515,7 +538,7 @@ Same structural pattern (4px/3px/2px/1px progression).**
 **METAPHOR RICHNESS ISN'T FREE. Perceptual costs are REAL costs.**
 
 **Core guardrails (Flagship thresholds):**
-1. **940-960px container width** (SC-01)
+1. **860-1100px container width** (consistent within page, variable across pages per content needs)
 2. **>= 15 RGB max-channel delta** at zone boundaries (SC-09)
 3. **<= 120px total stacked gap** at section boundaries (SC-10)
 4. **3+ distinct typography zones**, display-body >= 10px delta (SC-11)
@@ -547,22 +570,20 @@ Same structural pattern (4px/3px/2px/1px progression).**
 
 ## 6-LAYER ONTOLOGY QUICK MAP
 
-**Layer 1: identity/ (REFUSES) — always load**
-- prohibitions.md: 22 prohibitions (8 absolute, 12 conditional, 2 meta)
-- soul-constraints.md: 3 immutable anchors
+**Layer 1: identity/ (WHO IT IS) — always load**
+- identity.md: Character + soul principles + refusals + diagnostics (87 lines)
+- vocabulary.md: Design decisions & rationale (55 lines)
 
 **Layer 2: vocabulary/ (ATOMS) — always load**
-- tokens.css: :root block with 65 tokens
-- token-mutability.md: IMMUTABLE vs MUTABLE classification
+- tokens.css: :root block with 65 CSS tokens (124 lines)
 
 **Layer 3: grammar/ (COMBINES) — Phase 4+**
-- mechanism-catalog.md: 18 mechanisms
-- compositional-rules.md: 11 rules
-- border-grammar.md: 3-category encoding
+- mechanisms.md: 20 mechanisms with categories + transition grammar (88 lines)
+- grammar.md: Compositional rules + sequencing + density patterns (149 lines)
 
-**Layer 4: components/ (IMPLEMENTS) — Phase 4+**
-- components.css: merged CSS (31KB)
-- component-inventory.md: confidence levels
+**Layer 4: components/ (IMPLEMENTS) — always load (CSS), Phase 4+ (inventory)**
+- components.css: CSS implementations (779 lines)
+- components.md: Component inventory with velocity/weight (37 lines)
 
 **Layer 5: case-studies/ (PROVES) — Phase 5 only, anti-prescription**
 - _INDEX.md: titles + tensions
@@ -597,7 +618,7 @@ Same structural pattern (4px/3px/2px/1px progression).**
 - □ Metaphor is STRUCTURAL (not ANNOUNCED or LABELED)
 
 **Guardrails (Flagship thresholds):**
-- □ 940-960px container width (SC-01)
+- □ 860-1100px container width, consistent within page (SC-01)
 - □ >= 15 RGB max-channel delta at zone boundaries (SC-09)
 - □ <= 120px total stacked gap at boundaries (SC-10)
 - □ 3+ distinct typography zones, display-body >= 10px (SC-11)
@@ -618,9 +639,9 @@ Same structural pattern (4px/3px/2px/1px progression).**
 
 Phase D through Flagship experiments (2026-02-15 to 2026-02-18) tested 7 pipeline configurations. Key lessons for builders:
 
-1. **Container width 940-960px is NON-NEGOTIABLE.** This was THE primary failure mode (4/5 pages violated it). Express narrowing through INTERNAL spacing, not external width reduction. No metaphor may override this.
+1. **Container width 860-1100px range.** Consistent within a single page, variable across pages. Narrow (860px) for dense reading-focused content, standard (900-1000px) for general purpose, wide (1100px) for multi-axis spatial layouts. See vocabulary.md for exploration evidence.
 
-2. **The always-load protocol is CRITICAL.** Track 1's instant fail (5 critical violations, 11/19 compliance) was caused by not reading prohibitions.md. This file is not optional.
+2. **The always-load protocol is CRITICAL.** Track 1's instant fail (5 critical violations, 11/19 compliance) was caused by not reading the identity files. These files are not optional.
 
 3. **"Weak permission" framing has ZERO effect.** Telling agents case studies are "available for reference" produces identical behavior to not mentioning them. Library access must be phase-gated (anti-gravity R1), not permission-gated.
 
@@ -640,21 +661,39 @@ Phase D through Flagship experiments (2026-02-15 to 2026-02-18) tested 7 pipelin
 
 ## FILE REFERENCE
 
-**Key file paths within compositional-core/:**
-- identity/prohibitions.md
-- vocabulary/tokens.css
-- grammar/mechanism-catalog.md
-- components/components.css
+**Key file paths within compositional-core/ (7-file vocabulary):**
+- identity/identity.md (character + soul + refusals, 87 lines)
+- identity/vocabulary.md (design decisions, 55 lines)
+- vocabulary/tokens.css (CSS tokens, 124 lines)
+- grammar/mechanisms.md (20 mechanisms, 88 lines)
+- grammar/grammar.md (compositional rules, 149 lines)
+- components/components.css (CSS implementations, 779 lines)
+- components/components.md (inventory, 37 lines)
+
+**Supporting files:**
 - case-studies/_INDEX.md
 - guidelines/usage-criteria.md
 - validation/anti-gravity-compliance.md
 - process/lens-manifesto.md
 
+**Superseded files (in `_superseded/`, kept for provenance, NOT operational):**
+- _superseded/prohibitions.md → replaced by identity/identity.md
+- _superseded/soul-constraints.md → replaced by identity/identity.md
+- _superseded/mechanism-catalog.md → replaced by grammar/mechanisms.md
+- _superseded/compositional-rules.md → replaced by grammar/grammar.md
+- _superseded/border-system.md → absorbed into grammar/grammar.md
+- _superseded/mechanism-combinations.md → absorbed into grammar/grammar.md
+- _superseded/tokens-mutability.md → absorbed into vocabulary/tokens.css
+- _superseded/component-inventory.md → replaced by components/components.md
+- _superseded/components-dd-od.css → merged into components/components.css
+- _superseded/components-cd-tt.css → merged into components/components.css
+
 **Skills (outside compositional-core):**
+- ~/.claude/skills/compose/SKILL.md (page building orchestrator)
 - ~/.claude/skills/tension-composition/SKILL.md
 - ~/.claude/skills/perceptual-auditing/SKILL.md
 
-**For comprehensive documentation:** compositional-core/README.md (923 lines)
+**For architecture and file inventory:** compositional-core/README.md (212 lines)
 
 ---
 
