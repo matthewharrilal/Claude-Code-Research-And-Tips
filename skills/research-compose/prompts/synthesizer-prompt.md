@@ -58,7 +58,7 @@ If specialists disagree (e.g., S1 says a finding is HIGH relevance but S3's case
 3. **Specific > generic.** Any specialist output that references THIS content by name outweighs generic advice.
 4. **Constraints are non-negotiable.** If S4 says something is a soul constraint, it cannot be overridden by any other specialist. Soul constraints are physics.
 
-### Step 5: INTEGRATE into 10 sections across 3 files
+### Step 5: INTEGRATE into 11 sections across 3 files
 
 Map each specialist's output into the appropriate section. See the section templates below.
 
@@ -78,11 +78,11 @@ If you catch yourself writing "ensure" or "must be," rewrite as an action sequen
 
 ## THE THREE OUTPUT FILES
 
-### File 1: `_package-pass-1.md` — FOUNDATIONS (~130-170 lines)
+### File 1: `_package-pass-1.md` — FOUNDATIONS (~280-360 lines)
 
-This file goes to Builder Pass 1 (STRUCTURE). It establishes boundaries and creative direction. The builder reads this first and builds the initial HTML skeleton.
+This file goes to Builder Pass 1 (STRUCTURE). It establishes boundaries, creative direction, and compositional questions. The builder reads this first and builds the initial HTML skeleton.
 
-**Contains Sections 0, 1, 2, 9.**
+**Contains Sections 0, 1, 2, 9, 10, 11.**
 
 #### Section 0: Soul Checklist (~15 lines)
 
@@ -210,26 +210,194 @@ READ this package in this order. Each step builds on the previous:
    before you see mechanisms. Compose FROM conviction, not FROM tools.
 3. **STUDY** Section 2 (Mechanisms) — Each was selected FOR this content. Read the
    rationale column. Understand WHY, not just WHAT.
-4. BUILD the HTML skeleton: zones first, then mechanisms, then responsive.
-5. After Pass 1, write _pass-1-decisions.md: what you built, which mechanisms deployed, why.
+4. **EXPLORE** Section 10 (Compositional Questions) — These are invitations that generate
+   CSS decisions you wouldn't make from mechanisms alone. Select 2-3 to explore during build.
+5. **EVALUATE** Section 11 (Structural Propositions, if present) — For each proposition,
+   decide ADOPT / MODIFY / REJECT. If adopted, you will follow the Standard/Structural
+   build path (standard skeleton first, then structural module as self-contained unit).
+   Section 11 is OPTIONAL — if empty or all rejected, build standard vertical.
+6. BUILD the HTML skeleton: zones first, then mechanisms, then responsive.
+7. As you build, let the questions from Section 10 INFORM your CSS decisions across
+   multiple channels simultaneously (spacing, typography, color, borders, line-height).
+8. After Pass 1, write _pass-1-decisions.md: what you built, which mechanisms deployed,
+   which questions explored, which channels affected.
 
-**Anti-orphaning:** Before writing any CSS rule, identify its source:
-- Finding ID → build action (from Section 3, Package Pass 2)
-- Mechanism name → CSS implementation (from Section 2)
-- Soul constraint → tokens.css value (from Section 0)
-- TC brief conviction → spatial/emotional direction (from Section 1)
+**Anti-orphaning:** Before writing any CSS rule, identify its source using the
+standardized citation format:
+- `/* PACKAGE S2-M[NN]: ... */` → Mechanism from Section 2
+- `/* FINDING [ID]: ... */` → Research finding from Section 3 (Pass 2)
+- `/* CASE-STUDY [ID]: ... */` → Case study technique from Section 5 (Pass 2)
+- `/* SOUL: ... */` → Soul constraint from Section 0 / tokens.css
+- `/* TC-BRIEF: ... */` → Conviction brief direction from Section 1
+- `/* QUESTION Q[N]: ... */` → Compositional question from Section 10
+- `/* STRUCTURAL: [content-logic] — [spatial form] */` → Structural invention from Section 11
 If a CSS rule has no identifiable source, question whether it belongs.
 ```
 
+#### Section 10: Compositional Questions (~30-40 lines)
+
+**Source:** TC Brief experimental questions (preserved by S1/S2) + Knowledge Base question families (adapted by you) + Cross-specialist synthesis (derived by you)
+
+**THIS IS THE CORE v1.1 ADDITION.** These questions are INVITATIONS, not requirements. Each one, if explored, can generate multi-channel CSS decisions the builder wouldn't make from mechanisms alone. The builder explores 2-3 during their build.
+
+**Three question sources (assemble 5-8 questions total: 4-6 texture + 0-1 structural + 1 cross-specialist):**
+
+**Source 1: TC Brief Experimental Questions (2-3 questions)**
+Find these in the "TC Experimental Questions (Preserved)" sections of S1 and S2 outputs. Copy them VERBATIM. These are the highest-value questions because they emerged from direct engagement with THIS content.
+
+**Source 2: Knowledge Base Question Families (2-3 texture + 0-1 structural, adapted)**
+Select from these proven question families and adapt each to THIS content + THIS metaphor:
+
+**TEXTURE Question Families (explore 2-3):**
+
+| Family | Template | Source Exploration | Implied Channels |
+|--------|----------|-------------------|-----------------|
+| Certainty Encoding | "What if visual weight mapped to [epistemic/authority/confidence gradient] in this content?" | OD-004 confidence | border-weight, padding, bg-color, font-size, line-height |
+| Fractal Self-Similarity | "What if the same structural rhythm repeated at [N] scales — page, section, component, character?" | DD-006 fractal | padding ratios, font-size ratios, spacing ratios, border-weight ratios |
+| Velocity Interleaving | "What if every [heavy/slow] content element had a [light/fast] breathing partner?" | CD-001 reasoning-inside-code | component selection, spacing between pairs, background alternation |
+| Atmospheric Signature | "What if each [zone/section/stratum] had a unique atmospheric signature — not just different colors, but a different FEEL encoded across typography, spacing, and material weight?" | DD-004 layers | bg-color, line-height, letter-spacing, padding, border-color |
+| Temporal Compression | "What if the page's visual density compressed over time, as if [metaphor-specific process] were accelerating?" | DD-003 islands | progressive padding reduction, typography tightening, bg-color intensification |
+
+**STRUCTURAL Question Families (Category 3 — explore 0-1):**
+
+| Family | Template | Source | Implied Structure |
+|--------|----------|--------|-------------------|
+| Parallel Revelation | "What if all [N parallel items] were visible simultaneously in a [grid/constellation]?" | OD-005, AD-006 | Grid, constellation, cards |
+| Reading Path Choice | "What if the reader could choose which [branch/territory/domain] to explore first?" | CD-001, OD-005 | Tab, hub-spoke, entry-point grid |
+| Structural Self-Awareness | "What if the page SHOWED its own organizational logic via [minimap/progress/annotation]?" | DD-006, OD-006 | Meta-layer, minimap, scroll witness |
+| Content-Form Mirroring | "What if each section's layout EMBODIED its content type — [taxonomy as grid, tutorial as islands, comparison as side-by-side]?" | CD-006, OD-003 | Per-section variation |
+| Temporal Architecture | "What if sections of different TYPES had distinct geometry — [exposition wide, evidence narrow, argument full-bleed]?" | DD-003, CD-005 | Content-type-driven layout |
+
+**Structural question adaptation:** Structural questions are OPTIONAL. Select 0-1 structural question ONLY when TC Section 7 identifies a non-linear archetype (Parallel Items, Hierarchical Taxonomy, Branching Paths). For Linear Narrative content, select 0 structural questions. Each adapted structural question must reference the specific content section where the structural form would apply.
+
+**Adaptation instruction (texture questions):** Do NOT copy template questions verbatim. Rewrite each in the vocabulary of THIS content's metaphor. Replace bracket placeholders with specific content features. Each adapted question must imply 3+ CSS properties varying together.
+
+**Source 3: Cross-Specialist Synthesis Question (1 question)**
+Derive ONE question from the INTERSECTION of all 5 specialist findings — a question no single specialist would ask. Read across all 5 outputs and identify a compound insight:
+- Where do S1's findings and S3's case study techniques converge on a mechanism?
+- Where does S2's validated evidence suggest a pattern S4's constraints haven't addressed?
+- What compositional question bridges the gap between S5's protocol logic and S1's content-specific findings?
+
+**Section 10 format for the package:**
+
+```markdown
+## 10. COMPOSITIONAL QUESTIONS
+
+These questions are INVITATIONS, not requirements. Each one, if explored,
+can generate multi-channel CSS decisions you wouldn't make from mechanisms alone.
+EXPLORE 2-3 during your build. Do not attempt all.
+
+### From Your Content's Metaphor (TC Brief — preserved verbatim)
+1. [TC question 1]
+   → Invocation: when implementing [mechanism], ask [sub-question]
+   → Implied channels: [list 3+ CSS properties]
+
+2. [TC question 2]
+   → Invocation: test whether [prediction] holds
+   → Implied channels: [list 3+ CSS properties]
+
+### Adapted from Proven Question Families (Knowledge Base)
+3. [Adapted from OD-004]: For THIS content, [certainty/authority encoding question]
+   → Invocation: [specific context when to ask this during build]
+   → Implied channels: [list 3+ CSS properties]
+
+4. [Adapted from DD-006]: For THIS content, [fractal self-similarity question]
+   → Invocation: [specific context]
+   → Implied channels: [list 3+ CSS properties]
+
+### Cross-Specialist Synthesis (Emergent)
+5. [Derived from S1+S3+S4 intersection]: [compound question no single specialist would ask]
+   → Invocation: [specific build moment when this becomes relevant]
+   → Implied channels: [list 3+ CSS properties]
+```
+
+**Quality floor for Section 10:**
+- Minimum 5 questions, maximum 8 (4-6 texture + 0-1 structural + 1 cross-specialist)
+- EVERY question must imply 3+ CSS properties varying together
+- EVERY question must be content-specific (not generic design advice)
+- TC questions are VERBATIM (not paraphrased)
+- KB questions are ADAPTED (not template copies)
+- Cross-specialist question is NOVEL (derived from specialist intersection)
+
+#### Section 11: Structural Propositions (~50-80 lines) — OPTIONAL
+
+**Source:** TC Brief Section 7 (Structural Observation — primary) + Specialist 3 (Structural Logic Extraction — secondary) + Specialist 1 (Spatial Convergence — tertiary) + Specialist 2 (Spatial Implication validation — supporting)
+
+**THIS IS THE CORE v2.0 ADDITION.** Structural propositions are INVITATIONS for the builder to create non-standard spatial layouts derived from the content's organizational logic. They are OPTIONAL — the builder can reject any or all propositions and build standard vertical. Every proposition includes a blueprint CSS starting point.
+
+**When Section 11 is EMPTY (valid outcome):**
+If TC Section 7 identifies the content archetype as purely "Linear Narrative" (no secondary archetype signals — no parallel items, no taxonomies, no comparisons within the narrative) and no specialist flags spatial convergence, Section 11 should contain a single line: "No structural propositions. Content archetype is Linear Narrative — standard vertical layout is the correct spatial form."
+
+**NOTE:** Most real articles are Hybrid — primarily Linear Narrative with parallel sub-sections (lists of items, comparison tables, taxonomies embedded within the argument). If TC Section 7 identifies secondary archetype signals within a linear narrative, proceed to proposition assembly for those specific sub-sections only.
+
+**When Section 11 has propositions (1-3 maximum):**
+
+Assemble propositions from upstream sources using this priority:
+1. **TC Section 7** (content archetype + spatial proposition) — the primary source
+2. **S3 Structural Logic Extraction** (case study precedent for this spatial form) — provides the HOW
+3. **S1 Spatial Convergence** (multiple findings pointing to the same form) — provides corroboration
+4. **S2 Spatial Implication validation** (validated across stages) — provides confidence
+
+For each proposition:
+
+```markdown
+### 11. STRUCTURAL PROPOSITIONS (INVITATIONS, NOT REQUIREMENTS)
+
+The builder decides ADOPT / MODIFY / REJECT for each proposition.
+Every proposition is optional. Standard vertical is always valid.
+
+#### Proposition 1: [Content section name] as [spatial form]
+
+**Content logic:** [What about THIS content suggests this form — from TC Section 7]
+**Spatial question:** [What the layout needs to achieve for the reader]
+**Case study precedent:** [If S3 found a case study that used this form — cite it. If none, write "No direct precedent."]
+**Blueprint CSS:**
+```css
+/* Starting point — builder adapts or replaces entirely */
+/* STRUCTURAL: [content-logic] — [spatial form] */
+.section-[name] {
+  display: grid;
+  grid-template-columns: [starting layout];
+  gap: [starting gap];
+}
+@media (max-width: 768px) {
+  .section-[name] {
+    grid-template-columns: 1fr; /* Graceful degradation to single column */
+  }
+}
+```
+**Responsive degradation:** At 768px, this [form] degrades to [fallback — usually single-column vertical]
+**Risk:** [LOW — well-precedented / MEDIUM — some precedent / HIGH — novel, no case study]
+**Alternative:** [Standard vertical approach if proposition is rejected — brief description]
+```
+
+**Section 11 assembly protocol:**
+1. Read TC Section 7 archetype identification
+2. If archetype is purely Linear Narrative (no secondary signals) → write "No structural propositions" → done
+   If archetype is Hybrid or has secondary non-linear signals → proceed to Step 3 for those sub-sections
+3. If archetype suggests non-standard form → draft proposition from TC spatial proposition
+4. Cross-reference with S3 Structural Logic Extraction — does a case study validate this form?
+5. Cross-reference with S1 Spatial Convergence — do multiple findings corroborate?
+6. Cross-reference with S2 Spatial Implication — was this form validated across stages?
+7. Include blueprint CSS with responsive degradation
+8. Maximum 3 propositions per package
+
+**Quality floor for Section 11:**
+- Every proposition must trace to TC Section 7 content archetype (no invented structure)
+- Every proposition must include blueprint CSS with responsive degradation
+- Every proposition must include a standard vertical alternative
+- Risk rating must be honest — HIGH risk if no case study precedent
+- Section must never be more than 80 lines (structural propositions are invitations, not essays)
+
 ---
 
-### File 2: `_package-pass-2.md` — ENRICHMENT (~130-180 lines)
+### File 2: `_package-pass-2.md` — ENRICHMENT (~180-230 lines)
 
 This file goes to Builder Pass 2 (ENRICHMENT). The builder has already created the HTML skeleton in Pass 1. Now they enrich it with research findings, zone-level detail, and case study CSS.
 
 **Contains Sections 3, 4, 5.**
 
-#### Section 3: Findings → Build-Specific Actions (~80-100 lines)
+#### Section 3: Findings → Build-Specific Actions (~100-130 lines)
 
 **Source:** Specialist 1 (Findings Mapper) + Specialist 2 (Validation Mapper)
 
@@ -289,6 +457,7 @@ ZONE 4 (Resolution):  ····##      [EASING — dense→sparse release]
 - Components: [Which components from the content map]
 - Spacing: padding-top: 64px, padding-bottom: 48px, inter-element: 32px
 - Emotional register: [From TC brief — inviting, establishing, etc.]
+- Layout: [STANDARD VERTICAL / STRUCTURAL — if this zone has a Section 11 proposition, note it]
 
 **Zone 2: [Name from metaphor]**
 - Content: [Which article sections]
@@ -340,7 +509,7 @@ Include 2-4 case studies with structural affinity. Each must have: affinity rati
 
 ---
 
-### File 3: `_package-pass-3.md` — HARDENING (~110-150 lines)
+### File 3: `_package-pass-3.md` — HARDENING (~140-180 lines)
 
 This file goes to Builder Pass 3 (HARDENING). The build is nearly complete. This pass is defensive: catch problems, integrate proven CSS, verify structural hypotheses.
 
@@ -475,21 +644,22 @@ Key format patterns to study:
 Your output must meet ALL of the following:
 
 ### Per-File Requirements
-- [ ] `_package-pass-1.md`: 130-170 lines, contains Sections 0, 1, 2, 9
-- [ ] `_package-pass-2.md`: 130-180 lines, contains Sections 3, 4, 5
-- [ ] `_package-pass-3.md`: 110-150 lines, contains Sections 6, 7, 8
-- [ ] No file below 100 lines
-- [ ] Total across 3 files: 400-600 lines
+- [ ] `_package-pass-1.md`: 280-360 lines, contains Sections 0, 1, 2, 9, 10, 11 (Section 11 optional — may be 1 line for linear content)
+- [ ] `_package-pass-2.md`: 180-230 lines, contains Sections 3, 4, 5 (increased from 130-180: +50 for richer Section 3 findings with question attributions)
+- [ ] `_package-pass-3.md`: 140-180 lines, contains Sections 6, 7, 8 (increased from 110-150: +30 for richer Section 7 proven CSS patterns)
+- [ ] No file below 130 lines (increased from 100)
+- [ ] Total across 3 files: 600-740 lines (accounts for Section 11 when present)
 
 ### Content Requirements
 - [ ] Every section uses recipe format (sequenced verbs, not checklist verbs)
-- [ ] Section 2 (Mechanisms) includes 5-8 mechanisms with CSS examples
-- [ ] Section 3 (Findings) includes minimum 15 HIGH findings with build actions
+- [ ] Section 2 (Mechanisms) includes 5-8 mechanisms with CSS examples (adjust by content complexity: simple prose → 5, rich multi-type content → 7-8)
+- [ ] Section 3 (Findings) includes minimum 18 HIGH findings with build actions (adjust: simple content → 18-20, complex multi-section content → 22-25). NOTE: S1 guarantees 20+ HIGH findings. After deduplication with S2 validated findings (merger, not deletion), expect 18-25 to survive. If fewer than 18 survive deduplication, re-examine whether findings were deleted rather than merged.
 - [ ] Section 4 (Zones) includes an ASCII density diagram
-- [ ] Section 5 (Case Studies) includes 2-4 case studies with adapted CSS
+- [ ] Section 5 (Case Studies) includes 2-4 case studies with adapted CSS (adjust: high KB affinity → 3-4, low affinity → 2 + mechanism extractions)
 - [ ] Section 6 (Anti-Patterns) includes minimum 5 risk-profiled anti-patterns
 - [ ] Section 7 (CSS Examples) includes minimum 4 proven CSS patterns
 - [ ] Section 8 (Propositions) includes 3-5 testable hypotheses
+- [ ] Section 10 (Compositional Questions) includes 5-8 questions from 3 sources (4-6 texture + 0-1 structural + 1 cross-specialist), each implying 3+ CSS channels
 
 ### Integration Requirements
 - [ ] Specialist overlaps are merged (no duplicate entries across sections)
@@ -517,7 +687,7 @@ If a specialist produced fewer lines than expected (e.g., S3 found only 1 case s
 
 If the content is atypical (e.g., pure poetry, dialogue-heavy, or very short) and the metaphor is unusual (e.g., not geological/architectural but musical or kinetic), the Agent-0C templates may not map directly. That's fine.
 
-**Action:** Adapt the template structure to fit. The 10-section framework is a STARTING POINT, not a prison. If this content needs a section on "Dialogue Rhythm" instead of "Component Selection," create it. But keep the 3-file split and the recipe format.
+**Action:** Adapt the template structure to fit. The 11-section framework is a STARTING POINT, not a prison. If this content needs a section on "Dialogue Rhythm" instead of "Component Selection," create it. But keep the 3-file split and the recipe format.
 
 ### Edge Case 3: Specialists disagree on mechanism importance
 
@@ -561,12 +731,22 @@ understand the optimal absorption sequence.
 ## 9. CONSUMPTION PROTOCOL
 [Section 9 content]
 
+## 10. COMPOSITIONAL QUESTIONS
+[Section 10 content — 5-7 questions from 3 sources]
+
+## 11. STRUCTURAL PROPOSITIONS
+[Section 11 content — 0-3 propositions, or "No structural propositions" for linear content]
+
 ---
 
 ## Agent Log: Synthesizer (Pass 1)
 - Specialist inputs consumed: [list with line counts]
 - Deduplication actions: [what was merged]
 - Conflict resolutions: [what was resolved and how]
+- TC questions preserved: [count] verbatim, [count] derived
+- Structural propositions assembled: [count] (from TC Section 7 + S3 + S1 convergence)
+- KB questions adapted: [count] from [which families]
+- Cross-specialist question: [1-sentence summary]
 - Output size: [line count]
 ```
 

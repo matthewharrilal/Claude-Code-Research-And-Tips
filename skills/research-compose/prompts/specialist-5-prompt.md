@@ -66,6 +66,10 @@ Study how the master execution specs structured reading order:
 6. INTEGRATE case study CSS (Section 5) — weave proven patterns into zones
 7. VERIFY against anti-patterns (Section 6) — defensive check
 8. TEST structural propositions (Section 8) — does the build embody the hypotheses?
+9. EVALUATE structural propositions (Section 11, if present) — decide ADOPT/MODIFY/REJECT for each.
+   Section 11 contains content-derived spatial suggestions with blueprint CSS.
+   If adopted, the builder follows the Standard/Structural build path (standard skeleton first, then structural module).
+   This step is OPTIONAL — Section 11 may be empty for linear content.
 ```
 
 ### B. AGENT-0C'S EFFECTIVE PATTERNS
@@ -84,6 +88,9 @@ Study all 6 packages structurally. Extract the patterns that made them work as b
 8. **Transition grammar references:** How were axis-to-axis transitions specified with the correct type (Smooth/Bridge/Breathing)?
 9. **Breathing zone specifications:** How did Agent-0C specify pixel-level spacing between density zones?
 10. **Crown jewel escalation:** What extra sections did cd-006 receive that cd-001 didn't? (0.5 Crown Jewel Status, Wave 2 Note, expanded scoring criteria)
+11. **Non-Linear Reading Path Support:** When the builder creates structural sections (grids, hub-spoke, splits), the consumption protocol must support non-linear reading. Standard protocol assumes top-to-bottom consumption. Structural sections create ENTRY POINTS — the reader may enter a grid from any cell. The protocol should note: "For structural sections, the reading path is determined by the spatial form, not by section order. Grid sections are scanned, not scrolled."
+
+RECOMMENDATION FOR SYNTHESIZER: If Section 11 contains structural propositions, the consumption protocol (Section 9) should include a note about non-linear reading within structural sections.
 
 ### C. THE ANTI-ORPHANING PRINCIPLE
 
@@ -91,17 +98,58 @@ Study all 6 packages structurally. Extract the patterns that made them work as b
 
 **Why this matters:** The key diagnostic for the entire tripod pipeline is the comparison report (Phase 4). It maps: what the package instructed → what the builder did → what the PA found. Orphan CSS breaks this chain — it's CSS that appeared from nowhere, making the comparison report incomplete.
 
-**Extract:** A clear statement of the anti-orphaning principle and how the builder should maintain traceability. Example format:
+**Extract:** A clear statement of the anti-orphaning principle and how the builder should maintain traceability. Use this STANDARDIZED citation format (all builders must use the same format for comparison report parsing):
 
 ```
-ANTI-ORPHANING: Before writing any CSS rule, identify its source:
-- Finding ID (e.g., "DD-F-006 → fractal self-similarity at component scale")
-- Mechanism name (e.g., "Typography Compression from mechanisms.md")
-- Soul constraint (e.g., "border-radius: 0 from identity.md")
-- Conviction brief direction (e.g., "warm palette from TC Section 1")
+ANTI-ORPHANING CITATION FORMAT:
+
+Every CSS rule gets an inline comment citing its source. Use ONE of these prefixes:
+
+/* PACKAGE S[N]-M[NN]: [mechanism name] — [what it does] */
+  → For mechanism deployments from Section 2
+
+/* FINDING [ID]: [finding title] — [CSS action taken] */
+  → For research finding deployments from Section 3
+
+/* CASE-STUDY [ID]: [technique name] — adapted from [source] */
+  → For case study technique integrations from Section 5
+
+/* SOUL: [constraint name] */
+  → For soul constraint compliance (identity.md / tokens.css)
+
+/* TC-BRIEF: [section] — [conviction direction] */
+  → For CSS driven by TC conviction brief direction
+
+/* QUESTION Q[N]: [abbreviated question] — [what this CSS explores] */
+  → For CSS generated from Section 10 compositional questions
+
+/* STRUCTURAL: [content-logic] — [spatial form chosen] */
+  → For structural invention CSS driven by Section 11 propositions
+  → Example: /* STRUCTURAL: 8 parallel domains — authority-encoded grid */
 
 If a CSS rule has no identifiable source, question whether it belongs.
+
+Examples:
+/* PACKAGE S2-M03: Border-weight gradient — encodes confidence hierarchy */
+/* FINDING DD-F-006: Fractal self-similarity — component-scale density */
+/* CASE-STUDY OD-004: Border-weight encoding — adapted for tower metaphor */
+/* SOUL: border-radius: 0 */
+/* TC-BRIEF: Compositional Arc — descent compression */
+/* QUESTION Q2: "What if each floor..." — zone-specific line-height gradient */
 ```
+
+**This standardized format enables automated comparison report extraction** — the weaver can grep for citation prefixes and count compliance per source category.
+
+### D. PROTOCOL CONDENSATION
+
+**The consumption protocol (Section A) should be CONDENSED, not exhaustive.** Observed specialist outputs averaged 80-120 lines, and an overly long protocol section can crowd out the more actionable patterns and anti-orphaning guidance.
+
+**Condensation target:** The consumption protocol section should be 20-30 lines maximum. Focus on:
+1. The SEQUENCE (what order to read package sections)
+2. The RATIONALE per step (1 sentence each — why this order)
+3. The COGNITIVE LOGIC (boundaries → direction → tools → structure → enrichment → defense)
+
+**Do NOT include:** Extended philosophical justification, multiple examples per step, or repetition of content that belongs in other sections. The protocol is a MAP, not a LESSON.
 
 ---
 
@@ -157,7 +205,7 @@ Your output must meet ALL of the following:
 - [ ] Each protocol step includes rationale (WHY this order, not just WHAT order)
 - [ ] Minimum 5 Agent-0C patterns identified with: name, description, why effective, recommendation for synthesizer
 - [ ] Anti-orphaning principle stated clearly with traceability format
-- [ ] Template structure proposed for the synthesizer (how 10 sections should be organized)
+- [ ] Template structure proposed for the synthesizer (how 12 sections (0-11) should be organized across 3 files — Section 11 is NEW: Structural Propositions in Pass 1 package)
 - [ ] Content-specific: references to THIS article and THIS metaphor appear throughout (not a generic analysis)
 - [ ] Output length: 80-120 lines (dense, structured, no filler — the original 60-80 range was too tight for comprehensive protocol analysis)
 
@@ -200,7 +248,7 @@ Structure it as:
 [Clear statement + traceability format]
 
 ## Template Recommendation for Synthesizer
-[How the 10 sections should be organized across 3 files]
+[How the 12 sections (0-11) should be organized across 3 files]
 
 ## Agent Log: Specialist 5
 - Files read: [list with line counts]

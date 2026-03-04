@@ -1,0 +1,2356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Agent Patterns for Claude Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ========================================
+   TOKENS (from design system tokens.css)
+   ======================================== */
+:root {
+  --color-primary: #E83025;
+  --color-background: #FEF9F5;
+  --color-text: #1A1A1A;
+  --color-text-secondary: #666666;
+  --color-border: #E0D5C5;
+  --color-border-subtle: #F0EBE3;
+  --accent-blue: #4A90D9;
+  --accent-green: #4A9D6B;
+  --accent-purple: #7C3AED;
+  --accent-amber: #D97706;
+  --color-zone-sparse: #FEF9F5;
+  --color-zone-dense: #FFFFFF;
+  --color-zone-breathing: #F5EDE0;
+  --color-zone-bedrock: #1A1A1A;
+  --bg-card: #FFFFFF;
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+  --border-radius: 0;
+  --box-shadow: none;
+
+  /* Topology colors -- persistent identity for each architecture */
+  --topo-hub: #E83025;
+  --topo-peer: #4A90D9;
+  --topo-factory: #7C3AED;
+  --topo-kanban: #4A9D6B;
+}
+
+/* ========================================
+   RESET
+   ======================================== */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background-color: var(--color-background);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -48px;
+  left: 0;
+  background: var(--color-primary);
+  color: var(--color-zone-dense);
+  padding: 8px 16px;
+  z-index: 100;
+  font-size: 14px;
+  text-decoration: none;
+}
+.skip-link:focus { top: 0; }
+
+/* ========================================
+   CONTAINERS
+   ======================================== */
+.container {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.container--narrow { max-width: 680px; margin: 0 auto; padding: 0 24px; }
+.container--wide { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+
+/* ========================================
+   HEADER
+   ======================================== */
+.page-header {
+  padding: 80px 24px 48px;
+  text-align: center;
+  max-width: 940px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--color-text);
+  margin-bottom: 20px;
+}
+
+.page-subtitle {
+  font-size: 17px;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+  max-width: 600px;
+  margin: 0 auto 32px;
+}
+
+.header-rule {
+  width: 80px;
+  height: 4px;
+  background: var(--color-primary);
+  margin: 0 auto;
+  border: none;
+}
+
+/* ========================================
+   TOPOLOGY LEGEND
+   ======================================== */
+.topology-legend {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  margin: 32px auto 48px;
+  max-width: 940px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+}
+
+/* ========================================
+   SECTION STRUCTURE
+   ======================================== */
+.zone { padding: 56px 0; margin-bottom: 0; }
+.zone--breathing { background: var(--color-zone-breathing); padding: 56px 0; margin-bottom: 0; border-top: 1px solid var(--color-border); }
+.zone--dense { background: var(--color-zone-dense); padding: 56px 0; margin-bottom: 0; border-top: 1px solid var(--color-border); }
+.zone--bedrock { background: var(--color-zone-bedrock); padding: 64px 0; margin-bottom: 0; color: var(--color-zone-sparse); }
+
+.section-number {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.section-intro {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  max-width: 600px;
+  margin-bottom: 40px;
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin: 40px 0 12px;
+}
+
+h4 {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 24px 0 8px;
+}
+
+/* ========================================
+   FOUNDATIONAL PATTERN CARDS
+   ======================================== */
+.pattern-card {
+  background: var(--color-zone-dense);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-border);
+  padding: 40px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.pattern-card.topo-hub { border-left-color: var(--topo-hub); }
+.pattern-card.topo-kanban { border-left-color: var(--topo-kanban); }
+.pattern-card.topo-factory { border-left-color: var(--topo-factory); }
+
+.pattern-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.pattern-name {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.pattern-author {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+.topo-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  padding: 4px 12px;
+  border: 1px solid;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.topo-tag.hub { color: var(--topo-hub); border-color: var(--topo-hub); }
+.topo-tag.kanban { color: var(--topo-kanban); border-color: var(--topo-kanban); }
+.topo-tag.factory { color: var(--topo-factory); border-color: var(--topo-factory); }
+
+.pattern-desc {
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.pattern-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.pattern-block {
+  padding: 20px;
+  background: var(--color-zone-breathing);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.pattern-block-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+/* ========================================
+   CODE BLOCKS
+   ======================================== */
+.code-block {
+  background: var(--color-zone-breathing);
+  border: 1px solid var(--color-border);
+  padding: 20px 24px;
+  overflow-x: auto;
+  margin: 16px 0;
+  position: relative;
+}
+
+.code-block pre {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre;
+  overflow-x: auto;
+  margin: 0;
+}
+
+.code-lang {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+code {
+  font-family: var(--font-mono);
+}
+
+p code, li code, td code {
+  font-size: 0.875em;
+  background: var(--color-zone-breathing);
+  padding: 2px 6px;
+  border: 1px solid var(--color-border-subtle);
+}
+
+/* ========================================
+   TOPOLOGY GRID -- The Conceptual Heart
+   4 architectures visible simultaneously
+   ======================================== */
+.topology-zone {
+  background: var(--color-zone-dense);
+  border-top: 4px solid var(--color-primary);
+  border-bottom: 3px solid var(--color-border);
+  padding: 80px 24px 64px;
+}
+
+.topology-zone .zone-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.topology-zone .section-intro {
+  margin: 0 auto;
+}
+
+.topology-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  max-width: 960px;
+  margin: 0 auto;
+  border: 1px solid var(--color-border);
+}
+
+.topo-cell {
+  padding: 32px;
+  border: 1px solid var(--color-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.topo-cell::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.topo-cell.hub::before { background: var(--topo-hub); }
+.topo-cell.peer::before { background: var(--topo-peer); }
+.topo-cell.factory::before { background: var(--topo-factory); }
+.topo-cell.kanban::before { background: var(--topo-kanban); }
+
+.topo-cell-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+
+.topo-cell-sub {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+
+.topo-diagram {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--color-text-secondary);
+  background: var(--color-zone-breathing);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.topo-cell-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.topo-best-for {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+.topo-best-for strong { color: var(--color-text); font-weight: 500; }
+
+/* ========================================
+   STRATEGY ITEMS
+   ======================================== */
+.strategy-item {
+  padding: 32px 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.strategy-item:last-child { border-bottom: none; }
+
+.strategy-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.strategy-text {
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+/* ========================================
+   TABLES
+   ======================================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 14px;
+}
+
+th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  border-bottom: 3px solid var(--color-border);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+
+/* ========================================
+   TWO-COLUMN CARDS
+   ======================================== */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 24px 0;
+}
+
+.card {
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  background: var(--color-zone-dense);
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.card-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+/* ========================================
+   PRODUCTION STORIES / QUOTES
+   ======================================== */
+.story {
+  padding: 28px 32px;
+  border-left: 4px solid var(--color-primary);
+  background: var(--color-zone-dense);
+  margin: 24px 0;
+}
+
+.story-source {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+
+.story-quote {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-style: italic;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.story-context {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* Story grid -- 2x2 layout for comparison (R1-008: horizontal only for comparison) */
+.story-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.story-grid .story {
+  margin: 0;
+}
+.story-grid .story-quote {
+  font-size: 17px;
+}
+.story-grid .story-context {
+  font-size: 13px;
+}
+
+/* ========================================
+   SELECTION GUIDE
+   ======================================== */
+.selection-guide {
+  background: var(--color-zone-dense);
+  border: 1px solid var(--color-border);
+  padding: 40px;
+  margin: 40px 0;
+}
+
+.selection-guide-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.sel-row {
+  display: flex;
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding: 12px 0;
+}
+.sel-row:last-child { border-bottom: none; }
+
+.sel-scenario {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  padding-right: 16px;
+}
+
+.sel-pattern {
+  flex: 1;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sel-dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+}
+
+/* ========================================
+   RESOURCES GRID
+   ======================================== */
+.resources-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.resource-card {
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-zone-dense);
+}
+
+.resource-cat {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.resource-item {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+/* ========================================
+   LISTS
+   ======================================== */
+ul, ol { padding-left: 20px; margin: 12px 0; }
+li { font-size: 15px; line-height: 1.7; margin-bottom: 4px; }
+strong { font-weight: 600; }
+
+/* ========================================
+   BLOCKQUOTES
+   ======================================== */
+blockquote {
+  border-left: 4px solid var(--color-primary);
+  padding: 16px 24px;
+  margin: 20px 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-style: italic;
+  line-height: 1.6;
+  background: var(--color-zone-breathing);
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+.page-footer {
+  background: var(--color-zone-bedrock);
+  border-top: 3px solid var(--color-primary);
+  padding: 40px 24px;
+  text-align: center;
+  margin-top: 0;
+}
+
+.page-footer p {
+  font-size: 13px;
+  color: #B0A89E;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+  .page-title { font-size: 32px; }
+  .page-header { padding: 48px 24px 32px; }
+  .topology-legend { gap: 16px; }
+  .topology-grid { grid-template-columns: 1fr; }
+  .pattern-grid { grid-template-columns: 1fr; }
+  .card-grid { grid-template-columns: 1fr; }
+  .resources-grid { grid-template-columns: 1fr; }
+  .story-grid { grid-template-columns: 1fr; }
+  .pattern-header { flex-direction: column; }
+  .section-title { font-size: 26px; }
+  .pattern-card { padding: 24px; }
+  .sel-row { flex-direction: column; gap: 4px; }
+  .tool-split { grid-template-columns: 1fr; }
+  .handoff-card { padding: 20px; }
+  .network-map-inner { padding: 20px; }
+  .network-map-diagram { font-size: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ========================================
+   PROGRESSIVE DISCLOSURE (Details/Summary)
+   ======================================== */
+details {
+  border: 1px solid var(--color-border);
+  margin: 16px 0;
+}
+
+details summary {
+  padding: 16px 20px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+
+details summary::-webkit-details-marker { display: none; }
+
+details summary::before {
+  content: '+';
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+details[open] summary::before { content: '\2212'; }
+
+details summary:hover { background: var(--color-zone-breathing); }
+
+details[open] summary {
+  border-bottom: 1px solid var(--color-border);
+}
+
+details .detail-content {
+  padding: 20px;
+}
+
+/* Deep dive details have a different treatment */
+.deep-dive-group {
+  margin: 32px 0;
+}
+
+.deep-dive-group-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  padding-left: 12px;
+  border-bottom: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+}
+
+/* ========================================
+   BEDROCK ZONE (for reference/climax sections)
+   ======================================== */
+.zone--bedrock {
+  background: var(--color-zone-bedrock);
+  padding: 64px 0;
+  margin-bottom: 0;
+  color: #E8E0D6;
+}
+
+.zone--bedrock .section-number { color: #888; }
+.zone--bedrock .section-title { color: #F5F0EB; }
+.zone--bedrock .section-intro { color: #B0A89E; }
+.zone--bedrock h3 { color: #E8E0D6; }
+.zone--bedrock .code-block {
+  background: #2A2420;
+  border-color: #3D3530;
+}
+.zone--bedrock .code-block pre { color: #E8E0D6; }
+.zone--bedrock .code-lang { color: #888; }
+.zone--bedrock .resource-card {
+  background: #1F1B18;
+  border-color: #3D3530;
+}
+.zone--bedrock .resource-cat { color: #888; }
+.zone--bedrock .resource-item { color: #C5BDB5; }
+.zone--bedrock p code, .zone--bedrock li code {
+  background: #2A2420;
+  border-color: #3D3530;
+  color: #E8E0D6;
+}
+
+/* ========================================
+   CROSS-REFERENCE TAGS
+   ======================================== */
+.xref {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-zone-dense);
+  display: inline-block;
+  margin: 2px 4px 2px 0;
+}
+
+/* ========================================
+   STAT COUNTER
+   ======================================== */
+.stat-bar {
+  display: flex;
+  gap: 32px;
+  padding: 20px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  margin: 32px 0;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  display: block;
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+/* ========================================
+   SECTION CROSS-REFERENCES
+   ======================================== */
+.section-xrefs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.section-xref {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-zone-breathing);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.section-xref::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  flex-shrink: 0;
+}
+.section-xref.relates-hub::before { background: var(--topo-hub); }
+.section-xref.relates-peer::before { background: var(--topo-peer); }
+.section-xref.relates-factory::before { background: var(--topo-factory); }
+.section-xref.relates-kanban::before { background: var(--topo-kanban); }
+
+/* ========================================
+   SAMPLE OUTPUT BLOCKS
+   ======================================== */
+.sample-output {
+  background: #1A1A1A;
+  padding: 16px 20px;
+  margin: 16px 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: #C5BDB5;
+  overflow-x: auto;
+  white-space: pre;
+  border-left: 3px solid var(--color-primary);
+}
+
+.sample-output .highlight { color: #4A9D6B; }
+.sample-output .dim { color: #666; }
+.sample-output .accent { color: #E83025; }
+
+/* ========================================
+   HANDOFF CARDS -- Enhanced
+   ======================================== */
+.handoff-card {
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  background: var(--color-zone-dense);
+  position: relative;
+}
+.handoff-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+.handoff-card.file-based::before { background: var(--topo-hub); }
+.handoff-card.git-based::before { background: var(--topo-kanban); }
+.handoff-card.docker-based::before { background: var(--topo-factory); }
+.handoff-card.mcp-based::before { background: var(--topo-peer); }
+
+.handoff-mechanism {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+/* ========================================
+   PHILOSOPHY CALLOUT
+   ======================================== */
+.philosophy {
+  padding: 24px 32px;
+  border-left: 4px solid var(--color-primary);
+  background: var(--color-zone-dense);
+  margin: 24px 0;
+}
+.philosophy-author {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+.philosophy-text {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ========================================
+   DROP CAP -- Editorial opening signal (once per page)
+   ======================================== */
+.drop-cap::first-letter {
+  font-family: var(--font-display);
+  font-size: 3.5em;
+  float: left;
+  line-height: 0.8;
+  padding-right: 8px;
+  padding-top: 4px;
+  color: var(--color-primary);
+}
+
+/* ========================================
+   DENSITY PROGRESSION -- CRESCENDO pattern
+   Page builds from sparse (top) to dense (bottom)
+   R3 Temporal Density: sparse → medium → dense
+   ======================================== */
+
+/* Phase 1: Open/Sparse (Sections 01-03) -- default 64px padding, full spacing */
+/* These use the base .zone and .zone--breathing styles */
+
+/* Phase 2: Medium (Sections 04-07) -- slightly tighter */
+.zone--medium { padding: 52px 0 !important; margin-bottom: 0; }
+.zone--medium .section-title { font-size: 30px; }
+.zone--medium .section-intro { margin-bottom: 32px; }
+.zone--medium .strategy-item { padding: 24px 0; }
+
+/* Phase 3: Dense (Sections 08-11) -- noticeably tighter */
+.zone--compact { padding: 44px 0 !important; margin-bottom: 0; }
+.zone--compact .section-intro { margin-bottom: 28px; }
+.zone--compact .section-title { font-size: 28px; }
+.zone--compact .card-grid { gap: 16px; }
+.zone--compact .card { padding: 20px; }
+.zone--compact .card-title { font-size: 16px; }
+.zone--compact .card-desc { font-size: 13px; }
+.zone--compact .story { padding: 24px 28px; margin: 16px 0; }
+
+/* Phase 4: Reference/Bedrock -- maximum density, already handled by .zone--bedrock */
+
+/* ========================================
+   ZONE TRANSITION STRENGTHENING
+   Research says >=15 RGB delta at boundaries
+   Current border-subtle (#F0EBE3) on bg (#FEF9F5) = ~5 delta = IMPERCEPTIBLE
+   Fix: use --color-border (#E0D5C5) on breathing zones = ~30 delta = PERCEIVABLE
+   ======================================== */
+
+/* ========================================
+   SECTION HEADER TIGHTENING for medium/compact
+   Creates visual acceleration
+   ======================================== */
+.zone--medium .section-number { margin-bottom: 4px; }
+.zone--compact .section-number { margin-bottom: 4px; font-size: 11px; }
+.zone--compact h3 { margin: 28px 0 8px; }
+.zone--compact ul, .zone--compact ol { margin: 8px 0; }
+.zone--compact li { margin-bottom: 2px; }
+.zone--compact blockquote { margin: 16px 0; padding: 12px 20px; font-size: 16px; }
+
+/* ========================================
+   WAVE 3: CASE STUDY PATTERNS
+   From DD-006 (fractal), CD-001 (velocity), OD-006 (transitions), DD-003 (islands)
+   ======================================== */
+
+/* Mode-Transition Breathing (OD-006)
+   Stronger visual signal at major phase changes */
+.phase-transition {
+  text-align: center;
+  padding: 28px 0;
+  margin: 0;
+  position: relative;
+}
+.phase-transition::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 3px;
+  background: var(--color-primary);
+}
+.phase-transition::after {
+  content: attr(data-phase);
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-top: 8px;
+}
+
+/* Velocity Interleaving Callout (CD-001)
+   Fast-read callout between heavy blocks */
+.velocity-callout {
+  padding: 12px 20px;
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-zone-dense);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--color-text-secondary);
+  margin: 24px 0;
+  line-height: 1.6;
+}
+.velocity-callout strong {
+  color: var(--color-text);
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* Topology-Coded Strategy Items (DD-006 fractal color persistence)
+   Extend topology colors into Conflict Resolution */
+.strategy-item[data-topo]::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.strategy-item[data-topo="hub"]::before { background: var(--topo-hub); }
+.strategy-item[data-topo="peer"]::before { background: var(--topo-peer); }
+.strategy-item[data-topo="kanban"]::before { background: var(--topo-kanban); }
+.strategy-item[data-topo="factory"]::before { background: var(--topo-factory); }
+
+/* Enhanced Selection Guide (islands-inspired isolation) */
+.sel-row {
+  transition: background-color 150ms ease;
+}
+.sel-row:hover {
+  background: var(--color-zone-breathing);
+}
+
+/* Topology-coded section borders (DD-006 fractal scale persistence)
+   Extend topology identity to section level */
+[data-topo-primary] {
+  border-top: 3px solid transparent;
+}
+[data-topo-primary="hub"] { border-top-color: var(--topo-hub); }
+[data-topo-primary="peer"] { border-top-color: var(--topo-peer); }
+[data-topo-primary="factory"] { border-top-color: var(--topo-factory); }
+[data-topo-primary="kanban"] { border-top-color: var(--topo-kanban); }
+[data-topo-primary="mixed"] { border-top-color: var(--color-text); }
+
+/* Deep Dive section visual enhancement */
+.deep-dive-group {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.deep-dive-group:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Architecture section enhanced (conceptual heart) */
+.topology-zone {
+  border-top: 4px solid var(--color-primary);
+}
+
+/* Network Map -- reveals the page's own topology */
+.network-map {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.network-map-inner {
+  border: 1px solid var(--color-border);
+  background: var(--color-zone-dense);
+  padding: 24px 32px;
+  position: relative;
+}
+.network-map-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+.network-map-diagram {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  white-space: pre;
+  overflow-x: auto;
+}
+.network-map-diagram .hub { color: var(--topo-hub); }
+.network-map-diagram .peer { color: var(--topo-peer); }
+.network-map-diagram .factory { color: var(--topo-factory); }
+.network-map-diagram .kanban { color: var(--topo-kanban); }
+.network-map-diagram .emphasis { color: var(--color-text); font-weight: 500; }
+
+/* Orchestrator/Worker split visual (CD-001 2-zone DNA) */
+.tool-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 24px 0;
+}
+.tool-split-panel {
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-zone-dense);
+}
+.tool-split-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+/* Pattern count indicator for selection guide */
+.sel-topology-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  text-align: right;
+  padding: 8px 0 4px;
+  border-top: 1px solid var(--color-border-subtle);
+  margin-top: 8px;
+  letter-spacing: 0.03em;
+}
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<header class="page-header" role="banner">
+  <h1 class="page-title">Multi-Agent Patterns for Claude Code</h1>
+  <p class="page-subtitle">Architectures, coordination strategies, and production patterns for orchestrating autonomous AI agents. Synthesized from community innovations, production implementations, and Anthropic's official guidance.</p>
+  <hr class="header-rule" aria-hidden="true">
+  <div class="stat-bar" style="max-width: 600px; margin: 32px auto 0; justify-content: center;">
+    <div class="stat-item"><span class="stat-value">13</span><span class="stat-label">Sections</span></div>
+    <div class="stat-item"><span class="stat-value">4</span><span class="stat-label">Topologies</span></div>
+    <div class="stat-item"><span class="stat-value">3</span><span class="stat-label">Foundational Patterns</span></div>
+    <div class="stat-item"><span class="stat-value">8+</span><span class="stat-label">Role Types</span></div>
+  </div>
+</header>
+
+<nav class="topology-legend" aria-label="Architecture topology legend">
+  <div class="legend-item"><div class="legend-dot" style="background: var(--topo-hub);" aria-hidden="true"></div> Hub &amp; Spoke</div>
+  <div class="legend-item"><div class="legend-dot" style="background: var(--topo-peer);" aria-hidden="true"></div> Peer-to-Peer</div>
+  <div class="legend-item"><div class="legend-dot" style="background: var(--topo-factory);" aria-hidden="true"></div> Factory</div>
+  <div class="legend-item"><div class="legend-dot" style="background: var(--topo-kanban);" aria-hidden="true"></div> Kanban Loop</div>
+</nav>
+
+<main id="main" role="main">
+
+<div class="network-map" style="margin-bottom: 32px;">
+  <div class="network-map-inner">
+    <div class="network-map-label">How this document connects</div>
+    <div class="network-map-diagram"><span class="emphasis">S01 Patterns</span> ──┬── <span class="hub">S02-03 Isolation</span> ──── <span class="hub">S04-05 Coordination</span> ──── S06 Handoffs
+               │                              │                        │
+               │         <span class="hub">S08 Specialization</span> ◄──┘                        │
+               │                                                        │
+               └──────────── <span class="emphasis">S07 Architecture</span> ◄────── <span class="peer">S09 Conflicts</span> ◄──┘
+                              (framework)        S10 Monitoring
+                                  │              S11 Production
+                                  ▼
+                     S12-13 Ecosystem + Guidance
+                              │
+                              ▼
+                     S14-21 Deep Dive Extensions</div>
+  </div>
+</div>
+
+<!-- ==========================================
+     FOUNDATIONAL PATTERNS
+     ========================================== -->
+<section class="zone" aria-label="Foundational Patterns" data-topo-primary="mixed">
+  <div class="container">
+    <div class="section-number">01</div>
+    <h2 class="section-title">Foundational Patterns</h2>
+    <p class="section-intro drop-cap">Three named innovations that defined multi-agent work. Each embodies a different philosophy of coordination and maps to a distinct architectural topology.</p>
+    <div class="section-xrefs">
+      <span class="section-xref relates-hub">S07 Hub &amp; Spoke</span>
+      <span class="section-xref relates-kanban">S07 Kanban Loop</span>
+      <span class="section-xref relates-factory">S07 Factory</span>
+    </div>
+
+    <div class="velocity-callout">
+      <strong>Three philosophies, one ecosystem.</strong> Each pattern below embodies a fundamentally different relationship between human and agent -- from surveillance reversal to iterative convergence to specialized composition.
+    </div>
+
+    <article class="pattern-card topo-hub">
+      <div class="pattern-header">
+        <div>
+          <div class="pattern-name">The Personal Panopticon</div>
+          <div class="pattern-author">Molly Cantillon -- 2.4K likes, 418K views, 3.8K bookmarks</div>
+        </div>
+        <div class="topo-tag hub">Hub &amp; Spoke</div>
+      </div>
+      <p class="pattern-desc">Run Claude Code as a swarm of 8 parallel isolated instances, each owning a life domain, to achieve "self-legibility" and reverse the data asymmetry institutions have over you. Not just automation -- surveillance reversal.</p>
+      <details style="margin-bottom: 16px;">
+        <summary>Utilities &amp; Scheduling</summary>
+        <div class="detail-content">
+          <div class="code-block"><span class="code-lang">bash</span><pre># Keep system awake during long runs
+caffeinate -i
+
+# Simple alias for natural language CLI
+alias c='claude'
+
+# Cron jobs for scheduled runs
+0 6 * * * cd ~/trades && claude "Generate morning brief" > brief.md</pre></div>
+        </div>
+      </details>
+      <div class="pattern-grid">
+        <div class="pattern-block">
+          <div class="pattern-block-label">Architecture</div>
+          <div class="code-block"><pre>~/nox        # Company/product
+~/metrics    # Analytics/data
+~/email      # Communications
+~/growth     # Marketing/acquisition
+~/trades     # Personal finance
+~/health     # Fitness/sleep/wellness
+~/writing    # Content creation
+~/personal   # Life admin</pre></div>
+        </div>
+        <div class="pattern-block">
+          <div class="pattern-block-label">Key Mechanics</div>
+          <ul>
+            <li><strong>Isolation:</strong> Each instance operates independently</li>
+            <li><strong>Subagents:</strong> Spawn short-lived agents for specific tasks</li>
+            <li><strong>Handoffs:</strong> Context via file-based handoffs</li>
+            <li><strong>GUI fallback:</strong> Mouse/keystroke injection for desktop apps</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="pattern-card topo-kanban">
+      <div class="pattern-header">
+        <div>
+          <div class="pattern-name">The Ralph Wiggum Loop</div>
+          <div class="pattern-author">Geoffrey Huntley, Matt Pocock, Ryan Carson -- 2440+ likes</div>
+        </div>
+        <div class="topo-tag kanban">Kanban Loop</div>
+      </div>
+      <p class="pattern-desc">A bash loop that runs Claude Code repeatedly with fresh context until a completion condition is met. Each iteration gets a clean slate with access to git history and file-based memory. Enables overnight feature shipping.</p>
+      <div class="pattern-grid">
+        <div class="pattern-block">
+          <div class="pattern-block-label">Implementation</div>
+          <div class="code-block"><span class="code-lang">bash</span><pre>#!/bin/bash
+MAX_ITERATIONS=${1:-10}
+for (( i=1; i<=$MAX_ITERATIONS; i++ )); do
+  echo "Iteration $i / $MAX_ITERATIONS"
+  claude "Review plans/prd.json...
+    Mark PRD items as passes: true.
+    Make a git commit.
+    If complete, output PROMISE COMPLETE HERE." \
+    | tee output.txt
+  if grep -q "PROMISE COMPLETE HERE" output.txt; then
+    break
+  fi
+done</pre></div>
+        </div>
+        <div class="pattern-block">
+          <div class="pattern-block-label">Key Principles</div>
+          <ul>
+            <li><strong>Fresh context per iteration</strong> -- avoids context rot</li>
+            <li><strong>External memory</strong> -- git history + progress.txt</li>
+            <li><strong>Verifiable completion</strong> -- tests must pass</li>
+            <li><strong>Small task sizing</strong> -- one story per context window</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="pattern-card topo-factory">
+      <div class="pattern-header">
+        <div>
+          <div class="pattern-name">The Infinite Orchestra</div>
+          <div class="pattern-author">0xSero -- github.com/0xSero/orchestra</div>
+        </div>
+        <div class="topo-tag factory">Factory</div>
+      </div>
+      <p class="pattern-desc">A self-improving orchestrator that runs 24/7 in Docker, with specialized worker profiles. The conductor monitors idle time and activity, triggering self-improvement cycles.</p>
+      <div class="pattern-grid">
+        <div class="pattern-block">
+          <div class="pattern-block-label">Worker Profiles</div>
+          <div class="code-block"><span class="code-lang">json</span><pre>{
+  "profiles": [
+    { "id": "vision",    "purpose": "Visual analysis" },
+    { "id": "docs",      "purpose": "Documentation" },
+    { "id": "research",  "purpose": "Deep investigation" },
+    { "id": "coder",     "purpose": "Implementation" },
+    { "id": "memory",    "purpose": "Context persistence" },
+    { "id": "architect", "purpose": "System design" }
+  ]
+}</pre></div>
+        </div>
+        <div class="pattern-block">
+          <div class="pattern-block-label">Caveats</div>
+          <ul>
+            <li>Sequential only (no parallelization yet)</li>
+            <li>Conflicts with 5+ agents with 5 subagents each</li>
+            <li>No checkpointing -- crashes lose progress</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <div class="philosophy">
+      <div class="philosophy-author">Steve Yegge on Gas Town</div>
+      <div class="philosophy-text">"You just make up features, design them, file the implementation plans, and sling work around to your polecats and crew."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     PARALLEL STRATEGIES & ISOLATION
+     ========================================== -->
+<section class="zone--breathing" aria-label="Parallel Strategies" data-topo-primary="hub">
+  <div class="container">
+    <div class="section-number">02 -- 03</div>
+    <h2 class="section-title">Parallel Strategies &amp; Isolation</h2>
+    <p class="section-intro">Four isolation strategies for running agents in parallel, from simple directory separation to full container isolation.</p>
+    <div class="section-xrefs">
+      <span class="section-xref relates-hub">from S01 Panopticon</span>
+      <span class="section-xref">enables S04-05</span>
+      <span class="section-xref">deepened in S14-21</span>
+    </div>
+
+    <div class="strategy-item">
+      <div class="strategy-title">Domain-Isolated Instances</div>
+      <p class="strategy-text">From the Panopticon pattern: run separate Claude Code processes in different directories. Filesystem isolation prevents context pollution.</p>
+      <div class="code-block"><span class="code-lang">bash</span><pre># Terminal 1: Frontend specialist
+cd ~/project/frontend && claude
+
+# Terminal 2: Backend specialist
+cd ~/project/backend && claude
+
+# Terminal 3: Documentation specialist
+cd ~/project/docs && claude</pre></div>
+    </div>
+
+    <div class="strategy-item">
+      <div class="strategy-title">Branch-Based Parallel Work</div>
+      <p class="strategy-text">Each agent works on its own branch. Human reviews and resolves conflicts during PR. Simple, effective, battle-tested.</p>
+    </div>
+
+    <div class="velocity-callout"><strong>Isolation intensity scales with agent count.</strong> Directory separation works for 2-3 agents. Branch-based works for small teams. But at 4+ parallel agents, you need worktrees or containers -- anything less and merge conflicts will consume more time than the parallelism saves.</div>
+
+    <div class="strategy-item">
+      <div class="strategy-title">Git Worktrees</div>
+      <p class="strategy-text">Git worktrees create isolated working directories sharing the same repo. The gold standard for multi-agent isolation -- each agent gets its own filesystem checkout without full clones.</p>
+      <div class="code-block"><span class="code-lang">bash</span><pre>~/project/
+  ├── .git/           # Shared git database
+  └── src/            # Main working directory
+
+~/project-worktrees/
+  ├── feature-a/      # Agent 1's isolated directory
+  ├── feature-b/      # Agent 2's isolated directory
+  └── bugfix-c/       # Agent 3's isolated directory</pre></div>
+    </div>
+
+    <div class="strategy-item">
+      <div class="strategy-title">Container-Isolated Parallelism</div>
+      <p class="strategy-text">For heavy parallel work, run Claude Code instances in isolated Docker containers (AI-Maestro pattern). No branch/file conflicts, per-container firewalls, persistent caches.</p>
+      <div class="code-block"><pre>┌─────────────────────────────────────┐
+│           AI-Maestro                │
+├─────────────────────────────────────┤
+│ ┌─────────┐ ┌─────────┐ ┌────────┐ │
+│ │Container│ │Container│ │Contanr │ │
+│ │ Claude1 │ │ Claude2 │ │ Claude3│ │
+│ │ BranchA │ │ BranchB │ │ BranchC│ │
+│ └─────────┘ └─────────┘ └────────┘ │
+│      │           │           │      │
+│      └───────────┼───────────┘      │
+│                  │                  │
+│       Shared Docker Volume          │
+│      (file-based messaging)         │
+└─────────────────────────────────────┘</pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     SUBAGENT COORDINATION & TASK MANAGEMENT
+     ========================================== -->
+<section class="zone zone--medium" aria-label="Subagent Coordination" data-topo-primary="hub">
+  <div class="container">
+    <div class="section-number">04 -- 05</div>
+    <h2 class="section-title">Subagent Coordination &amp; Task Management</h2>
+    <p class="section-intro">How orchestrators delegate to specialized workers, and the task management primitives that enable structured coordination.</p>
+    <div class="section-xrefs">
+      <span class="section-xref relates-hub">implements S07 Hub</span>
+      <span class="section-xref">enabled by S02-03</span>
+      <span class="section-xref">specializes into S08</span>
+    </div>
+
+    <blockquote>"You do not write code. You do not run commands. You do not explore codebases. You are the conductor. Your agents play the instruments."</blockquote>
+
+    <div class="velocity-callout">
+      <strong>The conductor/instrument split is fundamental.</strong> Orchestrators manage the task graph; workers execute. Mixing roles leads to context pollution and lost coordination state.
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Orchestrator Tools</div>
+        <div class="card-desc">
+          <ul>
+            <li><code>Read</code> -- references, guides (1-2 files max)</li>
+            <li><code>TaskCreate</code>, <code>TaskUpdate</code>, <code>TaskGet</code>, <code>TaskList</code></li>
+            <li><code>Task</code> -- spawn workers</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Worker Tools</div>
+        <div class="card-desc">
+          <ul>
+            <li><code>Read</code>, <code>Write</code>, <code>Edit</code>, <code>Bash</code></li>
+            <li><code>Glob</code>, <code>Grep</code>, <code>WebFetch</code>, <code>WebSearch</code></li>
+            <li>Cannot spawn sub-agents or manage task graph</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <h3>Model Selection for Subagents</h3>
+    <table>
+      <thead><tr><th>Model</th><th>Use Case</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Haiku</strong></td><td>Errand runner: fetch files, grep, simple lookups. Spawn 5-10 in parallel.</td></tr>
+        <tr><td><strong>Sonnet</strong></td><td>Capable worker: structured implementation, following patterns, test generation.</td></tr>
+        <tr><td><strong>Opus</strong></td><td>Complex reasoning, architecture decisions, ambiguous tasks.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Native Task Management</h3>
+    <div class="code-block"><pre>TaskCreate  -> Create with subject, description, acceptance criteria
+TaskList    -> Filter: status='open', no owner, not blocked
+TaskGet     -> Full context: description, comments, dependencies
+TaskUpdate  -> Claim (set owner), add comments, resolve
+
+Dependency Management:
+  addBlocks     -> This task blocks another
+  addBlockedBy  -> This task is blocked by another</pre></div>
+  </div>
+</section>
+
+<!-- ==========================================
+     AGENT-TO-AGENT HANDOFFS
+     ========================================== -->
+<section class="zone--breathing zone--medium" aria-label="Agent Handoffs" data-topo-primary="mixed">
+  <div class="container">
+    <div class="section-number">06</div>
+    <h2 class="section-title">Agent-to-Agent Handoffs</h2>
+    <p class="section-intro">Four communication mechanisms for agents that need to pass context, state, and instructions to each other.</p>
+
+    <div class="card-grid">
+      <div class="handoff-card file-based">
+        <div class="card-title">File-Based Handoffs</div>
+        <div class="card-desc">Agents communicate through the filesystem. Structured JSON files in shared directories. The Panopticon pattern -- each agent reads/writes to its own directory as persistent memory.</div>
+        <div class="handoff-mechanism">Sync: Polling | Latency: ~seconds | Complexity: Low</div>
+      </div>
+      <div class="handoff-card git-based">
+        <div class="card-title">Git-Based Handoffs</div>
+        <div class="card-desc">Progress persists in files, git history provides context. Append-only <code>progress.txt</code>, PRD status tracking, commit history as memory. Each iteration gets a clean slate.</div>
+        <div class="handoff-mechanism">Sync: Commit/Pull | Latency: ~seconds | Complexity: Low</div>
+      </div>
+      <div class="handoff-card docker-based">
+        <div class="card-title">Docker Volume Handoffs</div>
+        <div class="card-desc">Agents write output JSON to shared Docker volumes. Not real-time, but lightweight and requires no external dependencies. AI-Maestro uses this for inter-container messaging.</div>
+        <div class="handoff-mechanism">Sync: Shared Volume | Latency: ~ms | Complexity: Medium</div>
+      </div>
+      <div class="handoff-card mcp-based">
+        <div class="card-title">MCP Agent Mail</div>
+        <div class="card-desc">Email-like interfaces for agent collaboration. No training needed, natural "agent village" behavior, async by default. From Steve Yegge's Gas Town -- agents have inboxes.</div>
+        <div class="handoff-mechanism">Sync: Async Queue | Latency: ~ms | Complexity: Medium</div>
+      </div>
+    </div>
+    <div class="section-xrefs">
+      <span class="section-xref relates-hub">instantiates S07 Hub</span>
+      <span class="section-xref relates-kanban">instantiates S07 Kanban</span>
+      <span class="section-xref">deepened in S14-21</span>
+    </div>
+  </div>
+</section>
+
+<!-- Phase transition: entering the conceptual heart -->
+<div class="phase-transition" aria-hidden="true" data-phase="The Framework"></div>
+
+<!-- ==========================================
+     ARCHITECTURE PATTERNS (THE HEART)
+     ========================================== -->
+<section class="topology-zone" aria-label="Architecture Patterns">
+  <div class="zone-header" style="text-align: center; max-width: 940px; margin: 0 auto 48px;">
+    <div class="section-number">07</div>
+    <h2 class="section-title">Architecture Patterns</h2>
+    <p class="section-intro" style="margin: 0 auto;">The four fundamental topologies. Every pattern in this document is an instance of one of these architectures.</p>
+    <div class="velocity-callout" style="max-width: 600px; margin: 24px auto 0; text-align: left;">
+      <strong>This is the organizing framework.</strong> Everything above is an instance of one of these four shapes. Everything below is a strategy for making them work. The topology you choose constrains every other decision.
+    </div>
+  </div>
+
+  <div class="topology-grid">
+    <div class="topo-cell hub">
+      <div class="topo-cell-name">Hub-and-Spoke</div>
+      <div class="topo-cell-sub">Central orchestrator delegates to specialized workers</div>
+      <div class="topo-diagram">     ┌────────────┐
+     │ Orchestratr│
+     └──────┬─────┘
+            │
+  ┌─────────┼─────────┐
+  ▼         ▼         ▼
+┌──────┐ ┌──────┐ ┌──────┐
+│Coder │ │Tester│ │ Docs │
+└──────┘ └──────┘ └──────┘</div>
+      <p class="topo-cell-desc">Clear task decomposition, predictable workflow, centralized monitoring.</p>
+      <p class="topo-best-for"><strong>Best for:</strong> Predictable workflows. <strong>Examples:</strong> CC Mirror, Gas Town.</p>
+    </div>
+
+    <div class="topo-cell peer">
+      <div class="topo-cell-name">Peer-to-Peer</div>
+      <div class="topo-cell-sub">Agents communicate directly, no central coordinator</div>
+      <div class="topo-diagram">┌──────┐    ┌──────┐
+│Agnt 1│<-->│Agnt 2│
+└──────┘    └──────┘
+    ▲           ▲
+    │           │
+    └─────┬─────┘
+          ▼
+     ┌──────┐
+     │Agnt 3│
+     └──────┘</div>
+      <p class="topo-cell-desc">Emergent collaboration, flexible workflows, resilience with no single point of failure.</p>
+      <p class="topo-best-for"><strong>Best for:</strong> Flexible workflows, resilience.</p>
+    </div>
+
+    <div class="topo-cell factory">
+      <div class="topo-cell-name">Factory Pattern</div>
+      <div class="topo-cell-sub">Not just agents, but an agent factory</div>
+      <div class="topo-diagram">Gas Town (~/.gt)
+├── HQ (management)
+├── Rigs (project repos)
+│   └── Witness (observer)
+├── Workers
+│   ├── Mayor (coordination)
+│   ├── Dogs (quality gates)
+│   ├── Refinery (decompose)
+│   └── Crew (ephemeral)
+└── Overseer (YOU)</div>
+      <p class="topo-cell-desc">Steve Yegge's Gas Town. Self-organizing agent factory with named persistent workers and ephemeral crew.</p>
+      <p class="topo-best-for"><strong>Best for:</strong> Massive scale (10+ agents). <strong>Example:</strong> Gas Town.</p>
+    </div>
+
+    <div class="topo-cell kanban">
+      <div class="topo-cell-name">Kanban Loop</div>
+      <div class="topo-cell-sub">Single agent picks from board, completes, returns</div>
+      <div class="topo-diagram">┌──────────────────────┐
+│ Pick task from board │
+│        ↓             │
+│ Complete task        │
+│        ↓             │
+│ Back to board        │
+│        ↓             │
+│ All done? -> Exit    │
+│ Not done? -> Loop    │
+└──────────────────────┘</div>
+      <p class="topo-cell-desc">Focus on WHAT to achieve, not HOW. Each iteration is independent with fresh context and external memory.</p>
+      <p class="topo-best-for"><strong>Best for:</strong> Overnight features, autonomous pipelines. <strong>Example:</strong> Ralph Loop.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     AGENT SPECIALIZATION
+     ========================================== -->
+<section class="zone zone--medium" aria-label="Agent Specialization" data-topo-primary="hub">
+  <div class="container">
+    <div class="section-number">08</div>
+    <h2 class="section-title">Agent Specialization</h2>
+    <p class="section-intro">Role definitions, adversarial speccing, and domain-specific reference loading.</p>
+    <div class="section-xrefs">
+      <span class="section-xref">specializes S04-05</span>
+      <span class="section-xref relates-factory">from S01 Orchestra</span>
+      <span class="section-xref relates-hub">from S07 Hub</span>
+    </div>
+
+    <table>
+      <thead><tr><th>Role</th><th>Purpose</th><th>Tools</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Researcher</strong></td><td>Deep investigation, codebase exploration</td><td><code>Glob</code>, <code>Grep</code>, <code>Read</code>, <code>WebSearch</code></td></tr>
+        <tr><td><strong>Coder</strong></td><td>Implementation</td><td><code>Write</code>, <code>Edit</code>, <code>Bash</code></td></tr>
+        <tr><td><strong>Tester</strong></td><td>Verification, test generation</td><td><code>Bash</code>, <code>Read</code></td></tr>
+        <tr><td><strong>Reviewer</strong></td><td>Code review, security analysis</td><td><code>Read</code>, <code>Grep</code>, <code>LSP</code></td></tr>
+        <tr><td><strong>Architect</strong></td><td>System design, decisions</td><td><code>Read</code>, <code>WebSearch</code></td></tr>
+        <tr><td><strong>Docs</strong></td><td>Documentation, README generation</td><td><code>Write</code>, <code>Read</code></td></tr>
+        <tr><td><strong>Vision</strong></td><td>Visual analysis (screenshots, UI)</td><td>Browser tools</td></tr>
+        <tr><td><strong>Memory</strong></td><td>Context persistence across sessions</td><td>SQLite, file operations</td></tr>
+      </tbody>
+    </table>
+
+    <div class="velocity-callout"><strong>Roles define boundaries, not identities.</strong> An agent's role constrains its tool access and focus area. The same underlying model becomes a "Researcher" or a "Coder" through prompt framing and tool restriction -- not through different training.</div>
+
+    <h3>Adversarial Speccing</h3>
+    <p class="strategy-text">Use two subagents in debate for complex features. An Architect proposes, a Critic challenges from a specific persona -- DHH for simplicity, security engineer for attack vectors, performance engineer for latency. Iterate until the critic approves.</p>
+
+    <h3>Domain Reference Loading</h3>
+    <p style="font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 16px;">From CC Mirror: match task type to specialized reference docs for context-efficient agent prompting.</p>
+    <table>
+      <thead><tr><th>Task Type</th><th>Reference</th></tr></thead>
+      <tbody>
+        <tr><td>Feature, bug, refactor</td><td><code>software-development.md</code></td></tr>
+        <tr><td>PR review, security</td><td><code>code-review.md</code></td></tr>
+        <tr><td>Codebase exploration</td><td><code>research.md</code></td></tr>
+        <tr><td>Test generation</td><td><code>testing.md</code></td></tr>
+        <tr><td>Docs, READMEs</td><td><code>documentation.md</code></td></tr>
+        <tr><td>CI/CD, deployment</td><td><code>devops.md</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ==========================================
+     CONFLICT RESOLUTION
+     ========================================== -->
+<section class="zone--breathing zone--medium" aria-label="Conflict Resolution" data-topo-primary="peer">
+  <div class="container">
+    <div class="section-number">09</div>
+    <h2 class="section-title">Conflict Resolution</h2>
+    <p class="section-intro">Five strategies for managing the inevitable conflicts when multiple agents work in shared codebases.</p>
+    <div class="section-xrefs">
+      <span class="section-xref">resolves S02-03</span>
+      <span class="section-xref relates-kanban">resolves S01 Ralph</span>
+      <span class="section-xref">deepened in S14-21</span>
+    </div>
+
+    <div class="velocity-callout">
+      <strong>Conflicts are inevitable, not optional.</strong> The question is never "will agents conflict?" but "how quickly will conflicts be detected and resolved?" These five strategies trade off simplicity against granularity.
+    </div>
+
+    <div class="strategy-item">
+      <div class="strategy-title">Branch Isolation</div>
+      <p class="strategy-text">"Parallel agents cause merge conflicts -- use serial." The primary strategy: each agent works on its own branch. Human merges.</p>
+    </div>
+    <div class="strategy-item">
+      <div class="strategy-title">File-Level Locking</div>
+      <p class="strategy-text">Acquire a lock file before editing, release after. Simple but effective for preventing concurrent modification.</p>
+      <div class="code-block"><span class="code-lang">bash</span><pre>if [ ! -f "$FILE.lock" ]; then
+  touch "$FILE.lock"
+  # do work
+  rm "$FILE.lock"
+else
+  echo "File locked, waiting..."
+fi</pre></div>
+    </div>
+    <div class="strategy-item">
+      <div class="strategy-title">Directory Ownership</div>
+      <p class="strategy-text">Each agent owns specific directories. <code>agent-frontend/</code> is exclusive to the frontend agent. <code>shared/</code> is read-only for all, write via handoff protocol.</p>
+    </div>
+    <div class="strategy-item">
+      <div class="strategy-title">Transactional File Operations</div>
+      <p class="strategy-text">Write to temp files, then atomic rename: <code>echo "content" > file.tmp && mv file.tmp file.actual</code></p>
+    </div>
+    <div class="strategy-item">
+      <div class="strategy-title">Git-Based Conflict Detection</div>
+      <p class="strategy-text">Check for conflicts before starting work with <code>git merge-base --is-ancestor</code>. Detect early, resolve before divergence compounds.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     MONITORING & OBSERVABILITY
+     ========================================== -->
+<section class="zone zone--compact" aria-label="Monitoring" data-topo-primary="mixed">
+  <div class="container">
+    <div class="section-number">10</div>
+    <h2 class="section-title">Monitoring &amp; Observability</h2>
+    <p class="section-intro">Tools for watching, managing, and understanding what your agent swarm is doing.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Claude HUD</div>
+        <div class="card-desc">Plugin showing context remaining, executing tools, running subagents, and progress.</div>
+        <div class="code-block" style="margin-top: 12px;"><pre>/plugin marketplace add jarrodwatts/claude-hud
+/plugin install claude-hud</pre></div>
+      </div>
+      <div class="card">
+        <div class="card-title">rpai (tmux Manager)</div>
+        <div class="card-desc">Scans tmux panes for running AI agents. TUI with agent list, status, output previews. Jump to any agent with selection.</div>
+        <div class="code-block" style="margin-top: 12px;"><pre>cargo install rpai
+rpai  # Run in any tmux session</pre></div>
+      </div>
+      <div class="card">
+        <div class="card-title">CC Mirror Monitoring</div>
+        <div class="card-desc">Built-in CLI for monitoring parallel agents. Navigate with arrow keys, view details, kill agents.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Gas Town Roles</div>
+        <div class="card-desc"><strong>Deacon:</strong> monitoring + handshakes. <strong>Dogs:</strong> quality gates. <strong>Witness:</strong> per-rig observer. Auto-compact prevents context collapse.</div>
+      </div>
+    </div>
+
+    <div class="velocity-callout">
+      <strong>Visibility is not optional.</strong> Long-running agent swarms without monitoring are black boxes. At minimum, you need context remaining (are agents running out?), tool execution history (what have they tried?), and a way to kill runaway processes.
+    </div>
+
+    <h3>Sample Outputs</h3>
+    <div class="card-grid">
+      <div class="card" style="padding: 0; overflow: hidden;">
+        <div style="padding: 12px 16px; border-bottom: 1px solid var(--color-border-subtle);">
+          <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-secondary);">Claude HUD Output</span>
+        </div>
+        <div class="sample-output" style="margin: 0; border-left: none;">[Opus 4.5] <span class="highlight">########</span><span class="dim">##</span> 35% | 1 MCPs | 1m
+<span class="highlight">&#10003;</span> Read x2 | <span class="highlight">&#10003;</span> WebFetch x1 | <span class="highlight">&#10003;</span> Skill x1 | <span class="highlight">&#10003;</span> Edit x1</div>
+      </div>
+      <div class="card" style="padding: 0; overflow: hidden;">
+        <div style="padding: 12px 16px; border-bottom: 1px solid var(--color-border-subtle);">
+          <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-secondary);">CC Mirror Agent View</span>
+        </div>
+        <div class="sample-output" style="margin: 0; border-left: none;">Background Tasks: 1 active
+
+Async agents (6):
+<span class="accent">&gt;</span> Implement data models <span class="dim">(running)</span>
+  Create API docs <span class="highlight">(completed)</span>
+  Write integration tests <span class="highlight">(completed)</span>
+  Implement REST endpoints <span class="highlight">(completed)</span>
+  Create project structure <span class="highlight">(completed)</span>
+  Design API architecture <span class="highlight">(completed)</span></div>
+      </div>
+    </div>
+
+    <h3>Context Auto-Compact</h3>
+    <p style="font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; margin-top: 8px;">Critical for preventing context collapse in long-running orchestration. Enable with Claude Code's beta feature. Without it, agents hit context limits and lose critical coordination state.</p>
+    <div class="section-xrefs" style="margin-top: 12px;">
+      <span class="section-xref">monitors S04-05</span>
+      <span class="section-xref relates-hub">extends Hub topology</span>
+      <span class="section-xref relates-factory">extends Factory topology</span>
+      <span class="section-xref">deepened in S14-21</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     PRODUCTION SETUPS
+     ========================================== -->
+<section class="zone--breathing zone--compact" aria-label="Production Setups" data-topo-primary="mixed">
+  <div class="container">
+    <div class="section-number">11</div>
+    <h2 class="section-title">Production Multi-Agent Setups</h2>
+    <p class="section-intro">Real-world configurations from practitioners running multi-agent systems in production.</p>
+
+    <div class="story-grid">
+      <div class="story" style="border-left-color: var(--topo-factory);">
+        <div class="story-source">Steve Yegge -- Gas Town</div>
+        <div class="story-quote">"If you have any doubt whatsoever, then you can't use it."</div>
+        <div class="story-context">Code is 3 weeks old. 100% vibe-coded. Expensive. Requires tmux. Stage 7+ in dev evolution. Comfort with chaos required.</div>
+      </div>
+
+      <div class="story" style="border-left-color: var(--topo-hub);">
+        <div class="story-source">Boris Cherny -- Claude Code Creator</div>
+        <div class="story-quote">"Run 5-10 parallel sessions across terminal, web, and mobile."</div>
+        <div class="story-context">Opus 4.5 with thinking mode. Shared CLAUDE.md in Git for team consistency. Slash commands, subagents, and hooks.</div>
+      </div>
+
+      <div class="story" style="border-left-color: var(--topo-kanban);">
+        <div class="story-source">Molly Cantillon -- Real-World Shipping</div>
+        <div class="story-quote">"Customer support: fully autonomous department."</div>
+        <div class="story-context">A/B testing auto-generates winning copy. Email inbox zero. Overnight brokerage scraping. Cron pulls Amplitude, cross-refs GitHub, surfaces what needs building.</div>
+      </div>
+
+      <div class="story" style="border-left-color: var(--topo-peer);">
+        <div class="story-source">CC Mirror + GLM-4.7</div>
+        <div class="story-quote">"GLM handles the multi-agent coordination very well."</div>
+        <div class="story-context">Production-ready for generic demos, standard web app development, 80% of use cases with zero effort. Limitations: production needs state control, business logic, custom observability, evals.</div>
+      </div>
+    </div>
+
+    <div class="section-xrefs" style="margin-top: 24px;">
+      <span class="section-xref">validates S01-10</span>
+      <span class="section-xref relates-factory">Gas Town S07</span>
+      <span class="section-xref relates-hub">CC Mirror S07</span>
+      <span class="section-xref relates-kanban">Ralph S07</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     ECOSYSTEM & OFFICIAL GUIDANCE
+     ========================================== -->
+<section class="zone zone--compact" aria-label="Ecosystem" data-topo-primary="mixed">
+  <div class="container">
+    <div class="section-number">12 -- 13</div>
+    <h2 class="section-title">Ecosystem &amp; Official Guidance</h2>
+    <p class="section-intro">Alternative tools with multi-agent DNA, plus Anthropic's own recommendations.</p>
+
+    <div class="velocity-callout"><strong>The ecosystem is the topology made real.</strong> Every tool below implements one of the four architectures -- orchestrators are hub-and-spoke, Ralph variants are kanban loops, Gas Town extensions are factories. The topology isn't abstract; it's running in production.</div>
+
+    <div class="resources-grid">
+      <div class="resource-card">
+        <div class="resource-cat">Orchestrators</div>
+        <div class="resource-item">Aider -- Architect + Editor modes</div>
+        <div class="resource-item">OpenCode / Orchestra</div>
+        <div class="resource-item">Cursor Parallel Agents</div>
+      </div>
+      <div class="resource-card">
+        <div class="resource-cat">Ralph Variants</div>
+        <div class="resource-item">Marathon Ralph -- full SDLC</div>
+        <div class="resource-item">Dr. Ralph -- confidence thresholds</div>
+        <div class="resource-item">Lisa -- logging + progress</div>
+        <div class="resource-item">Zeroshot -- next-gen loops</div>
+      </div>
+      <div class="resource-card">
+        <div class="resource-cat">Gas Town Extensions</div>
+        <div class="resource-item">GTGUI -- Gas Town GUI</div>
+        <div class="resource-item">Roughneck -- multi Gas Town</div>
+        <div class="resource-item">Station -- NATS-based</div>
+      </div>
+    </div>
+
+    <h3>Official Ralph Wiggum Plugin</h3>
+    <div class="code-block" style="margin-bottom: 24px;"><span class="code-lang">bash</span><pre>/ralph-loop "prompt" --completion-promise "COMPLETE" --max-iterations 10</pre></div>
+
+    <h3>Anthropic Official Guidance</h3>
+    <ul>
+      <li><strong>Subagents have isolated context</strong> -- don't pollute main conversation</li>
+      <li><strong>Use for multi-step reasoning workflows</strong></li>
+      <li><strong>Use for parallel processing and adversarial validation</strong></li>
+      <li><strong>Always include feedback loops:</strong> type checking, unit tests, CI green, browser automation</li>
+      <li><strong>PRD format:</strong> JSON file of user stories with <code>passes: false/true</code></li>
+    </ul>
+
+    <blockquote>"Claude's tendency to mark features complete without proper testing... did much better at verifying end-to-end once explicitly prompted to use browser automation tools."</blockquote>
+  </div>
+</section>
+
+<!-- ==========================================
+     DEEP DIVE: ADVANCED PATTERNS
+     ========================================== -->
+<section class="zone--breathing zone--compact" aria-label="Deep Dive: Advanced Patterns" data-topo-primary="mixed">
+  <div class="container">
+    <div class="section-number">14 -- 21</div>
+    <h2 class="section-title">Deep Dive: Advanced Patterns</h2>
+    <p class="section-intro">Extended implementations for production-grade multi-agent systems. Worktree lifecycle management, communication protocols, conflict resolution, load balancing, deployment, and cross-tool patterns.</p>
+
+    <div class="deep-dive-group">
+      <div class="deep-dive-group-title">Infrastructure &amp; Isolation</div>
+
+      <details>
+        <summary>Advanced Worktree Management <span class="xref">extends S03</span></summary>
+        <div class="detail-content">
+          <p style="margin-bottom: 16px;">Production-grade worktree lifecycle with automatic cleanup, agent spawning, and shared state synchronization.</p>
+          <div class="code-block"><span class="code-lang">bash</span><pre>create_worktree() {
+  local branch=$1
+  local worktree_path="$WORKTREE_BASE/$branch"
+  git worktree add -b "$branch" "$worktree_path" main
+  cp .claude/CLAUDE.md "$worktree_path/.claude/"
+  date +%s > "$worktree_path/.worktree-created"
+  echo "$worktree_path"
+}
+
+cleanup_stale_worktrees() {
+  local cutoff=$(($(date +%s) - STALE_HOURS * 3600))
+  for wt in $(git worktree list --porcelain | grep "^worktree" | cut -d' ' -f2); do
+    local created=$(cat "$wt/.worktree-created" 2>/dev/null)
+    if [ -n "$created" ] && [ $created -lt $cutoff ]; then
+      git worktree remove --force "$wt"
+    fi
+  done
+}</pre></div>
+          <h4>Synchronization Pattern</h4>
+          <div class="code-block"><pre>Main Repo
+  └── .shared/           # Symlinked into all worktrees
+      ├── config.json    # Shared configuration
+      ├── schemas/       # Type definitions
+      └── interfaces/    # Contracts between agents</pre></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Containerized Agent Pools <span class="xref">extends S11</span></summary>
+        <div class="detail-content">
+          <p style="margin-bottom: 16px;">Docker and Kubernetes configurations for agent pool management with resource limits and auto-scaling.</p>
+          <div class="code-block"><span class="code-lang">dockerfile</span><pre>FROM ubuntu:22.04
+RUN apt-get update && apt-get install -y \
+    curl git nodejs npm tmux \
+    && npm install -g @anthropic-ai/claude-code
+
+ENV AGENT_POOL_SIZE=4
+ENV AGENT_MODEL=sonnet
+ENTRYPOINT ["/entrypoint.sh"]</pre></div>
+          <h4>Kubernetes Agent Operator</h4>
+          <div class="code-block"><span class="code-lang">yaml</span><pre>apiVersion: agents.claude.ai/v1
+kind: AgentPool
+spec:
+  minReplicas: 2
+  maxReplicas: 10
+  agents:
+    - name: architect  # model: opus, replicas: 1
+    - name: coder      # model: sonnet, replicas: 3
+    - name: tester     # model: haiku, replicas: 2</pre></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="deep-dive-group">
+      <div class="deep-dive-group-title">Communication &amp; Coordination</div>
+
+      <details>
+        <summary>Message Queue Pattern <span class="xref">extends S06</span></summary>
+        <div class="detail-content">
+          <p style="margin-bottom: 16px;">Beyond file-based handoffs: FIFO pipes for lightweight real-time message passing between agents.</p>
+          <div class="code-block"><span class="code-lang">bash</span><pre>AGENT_INBOX="/tmp/agent-$AGENT_ID-inbox"
+mkfifo "$AGENT_INBOX" 2>/dev/null
+
+send_message() {
+  local target_agent=$1
+  local message=$2
+  echo "{\"from\":\"$AGENT_ID\",\"ts\":$(date +%s),\"msg\":\"$message\"}" \
+    > "/tmp/agent-$target_agent-inbox"
+}
+
+check_messages() {
+  if read -t 0.1 message < "$AGENT_INBOX"; then
+    echo "Received: $message"
+  fi
+}</pre></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Event-Driven Architecture <span class="xref">extends S06</span></summary>
+        <div class="detail-content">
+          <p style="margin-bottom: 16px;">File-based event bus with fswatch/inotify for reactive agent coordination.</p>
+          <div class="code-block"><pre>/tmp/agent-events/
+  ├── task-complete-*.json
+  ├── conflict-detected-*.json
+  ├── resource-requested-*.json
+  └── checkpoint-*.json
+     │              │              │
+     ▼              ▼              ▼
+  Agent A        Agent B        Agent C
+  watches        watches        watches</pre></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Consensus Protocols <span class="xref">extends S09</span></summary>
+        <div class="detail-content">
+          <p style="margin-bottom: 16px;">When multiple agents must agree on architecture decisions: broadcast, collect proposals, vote, escalate if no consensus (&gt;66% agreement threshold).</p>
+          <div class="code-block"><span class="code-lang">json</span><pre>{
+  "agent_id": "architect-1",
+  "decision_id": "db-schema-v2",
+  "proposal": "Use PostgreSQL with normalized schema",
+  "confidence": 0.85,
+  "alternatives_considered": ["MongoDB", "SQLite"],
+  "votes_for": [],
+  "votes_against": []
+}</pre></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="deep-dive-group">
+      <div class="deep-dive-group-title">Conflict Resolution &amp; Recovery</div>
+
+      <details>
+        <summary>Semantic Merge with AI <span class="xref">extends S09</span></summary>
+        <div class="detail-content">
+          <p style="margin-bottom: 16px;">Use Claude to resolve merge conflicts semantically -- understanding intent of each change, not just text diffs.</p>
+          <div class="code-block"><span class="code-lang">bash</span><pre>resolve_conflict() {
+  local file=$1
+  claude --print "You are a merge conflict resolver.
+    Analyze both versions semantically. Consider:
+    1. Intent of each change
+    2. Potential semantic conflicts
+    3. Dependencies and side effects
+    4. Test implications
+    Provide the merged result with no conflict markers."
+}</pre></div>
+          <h4>Three-Way Merge with Agent Context</h4>
+          <div class="code-block"><pre>     Base (main)
+         │
+    ┌────┴────┐
+    ▼         ▼
+Agent A    Agent B
+ change     change
+    │         │
+    └────┬────┘
+         ▼
+   Merge Agent
+   (understands both
+    agent contexts)</pre></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Failure Recovery &amp; Checkpointing <span class="xref">new</span></summary>
+        <div class="detail-content">
+          <h4>Graceful Degradation Hierarchy</h4>
+          <table>
+            <thead><tr><th>Level</th><th>Trigger</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><strong>1</strong></td><td>Transient API errors</td><td>Retry 3x with exponential backoff</td></tr>
+              <tr><td><strong>2</strong></td><td>Model unavailable</td><td>Fallback: Opus -> Sonnet -> Haiku</td></tr>
+              <tr><td><strong>3</strong></td><td>Context corruption</td><td>Checkpoint, terminate, requeue to fresh agent</td></tr>
+              <tr><td><strong>4</strong></td><td>Repeated failures (&gt;3)</td><td>Alert human, pause pipeline</td></tr>
+              <tr><td><strong>5</strong></td><td>Critical infrastructure failure</td><td>Checkpoint all agents, safe shutdown</td></tr>
+            </tbody>
+          </table>
+          <h4>Dead Letter Queue</h4>
+          <p style="margin-top: 8px;">Tasks that fail 3+ times move to a dead letter queue with full context for human review.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Circuit Breaker Pattern <span class="xref">extends S10</span></summary>
+        <div class="detail-content">
+          <p style="margin-bottom: 16px;">Prevent cascading failures across agent pools. States: CLOSED (normal) -> OPEN (failing fast) -> HALF_OPEN (testing recovery).</p>
+          <div class="code-block"><span class="code-lang">bash</span><pre>FAILURE_THRESHOLD=3
+RECOVERY_TIMEOUT=300  # seconds
+
+call_agent() {
+  local agent_type=$1
+  case ${circuit_state[$agent_type]:-CLOSED} in
+    OPEN)
+      if [ $((now - last)) -gt $RECOVERY_TIMEOUT ]; then
+        circuit_state[$agent_type]="HALF_OPEN"
+      else
+        echo "Circuit OPEN - failing fast"; return 1
+      fi ;;
+  esac
+  # ... attempt call, track failures
+}</pre></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="deep-dive-group">
+      <div class="deep-dive-group-title">Scaling &amp; Optimization</div>
+
+      <details>
+        <summary>Load Balancing &amp; Auto-Scaling <span class="xref">new</span></summary>
+        <div class="detail-content">
+          <h4>Resource-Aware Scheduling</h4>
+          <table>
+            <thead><tr><th>Profile</th><th>Model</th><th>Concurrent</th><th>Use Case</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Light</strong></td><td>Haiku</td><td>10</td><td>Lookups, simple transforms</td></tr>
+              <tr><td><strong>Medium</strong></td><td>Sonnet</td><td>5</td><td>Implementation, testing</td></tr>
+              <tr><td><strong>Heavy</strong></td><td>Opus</td><td>2</td><td>Architecture, complex reasoning</td></tr>
+            </tbody>
+          </table>
+          <h4 style="margin-top: 20px;">Scheduling Rules</h4>
+          <ul>
+            <li>Match task complexity to agent profile</li>
+            <li>Prefer Light agents for parallelizable subtasks</li>
+            <li>Reserve Heavy agents for blocking decisions</li>
+            <li>Degrade gracefully: Heavy -> Medium if Opus unavailable</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>Cost Optimization <span class="xref">new</span></summary>
+        <div class="detail-content">
+          <h4>Smart Model Selection</h4>
+          <table>
+            <thead><tr><th>Task</th><th>Model</th><th>Rationale</th></tr></thead>
+            <tbody>
+              <tr><td>File lookup, simple grep</td><td>Haiku</td><td>Fast, cheap</td></tr>
+              <tr><td>Code generation</td><td>Sonnet</td><td>Good quality/cost</td></tr>
+              <tr><td>Architecture decisions</td><td>Opus</td><td>Deep reasoning</td></tr>
+              <tr><td>Security review</td><td>Opus</td><td>High stakes</td></tr>
+              <tr><td>Documentation</td><td>Haiku/Sonnet</td><td>Lower complexity</td></tr>
+            </tbody>
+          </table>
+          <h4 style="margin-top: 20px;">Dynamic Downgrade Rules</h4>
+          <ul>
+            <li>If Opus task takes &gt;5 min without progress, try Sonnet</li>
+            <li>If task fails with Opus, don't auto-retry with Opus</li>
+            <li>Parallelize with multiple Haiku before single Opus when possible</li>
+            <li>Cache expensive operations (codebase analysis, architecture reviews)</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>Testing Multi-Agent Systems <span class="xref">new</span></summary>
+        <div class="detail-content">
+          <h4>Chaos Testing Scenarios</h4>
+          <ul>
+            <li><strong>Agent Crash Recovery:</strong> Kill agent mid-task. Verify orchestrator detects within 60s, requeues task, no data loss.</li>
+            <li><strong>Network Partition:</strong> Drop API traffic. Verify backoff mode. Restore. Verify resume without duplicate work.</li>
+            <li><strong>Conflicting Edits:</strong> Assign same file to two agents. Verify conflict detection before merge.</li>
+            <li><strong>Resource Exhaustion:</strong> Queue more tasks than agents can handle. Verify priority ordering maintained.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <div class="deep-dive-group">
+      <div class="deep-dive-group-title">Cross-Tool Patterns</div>
+
+      <details>
+        <summary>AutoGen Group Chat Pattern <span class="xref">Microsoft</span></summary>
+        <div class="detail-content">
+          <p style="margin-bottom: 16px;">Multiple agents share a conversation thread, taking turns based on round-robin, topic relevance, or orchestrator direction.</p>
+          <div class="code-block"><span class="code-lang">bash</span><pre>group_chat() {
+  for ((turn=1; turn<=max_turns; turn++)); do
+    for agent in "${AGENTS[@]}"; do
+      response=$(claude "You are the $agent.
+        Chat history: $(tail -50 "$CHAT_LOG")
+        Contribute 2-3 sentences. Say 'CONSENSUS REACHED' if resolved.")
+      echo "[$agent] $response" >> "$CHAT_LOG"
+    done
+  done
+}</pre></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>CrewAI Role Definitions <span class="xref">CrewAI</span></summary>
+        <div class="detail-content">
+          <p style="margin-bottom: 16px;">Agents with explicit roles, goals, and backstories for persona-driven collaboration.</p>
+          <div class="code-block"><span class="code-lang">yaml</span><pre>agents:
+  - role: "Senior Software Architect"
+    goal: "Design scalable, maintainable architectures"
+    backstory: "15 years at Google and Stripe. Prioritizes simplicity."
+  - role: "Security Engineer"
+    goal: "Identify and prevent vulnerabilities"
+    backstory: "Red team veteran. Paranoid by nature."
+  - role: "Junior Developer"
+    goal: "Implement features while learning"
+    backstory: "Catches issues seniors overlook."</pre></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>LangGraph State Machine <span class="xref">LangGraph</span></summary>
+        <div class="detail-content">
+          <p style="margin-bottom: 16px;">Multi-agent workflows modeled as state machines with explicit transitions.</p>
+          <div class="code-block"><pre>┌─────────┐     ┌─────────┐     ┌─────────┐
+│  PLAN   │────>│  CODE   │────>│  TEST   │
+└─────────┘     └─────────┘     └─────────┘
+                     │               │
+                     ▼               │
+               ┌─────────┐          │
+               │ REVIEW  │<─────────┘
+               └─────────┘
+                Pass │  Fail -> back to CODE
+                     ▼
+               ┌─────────┐
+               │  DONE   │
+               └─────────┘</pre></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="deep-dive-group">
+      <div class="deep-dive-group-title">Memory &amp; Context</div>
+
+      <details>
+        <summary>Memory Hierarchy for Multi-Agent <span class="xref">extends S13</span></summary>
+        <div class="detail-content">
+          <div class="code-block"><pre>Layer 1: Enterprise Policy
+  /Library/Application Support/ClaudeCode/CLAUDE.md
+  Organization-wide security, compliance
+
+Layer 2: Project Memory
+  ./CLAUDE.md or ./.claude/CLAUDE.md
+  Architecture decisions, coding standards
+
+Layer 3: Modular Rules
+  ./.claude/rules/*.md
+  Path-specific rules with frontmatter targeting
+
+Layer 4: Personal + Local
+  ~/.claude/CLAUDE.md (user global)
+  ./CLAUDE.local.md (project local, gitignored)
+  Agent-specific context, sandbox URLs</pre></div>
+          <h4>Multi-Agent Memory Pattern</h4>
+          <p style="margin-top: 8px;">Shared <code>CLAUDE.md</code> for project rules + agent-specific <code>CLAUDE.local.md</code> with task context, owned files, and coordination state.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Anthropic Best Practices (Extended) <span class="xref">official</span></summary>
+        <div class="detail-content">
+          <h4>Task Sizing Guidelines</h4>
+          <table>
+            <thead><tr><th>Size</th><th>Example</th><th>Verdict</th></tr></thead>
+            <tbody>
+              <tr><td>Too small</td><td>"Add a comment to line 42"</td><td>Overhead exceeds value</td></tr>
+              <tr><td><strong>Just right</strong></td><td>"Implement User model with JWT auth"</td><td>One context window, verifiable</td></tr>
+              <tr><td>Too large</td><td>"Build the entire backend"</td><td>Context collapse risk</td></tr>
+            </tbody>
+          </table>
+          <h4 style="margin-top: 20px;">Sizing Heuristics</h4>
+          <ul>
+            <li>~100-500 lines of code change</li>
+            <li>~1-3 files modified</li>
+            <li>~30-60 minutes equivalent human time</li>
+            <li>Clear success criteria (tests pass, feature works)</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     PATTERN SELECTION GUIDE
+     ========================================== -->
+<section class="zone--dense zone--compact" aria-label="Pattern Selection Guide" data-topo-primary="mixed">
+  <div class="container">
+    <div class="selection-guide">
+      <div class="selection-guide-title">Pattern Selection Guide</div>
+      <div class="sel-row" style="border-bottom: 3px solid var(--color-border); padding-bottom: 8px; margin-bottom: 4px;">
+        <div class="sel-scenario" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-secondary); font-weight: 500;">Scenario</div>
+        <div class="sel-pattern" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-secondary);">Recommended Pattern</div>
+      </div>
+      <div class="sel-row"><div class="sel-scenario">Single feature, overnight</div><div class="sel-pattern"><div class="sel-dot" style="background: var(--topo-kanban);"></div> Ralph Loop</div></div>
+      <div class="sel-row"><div class="sel-scenario">Multiple life domains</div><div class="sel-pattern"><div class="sel-dot" style="background: var(--topo-hub);"></div> Panopticon</div></div>
+      <div class="sel-row"><div class="sel-scenario">Team project, parallel features</div><div class="sel-pattern"><div class="sel-dot" style="background: var(--topo-peer);"></div> Git worktrees + branch discipline</div></div>
+      <div class="sel-row"><div class="sel-scenario">Complex architecture work</div><div class="sel-pattern"><div class="sel-dot" style="background: var(--topo-hub);"></div> Hub-and-spoke with specialists</div></div>
+      <div class="sel-row"><div class="sel-scenario">Production app with dependencies</div><div class="sel-pattern"><div class="sel-dot" style="background: var(--topo-hub);"></div> CC Mirror native orchestration</div></div>
+      <div class="sel-row"><div class="sel-scenario">Massive scale (10+ agents)</div><div class="sel-pattern"><div class="sel-dot" style="background: var(--topo-factory);"></div> Gas Town factory</div></div>
+      <div class="sel-row"><div class="sel-scenario">Content / marketing</div><div class="sel-pattern"><div class="sel-dot" style="background: var(--topo-kanban);"></div> Ralph Wiggum Marketer</div></div>
+      <div class="sel-row"><div class="sel-scenario">Self-improving system</div><div class="sel-pattern"><div class="sel-dot" style="background: var(--topo-factory);"></div> Infinite Orchestra</div></div>
+      <div class="sel-topology-count">Hub & Spoke: 3 &nbsp;&middot;&nbsp; Kanban: 2 &nbsp;&middot;&nbsp; Factory: 2 &nbsp;&middot;&nbsp; Peer: 1</div>
+    </div>
+  </div>
+</section>
+
+<!-- Phase transition: entering bedrock reference -->
+<div class="phase-transition" aria-hidden="true" data-phase="Quick Reference"></div>
+
+<!-- ==========================================
+     QUICK REFERENCE (BEDROCK)
+     ========================================== -->
+<section class="zone--bedrock" aria-label="Quick Reference">
+  <div class="container">
+    <div class="section-number">Reference</div>
+    <h2 class="section-title">Quick Reference</h2>
+    <div class="code-block"><span class="code-lang">bash</span><pre># Ralph Loop
+./ralph.sh 25
+
+# Git Worktree
+git worktree add ../feature-branch feature-branch
+
+# CC Mirror
+npx cc-mirror quick --provider mirror --name mclaude
+
+# Claude HUD
+/plugin install claude-hud
+
+# rpai (tmux manager)
+cargo install rpai && rpai
+
+# Gas Town
+go install github.com/steveyegge/gastown/cmd/gt@latest
+
+# Worktree lifecycle (Deep Dive)
+./worktree-manager.sh create feature-x
+./worktree-manager.sh merge feature-x
+
+# Cost tracking
+./cost-tracker.sh daily-report</pre></div>
+
+    <h3>Resources</h3>
+    <div class="resources-grid">
+      <div class="resource-card">
+        <div class="resource-cat">Official</div>
+        <div class="resource-item">github.com/anthropics/claude-code</div>
+        <div class="resource-item">Ralph Plugin (official)</div>
+        <div class="resource-item">Claude Code Subagents docs</div>
+      </div>
+      <div class="resource-card">
+        <div class="resource-cat">Community</div>
+        <div class="resource-item">CC Mirror</div>
+        <div class="resource-item">Gas Town</div>
+        <div class="resource-item">Orchestra</div>
+        <div class="resource-item">Claude HUD / rpai</div>
+      </div>
+      <div class="resource-card">
+        <div class="resource-cat">Research</div>
+        <div class="resource-item">AutoGen (Microsoft)</div>
+        <div class="resource-item">MetaGPT (DeepWisdom)</div>
+        <div class="resource-item">CAMEL Framework</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="page-footer" role="contentinfo">
+  <p>Multi-Agent Patterns for Claude Code. Synthesized from community innovations, production implementations, and Anthropic's official guidance.</p>
+</footer>
+
+</body>
+</html>

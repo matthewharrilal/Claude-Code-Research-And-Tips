@@ -176,6 +176,67 @@ that [rises/falls/pulses]. Uniform density contradicts this arc — it says
 are identical (or within 8px), density is uniform — apply variation.
 ```
 
+### Spatial Anti-Patterns (NEW — structural invention guard rails)
+
+When the builder uses non-standard spatial layouts (grids, splits, hub-spoke), these anti-patterns become relevant:
+
+```
+### Anti-Pattern: Grid for Sequential Content
+
+**Risk trigger:** Builder applies grid layout to content that is inherently sequential.
+
+**Why it fails:** Grids imply simultaneity — all items are co-present and co-equal.
+Sequential content ("Step 1, Step 2, Step 3" or "First... then... finally...")
+has inherent ordering that grid layout destroys. The reader loses the sequence
+and sees a collection instead of a process.
+
+**Signal words that PREVENT grid:** "then," "next," "step," "first/second/third,"
+"before doing X," "after completing Y."
+
+**Signal words that PERMIT grid:** "domains," "territories," "categories,"
+"types of," "parallel," "simultaneously," "alternatives."
+
+**Detection:** Count ordering words in the content section. If > 3 ordering
+words appear, grid is contraindicated. Use vertical layout with sequential markers.
+```
+
+```
+### Anti-Pattern: Hub-Spoke for Hierarchical Content
+
+**Risk trigger:** Builder applies hub-spoke layout to content with a clear
+parent-child hierarchy.
+
+**Why it fails:** Hub-spoke implies equal-weight spokes radiating from a hub.
+Hierarchical content ("The main category contains 3 subcategories, each with...")
+has inherent nesting that hub-spoke flattens. Parent and children become siblings.
+
+**Signal words that PREVENT hub-spoke:** "contains," "subdivides," "within,"
+"under," "part of," "parent/child."
+
+**Signal words that PERMIT hub-spoke:** "alternatives," "viewpoints," "domains,"
+"parallel," "choose," "explore."
+
+**Detection:** If content section has 2+ nesting levels (categories within
+categories), hub-spoke is contraindicated. Use nested/accordion instead.
+```
+
+```
+### Anti-Pattern: Structural Overload
+
+**Risk trigger:** Builder applies more than 2 non-standard spatial sections per page.
+
+**Why it fails:** Each non-standard section demands reader orientation effort.
+1 non-standard section is a highlight. 2 is variety. 3+ is chaos — the reader
+can't build a mental model of the page's spatial logic because it keeps changing.
+
+**Maximum:** 2 non-standard spatial sections per page. All other sections use
+standard vertical layout. The non-standard sections should be the page's
+STRUCTURAL HIGHLIGHTS, not the default.
+
+**Detection:** Count sections with `display: grid` (excluding standard 1-column
+grids and responsive fallbacks). If > 2, reduce to the 2 most content-justified.
+```
+
 ### Category 4: CREATIVE TERRITORY (Where Freedom Exists)
 
 Creative territory is what's LEFT after soul, convention, and anti-pattern constraints are applied. This is where the builder exercises 80% creative authority. Explicitly mapping creative territory prevents the builder from being paralyzed by constraints — they need to know WHERE they can innovate.

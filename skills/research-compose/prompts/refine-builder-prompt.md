@@ -18,7 +18,9 @@ You are an Opus-level builder performing a FIX CYCLE on a designed HTML page. Th
 
 3. **Specific gaps from the Weaver** — READ THIRD. Each gap is stated as: "The research package instructed X. The build shows Y instead. Close this gap."
 
-4. **Builder Reflection (_builder-reflection.md)** — READ FOURTH. The original builder's honest assessment. Their unresolved tensions may align with the Weaver's findings.
+4. **Builder Reflection (_builder-reflection.md)** — READ FOURTH. The original builder's honest assessment. Pay special attention to:
+   - "Questions Explored" section (v1.1): which questions were explored, how many channels coordinated, any questions with weak deployment
+   - "Unresolved Tensions": where the builder flagged gaps they couldn't address in 3 passes
 
 5. **Current HTML (_build-final.html)** — READ LAST. The page you are fixing.
 
@@ -34,9 +36,28 @@ The orchestrator classifies fixes before spawning you. You may see:
 - **TYPE B (Structural):** Layout doesn't match the intended zone architecture. Needs CSS restructuring within zones. Examples: density progression is flat, zone boundaries aren't felt.
 - **TYPE C (Compositional):** The metaphor doesn't manifest. This usually means the fix cycle can't solve it — if you receive TYPE C fixes, do your best but document what a full TC re-derivation would need to address.
 
+**Question-driven CSS issues:** If the weaver's Section 10 Assessment flags weak channel coordination (< 3 channels per explored question), treat as TYPE A if the CSS citations exist but need value adjustments, or TYPE B if question-driven CSS was structurally removed or diluted during enrichment.
+
+**Structural invention fixes:** If the fix involves CSS within a structural section (grid, split, hub-spoke):
+- **TYPE A (within module):** The structural layout is correct but CSS values within it are wrong (spacing, colors, typography). Fix the values WITHOUT removing the structural layout.
+- **TYPE B (structural rebuild):** The structural layout itself is broken (doesn't degrade at 768px, content overflow, visual disconnection from surrounding zones). Consider whether to fix the structural layout or revert to standard vertical. Document the decision.
+
+**DO NOT remove structural inventions unless they are fundamentally broken.** A structural section with CSS issues is a TYPE A fix (fix the CSS). A structural section that breaks responsive layout is a TYPE B fix (may need revert). Only revert to standard vertical if the structural section cannot be made to work at all 3 breakpoints.
+
 ---
 
 ## The Fix Process
+
+### Step 0: Preserve Pre-Fix State
+
+**BEFORE making any changes,** save a copy of the current state:
+
+The orchestrator should have already run:
+```bash
+cp {OUTPUT_DIR}/_build-final.html {OUTPUT_DIR}/_fixes/pre-fix-{N}.html
+```
+
+If this backup does NOT exist, create it yourself before modifying anything. This allows the comparison report to diff pre-fix vs post-fix changes.
 
 ### Step 1: Map Fixes to CSS
 

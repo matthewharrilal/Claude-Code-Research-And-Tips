@@ -111,6 +111,13 @@ Key cross-stage chains to look for:
 - **OD-F-005 → AD-F-004 → AD-F-023**: Organization IS density IS axis. The 3-way unification, crowned by ATTENTION TOPOLOGY.
 - **DD-F-002 (CRESCENDO) → OD-F-010 → AD-F-006**: Sparse-to-dense progression validated through typography compression.
 
+**Spatial Chain Tracking:** For each cross-stage chain, also note:
+- Did ANY exploration in this chain use a non-standard spatial layout?
+- If so, what was the spatial form and why was it chosen?
+- Was the spatial choice VALIDATED (reproduced in later stages) or SINGULAR (appeared once)?
+
+Example: "DD-F-006 chain: DD-006 used fractal NESTED LAYOUTS (grid-within-grid-within-grid) — this spatial choice was validated through OD-006 (3-column layout with fractal annotation). The nesting IS the fractal — spatial form IS the finding's expression."
+
 ### Step 9: Write Your Output
 
 Organize findings into three confidence tiers:
@@ -125,6 +132,7 @@ For each elevated finding relevant to this build:
 **Elevation:** [What changed — how did the finding grow in scope or confidence?]
 **Validation Evidence:** [Concrete evidence from the exploration that tested it — cite the exploration ID and what was built]
 **Build Application:** [How to apply this finding to THIS build. Specific CSS direction. Recipe verbs.]
+**Spatial Implication:** [Did any stage in this finding's chain use a non-standard spatial form (grid, hub-spoke, split, nested)? If yes, describe what spatial form was used and at which stage. If no, write "Vertical deployment across all stages."]
 **Confidence:** ELEVATED — validated in [N] stages with [evidence type].
 ```
 
@@ -157,7 +165,29 @@ A concise section listing the 5-7 strongest provenance chains for THIS build, or
 2. ...
 ```
 
-### Step 11: Write the Agent Log Footer
+### Step 11: Preserve TC Experimental Questions
+
+Read `_tc-brief.md` again and locate the TC agent's experimental questions — the "what if..." questions from the conviction brief. They may appear in Creative Conditions, Compositional Arc, or as standalone questions.
+
+**Copy these questions VERBATIM into a dedicated section at the end of your output:**
+
+```
+---
+## TC Experimental Questions (Preserved)
+
+These questions are carried verbatim from the TC conviction brief. They are generative
+invitations that should flow through to the synthesizer's Section 10 (Compositional Questions).
+Do not paraphrase, summarize, or rate them.
+
+1. [Exact TC question 1] — Originating section: [which TC brief section]
+2. [Exact TC question 2] — Originating section: [which TC brief section]
+```
+
+**Why both S1 and S2 carry these:** Redundancy ensures the synthesizer receives TC questions even if one specialist output is thin. The synthesizer deduplicates.
+
+**If no explicit experimental questions exist in the brief:** Extract 1-2 implicit questions from the TC brief's compositional arc. Label them `[DERIVED FROM TC BRIEF]`.
+
+### Step 12: Write the Agent Log Footer
 
 ```
 ---
@@ -186,6 +216,7 @@ These show the expected depth and provenance chain notation.
 **Elevation:** Originally a research hypothesis about self-similar density patterns. DD validated it visually. OD proved it works across all organization patterns. AD confirmed it at 5 specific scales AND bounded it (AD-F-028: no 6th scale exists).
 **Validation Evidence:** DD-006 fractal exploration demonstrated visible sparse-dense rhythm at 4 scales. AD-006 compound exploration confirmed the 5th scale (navigation). 20+ files reference this chain.
 **Build Application:** Deploy fractal density at 4-5 scales in this build. Page scale: alternate section backgrounds between var(--surface) and var(--recessed). Section scale: vary padding (64px outer, 48px inner). Component scale: code blocks use 16px padding, blockquotes use 24px. Character scale: heading letter-spacing tightens at deeper levels (-0.02em h2, -0.01em h4). Apply the geological metaphor's strata as the fractal expression — each stratum is a fractal level.
+**Spatial Implication:** DD-006 used NESTED GRID layouts (grid-within-grid) to express fractal self-similarity spatially. OD-006 used 3-COLUMN PAGE LAYOUT. The fractal finding's spatial expression was validated across stages — nesting is not just a density pattern but a spatial form. For this build: if content has 3+ hierarchical levels, consider nested layout as the spatial expression of fractal density.
 **Confidence:** ELEVATED — validated in 4 stages (DD, OD, AD, bounded by AD-F-028). Highest-confidence finding in the system.
 ```
 
@@ -225,7 +256,9 @@ Your output MUST meet ALL of these criteria:
 
 6. **Chain Summary present.** The 5-7 strongest chains listed with one-sentence build implications.
 
-7. **Agent log footer present and honest.**
+7. **TC Experimental Questions section present** with verbatim questions from the conviction brief.
+
+8. **Agent log footer present and honest.**
 
 ---
 

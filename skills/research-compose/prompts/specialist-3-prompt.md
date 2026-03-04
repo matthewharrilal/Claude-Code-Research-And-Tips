@@ -100,6 +100,53 @@ For each affinity case study, document:
 - What MECHANISMS did it deploy and WHY? (from its "Where Mechanisms Were Applied" section)
 - How did it SEQUENCE its decisions? (the order in which choices were made)
 
+### Step 2.5: Extract the STRUCTURAL LOGIC (Why This Spatial Form?)
+
+For each case study with structural affinity, examine its HTML structure — not just its CSS. Ask:
+
+1. **What CONTENT LOGIC drove the spatial decision?**
+   - "8 parallel roles → grid layout because simultaneity requires spatial proximity"
+   - "Concept-to-code mapping → side-by-side panels because comparison requires co-visibility"
+   - "Linear argument → vertical flow because sequential logic requires linear reading"
+
+2. **What SPATIAL FORM was chosen?**
+   - Grid (named areas, auto-fit, fractional units)
+   - Hub-spoke (central hub with radial spokes)
+   - Split/facing (side-by-side panels)
+   - Nested (layout within layout)
+   - Fractal (self-similar structure at multiple scales)
+   - Standard vertical (single column — this is a VALID answer)
+
+3. **What made that form WORK better than vertical stacking?**
+   - "The grid makes 8 simultaneous domains scannable in 2 seconds — stacking them requires scrolling through 8 sections"
+   - "Side-by-side makes the concept↔code relationship visible without scrolling between sections"
+
+4. **What CONTENT SIGNAL would trigger the same spatial logic in a DIFFERENT build?**
+   - "Any content with 4+ parallel items at the same hierarchy level → consider grid"
+   - "Any content with explicit comparison/contrast → consider side-by-side"
+   - "Any content with nested categories → consider nested/accordion layout"
+
+**EXEMPLAR — Structural Logic Extraction for OD-005:**
+```
+### Structural Logic: OD-005 (Hub-Spoke Territory Grid)
+
+**Content logic:** The content describes 6 parallel "territories" that are
+conceptually simultaneous — not sequential. A reader needs to see all 6
+exist before diving into any one.
+
+**Spatial form:** Hub-spoke — central grid map + per-territory spoke pages.
+CSS: `grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))`
+
+**Why it works better than vertical:** Vertical stacking implies sequence
+(Territory 1 comes before Territory 2). Grid implies simultaneity — all 6
+are co-present, reader chooses entry point. The CONTENT'S parallelism
+demands spatial parallelism.
+
+**Trigger signal for other builds:** 4+ items at the same hierarchy level
+that are conceptually simultaneous (not sequential). Signal words:
+"domains," "territories," "categories," "types of," "parallel."
+```
+
 ### Step 3: Extract Adapted CSS
 
 For each affinity case study, find CSS patterns that PRODUCED RICHNESS and adapt them for the current build's metaphor.
@@ -169,12 +216,34 @@ This is the case study's own "What YOU Extract" section, re-evaluated through th
 
 ### Edge Case 1: No Case Studies Share Affinity
 
-If after reading all 12 case studies, NONE have structural affinity with the current content + metaphor:
+If after reading all case studies (excluding README.md and ANTI-PRESCRIPTION-TEMPLATE.md which are reference documents), NONE have structural affinity with the current content + metaphor:
 
 1. **Document the gap explicitly.** State: "No case studies share structural affinity. The current content's [describe shape] and metaphor's [describe logic] are not represented in the library."
 2. **Extract mechanism-level techniques anyway.** Even without case-level affinity, individual mechanisms from case studies may apply. Scan all 12 for any mechanism (border-weight, zone alternation, fractal rhythm, 2-zone DNA) that the TC brief's mechanisms suggest.
 3. **Produce the output at mechanism level** instead of case-study level. 3-5 mechanism extractions with adapted CSS instead of 3-5 case study analyses.
 4. **Minimum output:** 50 lines (reduced from 100). The synthesizer needs to know the gap exists.
+
+### Edge Case 5: MEDIUM-Affinity Case Studies
+
+Some case studies will have MEDIUM structural affinity — not strong enough for full case-study-level analysis, but containing mechanism-level techniques that are transferable.
+
+**For MEDIUM-affinity case studies (expect 2-4 per build):**
+
+1. **Do NOT extract the full process** (tensions, candidates, selection sequence). Full process extraction is for HIGH-affinity case studies only — it's wasteful on partial matches.
+2. **DO extract mechanism-level techniques.** Scan for specific CSS techniques that apply regardless of structural match: border-weight gradient, zone alternation, fractal rhythm, 2-zone DNA, typography compression.
+3. **Format:** A condensed entry (10-15 lines instead of 30-50):
+
+```markdown
+## MEDIUM Affinity: [Case Study ID] — Mechanism Extraction Only
+
+**Affinity:** MEDIUM — [1 sentence: which axis has partial match, which doesn't]
+**Transferable techniques:**
+- [Mechanism name]: [2-3 lines of adapted CSS with comments]
+- [Mechanism name]: [2-3 lines of adapted CSS with comments]
+**Non-transferable:** [1 sentence: what's too entangled with the case study's metaphor]
+```
+
+4. **Include MEDIUM-affinity entries AFTER all HIGH-affinity entries** in your output. They provide supplementary CSS vocabulary without the process overhead.
 
 ### Edge Case 2: CSS is Too Exploration-Specific to Adapt
 
@@ -218,6 +287,9 @@ Structure:
 [2-3 sentences: WHY this case study's decisions are relevant]
 ### Process Extraction
 [How the case study THOUGHT — tensions, candidates, selection, sequencing]
+### Structural Logic Extraction
+[What content logic drove the spatial form? What spatial form was chosen?
+Why does it work better than vertical? What content signal triggers it?]
 ### Adapted CSS
 [10+ lines of CSS adapted for this build's metaphor — with comments explaining adaptation]
 ### Reusable vs Non-Reusable
@@ -254,6 +326,7 @@ Your output MUST meet these minimums:
 4. **Every adapted CSS block** must use the CURRENT build's metaphor vocabulary (class names, custom property names), NOT the original case study's vocabulary
 5. **Recipe format:** Use sequencing verbs (the case study FACED → CONSIDERED → REJECTED → SELECTED → DEPLOYED). Not checklist format.
 6. **Cross-case-study patterns section** is mandatory — what does the convergence of techniques suggest?
+7. **Structural Logic present** for each HIGH-affinity case study: content logic → spatial form → why it works → trigger signal. If a case study used only standard vertical layout, state why vertical was the correct spatial choice for its content.
 
 If you cannot identify 3 case studies with affinity, see Edge Case 1 above.
 

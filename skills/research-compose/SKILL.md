@@ -29,13 +29,13 @@ Use this table to find your current position after context compression. If conte
 | Phase | Name | Agents | Key Outputs | Validation Gate |
 |-------|------|--------|-------------|-----------------|
 | 0 | SETUP | 0 (orchestrator) | Dirs created, files loaded | Input file exists, dirs created |
-| 1 | DERIVE | 1 TC (Opus) | `_tc-brief.md` | 6 sections, definitive metaphor, 3+ waypoints |
+| 1 | DERIVE | 1 TC (Opus) | `_tc-brief.md` | 6 sections, definitive metaphor, 3+ waypoints, structural observation (non-blocking) |
 | 2 | RESEARCH | 5 specialists + 1 synth (Opus) | `_specialist-[1-5]-*.md`, `_package-pass-[1-3].md` | Each specialist >= quality floor lines, each package >= 100 lines |
 | 3 | BUILD | 1 builder x 3 passes (Opus) | `_build-pass-[1-2].html`, `_build-final.html`, `_pass-[1-2]-decisions.md`, `_builder-reflection.md` | HTML > 1KB, has `<style>`, has Google Fonts, self-contained |
 | 4 | EVALUATE | 5 PA + 1 weaver (Opus) | `_pa/auditor-[1-5].md`, `_pa/synthesis.md`, `_comparison-report.md` | Synthesis has verdict, comparison report has gap analysis |
 | 5 | REFINE | 0-1 builder (Opus) | Updated `_build-final.html`, `_fixes/fix-N-*.md` | Max 2 cycles, re-screenshot + re-PA after each |
 
-**Total agents per run:** 16-17 (1 TC + 5 specialists + 1 synthesizer + 3 builder passes + 5 PA auditors + 1 weaver + 0-1 refine builder)
+**Total agents per run:** 16-17 base (1 TC + 5 specialists + 1 synthesizer + 3 builder passes + 5 PA auditors + 1 weaver) + 0-7 per refine cycle (1 refine builder + 5 PA re-auditors + 1 re-weaver). Maximum with 2 refine cycles: 30 agents.
 
 ---
 
@@ -90,7 +90,7 @@ Every phase checkpoint written to `_pipeline-log.md` must follow this structure:
 ---
 ```
 
-Cost estimate ranges per phase: Phase 1 ($3-5), Phase 2 ($8-15), Phase 3 ($12-18), Phase 4 ($5-10), Phase 5 ($0-8). If cumulative upper bound exceeds $50, PAUSE and report to user before proceeding. Maximum 1 re-run per agent per phase. If re-run also fails, proceed with best available output.
+Cost estimate ranges per phase: Phase 1 ($3-5), Phase 2 ($10-18, increased for Section 10 assembly), Phase 3 ($12-18), Phase 4 ($5-10), Phase 5 ($0-8). Estimated total per run: $30-59 base + $0-16 per refine cycle. If cumulative upper bound exceeds $50, this is a **HARD GATE**: PAUSE and report to user with current cost breakdown per phase before proceeding. The user must explicitly approve continued spending. Do NOT proceed past $50 without approval. Maximum 1 re-run per agent per phase. If re-run also fails, proceed with best available output.
 
 ---
 
@@ -148,8 +148,11 @@ Run the full TC pipeline (Phases 0 through 4.5) using the tension-composition sk
 4. Section 1 contains a definitive metaphor statement (no 'could', 'might', 'perhaps')
 5. Section 4 contains at least 3 creative waypoints
 6. Brief is conviction-driven (creative invitations, not compliance checklists)
+7. **Compositional Questions section present** with 2-3 explicit "What if..." questions, each implying 3+ CSS channels. Check for the "Compositional Questions (CARRY VERBATIM TO BUILDERS)" header.
 
-**If validation fails:** Re-spawn the TC agent with feedback: "The brief is missing [specific issue]. The conviction brief must transfer FULL compositional intelligence to the builder. Go deeper."
+**Structural observation check (non-blocking):** If TC brief contains Section 7 (Structural Observation) with content archetype identification, note it in the pipeline log. If absent, note "TC did not produce structural observation — standard vertical pipeline." This is informational, not a gate failure.
+
+**If validation fails:** Re-spawn the TC agent with feedback: "The brief is missing [specific issue]. The conviction brief must transfer FULL compositional intelligence to the builder. Go deeper." For missing compositional questions: "The brief needs 2-3 explicit 'What if...' compositional questions that imply multi-channel CSS coordination. Each question should naturally generate CSS changes across 3+ visual channels (spacing, typography, color, borders, line-height, letter-spacing). See the tc-derivation.md prompt for examples."
 
 **Write Phase 1 checkpoint to `_pipeline-log.md`** using the Layer B template format. Key fields: Agents spawned: 1 (TC). Artifacts: _tc-brief.md ({line-count} lines). Cumulative cost estimate: $3-5.
 
@@ -161,7 +164,7 @@ Run the full TC pipeline (Phases 0 through 4.5) using the tension-composition sk
 
 **Context recovery:** If context has compressed, re-read `{OUTPUT_DIR}/_pipeline-log.md`. If Phase 1 is marked COMPLETE and Phase 2 is not, you are HERE. Re-read `{OUTPUT_DIR}/_tc-brief.md` to recall the metaphor and content.
 
-This is the NEW phase — the core of the tripod. 5 specialists read different slices of the 26,528-line knowledge base and produce curated, content-specific research. Then 1 synthesizer merges their output into 3 rotation-ready package files.
+This is the core of the tripod. 5 specialists read different slices of the 26,528-line knowledge base and produce curated, content-specific research. Then 1 synthesizer merges their output into 3 rotation-ready package files.
 
 ### Step 2A: Spawn 5 Specialists (PARALLEL)
 
@@ -187,7 +190,7 @@ All 5 specialists run in parallel. Each receives the common input plus their dom
 **Agent prompt:** Read the full prompt from `~/.claude/skills/research-compose/prompts/specialist-1-prompt.md` and pass the file path to the agent in its task description. The agent reads it via the Read tool — do NOT read the full prompt into your own context.
 
 **Output:** `{OUTPUT_DIR}/_specialist-1-findings.md`
-**Quality floor:** 100 lines minimum. 20+ HIGH findings. Each HIGH finding: finding ID + relevance rationale + specific CSS action for THIS build. Recipe format.
+**Quality floor:** 200 lines minimum. 20+ HIGH findings with originating question attribution. TC Experimental Questions (Preserved) section present. Each HIGH finding: finding ID + relevance rationale + specific CSS action for THIS build + originating question link. Recipe format.
 
 ---
 
@@ -286,8 +289,8 @@ After all 5 specialists complete, validate EACH output:
 For each specialist N in [1, 2, 3, 4, 5]:
   1. Verify file exists: {OUTPUT_DIR}/_specialist-{N}-*.md
   2. Count lines. Compare against quality floor:
-     - S1: >= 100 lines
-     - S2: >= 80 lines
+     - S1: >= 200 lines (includes TC Experimental Questions section)
+     - S2: >= 80 lines (includes TC Experimental Questions section)
      - S3: >= 100 lines
      - S4: >= 60 lines
      - S5: >= 80 lines
@@ -327,21 +330,28 @@ For each specialist N in [1, 2, 3, 4, 5]:
 
 **Agent produces THREE files (not one):**
 
-- `{OUTPUT_DIR}/_package-pass-1.md` — **Foundations** (~140-190 lines)
+- `{OUTPUT_DIR}/_package-pass-1.md` — **Foundations** (~280-360 lines)
   - Section 0: Soul Checklist (~15 lines)
   - Section 1: Build Context — metaphor + content map + **zone architecture summary** (~40-50 lines)
     - NOTE: Section 1 MUST include a condensed zone overview (zone names, density progression direction, ASCII density diagram) because the Pass 1 builder creates zones but does NOT see Section 4. Without this, the zone creator is blind to the zone recipe.
   - Section 2: Mechanism Selections + full rationale + CSS examples (~100-120 lines)
   - Section 9: Consumption Protocol — how to read and sequence work (~20 lines)
+  - Section 10: Compositional Questions — 5-7 generative "What if..." questions from 3 sources (~30-40 lines)
+    - Source 1: TC Brief experimental questions (2-3, carried verbatim from S1/S2's "TC Experimental Questions (Preserved)" sections)
+    - Source 2: Knowledge Base question families (2-3, adapted from proven exploration questions to THIS content)
+    - Source 3: Cross-specialist synthesis question (1, derived from the intersection of all 5 specialist findings)
+  - Section 11: Structural Propositions from Synthesizer (~20-50 lines)
+    - Content archetype + 2-4 structural propositions (non-standard layout ideas tied to content features)
+    - Section 11 may be a single line ("No structural propositions") for linear content — this is valid
 
-- `{OUTPUT_DIR}/_package-pass-2.md` — **Enrichment** (~130-180 lines)
-  - Section 3: Findings -> Build-Specific Actions (~80-100 lines)
+- `{OUTPUT_DIR}/_package-pass-2.md` — **Enrichment** (~180-230 lines)
+  - Section 3: Findings -> Build-Specific Actions (~100-130 lines, increased for question attributions)
   - Section 4: Zone Architecture — zone-by-zone recipe with ASCII density diagram (~50-70 lines)
   - Section 5: Case Study Processes + CSS that worked (~50-60 lines)
 
-- `{OUTPUT_DIR}/_package-pass-3.md` — **Hardening** (~110-150 lines)
+- `{OUTPUT_DIR}/_package-pass-3.md` — **Hardening** (~140-180 lines)
   - Section 6: Anti-Patterns risk-profiled + CSS mitigations (~30-40 lines)
-  - Section 7: CSS Examples from validated explorations (~40-60 lines)
+  - Section 7: CSS Examples from validated explorations (~60-80 lines, increased for richer patterns)
   - Section 8: Structural Propositions — testable hypotheses (~20-30 lines)
 
 ### Step 2D: Validate Synthesizer Outputs (YOU do this)
@@ -349,7 +359,7 @@ For each specialist N in [1, 2, 3, 4, 5]:
 ```
 For each package file in [_package-pass-1.md, _package-pass-2.md, _package-pass-3.md]:
   1. Verify file exists (bash: test -f)
-  2. Verify >= 100 lines (bash: wc -l)
+  2. Verify >= 130 lines (bash: wc -l)
   3. Verify recipe format: grep for sequenced verbs (Read, Deploy, Apply, Internalize).
      If the file has more checklist verbs (Verify, Fail if, Must be) than recipe verbs, flag it.
   4. Verify content-specificity: grep for the article title or key topic words.
@@ -359,6 +369,15 @@ For each package file in [_package-pass-1.md, _package-pass-2.md, _package-pass-
      verify at least 2 mechanism rationales reference specific content features
      (not just "for this article"). Look for concrete references to content structure,
      not generic design principles.
+  6. Section 10 presence check (Pass 1 only): Verify _package-pass-1.md contains
+     "## 10. COMPOSITIONAL QUESTIONS" header. Verify at least 5 numbered questions
+     exist below it. If missing, the builder receives no compositional questions
+     and multi-channel coordination will be limited.
+  7. Section 11 presence check (Pass 1 only): Verify _package-pass-1.md contains
+     "## 11. STRUCTURAL PROPOSITIONS" header (or similar). Content may be a single
+     line ("No structural propositions") for linear content — this is valid and
+     passes the check. If the header is entirely absent, log it as a non-blocking
+     note: "Section 11 absent — builder will use standard vertical layout."
 ```
 
 **If any package file is < 100 lines or too generic:** Re-spawn the synthesizer with: "Package file {name} is {issue}. Every section must reference specific aspects of THIS article and THIS metaphor. Generic advice is useless to the builder."
@@ -409,6 +428,8 @@ In this order (order matters for attention primacy):
 5. `_pass-1-decisions.md` exists and is > 10 lines
 
 **If validation fails:** Re-spawn the builder with: "The output is missing {specific issue}. The HTML must be self-contained with all CSS inline in a <style> block."
+
+**Section 11 handling:** The builder reads Section 11 as part of the Pass 1 package. If Section 11 contains propositions, the builder decides ADOPT/MODIFY/REJECT per the Standard/Structural Build Path in the builder prompt. The orchestrator does NOT enforce structural adoption — it is the builder's creative decision.
 
 ---
 
@@ -461,8 +482,9 @@ In this order (order matters for attention primacy):
 **Agent prompt (Pass 3 builder instructions):** Read the full prompt from `~/.claude/skills/research-compose/prompts/builder-pass-3-prompt.md` and pass the file path to the agent in its task description. The agent reads it via the Read tool — do NOT read the full prompt into your own context.
 
 **Agent outputs to:**
-- `{OUTPUT_DIR}/_build-final.html`
-- `{OUTPUT_DIR}/_builder-reflection.md` (~30-50 lines — 6 dimensions: conviction fidelity, alternatives considered, surprises, impulses resisted, experience quality, unresolved tensions)
+- `{OUTPUT_DIR}/_build-pass-3.html` (hardened HTML, saved as distinct artifact)
+- `{OUTPUT_DIR}/_build-final.html` (copy of `_build-pass-3.html` — the deliverable)
+- `{OUTPUT_DIR}/_builder-reflection.md` (~40-60 lines — 7 dimensions: conviction fidelity, **questions explored** (v1.1), alternatives considered, surprises, impulses resisted, experience quality, unresolved tensions)
 
 **Pass 3 Validation (YOU verify):**
 1. `_build-final.html` exists and is > 1KB
@@ -551,11 +573,16 @@ In this order (order matters for attention primacy):
   - Language Constraint + Metaphor Awareness sections
 
 **Auditor question assignments:**
-- Auditor 1: E-01 (first notice), E-05 (breathing), E-11 (fighting content), E-17 (voice)
+- Auditor 1: E-01 (first notice), E-05 (breathing), E-11 (fighting content), E-17 (voice), E-21 (layout variety)
 - Auditor 2: E-02 (scroll speed), E-08 (attention thirds), E-14 (rhythm), E-18 (best moment)
-- Auditor 3: E-03 (character), E-07 (shifting), E-12 (shapes), E-19 (almost working)
+- Auditor 3: E-03 (character), E-07 (shifting), E-12 (shapes), E-19 (almost working), E-22 (showing vs telling)
 - Auditor 4: E-04 (empty space), E-06 (confidence), E-13 (complexity), E-20 (one change)
-- Auditor 5: E-09 (form coupling), E-10 (design adds), E-15 (dramatic peak), E-16 (consistency)
+- Auditor 5: E-09 (form coupling), E-10 (design adds), E-15 (dramatic peak), E-16 (consistency), E-23 (page topology)
+
+**Structural perception questions (added to pool):**
+- E-21: "Does every section have the same layout, or do some have different geometry?"
+- E-22: "Is there a section that SHOWS what it's about, not just tells?"
+- E-23: "If the page were a map, would it be a single road or have intersections and plazas?"
 
 **Each auditor does NOT receive:**
 - The conviction brief, mechanism names, metaphor identity
@@ -582,16 +609,23 @@ Pass the file path `~/.claude/skills/research-compose/prompts/pa-auditor-prompt.
 - Sanitized screenshots: `{OUTPUT_DIR}/_pa/_images/`
 - All 5 auditor reports: `{OUTPUT_DIR}/_pa/auditor-{1-5}.md`
 - The Weaver protocol from PA skill: `~/.claude/skills/perceptual-auditing/SKILL.md` (Section: "THE WEAVER: CREATIVE SYNTHESIS")
-- **NEW in /research-compose:** The 3 package files for compliance checking:
+- The 3 package files for compliance checking:
   - `{OUTPUT_DIR}/_package-pass-1.md`
   - `{OUTPUT_DIR}/_package-pass-2.md`
   - `{OUTPUT_DIR}/_package-pass-3.md`
-- **NEW in /research-compose:** The HTML source for CSS-level compliance checks:
+- The HTML source for CSS-level compliance checks:
   - `{OUTPUT_DIR}/_build-final.html`
+- Builder reflection (for Section 10 Assessment only — read AFTER completing experiential Outputs 1-3):
+  - `{OUTPUT_DIR}/_builder-reflection.md`
+- Builder decisions (for Section 11 Assessment only — read AFTER completing experiential Outputs 1-3):
+  - `{OUTPUT_DIR}/_pass-1-decisions.md`
 
 **Weaver does NOT receive:**
-- The conviction brief or builder reflection
+- The conviction brief (`_tc-brief.md`) — you must NOT know the metaphor name
+- `_pass-2-decisions.md` (Pass 2 decisions are not needed for structural assessment)
 - Vocabulary files, tokens, mechanisms, grammar
+
+**NOTE:** The weaver DOES receive `_builder-reflection.md` (for Section 10 Assessment) and `_pass-1-decisions.md` (for Section 11 Assessment) — read BOTH only AFTER completing experiential Outputs 1-3. Do NOT read these files before your anchor impression is formed.
 
 **Weaver prompt:** Pass the file path `~/.claude/skills/research-compose/prompts/weaver-prompt.md` to the agent in its task description. The agent reads it via the Read tool — do NOT read the full prompt into your own context. Also reference the Weaver protocol from `~/.claude/skills/perceptual-auditing/SKILL.md` (Section: THE WEAVER: CREATIVE SYNTHESIS). Write all outputs to `{OUTPUT_DIR}/_pa/synthesis.md`. Include an Agent Log footer.
 
@@ -601,26 +635,54 @@ Pass the file path `~/.claude/skills/research-compose/prompts/pa-auditor-prompt.
 3. **Verdict** — SHIP / REFINE / REBUILD with issue classification (TYPE A mechanical / TYPE B structural / TYPE C compositional)
 4. **Package Compliance** — section-by-section: what the package instructed vs what the build did vs gaps identified, with NOVEL/STANDARD compliance tracked separately
 
+**Structural variety assessment:** The weaver includes structural variety metrics in Output 4 (DIVERSE/UNIFORM with sub-metrics: distinct layout count, non-standard section count). If Section 11 was present but all propositions were rejected, the weaver diagnoses whether this was BUILDER DIVERGED (builder had a better idea), PACKAGE UNCLEAR (propositions were too vague to act on), or CONTENT INAPPROPRIATE (content didn't warrant structural variation).
+
 **Weaver outputs to:** `{OUTPUT_DIR}/_pa/synthesis.md`
 
 ### Step 4D: Extract Comparison Report (YOU do this — plumbing, not creativity)
 
 The Weaver's Output 4 (Package Compliance) IS the comparison report. Extract it into a standalone file for archival. This is a COPY operation, not a composition — do NOT write your own analysis.
 
+**Extraction method (use Bash — grep for the section header):**
+
 ```bash
-# Extract Output 4 from synthesis.md into standalone comparison report
-# The Weaver writes "## Output 4: Package Compliance" as a section header
+# Find the line number where Output 4 starts
+LINE=$(grep -n "## Output 4: Package Compliance" {OUTPUT_DIR}/_pa/synthesis.md | head -1 | cut -d: -f1)
+# Extract from that line to end of file
+tail -n +${LINE} {OUTPUT_DIR}/_pa/synthesis.md > {OUTPUT_DIR}/_comparison-report.md
 ```
 
-Read `{OUTPUT_DIR}/_pa/synthesis.md` and copy everything from "## Output 4: Package Compliance" to the end of the file into `{OUTPUT_DIR}/_comparison-report.md`. Prepend a header:
+**If grep finds nothing** (the Weaver used a slightly different header), try:
+```bash
+grep -n "Package Compliance" {OUTPUT_DIR}/_pa/synthesis.md
+```
+Then extract from the matching line.
 
+**Prepend a header** to the comparison report:
+
+```bash
+# Read the verdict from Output 3 (it follows "## Output 3: Verdict")
+VERDICT_LINE=$(grep -A1 "## Output 3: Verdict" {OUTPUT_DIR}/_pa/synthesis.md | tail -1)
+```
+
+The final `_comparison-report.md` should have this structure:
 ```markdown
-# Package -> Build Comparison Report
+# Package → Build Comparison Report
 Extracted from: _pa/synthesis.md Output 4
-Verdict: {copy from Output 3}
+Verdict: {SHIP/REFINE/REBUILD from Output 3}
+Date: {ISO date}
+
+{Full Output 4 content}
 ```
 
-**Write Phase 4 checkpoint to `_pipeline-log.md`** using the Layer B template format. Key fields: Agents spawned: 6 (5 PA auditors + 1 weaver). Verdict: {SHIP/REFINE/REBUILD}. Package compliance: {estimate}%. NOVEL instruction compliance: {N/N}. STANDARD instruction compliance: {N/N}. Cumulative cost estimate: $28-48.
+**v1.1 addition:** Also extract the "Channels Coordinated Per Question" summary and the Section 10 Assessment from Output 4 into the comparison report header for quick reference.
+
+**Structural variety section in comparison report:**
+- Section 11 propositions: [count] proposed, [count] adopted, [count] visible in final build
+- Structural metrics from weaver: DIVERSE/UNIFORM, distinct layout count, non-standard section count
+- Comparison to baseline: previous builds had 0 structural variety; target is 1-2 non-standard sections when content warrants
+
+**Write Phase 4 checkpoint to `_pipeline-log.md`** using the Layer B template format. Key fields: Agents spawned: 6 (5 PA auditors + 1 weaver). Verdict: {SHIP/REFINE/REBUILD}. Package compliance: {estimate}%. NOVEL instruction compliance: {N/N}. STANDARD instruction compliance: {N/N}. **Channels coordinated per question: avg {N} across {M} explored questions.** **Questions explored: {M} of {total in Section 10}.** Cumulative cost estimate: $30-51.
 
 **If verdict is SHIP:** Pipeline complete. Skip Phase 5. Report to user.
 **If verdict is REBUILD:** Stop and report to user. Explain the compositional issues. Ask whether to restart from Phase 1 with different TC analysis.
@@ -685,11 +747,16 @@ If gaps span multiple packages, send all relevant packages.
 - `{OUTPUT_DIR}/_fixes/fix-{N}-page.html`
 - `{OUTPUT_DIR}/_fixes/fix-{N}-feedback.md` (what was changed and why)
 
-#### Step 5D: Copy Fixed Page
+#### Step 5D: Preserve Pre-Fix State and Copy Fixed Page
 
 ```bash
+# ALWAYS preserve pre-fix state before overwriting
+cp {OUTPUT_DIR}/_build-final.html {OUTPUT_DIR}/_fixes/pre-fix-{N}.html
+# Then copy the fixed page into place
 cp {OUTPUT_DIR}/_fixes/fix-{N}-page.html {OUTPUT_DIR}/_build-final.html
 ```
+
+This creates a before/after pair for each fix cycle: `pre-fix-{N}.html` (before) and `fix-{N}-page.html` (after). The comparison report can diff these to see exactly what the refine builder changed.
 
 #### Step 5E: Re-Evaluate
 
@@ -755,9 +822,10 @@ When complete, `{OUTPUT_DIR}/` contains:
 +-- _package-pass-3.md .............. Research package: Hardening
 +-- _build-pass-1.html .............. Structure pass output
 +-- _build-pass-2.html .............. Enrichment pass output
++-- _build-pass-3.html .............. Hardening pass output (pre-copy to _build-final)
 +-- _pass-1-decisions.md ............ Pass 1 build decisions
 +-- _pass-2-decisions.md ............ Pass 2 build decisions
-+-- _builder-reflection.md .......... Builder's 6-dimension reflection
++-- _builder-reflection.md .......... Builder's 7-dimension reflection
 +-- _pipeline-log.md ................ Phase checkpoint reflections
 +-- _comparison-report.md ........... Package vs build gap analysis
 +-- _screenshots/ ................... Viewport captures
@@ -769,7 +837,9 @@ When complete, `{OUTPUT_DIR}/` contains:
 |   +-- auditor-1.md through auditor-5.md
 |   +-- synthesis.md ................ Weaver's verdict + package compliance
 +-- _fixes/ ......................... Fix cycle artifacts (if any)
+    +-- pre-fix-1.html .............. Pre-fix baseline (copy of _build-final before fix 1)
     +-- fix-1-feedback.md, fix-1-page.html
+    +-- pre-fix-2.html .............. Pre-fix baseline (copy of _build-final before fix 2)
     +-- fix-2-feedback.md, fix-2-page.html (if needed)
 ```
 
@@ -804,6 +874,26 @@ When complete, `{OUTPUT_DIR}/` contains:
 13. **Instrumentation is diagnostic, not overhead.** Layer A (agent logs) adds ~200 tokens per agent. Layer B (checkpoints) is the orchestrator's memory. Layer C (comparison report) is the pipeline's success metric. All three layers exist to answer: "Where did knowledge transfer succeed or fail?"
 
 ---
+
+## Version History
+
+| Version | Date | Key Changes |
+|---------|------|-------------|
+| v1.0 | 2026-03-01 | Initial release. 5-phase pipeline, 16-17 agents, 14 prompt files. Tested on Molly/Panopticon and Yegge/Gas Town. |
+| v1.1 | 2026-03-02 | 31-finding remediation. Added Compositional Questions layer (Section 10), standardized citation format, TC question carry-through, KB question families, count variability, builder question exploration across 3 passes, PA rebalancing, weaver override visibility, pre-fix preservation, $50 hard gate. Core improvement: multi-channel coordination through generative questions. Target: 5-7 channel coordination per compositional idea (up from 3-4 in v1.0). |
+| v1.2 | 2026-03-02 | Structural awareness across all 5 phases. TC structural observation check (non-blocking). Section 11 (Structural Propositions) in Pass 1 package. Builder ADOPT/MODIFY/REJECT for structural propositions. PA questions E-21/E-22/E-23 for structural perception. Weaver structural variety metrics (DIVERSE/UNIFORM). Comparison report structural variety section. All structural checks non-blocking — orchestrator enables but does not enforce structural invention. |
+
+## Key Design Decisions
+
+1. **Questions in Pass 1 only (not all 3 passes).** Section 10 lives in `_package-pass-1.md` because question EXPLORATION happens during structure creation. Passes 2-3 DEEPEN and VERIFY question-driven CSS through the decisions.md handoff mechanism. Self-containment preserved: each pass reads the previous pass's decisions file.
+
+2. **3 question sources, not 1.** TC questions (firsthand, content-specific) + KB families (proven, adapted) + cross-specialist synthesis (novel, emergent). This diversity prevents the questions from being a single perspective. TC questions have the highest generative power; KB questions provide vocabulary; cross-specialist questions force novel connections.
+
+3. **Standardized citation format across all builders.** All 6 citation prefixes (`PACKAGE`, `FINDING`, `CASE-STUDY`, `SOUL`, `TC-BRIEF`, `QUESTION`) enable automated comparison report extraction. The weaver can grep for prefixes and count compliance per source category.
+
+4. **$50 hard gate.** Moved from advisory ("PAUSE and report") to mandatory ("MUST get user approval"). Pipeline runs averaging $28-56 need explicit cost governance at the upper range.
+
+5. **Pre-fix preservation.** Every fix cycle creates `pre-fix-{N}.html` before overwriting `_build-final.html`. This enables before/after diffing in the comparison report and prevents losing the fix baseline.
 
 ## Prompt File Reference
 

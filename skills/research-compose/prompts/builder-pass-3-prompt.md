@@ -68,6 +68,7 @@ You are an Opus-level builder performing the FINAL quality pass on a designed HT
 - Rename custom properties
 - Remove content or zones
 - Start from scratch (this applies in EVERY pass)
+- Do NOT add new structural inventions in Pass 3. If you see a structural opportunity, document it in the reflection as "Would benefit from structural layout" — but do NOT implement it. Pass 3 is DEFENSIVE, not creative.
 
 ---
 
@@ -86,6 +87,31 @@ If the HTML is broken, document the issue in _builder-reflection.md and fix it b
 ---
 
 ## Your Task: Defensive Quality Pass
+
+### Compositional Questions Verification
+
+Before starting the anti-pattern sweep, verify that question-driven CSS survived enrichment:
+
+1. Read `_pass-1-decisions.md` "Questions Explored" and `_pass-2-decisions.md` "Questions Deepened / Explored"
+2. For EACH question explored across Passes 1-2, verify the corresponding CSS citations still exist in the HTML: `/* QUESTION Q[N]: ... */`
+3. Count the channels per question: does each explored question span 3+ visual channels?
+4. If question-driven CSS was removed or diluted during enrichment, note it but do NOT re-add it (that would be creative, not defensive). Document the loss in the reflection.
+
+**This verification feeds into the "Questions Explored" section of _builder-reflection.md** (see Output section below).
+
+### Standardized Citations (Consistent with Passes 1-2)
+
+**Verify citation consistency.** Every CSS rule should have one of these inline comments:
+- `/* PACKAGE S[N]-M[NN]: ... */` — mechanisms
+- `/* FINDING [ID]: ... */` — research findings
+- `/* CASE-STUDY [ID]: ... */` — case study techniques
+- `/* SOUL: ... */` — soul constraints
+- `/* TC-BRIEF: ... */` — conviction brief
+- `/* QUESTION Q[N]: ... */` — compositional questions
+
+**Check for orphan CSS:** Search for CSS rules with no citation comment. If you find orphan CSS:
+- If it's structural plumbing (layout, responsive) — acceptable, leave it
+- If it's a mechanism deployment or creative decision — flag it in the reflection as "possible orphan CSS"
 
 ### Section 6: Anti-Pattern Sweep
 
@@ -120,6 +146,7 @@ For each anti-pattern:
 - [ ] **Stacked spacing voids:** Measure total gap at section boundaries. Individual values may pass (each <= 96px) but STACKED values at boundaries can create 200+ px voids. Total gap must be <= 120px
 - [ ] **Sub-perceptual CSS:** Search for `letter-spacing` < 0.025em, background color deltas < 15 RGB points between adjacent zones. Delete if found — invisible CSS is wasted CSS
 - [ ] **Missing footer:** Verify a `<footer>` element exists with structural border-top
+- [ ] **Metronomic transitions:** Check every zone boundary. Are ALL using the same technique (e.g., all border-top: 3px)? If yes, document as a rhythmic diversity concern in the reflection. Do NOT fix in Pass 3 (that would be creative) — document for the PA auditors to evaluate.
 
 ### Section 7: Integrate Validated CSS
 
@@ -234,6 +261,21 @@ Also verify:
 [ ] 8+ component library class instances
 ```
 
+### Structural Integrity (if structural sections exist)
+
+If Pass 1 or Pass 2 created non-standard spatial sections (grids, splits, hub-spoke), verify:
+```
+[ ] Each structural section works at 1440px (content visible, grid aligned)
+[ ] Each structural section works at 1024px (layout adapts, no overflow)
+[ ] Each structural section degrades gracefully at 768px (typically → single column)
+[ ] Each structural section has a `/* STRUCTURAL: ... */` citation comment
+[ ] Each structural section is documented in _pass-1-decisions.md or _pass-2-decisions.md
+[ ] Maximum 2 structural sections total across Pass 1 + Pass 2 (max 2 from P1 + max 1 from P2 = theoretical 3, but practical limit is 2 visible at any time)
+[ ] Structural sections integrate with surrounding vertical zones (no visual disconnection)
+[ ] Content within structural sections is accessible and readable
+```
+If no structural sections exist, skip this checklist — standard vertical builds do not need structural verification.
+
 ### Responsive (FINAL CHECK)
 
 ```
@@ -249,13 +291,16 @@ Also verify:
 
 ## Outputs
 
-You produce TWO files:
+You produce THREE files:
 
-### File 1: `_build-final.html`
-The hardened, final HTML page. Same document structure, all enrichments preserved, all anti-patterns fixed, all accessibility improvements added. Self-contained with all CSS inline.
+### File 1: `_build-pass-3.html`
+The hardened HTML page BEFORE copying to `_build-final.html`. Save this as a distinct artifact so the comparison report can diff Pass 3's hardening against Pass 2's enrichment. Write to `_build-pass-3.html` first.
 
-### File 2: `_builder-reflection.md`
-A 30-50 line reflection across 6 dimensions. This is the builder's voice — honest assessment of the build.
+### File 2: `_build-final.html`
+Copy `_build-pass-3.html` to `_build-final.html`. This is the deliverable. The two files should be identical at this point.
+
+### File 3: `_builder-reflection.md`
+A 40-60 line reflection across 7 dimensions (expanded from 6 to include Questions Explored). This is the builder's voice — honest assessment of the build.
 
 ```markdown
 # Builder Reflection
@@ -264,28 +309,39 @@ A 30-50 line reflection across 6 dimensions. This is the builder's voice — hon
 [How well does the final page embody the conviction brief's metaphor and arc?
 Where does it succeed? Where did you compromise? Why?]
 
-## 2. Alternatives Considered
+## 2. Questions Explored
+[For EACH compositional question explored across all 3 passes:]
+- **Q[N]: [abbreviated question]**
+  - Channels coordinated: [list all CSS properties that vary together by this question's rule]
+  - Channel count: [N] of 7 (border-weight, padding, bg-color, font-size, line-height, letter-spacing, content-spacing)
+  - CSS citations: [count of /* QUESTION Q[N] */ comments in the final HTML]
+  - Assessment: [Did this question produce multi-channel coordination? Or did it produce
+    single-channel deployment despite multi-channel potential?]
+
+[Summary: total questions explored, average channels per question, questions NOT explored]
+
+## 3. Alternatives Considered
 [CSS approaches you considered but rejected. What would you try differently?
 Include at least 2 specific alternatives with reasoning.]
 
-## 3. Surprises
+## 4. Surprises
 [What surprised you during the 3-pass build? What worked better than expected?
 What was harder than expected?]
 
-## 4. Impulses Resisted
+## 5. Impulses Resisted
 [What did you WANT to do but held back? Decorative additions? Extra features?
 What restraint did you exercise?]
 
-## 5. Experience Quality
+## 6. Experience Quality
 [If you were a reader encountering this page cold, what would you feel?
 Where would your eye go first? Where would you linger? Where would you skip?]
 
-## 6. Unresolved Tensions
+## 7. Unresolved Tensions
 [What's still not right? What would a 4th pass fix?
 What trade-offs remain in the current build?]
 ```
 
-**This reflection feeds into the REFINE phase.** If the build enters fix cycles, the refine builder reads it to understand your intent and unresolved tensions.
+**This reflection feeds into the REFINE phase.** If the build enters fix cycles, the refine builder reads it to understand your intent and unresolved tensions. The "Questions Explored" section feeds into the comparison report's channel coordination metrics.
 
 ---
 

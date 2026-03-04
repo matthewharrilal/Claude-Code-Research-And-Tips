@@ -92,6 +92,51 @@ If the HTML is broken or incomplete, document the issue in _pass-2-decisions.md 
 
 ---
 
+## Compositional Questions: Deepen Pass 1 Explorations
+
+Read `_pass-1-decisions.md` "Questions Explored" section. The Pass 1 builder explored 2-3 compositional questions and recorded which channels they affected.
+
+**Your task:** Either DEEPEN those explorations or explore REMAINING questions (listed in `_pass-1-decisions.md` under "Open Questions for Pass 2").
+
+**Deepening means extending to additional channels:**
+- If Pass 1 explored Q2 and affected heading-size + padding + background, you should extend Q2 to affect line-height + letter-spacing + content-block-spacing (the remaining channels)
+- A fully-explored question should produce CSS changes across **5-7 visual channels varying together** by one generative rule
+
+**Exploring remaining questions means:**
+- Check Pass 1's "Open Questions for Pass 2" — it may list unexplored Section 10 questions
+- Select 1-2 remaining questions and explore them with the same depth Pass 1 used
+
+**Record your question work in _pass-2-decisions.md** — which questions deepened, which new questions explored, which channels now covered.
+
+## Standardized Citations (Consistent with Pass 1)
+
+**Use the same citation format as Pass 1.** Every CSS rule you add must have an inline comment:
+- `/* PACKAGE S2-M[NN]: [name] — [what] */`
+- `/* FINDING [ID]: [title] — [action] */`
+- `/* CASE-STUDY [ID]: [technique] — adapted from [source] */`
+- `/* SOUL: [constraint] */`
+- `/* TC-BRIEF: [section] — [direction] */`
+- `/* QUESTION Q[N]: [abbreviated] — [exploration] */`
+
+## Enrichment vs Preservation: The Critical Distinction
+
+### Three-Category Enrichment Framework
+
+**ENRICHMENT** (SAFE — the primary activity of Pass 2): Adds CSS density WITHIN existing zones — more CSS rules, more channels coordinated, more visual differentiation between zones. Enrichment makes zones RICHER without changing their boundaries. Examples: adding typography compression, deploying border-weight gradient, deepening zone backgrounds.
+
+**PRESERVATION** (REQUIRED — protect Pass 1 structure): Keeps the structural skeleton from Pass 1 intact — zone boundaries, custom property names, content placement, responsive structure. Everything Pass 1 built stays unless specifically broken.
+
+**STRUCTURAL EVOLUTION** (DOCUMENTED — maximum 1 per pass): A spatial change to an existing zone's layout. This is NOT adding a new structural section from scratch (that was Pass 1's job). This is recognizing that an existing zone could benefit from a layout change the builder didn't see in Pass 1.
+
+Example: Pass 1 created Zone 3 as vertical stacking for 6 comparison items. During enrichment, you realize the comparison would read better as 2x3 grid. This is STRUCTURAL EVOLUTION — document it thoroughly:
+- What zone was changed
+- What spatial form was applied (grid, split, etc.)
+- What content logic justifies the change
+- Does it work at all 3 breakpoints?
+- Cite with `/* STRUCTURAL: [content-logic] — [spatial form] */`
+
+**Report these SEPARATELY in _pass-2-decisions.md.**
+
 ## Your Task: Enrich Zone by Zone
 
 ### Section 3: Apply Findings
@@ -123,6 +168,8 @@ For each finding in Section 3:
 ```
 
 **Checkpoint:** After applying all Section 3 findings, count how many you deployed. If fewer than 10 findings were deployed, re-read Section 3 — you may have been too conservative.
+
+**Genuine Synthesis Requirement:** When documenting findings in _pass-2-decisions.md, explain HOW findings interact, not just THAT they were deployed. Bad: "Deployed DD-F-006 and R5-T2." Good: "DD-F-006 (fractal) and R5-T2 (velocity mismatch) interact in Zone 3: the fractal density creates a compression that the velocity interleaving breaks with a breathing callout, producing a push-pull rhythm visible at section scale."
 
 ### Section 4: Verify and Adjust Zone Architecture
 
@@ -165,6 +212,25 @@ Section 5 contains PROCESSES and CSS examples from validated explorations that s
   /* Sparse label zone | Dense content zone */
 }
 ```
+
+### Structural Opportunity Assessment
+
+After deploying findings and integrating case study CSS, do ONE final assessment:
+
+**Is there a section where vertical stacking reads poorly — where the content's organizational logic would be better served by a different spatial form?**
+
+Check for these signals:
+- 4+ parallel items at the same hierarchy level (→ consider grid)
+- Explicit comparison content with point-by-point contrast (→ consider side-by-side)
+- Hub-and-spoke content with a central concept and radiating topics (→ consider hub layout)
+
+**If you find a structural opportunity:**
+1. Check _pass-1-decisions.md — did Pass 1 already consider and reject this? If so, RESPECT the rejection unless you have new evidence
+2. If Pass 1 didn't consider it, this is a STRUCTURAL EVOLUTION candidate
+3. Apply the 3-category framework: maximum 1 structural evolution per Pass 2
+4. Document thoroughly in _pass-2-decisions.md
+
+**If no structural opportunity exists:** This is the EXPECTED outcome for most builds. Note "No structural evolution needed — vertical layout serves the content" in decisions.
 
 ---
 
@@ -249,7 +315,26 @@ A 20-30 line summary of what you enriched and why. Structure:
 # Pass 2 Decisions
 
 ## Findings Deployed
-[List each finding from Section 3 with: finding ID, target zone, CSS action taken]
+[List each finding from Section 3 with: finding ID, target zone, CSS action taken.
+For each, explain HOW it interacts with other findings — not just THAT it was deployed.]
+
+## Questions Deepened / Explored
+[For each question continued from Pass 1 or newly explored:]
+- **Q[N]: [abbreviated question]**
+  - Pass 1 covered channels: [list from Pass 1 decisions]
+  - Pass 2 extended to channels: [list new channels added]
+  - Total channels now coordinated: [count] of 7
+  - CSS generated: [brief description]
+
+## Enrichment vs Preservation Report
+**Enrichment actions (density added WITHIN zones):**
+- [Zone name]: [what was added, how many CSS rules]
+
+**Preservation actions (structure kept from Pass 1):**
+- [Zone name]: [what was preserved unchanged]
+
+**Structural changes (if any — flag these):**
+- [Description + justification]
 
 ## Density Adjustments
 [What was adjusted per Section 4's density diagram. What matched, what diverged.]
@@ -257,14 +342,20 @@ A 20-30 line summary of what you enriched and why. Structure:
 ## Case Study Techniques Integrated
 [Which techniques from Section 5, adapted how, applied where]
 
+## Structural Evolution (if any)
+- **Zone affected:** [which zone]
+- **Previous layout:** Standard vertical
+- **New layout:** [grid / split / etc.]
+- **Content logic:** [why this change serves the content]
+- **Responsive:** [how it degrades at 768px]
+- **Or:** No structural evolution needed — vertical layout serves the content.
+
 ## Density Self-Assessment
 [Above-fold impression, mid-page shift, closing resolution. Honest assessment.]
 
-## Changes to Zone Architecture
-[Any zones modified, spacing adjusted, backgrounds shifted]
-
 ## Concerns for Pass 3
-[Any anti-patterns you suspect, unresolved density issues, areas needing hardening]
+[Any anti-patterns you suspect, unresolved density issues, areas needing hardening.
+Note which Section 10 questions still have unexplored channels for Pass 3 to verify.]
 ```
 
 **CRITICAL:** This decisions file is the continuity bridge to Pass 3. The hardening builder reads it alongside Pass 1's decisions to understand the FULL build history. Write it with care.
@@ -292,6 +383,21 @@ If a Section 3 finding contradicts a mechanism already deployed in Pass 1:
 If Section 3 contains fewer than 10 findings, focus on DEPTH over BREADTH. Apply each finding with maximum CSS density — multiple rules, multiple scales, perceptible at every breakpoint. The research team curated what matters; deploy it thoroughly.
 
 ---
+
+## Rhythmic Diversity Check
+
+**Before finalizing, verify zone transitions are varied — not metronomic.**
+
+Scan every zone boundary in the current HTML:
+- Are ALL boundaries using the same mechanism (e.g., all `border-top: 3px solid`)? → FAIL
+- Does EACH boundary shift a DIFFERENT combination of channels? → PASS
+
+If the transitions feel repetitive, vary them:
+- One boundary via background shift + typography change (no border)
+- Another via structural border + spacing compression (no background shift)
+- Another via dramatic padding reduction + line-height change
+
+**This is an enrichment concern, not a hardening concern.** Add variety during enrichment; Pass 3 merely verifies it survived.
 
 ## Richness Standard
 
