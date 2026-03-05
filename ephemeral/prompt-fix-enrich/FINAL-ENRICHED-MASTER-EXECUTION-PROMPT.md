@@ -337,7 +337,7 @@ TC Phase 5 (Divergence Verification): -> Embedded Auditor + PA Auditors. Percept
 PA-01 through PA-48:  -> 9 Mode 4 auditors (see Section C4 for assignments).
 PA-50 through PA-53:  -> Auditor C (Spatial specialist). Sequential: detect -> quantify -> classify -> assess.
 PA-05 scoring:        -> All auditors contribute. 4 sub-criteria: Designed, Coherent, Proportionate, Polished.
-                         Calibration: Middle=4/4, Ceiling=1.5/4, DD-006=4/4, CD-006=4/4.
+                         Calibration: Middle=4/4, Ceiling=1.5/4, DD-006=4/4, CD-006=~3/4 COMPOSED (39/40 soul, CEILING tier).
 PA-17/PA-41:          -> Auditor F primary. Elevated to Tier 1 for Ceiling+. Others corroborate.
                          5+ contradictions of Auditor F = escalate.
 Gate-then-Ranking:    -> TC rubric gates metaphor quality (reject < 12/18). PA ranks perceptual quality.

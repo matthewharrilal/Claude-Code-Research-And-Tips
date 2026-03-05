@@ -92,7 +92,7 @@
 
 - **Page A:** MIDDLE tier (PA-05 ~2.75/4, estimated 4/14 Flagship dimensions passing). Achieves ~35% of Flagship standard.
 - **Page B:** CEILING tier (PA-05 3.5/4, estimated 7-8/14 Flagship dimensions passing). Achieves ~50% of Flagship standard.
-- **CD-006:** CEILING tier (PA-05 ~4/4 Ceiling register, estimated 10-11/14 Flagship dimensions passing). Achieves ~72% of Flagship standard.
+- **CD-006:** CEILING tier (PA-05 ~3/4 COMPOSED, 39/40 soul score, estimated 10-11/14 Flagship dimensions passing). Achieves ~72% of Flagship standard.
 - **Flagship 4/4:** THEORETICAL -- 14/14 dimensions, PA-05 >= 3.5 + Tier 5 >= 6/8 + zero soul violations + metaphor STRUCTURAL. Never achieved.
 
 **Visual audit findings (added post-initial evaluation):** Viewing both pages in-browser at 1440x900 CONFIRMED and STRENGTHENED the source-code-based assessments. Page B's zone background arc is immediately perceptible at casual scan speed -- no effort required to see the darkening-then-lightening progression. Page A's zone alternation is barely visible. Page B's hierarchical role cards with solid-offset depth are the strongest visual anchor in either page. Page B has visual MOMENTUM (acceleration through Z2-Z3, then deceleration through Z4). Page A is visually FLAT -- same rhythm throughout. Page A is also TWICE the height (15,936px vs 7,751px) for similar content, creating significant density dilution. One CSS bug found in Page B: blockquote text is dark-on-dark (invisible) in Z1.
@@ -441,7 +441,7 @@ The "dispatch/command post" metaphor operates at multiple levels:
 |----------|---------------------------|-------------------------------|-------------|
 | **Page A** | **5-6/10** | **4/14** | ~2.75/4 |
 | **Page B** | **10/10** | **7-8/14** (counting D-13 partial as 0.5) | 3.5/4 |
-| **CD-006** | **10/10** | **10-11/14** | ~4/4 (Ceiling register) |
+| **CD-006** | **10/10** | **10-11/14** | ~3/4 COMPOSED (39/40 soul, Ceiling register) |
 | **Flagship target** | **10/10** | **14/14** | 4/4 (Flagship register) |
 
 ---

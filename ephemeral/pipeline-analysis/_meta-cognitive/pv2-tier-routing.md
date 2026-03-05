@@ -273,7 +273,7 @@ The tiers differ in HOW mechanisms are deployed, not just how many:
 | **Middle** | Middle-tier experiment (2026-02-16) | 4/4 DESIGNED | 12 (S:1, H:3, C:4, D:2, N:3) |
 | **Ceiling** | Ceiling experiment (pre-remediation) | 1.5/4 DO NOT SHIP (but with known process failures) | 14 (metaphor-driven, but imperceptible CSS) |
 | **Ceiling** | Post-remediation (2026-02-18) | 2.5/4 SHIP WITH FIXES (projected 3.0-3.2 after CSS fixes) | 14 (same mechanisms, perceptible CSS) |
-| **Flagship** | CD-006 pilot (reference, different process) | 39/40 (~4/4 equivalent) | ~16-18 |
+| **Flagship** | CD-006 pilot (reference, different process) | 39/40 soul score (~3/4 PA-05 COMPOSED, CEILING tier) | ~16-18 |
 
 **CAVEAT:** N=2-3 for most tiers. Expected outcomes are calibrated hypotheses, not proven ranges. The Middle experiment's 4/4 PA-05 may be an outlier (content was particularly well-suited). True Middle range likely 3-4/4.
 

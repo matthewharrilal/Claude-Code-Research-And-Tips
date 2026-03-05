@@ -25,7 +25,7 @@ model, different instructions, different outcome. This corpus explains WHY.
 | Term | Meaning |
 |------|---------|
 | PA-05 | Perceptual Audit question 05: "Does this feel DESIGNED?" Scale: 1/4 DEFICIENT, 2/4 FUNCTIONAL, 3/4 COMPOSED, 4/4 DESIGNED |
-| CD-006 | The crown jewel reference page that scored 39/40 — the quality target |
+| CD-006 | The best existing reference page (39/40 soul score, CEILING tier, ~3/4 PA-05 COMPOSED -- NOT 4/4, NOT Flagship) |
 | Perception thresholds | Minimum CSS deltas a human can see (background >= 15 RGB, font-size >= 2px, letter-spacing >= 0.5px, padding >= 24px between zones) |
 | Recipe | Sequenced steps with exact values ("font-size: 17px") — succeeds |
 | Checklist | Constraints with thresholds ("must be rich") — fails |
@@ -112,7 +112,7 @@ accompany EVERY finding you present to the user.
 | Term | Meaning | Defined in |
 |------|---------|-----------|
 | PA-05 | "Does this feel DESIGNED?" 1/4 DEFICIENT, 2/4 FUNCTIONAL, 3/4 COMPOSED, 4/4 DESIGNED | perceptual-auditing SKILL.md |
-| CD-006 | Crown jewel reference artifact (scored 39/40) | `design-system/validated-explorations/combination/` |
+| CD-006 | Best existing reference artifact (39/40 soul score, CEILING tier, ~3/4 PA-05 COMPOSED) | `design-system/validated-explorations/combination/` |
 | Flagship | The failed experiment artifact (`07-intentionality.html`, PA-05 1.5/4) | `ephemeral/flagship-experiment/` |
 | Mechanism | A compositional technique from the mechanism catalog (18 types) | `design-system/compositional-core/grammar/mechanism-catalog.md` |
 | Channel | A CSS property axis (background, typography, spacing, borders, etc.) | File 08, File 41 (A2) |

@@ -189,7 +189,7 @@ The prompt specifies 940-1100px (expanded from original 940-960px) with 960px as
 
 The PA-05 calibration in the enriched prompt (B9 section) explicitly includes:
 - "PA-05 scoring: All auditors contribute. 4 sub-criteria: Designed, Coherent, Proportionate, Polished."
-- "Calibration: Middle=4/4, Ceiling=1.5/4, DD-006=4/4, CD-006=4/4."
+- "Calibration: Middle=4/4, Ceiling=1.5/4, DD-006=4/4, CD-006=~3/4 COMPOSED (39/40 soul, CEILING tier)."
 
 This calibration DATA is present and correct. The agents will know that 1.5/4 is the ceiling benchmark to exceed.
 

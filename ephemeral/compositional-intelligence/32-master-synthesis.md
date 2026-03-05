@@ -131,7 +131,7 @@ The evidence is unambiguous:
 
 | Experiment | Builder Input | PA-05 Score | Quality |
 |------------|---------------|-------------|---------|
-| CD-006 | ~50 lines (tokens + soul) | ~4/4 (39/40 overall) | Crown jewel |
+| CD-006 | ~50 lines (tokens + soul) | ~3/4 COMPOSED (39/40 soul, CEILING tier) | Best empirical reference |
 | Middle | ~100 lines (recipe) | 4/4 DESIGNED | Best pipeline result |
 | Remediation | ~300 lines (targeted spec) | 2.5/4 COMPOSED | Improved but capped |
 | Flagship | ~530 lines (full recipe) | 1.5/4 FLAT | Failure |

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tripod Pipeline Audit — /research-compose Exhaustive Analysis</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --recessed: #f4f4f5;
+    --text-primary: #171717;
+    --text-secondary: #6b6b6b;
+    --text-tertiary: #a1a1a1;
+    --heading: #0a0a0a;
+    --accent: #3b82f6;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --border: #e5e5e5;
+    --border-hover: #d4d4d4;
+    --code-bg: #f4f4f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --recessed: #1a1a1a;
+      --text-primary: #ededed;
+      --text-secondary: #888888;
+      --text-tertiary: #666666;
+      --heading: #ededed;
+      --accent: #60a5fa;
+      --border: #2a2a2a;
+      --border-hover: #3a3a3a;
+      --code-bg: #1a1a1a;
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1 { font-size: 36px; font-weight: 500; letter-spacing: -0.025em; color: var(--heading); line-height: 1.2; margin-bottom: 8px; }
+  h2 { font-size: 22px; font-weight: 500; letter-spacing: -0.015em; color: var(--heading); line-height: 1.3; margin-top: 56px; margin-bottom: 16px; }
+  h3 { font-size: 17px; font-weight: 500; letter-spacing: -0.01em; color: var(--heading); margin-top: 32px; margin-bottom: 12px; }
+  h4 { font-size: 15px; font-weight: 500; color: var(--text-secondary); margin-top: 24px; margin-bottom: 8px; }
+  p { margin-bottom: 16px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .subtitle { font-size: 17px; color: var(--text-secondary); margin-bottom: 40px; line-height: 1.6; }
+  .context-box { border-left: 3px solid var(--accent); padding: 20px 24px; margin-bottom: 40px; background: var(--surface); border-radius: 0 6px 6px 0; }
+  .context-box p { margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+  .context-box strong { color: var(--text-primary); }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 24px 0; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+  .stat-box .number { font-size: 28px; font-weight: 500; color: var(--heading); display: block; letter-spacing: -0.02em; }
+  .stat-box .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .stat-box.green .number { color: var(--success); }
+  .stat-box.blue .number { color: var(--accent); }
+  .stat-box.amber .number { color: var(--warning); }
+  .stat-box.red .number { color: var(--error); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 24px 0; }
+  th { text-align: left; padding: 10px 12px; font-weight: 500; color: var(--heading); border-bottom: 2px solid var(--border); font-size: 13px; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-primary); }
+  tr:last-child td { border-bottom: none; }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 9999px; font-size: 11px; font-weight: 500; border: 1px solid var(--border); }
+  .tag-deep { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+  .tag-strong { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+  .tag-genuine { background: #faf5ff; color: #6b21a8; border-color: #e9d5ff; }
+  .tag-partial { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+  .tag-gap { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+  @media (prefers-color-scheme: dark) {
+    .tag-deep { background: #052e16; color: #86efac; border-color: #166534; }
+    .tag-strong { background: #172554; color: #93c5fd; border-color: #1e40af; }
+    .tag-genuine { background: #3b0764; color: #d8b4fe; border-color: #6b21a8; }
+    .tag-partial { background: #451a03; color: #fcd34d; border-color: #92400e; }
+    .tag-gap { background: #450a0a; color: #fca5a5; border-color: #991b1b; }
+  }
+  details { border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; }
+  details summary { padding: 12px 16px; cursor: pointer; font-weight: 500; color: var(--heading); user-select: none; font-size: 14px; }
+  details summary:hover { background: var(--recessed); border-radius: 8px; }
+  details[open] summary { border-bottom: 1px solid var(--border); border-radius: 8px 8px 0 0; }
+  details .detail-content { padding: 16px; font-size: 14px; }
+  details .detail-content p { margin-bottom: 12px; }
+  details .detail-content p:last-child { margin-bottom: 0; }
+  .callout { padding: 16px 20px; border-radius: 6px; margin: 24px 0; border-left: 3px solid; font-size: 14px; }
+  .callout-info { background: #eff6ff; border-color: var(--accent); color: #1e40af; }
+  .callout-success { background: #f0fdf4; border-color: var(--success); color: #166534; }
+  .callout-warning { background: #fffbeb; border-color: var(--warning); color: #92400e; }
+  .callout-error { background: #fef2f2; border-color: var(--error); color: #991b1b; }
+  @media (prefers-color-scheme: dark) {
+    .callout-info { background: #172554; color: #93c5fd; }
+    .callout-success { background: #052e16; color: #86efac; }
+    .callout-warning { background: #451a03; color: #fcd34d; }
+    .callout-error { background: #450a0a; color: #fca5a5; }
+  }
+  .milestone { background: var(--heading); color: var(--bg); padding: 12px 24px; border-radius: 6px; text-align: center; margin: 40px 0; font-weight: 500; font-size: 14px; letter-spacing: 0.01em; }
+  code { font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace; font-size: 13px; background: var(--code-bg); padding: 2px 6px; border-radius: 4px; }
+  .score-bar { height: 8px; border-radius: 4px; background: var(--recessed); margin: 8px 0 4px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 4px; }
+  .score-fill.high { background: var(--success); }
+  .score-fill.mid { background: var(--warning); }
+  .score-fill.low { background: var(--error); }
+  .flow-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin: 24px 0; font-family: 'SF Mono', monospace; font-size: 13px; line-height: 1.8; color: var(--text-secondary); overflow-x: auto; }
+  .flow-diagram .highlight { color: var(--error); font-weight: 500; }
+  .flow-diagram .present { color: var(--success); }
+  .section-divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+  .footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-tertiary); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Tripod Pipeline Audit</h1>
+<p class="subtitle">/research-compose exhaustive analysis across 2 real pipeline runs, 13 audit dimensions, 13 Opus agents</p>
+
+<div class="context-box">
+  <p><strong>What this is:</strong> A comprehensive audit of the /research-compose skill (Tripod Pipeline) using real output from 2 pipeline runs — Molly Panopticon and Yegge Gas Town, both built on 2026-03-02. The audit traces knowledge propagation from 26,528 lines of design system knowledge through 5 specialist agents, a synthesizer, 3 builder passes, perceptual audit, and fix cycles into the final HTML. 13 Opus agents produced 13 dimension reports totaling ~4,500 lines of analysis.</p>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-box green"><span class="number">100%</span><span class="label">Phase completion</span></div>
+  <div class="stat-box green"><span class="number">35/35</span><span class="label">Artifacts produced</span></div>
+  <div class="stat-box green"><span class="number">0</span><span class="label">Soul violations</span></div>
+  <div class="stat-box blue"><span class="number">13</span><span class="label">Audit dimensions</span></div>
+  <div class="stat-box amber"><span class="number">~$60</span><span class="label">Cost per run</span></div>
+  <div class="stat-box blue"><span class="number">23</span><span class="label">Agents per run</span></div>
+</div>
+
+<hr class="section-divider">
+
+<h2>I. Knowledge Chain Strength</h2>
+
+<p>Each specialist reads a slice of the 26,528-line knowledge base and produces curated output for the synthesizer. The question: how deeply did each absorb their material, and how much survived into the final HTML?</p>
+
+<table>
+  <thead>
+    <tr><th>Specialist</th><th>Absorption</th><th>Synth Transfer</th><th>HTML Propagation</th><th>Cross-Run</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>S1</strong> Findings Mapper</td>
+      <td><span class="tag tag-deep">DEEP</span></td>
+      <td><span class="tag tag-strong">100%</span></td>
+      <td><span class="tag tag-strong">FULL</span></td>
+      <td><span class="tag tag-genuine">GENUINE</span></td>
+    </tr>
+    <tr>
+      <td><strong>S2</strong> Validation Mapper</td>
+      <td><span class="tag tag-deep">DEEP</span></td>
+      <td><span class="tag tag-strong">STRONG</span></td>
+      <td><span class="tag tag-partial">ASYMMETRIC</span></td>
+      <td><span class="tag tag-genuine">GENUINE</span></td>
+    </tr>
+    <tr>
+      <td><strong>S3</strong> Case Study Mapper</td>
+      <td><span class="tag tag-deep">DEEP</span></td>
+      <td><span class="tag tag-strong">STRONGEST</span></td>
+      <td><span class="tag tag-strong">4-5/5 CSS</span></td>
+      <td><span class="tag tag-genuine">GENUINE</span></td>
+    </tr>
+    <tr>
+      <td><strong>S4</strong> Constraint Mapper</td>
+      <td><span class="tag tag-deep">DEEP</span></td>
+      <td><span class="tag tag-strong">STRONG</span></td>
+      <td><span class="tag tag-strong">0 violations</span></td>
+      <td><span class="tag tag-genuine">GENUINE</span></td>
+    </tr>
+    <tr>
+      <td><strong>S5</strong> Protocol Analyst</td>
+      <td><span class="tag tag-deep">DEEPEST</span></td>
+      <td><span class="tag tag-strong">5/5 props</span></td>
+      <td><span class="tag tag-strong">10/10 verified</span></td>
+      <td><span class="tag tag-genuine">0 overlap</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<details>
+  <summary>S1: Findings Mapper — 24-25 HIGH findings per run</summary>
+  <div class="detail-content">
+    <p>S1 reads 5 research streams (~337 findings) and curates the top 24-25 for this specific content. Each finding gets a content-specific CSS action. Both runs show genuine content-responsive curation — different findings elevated for different content. Molly promotes cartographic vocabulary (geological model, asymmetric spacing), Yegge promotes industrial vocabulary (role-card hierarchy, code-block differentiation).</p>
+    <p><strong>Transfer chain:</strong> 100% of S1's HIGH findings appear in synthesized packages. 20/24 (Molly) and 24/25 (Yegge) deployed to HTML. Traceability gap: builders cite PACKAGE IDs not original S1 finding IDs, making audit harder.</p>
+    <p><strong>Weakness:</strong> Builder-side citation inconsistency — Yegge has 60+ CITE comments, Molly has 3.</p>
+  </div>
+</details>
+
+<details>
+  <summary>S2: Validation Mapper — Confidence ranking is the value</summary>
+  <div class="detail-content">
+    <p>S2 traces provenance chains through the design system's validated explorations, producing confidence-ranked build applications. The value is not the mechanisms themselves but their RANKING — which chains are ELEVATED (direct validation), BOUNDED (conditional), or REINFORCED (convergent evidence).</p>
+    <p><strong>Asymmetric propagation:</strong> Yegge's builder produced 60+ CSS comments citing S2 chains. Molly's builder produced 3. Same specialist quality, dramatically different builder uptake. This is a prompt enforcement gap, not a specialist gap.</p>
+  </div>
+</details>
+
+<details>
+  <summary>S3: Case Study Mapper — Strongest overall chain (8.5/10)</summary>
+  <div class="detail-content">
+    <p>S3 reads case study files (OD-004, DD-004, CD-001, DD-003, CD-006, OD-006) and extracts PROCESS intelligence — not what they built, but how they thought. Both runs demonstrate genuine structural reasoning and follow the anti-prescription mandate (extracting process, not copying CSS).</p>
+    <p>4-5 of 5 case study CSS patterns traceable to final HTML in both runs. Example: OD-004's border-weight-as-certainty pattern appears as <code>.role-card--town</code> (4px) / <code>.role-card--rig</code> (3px) / <code>.role-card--worker</code> (1px) in Yegge.</p>
+  </div>
+</details>
+
+<details>
+  <summary>S4: Constraint Mapper — Zero soul violations + custom anti-patterns</summary>
+  <div class="detail-content">
+    <p>S4 maps content-specific constraints: soul checklist, conventions with reasoning, risk-profiled anti-patterns, and creative territory. Both runs produced custom anti-patterns not in the registry — Yegge's "Uniform Role Cards" (derived from the 8-role section) is the standout.</p>
+    <p><strong>HTML result:</strong> Zero <code>border-radius</code> violations, zero <code>box-shadow</code>, zero <code>rgba()</code>, zero gradients across all builds. The callout cacophony mitigation is explicitly documented in HTML comments.</p>
+    <p><strong>Bug found:</strong> Yegge builder deployed 10 voice-eruptions when S4 budgeted 3-4. Different component name circumvented the budget.</p>
+  </div>
+</details>
+
+<details>
+  <summary>S5: Protocol Analyst — The pipeline's structural backbone</summary>
+  <div class="detail-content">
+    <p>S5 defines HOW the package is organized and HOW the builder consumes it. It's the only specialist that produces testable structural propositions. 10/10 propositions verified in CSS across both runs — every single one has HTML evidence.</p>
+    <p><strong>Strongest trace:</strong> Molly's <code>.zone-annotations .survey-container { padding-left: 80px }</code> — the asymmetric margin IS S5's "written in the margin" effect. The 80px left padding creates the spatial annotation metaphor S5 prescribed.</p>
+    <p><strong>Cross-run differentiation:</strong> Zero shared propositions between runs. Molly's propositions involve survey deepening and map-running-out. Yegge's involve tower descent and authority hierarchy. The protocol extracts genuinely different structural hypotheses from different metaphors.</p>
+  </div>
+</details>
+
+<hr class="section-divider">
+
+<h2>II. Synthesizer Quality</h2>
+
+<div class="stat-grid">
+  <div class="stat-box"><span class="number">8.8</span><span class="label">Overall score /10</span></div>
+  <div class="stat-box green"><span class="number">10/10</span><span class="label">Content specificity</span></div>
+  <div class="stat-box"><span class="number">9/10</span><span class="label">Merge quality</span></div>
+  <div class="stat-box amber"><span class="number">8/10</span><span class="label">Line budget</span></div>
+</div>
+
+<p>Both runs demonstrate <strong>genuine synthesis, not concatenation</strong>. Multiple specialist findings are collapsed into single unified mechanisms with cross-referencing. Conflict resolution follows the correct hierarchy (TC brief > validated > specific > generic).</p>
+
+<h3>Content Specificity: 10/10</h3>
+<p>The swap test — could you give Molly's packages to Yegge's builder? <strong>No. They would be unusable.</strong> Every class name (<code>.zone--cartouche</code> vs <code>.zone--overseer</code>), every custom property (<code>--zone-parchment</code> vs <code>--tower-surface</code>), every anti-pattern risk profile is saturated with content-specific language.</p>
+
+<h3>Concerns</h3>
+<p><strong>Identical structural counts:</strong> Both runs produce exactly 8 mechanisms, 3 case studies, 5 propositions — suggesting template-following rather than content-driven adaptation. The prompt says "5-8 mechanisms" and "2-4 case studies" but the synthesizer lands at the same number every time.</p>
+<p><strong>Line budget overrun:</strong> Both runs exceed the 600-line ceiling (739 and 788 lines). Consistent 23-32% overshoot.</p>
+
+<hr class="section-divider">
+
+<h2>III. 3-Pass Build Evolution</h2>
+
+<p>The 3-pass rotation is <strong>NOT redundant</strong>. Each pass has a genuinely distinct cognitive mode:</p>
+
+<table>
+  <thead><tr><th>Pass</th><th>Mode</th><th>Evidence</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Pass 1</strong></td><td>GENERATIVE</td><td>Build from nothing. 149-169 selectors, 8 mechanisms deployed, zone architecture created</td></tr>
+    <tr><td><strong>Pass 2</strong></td><td>AUGMENTATIVE</td><td>+20% CSS, 12 new classes (Molly), progressive disclosure (0→17 <code>&lt;details&gt;</code>)</td></tr>
+    <tr><td><strong>Pass 3</strong></td><td>EVALUATIVE</td><td>Anti-pattern fixes, accessibility (skip links, ARIA), dark zone contrast fix (51→199 RGB pts)</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Would a single pass produce equivalent quality?</strong> No. The information budget argument is decisive: Pass 1 consumes Sections 0/1/2/9, Pass 2 consumes 3/4/5, Pass 3 consumes 6/7/8. A single builder consuming all 10 sections would exceed effective context utilization.</p>
+
+<div class="callout callout-warning">
+  <strong>Continuity regression:</strong> Molly lost 7 <code>&lt;details&gt;</code> elements and the transition table during the fix cycle. The fix cycle builder should have a continuity checklist.
+</div>
+
+<hr class="section-divider">
+
+<h2>IV. PA + Weaver Evaluation</h2>
+
+<div class="stat-grid">
+  <div class="stat-box"><span class="number">8.7</span><span class="label">Average score /10</span></div>
+  <div class="stat-box green"><span class="number">9/10</span><span class="label">Fresh-eyes fidelity</span></div>
+  <div class="stat-box green"><span class="number">9/10</span><span class="label">Convergence quality</span></div>
+  <div class="stat-box amber"><span class="number">10/10</span><span class="label">REFINE unanimity</span></div>
+</div>
+
+<p>Fresh-eyes perception is genuine — zero pipeline vocabulary contamination across 10 auditors. Language is strongly experiential ("like being handed a classified document in a dimly lit room," "I hear a warm acoustic bass"). Convergence identifies real patterns verified against screenshots.</p>
+
+<h3>Calibration Concern</h3>
+<p>10/10 auditors across both runs said REFINE. While justified, this unanimity raises the question: is the question battery biased toward finding weaknesses? Questions like E-11 ("fighting content") and E-19 ("almost working") explicitly probe for problems. A well-built page should occasionally produce at least one SHIP from a fresh-eyes auditor.</p>
+
+<p><strong>Weaver override:</strong> Both Weavers moved from 5/5 REFINE to SHIP after fix cycle 1, with sound cost-benefit reasoning. But the override is not explicitly flagged — the Weaver should state "I am overriding 5/5 auditor REFINE."</p>
+
+<hr class="section-divider">
+
+<h2>V. Cross-Pipeline Comparison</h2>
+<p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px;">/compose v5 vs /research-compose on the same Yegge Gas Town content</p>
+
+<table>
+  <thead><tr><th>Dimension</th><th>OLD (/compose v5)</th><th>NEW (/research-compose)</th><th>Winner</th></tr></thead>
+  <tbody>
+    <tr><td>CSS volume</td><td>2,147 lines</td><td>1,097 lines</td><td style="color:var(--text-secondary)">OLD (2x)</td></tr>
+    <tr><td>CSS classes</td><td>219 definitions</td><td>70 definitions</td><td style="color:var(--text-secondary)">OLD (3x)</td></tr>
+    <tr><td>Grid layouts</td><td>10 grids, 17 flex</td><td>1 grid, 0 flex</td><td style="color:var(--text-secondary)">OLD (10x)</td></tr>
+    <tr><td>Typographic range</td><td>15 sizes, 7 LH, 5 LS</td><td>17 sizes, 9 LH, 6 LS</td><td style="color:var(--success)">NEW</td></tr>
+    <tr><td>Zone-scoped typography</td><td>None</td><td>CRESCENDO compression</td><td style="color:var(--success)">NEW</td></tr>
+    <tr><td>Compositional arc</td><td>Ad-hoc</td><td>Documented transitions</td><td style="color:var(--success)">NEW</td></tr>
+    <tr><td>Progressive disclosure</td><td>0 elements</td><td>17 elements</td><td style="color:var(--success)">NEW</td></tr>
+    <tr><td>Mechanism provenance</td><td>Some comments</td><td>Full chain traceability</td><td style="color:var(--success)">NEW</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Final score: NEW 6, OLD 5, TIE 2.</strong></p>
+
+<div class="callout callout-info">
+  <strong>The core paradox:</strong> The research phase produces a MORE ARCHITECTED but LESS RICH build. The unconstrained v5 builder created 2x the CSS, 3x the components, and 10x the grid layouts. But the new build has named density tokens, CRESCENDO compression, zone-specific typography gradients, and 17 progressive disclosure elements. Research constrains the builder toward PURPOSE but away from ABUNDANCE.
+</div>
+
+<hr class="section-divider">
+
+<h2>VI. The Missing Layer — Compositional Questions</h2>
+
+<p style="font-size: 17px; color: var(--heading); margin-bottom: 24px;">The audit's most significant discovery.</p>
+
+<p>The original validated explorations (OD-004, CD-001, DD-006, etc.) were driven by <strong>compositional questions</strong> — "what if..." interrogatives about layout structure. 38 such questions were extracted from the knowledge base. These questions don't just inspire layouts — they <em>dictate</em> them. Each question constrains the solution space so tightly that the visual answer is nearly deterministic.</p>
+
+<h3>The Gap</h3>
+
+<div class="flow-diagram">
+<strong>Original explorations:</strong><br>
+Content tensions → <span class="present">COMPOSITIONAL QUESTION</span> → Structural constraints → Mechanism selection → CSS<br><br>
+<strong>Current pipeline:</strong><br>
+Content tensions → Metaphor → <span class="highlight">??? (missing)</span> → Mechanism selection → CSS
+</div>
+
+<h3>Propagation Trace</h3>
+
+<table>
+  <thead><tr><th>Stage</th><th>Questions Present?</th><th>Evidence</th></tr></thead>
+  <tbody>
+    <tr><td>Knowledge base</td><td><span class="tag tag-deep">38 questions</span></td><td>Every exploration driven by a "what if..." question</td></tr>
+    <tr><td>TC briefs</td><td><span class="tag tag-strong">6-10 questions</span></td><td>Experimental questions + creative invitations generated independently</td></tr>
+    <tr><td>Specialist prompts</td><td><span class="tag tag-gap">0 instructions</span></td><td>No output format has a "question" field</td></tr>
+    <tr><td>Specialist outputs</td><td><span class="tag tag-gap">1 question total</span></td><td>Only OD-004's question in S3 output</td></tr>
+    <tr><td>Synthesized packages</td><td><span class="tag tag-gap">0 generative</span></td><td>Section 8 has verification checks, not generative questions</td></tr>
+    <tr><td>Builder</td><td><span class="tag tag-gap">Execution mode</span></td><td>Receives answers without questions</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Question propagation rate: ~10%.</strong> TC brief questions die at the specialist boundary. The pipeline gives builders the ANSWERS without the QUESTIONS — producing execution mode rather than derivation mode.</p>
+
+<h3>Impact on Visual Maturity</h3>
+
+<table>
+  <thead><tr><th>Metric</th><th>New Pipeline</th><th>Old Pipeline (v5)</th></tr></thead>
+  <tbody>
+    <tr><td>Question-driven CSS</td><td><strong>~50%</strong></td><td>~32%</td></tr>
+    <tr><td>Rule-following CSS</td><td>~38%</td><td>~42%</td></tr>
+    <tr><td>Metaphor-naming-only CSS</td><td>~12%</td><td>~26%</td></tr>
+  </tbody>
+</table>
+
+<p>The research phase DOES bring questions into HTML through an indirect mechanism: the metaphor generates the zone system, which generates gradients. But approximately 30-40% of the explorations' question-driven approach is lost — specifically the meta-layer (self-aware visualizations, explicit hypothesis statements) and the generative question as a reader-facing content element.</p>
+
+<h3>Root Causes</h3>
+<ol style="margin: 16px 0; padding-left: 20px; font-size: 14px; line-height: 1.8;">
+  <li><strong>Prompts designed for knowledge compression, not question transfer.</strong> Questions are "overhead" in a compression frame.</li>
+  <li><strong>No question slot in any output format.</strong> Finding → CSS Action has no field for "what if..."</li>
+  <li><strong>TC brief questions die at the specialist boundary.</strong> Specialists use the brief as a lens, not a source of questions to carry forward.</li>
+</ol>
+
+<hr class="section-divider">
+
+<h2>VII. Pipeline Operations</h2>
+
+<h3>What Worked</h3>
+<ul style="margin: 12px 0; padding-left: 20px; font-size: 14px; line-height: 2;">
+  <li>100% phase completion — all 6 phases, SHIP after 1 fix cycle each</li>
+  <li>35/35 expected artifacts produced in both runs, zero missing</li>
+  <li>Zero blank screenshots (historically persistent issue resolved)</li>
+  <li>Quality floors consistently exceeded — average 2.8x floor minimum</li>
+  <li>Layer B checkpoint template faithfully followed</li>
+  <li>Agent counts match SKILL specification exactly (23 per run)</li>
+</ul>
+
+<h3>What Needs Fixing</h3>
+
+<div class="callout callout-error">
+  <strong>Cost estimates systematically low.</strong> Phase 4 actual ($10-14) exceeds estimate ($5-10). Phase 5 actual ($16-20) vastly exceeds estimate ($0-8). The $50 pause gate was not enforced in either run.
+</div>
+
+<table>
+  <thead><tr><th>Phase</th><th>SKILL Estimate</th><th>Actual</th><th>Gap</th></tr></thead>
+  <tbody>
+    <tr><td>Phase 2 (Research)</td><td>$8-15</td><td>$12-15</td><td style="color:var(--warning)">Tight</td></tr>
+    <tr><td>Phase 4 (Evaluate)</td><td>$5-10</td><td>$10-14</td><td style="color:var(--error)">2x low</td></tr>
+    <tr><td>Phase 5 (Refine)</td><td>$0-8</td><td>$16-20</td><td style="color:var(--error)">2.5x low</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>$28-56</strong></td><td><strong>$56-68</strong></td><td style="color:var(--error)"><strong>~2x</strong></td></tr>
+  </tbody>
+</table>
+
+<hr class="section-divider">
+
+<h2>VIII. Consolidated Recommendations</h2>
+
+<h3>High Priority</h3>
+
+<table>
+  <thead><tr><th>#</th><th>Recommendation</th><th>Source Dimension</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><strong>Add "Compositional Questions" to specialist output formats and a new Section 10 to packages.</strong> Propagate TC brief experimental questions verbatim. Add question fields to S1 and S3 output templates.</td><td>D11a, D11b</td></tr>
+    <tr><td>2</td><td><strong>Update cost estimates.</strong> Phase 4: $10-15. Phase 5 per cycle: $14-20. Total with 1 fix cycle: $44-73. Either enforce or remove the $50 pause gate.</td><td>D9</td></tr>
+    <tr><td>3</td><td><strong>Enforce builder citation consistency.</strong> Add explicit "CITE every CSS rule with its package source" instruction to all 3 builder prompts. Yegge's 60+ cites vs Molly's 3 shows this is a prompt gap.</td><td>D1, D7</td></tr>
+    <tr><td>4</td><td><strong>Reframe Section 8 from verification to exploration.</strong> Change "Zone boundaries should be felt, not seen" (test after) to "What if zone boundaries were felt rather than seen? Explore this while building."</td><td>D11b</td></tr>
+  </tbody>
+</table>
+
+<h3>Medium Priority</h3>
+
+<table>
+  <thead><tr><th>#</th><th>Recommendation</th><th>Source Dimension</th></tr></thead>
+  <tbody>
+    <tr><td>5</td><td><strong>Vary structural counts by content.</strong> The synthesizer produces 8/3/5 (mechanisms/cases/propositions) regardless of content. Add prompt language encouraging content-driven count variation.</td><td>D6</td></tr>
+    <tr><td>6</td><td><strong>Separate Pass 3 from Fix Cycle.</strong> Write <code>_build-pass-3.html</code> as a distinct artifact before fixes start. Enables measuring Pass 3's contribution independently.</td><td>D7</td></tr>
+    <tr><td>7</td><td><strong>Add continuity checklist to fix cycle.</strong> "Before modifying: transition table present? All &lt;details&gt; from Pass 2 preserved? All custom properties intact?"</td><td>D7</td></tr>
+    <tr><td>8</td><td><strong>Flag Weaver overrides explicitly.</strong> When the Weaver overrides 5/5 REFINE to SHIP, it should state the override and its reasoning in a dedicated section.</td><td>D8</td></tr>
+    <tr><td>9</td><td><strong>Tighten or raise the synthesizer line budget.</strong> Actual output is 739-788 lines against a 400-600 target. Either raise to 400-800 or add harder enforcement.</td><td>D6</td></tr>
+    <tr><td>10</td><td><strong>Preserve pre-fix PA artifacts.</strong> Archive both pre-fix and post-fix auditor reports and synthesis for auditability.</td><td>D8</td></tr>
+  </tbody>
+</table>
+
+<h3>Low Priority / Monitor</h3>
+
+<table>
+  <thead><tr><th>#</th><th>Recommendation</th><th>Source Dimension</th></tr></thead>
+  <tbody>
+    <tr><td>11</td><td><strong>Review PA question battery for REFINE bias.</strong> 10/10 unanimous REFINE across 2 runs may indicate calibration toward weakness-finding.</td><td>D8</td></tr>
+    <tr><td>12</td><td><strong>Investigate layout complexity reduction.</strong> Research-compose produces 1 grid vs v5's 10. Consider whether the research phase's focus on compositional arc suppresses layout experimentation.</td><td>D10</td></tr>
+    <tr><td>13</td><td><strong>Voice eruption budget enforcement.</strong> S4 budgeted 3-4 Essence callouts; Yegge builder deployed 10 as "voice-eruptions." Component renaming circumvents the budget.</td><td>D4</td></tr>
+  </tbody>
+</table>
+
+<hr class="section-divider">
+
+<h2>IX. Verdict</h2>
+
+<div class="milestone">THE PIPELINE WORKS — WITH ONE STRUCTURAL GAP</div>
+
+<p>The /research-compose pipeline successfully orchestrates 23 Opus agents across 6 phases to produce fully designed HTML pages from content markdown. Knowledge chains are strong (all 5 specialists achieve DEEP absorption), the synthesizer produces genuine merges with 10/10 content specificity, the 3-pass rotation creates measurable progressive improvement, and the PA evaluation identifies real perceptual patterns.</p>
+
+<p><strong>The structural gap is the missing compositional questions layer.</strong> The original explorations that created the knowledge base were driven by "what if..." questions about layout. These questions generated the mechanisms, the case studies, the validated patterns. But the pipeline strips the questions during knowledge compression and delivers only the answers. The builder operates in execution mode (apply these 8 mechanisms) rather than derivation mode (explore these questions and discover your layout). This is the primary difference between the pipeline's "mechanistically correct but compositionally safe" output and the explorations' "question-driven, structurally imaginative" output.</p>
+
+<p>Despite this gap, the research phase produces measurably more question-driven CSS (~50%) than the non-research pipeline (~32%). The metaphor-question fusion — where the metaphor generates the zone system which generates the gradients — is the mechanism through which questions indirectly reach the HTML. Adding an explicit question propagation layer would close the remaining 30-40% gap.</p>
+
+<div class="footer">
+  <p>Audit produced by 13 Opus agents across 2 waves. 10 dimension reports (Wave 1) + 3 compositional question reports (Wave 1B). Source reports in <code>ephemeral/tripod-audit/dimension-reports/</code>. Pipeline runs in <code>ephemeral/builds/</code>.</p>
+  <p style="margin-top: 8px;">2026-03-02</p>
+</div>
+
+</div>
+</body>
+</html>

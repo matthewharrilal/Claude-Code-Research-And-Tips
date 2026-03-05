@@ -435,7 +435,7 @@ Quality = (Builder Skill x Content-Form Coupling x Compositional Metaphor) / Act
 
 | # | Suppressor | Mechanism | What It Does |
 |---|-----------|-----------|-------------|
-| S-01 | **Checklist format** | Puts builder in defensive mode ("verify X") instead of generative mode ("build X") | Every experiment confirms: recipe format (Middle 4/4, CD-006 ~4/4) outperforms checklist format (Flagship 1.5/4). The format determines whether the builder is COMPOSING or COMPLYING. |
+| S-01 | **Checklist format** | Puts builder in defensive mode ("verify X") instead of generative mode ("build X") | Every experiment confirms: recipe format (Middle 4/4, CD-006 ~3/4 COMPOSED with 39/40 soul) outperforms checklist format (Flagship 1.5/4). The format determines whether the builder is COMPOSING or COMPLYING. |
 | S-02 | **Prohibition overload** | 55 prohibitions exhaust cognitive budget on avoidance | Guardrail-to-playbook ratio of 7.9:1. Builder told 55 things NOT to do, almost nothing TO do. Cap at 15-20 prohibitions balanced with equal playbook entries. |
 | S-04 | **Sub-perceptual emphasis** | Prompt vocabulary ("refinement gradients") directs skill toward invisibility | 22% of Flagship CSS budget (227 lines) on letter-spacing 0.001-0.01em. When prompts name invisible things, invisible things get built. Must name VISIBLE targets instead. |
 | S-08 | **No perception thresholds** | Allows technically-valid but invisible CSS | Without minimum deltas (>= 15 RGB, >= 0.03em), "channel active" is satisfied by a 1 RGB background shift. The concept of perceptibility was missing entirely from the pipeline. |

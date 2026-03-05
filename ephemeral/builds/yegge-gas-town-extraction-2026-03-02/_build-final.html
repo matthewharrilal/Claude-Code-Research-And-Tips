@@ -1,0 +1,3072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>Steve Yegge and Gas Town: The Agent Factory Architecture</title>
+  <style>
+/*
+TRANSITION TABLE (Pass 3 — HARDENED):
+Zone 1 (Overseer Floor — opening) → Zone 2 (Operations Core):
+  bg: var(--tower-surface) #FEF9F5 → var(--tower-coordination) #FFFFFF
+  type: Instrument Serif h1 2.5rem → Instrument Serif h2 1.625rem, Inter body
+  space: 80px top padding → 48px padding
+  border: 3px red bottom (header) → 4px left borders on Town-Level roles
+  channels: background, typography size, spacing, border treatment = 4 channels
+
+Zone 2 (Operations Core) → Zone 3 (Bedrock):
+  bg: var(--tower-coordination) #FFFFFF → var(--tower-bedrock) #1A1A1A
+  type: Instrument Serif h2 1.625rem → Instrument Serif h2 1.375rem, compressed
+  space: 48px → 32px (maximum compression)
+  border: operational borders → inverted (light borders on dark)
+  channels: background, typography size+weight, spacing, border color = 4 channels
+
+Zone 3 (Bedrock) → Zone 4 (Philosophical Plateau):
+  bg: var(--tower-bedrock) #1A1A1A → var(--tower-execution) #FAF5ED
+  type: compressed mono → Instrument Serif h2 1.625rem (release)
+  space: 32px → 64px (breathing)
+  border: inverted → warm accent borders
+  channels: background (max contrast), typography, spacing, border = 4 channels
+
+Zone 4 (Philosophical Plateau) → Zone 5 (Factory Floor):
+  bg: var(--tower-execution) #FAF5ED → var(--tower-execution) #FAF5ED (same)
+  type: narrative serif → JetBrains Mono code-heavy
+  space: 64px → 40px (practical compression)
+  border: 1px solid #E0D5C5 border-top (PASS 3: added for same-bg boundary)
+  channels: border-top, typography register, spacing = 3 channels
+
+Zone 5 (Factory Floor) → Zone 6 (Return to Surface):
+  bg: var(--tower-execution) #FAF5ED → var(--tower-surface) #FEF9F5
+  type: code-heavy mono → Instrument Serif display (warm return)
+  space: 40px → 64px (resolution breathing)
+  border: code borders → warm structural borders
+  channels: background, typography, spacing, border treatment = 4 channels
+
+PASS 3 HARDENING LOG:
+  - Dark zone code blocks: border #444444 → #E0D5C5 (contrast fix)
+  - Zone 4→5 boundary: added 1px border-top (same-bg differentiation)
+  - Callout demotion: 2 of 3 Zone 5 checkpoints → inline bold (cacophony fix)
+  - Mayor card: default open for above-fold richness
+  - Footer quote: inline style → .footer-quote class
+  - Double callout class: --info --essence → --essence only
+*/
+
+/* === RESET + BASE === */
+/* SOURCE: Soul constraint — border-radius: 0, box-shadow: none */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:root {
+  /* PACKAGE S2-M01: Tower floor backgrounds — geological descent */
+  --tower-surface: #FEF9F5;
+  --tower-coordination: #FFFFFF;
+  --tower-execution: #FAF5ED;
+  --tower-bedrock: #1A1A1A;
+
+  /* Token values — locked palette */
+  --color-primary: #E83025;
+  --color-text: #1A1A1A;
+  --color-text-secondary: #666666;
+  --color-border: #E0D5C5;
+  --color-border-subtle: #F0EBE3;
+  --bg-card: #FFFFFF;
+
+  /* Accent palette */
+  --accent-blue: #4A90D9;
+  --accent-green: #4A9D6B;
+  --accent-coral: #C97065;
+  --accent-amber: #D97706;
+  --accent-purple: #7C3AED;
+
+  /* Callout backgrounds */
+  --bg-callout-info: #F5F9FE;
+  --bg-callout-tip: #F2F9F4;
+  --bg-callout-gotcha: #FEF6F5;
+  --bg-callout-challenge: #FFFBF2;
+  --bg-callout-essence: #F8F5FE;
+
+  /* Typography trinity */
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+  /* PACKAGE S2-M08: Density wave encoded as section padding */
+  --density-sparse: 64px;
+  --density-moderate: 48px;
+  --density-dense: 40px;
+  --density-maximum: 32px;
+
+  /* Spacing scale (4px base) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* Border weights — 3-category system */
+  --border-structural: 4px;
+  --border-accent: 3px;
+  --border-micro: 1px;
+
+  /* Syntax highlighting */
+  --syntax-keyword: #E83025;
+  --syntax-string: #6B9B7A;
+  --syntax-comment: #666666;
+  --syntax-function: #4A7C9B;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--tower-surface);
+  line-height: 1.7;
+}
+
+/* === SKIP LINK === */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  background: var(--color-primary);
+  color: var(--tower-surface);
+  padding: 8px 16px;
+  z-index: 1000;
+  font-family: var(--font-body);
+  font-size: 14px;
+  text-decoration: none;
+}
+.skip-link:focus { top: 0; }
+
+/* === SELECTION === */
+::selection {
+  background: var(--color-primary);
+  color: var(--tower-surface);
+}
+
+/* === FOCUS === */
+*:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+
+/* ============================================================
+   ZONE SYSTEM — PACKAGE S2-M01: Geological Stratification
+   Each zone = one tower floor with distinct bg + type + spacing
+   ============================================================ */
+
+/* PACKAGE S2-M01: Zone backgrounds encode tower descent */
+.zone--overseer {
+  background: var(--tower-surface);
+  padding: var(--space-20) 0 var(--density-sparse) 0;
+}
+
+.zone--operations {
+  background: var(--tower-coordination);
+  padding: var(--density-moderate) 0;
+}
+
+.zone--bedrock {
+  background: var(--tower-bedrock);
+  color: #ededed;
+  padding: var(--density-maximum) 0 var(--density-dense) 0;
+}
+
+/* FIX CYCLE 1 — GAP 2: Increased opening padding to 80px for decompression
+   after Beads dark zone. The reader should feel like surfacing after a dive. */
+.zone--philosophical {
+  background: var(--tower-execution);
+  padding: var(--space-20) 0 var(--density-sparse) 0;
+}
+
+/* ANTI-PATTERN FIX: Zone 4→5 share same bg (#FAF5ED) — add 1px border-top
+   per Pattern 1: "Use 1px subtle border-top only where adjacent zones
+   share the same background color." */
+.zone--factory {
+  background: var(--tower-execution);
+  padding: var(--density-dense) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+/* FIX CYCLE 1 — GAP 4: Increased Zone 6 padding to 80px for bookend symmetry
+   with Zone 1's spaciousness. The return to warm cream should feel decisive. */
+.zone--resolution {
+  background: var(--tower-surface);
+  padding: var(--space-20) 0;
+}
+
+
+/* === PAGE CONTAINER === */
+/* SOURCE: Soul constraint — max-width 960px */
+.tower-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+/* FINDING 17: Narrower reading corridor for philosophical zone */
+/* ADAPTED from DD-004: spacing compression gradient */
+.zone--philosophical .tower-container {
+  max-width: 640px;
+}
+
+
+/* ============================================================
+   HEADER — Dark full-bleed, Instrument Serif, 3px red border
+   SOURCE: Soul checklist item — dark header
+   ============================================================ */
+
+.tower-header {
+  background: var(--tower-bedrock);
+  border-bottom: 3px solid var(--color-primary);
+  padding: var(--space-6);
+}
+
+.tower-header__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.tower-header__id {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-2);
+}
+
+.tower-header__title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-style: italic;
+  color: var(--tower-surface);
+  margin-bottom: var(--space-3);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.tower-header__subtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  max-width: 600px;
+}
+
+
+/* ============================================================
+   TYPOGRAPHY — PACKAGE S2-M03: CRESCENDO Compression
+   FINDING 4: Heading sizes shrink, line-height tightens,
+   inter-heading spacing reduces across zones
+   ============================================================ */
+
+/* PACKAGE S2-M03: Zone 1 Overseer — generous, literary */
+.zone--overseer h2 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  margin-bottom: var(--space-6);
+  color: var(--color-text);
+}
+.zone--overseer h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-style: italic;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  margin-bottom: var(--space-4);
+  color: var(--color-text);
+}
+.zone--overseer p {
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: var(--space-4);
+}
+
+/* PACKAGE S2-M03: Zone 2 Operations — tightening */
+.zone--operations h2 {
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  font-style: italic;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  margin-bottom: var(--space-6);
+  color: var(--color-text);
+}
+.zone--operations h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-bottom: var(--space-4);
+  color: var(--color-text);
+}
+.zone--operations h4 {
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+  color: var(--color-text);
+}
+.zone--operations p {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: var(--space-4);
+}
+
+/* PACKAGE S2-M03: Zone 3 Bedrock — maximum compression */
+.zone--bedrock h2 {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-bottom: var(--space-5);
+  color: #ededed;
+}
+.zone--bedrock h3 {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-style: italic;
+  line-height: 1.3;
+  margin-bottom: var(--space-3);
+  color: #ededed;
+}
+.zone--bedrock p {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  margin-bottom: var(--space-3);
+  color: #ededed;
+}
+
+/* PACKAGE S2-M03: Zone 4 Philosophical — releases back */
+/* FIX CYCLE 1 — GAP 2: Zone opener class at 2rem to match Overseer's
+   generous sizing, signaling "you've surfaced" after the Beads descent.
+   Opening paragraph gets 1.85 line-height for decompression breathing. */
+.zone-opener {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  margin-bottom: var(--space-6);
+  color: var(--color-text);
+}
+.zone-opener + p {
+  line-height: 1.85;
+}
+.zone--philosophical h2 {
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  font-style: italic;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  margin-bottom: var(--space-6);
+  color: var(--color-text);
+}
+.zone--philosophical h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-style: italic;
+  line-height: 1.3;
+  margin-bottom: var(--space-4);
+  color: var(--color-text);
+}
+.zone--philosophical p {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: var(--space-4);
+}
+
+/* PACKAGE S2-M03: Zone 5 Factory — practical compression */
+.zone--factory h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-bottom: var(--space-5);
+  color: var(--color-text);
+}
+.zone--factory h3 {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-style: italic;
+  line-height: 1.3;
+  margin-bottom: var(--space-3);
+  color: var(--color-text);
+}
+.zone--factory h4 {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+  color: var(--color-text);
+}
+.zone--factory p {
+  font-size: 1rem;
+  line-height: 1.65;
+  margin-bottom: var(--space-3);
+}
+
+/* PACKAGE S2-M03: Zone 6 Resolution — relaxes to surface */
+.zone--resolution h2 {
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  font-style: italic;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  margin-bottom: var(--space-6);
+  color: var(--color-text);
+}
+.zone--resolution h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-style: italic;
+  line-height: 1.3;
+  margin-bottom: var(--space-4);
+  color: var(--color-text);
+}
+.zone--resolution p {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: var(--space-4);
+}
+
+
+/* ============================================================
+   CONTENT SPACING — PACKAGE S2-M08: Density Wave
+   ============================================================ */
+
+/* PACKAGE S2-M08: Inter-element spacing tightens with density */
+.zone--overseer .content-block + .content-block { margin-top: var(--space-6); }
+.zone--operations .content-block + .content-block { margin-top: var(--space-4); }
+.zone--bedrock .content-block + .content-block { margin-top: var(--space-3); }
+.zone--philosophical .content-block + .content-block { margin-top: var(--space-6); }
+.zone--factory .content-block + .content-block { margin-top: var(--space-4); }
+.zone--resolution .content-block + .content-block { margin-top: var(--space-6); }
+
+/* Section separators within zones */
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--color-border-subtle);
+  margin: var(--space-10) 0;
+}
+.zone--operations .section-divider { margin: var(--space-8) 0; }
+.zone--bedrock .section-divider {
+  border-top-color: #333333;
+  margin: var(--space-6) 0;
+}
+.zone--factory .section-divider { margin: var(--space-8) 0; }
+
+
+/* ============================================================
+   SECTION INDICATOR — Mono label above each section
+   SOURCE: Components CSS — section-indicator pattern
+   ============================================================ */
+
+.section-indicator {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.zone--bedrock .section-indicator {
+  color: #888888;
+  border-bottom-color: #333333;
+}
+
+
+/* ============================================================
+   ROLE CARDS — PACKAGE S2-M02: Border-Weight Gradient
+   FINDING 3: GEOLOGICAL as border-weight gradient
+   4px = Town-Level authority (Mayor, Deacon, Dogs)
+   3px = Rig-Level operational (Refinery, Witness, Polecat)
+   1px = Worker-Level ephemeral (Crew)
+   ADAPTED from OD-004: border-weight hierarchy
+   ============================================================ */
+
+/* PACKAGE S2-M02 + S2-M05: Role cards with fractal sparse/dense */
+.role-card {
+  margin-bottom: var(--space-6);
+  background: var(--bg-card);
+}
+
+/* PACKAGE S2-M02: Town-Level — maximum authority */
+.role-card--town {
+  border-left: 4px solid var(--color-text);
+  padding: var(--space-6);
+}
+.role-card--town .role-card__body {
+  line-height: 1.8;
+  padding-top: var(--space-4);
+}
+
+/* PACKAGE S2-M02: Rig-Level — operational */
+.role-card--rig {
+  border-left: 3px solid var(--color-border);
+  padding: var(--space-5);
+}
+.role-card--rig .role-card__body {
+  line-height: 1.7;
+  padding-top: var(--space-3);
+}
+
+/* PACKAGE S2-M02: Worker-Level — ephemeral */
+.role-card--worker {
+  border-left: 1px solid var(--color-border-subtle);
+  padding: var(--space-4);
+}
+.role-card--worker .role-card__body {
+  line-height: 1.6;
+  padding-top: var(--space-2);
+  font-size: 0.9375rem;
+}
+
+/* PACKAGE S2-M05: Fractal sparse header / dense body within each card */
+.role-card__header {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.role-card__title {
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.role-card__function {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: var(--space-3);
+}
+
+.role-card ul {
+  list-style: none;
+  padding: 0;
+}
+.role-card li {
+  padding-left: var(--space-4);
+  position: relative;
+  margin-bottom: var(--space-2);
+  font-size: 0.9375rem;
+}
+.role-card li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 6px;
+  height: 1px;
+  background: var(--color-border);
+}
+
+
+/* ============================================================
+   VOICE ERUPTIONS — PACKAGE S2-M04: Velocity Interleaving
+   FINDING 9: Yegge quotes as pull quotes
+   FINDING 12: Velocity interleave in 8 Roles
+   FAST component between SLOW role blocks
+   ADAPTED from CD-001: velocity interleaving
+   ============================================================ */
+
+/* PACKAGE S2-M04: Yegge voice eruption — FAST interleaver */
+.voice-eruption {
+  border-left: 4px solid var(--color-primary);
+  padding: var(--space-4) var(--space-6);
+  margin: var(--space-10) 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  color: var(--color-text);
+  max-width: 85%;
+}
+
+.voice-eruption cite {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-style: normal;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-2);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Voice eruption in bedrock zone — inverted */
+.zone--bedrock .voice-eruption {
+  border-left-color: var(--color-primary);
+  color: #ededed;
+}
+.zone--bedrock .voice-eruption cite {
+  color: #888888;
+}
+
+
+/* ============================================================
+   META INDICATOR — PACKAGE S2-M04: Velocity Interleaving
+   FINDING 14: Tech spec metadata labels
+   FAST metadata between SLOW code blocks
+   ============================================================ */
+
+.meta-indicator {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  margin-bottom: var(--space-3);
+}
+
+.zone--bedrock .meta-indicator {
+  color: #888888;
+  border-bottom-color: #333333;
+}
+
+/* FINDING 14: Role label — uppercase letter-spaced control panel indicator */
+.role-label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-1);
+}
+
+
+/* ============================================================
+   CALLOUT SYSTEM — Components CSS DNA
+   2-zone: sparse label + dense body + 4px left border
+   ============================================================ */
+
+.callout {
+  border-left: 4px solid var(--accent-blue);
+  background: var(--bg-callout-info);
+  padding: var(--space-6) var(--space-5) 28px var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.callout__label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-3);
+}
+
+.callout__body {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+
+/* Callout variants */
+.callout--essence {
+  border-left-color: var(--accent-purple);
+  background: var(--bg-callout-essence);
+}
+.callout--essence .callout__label { color: var(--accent-purple); }
+.callout--essence .callout__body {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-style: italic;
+}
+
+.callout--tip {
+  border-left-color: var(--accent-green);
+  background: var(--bg-callout-tip);
+}
+.callout--tip .callout__label { color: var(--accent-green); }
+
+.callout--warning {
+  border-left-color: var(--color-primary);
+  background: var(--bg-callout-gotcha);
+}
+.callout--warning .callout__label { color: var(--color-primary); }
+
+.callout--challenge {
+  border-left-color: var(--accent-amber);
+  background: var(--bg-callout-challenge);
+}
+.callout--challenge .callout__label { color: var(--accent-amber); }
+
+.callout--info .callout__label { color: var(--accent-blue); }
+
+
+/* ============================================================
+   CODE BLOCKS — Components CSS
+   Dark background, 3px border, mono font
+   ============================================================ */
+
+pre {
+  background: var(--tower-bedrock);
+  color: var(--tower-surface);
+  border: 3px solid var(--color-border);
+  padding: var(--space-6) var(--space-8);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: auto;
+  margin-bottom: var(--space-8);
+  white-space: pre;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Inline code */
+p code, li code, td code {
+  background: var(--color-border-subtle);
+  padding: 2px 6px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  border: 1px solid var(--color-border);
+}
+
+/* ANTI-PATTERN FIX: Dark zone code block contrast (Pattern 2)
+   Original: border #444444 on #111111 — insufficient contrast (51 RGB delta)
+   Fix: 3px #E0D5C5 border on zone bg — prominent differentiation per package */
+.zone--bedrock pre {
+  border: 3px solid #E0D5C5;
+  background: var(--tower-bedrock);
+}
+
+/* PASS 3: Dark zone inline code — inverted treatment for readability */
+.zone--bedrock code:not(pre code) {
+  background: #333333;
+  border-color: #444444;
+  color: #ededed;
+}
+
+/* FIX CYCLE 1 — GAP 1: Secondary code block treatment for minor snippets.
+   Breaks the metronomic dark-block uniformity by giving short command snippets
+   a lighter, inline-feeling presentation. Reserves full dark treatment for
+   structural anchors (ASCII diagrams, long scripts, architecture exhibits). */
+pre.code-minor {
+  background: var(--color-border-subtle);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-6);
+}
+pre.code-minor code {
+  color: var(--color-text);
+}
+
+/* ASCII diagram — wider treatment for structural anchors */
+/* PACKAGE S2-M04 / TC brief Invitation 4: ASCII diagrams as structural anchors */
+.ascii-anchor {
+  margin: var(--space-8) 0;
+}
+.ascii-anchor pre {
+  font-size: 13px;
+  line-height: 1.4;
+  padding: var(--space-8);
+}
+
+
+/* ============================================================
+   TABLES — Components CSS
+   3px header border, uppercase mono headers, no vertical borders
+   ============================================================ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-8);
+  display: block;
+  overflow-x: auto;
+}
+
+th {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 3px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 14px;
+  line-height: 1.6;
+  vertical-align: top;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* Tables inside bedrock zone */
+.zone--bedrock th {
+  border-bottom-color: #444444;
+  color: #888888;
+}
+.zone--bedrock td {
+  border-bottom-color: #333333;
+  color: #ededed;
+}
+
+
+/* ============================================================
+   PULSE ALTERNATION — PACKAGE S2-M06
+   FINDING 5: Width-differential for paired content
+   ============================================================ */
+
+/* PACKAGE S2-M06: Q&A pairs with width differential */
+.pulse-pair {
+  margin-bottom: var(--space-8);
+}
+.pulse-label {
+  max-width: 70%;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: var(--space-3);
+  font-size: 1rem;
+}
+.pulse-content {
+  max-width: 100%;
+}
+
+/* PACKAGE S2-M06: Quote items pulse — sparse voice, dense context */
+.quote-item {
+  padding: var(--space-8) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.quote-item:last-child { border-bottom: none; }
+
+/* FIX CYCLE 1 — GAP 5: Voice width increased to 90% for wider PULSE differential */
+.quote-item__voice {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  color: var(--color-text);
+  border-left: 4px solid var(--color-primary);
+  padding-left: var(--space-6);
+  max-width: 90%;
+  margin-bottom: var(--space-3);
+}
+
+/* FIX CYCLE 1 — GAP 5: Increased width differential for PULSE visibility.
+   Voice at 90% width, context at 60%. Creates a visible asymmetry between
+   the hot voice and the cool framing context. */
+.quote-item__context {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  padding-left: calc(4px + var(--space-6));
+  max-width: 60%;
+}
+
+
+/* ============================================================
+   REGISTER BRIDGES — PACKAGE S2-M07
+   FINDING 7: Mode-transition breathing 48px+
+   ============================================================ */
+
+/* PACKAGE S2-M07: Bridge between incompatible registers */
+/* PASS 3 FIX: Originally reduced from 48px to 24px for whitespace void concern.
+   FIX CYCLE 1 — GAP 3: Restored to 40px (compromise). Auditors did not perceive
+   meaningful pauses at zone boundaries with 24px. 40px provides perceptible
+   breathing without triggering the >200px whitespace void threshold. */
+.register-bridge {
+  padding: var(--space-10) 0;
+}
+
+
+/* ============================================================
+   COMPARISON TABLES — enhanced for Zone 6
+   FINDING 22: Resolution components end sections
+   ============================================================ */
+
+.comparison-block {
+  margin-bottom: var(--space-10);
+}
+.comparison-block h3 {
+  margin-bottom: var(--space-4);
+}
+
+/* FINDING 23: One concept per viewport — generous margins */
+.viewport-moment {
+  margin: var(--space-10) 0;
+}
+
+
+/* ============================================================
+   LISTS
+   ============================================================ */
+
+ul, ol {
+  padding-left: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+li {
+  margin-bottom: var(--space-2);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* Checklist style */
+.checklist {
+  list-style: none;
+  padding-left: 0;
+}
+.checklist li {
+  padding-left: var(--space-6);
+  position: relative;
+}
+.checklist li::before {
+  content: '\25A1';
+  position: absolute;
+  left: 0;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+
+/* ============================================================
+   BENTO GRID — FINDING 11: Bento grid for role hierarchy
+   ADAPTED from CD-001: Bento Grid at climax
+   Town-Level: 2fr/1fr/1fr (Mayor larger = more authority)
+   ============================================================ */
+
+/* FINDING 11: Tiered bento — grid size encodes operational authority */
+.role-grid--town {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+.role-grid--town .role-card--town:first-child {
+  grid-column: 1 / -1;
+}
+
+
+/* ============================================================
+   PROGRESSIVE DISCLOSURE — FINDING 13 + 20
+   Roles: summary visible, full details in <details>
+   Troubleshooting: symptom visible, fix in <details>
+   ============================================================ */
+
+/* FINDING 13: Progressive disclosure for roles */
+details.role-disclosure {
+  border: 1px solid var(--color-border);
+  margin: var(--space-3) 0;
+}
+details.role-disclosure summary {
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+  list-style: none;
+  user-select: none;
+}
+details.role-disclosure summary::-webkit-details-marker { display: none; }
+details.role-disclosure summary::before {
+  content: '\25B8';
+  display: inline-block;
+  margin-right: var(--space-2);
+  transition: transform 150ms ease;
+  font-size: 11px;
+}
+details.role-disclosure[open] summary::before {
+  transform: rotate(90deg);
+}
+details.role-disclosure[open] summary {
+  border-bottom: 1px solid var(--color-border);
+}
+details.role-disclosure .detail-content {
+  padding: var(--space-4);
+}
+
+/* FINDING 20: Progressive disclosure for troubleshooting */
+details.trouble-disclosure {
+  border: 1px solid var(--color-border);
+  margin: var(--space-3) 0;
+}
+details.trouble-disclosure summary {
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-primary);
+  letter-spacing: 0.02em;
+  list-style: none;
+  user-select: none;
+}
+details.trouble-disclosure summary::-webkit-details-marker { display: none; }
+details.trouble-disclosure summary::before {
+  content: '\25B8';
+  display: inline-block;
+  margin-right: var(--space-2);
+  transition: transform 150ms ease;
+  font-size: 11px;
+}
+details.trouble-disclosure[open] summary::before {
+  transform: rotate(90deg);
+}
+details.trouble-disclosure[open] summary {
+  border-bottom: 1px solid var(--color-border);
+}
+details.trouble-disclosure .detail-content {
+  padding: var(--space-4);
+}
+details.trouble-disclosure .trouble-cause {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: var(--space-3);
+}
+
+
+/* ============================================================
+   WAVE HIGHLIGHT — 6 Waves table with Wave 6 emphasis
+   TC Brief Creative Waypoint 3
+   ============================================================ */
+
+.wave-highlight td {
+  font-weight: 600;
+  color: var(--color-text);
+  border-bottom: 3px solid var(--color-primary);
+}
+.wave-highlight td:first-child {
+  color: var(--color-primary);
+}
+
+
+/* ============================================================
+   TROUBLESHOOTING PATTERN — symptom/cause/recovery
+   (kept for backward compat, progressive disclosure added)
+   ============================================================ */
+
+.trouble-pattern {
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.trouble-pattern:last-child { border-bottom: none; }
+
+.trouble-pattern__symptom {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+}
+
+.trouble-pattern__cause {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: var(--space-3);
+}
+
+
+/* ============================================================
+   DECISION TREE / SPECTRUM — closing spatial events
+   FINDING 23: one-concept-per-viewport
+   ============================================================ */
+
+.decision-diagram {
+  margin: var(--space-10) 0;
+}
+.decision-diagram pre {
+  padding: var(--space-8);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   BEADS MEMORY TIERS — FINDING 16: nested hierarchy in dark zone
+   PACKAGE S2-M02: Border-weight within bedrock
+   ============================================================ */
+
+.memory-tier {
+  margin-bottom: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+}
+/* FINDING 16: Hot = 4px warm accent, Warm = 3px medium, Cold = 1px subtle */
+.memory-tier--hot {
+  border-left: 4px solid var(--color-primary);
+}
+.memory-tier--warm {
+  border-left: 3px solid var(--accent-amber);
+}
+.memory-tier--cold {
+  border-left: 1px solid #444444;
+}
+
+.memory-tier__label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-2);
+}
+.memory-tier--hot .memory-tier__label { color: var(--color-primary); }
+.memory-tier--warm .memory-tier__label { color: var(--accent-amber); }
+.memory-tier--cold .memory-tier__label { color: #888888; }
+
+
+/* ============================================================
+   FACTORY DECLARATION — TC Brief Creative Waypoint 1
+   FINDING 10: Density contrast before peak — 80px padding
+   ============================================================ */
+
+/* FINDING 10: 2:1 padding ratio (80px vs 40px in Roles) */
+.factory-declaration {
+  border-left: 4px solid var(--color-primary);
+  padding: var(--space-20) var(--space-6);
+  margin: var(--space-10) 0;
+  background: var(--tower-execution);
+}
+.factory-declaration p {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  max-width: 55ch;
+}
+
+
+/* ============================================================
+   FOOTER — 3px border-top mirroring header
+   SOURCE: Soul checklist — footer with 3px border
+   ============================================================ */
+
+.tower-footer {
+  border-top: 3px solid var(--color-primary);
+  padding: var(--space-6);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  background: var(--tower-bedrock);
+}
+
+.tower-footer__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.tower-footer__section {
+  margin-bottom: var(--space-4);
+}
+
+.tower-footer__label {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-2);
+  color: #888888;
+}
+
+.tower-footer p {
+  color: #888888;
+  margin-bottom: var(--space-2);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.tower-footer a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+/* PASS 3 FIX: Footer closing quote — was inline style, now a proper class
+   Per Pass 2 concern #4: consistent with voice eruption treatment
+   Specificity: .tower-footer .footer-quote overrides .tower-footer p */
+.tower-footer .footer-quote {
+  font-style: italic;
+  font-family: var(--font-display);
+  color: var(--tower-surface);
+}
+
+
+/* ============================================================
+   LINKS
+   ============================================================ */
+
+a {
+  color: var(--accent-blue);
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+.zone--bedrock a { color: #60a5fa; }
+
+
+/* ============================================================
+   STRONG / EM
+   ============================================================ */
+
+strong { font-weight: 600; }
+
+
+/* ============================================================
+   FINDING 15: Visual weight balance
+   ADAPTED from CD-001: Breathing between HEAVY cards
+   ============================================================ */
+
+/* FINDING 15: 40px margin before/after each code block in roles */
+.zone--operations .role-card pre {
+  margin: var(--space-10) 0 var(--space-6) 0;
+}
+
+/* FINDING 19: Anti-code-wall — prose between every code block */
+.zone--factory pre + pre {
+  margin-top: var(--space-10);
+}
+
+
+/* ============================================================
+   FINDING 21: Temperature buffering before quotes
+   Neutral buffer zone before dramatic register whiplash
+   ============================================================ */
+
+.temperature-buffer {
+  padding: var(--space-12) 0;
+}
+
+
+/* ============================================================
+   RESPONSIVE — PACKAGE: At least 2 breakpoints
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  .role-grid--town {
+    grid-template-columns: 1fr;
+  }
+
+  .tower-header__title {
+    font-size: 1.75rem;
+  }
+
+  .zone--philosophical .tower-container {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .zone--overseer { padding: var(--space-12) 0 var(--space-10) 0; }
+  .zone--operations { padding: var(--space-8) 0; }
+  .zone--bedrock { padding: var(--space-6) 0 var(--space-8) 0; }
+  .zone--philosophical { padding: var(--space-10) 0; }
+  .zone--factory { padding: var(--space-8) 0; }
+  .zone--resolution { padding: var(--space-10) 0; }
+
+  .tower-container {
+    padding: 0 var(--space-4);
+  }
+
+  .zone--philosophical .tower-container {
+    max-width: 100%;
+  }
+
+  .tower-header__title {
+    font-size: 1.5rem;
+  }
+
+  .zone--overseer h2 { font-size: 1.5rem; }
+  .zone--operations h2 { font-size: 1.375rem; }
+  .zone--bedrock h2 { font-size: 1.25rem; }
+  .zone--philosophical h2 { font-size: 1.375rem; }
+  .zone--factory h2 { font-size: 1.25rem; }
+  .zone--resolution h2 { font-size: 1.375rem; }
+
+  .voice-eruption {
+    max-width: 100%;
+    font-size: 1.125rem;
+  }
+
+  .quote-item__voice {
+    max-width: 100%;
+    font-size: 1.125rem;
+  }
+
+  .quote-item__context {
+    max-width: 100%;
+  }
+
+  pre.code-minor {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  pre {
+    font-size: 12px;
+    padding: var(--space-4);
+  }
+
+  .role-grid--town {
+    grid-template-columns: 1fr;
+  }
+
+  .role-card--town,
+  .role-card--rig,
+  .role-card--worker {
+    padding: var(--space-4);
+  }
+
+  .factory-declaration {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  table {
+    font-size: 13px;
+  }
+  th, td {
+    padding: var(--space-2) var(--space-3);
+  }
+}
+
+/* === REDUCED MOTION === */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+  </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- ============================================================
+     HEADER — Dark full-bleed, Instrument Serif
+     SOURCE: Soul checklist — dark header, 3px red border-bottom
+     ============================================================ -->
+<header class="tower-header" role="banner">
+  <div class="tower-header__inner">
+    <div class="tower-header__id">Extraction — Deep Dive</div>
+    <h1 class="tower-header__title">Steve Yegge and Gas Town</h1>
+    <p class="tower-header__subtitle">The agent factory architect building team-scale productivity for solo developers.</p>
+  </div>
+</header>
+
+
+<!-- ============================================================
+     ZONE 1: OVERSEER FLOOR — Warm, sparse, provocative orientation
+     Content: You Are Here + Who is Yegge + Gas Town Mental Model
+     PACKAGE S2-M01: tower-surface background
+     PACKAGE S2-M03: generous typography (2rem headings, 1.8 line-height)
+     PACKAGE S2-M08: sparse density (64-80px padding)
+     FINDING 8: Smart whitespace 38% retention — 80px hero, 64px between sections
+     FINDING 9: Yegge quotes as pull quotes
+     FINDING 10: Density contrast before peak — factory declaration 80px
+     ============================================================ -->
+<main id="main-content" role="main">
+<section class="zone--overseer" aria-label="Orientation and Mental Model">
+  <div class="tower-container">
+
+    <!-- YOU ARE HERE -->
+    <div class="content-block">
+      <div class="section-indicator">Level 7 — The Complexity Ladder</div>
+      <h2>You Are Here</h2>
+
+      <div class="ascii-anchor">
+<pre><code>                           The Complexity Ladder
+
+    Level 7: Gas Town Factory          &lt;-- YOU ARE LEARNING THIS
+             |
+    Level 6: Parallel Swarms + Worktrees
+             |
+    Level 5: Multi-Agent Orchestration (CC Mirror)
+             |
+    Level 4: PRD-Driven Loops (Full Ralph)
+             |
+    Level 3: Simple Loops (Basic Ralph)
+             |
+    Level 2: Subagents + Hooks
+             |
+    Level 1: CLAUDE.md + Slash Commands
+             |
+    Level 0: Single Interactive Session</code></pre>
+      </div>
+
+      <!-- PACKAGE S2-M06: PULSE — paired Q&A with width differential -->
+      <div class="pulse-pair">
+        <div class="pulse-label"><strong>Your current state:</strong> You're a developer who has:</div>
+        <div class="pulse-content">
+          <ul>
+            <li>Mastered Levels 0-6 on the complexity ladder</li>
+            <li>Run 5+ Claude Code instances simultaneously ("juggling" agents daily)</li>
+            <li>Shipped features overnight with Ralph loops</li>
+            <li>Experienced the limits of sequential processing</li>
+            <li>Felt the pain of the "Merge Wall" with multiple agents</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pulse-pair">
+        <div class="pulse-label"><strong>After this document, you will:</strong></div>
+        <div class="pulse-content">
+          <ul>
+            <li>Understand the factory-scale agent architecture</li>
+            <li>Know when Gas Town is appropriate (and when it's overkill)</li>
+            <li>Be able to install and configure a basic Gas Town setup</li>
+            <li>Understand the 8 roles and how they coordinate</li>
+            <li>Comprehend how Beads provides memory across agent colonies</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout callout--warning">
+        <div class="callout__label">Prerequisites</div>
+        <div class="callout__body">
+          <ul>
+            <li>Stage 7+ on Yegge's 8-Stage Dev Evolution</li>
+            <li>Comfort with chaos and imperfection</li>
+            <li>Go language runtime installed</li>
+            <li>tmux proficiency (mandatory)</li>
+            <li>Budget: $50-200/day for API costs</li>
+            <li>100+ hours experience with multi-agent setups</li>
+          </ul>
+        </div>
+      </div>
+
+      <p><strong>Complexity Level:</strong> Level 7 on the complexity ladder (highest)</p>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 1. WHO IS STEVE YEGGE -->
+    <div class="content-block">
+      <div class="section-indicator">Section 01 — Background</div>
+      <h2>Who is Steve Yegge?</h2>
+
+      <h3>Professional Background</h3>
+      <p>Steve Yegge is a 40-year software development veteran with a career that provides unique credibility for building Gas Town:</p>
+
+      <table>
+        <thead>
+          <tr><th>Company</th><th>Role</th><th>Relevance</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Amazon</strong></td><td>Early employee</td><td>Built internal tools at scale</td></tr>
+          <tr><td><strong>Google</strong></td><td>Senior Engineer</td><td>Famous for "Stevey's Blog Rants," internal platforms</td></tr>
+          <tr><td><strong>Sourcegraph</strong></td><td>Senior role</td><td>Code intelligence, developer tooling</td></tr>
+          <tr><td><strong>Current</strong></td><td>Full-time AI dev advocate</td><td>Building the future of agent-assisted dev</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Why His Opinion Matters</h3>
+      <ul>
+        <li><strong>~1 million lines vibe-coded in 2025</strong> — Not theory, practice</li>
+        <li><strong>Built Beads (225K lines of Go)</strong> — Proof of concept at scale</li>
+        <li><strong>Built Gas Town using Gas Town</strong> — Recursive validation</li>
+        <li><strong>Transparent about limitations</strong> — Warns about chaos, costs, maturity</li>
+        <li><strong>Decades of platform engineering</strong> — Knows what scales and what breaks</li>
+      </ul>
+
+      <h3>Public Presence</h3>
+      <ul>
+        <li><strong>Twitter/X:</strong> @steve_yegge (primary announcements)</li>
+        <li><strong>Medium:</strong> steve-yegge.medium.com (deep philosophical pieces)</li>
+        <li><strong>GitHub:</strong> github.com/steveyegge (Gas Town, Beads, MCP Agent Mail)</li>
+        <li><strong>Podcasts:</strong> Changelog, O'Reilly Radar</li>
+      </ul>
+
+      <h3>The "Vibe Coding" Pioneer</h3>
+      <p>Steve didn't just adopt AI-assisted development — he pioneered "vibe coding" as a philosophy:</p>
+
+      <!-- PACKAGE S2-M04: Voice eruption as FAST interleaver -->
+      <div class="voice-eruption">
+        "Work becomes fluid, an uncountable that you sling around freely, like slopping shiny fish into wooden barrels at the docks."
+        <cite>— Steve Yegge</cite>
+      </div>
+
+      <p><strong>Vibe coding principles:</strong></p>
+      <ul>
+        <li>Describe what you want (the "vibe")</li>
+        <li>AI generates the code</li>
+        <li>You never read the code directly</li>
+        <li>Judge by outcomes, not implementation</li>
+        <li>Accept some bugs, focus on throughput</li>
+      </ul>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 2. THE GAS TOWN MENTAL MODEL -->
+    <div class="content-block">
+      <div class="section-indicator">Section 02 — Mental Model</div>
+      <h2>The Gas Town Mental Model</h2>
+
+      <h3>The Core Insight</h3>
+
+      <!-- PACKAGE S2-M04: THE defining voice eruption -->
+      <div class="voice-eruption">
+        "Claude Code is the world's biggest fuckin' ant. Everyone is focused on making their ant run longer... when nature prefers colonies."
+        <cite>— Steve Yegge</cite>
+      </div>
+
+      <p>This is the fundamental shift Gas Town represents:</p>
+
+      <div class="ascii-anchor">
+<pre><code>TRADITIONAL APPROACH                 GAS TOWN APPROACH
+━━━━━━━━━━━━━━━━━━━━                ━━━━━━━━━━━━━━━━━━━
+
+     One Big Ant                     Ant Colony
+         |                               |
+    Make it                        Build the
+    run longer                     factory
+         |                               |
+    Context window               Multiple workers
+    limits everything            share the load
+         |                               |
+    You are the                  You are the
+    programmer                   Product Manager</code></pre>
+      </div>
+
+      <!-- TC Brief Creative Waypoint 1: Factory declaration -->
+      <!-- FINDING 10: 80px padding creates density contrast before Operations zone -->
+      <div class="factory-declaration">
+        <p>Gas Town isn't an agent — it's a <strong>factory for agents</strong>.</p>
+      </div>
+
+      <h3>The Factory Metaphor</h3>
+
+      <table>
+        <thead>
+          <tr><th>Traditional Dev</th><th>Gas Town</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>You write code</td><td>You file features</td></tr>
+          <tr><td>You debug</td><td>Agents debug</td></tr>
+          <tr><td>You're the implementer</td><td>You're the PM</td></tr>
+          <tr><td>Single context window</td><td>Many workers, shared memory</td></tr>
+          <tr><td>Session ends, context lost</td><td>Workers persist, memory survives</td></tr>
+        </tbody>
+      </table>
+
+      <h3>The "Idea Compiler"</h3>
+
+      <div class="voice-eruption">
+        "Gas Town is an Idea Compiler. You just make up features, design them, file the implementation plans, and sling work around to your polecats and crew."
+        <cite>— Steve Yegge</cite>
+      </div>
+
+      <p><strong>Input:</strong> Your ideas and feature requests<br>
+      <strong>Output:</strong> Working code, shipped products</p>
+
+      <p>You're not writing code anymore. You're managing a factory.</p>
+
+      <h3>Why "Gas Town"?</h3>
+      <p>The Mad Max: Fury Road reference isn't accidental:</p>
+      <ul>
+        <li><strong>Post-apocalyptic resourcefulness</strong> — Work with chaos, not against it</li>
+        <li><strong>Clear role hierarchy</strong> — Mayor, Deacon, Dogs, Workers</li>
+        <li><strong>Survival-focused</strong> — Throughput over perfection</li>
+        <li><strong>Community-built</strong> — Everyone contributes to the economy</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- PACKAGE S2-M07: BRIDGE — Provocative -> Reference register shift -->
+<!-- FINDING 7: Mode-transition breathing 48px+ -->
+<div class="register-bridge" aria-hidden="true"></div>
+
+
+<!-- ============================================================
+     ZONE 2: OPERATIONS CORE — Dense, structural, the tower's blueprint
+     Content: 8 Roles Architecture
+     PACKAGE S2-M01: tower-coordination background (white)
+     PACKAGE S2-M02: Border-weight gradient across role tiers
+     PACKAGE S2-M03: tightening typography (1.625rem headings)
+     PACKAGE S2-M04: Voice eruptions between heavy role blocks
+     PACKAGE S2-M05: Fractal sparse/dense within role cards
+     PACKAGE S2-M08: dense spacing (48px padding)
+     FINDING 11: Bento grid 2fr/1fr/1fr for Town-Level
+     FINDING 12: Velocity interleave meta-indicators
+     FINDING 13: Progressive disclosure for roles
+     FINDING 14: Tech spec metadata labels
+     FINDING 15: Visual weight balance
+     ADAPTED from OD-004: border-weight hierarchy
+     ADAPTED from CD-001: velocity interleaving + bento grid
+     ============================================================ -->
+<section class="zone--operations" aria-label="8 Roles Architecture">
+  <div class="tower-container">
+    <div class="section-indicator">Section 03 — Architecture</div>
+    <h2>The 8 Roles Architecture</h2>
+
+    <h3>Hierarchy Overview</h3>
+
+    <div class="ascii-anchor">
+<pre><code>+===========================================================================+
+|                          GAS TOWN ROLE HIERARCHY                          |
++===========================================================================+
+|                                                                           |
+|  TOWN LEVEL (Global - One instance each)                                  |
+|  +----------------+  +----------------+  +----------------+              |
+|  |     MAYOR      |  |     DEACON     |  |      DOGS      |              |
+|  |  Coordination  |  |   Monitoring   |  |  Quality Gates |              |
+|  |  across rigs   |  |  &amp; handshakes  |  |  &amp; watchdogs   |              |
+|  +----------------+  +----------------+  +----------------+              |
+|          |                    |                    |                      |
+|          +--------------------+--------------------+                      |
+|                               |                                           |
+|                               v                                           |
+|  RIG LEVEL (Per-Project - Multiple instances)                             |
+|  +----------------+  +----------------+  +----------------+              |
+|  |    REFINERY    |  |    WITNESS     |  |    POLECAT     |              |
+|  | Decomposes big |  |  Observes all  |  | Named workers  |              |
+|  | tasks -> small |  | rig activity   |  | (persistent)   |              |
+|  +----------------+  +----------------+  +----------------+              |
+|                                                  |                        |
+|                                                  v                        |
+|                                          +----------------+              |
+|                                          |      CREW      |              |
+|                                          |   Ephemeral    |              |
+|                                          | burst workers  |              |
+|                                          +----------------+              |
+|                                                                           |
+|  HUMAN LEVEL                                                              |
+|  +---------------------------------------------------------------+      |
+|  |                        OVERSEER (YOU)                          |      |
+|  |           Product Manager . Decision Maker . Human Boss        |      |
+|  |                    Has inbox, sends/receives mail               |      |
+|  +---------------------------------------------------------------+      |
+|                                                                           |
++===========================================================================+</code></pre>
+    </div>
+
+    <h3>Role Deep Dives</h3>
+
+    <!-- TOWN-LEVEL ROLES — PACKAGE S2-M02: 4px border, maximum authority -->
+    <!-- FINDING 11: Bento grid 2fr/1fr/1fr — grid size encodes authority -->
+    <div class="content-block">
+      <div class="meta-indicator">Town Level — Global Coordination</div>
+
+      <div class="role-grid--town">
+        <!-- Mayor — primary card, spans full width -->
+        <div class="role-card role-card--town">
+          <div class="role-card__header">Role 01 · Town-Level</div>
+          <div class="role-card__title">Mayor</div>
+          <div class="role-card__function">Chief coordinator — your concierge and chief-of-staff</div>
+          <!-- FINDING 13: Progressive disclosure — summary visible, details on demand -->
+          <!-- PASS 3 FIX: Mayor card open by default for above-fold richness (Pass 2 concern #1) -->
+          <details class="role-disclosure" open>
+            <summary>Commands, model recommendation, and responsibilities</summary>
+            <div class="detail-content">
+              <ul>
+                <li>Receives high-level directives from Overseer</li>
+                <li>Routes work to appropriate rigs</li>
+                <li>Manages cross-rig coordination</li>
+                <li>Handles town-level decisions</li>
+                <li>Primary AI coordinator for the entire town</li>
+              </ul>
+<pre class="code-minor"><code>gt mayor up        # Start mayor
+gt mayor status    # Check mayor state
+gt mayor down      # Stop mayor</code></pre>
+              <!-- FINDING 14: Tech spec metadata label -->
+              <div class="meta-indicator">Model recommendation: Opus 4.5 (complex coordination requires top-tier reasoning)</div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Deacon -->
+        <div class="role-card role-card--town">
+          <div class="role-card__header">Role 02 · Town-Level</div>
+          <div class="role-card__title">Deacon</div>
+          <div class="role-card__function">Health monitoring and agent coordination</div>
+          <details class="role-disclosure">
+            <summary>Commands, model recommendation, and responsibilities</summary>
+            <div class="detail-content">
+              <ul>
+                <li>Monitors agent health across the town</li>
+                <li>Handles agent-to-agent handshakes</li>
+                <li>Reports anomalies to Mayor</li>
+                <li>Tracks work progress</li>
+                <li>Manages handoff protocols and worker recycling</li>
+              </ul>
+<pre class="code-minor"><code>gt deacon up       # Start deacon
+gt deacon status   # View monitoring state</code></pre>
+              <div class="meta-indicator">Model recommendation: Haiku (simple health checks don't need heavy reasoning)</div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Dogs -->
+        <div class="role-card role-card--town">
+          <div class="role-card__header">Role 03 · Town-Level</div>
+          <div class="role-card__title">Dogs</div>
+          <div class="role-card__function">Quality assurance and safety gates — town-level grunts</div>
+          <details class="role-disclosure">
+            <summary>Commands, model recommendation, and responsibilities</summary>
+            <div class="detail-content">
+              <ul>
+                <li>Reviews work before acceptance</li>
+                <li>Enforces quality standards</li>
+                <li>Guards against regressions</li>
+                <li>Can reject/rollback work</li>
+                <li>Stale branch cleanup</li>
+              </ul>
+<pre class="code-minor"><code>gt dogs up         # Start dogs
+gt dogs bark       # Trigger quality check</code></pre>
+              <div class="meta-indicator">Model recommendation: Sonnet (quality review requires reasoning, not Opus-level)</div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINDING 12: Velocity interleave — voice eruption between HEAVY tier blocks -->
+    <!-- PACKAGE S2-M04: Voice eruption between Town and Rig tiers -->
+    <div class="voice-eruption">
+      "You're not a programmer anymore. You're the head chef of a kitchen with AI robotic sous chefs."
+      <cite>— Steve Yegge</cite>
+    </div>
+
+    <!-- RIG-LEVEL ROLES — PACKAGE S2-M02: 3px border, operational -->
+    <div class="content-block">
+      <div class="meta-indicator">Rig Level — Per-Project Operations</div>
+
+      <!-- Refinery -->
+      <div class="role-card role-card--rig">
+        <div class="role-card__header">Role 04 · Rig-Level</div>
+        <div class="role-card__title">Refinery</div>
+        <div class="role-card__function">Breaks down large tasks into agent-sized work</div>
+        <details class="role-disclosure">
+          <summary>Commands, model recommendation, and responsibilities</summary>
+          <div class="detail-content">
+            <ul>
+              <li>Receives feature requests from Mayor</li>
+              <li>Decomposes into smaller, atomic tasks</li>
+              <li>Assigns to Polecats or Crew</li>
+              <li>Tracks decomposition progress</li>
+              <li>Manages the merge queue with sequential rebasing</li>
+            </ul>
+<pre class="code-minor"><code>gt refinery up &lt;rig&gt;           # Start refinery for rig
+gt refinery decompose &lt;task&gt;   # Manually trigger decomposition</code></pre>
+            <div class="meta-indicator">Model recommendation: Opus 4.5 (task decomposition is architecturally complex)</div>
+          </div>
+        </details>
+      </div>
+
+      <!-- FINDING 12: FAST meta-indicator between HEAVY role cards -->
+      <div class="meta-indicator">Named workers execute decomposed tasks from the Refinery</div>
+
+      <!-- Polecat -->
+      <div class="role-card role-card--rig">
+        <div class="role-card__header">Role 05 · Rig-Level</div>
+        <div class="role-card__title">Polecat</div>
+        <div class="role-card__function">Named, persistent agent workers with specializations</div>
+        <details class="role-disclosure">
+          <summary>Commands, model recommendation, and responsibilities</summary>
+          <div class="detail-content">
+            <ul>
+              <li>Execute assigned tasks</li>
+              <li>Maintain context across sessions</li>
+              <li>Specialize in rig-specific knowledge</li>
+              <li>Report completion to Refinery</li>
+              <li>Ephemeral but can be persistent workspaces</li>
+            </ul>
+<pre class="code-minor"><code>gt polecat up &lt;rig&gt; alice      # Start polecat named "alice"
+gt polecat up &lt;rig&gt; bob        # Start polecat named "bob"
+gt polecat list &lt;rig&gt;          # List polecats for rig
+gt polecat assign alice &lt;task&gt; # Assign task to alice</code></pre>
+            <p><strong>Naming convention:</strong> Human names (alice, bob, carol) help with mental model</p>
+            <div class="meta-indicator">Model recommendation: Sonnet (implementation work, main workhorse)</div>
+          </div>
+        </details>
+      </div>
+
+      <!-- FINDING 12: FAST meta-indicator between HEAVY role cards -->
+      <div class="meta-indicator">Witnesses observe rig activity and provide context to new workers</div>
+
+      <!-- Witness -->
+      <div class="role-card role-card--rig">
+        <div class="role-card__header">Role 06 · Rig-Level</div>
+        <div class="role-card__title">Witness</div>
+        <div class="role-card__function">Observes and records rig activity — watches over polecats</div>
+        <details class="role-disclosure">
+          <summary>Commands, model recommendation, and responsibilities</summary>
+          <div class="detail-content">
+            <ul>
+              <li>Watches all work in assigned rig</li>
+              <li>Records history and context</li>
+              <li>Provides state to new workers</li>
+              <li>Reports anomalies to Deacon</li>
+              <li>Unsticks drifting agents</li>
+            </ul>
+<pre class="code-minor"><code>gt witness up &lt;rig&gt;    # Start witness for rig
+gt witness report      # Get current state report</code></pre>
+            <div class="meta-indicator">Model recommendation: Haiku (observation and logging don't need heavy reasoning)</div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- WORKER-LEVEL — PACKAGE S2-M02: 1px border, ephemeral -->
+    <div class="content-block">
+      <div class="meta-indicator">Worker Level — Ephemeral Execution</div>
+
+      <div class="role-card role-card--worker">
+        <div class="role-card__header">Role 07 · Worker-Level</div>
+        <div class="role-card__title">Crew</div>
+        <div class="role-card__function">Short-lived, task-specific burst workers</div>
+        <details class="role-disclosure">
+          <summary>Commands, model recommendation, and responsibilities</summary>
+          <div class="detail-content">
+            <ul>
+              <li>Execute single tasks</li>
+              <li>No persistent state</li>
+              <li>Cheap and disposable</li>
+              <li>Used for parallel bursts</li>
+              <li>Spawn, complete, disappear</li>
+            </ul>
+<pre class="code-minor"><code>gt crew spawn &lt;rig&gt; --task "fix this bug"
+gt crew count &lt;rig&gt;    # Count active crew
+gt crew purge &lt;rig&gt;    # Kill all crew</code></pre>
+            <div class="meta-indicator">Model recommendation: Haiku (simple, isolated tasks)</div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- HUMAN LEVEL — Overseer gets special warm treatment -->
+    <div class="content-block">
+      <div class="meta-indicator">Human Level — You</div>
+
+      <div class="role-card role-card--town">
+        <div class="role-card__header">Role 08 · Human-Level</div>
+        <div class="role-card__title">Overseer (YOU)</div>
+        <div class="role-card__function">Product Manager and decision maker</div>
+        <details class="role-disclosure">
+          <summary>Interface details and responsibilities</summary>
+          <div class="detail-content">
+            <ul>
+              <li>Define features and priorities</li>
+              <li>Review inbox decisions</li>
+              <li>Approve major changes</li>
+              <li>Provide human judgment</li>
+              <li>Has identity in the system with own inbox</li>
+            </ul>
+            <p><strong>Interface:</strong> Human inbox for decisions, tmux panes for observation, <code>gt</code> CLI for commands, can send and receive town mail.</p>
+          </div>
+        </details>
+      </div>
+
+      <!-- FINDING 12: Voice eruption after Overseer card -->
+      <div class="voice-eruption">
+        "That's you, Human. As the Overseer, you have an identity in the system, and your own inbox, and you can send and receive town mail."
+        <cite>— Steve Yegge</cite>
+      </div>
+    </div>
+
+    <!-- Communication Flow Diagram -->
+    <div class="content-block">
+      <h3>Role Communication Flow</h3>
+
+      <div class="ascii-anchor">
+<pre><code>[Overseer: YOU]
+     |
+     | "Build user authentication"
+     v
+[Mayor] ------------------------------------------+
+     |                                              |
+     | routes to rig                                | status reports
+     v                                              |
+[Refinery] -------------------------+              |
+     |                               |              |
+     | decomposes into:              | progress     |
+     | - task 1: DB schema           |              |
+     | - task 2: API routes          |              |
+     | - task 3: Frontend forms      |              |
+     v                               v              |
+[Polecat: alice] <----------- [Witness] -----------+
+[Polecat: bob]     observes    |
+[Crew: temp-1]                 |
+     |                         |
+     | on anomaly              |
+     v                         |
+[Dogs] <- quality check -------+
+     |
+     | if passes
+     v
+[Complete]</code></pre>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- PACKAGE S2-M07: BRIDGE — Reference -> Maximum Density register shift
+     The visual contrast between white and dark IS the bridge (per package) -->
+
+
+<!-- ============================================================
+     ZONE 3: BEDROCK — Maximum density, dark zone
+     Content: Beads: The Memory System
+     PACKAGE S2-M01: tower-bedrock background (#1A1A1A)
+     PACKAGE S2-M02: Border-weight for Hot/Warm/Cold memory tiers
+     PACKAGE S2-M03: maximum compression (1.375rem headings, 0.9375rem body)
+     PACKAGE S2-M08: maximum density (32px padding)
+     FINDING 16: Beads as bedrock layer — border-weight descent within dark
+     FINDING 18: Component density tolerance — no NEW voice eruptions in dark
+     ============================================================ -->
+<section class="zone--bedrock" aria-label="Beads Memory System">
+  <div class="tower-container">
+    <div class="section-indicator">Section 04 — Data Plane</div>
+    <h2>Beads: The Memory System</h2>
+
+    <h3>The "50 First Dates" Problem</h3>
+
+    <!-- FINDING 18: Existing voice eruption kept (content-critical),
+         but no NEW ones added per component density tolerance -->
+    <div class="voice-eruption">
+      "Agents suffer from '50 First Dates' syndrome — they wake up with no memory of yesterday."
+      <cite>— Steve Yegge</cite>
+    </div>
+
+    <p>Every new Claude session starts fresh. This is the fundamental problem Beads solves.</p>
+
+    <h3>Why Markdown Plans Fail at Scale</h3>
+
+    <table>
+      <thead>
+        <tr><th>Problem</th><th>Consequence</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Not queryable</td><td>Agents must parse dozens of files to reconstruct work graph</td></tr>
+        <tr><td>No dependency tracking</td><td>Agents can't compute which tasks are unblocked</td></tr>
+        <tr><td>Conflict-prone</td><td>Multiple agents editing same files</td></tr>
+        <tr><td>Implicit task stacks</td><td>"Intelligent wandering" without clear direction</td></tr>
+      </tbody>
+    </table>
+
+    <h3>What Beads Does</h3>
+
+    <p><strong>Beads</strong> (github.com/steveyegge/beads) is a ~225K line Go project providing:</p>
+
+    <ul>
+      <li><strong>Git-backed storage:</strong> All state persisted in git</li>
+      <li><strong>Universal context:</strong> Shared context across all agents</li>
+      <li><strong>Memory management:</strong> Agents can read/write context</li>
+      <li><strong>Hash-based IDs:</strong> (e.g., <code>bd-a1b2</code>) prevent merge conflicts</li>
+      <li><strong>Dependency tracking:</strong> Explicit links between tasks</li>
+      <li><strong>Memory decay:</strong> Compaction summarizes old closed tasks</li>
+    </ul>
+
+    <h3>Beads Architecture</h3>
+
+    <div class="ascii-anchor">
+<pre><code>+-------------------------------------------------------------+
+|                       GAS TOWN                               |
+|  +------------+  +------------+  +------------+             |
+|  |   Mayor    |  |   Polecat  |  |    Crew    |             |
+|  +-----+------+  +------+-----+  +------+-----+             |
+|        |                |               |                    |
+|        +----------------+---------------+                    |
+|                         |                                    |
+|                   +-----v-----+                             |
+|                   |   BEADS   |                             |
+|                   | Data Plane|                             |
+|                   +-----+-----+                             |
+|                         |                                    |
++-------------------------+------------------------------------+
+                          |
+                          v
+                   +-------------+
+                   |    Git      |
+                   | Repository  |
+                   +-------------+</code></pre>
+    </div>
+
+    <h3>Key Beads Commands</h3>
+
+<pre><code>bd ready           # List tasks with zero blockers (what can be done NOW)
+bd create "Title"  # Create new task
+bd dep add X Y     # X is blocked by Y
+bd show &lt;id&gt;       # Full task state and history</code></pre>
+
+    <h3>Memory Model</h3>
+
+    <!-- FINDING 16: Border-weight descent within bedrock -->
+    <!-- Hot = 4px warm accent, Warm = 3px medium, Cold = 1px subtle -->
+    <div class="memory-tier memory-tier--hot">
+      <div class="memory-tier__label">Layer 1: Hot Context (RAM-cached)</div>
+      <ul>
+        <li>Current task state</li>
+        <li>Last N interactions</li>
+        <li>Active file references</li>
+      </ul>
+    </div>
+
+    <div class="memory-tier memory-tier--warm">
+      <div class="memory-tier__label">Layer 2: Warm Context (SQLite + Git index)</div>
+      <ul>
+        <li>Recent commit history</li>
+        <li>Cross-agent message log</li>
+        <li>Rig state snapshots</li>
+      </ul>
+    </div>
+
+    <div class="memory-tier memory-tier--cold">
+      <div class="memory-tier__label">Layer 3: Cold Context (Git history)</div>
+      <ul>
+        <li>Full project history</li>
+        <li>Previous run outcomes</li>
+        <li>Archived decisions</li>
+      </ul>
+    </div>
+
+    <p><strong>Retrieval:</strong> Hot -> Warm -> Cold (only query cold if needed)</p>
+
+    <h3>Why Git as Database?</h3>
+
+    <div class="voice-eruption">
+      "Git as database provides durable, diffable, auditable storage with zero infrastructure."
+      <cite>— Steve Yegge</cite>
+    </div>
+
+    <ul>
+      <li><strong>Survives crashes:</strong> Everything is committed</li>
+      <li><strong>Audit trail:</strong> Full history of all agent actions</li>
+      <li><strong>Recovery:</strong> Roll back to any point in time</li>
+      <li><strong>Sharing:</strong> Multiple agents share the same store</li>
+      <li><strong>No heavyweight message bus required</strong></li>
+    </ul>
+
+  </div>
+</section>
+
+
+<!-- PACKAGE S2-M07: BRIDGE — dark bedrock to earthy philosophical
+     The dark->light shift IS the bridge -->
+
+
+<!-- ============================================================
+     ZONE 4: PHILOSOPHICAL PLATEAU — Breathing, conviction
+     Content: 6 Waves of AI + Core Principles
+     PACKAGE S2-M01: tower-execution background (#FAF5ED)
+     PACKAGE S2-M03: releases typography back to generous
+     PACKAGE S2-M08: breathing density (64px padding)
+     FINDING 17: Density debt after peak — narrower 640px reading corridor
+     FINDING 4: CRESCENDO compression releases here
+     ADAPTED from DD-004: spacing compression gradient (64px release)
+     ============================================================ -->
+<section class="zone--philosophical" aria-label="Historical Context and Principles">
+  <div class="tower-container">
+
+    <!-- 5. THE 6 WAVES OF AI -->
+    <div class="content-block">
+      <div class="section-indicator">Section 05 — Historical Waves</div>
+      <!-- FIX CYCLE 1 — GAP 2: zone-opener class signals decompression after Beads -->
+      <h2 class="zone-opener">The 6 Waves of AI</h2>
+
+      <p>Steve frames the evolution of AI-assisted development as six overlapping waves:</p>
+
+      <table>
+        <thead>
+          <tr><th>Wave</th><th>Era</th><th>Description</th><th>Productivity</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Pre-2022</td><td>Traditional manual coding</td><td>Baseline</td></tr>
+          <tr><td>2</td><td>2023</td><td>Completions-based (Copilot-style)</td><td>~2x</td></tr>
+          <tr><td>3</td><td>2024</td><td>Chat-based (CHOP)</td><td>~5x</td></tr>
+          <tr><td>4</td><td>2025 H1</td><td>Coding agents (Claude Code, Amp, Codex)</td><td>~10x</td></tr>
+          <tr><td>5</td><td>2025 H2</td><td>Agent clusters (multi-agent parallel)</td><td>~25x</td></tr>
+          <tr class="wave-highlight"><td><strong>6</strong></td><td><strong>2026+</strong></td><td><strong>Agent fleets (AI supervisors managing swarms)</strong></td><td><strong>~50x+</strong></td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Gas Town is Wave 6 infrastructure.</strong></p>
+
+      <h3>The 8 Stages of Dev Evolution</h3>
+
+      <table>
+        <thead>
+          <tr><th>Stage</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Zero/near-zero AI</td></tr>
+          <tr><td>2</td><td>Agent in IDE, permissions on</td></tr>
+          <tr><td>3</td><td>Agent in IDE, YOLO mode</td></tr>
+          <tr><td>4</td><td>Agent fills screen, code is just diffs</td></tr>
+          <tr><td>5</td><td>CLI single agent, YOLO</td></tr>
+          <tr><td>6</td><td>CLI multi-agent (3-5 parallel)</td></tr>
+          <tr><td>7</td><td>10+ agents, hand-managed</td></tr>
+          <tr><td><strong>8</strong></td><td><strong>Building your own orchestrator</strong></td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout callout--warning">
+        <div class="callout__label">Critical Warning</div>
+        <div class="callout__body">
+          "If you're not at Stage 7, you'll get your face ripped off by superintelligent chimpanzees."
+          <br><br>
+          Gas Town is for Stage 7+ developers. If you're not there yet, go back to Ralph loops.
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 6. CORE PRINCIPLES -->
+    <div class="content-block">
+      <div class="section-indicator">Section 06 — Philosophy</div>
+      <h2>Core Principles</h2>
+
+      <h3>GUPP: The Universal Propulsion Principle</h3>
+
+      <div class="voice-eruption">
+        "If there is work on your hook, YOU MUST RUN IT."
+        <cite>— Steve Yegge</cite>
+      </div>
+
+      <p>This solves the fundamental problem that "Claude Code ends":</p>
+      <ul>
+        <li>Work is "slung" to agent hooks (persistent git worktrees)</li>
+        <li>When an agent starts, it checks its hook</li>
+        <li>If work exists, execution is immediate — no confirmation, no waiting</li>
+        <li>Work survives crashes and restarts</li>
+      </ul>
+
+      <p><strong>The Gupp Nudge:</strong> Claude Code is "so miserably polite" that GUPP doesn't always work. Gas Town implements a "Gupp Nudge" — agents get a startup poke with <code>gt nudge</code> roughly 30-60 seconds after starting.</p>
+
+      <hr class="section-divider">
+
+      <h3>Zero Framework Cognition</h3>
+
+      <div class="voice-eruption">
+        "Claude makes all decisions. The orchestrator executes."
+        <cite>— Steve Yegge</cite>
+      </div>
+
+      <p><strong>Key design principle:</strong> All decisions delegated to AI. No heuristics, regex, or parsing in the orchestrator. The framework provides infrastructure, not intelligence.</p>
+
+      <hr class="section-divider">
+
+      <h3>Agents as Cattle, Not Pets</h3>
+
+      <p>This is Kubernetes thinking applied to agents:</p>
+      <ul>
+        <li>Individual sessions are ephemeral</li>
+        <li>The work graph is persistent</li>
+        <li>The agent is not the session</li>
+        <li>The agent is a Bead (identity with a global address)</li>
+      </ul>
+
+      <hr class="section-divider">
+
+      <h3>Nondeterministic Idempotence</h3>
+
+      <p>Workflows can be interrupted and resumed at any time:</p>
+      <ul>
+        <li>Path is fully nondeterministic — different runs take different routes</li>
+        <li>Workflow eventually finishes as long as you keep throwing agents at it</li>
+        <li>Agents may make mistakes but self-correct because acceptance criteria are well-specified</li>
+        <li>The system is resilient to individual component failures</li>
+      </ul>
+
+      <hr class="section-divider">
+
+      <h3>Token Spend as Health Metric</h3>
+
+      <div class="voice-eruption">
+        "Token spend per developer per unit time is the new health metric that best represents how well your company is doing with AI."
+        <cite>— Steve Yegge</cite>
+      </div>
+
+      <p><strong>The math:</strong></p>
+      <ul>
+        <li>Agent cost: ~$10-12 per operating hour</li>
+        <li>Recommended daily developer LLM budget: $100-300</li>
+        <li>Yegge's personal spend: ~$300/day, ~$80,000/year</li>
+        <li>Gas Town workshops generate 12,000 LOC/day per developer</li>
+      </ul>
+
+      <hr class="section-divider">
+
+      <h3>Talk to the Plan, Not the Agent</h3>
+
+      <p>Because agents have limited context windows and experience "amnesia":</p>
+      <ul>
+        <li>Maintain persistent, readable plans in files</li>
+        <li>Both you and agents reference these plans</li>
+        <li>"Land the Plane" pattern: At session end, clean up git, update issues, spit out prompt for next session</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- PACKAGE S2-M07: BRIDGE — Narrative -> Code register shift -->
+<div class="register-bridge" aria-hidden="true"></div>
+
+
+<!-- ============================================================
+     ZONE 5: FACTORY FLOOR — Dense-practical, code-heavy
+     Content: Implementation Guide + Checkpoints + Troubleshooting
+     PACKAGE S2-M01: tower-execution background (#FAF5ED)
+     PACKAGE S2-M03: practical compression (1.5rem headings)
+     PACKAGE S2-M04: Velocity interleaving between code blocks
+     PACKAGE S2-M08: dense spacing (40px padding)
+     FINDING 19: Anti-code-wall — prose between every code block
+     FINDING 20: Progressive disclosure for troubleshooting
+     ============================================================ -->
+<section class="zone--factory" aria-label="Implementation and Operations">
+  <div class="tower-container">
+
+    <!-- 7. IMPLEMENTATION GUIDE -->
+    <div class="content-block">
+      <div class="section-indicator">Section 07 — Implementation</div>
+      <h2>Implementation Guide</h2>
+
+      <h3>Prerequisites Checklist</h3>
+      <p>Before installing Gas Town, verify:</p>
+      <ul class="checklist">
+        <li><strong>Go 1.21+</strong> installed (<code>go version</code>)</li>
+        <li><strong>tmux</strong> installed and proficient (<code>tmux -V</code>)</li>
+        <li><strong>Multiple Claude accounts</strong> for parallel agents</li>
+        <li><strong>Stage 7+ experience</strong> (100+ hours multi-agent)</li>
+        <li><strong>High chaos tolerance</strong> (some bugs, some lost work)</li>
+        <li><strong>Budget:</strong> $50-200/day</li>
+      </ul>
+
+      <h3>Installation</h3>
+
+      <!-- FINDING 19: Anti-code-wall — prose before each code block -->
+      <p>Install the Gas Town CLI and initialize your workspace:</p>
+
+<pre class="code-minor"><code># Step 1: Install Gas Town
+go install github.com/steveyegge/gastown/cmd/gt@latest
+
+# Step 2: Verify installation
+gt version
+
+# Step 3: Initialize your town (creates ~/.gt)
+gt init</code></pre>
+
+      <div class="callout callout--tip">
+        <div class="callout__label">Checkpoint</div>
+        <div class="callout__body">You should see <code>Town initialized at ~/.gt</code></div>
+      </div>
+
+      <h3>Adding Your First Rig</h3>
+
+      <p>A rig is a project workspace. Add your repository as a rig:</p>
+
+<pre class="code-minor"><code># Add a project rig
+gt rig add /path/to/your/project
+
+# Verify
+gt rig list</code></pre>
+
+      <!-- PASS 3 FIX: Demoted from callout to inline (Callout Cacophony — max 2 per 800px viewport) -->
+      <p><strong>Checkpoint:</strong> Your project should appear in the rig list.</p>
+
+      <h3>Starting the Core Roles</h3>
+      <p>Recommended startup sequence — town-level first, then rig infrastructure, then workers:</p>
+
+<pre><code># 1. Start town-level roles first
+gt mayor up
+gt deacon up
+gt dogs up
+
+# 2. Start rig-level infrastructure
+gt witness up my-project
+gt refinery up my-project
+
+# 3. Start named workers
+gt polecat up my-project alice
+gt polecat up my-project bob
+gt polecat up my-project carol</code></pre>
+
+      <!-- PASS 3 FIX: Demoted from callout to inline (Callout Cacophony — max 2 per 800px viewport) -->
+      <p><strong>Checkpoint:</strong> <code>gt status</code> should show all roles running.</p>
+
+      <h3>tmux Workflow</h3>
+      <p>Gas Town is tmux-native. Each role gets its own window or pane:</p>
+
+      <div class="ascii-anchor">
+<pre><code>+-------------------------------------------------------------+
+|  tmux session: gastown                                       |
++--------------------+--------------------+-------------------+
+|                    |                    |                   |
+|  Window: mayor     |  Window: alice     |  Window: bob      |
+|  +==============+  |  +==============+  |  +=============+ |
+|  |  Mayor       |  |  |  Polecat     |  |  |  Polecat    | |
+|  |  Agent       |  |  |  Alice       |  |  |  Bob        | |
+|  +==============+  |  +==============+  |  +=============+ |
++--------------------+--------------------+-------------------+
+|  Window: overview                                            |
+|  +=========================================================+|
+|  | rpai - Agent Status Monitor                             ||
+|  +=========================================================+|
++-------------------------------------------------------------+</code></pre>
+      </div>
+
+      <h3>Startup Script</h3>
+      <p>Save this as <code>gastown-start.sh</code> to automate your daily startup:</p>
+
+<pre><code>#!/bin/bash
+SESSION="gastown"
+
+# Kill existing session if requested
+if [ "$1" = "--fresh" ]; then
+  tmux kill-session -t $SESSION 2>/dev/null
+fi
+
+# Create session
+tmux new-session -d -s $SESSION -n 'overview'
+
+# Infrastructure windows
+tmux new-window -t $SESSION -n 'mayor'
+tmux new-window -t $SESSION -n 'infra'
+tmux split-window -h -t $SESSION:infra
+
+# Per-rig windows
+for RIG in project1 project2; do
+  tmux new-window -t $SESSION -n "rig-$RIG"
+  tmux split-window -h -t "rig-$RIG"
+done
+
+# Polecat windows
+for POLECAT in alice bob carol; do
+  tmux new-window -t $SESSION -n "$POLECAT"
+done
+
+# Inbox window
+tmux new-window -t $SESSION -n 'inbox'
+
+# Start roles
+tmux send-keys -t $SESSION:mayor 'gt mayor up' C-m
+tmux send-keys -t $SESSION:infra.0 'gt deacon up' C-m
+tmux send-keys -t $SESSION:infra.1 'gt dogs up' C-m
+tmux send-keys -t $SESSION:rig-project1.0 'gt witness up project1' C-m
+tmux send-keys -t $SESSION:rig-project1.1 'gt refinery up project1' C-m
+tmux send-keys -t $SESSION:alice 'gt polecat up project1 alice' C-m
+tmux send-keys -t $SESSION:bob 'gt polecat up project1 bob' C-m
+tmux send-keys -t $SESSION:inbox 'watch -n 5 gt inbox' C-m
+
+# Attach
+tmux select-window -t $SESSION:overview
+tmux attach -t $SESSION</code></pre>
+
+      <h3>Typical Daily Workflow</h3>
+
+      <p>A normal day with Gas Town looks like managing a team, not writing code:</p>
+
+<pre><code># Morning: Start town
+./gastown-start.sh
+
+# Review overnight status
+gt status
+gt inbox
+
+# File new feature
+gt inbox send my-project "Build user authentication"
+
+# Refinery decomposes, assigns to polecats
+# You review pending decisions
+gt inbox respond 5 --approve
+gt inbox respond 7 --approve
+
+# Monitor throughout day (switch tmux windows)
+# Dogs run quality checks automatically
+
+# Evening: Review completed work
+gt inbox review
+gt approve 12 15 18  # Approve completed items
+
+# End of day (polecats persist, crew killed)
+gt crew purge my-project</code></pre>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 8. CHECKPOINTS AND VERIFICATION -->
+    <div class="content-block">
+      <div class="section-indicator">Section 08 — Verification</div>
+      <h2>Checkpoints and Verification</h2>
+
+      <h3>Post-Installation Checkpoints</h3>
+
+      <table>
+        <thead>
+          <tr><th>Step</th><th>Command</th><th>Expected Output</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Go installed</td><td><code>go version</code></td><td><code>go version go1.21+</code></td></tr>
+          <tr><td>gt installed</td><td><code>gt version</code></td><td>Version number</td></tr>
+          <tr><td>Town initialized</td><td><code>gt status</code></td><td>Shows town state</td></tr>
+          <tr><td>Rig added</td><td><code>gt rig list</code></td><td>Shows your project</td></tr>
+          <tr><td>Mayor running</td><td><code>gt mayor status</code></td><td><code>running</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3>Health Checks</h3>
+
+      <p>Use these commands to verify your town is operating normally:</p>
+
+<pre class="code-minor"><code># Check all role status
+gt status
+
+# Check specific rig
+gt rig status my-project
+
+# View agent health
+gt deacon report</code></pre>
+
+      <p><strong>Healthy state indicators:</strong></p>
+      <ul>
+        <li>All roles show <code>running</code></li>
+        <li>Deacon reports no anomalies</li>
+        <li>Inbox has reasonable pending items (not 100+)</li>
+        <li>Polecats are progressing on tasks</li>
+      </ul>
+
+      <h3>Quality Verification</h3>
+
+      <p>Trigger a manual quality check when you want to verify work:</p>
+
+<pre class="code-minor"><code># Trigger Dogs quality check
+gt dogs bark
+
+# Review what passed/failed
+gt dogs report</code></pre>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 9. TROUBLESHOOTING -->
+    <!-- FINDING 20: Progressive disclosure — symptom as summary, fix in details -->
+    <div class="content-block">
+      <div class="section-indicator">Section 09 — Troubleshooting</div>
+      <h2>Troubleshooting</h2>
+
+      <h3>Common Failures and Recovery</h3>
+
+      <!-- FINDING 20: Each failure pattern as <details> — scannable symptom directory -->
+      <details class="trouble-disclosure">
+        <summary>Context Collapse — Agents stop making sense, circular reasoning</summary>
+        <div class="detail-content">
+          <div class="trouble-cause"><strong>Cause:</strong> Beads state corruption or no auto-compact</div>
+<pre class="code-minor"><code>gt town reset --soft   # Keep config, clear state
+gt beads sync --force  # Force context resync</code></pre>
+        </div>
+      </details>
+
+      <details class="trouble-disclosure">
+        <summary>Race Conditions / Merge Conflicts — Conflicting commits, overwritten work</summary>
+        <div class="detail-content">
+          <div class="trouble-cause"><strong>Cause:</strong> Multiple Polecats editing same files</div>
+          <p><strong>Recovery:</strong> Use git worktrees for file isolation. Implement file ownership rules. Use the Refinery's merge queue.</p>
+<pre class="code-minor"><code># Check for conflicts
+git status
+
+# If conflicts exist
+gt refinery resolve my-project</code></pre>
+        </div>
+      </details>
+
+      <details class="trouble-disclosure">
+        <summary>Runaway Crew — Cost spike, dozens of Crew spawned unexpectedly</summary>
+        <div class="detail-content">
+          <div class="trouble-cause"><strong>Cause:</strong> Refinery misconfiguration or task explosion</div>
+<pre class="code-minor"><code># Kill all crew immediately
+gt crew purge --all
+
+# Set limits
+gt config set crew.max_per_rig 5
+gt config set crew.idle_timeout 15</code></pre>
+        </div>
+      </details>
+
+      <details class="trouble-disclosure">
+        <summary>Mayor Deadlock — No work getting assigned, town seems stuck</summary>
+        <div class="detail-content">
+          <div class="trouble-cause"><strong>Cause:</strong> Mayor waiting for human decision on something</div>
+<pre class="code-minor"><code># Check inbox
+gt inbox
+
+# Approve/reject pending items
+gt inbox respond &lt;id&gt; --approve
+gt inbox respond &lt;id&gt; --reject</code></pre>
+        </div>
+      </details>
+
+      <details class="trouble-disclosure">
+        <summary>Beads Desync — Agents have stale context, working on old state</summary>
+        <div class="detail-content">
+          <div class="trouble-cause"><strong>Cause:</strong> Git conflicts in Beads repo</div>
+<pre class="code-minor"><code># Force sync
+gt beads sync --force
+
+# If that fails, reset Beads
+gt beads reset</code></pre>
+        </div>
+      </details>
+
+      <details class="trouble-disclosure">
+        <summary>Agent Won't Start — <code>gt polecat up</code> returns error</summary>
+        <div class="detail-content">
+          <div class="trouble-cause"><strong>Cause:</strong> Claude account issue, rate limiting, or config problem</div>
+<pre class="code-minor"><code># Check config
+gt config list
+
+# Try different account
+gt config set polecat.alice.account secondary
+
+# Check Claude status
+claude --version</code></pre>
+        </div>
+      </details>
+
+      <h3>Recovery Command Reference</h3>
+
+      <p>Keep these commands handy for emergency recovery:</p>
+
+<pre><code># Soft reset (keep config)
+gt town reset --soft
+
+# Hard reset (full reinstall)
+gt town reset --hard
+
+# Kill all agents
+gt town down
+
+# Restart specific role
+gt polecat down my-project alice
+gt polecat up my-project alice
+
+# Force Beads sync
+gt beads sync --force
+
+# Clear inbox backlog
+gt inbox clear --all
+
+# Emergency cost stop
+gt pause --all  # Pause all work
+gt resume --all # Resume when ready</code></pre>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- FINDING 21: Temperature buffer — neutral zone before dramatic register whiplash -->
+<!-- Code (cold, terminal) -> Quotes (hot, personality) needs buffering -->
+<div class="register-bridge temperature-buffer" aria-hidden="true"></div>
+
+
+<!-- ============================================================
+     ZONE 6: RETURN TO SURFACE — Warm, sparse, resolution
+     Content: When to Use + Quotes + Comparison + Sources + Appendix
+     PACKAGE S2-M01: tower-surface background (return to warm cream)
+     PACKAGE S2-M03: relaxes back to generous typography
+     PACKAGE S2-M06: PULSE for quotes section
+     PACKAGE S2-M08: resolution breathing (48-64px)
+     FINDING 22: Resolution components — warm cream, generous padding
+     FINDING 23: One concept per viewport
+     FINDING 24: Contrast creates harmony — serif voice + mono precision
+     ============================================================ -->
+<section class="zone--resolution" aria-label="Decision Making and Resources">
+  <div class="tower-container">
+
+    <!-- 10. WHEN TO USE GAS TOWN -->
+    <div class="content-block">
+      <div class="section-indicator">Section 10 — Decision</div>
+      <h2>When to Use Gas Town</h2>
+
+      <!-- PACKAGE S2-M06: PULSE — paired lists with width differential -->
+      <div class="pulse-pair">
+        <div class="pulse-label"><strong>Use Gas Town When:</strong></div>
+        <div class="pulse-content">
+          <ul>
+            <li>You're at Stage 7+ (10+ agents, comfortable with chaos)</li>
+            <li>Budget is not a concern ($50-200/day)</li>
+            <li>You want <strong>team-scale output</strong> as a solo developer</li>
+            <li>You have clear product vision but need implementation velocity</li>
+            <li>You're comfortable with imperfection (some bugs fixed 2-3 times)</li>
+            <li>You have tmux proficiency</li>
+            <li>You understand the PM -> engineering team mental model</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pulse-pair">
+        <div class="pulse-label"><strong>Don't Use Gas Town When:</strong></div>
+        <div class="pulse-content">
+          <ul>
+            <li>You're below Stage 6 on the dev evolution scale</li>
+            <li>Budget is constrained</li>
+            <li>You need polish and stability</li>
+            <li>You need predictable, controlled outcomes</li>
+            <li>You're not comfortable with chaos</li>
+            <li>The project is simple enough for Ralph loops</li>
+            <li>You haven't mastered Levels 0-6 on the complexity ladder</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Decision Matrix</h3>
+
+      <!-- FINDING 23: One concept per viewport — generous margins -->
+      <div class="decision-diagram viewport-moment">
+<pre><code>+----------------------------------------------------------------+
+|                    WHICH ORCHESTRATOR?                          |
++----------------------------------------------------------------+
+|                                                                 |
+|  START HERE                                                     |
+|      |                                                          |
+|      v                                                          |
+|  Are you Stage 7+? --No--> Use Ralph Wiggum or CC Mirror       |
+|      |                                                          |
+|     Yes                                                         |
+|      |                                                          |
+|      v                                                          |
+|  Is cost a concern? --Yes--> Use CC Mirror + Parallel Ralph    |
+|      |                                                          |
+|      No                                                         |
+|      |                                                          |
+|      v                                                          |
+|  Need 24/7 autonomous? --Yes--> Consider Infinite Orchestra    |
+|      |                                                          |
+|      No                                                         |
+|      |                                                          |
+|      v                                                          |
+|  Want maximum throughput + control?                             |
+|      |                                                          |
+|     Yes                                                         |
+|      |                                                          |
+|      v                                                          |
+|  +---------------------+                                        |
+|  |     GAS TOWN        |                                        |
+|  +---------------------+                                        |
+|                                                                 |
++----------------------------------------------------------------+</code></pre>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 11. QUOTES AND KEY STATEMENTS -->
+    <div class="content-block">
+      <div class="section-indicator">Section 11 — Voice</div>
+      <h2>Quotes and Key Statements</h2>
+
+      <!-- PACKAGE S2-M06: PULSE — sparse voice alternates with dense context -->
+      <!-- FINDING 24: Contrast creates harmony — serif italic voice + mono precision -->
+      <div class="quote-item">
+        <div class="quote-item__voice">"Claude Code is the world's biggest fuckin' ant. Everyone is focused on making their ant run longer... when nature prefers colonies."</div>
+        <div class="quote-item__context">On the Core Philosophy</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"Gas Town is an Idea Compiler. You just make up features, design them, file the implementation plans, and sling work around to your polecats and crew."</div>
+        <div class="quote-item__context">On the Core Philosophy</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"Work becomes fluid, an uncountable that you sling around freely, like slopping shiny fish into wooden barrels at the docks."</div>
+        <div class="quote-item__context">On the Core Philosophy</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"Some bugs fixed 2-3 times. Some fixes get lost. Focus: THROUGHPUT, not perfection."</div>
+        <div class="quote-item__context">On Expectations</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"You're not a programmer anymore. You're the head chef of a kitchen with AI robotic sous chefs."</div>
+        <div class="quote-item__context">On Expectations</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"If you're not at Stage 7, you'll get your face ripped off by superintelligent chimpanzees."</div>
+        <div class="quote-item__context">On Prerequisites</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"If you have any doubt whatsoever, then you can't use it."</div>
+        <div class="quote-item__context">On Prerequisites</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"Code is 3 weeks old — smuggled 400 miles upriver in my ass."</div>
+        <div class="quote-item__context">On Maturity</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"100% vibe-coded — I have never looked at the code myself."</div>
+        <div class="quote-item__context">On Maturity</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"If you care about costs, don't use this."</div>
+        <div class="quote-item__context">On Cost</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"Expensive as hell — multiple Claude accounts needed."</div>
+        <div class="quote-item__context">On Cost</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"Go is just... good. It's boring. You can always understand it!"</div>
+        <div class="quote-item__context">On Language Choice</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"TypeScript: 1/3 to 1/2 of diffs are type wrestling."</div>
+        <div class="quote-item__context">On Language Choice</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"That's you, Human. As the Overseer, you have an identity in the system, and your own inbox, and you can send and receive town mail."</div>
+        <div class="quote-item__context">On Agents</div>
+      </div>
+
+      <div class="quote-item">
+        <div class="quote-item__voice">"Build a colony of coding agents, not the world's largest ant."</div>
+        <div class="quote-item__context">On Agents</div>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 12. COMPARISON WITH OTHER PATTERNS -->
+    <div class="content-block">
+      <div class="section-indicator">Section 12 — Comparison</div>
+      <h2>Comparison with Other Patterns</h2>
+
+      <div class="comparison-block">
+        <h3>Gas Town vs Ralph Wiggum</h3>
+        <table>
+          <thead>
+            <tr><th>Aspect</th><th>Ralph Wiggum</th><th>Gas Town</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Model</strong></td><td>Single agent, retry loop</td><td>Multi-agent factory</td></tr>
+            <tr><td><strong>Complexity</strong></td><td>Bash script</td><td>Full system</td></tr>
+            <tr><td><strong>Persistence</strong></td><td>Via git/progress.txt</td><td>Beads data plane</td></tr>
+            <tr><td><strong>Parallelism</strong></td><td>None (sequential)</td><td>Native (many agents)</td></tr>
+            <tr><td><strong>Roles</strong></td><td>None</td><td>8 specialized roles</td></tr>
+            <tr><td><strong>Setup</strong></td><td>Minutes</td><td>Hours/days</td></tr>
+            <tr><td><strong>Cost</strong></td><td>Single agent</td><td>Multiple accounts</td></tr>
+            <tr><td><strong>Use Case</strong></td><td>Well-defined features</td><td>Complex systems, ongoing dev</td></tr>
+          </tbody>
+        </table>
+        <p><strong>When to use Ralph:</strong> Single feature, clear completion criteria, budget-conscious</p>
+        <p><strong>When to use Gas Town:</strong> Building entire products, team-scale output needed</p>
+      </div>
+
+      <div class="comparison-block">
+        <h3>Gas Town vs CC Mirror</h3>
+        <table>
+          <thead>
+            <tr><th>Aspect</th><th>CC Mirror</th><th>Gas Town</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Model</strong></td><td>Task-based DAG</td><td>Agent factory</td></tr>
+            <tr><td><strong>Complexity</strong></td><td>Medium</td><td>High</td></tr>
+            <tr><td><strong>Setup</strong></td><td>npx command</td><td>Go install + config</td></tr>
+            <tr><td><strong>Dependencies</strong></td><td>TaskCreate/BlockedBy</td><td>Beads + Agent Mail</td></tr>
+            <tr><td><strong>Parallelism</strong></td><td>Auto-scheduled</td><td>Explicit workers</td></tr>
+            <tr><td><strong>Roles</strong></td><td>None (generic agents)</td><td>8 specialized</td></tr>
+            <tr><td><strong>Persistence</strong></td><td>Built-in tasks</td><td>Git via Beads</td></tr>
+            <tr><td><strong>Cost</strong></td><td>Single variant</td><td>Multiple accounts</td></tr>
+          </tbody>
+        </table>
+
+        <!-- PASS 3 FIX: Removed conflicting double callout class (was --info + --essence) -->
+        <div class="callout callout--essence">
+          <div class="callout__label">nummanali's take</div>
+          <div class="callout__body">"Simplicity covers 80% with zero effort — mass-market ease. Gas Town for remaining 20%."</div>
+        </div>
+
+        <p><strong>When to use CC Mirror:</strong> Most projects, getting started with multi-agent</p>
+        <p><strong>When to use Gas Town:</strong> Stage 7+ scale, maximum throughput</p>
+      </div>
+
+      <div class="comparison-block">
+        <h3>Gas Town vs Infinite Orchestra</h3>
+        <table>
+          <thead>
+            <tr><th>Aspect</th><th>Orchestra</th><th>Gas Town</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Model</strong></td><td>Self-improving</td><td>Production factory</td></tr>
+            <tr><td><strong>Environment</strong></td><td>Docker container</td><td>tmux + local</td></tr>
+            <tr><td><strong>Autonomy</strong></td><td>High (improves itself)</td><td>Human-directed</td></tr>
+            <tr><td><strong>Parallelism</strong></td><td>Sequential (for now)</td><td>Native parallel</td></tr>
+            <tr><td><strong>Roles</strong></td><td>Profiles (coder, arch)</td><td>8 fixed roles</td></tr>
+            <tr><td><strong>Persistence</strong></td><td>Neo4j optional</td><td>Beads</td></tr>
+            <tr><td><strong>24/7</strong></td><td>Yes (designed for)</td><td>Yes (tmux)</td></tr>
+          </tbody>
+        </table>
+        <p><strong>When to use Orchestra:</strong> Experimental, self-evolving systems</p>
+        <p><strong>When to use Gas Town:</strong> Production development, human oversight</p>
+      </div>
+
+      <h3>Pattern Comparison Summary</h3>
+
+      <!-- TC Brief Creative Waypoint 4: Orchestrator spectrum -->
+      <!-- FINDING 23: One concept per viewport — generous margins -->
+      <div class="decision-diagram viewport-moment">
+<pre><code>+-----------------------------------------------------------------+
+|                    ORCHESTRATOR SPECTRUM                          |
++-----------------------------------------------------------------+
+|                                                                  |
+|  SIMPLE <------------------------------------------> COMPLEX    |
+|                                                                  |
+|  [Ralph Wiggum]    [CC Mirror]    [Orchestra]    [Gas Town]     |
+|       |                |              |              |           |
+|   Single agent     Multi-agent    Self-improving  Agent factory  |
+|   Retry loop       Task-based     Docker-based    Role-based    |
+|   Bash script      Native CC      Specialized     Full system   |
+|   $10-30/day       $30-80/day     $50-100/day    $50-200/day    |
+|                                                                  |
++-----------------------------------------------------------------+</code></pre>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- 13. SOURCES -->
+    <div class="content-block">
+      <div class="section-indicator">Section 13 — Sources</div>
+      <h2>Sources</h2>
+
+      <h3>Primary Sources</h3>
+
+      <h4>Blog Posts</h4>
+      <ul>
+        <li><a href="https://steve-yegge.medium.com/welcome-to-gas-town-4f25ee16dd04">Welcome to Gas Town</a> — Full philosophical context and architecture</li>
+        <li><a href="https://steve-yegge.medium.com/the-future-of-coding-agents-e9451a84207c">The Future of Coding Agents</a> — Agent evolution thesis</li>
+        <li><a href="https://steve-yegge.medium.com/beads-best-practices-2db636b9760c">Beads Best Practices</a> — Memory system deep dive</li>
+        <li><a href="https://sourcegraph.com/blog/revenge-of-the-junior-developer">Revenge of the Junior Developer</a> — Wave framework</li>
+        <li><a href="https://sourcegraph.com/blog/the-brute-squad">The Brute Squad</a> — Multi-agent philosophy</li>
+      </ul>
+
+      <h4>GitHub Repositories</h4>
+      <ul>
+        <li><a href="https://github.com/steveyegge/gastown">steveyegge/gastown</a> — Multi-agent workspace manager</li>
+        <li><a href="https://github.com/steveyegge/beads">steveyegge/beads</a> — Agent memory system (~225K lines Go)</li>
+        <li><a href="https://github.com/steveyegge/mcp_agent_mail">steveyegge/mcp_agent_mail</a> — Inter-agent communication</li>
+        <li><a href="https://github.com/steveyegge/vc">steveyegge/vc</a> — AI-orchestrated coding agent colony</li>
+        <li><a href="https://github.com/steveyegge/efrit">steveyegge/efrit</a> — Native elisp coding agent for Emacs</li>
+      </ul>
+
+      <h4>Podcasts &amp; Interviews</h4>
+      <ul>
+        <li><a href="https://changelog.com/friends/96">Changelog: Adventures in Babysitting Coding Agents</a></li>
+        <li><a href="https://www.oreilly.com/radar/podcast/generative-ai-in-the-real-world-vibe-coding-with-steve-yegge/">O'Reilly: Vibe Coding with Steve Yegge</a></li>
+      </ul>
+
+      <h4>Twitter/X</h4>
+      <ul>
+        <li><a href="https://x.com/steve_yegge">@steve_yegge</a> — Announcements and discussions</li>
+      </ul>
+
+      <h3>Community Extensions</h3>
+
+      <table>
+        <thead>
+          <tr><th>Extension</th><th>Author</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>GTGUI</strong></td><td>@TRIBE-INC</td><td>Age of Empires style GUI for Gas Town</td></tr>
+          <tr><td><strong>Roughneck</strong></td><td>@mjtechguy</td><td>Run multiple Gas Towns simultaneously</td></tr>
+          <tr><td><strong>Station</strong></td><td>@Esteban_Puerta9</td><td>Nats-based alternative architecture</td></tr>
+          <tr><td><strong>numman-ali Tutorial Skill</strong></td><td>@nummanali</td><td>Claude Code skill for learning Gas Town</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Installation</h3>
+
+<pre class="code-minor"><code># GTGUI
+git clone https://github.com/TRIBE-INC/gtgui
+
+# Roughneck
+git clone https://github.com/mjtechguy/roughneck
+
+# Tutorial skill
+/plugin marketplace add numman-ali/n-skills
+/plugin install gastown@numman-ali/n-skills</code></pre>
+
+      <h3>Books</h3>
+      <ul>
+        <li><a href="https://itrevolution.com">Vibe Coding</a> by Steve Yegge and Gene Kim</li>
+      </ul>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- APPENDIX: QUICK REFERENCE -->
+    <div class="content-block">
+      <div class="section-indicator">Appendix — Quick Reference</div>
+      <h2>Quick Reference</h2>
+
+      <h3>Installation Commands</h3>
+<pre class="code-minor"><code># Install
+go install github.com/steveyegge/gastown/cmd/gt@latest
+
+# Initialize
+gt init
+gt rig add /path/to/repo</code></pre>
+
+      <h3>Role Management</h3>
+<pre class="code-minor"><code># Town-level
+gt mayor up|down|status
+gt deacon up|down|status
+gt dogs up|down|status|bark
+
+# Rig-level
+gt witness up|down &lt;rig&gt;
+gt refinery up|down &lt;rig&gt;
+gt polecat up|down|list &lt;rig&gt; [name]
+gt crew spawn|count|purge &lt;rig&gt;</code></pre>
+
+      <h3>Inbox</h3>
+<pre class="code-minor"><code>gt inbox                     # View pending
+gt inbox respond &lt;id&gt; --approve|--reject
+gt inbox clear</code></pre>
+
+      <h3>Town Management</h3>
+<pre class="code-minor"><code>gt status                    # Town-wide status
+gt town down                 # Stop all agents
+gt town reset --soft|--hard  # Reset state
+gt config set|get|list       # Configuration</code></pre>
+
+      <h3>Beads</h3>
+<pre class="code-minor"><code>gt beads sync --force
+gt beads reset
+bd ready
+bd create "Task title"
+bd dep add &lt;child&gt; &lt;parent&gt;</code></pre>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- COST ESTIMATION -->
+    <div class="content-block">
+      <div class="section-indicator">Appendix — Cost</div>
+      <h2>Cost Estimation</h2>
+
+<pre class="code-minor"><code>Role-based cost per hour (estimates):
+------------------------------------
+Mayor (Opus):      $15-20/hour
+Refinery (Opus):   $15-20/hour
+Dogs (Sonnet):     $5-8/hour
+Polecats (Sonnet): $5-10/hour each
+Witness (Haiku):   $1-3/hour
+Deacon (Haiku):    $1-2/hour
+Crew (Haiku):      $0.50-2/hour each
+
+Example daily cost:
+-------------------
+1 Mayor + 1 Deacon + 1 Dogs + 2 Rigs + 3 Polecats + 5 Crew
+= $18 + $1.5 + $7 + $40 + $22.5 + $5
+= ~$94/hour (rough estimate)
+
+8 hours = ~$752/day (heavy usage)
+Conservative usage = $50-100/day</code></pre>
+    </div>
+
+  </div>
+</section>
+</main>
+
+
+<!-- ============================================================
+     FOOTER — Mirrors header: dark bg, 3px red border-top
+     SOURCE: Soul checklist — footer present with 3px border
+     ============================================================ -->
+<footer class="tower-footer" role="contentinfo">
+  <div class="tower-footer__inner">
+    <div class="tower-footer__section">
+      <div class="tower-footer__label">Source</div>
+      <p>Extracted from Steve Yegge's Gas Town documentation, blog posts, and public discussions.</p>
+    </div>
+    <div class="tower-footer__section">
+      <div class="tower-footer__label">Primary Links</div>
+      <p>
+        <a href="https://github.com/steveyegge/gastown">GitHub: gastown</a> ·
+        <a href="https://github.com/steveyegge/beads">GitHub: beads</a> ·
+        <a href="https://steve-yegge.medium.com/welcome-to-gas-town-4f25ee16dd04">Blog: Welcome to Gas Town</a>
+      </p>
+    </div>
+    <div class="tower-footer__section">
+      <div class="tower-footer__label">Metadata</div>
+      <p>Created: 2026-01-10 · Last enhanced: 2026-01-18 · Depth: Architecture-level extraction</p>
+    </div>
+    <div class="tower-footer__section">
+      <!-- PASS 3 FIX: Converted inline style to .footer-quote class (Pass 2 concern #4) -->
+      <p class="footer-quote">"Build a colony of coding agents, not the world's largest ant."</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

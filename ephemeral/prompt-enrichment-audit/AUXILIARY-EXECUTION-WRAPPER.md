@@ -260,7 +260,7 @@ I: PA-45,46,47,48,52,53        (Coherence + Void Assessment)
 - Cold look consensus: what do >= 5/9 auditors notice independently?
 - PA-05 composite score: average of all 9 auditors' PA-05 assessments
   - 4/4 = DESIGNED. 3/4 = ACCEPTABLE. 2/4 = SIGNIFICANT ISSUES. 1/4 = DO NOT SHIP.
-  - Calibration: Middle = 4/4, Ceiling = 1.5/4, CD-006 = 4/4, DD-006 = 4/4
+  - Calibration: Middle = 4/4, Ceiling = 1.5/4, CD-006 = ~3/4 COMPOSED (39/40 soul, CEILING tier), DD-006 = 4/4
 - Ship decision: PA-05 >= 3/4 = SHIP. PA-05 < 3/4 = DO NOT SHIP.
 
 **Programmatic audit (run in parallel with PA auditors):**

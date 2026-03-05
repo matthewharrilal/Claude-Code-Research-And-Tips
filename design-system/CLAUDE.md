@@ -19,13 +19,14 @@ THIS FILE IS AUTO-LOADED ON DIRECTORY ENTRY
 ## QUICK START — What Are You Here To Do?
 
 ### I'm here to BUILD content/pages
-**→ Run:** `/build-page <content-file-path>` (the ONLY way to build pages)
-**→ What it does:** Invokes the /build-page orchestrator, which handles content analysis, TC pipeline, builder deployment, gate verification, and PA audit automatically
-**→ Manual fallback:** `compositional-core/README.md` (if /build-page is unavailable)
-**→ ALWAYS loaded automatically:** `compositional-core/identity/prohibitions.md` + `compositional-core/vocabulary/tokens.css`
+**→ Run:** `/compose <content-file-path>` (the PRIMARY way to build pages)
+**→ What it does:** /compose orchestrates three phases — DERIVE (tension-composition), BUILD (Opus builder), EVALUATE (perceptual audit) — with fix cycles. Agents are Opus, context-isolated. Output is a self-contained HTML file + PA audit report.
+**→ Skill file:** `~/.claude/skills/compose/SKILL.md` (199 lines)
+**→ ALWAYS loaded automatically:** `compositional-core/identity/identity.md` + `compositional-core/identity/vocabulary.md` + `compositional-core/vocabulary/tokens.css` + `compositional-core/components/components.css`
+**→ Legacy:** `/build-page` (v3.1 pipeline via MANIFEST.md) is archived. Use `/compose` for all new builds.
 
 ### I'm here to VALIDATE/AUDIT
-**→ Start:** `compositional-core/identity/prohibitions.md` (soul constraints)
+**→ Start:** `compositional-core/identity/identity.md` (soul principles + refusals)
 **→ Then:** `compositional-core/validation/` (quantitative rules + anti-gravity report)
 
 ### I'm here to UNDERSTAND the philosophy
@@ -71,7 +72,7 @@ THIS FILE IS AUTO-LOADED ON DIRECTORY ENTRY
 ### Spacing Scale (4px base unit)
 - space-2 (8px), space-4 (16px), space-6 (24px), space-8 (32px), space-12 (48px), space-16 (64px)
 
-**Source of truth:** `compositional-core/identity/prohibitions.md` (22 prohibitions, 8 absolute + 12 conditional + 2 meta)
+**Source of truth:** `compositional-core/identity/identity.md` (soul principles, identity signatures, refusals, diagnostics)
 
 **Verification:** Read fresh from file (not memory) — values can change (rarely).
 
@@ -81,18 +82,18 @@ THIS FILE IS AUTO-LOADED ON DIRECTORY ENTRY
 
 ### compositional-core/ (NEW — Phase C Extraction, Feb 2026)
 **Status:** ACTIVE — operational layer
-**Files:** 43 files, 880KB, 20,576 lines
+**Files:** ~40 files (operational), ~980KB
 **Purpose:** Minimal operational vocabulary for building KortAI pages (40 items)
 
-**6-Layer Ontology:**
+**7-File Vocabulary (Step 2 rewrite, 2026-03-01):**
 ```
 compositional-core/
-├── identity/          [Layer 1] 20 prohibitions + 3 soul constraints (ABSOLUTE vs CONDITIONAL)
-├── vocabulary/        [Layer 2] tokens.css (:root block) + mutability classification
-├── grammar/           [Layer 3] 18 mechanisms + 11 compositional rules + border system
-├── components/        [Layer 4] components.css (31KB) + inventory with confidence
-├── case-studies/      [Layer 5] 9 case studies (anti-prescription format) — NOT TEMPLATES
-└── guidelines/        [Layer 6] 7+ semantic gap rules + responsive strategy + usage criteria
+├── identity/          identity.md (character + soul + refusals) + vocabulary.md (design decisions)
+├── vocabulary/        tokens.css (65 CSS tokens, :root block)
+├── grammar/           mechanisms.md (20 mechanisms) + grammar.md (compositional rules + sequencing)
+├── components/        components.css (CSS implementations) + components.md (inventory)
+├── case-studies/      9 case studies (anti-prescription format) — NOT TEMPLATES
+└── guidelines/        7+ semantic gap rules + responsive strategy + usage criteria
 ```
 
 **When to use:** Building new pages (Track 1 assembly OR Track 2 composition)
@@ -239,7 +240,7 @@ validated-explorations/
 
 **Phase D Results:**
 - Variant B (weak permission) scored 18/19 compliance, 4/5 novelty — best variant
-- Container width was THE primary failure mode (4/5 pages violated 940px)
+- Container width was a primary failure mode (explorations use 860-1100px range)
 - Prose-only content limited component testing to 22-44% (vs 67% target)
 - "Always-load" protocol failure caused Track 1's instant fail (5 critical violations)
 - "Weak permission" framing had ZERO behavioral effect on library utilization
@@ -320,42 +321,38 @@ validated-explorations/
 ## SKILLS — When to Invoke
 ═══════════════════════════════════════════════════════════════════════════════
 
-### /build-page (PRIMARY -- All Page Building)
+### /compose (PRIMARY -- All Page Building)
 
-**Trigger:** "Build a page from [content]" or any page-building request
+**Trigger:** "Build a page", "compose", "design this content", "turn this into a designed page"
 
 **Invocation:**
 ```
-/build-page <content-file-path>
+/compose <content-file-path>
 ```
 
-**What it orchestrates:** TC skill invocation (Phases 0-4, separate Opus agent) -> Opus builder deployment with TC brief -> 22-gate programmatic verification -> Mode 4 PA (9 auditors + 9 Tier 5 questions) -> fix cycles -> verdict
+**Architecture:** Three-phase pipeline — DERIVE (TC) → BUILD (Opus builder) → EVALUATE (PA) — with fix cycles. All agents are Opus. Context-isolated (TC doesn't see components, builder doesn't see PA questions, PA doesn't see the brief).
 
-**Success bar:** PA-05 >= 3.5 AND Tier 5 >= 7/9 AND zero soul violations
+**Skill file:** `~/.claude/skills/compose/SKILL.md` (~199 lines)
 
-**Sub-skills invoked automatically:**
-- Tension-composition (TC): Phases 0-4 (content assessment through mechanism selection), separate Opus agent, outputs ~50-line TC brief
-- Perceptual-auditing (PA): Full 65 questions (54 standard + 2 sub-perceptual + 9 Tier 5 PA-60 through PA-68), invoked after build
+**Success bar:** PA fresh-eyes verdict SHIP, zero soul violations
 
 **NOT invoked for:** Research, auditing existing pages, planning
 
 ---
 
-### Tension-Composition (Sub-Skill -- Invoked by /build-page)
+### /build-page (ARCHIVED -- Legacy Pipeline v3.1)
 
-**Direct invocation:** Only if /build-page is unavailable
-**Skill file:** `~/.claude/skills/tension-composition/SKILL.md`
-**Phase-gated access:** Library prohibition until Phase 5
-**ALWAYS FLAGSHIP:** No tier routing. TC runs Phases 0-4 (sub-skill mode), builder handles layout.
+**Status:** ARCHIVED. Use `/compose` instead for all new builds.
+
+**Legacy files:** `ephemeral/va-extraction/MANIFEST.md` + 9 artifacts + gate runner split + PA protocol split. Kept for reference only.
 
 ---
 
-### Perceptual-Auditing (Sub-Skill -- Invoked by /build-page)
+### Perceptual-Auditing (Standalone Skill -- For Auditing EXISTING Pages)
 
-**Direct invocation:** Only for auditing EXISTING pages (not builds)
+**Direct invocation:** Only for auditing EXISTING pages (not builds -- /compose handles PA internally)
 **Skill file:** `~/.claude/skills/perceptual-auditing/SKILL.md`
-**Full 65-question audit required** -- 54 standard + 2 sub-perceptual (PA-55, PA-56) + 9 Tier 5 (PA-60 through PA-68)
-**Passing criteria:** PA-05 >= 3.5, Tier 5 >= 7/9, zero soul violations, zero void patterns
+**Passing criteria:** Fresh-eyes verdict SHIP, zero soul violations, zero void patterns
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## INGESTION PROTOCOL — What to Load
@@ -365,20 +362,25 @@ validated-explorations/
 
 **Mandatory read at session start:**
 
-1. **`compositional-core/identity/prohibitions.md`** (353 lines)
-   - 8 absolute prohibitions (NEVER, zero exceptions)
-   - 12 conditional prohibitions (documented exceptions)
-   - 2 meta-prohibitions (process-level)
-   - Soul constraints: border-radius: 0, box-shadow: none, palette
+1. **`compositional-core/identity/identity.md`** (87 lines)
+   - Character statement, soul principles (angular geometry, no shadows)
+   - Identity signatures (warm palette, typography trinity, 4px left-border)
+   - Internal tensions, refusals (absolute + conditional), diagnostics
 
-2. **`compositional-core/vocabulary/tokens.css`** (174 lines)
-   - 65 tokens (21 immutable, 14 mutable, 30 available)
-   - Color palette (8 values)
-   - Typography trinity (3 fonts)
-   - Spacing scale (6 anchors, 14 increments)
-   - Border weights (4px/3px/1px)
+2. **`compositional-core/identity/vocabulary.md`** (55 lines)
+   - Design decisions & rationale (palette, typography, spacing, borders, container width)
+   - WHY the system makes each choice — the reasoning layer
 
-**Total mandatory overhead: 527 lines (2 files)**
+3. **`compositional-core/vocabulary/tokens.css`** (124 lines)
+   - 65 CSS tokens in :root block
+   - Color palette (8 values), typography trinity (3 fonts)
+   - Spacing scale (4px base), border weights (4px/3px/1px)
+
+4. **`compositional-core/components/components.css`** (779 lines)
+   - CSS implementations for all components
+   - Callout system, code blocks, tables, header/footer, bento grid
+
+**Total mandatory overhead: ~1,045 lines (4 files)**
 
 **Read fresh** (not from memory) — token values and prohibitions can change
 
@@ -389,7 +391,7 @@ validated-explorations/
 **Builder agents (invoked by /build-page orchestrator):**
 
 The /build-page orchestrator handles all builder loading automatically. Builders receive:
-1. prohibitions.md + tokens.css (pre-loaded by orchestrator)
+1. identity.md + vocabulary.md + tokens.css + components.css (pre-loaded by orchestrator)
 2. Conventions brief with content analysis + metaphor + mechanism selections (from TC pipeline)
 3. Operational recipe with specific CSS values + sequenced build steps
 4. Gate runner for micro-gate verification during build
@@ -397,10 +399,10 @@ The /build-page orchestrator handles all builder loading automatically. Builders
 Phase-gated access is enforced by the orchestrator:
 - Phases 0-3: TC runs BLIND (no library access)
 - Phase 3.5: Metaphor lock (GATE -- no changes after)
-- Phase 4: Mechanisms extracted (grammar/mechanism-catalog.md)
+- Phase 4: Mechanisms extracted (grammar/mechanisms.md + grammar/grammar.md)
 - Phase 5: Optional case study comparison (divergence check)
 - Phase 6: Opus builder implements with TC brief + conventions brief
-- Phase 7: Full verification (22 gates + 65-question PA)
+- Phase 7: Full verification (gates + PA)
 
 **Manual builder invocation (if /build-page unavailable):**
 - Follow compositional-core/CLAUDE.md Flagship Build Workflow
@@ -411,12 +413,12 @@ Phase-gated access is enforced by the orchestrator:
 **Auditor agents:**
 
 Mandatory read:
-- ✅ prohibitions.md + tokens.css (already loaded)
-- `compositional-core/grammar/mechanism-catalog.md` (full file)
+- ✅ identity.md + vocabulary.md + tokens.css + components.css (already loaded)
+- `compositional-core/grammar/mechanisms.md` + `compositional-core/grammar/grammar.md`
 - `compositional-core/case-studies/*.md` (quality comparison)
 
 Optional read:
-- `compositional-core/components/component-inventory.md` (confidence levels)
+- `compositional-core/components/components.md` (inventory with velocity/weight)
 - `compositional-core/validation/anti-gravity-compliance.md`
 - `compositional-core/guidelines/semantic-rules.md`
 
@@ -430,7 +432,7 @@ Mandatory read (context-first order):
 - `compositional-core/process/lens-manifesto.md` (WHY extraction choices)
 - `compositional-core/process/construction-narrative.md` (HOW extraction built)
 - `compositional-core/validation/anti-gravity-compliance.md`
-- ✅ prohibitions.md + tokens.css (already loaded)
+- ✅ identity.md + vocabulary.md + tokens.css + components.css (already loaded)
 
 Conditional read:
 - ALL research files (R1-R5, RESEARCH-SYNTHESIS.md)
@@ -443,14 +445,14 @@ Conditional read:
 **Planner agents:**
 
 Mandatory read:
-- ✅ prohibitions.md + tokens.css (already loaded)
+- ✅ identity.md + vocabulary.md + tokens.css + components.css (already loaded)
 - `compositional-core/guidelines/usage-criteria.md`
 - `compositional-core/validation/gap-check.md` (coverage gaps)
 
 Conditional read:
 - `research/RESEARCH-SYNTHESIS.md`
 - `compositional-core/case-studies/_INDEX.md`
-- `compositional-core/components/component-inventory.md`
+- `compositional-core/components/components.md`
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## ROUTING LOGIC — Task-to-Folder Decision Tree
@@ -458,7 +460,7 @@ Conditional read:
 
 ### Q1: Build or Understand?
 
-- **Build a page** → `/build-page <content-path>` (ALWAYS use this)
+- **Build a page** → `/compose <content-path>` (ALWAYS use this)
 - **Understand the system** → specification/ + research/
 - **Audit an existing page** → Invoke perceptual-auditing skill directly
 
@@ -471,10 +473,10 @@ Conditional read:
 
 ### Q3: What's my first file to read?
 
-- **Building** → Just run `/build-page`. It handles everything.
+- **Building** → Just run `/compose`. It handles everything.
 - **Philosophy/orientation** → README.md (THE KORTAI DESIGN MIND)
 - **Abstract specification** → specification/BACKBONE.md (master narrative)
-- **Soul compliance** → compositional-core/identity/prohibitions.md
+- **Soul compliance** → compositional-core/identity/identity.md
 - **Research grounding** → research/RESEARCH-SYNTHESIS.md
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -485,7 +487,7 @@ Conditional read:
 
 **Problem:** Reading specification/tokens/ (abstract, multi-file, 617 lines) when building
 
-**Correct:** Read compositional-core/vocabulary/tokens.css (operational, single-file, 174 lines)
+**Correct:** Read compositional-core/vocabulary/tokens.css (operational, single-file, 124 lines)
 
 **Rule:** specification/ for UNDERSTANDING, compositional-core/ for BUILDING
 
@@ -521,13 +523,13 @@ Conditional read:
 
 ---
 
-### 5. Not reading prohibitions.md before building
+### 5. Not reading identity.md before building
 
 **Problem:** Building with border-radius > 0, box-shadow, gradients
 
-**Correct:** compositional-core/identity/prohibitions.md is FIRST CONTACT layer (always-load)
+**Correct:** compositional-core/identity/identity.md is FIRST CONTACT layer (always-load)
 
-**Rule:** 8 absolute prohibitions have ZERO exceptions — violating = INVALID work
+**Rule:** Soul principles have ZERO exceptions — violating = INVALID work
 
 ---
 
@@ -541,13 +543,13 @@ Conditional read:
 
 ---
 
-### 7. Trying to build without /build-page
+### 7. Trying to build without /compose
 
 **Problem:** Manually invoking TC skill, manually assembling components, or building without the orchestrator
 
-**Correct:** Run `/build-page <content-path>`. The orchestrator handles TC pipeline, builder deployment, gate verification, and PA audit automatically.
+**Correct:** Run `/compose <content-path>`. The orchestrator handles TC derivation, builder deployment, and PA audit automatically.
 
-**Rule:** /build-page is the ONLY sanctioned way to build new pages. Manual building is a fallback for when /build-page is unavailable.
+**Rule:** /compose is the primary way to build new pages. Manual building is a fallback for when /compose is unavailable.
 
 ═══════════════════════════════════════════════════════════════════════════════
 ## DIRECTORY STRUCTURE (Accurate Tree)
@@ -555,11 +557,11 @@ Conditional read:
 
 ```
 design-system/
-├── compositional-core/      [43 files] Phase C extraction, 6-layer ontology
-│   ├── identity/            [Layer 1] 20 prohibitions + 3 soul constraints
-│   ├── vocabulary/          [Layer 2] tokens.css (:root block)
-│   ├── grammar/             [Layer 3] 18 mechanisms + 11 rules
-│   ├── components/          [Layer 4] merged CSS + inventory
+├── compositional-core/      [40 files] Phase C extraction, 6-layer ontology
+│   ├── identity/            [Layer 1] identity.md (character + soul + refusals) + vocabulary.md (design decisions)
+│   ├── vocabulary/          [Layer 2] tokens.css (65 CSS tokens, :root block)
+│   ├── grammar/             [Layer 3] mechanisms.md (20 mechanisms) + grammar.md (compositional rules)
+│   ├── components/          [Layer 4] components.css (CSS implementations) + components.md (inventory)
 │   ├── case-studies/        [Layer 5] 9 anti-prescription examples
 │   ├── guidelines/          [Layer 6] 7+ semantic gap rules
 │   ├── validation/          Anti-gravity audit, convergence, gap check
@@ -621,11 +623,14 @@ design-system/
 ## KEY FILE PATHS (Verified Correct)
 ═══════════════════════════════════════════════════════════════════════════════
 
-### Compositional-Core (6-Layer Ontology)
-- Layer 1 (Identity): `compositional-core/identity/prohibitions.md`
-- Layer 2 (Vocabulary): `compositional-core/vocabulary/tokens.css`
-- Layer 3 (Grammar): `compositional-core/grammar/mechanism-catalog.md`
-- Layer 4 (Components): `compositional-core/components/components.css`
+### Compositional-Core (7-File Vocabulary + Supporting Layers)
+- Layer 1a (Identity): `compositional-core/identity/identity.md` (87 lines — character, soul, refusals)
+- Layer 1b (Rationale): `compositional-core/identity/vocabulary.md` (55 lines — design decisions)
+- Layer 2 (Tokens): `compositional-core/vocabulary/tokens.css` (124 lines — CSS custom properties)
+- Layer 3a (Mechanisms): `compositional-core/grammar/mechanisms.md` (88 lines — 20 mechanisms)
+- Layer 3b (Grammar): `compositional-core/grammar/grammar.md` (149 lines — compositional rules)
+- Layer 4a (CSS): `compositional-core/components/components.css` (779 lines — implementations)
+- Layer 4b (Inventory): `compositional-core/components/components.md` (37 lines — catalog)
 - Layer 5 (Case Studies): `compositional-core/case-studies/_INDEX.md`
 - Layer 6 (Guidelines): `compositional-core/guidelines/semantic-rules.md`
 
@@ -635,7 +640,7 @@ design-system/
 - `specification/tokens/spacing.md` (155 lines)
 - `specification/tokens/geometry.md` (163 lines)
 
-**Relationship:** compositional-core/vocabulary/tokens.css is EXTRACTED from these files (174 lines subset of 617 lines). For BUILDING use tokens.css. For RESEARCH/RATIONALE use specification/tokens/.
+**Relationship:** compositional-core/vocabulary/tokens.css is EXTRACTED from these files (124 lines subset of 617 lines). For BUILDING use tokens.css. For RESEARCH/RATIONALE use specification/tokens/.
 
 ### Research (337 Findings)
 - `research/RESEARCH-SYNTHESIS.md` (cross-research insights)
@@ -663,11 +668,13 @@ design-system/
 
 **After compaction, re-read this file:**
 
-1. Soul constraints are ALWAYS active (border-radius: 0, box-shadow: none, palette)
-2. compositional-core/identity/prohibitions.md is FIRST CONTACT layer (always-load)
-3. compositional-core/vocabulary/tokens.css is SECOND CONTACT layer (always-load)
-4. For building: compositional-core/README.md (phase-gated protocol)
-5. For research: specification/README.md (THE KORTAI DESIGN MIND)
+1. Soul principles are ALWAYS active (border-radius: 0, box-shadow: none, palette)
+2. compositional-core/identity/identity.md is FIRST CONTACT layer (always-load)
+3. compositional-core/identity/vocabulary.md is SECOND CONTACT layer (always-load)
+4. compositional-core/vocabulary/tokens.css is THIRD CONTACT layer (always-load)
+5. compositional-core/components/components.css is FOURTH CONTACT layer (always-load)
+6. For building: compositional-core/README.md (phase-gated protocol)
+7. For research: specification/README.md (THE KORTAI DESIGN MIND)
 
 **Resume with ingestion protocol for your task type** (see "INGESTION PROTOCOL" section above)
 

@@ -142,7 +142,7 @@ The builder may override any non-soul value with logged reasoning. May introduce
 
 | Experiment | Builder Input | PA-05 Score |
 |---|---|---|
-| CD-006 | ~50 lines | 39/40 (~4/4) |
+| CD-006 | ~50 lines | ~3/4 COMPOSED (39/40 soul score, CEILING tier) |
 | Middle | ~100 lines | 4/4 DESIGNED |
 | Remediation | ~300 lines | 2.5/4 COMPOSED |
 | Flagship | ~530 lines | 1.5/4 FLAT |

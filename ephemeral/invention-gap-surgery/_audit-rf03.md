@@ -1,0 +1,22 @@
+# RF-03: Compression Chain Forensics — Kill Point Fix Audit
+
+**Source:** `ephemeral/invention-gap-analysis/03-compression-chain-forensics.md` (457 lines)
+**Question:** Does EVERY kill point have a corresponding fix in the modified files?
+
+## Kill Point Matches
+
+**KP1 — TC Derivation Exemplars (forensic lines 73-75, 397-398):** The forensic found both example questions were texture-only, steering all future TC questions toward texture. **FIX CONFIRMED.** `tc-derivation.md` Section 7 ("Structural Observation") now requires content archetype identification from an archetype table (lines 93-107), an inherent spatial logic analysis, and a spatial proposition. Lines 83-88 add two explicit STRUCTURAL question exemplars ("What if the 8 roles were arranged in an authority-encoded grid...", "What if each section's spatial organization embodied its content type..."). The original texture exemplars remain (lines 80-81) but are now balanced by structural counterparts. The archetype table maps content signals to non-standard layouts (Parallel Items -> grid, Hierarchical Taxonomy -> tree/accordion, Branching Paths -> hub-spoke). This directly addresses the "exemplar steering" kill mechanism.
+
+**KP2 — Synthesizer's 5 KB Question Families (forensic lines 246-253, 400-401):** The forensic found all 5 KB families were texture-only, leaving structural questions as orphans. **FIX CONFIRMED.** `synthesizer-prompt.md` lines 261-269 add a new "STRUCTURAL Question Families (Category 3)" table with 5 families: Parallel Revelation, Reading Path Choice, Structural Self-Awareness, Content-Form Mirroring, Temporal Architecture. Lines 322-388 add Section 11 (Structural Propositions, 50-80 lines) with blueprint CSS, responsive degradation, and risk rating. The synthesizer now has both a categorization path for structural questions (the 5 structural families) and a delivery vehicle (Section 11 propositions). The quality floor (line 315) explicitly requires "0-1 structural" question, gated on TC Section 7 archetype.
+
+**KP3 — Builder's Invention Prohibition (forensic lines 362-363, 383-385, 403-404):** The forensic found "Do NOT invent mechanisms" + "HOW not WHETHER" killed structural invention. **FIX CONFIRMED.** `builder-pass-1-prompt.md` lines 399-409 now explicitly PERMIT structural invention under four conditions (content-logic-derived, proposed in Section 11, documented in decisions file, works at all breakpoints). Lines 68-81 add Section 11 evaluation instructions (ADOPT/MODIFY/REJECT). Lines 207-215 add a "Structural Path" build process. Line 431 rewrites the authority statement to split texture (HOW authority) from structure (WHETHER authority on Section 11 propositions). The original "Do NOT invent mechanisms" (line 401) is now scoped to "TEXTURE mechanisms" only. The dead zone between "structural plumbing" and "mechanism deployment" is closed — structural invention has an explicit pathway.
+
+**S3 — Specialist 3 "Most Critical Specialist Gap" (forensic lines 103-129):** The forensic found S3 extracted CSS techniques but never structural logic. **FIX CONFIRMED.** `specialist-3-prompt.md` Step 2.5 (lines 103-148) adds "Extract the STRUCTURAL LOGIC (Why This Spatial Form?)" with four sub-questions: content logic driving spatial form, spatial form chosen (grid/hub-spoke/split/nested/fractal/vertical), why that form works better than vertical, and trigger signals for future builds. An exemplar (OD-005 Hub-Spoke Territory Grid) demonstrates the expected output. The quality floor (line 329) now requires structural logic extraction for every HIGH-affinity case study.
+
+## Gaps
+
+**No unaddressed kill points.** All 3 primary kill points and the specialist gap have corresponding fixes with appropriate scope and specificity. The fixes form a coherent chain: TC generates structural observations (KP1 fix) -> S3 extracts structural logic from case studies (S3 fix) -> Synthesizer categorizes structural questions and assembles Section 11 propositions (KP2 fix) -> Builder evaluates and optionally adopts structural propositions (KP3 fix).
+
+## Impact
+
+The compression chain forensic identified a systemic property: "the pipeline's information architecture has no pathway for structural questions." The fixes create that pathway end-to-end. The chain is gated appropriately — structural questions are OPTIONAL (0-1 per build), gated on content archetype, and the builder retains REJECT authority. Linear narrative content correctly produces zero structural propositions.
