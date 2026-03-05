@@ -1192,3 +1192,522 @@ The "mechanism count is a natural landing zone, not a target" principle from mec
 **No CSS changes from this pass.** This was an audit pass. Changes will come from case study absorption in subsequent passes.
 
 **Staleness check:** "Is this because the page is genuinely close to done, or because I have stopped seeing?" -- The zero-change result is appropriate for an AUDIT pass. The purpose was to map what IS, not to change it. Changes will emerge from case study comparison. The dimension of quality I am focused on is MECHANISM DEPLOYMENT, which is new (not the same as density in Pass 2.3 or axis in Pass 2.4).
+
+### Pass 3.2 — DD-006 Fractal (Crown Jewel 1, 1st Read: EXTRACTION)
+
+**Reading DD-006 through the lens of: "What does DD-006's fractal process reveal about MY page's density patterns?"**
+
+**Framing context:** Read README.md and ANTI-PRESCRIPTION-TEMPLATE.md first. Jazz Real Book analogy internalized: extract MECHANISMS (transferable tools), not METAPHORS (specific implementations). My metaphor (panopticon/corridor width) is already committed and locked. DD-006 is being studied as PROCESS PROOF, not as a template.
+
+**DD-006's core insight:** Fractal self-similarity means THE SAME RHYTHM visible at EVERY ZOOM LEVEL. Not "nested" -- "self-similar." The distinction matters: nested = big contains small. Fractal = big AND small exhibit THE SAME PATTERN.
+
+**DD-006 4-scale assessment against my page:**
+
+| Scale | DD-006 Pattern | My Page's Pattern | Assessment |
+|-------|---------------|------------------|------------|
+| Page | Dense sections alternate with sparse | S-D-S-D-D-D-D-D-S-D-S-M-M-S-D-S-S | PARTIAL -- 940px run has 4 consecutive DENSE without SPARSE interruption |
+| Section | Dense paragraphs alternate with whitespace within sections | H2 → prose → grid → H3 → grid (Architecture zone) | YES -- heading/prose intersperse with grids |
+| Component | Dense label zone + sparse body zone | domain-path (13px mono) + domain-name (12px caps) + domain-desc (13px body) | YES -- 2-zone DNA present (sparse label + dense body) |
+| Character | Dense code alternates with sparse comments | `# Launch all domains` (comment) → DOMAINS= (code) → for...done | PARTIAL -- comments exist but are sparse (1 comment per 5 code lines) |
+
+**The fractal question that matters:** My page was identified as exhibiting fractal self-similarity in Pass 2.3. But DD-006 demands a stricter test: is the SAME rhythm at every scale, or just similar patterns at different scales?
+
+**My page's rhythm = CORRIDOR WIDTH (not dense/sparse).** The page doesn't use DD-006's fractal rhythm (dense/sparse alternation). It uses a DIFFERENT fractal principle: the corridor metaphor repeats at multiple scales:
+- Page scale: corridor widens/narrows (600→780→100vw→940→680→600)
+- Section scale: within 940px zones, content fills or constricts its container differently (full-width prose vs contained grids)
+- Component scale: within grid cells, content is bounded by 1px walls (micro-corridors)
+- Character scale: within code blocks, comments and code live in dark corridors of fixed width
+
+This IS fractal, but the repeating pattern is CONTAINMENT (corridors within corridors) not ALTERNATION (dense/sparse). DD-006 fractal = rhythmic alternation. My fractal = recursive containment. Both are valid fractal patterns; they are structurally different.
+
+**Divergence verification (DD-006 Section 6):**
+
+| Dimension | DD-006 Fractal | My Page | Convergence? |
+|-----------|---------------|---------|--------------|
+| Core Metaphor | Fractal self-similarity (natural world patterns) | Panopticon/corridor width (surveillance architecture) | DIFFERENT |
+| Spatial Encoding | Same rhythm at all scales (alternation) | Corridor containment at all scales (nesting) | DIFFERENT |
+| Primary Tension | Meta-content alignment (teaching fractal BY BEING fractal) | Seeing/blindness asymmetry (institutional sight vs individual blindness) | DIFFERENT |
+| Structural Pattern | 4 discrete scales with identical dense/sparse alternation | 5 corridor widths with content-derived proportions | DIFFERENT |
+| Visual Treatment | Spacing compression (80px → 4px) + background shading | Width variation (600→940) + dark/light inversion | DIFFERENT |
+
+**5/5 DIFFERENT. Full divergence confirmed.** No pattern-matching risk.
+
+**Reusable mechanisms I extract from DD-006:**
+
+1. **Dense/Sparse Alternation** -- already deployed (Pass 3.1 confirmed). But DD-006 reveals a gap: my 940px run has 4 consecutive DENSE sections without a SPARSE interruption. Grammar.md says "Maximum consecutive dense: 3." The 940px run (Architecture → Isolation → CLAUDE.md → Implementation → Correlation) is 5 zones, all dense. However -- these 5 zones are part of a single PHASE (the system architecture exposition). They share the same corridor width. Breaking them with a SPARSE zone would disrupt the phase unity. The density is content-appropriate, but I should ask in later passes whether a visual breather within the 940px run would help without breaking the phase.
+
+2. **Spacing Compression** -- already deployed. My page compresses spacing with confidence: the 940px zones use 0px inter-section padding (maximum compression = maximum certainty about the system). The narrow zones use 48-56px (more space = more room for doubt/reflection).
+
+3. **2-Zone Component DNA** -- already deployed in domain cells, principle cells, timeline items. DD-006 confirms this is perceptually effective at the component scale.
+
+4. **Background Progression** -- DD-006 uses light → dark progression. My page uses FLAT background (cream everywhere) with TWO exceptions: dark bedrock (violent gap, code blocks, file tree) and breathing warm (closing zone). This is NOT a progression -- it's a binary: light = normal, dark = rupture/code. The page has fewer background states than DD-006 recommends. This is intentional: the panopticon sees in TWO modes (watching / not watching), not in a spectrum.
+
+**One actionable observation from DD-006:**
+
+DD-006's visual companion shows a scale visualization at the top of the page -- a 4-column display showing the fractal pattern at each zoom level. My page has the page-map (corridor width diagram in the middle of the page) which serves a similar meta-observational function. But the page-map is positioned at approximately the 60% mark. DD-006 places its visualization EARLY (near the top), which teaches the reader the pattern before they experience it. My page-map is placed AFTER the reader has already experienced the corridor changes -- it's a retrospective revelation, not a prospective guide. This positioning is deliberate: the panopticon's insight is that you only SEE the pattern after you've been observed by it. You experience the corridor changes first, then the page-map reveals what happened to you. This mirrors Cantillon's "violent gap" -- the moment of seeing comes AFTER the blindness.
+
+**No CSS changes from this pass.** DD-006 confirms my page's existing mechanisms while revealing a structural divergence in fractal type (alternation vs containment). The 940px density run warrants monitoring but is currently content-appropriate.
+
+**Staleness check:** The dimension of quality is FRACTAL PATTERN TYPE, which is new. I discovered that my page uses containment-fractal rather than alternation-fractal, which I hadn't articulated before this pass. This is a genuine insight from DD-006 absorption, not a restatement of previous findings.
+
+### Pass 3.3 — DD-003 Islands (Crown Jewel 2, 1st Read: EXTRACTION)
+
+**Reading DD-003 through the lens of: "My content has 8 parallel domains demanding simultaneous visibility. What does DD-003's island pattern reveal about how isolated content clusters work spatially?"**
+
+**DD-003's core insight:** High-density clusters surrounded by calm whitespace (sparse ocean) allow readers to navigate NON-LINEARLY. Islands float independently. No prescribed reading order. Each is self-contained.
+
+**Why DD-003 is relevant:** Cantillon's 8 domains (~/nox, ~/metrics, ~/email, ~/growth, ~/trades, ~/health, ~/writing, ~/personal) ARE islands. Each is self-contained. Each operates independently. The taxonomy exists because the domains DON'T bleed into each other.
+
+**But my page handles this DIFFERENTLY than DD-003:**
+
+DD-003 places each island in its own section, separated by 80px+ whitespace, with horizontal offset variety (left/right/center). My page places all 8 domains in a single 4x2 grid (the domain-grid) with 1px gaps. This is the OPPOSITE of DD-003's strategy:
+
+| Aspect | DD-003 Islands | My Page |
+|--------|---------------|---------|
+| Isolation method | Whitespace (80px+ between) | Grid walls (1px between) |
+| Reading order | Non-linear (jump between) | Systematic (scan grid) |
+| Cluster completeness | Each island is detailed (code + callout + matrix) | Each cell is compressed (path + name + description) |
+| Visual metaphor | Ocean calm between land masses | Surveillance grid / panopticon cells |
+
+**Why the divergence is content-appropriate:** DD-003's content (database types) requires DEEP COMPARISON -- readers study one type, then another, then decide. Cantillon's 8 domains require SIMULTANEOUS OVERVIEW -- the reader needs to see the taxonomy AS A WHOLE, not visit each domain individually. The panopticon's power comes from seeing ALL domains AT ONCE, not from exploring each separately. The 4x2 grid IS the panopticon -- it lets you observe all 8 domains in a single viewport, which is exactly what Cantillon's system does.
+
+**Divergence verification (DD-003 Section 6):**
+
+| Dimension | DD-003 Islands | My Page | Convergence? |
+|-----------|---------------|---------|--------------|
+| Core Metaphor | Islands in ocean (isolated land masses) | Panopticon cells (surveillance grid) | DIFFERENT |
+| Spatial Encoding | Extreme whitespace (80px+ sparse ocean) | 1px-gap grid (cells touching) | DIFFERENT |
+| Primary Tension | Self-contained topics vs unified reference | Observation of self (seeing/blindness) | DIFFERENT |
+| Structural Pattern | 4 discrete islands with horizontal offset | 4x2 uniform grid with 2-column headers | DIFFERENT |
+| Visual Treatment | Left/right/center alignment variety | Uniform grid cells with consistent internal structure | DIFFERENT |
+
+**5/5 DIFFERENT. Full divergence confirmed.**
+
+**Reusable mechanisms I extract from DD-003:**
+
+1. **Extreme Whitespace for Isolation** -- DD-003 uses 80px+ between islands. My page uses this at ZONE BOUNDARIES (48-56px between corridor-width sections) but NOT within the 940px grid zones. Within grids, isolation is achieved through 1px wall gaps, not whitespace. The two strategies coexist: whitespace between PHASES, walls within TAXONOMIES.
+
+2. **Self-Contained Content Units** -- Each of my domain grid cells is a self-contained unit (path + name + description). Each code block is self-contained (executable script). Each timeline phase is self-contained (phase label + heading + description). This principle is already implemented at multiple scales.
+
+3. **Archipelago Grouping** -- DD-003 groups related islands in a 2-column sub-grid. My domain grid uses a different grouping: the grid-legend divides domains into "Work" (4) and "Life" (4) with red/dark border-top encoding. This is CATEGORY HEADERS over a UNIFORM GRID rather than archipelago sub-clustering. Both serve the same purpose (showing which items belong together) through different spatial mechanisms.
+
+4. **2-Zone Component DNA** -- Already confirmed deployed in Pass 3.2.
+
+**One genuine insight from DD-003 that challenges my page:**
+
+DD-003 argues that island content should be DETAILED (code + callout + matrix) to be truly self-contained. My domain grid cells are COMPRESSED (3 lines each). The cells are overview, not detail. The detail for each domain lives LATER in the page (the CLAUDE.md examples section shows 3 domains in depth, the isolation section shows file structure, the implementation section shows automation scripts). This means my domain grid is NOT a set of islands -- it's a LEGEND. The islands are distributed through the subsequent sections. The grid is the MAP of the islands, not the islands themselves.
+
+This is actually more powerful than DD-003's approach: the MAP comes first (domain grid = "here are the 8 things you can observe"), then the TERRITORIES unfold (each subsequent section reveals one or more domains in depth). The panopticon shows you the overview FIRST, then lets you zoom into specifics.
+
+**No CSS changes from this pass.** DD-003 confirms that my page's grid approach is a valid alternative to island isolation, and that the domain grid functions as a legend/map rather than as individual content islands. The subsequent sections ARE the islands -- they just happen to be ordered by FUNCTION (isolation, implementation, correlation) rather than by DOMAIN (~/nox, ~/trades, ~/health).
+
+**Staleness check:** The dimension of quality is ISLAND vs GRID ISOLATION, which is new. I discovered that my domain grid is a MAP not a set of ISLANDS, which reframes how the page's information architecture works. This is a genuine insight.
+
+### Pass 3.4 — CD-006 Pilot Migration (Crown Jewel 3, 1st Read: EXTRACTION)
+
+**Reading CD-006 through the lens of: "How does compound combination (DD + OD + AD operating simultaneously) work in practice, and what does it reveal about my page's multi-dimensional deployment?"**
+
+**CD-006's core insight:** Each section commits to ONE axis pattern, with transition grammar managing the cognitive shift between sections. Sequential axis deployment prevents simultaneous axis confusion. The compound emerges not from MIXING axes within a section but from SEQUENCING different axes across sections.
+
+**This is the most instructive case study for my page.** My page ALREADY deploys sequential axis patterns:
+
+| Section | My Axis Pattern | CD-006 Equivalent |
+|---------|----------------|-------------------|
+| Provocation (600px, Z-entry) | Z-PATTERN (title sweep → meta → subtitle) | Section 2: Z-Pattern |
+| Asymmetry (780px, 70/30 grid) | F-PATTERN with GRID insert | Section 4: F-Pattern |
+| Violent gap (100vw, centered) | CENTERED FOCAL (single point of attention) | Section 1: Spiral (opening focus) |
+| Architecture (940px, 4x2 grid) | BENTO GRID (taxonomy) | Section 3: Bento Grid |
+| Warning (680px, prose) | F-PATTERN (dense reading) | Section 4: F-Pattern |
+| Closing (600px, centered) | Z-PATTERN (final sweep) | Section 7: Choreography |
+
+**My page deploys 4 distinct axis patterns (Z, F, Bento, Centered Focal) across 17 sections.** CD-006 deploys 5 patterns across 8 sections. The key difference: CD-006 LABELS its axis patterns (TOC has "SPIRAL", "Z-PATTERN" annotations) because it TEACHES the system. My page doesn't label its patterns because it USES them invisibly -- the panopticon observes without announcing its observation.
+
+**Divergence verification (CD-006 Section 6):**
+
+| Dimension | CD-006 Meta-Tutorial | My Page | Convergence? |
+|-----------|---------------------|---------|--------------|
+| Core Metaphor | Meta-tutorial (system teaching itself) | Panopticon/corridor (surveillance architecture) | DIFFERENT |
+| Spatial Encoding | Sequential lifecycle sections | Corridor width progression (cinematic camera) | DIFFERENT |
+| Primary Tension | Demonstration vs Prescription | Seeing vs Blindness (institutional asymmetry) | DIFFERENT |
+| Structural Pattern | 8 sections, each uses the pattern it teaches | 17 sections, width encodes argument scope | DIFFERENT |
+| Visual Treatment | Compound (DD+OD+AD simultaneously) | Compound (width + density + grid + dark/light) | SIMILAR (both compound) |
+| Axis Deployment | 5 axis patterns sequentially | 4 axis patterns sequentially | SIMILAR (both sequential) |
+| Transition Grammar | BREATHING, SMOOTH, BRIDGE | SMOOTH (14), BREATHING (4), BRIDGE (0) | DIFFERENT (no BRIDGE) |
+
+**5 DIFFERENT, 2 SIMILAR.** The similarities are at the MECHANISM level (compound combination, sequential axis deployment), which is expected -- these are transferable tools, not metaphor-specific decisions. Divergence confirmed.
+
+**Reusable mechanisms I extract from CD-006:**
+
+1. **Sequential Axis Deployment** -- ALREADY DEPLOYED. My page commits one axis per corridor-width zone. The 940px zones use BENTO/GRID, the narrow zones use F-PATTERN, the transitions use Z or CENTERED. This principle is functioning without explicit naming.
+
+2. **Transition Grammar** -- PARTIALLY DEPLOYED. CD-006 uses all 3 types (BREATHING, SMOOTH, BRIDGE). My page uses only SMOOTH (14) and BREATHING (4), with ZERO BRIDGE transitions. Pass 3.1 noted this as a "binary rhythm" (invisible observation vs sudden revelation). CD-006 suggests BRIDGE transitions exist for mid-level domain changes. **Question for future passes: Should the page have BRIDGE transitions? When the corridor width shifts from 940→780 (system→reflection), a 3px border signal might mark this as a domain change. Currently, this transition is SMOOTH (width change + padding shift only). Adding a BRIDGE would make it a three-mode rhythm. But the content's binary nature (watching/watched) argues for a two-mode rhythm.**
+
+3. **Compound Combination** -- ALREADY DEPLOYED. My page deploys DD (spacing compression + dense/sparse), OD (corridor width as organizational structure), AD (Z/F/Bento patterns), and CD (all three operating simultaneously at every boundary). The compound is present but was not previously articulated as "CD-level compound."
+
+4. **Progressive Section Complexity** -- ALREADY DEPLOYED. The page progresses from abstract (provocation at 600px) → concrete (system architecture at 940px) → reflective (warning at 680px) → closing (600px). This is the cinematic Wide-Close-Wide pattern from R4, which serves the same progressive-complexity function as CD-006's tutorial lifecycle.
+
+**One genuine insight from CD-006 that challenges my page:**
+
+CD-006 deploys ALL 11 component types. My page deploys 14/22 mechanisms (Pass 3.1). But CD-006's success comes from deploying components IN NATURAL CONTEXT -- each component appears because the content demands it, not because a checklist requires it. My page follows this principle: no forced deployment. The 8 absent mechanisms are absent because the content doesn't demand them. This CONFIRMS the approach. But it also raises the question: are there moments where a currently-absent mechanism would serve the content better than the current solution?
+
+Reviewing the 8 absent mechanisms through CD-006's "natural context" lens:
+- **Inline Code:** Could the domain paths (~/nox, ~/trades) be styled as inline code within prose? Currently they appear as styled mono text in grid cells. In the prose paragraphs, domain references like "~/health" are set in body font. Making these inline code would add a CSS mechanism AND be semantically correct -- directory paths ARE code.
+- **Dark Header:** Content demands immediate provocation entry, not structural framing. Still correct to omit.
+- **Solid Offset Depth:** Flat surveillance architecture. Still correct to omit.
+- **Drop Cap:** Mono label opening, not prose. Still correct to omit.
+- **Task Checklist:** Timeline is more appropriate. Still correct to omit.
+- **Version Badge:** Not a versioned document. Still correct to omit.
+- **Reasoning Columns:** Sequential reasoning, not comparative. Still correct to omit.
+- **Scroll Witness:** Static page, no JS. Still correct to omit.
+
+**ACTIONABLE CHANGE IDENTIFIED: Inline code styling for domain paths in prose.** When prose paragraphs reference specific directory paths (~/trades, ~/health, ~/correlation), these should be marked up as `<code>` elements with inline code styling. This is semantically correct AND adds a mechanism deployment.
+
+Let me verify how many prose references to directory paths exist before implementing.
+
+**No CSS changes YET from this pass.** The inline code change is identified but not yet implemented -- will be done in the next pass after verification.
+
+**Staleness check:** The dimension of quality is COMPOUND COMBINATION and TRANSITION GRAMMAR TYPE (BRIDGE absence). I discovered that my page's binary transition rhythm (SMOOTH/BREATHING only) maps to the content's binary thesis (observation/revelation). I also found an actionable change (inline code for domain paths in prose). Both are new insights.
+
+---
+
+### Pass 3.5 — IMPLEMENTATION: Inline Code Styling for Domain Paths
+
+**Source:** Pass 3.4 actionable finding + mechanisms.md "Inline Code Styling" mechanism
+
+**What I did:**
+
+Added the "Inline Code Styling" mechanism from mechanisms.md: "Subtle background + 1px border on `code:not(pre code)` elements within prose." This is both a semantic correction (directory paths ARE code) and a mechanism deployment.
+
+**CSS added** (after the h3 italic rule, before zone-specific styles):
+```css
+code:not(pre code) {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.5;
+  background: #F0EBE3;
+  padding: 2px 6px;
+  border: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+```
+
+The background `#F0EBE3` comes from components.css `--color-border-subtle` — a warm tone between the page background (`#FEF9F5`) and the border color (`#E0D5C5`). Visible against both light page background and the `#FAF5ED` breathing zones.
+
+**HTML changes:** 16 inline `<code>` elements added across 8 distinct contexts:
+
+| Context | Elements | Examples |
+|---------|----------|---------|
+| Principle descriptions (`.principle-desc`) | 5 | `~/health`, `~/trades`, `~/nox` |
+| Breathing moment prose | 2 | `~/trades`, `cd ~/trades` |
+| Correlation list items | 2 | `~/email`, `~/trades` |
+| Warning blockquote | 1 | `~/health` |
+| Critique blockquote | 2 | `~/bin`, `crontab -e` |
+| Build phase items | 2 | `~/shared/`, `~/correlation/` |
+| Key quotes blockquote | 1 | `~/health` |
+| Closing prose | 1 | `~/health` |
+
+**What I did NOT change:**
+- `.domain-path` spans in the domain grid — these are structured display elements with their own mono styling, not inline prose. The domain grid's `~/nox`, `~/trades` etc. are LABELS, not inline code.
+- Handoff flow spans (`~/trades` -> `~/shared/handoff.json` -> `~/personal`) — structural diagram, not prose.
+- `<h4>` headings (`~/trades/CLAUDE.md`, `~/correlation/output/`) — heading context, not prose.
+- Table `<td>` first-child cells — already mono-styled via `.automations-table td:first-child`.
+- Spoke domain divs — structural hub-spoke diagram elements.
+- Code block content — already in `<div class="code-block">` context.
+
+**The discrimination principle:** Only paths that appear WITHIN prose sentences (body text, blockquotes, list items) got `<code>` wrapping. Paths that serve as LABELS in structured components kept their existing treatment. The inline code mechanism is specifically for "code elements within prose" — it signals "this is literal" within otherwise natural-language flow.
+
+**Visual verification (4 screenshots):**
+1. `pass-3.5-clip-test.png` — Principles grid: `~/health`, `~/trades`, `~/nox` as warm pills within body text. Clear but not heavy.
+2. `pass-3.5-clip-breathing.png` — Breathing moment: `~/trades` and `cd ~/trades` as pills within italic Instrument Serif. Excellent contrast between italic serif prose and upright monospace code.
+3. `pass-3.5-clip-warning.png` — Warning blockquote: `~/health` within the italic display quote. The pill signals "this is a thing you can delete" within philosophical language.
+4. `pass-3.5-clip-critique.png` — Critique section: `~/bin` and `crontab -e` within monospace blockquote. Pills distinguishable even in already-mono context via background fill and border.
+5. `pass-3.5-clip-build.png` — Build Your Own phases: `~/shared/` and `~/correlation/` in body text. Natural and instructional.
+
+**Mechanism count update:** Pass 3.1 counted 14/22 mechanisms deployed. Adding Inline Code Styling brings it to **15/22 deployed (68%)**. The remaining 7 absent mechanisms are all content-appropriate absences (no dark header, no solid offset depth, no drop cap, no task checklist, no version badge, no reasoning columns, no scroll witness).
+
+**Perceptual assessment:** The inline code pills are clearly visible — background delta from page bg is ~14 RGB points (borderline per SC-09's 15-point rule for zone boundaries, but this is a component-level treatment, not a zone boundary). The 1px border adds additional definition. The `white-space: nowrap` prevents awkward path breaks mid-line.
+
+**One thing I noticed:** The `#F0EBE3` background on the `#FAF5ED` breathing zone gives only ~5 RGB points of delta. In the breathing moment screenshot, the pills are still clearly distinguishable because of the 1px border, but the background fill is less visible in that context. This is acceptable — the border carries the mechanism, and the breathing zone is only one of 8 contexts where codes appear. In all other contexts (cream page background), the delta is ~14 points and clearly visible.
+
+**Staleness check:** Fresh. I implemented a specific change derived from case study research (CD-006's inline code observation), verified it against the canonical mechanism definition (mechanisms.md), drew CSS values from the canonical component implementation (components.css), and visually verified across 5 clipped screenshots.
+
+---
+
+### Pass 3.6 — OD-004 Confidence (Tier 2 Rep 1, 1st Read: EXTRACTION)
+
+**Source:** OD-004-confidence.md (310 lines) — Organizational Dimension case study
+**Position in rotation:** [T2-1] after Crown Jewels 1-3
+
+**What OD-004 offers:**
+OD-004 explores content with a **confidence gradient** — epistemic status varies across content (established facts vs. speculative claims). It uses geological stratification (bedrock = certain, topsoil = uncertain) with border-weight gradient encoding, spacing compression, and background progression working together.
+
+**Key mechanisms (5 reusable):**
+1. Border-Weight Gradient Encoding — thickness = confidence/importance
+2. Spacing Compression — inverse density-confidence (certain = sparse, uncertain = dense)
+3. Zone Background Differentiation — chromatic reinforcement of structural boundaries
+4. Stratum Boundary Markers — spacing + rule + label between major sections
+5. Inverse Density-Confidence Correlation — certain claims are terse, uncertain need many words
+
+**The collapse insight:** Geological depth simultaneously resolves THREE tensions: (1) established/speculative via depth=stability, (2) sparse/dense via compression gradient, (3) foundational/experimental via bedrock vs topsoil. One metaphor, three resolutions.
+
+**How does this map to MY content?**
+
+The Panopticon content has a DIFFERENT confidence gradient than OD-004's epistemic certainty. My content's gradient is:
+
+| OD-004's Axis | My Content's Analog | Mapping |
+|---------------|-------------------|---------|
+| Established (bedrock) | The Problem (institutional asymmetry) | MOST CERTAIN — Foucault, history, observable |
+| Probable (sediment) | The Solution (8-domain architecture) | DEMONSTRATED — Cantillon's proof-of-concept |
+| Speculative (topsoil) | The Extensions (skeptical panopticon, scaling) | SPECULATIVE — proposed but untested |
+| Open (surface) | The Warning (Goodhart's Law, self-imprisonment) | GENUINELY OPEN — philosophical questions without resolution |
+
+**Wait — I already encoded this.** My corridor width progression IS a confidence gradient:
+- 600px (provocation) = narrow philosophical certainty (one sharp claim)
+- 780px (asymmetry) = expanding the known problem
+- 100vw (violent gap) = full emotional certainty of the felt experience
+- 940px (architecture through correlation) = maximum system confidence
+- 780px (extensions) = reopening — less certain territory
+- 680px (warning) = CONSTRICTED — uncertainty, danger, philosophical doubt
+- 780px (build your own) = practical reopening
+- 600px (closing) = return to narrow philosophical certainty
+
+The corridor width IS my border-weight gradient. OD-004 encodes confidence via 4px/3px/2px/1px. I encode it via 940px/780px/680px/600px. **Same mechanism (confidence encoding), different implementation (width vs. border weight).**
+
+**Divergence verification:**
+
+| Dimension | OD-004 | My Page | Verdict |
+|-----------|--------|---------|---------|
+| Core Metaphor | Geological stratification | Panoptic corridor (width = scope = confidence) | DIFFERENT |
+| Spatial Encoding | Vertical depth (surface to bedrock) | Horizontal width (narrow to wide to narrow) | DIFFERENT |
+| Primary Tension | Epistemic certainty gradient | Seeing/blindness asymmetry + institutional power | DIFFERENT |
+| Structural Pattern | 4 discrete strata | 19 continuous zones with width as argument | DIFFERENT |
+| Visual Treatment | Border-weight + spacing compression + bg progression | Corridor width + zone bg + transition type | DIFFERENT |
+
+5/5 DIFFERENT. Full divergence.
+
+**What OD-004 teaches me about MY content that I didn't know:**
+
+1. **I already have a confidence gradient — I just didn't name it.** The corridor width progression from 600px to 940px and back encodes confidence in the argument's scope. Narrow = certain about a specific claim. Wide = confident enough to show the full system. Constricted = uncertain, warning territory. This is OD-004's insight applied through a completely different mechanism.
+
+2. **The inverse density-confidence correlation is already present.** My WARNING zones (680px) are DENSE with philosophical caveats — "Goodhart's Law," "self-imprisonment," "the prison question." My ARCHITECTURE zones (940px) are SPARSE with confident assertions. Uncertain = many words qualifying. Certain = few words asserting. I deployed OD-004's key discovery without knowing I was doing it.
+
+3. **OD-004's stratum boundaries = my section dividers + breathing moments.** OD-004 uses "48px spacing + 3px rule + label" for stratum transitions. I use section dividers (horizontal rule with centered label) and breathing moments (full bg shift + italic prose). DIFFERENT implementation, SAME function: "you are crossing a confidence boundary."
+
+4. **One mechanism I DON'T have that OD-004 suggests:** OD-004 uses border-weight to REDUNDANTLY encode what spacing already encodes. I use corridor width for confidence, but I don't have a SECONDARY confidence signal. My border weights are structural (4px header/divider, 3px accent, 1px micro) not semantic (confidence-encoding). This is a potential enrichment — but only if the content demands it. Right now the corridor width carries the argument clearly enough.
+
+**No CSS changes from this pass.** The value of OD-004 was NAMING what I already built: the corridor width progression IS a confidence gradient. No new mechanisms needed — I already deployed this pattern. The insight is metacognitive, not implementational.
+
+**Dimension tracking:** This is OD's first primacy turn. DD has had 3 (3.1 audit, 3.2 DD-006, 3.3 DD-003). CD has had 1 (3.4 CD-006). OD now has 1 (this pass). No dimension has gone 4+ passes without primacy.
+
+**Staleness check:** Fresh. I discovered that my corridor width progression is a confidence gradient — the OD-004 insight expressed through a completely different mechanism. This reframes the corridor width from "spatial argument about scope" to "spatial argument about scope AND confidence." The two readings are not in tension; they reinforce. Width = scope = confidence = how much the argument can hold at this point in its progression.
+
+---
+
+### Pass 3.7 — DD-006 Fractal (Crown Jewel 1, 2nd Read: TRANSLATION)
+
+**Source:** DD-006-fractal.md re-read (378 lines) + programmatic multi-scale audit
+**Phase:** TRANSLATION — "how does DD-006 adapt to MY content?"
+
+**DD-006's core principle:** Self-similar rhythm at all structural scales. Dense/sparse alternation appears at page level, section level, component level, and character level. The SAME pattern, not merely SIMILAR patterns.
+
+**Multi-scale audit of MY page:**
+
+**Scale 1 — Page level (zone sequences):**
+Provocation=SPARSE(224px total pad) → Asymmetry=DENSE(64px) → Violent Gap=SPARSE(144px, dark bg) → Proof=DENSE(72px) → Architecture=SPARSE(80px) → Isolation=DENSE(40px) → CLAUDE.md=DENSE(40px) → Implementation=DENSE(40px) → Breathing=DENSE(64px, recessed bg) → Correlation=DENSE(40px)
+
+**Pattern:** SPARSE-DENSE-SPARSE-DENSE-SPARSE-DENSE-DENSE-DENSE-DENSE-DENSE
+
+The first 5 zones have clear alternation. Then zones 6-10 are all DENSE (40px padding) — a density run. This is the 940px system exposition corridor identified in Pass 3.2 as potentially violating grammar.md's "max 3 consecutive dense" guideline.
+
+**Scale 2 — Component level (2-zone DNA):**
+All component labels use the same pattern: JetBrains Mono, 11px, sparse uppercase label + dense body content below. This is consistent across provocation-label, proof-number-label, principle-number, phase-label. The 2-zone DNA is PRESENT and CONSISTENT at component level. Pass.
+
+**Scale 3 — Character level (inline code vs body text):**
+Body text: Inter 16px, transparent background. Inline code: JetBrains Mono 14px, #F0EBE3 background. The inline code creates dense/sparse alternation at the CHARACTER level — monospace code pills (dense, bordered, backgrounded) within flowing body prose (sparse, open, transparent). This was deployed in Pass 3.5 and is now a working character-level rhythm.
+
+**Self-similarity assessment:**
+
+| Scale | Pattern | Self-Similar to Page? |
+|-------|---------|----------------------|
+| Page | SPARSE-DENSE alternation (first 5 zones), then DENSE run | Partially |
+| Component | Sparse label + dense body (2-zone DNA) | YES — label=sparse, body=dense |
+| Character | Body prose (sparse) + inline code pills (dense) | YES — prose=sparse, code=dense |
+
+**The honest finding:** I have self-similarity at component and character scales but NOT at page level for the system exposition corridor (zones 6-10). The first half of the page alternates beautifully. The second half runs dense.
+
+**TRANSLATION question: Should I fix the density run?**
+
+The 940px corridor (Architecture → Isolation → CLAUDE.md → Implementation → Correlation) covers the SYSTEM EXPOSITION — the detailed 8-domain architecture with all its implementation specifics. This is the densest, most technical content. DD-006 would demand a breathing/sparse zone WITHIN this run.
+
+But: The content itself IS dense here. The system exposition is a single sustained argument about how domains are organized, isolated, and implemented. Interrupting it with forced sparse zones would fragment the argument.
+
+**Resolution:** The density run is CONTENT-APPROPRIATE but could benefit from MICRO-SCALE alternation within each zone. I already have this via:
+- 2-zone DNA labels (sparse) within dense zones
+- Section dividers between zones (breathing moments between dense blocks)
+- The breathing moment at zone 8 boundary IS a sparse interruption
+
+Wait — let me re-check. Is the breathing moment between Implementation and Correlation?
+
+Actually, looking at the page structure: after Implementation (zone 7) there IS a breathing moment before Correlation (zone 8). And between the page-map (zone 9) and the extensions (zone 10) there's also a transition. The density run isn't truly uninterrupted — it has micro-breathing within it.
+
+**What DD-006 TRANSLATION actually offers:**
+
+1. **I should TRUST the containment-fractal.** My fractal pattern is corridors-within-corridors (width narrows and widens), not dense/sparse alternation. DD-006's alternation pattern is the WRONG fractal to translate. My fractal is SPATIAL (width modulation at multiple scales), not RHYTHMIC (dense/sparse alternation at multiple scales).
+
+2. **The character-level addition (Pass 3.5's inline code) was the right move.** It completed a 3-scale self-similarity: page width modulation → component label/body DNA → character code/prose alternation. Three scales of the SAME PRINCIPLE: containment (narrow) vs expansion (wide) expressed differently at each scale.
+
+3. **The density run diagnostic is a false alarm FOR THIS CONTENT.** DD-006's fractal demands alternation because its content teaches alternation. My content's system exposition demands sustained density because the reader needs to absorb the full architecture without interruption. The breathing moment and section dividers provide sufficient micro-scale relief.
+
+**No CSS changes from this pass.** The translation confirmed that my fractal pattern (spatial containment, not rhythmic alternation) is operating at 3 scales and appropriate for the content. The density run is content-derived, not a compositional failure.
+
+**Dimension tracking:** DD now has 4 primacy turns (3.1 audit, 3.2 DD-006 extraction, 3.3 DD-003 extraction, 3.7 DD-006 translation). OD has 1 (3.6 OD-004). CD has 1 (3.4 CD-006). Next position in rotation is Tier 2 rep 2.
+
+**Staleness check:** The translation from DD-006 was productive — it reframed my fractal from "containment only at page level" to "containment at 3 scales" (width modulation, label/body DNA, code/prose alternation). The density run concern was explored and resolved as content-appropriate. Fresh insight, no action needed.
+
+---
+
+### Pass 3.8 — CD-005 Multi-Axis Transition (Tier 2 Rep 2, 1st Read: EXTRACTION)
+
+**Source:** CD-005-multi-axis-transition.md (387 lines) — Combination Dimension case study
+**Position in rotation:** [T2-2] after Crown Jewel 1 2nd read
+
+**What CD-005 offers:**
+CD-005 proves that 3+ axis patterns can coexist sequentially on one page when transition grammar (AD-F-025) is applied. Key mechanisms: sequential axis deployment (one pattern per section), SMOOTH transitions (shared component bridge), BRIDGE transitions (prose paragraph reset), WAVE density oscillation, velocity interleaving.
+
+**The critical insight for MY page:** CD-005's transition grammar has THREE types — SMOOTH, BRIDGE, and (from mechanisms.md) BREATHING. My Pass 3.1 audit found I have 14 SMOOTH + 4 BREATHING + 0 BRIDGE. CD-005 uses both SMOOTH and BRIDGE.
+
+**Divergence verification:**
+
+| Dimension | CD-005 | My Page | Verdict |
+|-----------|--------|---------|---------|
+| Core Metaphor | Structural (axis sequence IS the content) | Panoptic corridor (width = scope) | DIFFERENT |
+| Spatial Encoding | 3 sequential sections | 19 zones with progressive width | DIFFERENT |
+| Primary Tension | Complexity vs Clarity | Seeing vs Blindness (power asymmetry) | DIFFERENT |
+| Structural Pattern | Z -> SMOOTH -> F -> BRIDGE -> Bento | Z -> F -> Bento -> F -> Z (my axis progression) | SIMILAR |
+| Visual Treatment | WAVE density (MED/HIGH/MED-HIGH) | Corridor width modulation | DIFFERENT |
+| Transition Types | SMOOTH + BRIDGE | SMOOTH + BREATHING (no BRIDGE) | DIFFERENT |
+
+4 DIFFERENT, 1 SIMILAR (structural pattern uses same axis sequence concept), 1 DIFFERENT (transition types).
+
+The structural pattern similarity is GENUINE INDEPENDENT CONVERGENCE: Both pages use Z->F->Bento sequential deployment because Z suits overview/scanning, F suits detail/reading, and Bento suits taxonomy/reference. This is the natural axis-to-content mapping (CD-005 states this explicitly: "Overview = Z, Deep Dive = F, Reference = Bento"). My page independently arrived at the same mapping because the content demands it:
+- Provocation + Asymmetry = Z-pattern (scanning, establishing the problem)
+- Proof + Architecture + Isolation = F-pattern (reading deeply into system details)
+- Domain grid = Bento (8 domains as taxonomy)
+- Implementation + Correlation = F-pattern (back to reading implementation)
+- Warning + Closing = Z-pattern (scanning, wrapping up)
+
+**What CD-005 teaches me about MY transitions:**
+
+1. **My SMOOTH transitions are correct.** CD-005 uses SMOOTH between Z and F when they share component types (both use callouts). My page transitions between scanning and reading zones SMOOTHLY because adjacent zones share typographic treatment. This is the right choice.
+
+2. **My absence of BRIDGE transitions is now DIAGNOSED.** CD-005 uses BRIDGE between F and Bento because they have "incompatible topologies" — vertical descent vs. island grid. My page has the same incompatibility at the Bento domain grid: the F-pattern reading of Architecture/Asymmetry suddenly shifts to the 4x2 Bento grid of domains. This transition currently uses SMOOTH (just a padding shift). CD-005 suggests it should use BRIDGE — a prose paragraph or visual element that explicitly signals "you are about to encounter a different reading pattern."
+
+    **Wait.** Let me re-examine. The domain grid IS preceded by prose: "8 parallel Claude instances, each isolated in its own directory, each owning a distinct life domain. The taxonomy reflects natural boundaries in life management." That paragraph IS a bridge. It's just not visually marked as a BRIDGE transition (no 3px border, no explicit background shift). The prose does the cognitive bridging; the CSS doesn't reinforce it.
+
+3. **The velocity interleaving mechanism is relevant.** CD-005 interleaves FAST callouts with MEDIUM prose in F-pattern sections. My long F-pattern zones (Architecture through Implementation) have code blocks (HEAVY velocity), prose (MEDIUM), grids (FAST), and tables (MODERATE). The velocity variation IS present — it's natural component diversity rather than designed interleaving, but the effect is the same.
+
+**ACTIONABLE INSIGHT: Consider adding a BRIDGE transition before the domain grid.**
+
+The F-pattern reading of Asymmetry/Proof shifts to the Bento domain grid. Currently the transition is SMOOTH (just padding). A BRIDGE transition — perhaps a 3px primary border, or a background shift on the bridging prose paragraph — would signal "reading pattern change ahead." This is the only axis transition in the page that currently lacks visual reinforcement.
+
+But I need to think carefully. My Pass 3.4 analysis noted that the page's binary SMOOTH/BREATHING rhythm maps to the content's binary thesis (observation/revelation). Adding a BRIDGE transition would break this binary pattern. Is that justified?
+
+**Decision: DEFER.** The bridge insight is noted but the binary transition rhythm is a STRONGER content-form mapping than the axis transition signal. The prose paragraph already bridges the cognitive shift. The CSS doesn't need to reinforce it further. If the binary pattern is ever felt as a weakness during later visual evaluation, this BRIDGE addition is a ready remedy.
+
+**No CSS changes from this pass.**
+
+**Dimension tracking:** CD now has 2 primacy turns (3.4 CD-006, 3.8 CD-005). DD has 4 (3.1, 3.2, 3.3, 3.7). OD has 1 (3.6). Next position: Crown Jewel 2 2nd read (DD-003, TRANSLATION).
+
+**Staleness check:** Fresh. The CD-005 absorption diagnosed my missing BRIDGE transitions as a deliberate binary rhythm choice (not an omission), identified the domain grid entry as the strongest candidate for a BRIDGE if I ever need one, and confirmed that my velocity variation within F-pattern zones is organic but present. New diagnostic, new remedy in reserve.
+
+---
+
+### Pass 3.9 — COLD LOOK: Post-Case-Study Visual Evaluation
+
+**What I did:** After 7 absorption passes (3.1-3.8) with only 1 CSS change (Pass 3.5 inline code), I took 5 clipped screenshots for a cold-look evaluation — looking at the page through the accumulated dimensional lenses from DD-006, DD-003, CD-006, OD-004, CD-005.
+
+**Screenshots evaluated:**
+1. `pass-3.9-look-top.png` — Provocation + Asymmetry (y=0-900)
+2. `pass-3.9-look-domains.png` — Domain grid (y=1500-2100)
+3. `pass-3.9-look-mid.png` — Implementation: code blocks + automations table (y=3500-4200)
+4. `pass-3.9-look-warning.png` — Warning zone: constricted 680px corridor (y=5700-6400)
+5. `pass-3.9-look-closing.png` — Key quotes + closing section (y=7800-8400)
+
+**What I see through each dimensional lens:**
+
+**DD lens (density):**
+- Dense/sparse alternation is STRONG in the first half (provocation sparse -> asymmetry dense -> violent gap sparse -> proof dense -> architecture sparse)
+- Mid-page density run is sustained but component diversity compensates (code blocks, tables, grids = varied visual density within consistent spatial density)
+- The inline code pills add micro-density texture at character level (new from Pass 3.5)
+- Warning zone's 680px constriction physically compresses the content — density through width, not just padding
+
+**OD lens (organization):**
+- The confidence gradient (OD-004 translation from Pass 3.6) is visible: wide at certain claims, narrow at uncertain warnings
+- Progressive disclosure works: the page moves from WHAT IS THE PROBLEM -> HOW IT WAS SOLVED -> THE DETAILS -> THE WARNINGS -> BUILD YOUR OWN -> THE PHILOSOPHY
+- The page-map self-referential aside (not captured but seen before) is the organizational meta-layer
+
+**CD lens (combination):**
+- Sequential axis deployment (Z -> F -> Bento -> F -> Z) reads naturally — no cognitive whiplash at transitions
+- Binary transition rhythm (SMOOTH/BREATHING) feels deliberate, not accidental
+- The inline code mechanism works compound with the existing mechanisms — code pills + breathing zones + corridor width = three independent channels all active simultaneously
+
+**What needs attention (ranked by impact):**
+
+1. **NOTHING URGENT.** The page is compositionally solid after Waves 0-2 building and Wave 3 absorption. The inline code addition was the right single intervention for this wave.
+
+2. **MONITORING: Mid-page density run.** Zones 6-10 at 940px are the longest stretch of consistent width. Component diversity saves it but the spatial monotony is there. Potential future remedy: introduce a subtle width step (e.g., one zone at 900px) to break the lock-step. Low priority — content appropriateness overrides.
+
+3. **MONITORING: Page-map aside visibility.** I haven't screenshot-evaluated the self-referential page map in this session. Future pass should capture and evaluate it as a standalone spatial element.
+
+4. **NOTE: The inline code pills are the most successful micro-intervention.** They appear in 8 contexts, add character-level density variation, and are semantically correct. The visual impact is most felt in the blockquotes (warning, critique, key quotes) where the mono code pill within italic serif text creates productive tension between the philosophical and the literal.
+
+**No CSS changes from this pass.** The cold look confirmed the page is in good shape. Absorption is working — the dimensional thinking is deepening my understanding without requiring constant CSS changes.
+
+**Staleness check:** Fresh. The cold look was the first pure visual evaluation since the inline code change. Seeing the page through accumulated DD/OD/CD lenses confirmed the compositional choices are working. No new CSS actions needed, but two monitoring items noted for future passes.
+
+---
+
+### Pass 3.10 — DD-003 Islands (Crown Jewel 2, 2nd Read: TRANSLATION)
+
+**Source:** DD-003-islands.md re-read (sections 4-5, ~120 lines focused on mechanisms and extractables)
+**Phase:** TRANSLATION — "how does DD-003 adapt to MY content?"
+
+**DD-003's core mechanisms:**
+1. Extreme whitespace (80px+) between self-contained clusters
+2. Horizontal offset rhythm (left/right/center alignment variation)
+3. Self-contained island content (each cluster is complete with code, callouts, matrices)
+4. Border-left semantic signal (4px left border distinguishes island edge from ocean)
+5. Archipelago grouping (2-column grid for related mini-islands)
+
+**Translation to MY page:**
+
+| DD-003 Mechanism | My Translation | Status |
+|-----------------|----------------|--------|
+| Extreme whitespace (80px ocean) | Corridor width modulation (600-940px) | ALREADY DEPLOYED — but differently. My "ocean" is width narrowing, not padding increase. |
+| Horizontal offset (L/R/Center) | Multi-width corridors (6 different widths, all centered) | PARTIALLY PRESENT. All my content is centered. No left/right offset. |
+| Self-contained islands | Domain grid cells ARE self-contained | DEPLOYED. Each cell has path + category + description. Complete. |
+| Border-left signal | 4px red vertical divider in asymmetry section | DEPLOYED (differently). Used once for asymmetry, not on every cluster. |
+| Archipelago grouping | Domain grid (4x2), principles grid (2x2), CLAUDE.md grid (3-col) | DEPLOYED. Multiple grid instances group related content. |
+
+**The honest finding: My page and DD-003 solve the same problem (content clusters) with opposite spatial strategies.**
+
+DD-003's strategy: **ISOLATION through EXPANSION** — push clusters apart with 80px+ whitespace.
+My strategy: **ISOLATION through CONTAINMENT** — compress clusters into narrow corridors, use width as the differentiator.
+
+These are genuinely opposite approaches. DD-003 makes islands VISIBLE by surrounding them with ocean. My page makes zones VISIBLE by varying the corridor width. In DD-003, the signal is "look, empty space around dense content." In my page, the signal is "the corridor just got narrower — something changed."
+
+**What DD-003 teaches me that I could USE:**
+
+1. **Horizontal offset is a mechanism I haven't deployed.** All my content is centered within its corridor. DD-003 uses left/right alignment to create organic scatter. I COULD offset some zones — for example, the warning blocks could be LEFT-ALIGNED within their 680px corridor instead of centered, creating a "cornered" feeling that matches the philosophical trap. But this would be a significant spatial change and needs careful evaluation.
+
+   **Decision: NOTE but don't implement yet.** The centered corridor is part of the page's spatial argument (the corridor IS the argument). Breaking centering would be a strong move that needs its own evaluation pass.
+
+2. **The domain grid cells could be more self-contained.** DD-003's islands are COMPLETE — each has code, callouts, decision matrices. My domain cells have path + category + description (3 elements). They could be richer — but the content source doesn't have more detail per domain. The extraction is the constraint, not the design.
+
+3. **The 80px ocean spacing is NOT appropriate.** My page's argument is PROGRESSIVE (each section builds). DD-003's content is REFERENCE (islands are independent). Extreme whitespace between my zones would fragment the argument flow. My 48-64px gaps are right for progressive reading.
+
+**No CSS changes from this pass.** The horizontal offset idea is stored as a potential future intervention but needs dedicated evaluation. The rest of DD-003's mechanisms either confirm what I already have or don't apply to progressive-argument content.
+
+**Dimension tracking:** DD has 5 primacy turns (3.1, 3.2, 3.3, 3.7, 3.10). OD has 1 (3.6). CD has 2 (3.4, 3.8). OD is the lowest dimension. Next position in rotation: Tier 2 rep 3, which should be OD dimension to balance.
+
+**Staleness check:** The horizontal offset idea is genuinely new — I hadn't considered breaking the centered corridor for specific zones. It's a reserve mechanism for when/if I need to signal spatial disruption (warning, trap, philosophical challenge). Stored for future use.
